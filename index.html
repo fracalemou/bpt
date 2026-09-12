@@ -246,13 +246,13 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
     <div class="kpi span3"><b id="kPlayers">0</b><span>Joueurs classés</span></div>
     <div class="kpi span3"><b id="kRecord">0</b><span>Record participants</span></div>
     <div class="kpi span3"><b id="kPot">0 €</b><span>Total des mises</span></div>
-    <div class="card span8"><h2>Top 10</h2><div class="tablewrap"><table><thead><tr><th>Clt</th><th>Joueur</th><th>Points</th><th>Parties</th><th>Victoires</th><th>Kills</th><th>Solde</th></tr></thead><tbody id="dashTop"></tbody></table></div></div>
+    <div class="card span8"><h2>Top 10</h2><div class="tablewrap"><table><thead><tr><th>Clt</th><th>Joueur</th><th>Points</th><th>Participations</th><th>Victoires</th><th>Kills</th><th>Solde</th></tr></thead><tbody id="dashTop"></tbody></table></div></div>
     <div class="card span4"><h2>Dernière partie</h2><div id="lastGame"></div></div>
   </div>
 
   <div style="height:12px"></div>
 
-  <div class="card"><h2>Classement général détaillé</h2><div class="tablewrap"><table><thead><tr><th>Clt</th><th>Joueur</th><th>Points</th><th>Progression</th><th>Moy. pts</th><th>Parties</th><th>Victoires</th><th>Podiums</th><th>Tabliers</th><th>Kills</th><th>Kills/partie</th><th>Mises</th><th>Gains</th><th>Solde</th><th>Bourreau</th><th>Victime</th></tr></thead><tbody id="rankingBody"></tbody></table></div></div>
+  <div class="card"><h2>Classement général détaillé</h2><div class="tablewrap"><table><thead><tr><th>Clt</th><th>Joueur</th><th>Points</th><th>Progression</th><th>Moy. pts</th><th>Participations</th><th>Victoires</th><th>Podiums</th><th>Tabliers</th><th>Kills</th><th>Kills/partie</th><th>Mises</th><th>Gains</th><th>Solde</th><th>Bourreau</th><th>Victime</th></tr></thead><tbody id="rankingBody"></tbody></table></div></div>
 </section>
 <section id="history" class="view">
   <div class="card">
@@ -524,6 +524,46 @@ async function cloudFetchGames(){
   return history;
 }
 
+async function refreshCanonicalHistoryUI(showBusy=true){
+  if(!sbClient || !cloudReady)return false;
+
+  if(showBusy)setCloudStatus("busy","Actualisation…");
+
+  try{
+    const serverHistory=await cloudFetchGames();
+
+    cloudApplying=true;
+    db.history=serverHistory;
+    normalizeHistoryGameNumbers();
+    saveLocalOnly();
+
+    // IMPORTANT : les deux écrans sont recalculés dans le même passage,
+    // à partir du même snapshot de l'historique serveur.
+    renderDashboard();
+    renderRanking();
+    renderHistory();
+
+    if(correctionUnlocked)renderCorrectionGameList();
+    cloudApplying=false;
+
+    const games=cloudGameCount(db);
+    const hh=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+    setCloudStatus(
+      "ok",
+      `Synchronisé • ${games} partie${games>1?"s":""}`,
+      `Historique officiel : ${games} partie${games>1?"s":""} • ${hh}`
+    );
+    return true;
+  }catch(e){
+    cloudApplying=false;
+    cloudLastError=e?.message||String(e);
+    console.error("BPT canonical refresh:",e);
+    setCloudStatus("offline","Erreur synchro",cloudLastError);
+    return false;
+  }
+}
+
+
 async function cloudInsertGame(rows){
   const clean=(rows||[]).map(r=>{
     const x={...r};
@@ -599,11 +639,7 @@ async function flushPendingGames(){
     return false;
   }
 
-  db.history=await cloudFetchGames();
-  normalizeHistoryGameNumbers();
-  saveLocalOnly();
-  renderAll();
-  renderHistory();
+  await refreshCanonicalHistoryUI(false);
   return true;
 }
 
@@ -727,17 +763,22 @@ async function applyCloudState(row){
 }
 
 async function cloudPoll(){
-  if(!sbClient || !cloudReady)return;
+  if(!sbClient || !cloudReady || cloudApplying)return;
+
   try{
     if(pendingGamesLoad().length){
       await flushPendingGames();
     }
+
     if(cloudLocalDirty){
       await cloudPushNow();
       return;
     }
-    const row=await cloudFetchState();
-    if(row)await applyCloudState(row);
+
+    // L'historique canonique est lu directement depuis bpt_games_v2.
+    // Le Dashboard et l'Historique sont donc toujours recalculés ensemble.
+    await refreshCanonicalHistoryUI(false);
+
   }catch(e){
     cloudLastError=e?.message||String(e);
     console.error("BPT cloud poll:",e);
@@ -750,18 +791,12 @@ async function forceCloudSync(){
     await initCloudSync();
     return;
   }
+
   if(cloudLocalDirty){
     await cloudPushNow();
-    return;
   }
-  try{
-    setCloudStatus("busy","Actualisation…");
-    const row=await cloudFetchState();
-    if(row)await applyCloudState(row);
-  }catch(e){
-    cloudLastError=e?.message||String(e);
-    setCloudStatus("offline","Erreur synchro",cloudLastError);
-  }
+
+  await refreshCanonicalHistoryUI(true);
 }
 
 async function initCloudSync(){
@@ -2035,10 +2070,20 @@ function lockSettings(){
   $("settingsPasswordError").textContent="";
 }
 
-function showView(id){
+async function showView(id){
   document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===id));
-  if(id==="history")renderHistory();
+
+  if((id==="ranking" || id==="history") && cloudReady && sbClient){
+    await refreshCanonicalHistoryUI(true);
+  }else{
+    if(id==="ranking"){
+      renderDashboard();
+      renderRanking();
+    }
+    if(id==="history")renderHistory();
+  }
+
   if(id==="settings"){
     if(settingsUnlocked){
       $("settingsLock").style.display="none";
