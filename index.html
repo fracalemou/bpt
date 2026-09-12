@@ -372,16 +372,20 @@ let sbClient=null;
 let cloudReady=false;
 let cloudApplying=false;
 let cloudSaveTimer=null;
+let cloudPollTimer=null;
 let cloudLastRevision=0;
 let cloudChannel=null;
+let cloudLocalDirty=false;
+let cloudLastError="";
 
-function setCloudStatus(state,label){
+function setCloudStatus(state,label,details=""){
   const el=document.getElementById("cloudStatus");
   const txt=document.getElementById("cloudStatusText");
   if(!el||!txt)return;
   el.classList.remove("ok","busy","offline");
   if(state)el.classList.add(state);
   txt.textContent=label;
+  el.title=details||label;
 }
 
 function isValidBptState(x){
@@ -404,7 +408,7 @@ async function cloudFetchState(){
 }
 
 async function cloudPushNow(){
-  if(!sbClient || !cloudReady || cloudApplying)return;
+  if(!sbClient || !cloudReady || cloudApplying)return false;
   setCloudStatus("busy","Synchronisation…");
   try{
     const payload=JSON.parse(JSON.stringify(db));
@@ -414,24 +418,33 @@ async function cloudPushNow(){
       .select("revision,updated_at")
       .single();
     if(error)throw error;
+
     cloudLastRevision=Number(data?.revision||cloudLastRevision||0);
-    setCloudStatus("ok","Synchronisé");
+    cloudLocalDirty=false;
+    cloudLastError="";
+    const hh=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+    setCloudStatus("ok",`Synchronisé ${hh}`,"Dernière écriture Supabase réussie");
+    return true;
   }catch(e){
+    cloudLastError=e?.message||String(e);
     console.error("BPT cloud save:",e);
-    setCloudStatus("offline","Hors connexion");
+    setCloudStatus("offline","Erreur synchro",cloudLastError);
+    return false;
   }
 }
 
 function scheduleCloudSave(){
+  cloudLocalDirty=true;
   if(!cloudReady || cloudApplying)return;
   clearTimeout(cloudSaveTimer);
-  cloudSaveTimer=setTimeout(cloudPushNow,350);
+  cloudSaveTimer=setTimeout(cloudPushNow,250);
 }
 
 async function applyCloudState(row){
   if(!row || !isValidBptState(row.data))return false;
   const rev=Number(row.revision||0);
   if(rev && rev<=cloudLastRevision)return false;
+  if(cloudLocalDirty)return false; // ne jamais écraser une modification locale en attente
 
   cloudApplying=true;
   try{
@@ -441,18 +454,62 @@ async function applyCloudState(row){
     saveLocalOnly();
     renderAll();
     if(typeof liveRenderAll==="function")liveRenderAll();
-    setCloudStatus("ok","Synchronisé");
+    const hh=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+    setCloudStatus("ok",`Synchronisé ${hh}`,"Données reçues depuis Supabase");
   }finally{
     cloudApplying=false;
   }
   return true;
 }
 
+async function cloudPoll(){
+  if(!sbClient || !cloudReady)return;
+  try{
+    if(cloudLocalDirty){
+      await cloudPushNow(); // retry automatique d'une écriture en attente
+      return;
+    }
+    const row=await cloudFetchState();
+    if(row)await applyCloudState(row);
+  }catch(e){
+    cloudLastError=e?.message||String(e);
+    console.error("BPT cloud poll:",e);
+    setCloudStatus("offline","Erreur synchro",cloudLastError);
+  }
+}
+
+async function forceCloudSync(){
+  if(!sbClient){
+    await initCloudSync();
+    return;
+  }
+  if(cloudLocalDirty){
+    await cloudPushNow();
+  }else{
+    try{
+      setCloudStatus("busy","Actualisation…");
+      const row=await cloudFetchState();
+      if(row){
+        const rev=Number(row.revision||0);
+        if(rev>cloudLastRevision){
+          await applyCloudState(row);
+        }else{
+          const hh=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+          setCloudStatus("ok",`Synchronisé ${hh}`);
+        }
+      }
+    }catch(e){
+      cloudLastError=e?.message||String(e);
+      setCloudStatus("offline","Erreur synchro",cloudLastError);
+    }
+  }
+}
+
 async function initCloudSync(){
   setCloudStatus("busy","Connexion…");
 
   if(!window.supabase || !window.supabase.createClient){
-    setCloudStatus("offline","Supabase indisponible");
+    setCloudStatus("offline","Supabase indisponible","La bibliothèque Supabase n'a pas été chargée.");
     return;
   }
 
@@ -475,7 +532,6 @@ async function initCloudSync(){
       renderAll();
       if(typeof liveRenderAll==="function")liveRenderAll();
     }else{
-      // Première utilisation : le championnat local actuel devient l'état partagé.
       const {data,error}=await sbClient
         .from("bpt_state")
         .upsert({id:CLOUD_ROW_ID,data:JSON.parse(JSON.stringify(db))},{onConflict:"id"})
@@ -486,31 +542,41 @@ async function initCloudSync(){
     }
 
     cloudReady=true;
-    setCloudStatus("ok","Synchronisé");
+    cloudLocalDirty=false;
+    cloudLastError="";
+    setCloudStatus("ok","Synchronisé","Connexion Supabase opérationnelle");
 
-    // Mise à jour automatique des autres navigateurs.
-    cloudChannel=sbClient
-      .channel("bpt-shared-state")
-      .on(
-        "postgres_changes",
-        {event:"*",schema:"public",table:"bpt_state",filter:"id=eq."+CLOUD_ROW_ID},
-        async payload=>{
-          try{
-            const rev=Number(payload?.new?.revision||0);
-            if(rev && rev<=cloudLastRevision)return;
-            const row=await cloudFetchState();
-            await applyCloudState(row);
-          }catch(e){
-            console.error("BPT realtime:",e);
+    // Realtime : confort immédiat lorsqu'il fonctionne.
+    try{
+      cloudChannel=sbClient
+        .channel("bpt-shared-state")
+        .on(
+          "postgres_changes",
+          {event:"*",schema:"public",table:"bpt_state",filter:"id=eq."+CLOUD_ROW_ID},
+          async payload=>{
+            try{
+              const rev=Number(payload?.new?.revision||0);
+              if(rev && rev<=cloudLastRevision)return;
+              if(cloudLocalDirty)return;
+              const fresh=await cloudFetchState();
+              await applyCloudState(fresh);
+            }catch(e){console.error("BPT realtime:",e);}
           }
-        }
-      )
-      .subscribe();
+        )
+        .subscribe();
+    }catch(e){
+      console.warn("Realtime indisponible, polling utilisé :",e);
+    }
+
+    // Polling de secours : garantit la synchronisation même si Realtime est mal configuré.
+    clearInterval(cloudPollTimer);
+    cloudPollTimer=setInterval(cloudPoll,4000);
 
   }catch(e){
+    cloudLastError=e?.message||String(e);
     console.error("BPT cloud init:",e);
     cloudReady=false;
-    setCloudStatus("offline","Hors connexion");
+    setCloudStatus("offline","Erreur synchro",cloudLastError);
   }
 }
 
@@ -519,15 +585,10 @@ window.addEventListener("online",async()=>{
     await initCloudSync();
   }else{
     cloudReady=true;
-    await cloudPushNow();
+    await forceCloudSync();
   }
 });
 window.addEventListener("offline",()=>setCloudStatus("offline","Hors connexion"));
-
-const $=id=>document.getElementById(id);
-let db=loadDB();
-
-function clone(o){return JSON.parse(JSON.stringify(o));}
 
 function dedupeHistory(history){
   const byGame=new Map();
@@ -1587,10 +1648,11 @@ $("settingsPassword").addEventListener("keydown",e=>{
 
 renderAll();
 liveInit();
+document.getElementById("cloudStatus").onclick=forceCloudSync;
 initCloudSync();
 </script>
 
-<div id="cloudStatus" title="État de la synchronisation partagée">
+<div id="cloudStatus" title="État de la synchronisation partagée — cliquer pour forcer" style="cursor:pointer">
   <span id="cloudStatusDot">●</span>
   <span id="cloudStatusText">Connexion…</span>
 </div>
