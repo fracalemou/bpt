@@ -360,6 +360,10 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
 <footer>BPT — Gestion du championnat en HTML autonome</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<div id="cloudStatus" title="État de la synchronisation partagée — cliquer pour forcer" style="cursor:pointer">
+  <span id="cloudStatusDot">●</span>
+  <span id="cloudStatusText">Connexion…</span>
+</div>
 <script>
 const $ = id => document.getElementById(id);
 function clone(o){return JSON.parse(JSON.stringify(o));}
@@ -1653,13 +1657,10 @@ $("settingsPassword").addEventListener("keydown",e=>{
 
 renderAll();
 liveInit();
-document.getElementById("cloudStatus").onclick=forceCloudSync;
+if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 initCloudSync();
 </script>
 
-<div id="cloudStatus" title="État de la synchronisation partagée — cliquer pour forcer" style="cursor:pointer">
-  <span id="cloudStatusDot">●</span>
-  <span id="cloudStatusText">Connexion…</span>
-</div>
+
 </body>
 </html>
