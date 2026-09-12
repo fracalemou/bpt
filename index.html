@@ -1,0 +1,1548 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BPT — Gestion du championnat</title>
+<style>
+:root{--bg:#0e1712;--panel:#18231d;--panel2:#213128;--line:#32473a;--green:#173a2b;--green2:#2f6d50;--gold:#c8952e;--cream:#fff8ea;--text:#f7f4ec;--muted:#b7c3bb;--danger:#a94343;--ok:#79c594}
+*{box-sizing:border-box} body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+header{height:64px;background:var(--green);display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid #315441}
+.brand b{font-size:22px} .brand span{display:block;font-size:12px;color:#d9e1dc} button,input,select{font:inherit}
+.btn{border:0;border-radius:8px;padding:9px 13px;font-weight:700;cursor:pointer;background:var(--gold);color:#17120b}
+.btn.secondary{background:var(--green2);color:#fff} .btn.ghost{background:#34483c;color:#fff} .btn.danger{background:var(--danger);color:#fff}.btn:disabled{opacity:.45;cursor:not-allowed}
+nav{display:flex;gap:6px;flex-wrap:wrap;padding:9px 14px;background:#121e17;border-bottom:1px solid #283c31}
+nav button{background:transparent;border:1px solid #34483c;color:#dce5df;border-radius:8px;padding:8px 11px;cursor:pointer}
+nav button.active{background:var(--green2);color:white;border-color:var(--green2)}
+main{padding:14px;max-width:1550px;margin:auto} .view{display:none} .view.active{display:block}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:12px} .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+.card h2{font-size:14px;text-transform:uppercase;letter-spacing:.04em;color:#e8c39e;margin:0 0 10px} .card h3{margin:5px 0 10px}
+.span3{grid-column:span 3} .span4{grid-column:span 4} .span5{grid-column:span 5} .span6{grid-column:span 6} .span7{grid-column:span 7} .span8{grid-column:span 8} .span12{grid-column:span 12}
+.kpi{background:var(--panel2);border-radius:10px;padding:14px} .kpi b{display:block;font-size:27px} .kpi span{font-size:12px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:13px} th{position:sticky;top:0;background:#274334;color:#fff;text-align:left;padding:8px;z-index:1} td{border-bottom:1px solid #2b3d33;padding:7px}
+.tablewrap{overflow:auto;max-height:520px;border:1px solid #2c4035;border-radius:9px}
+.field{display:grid;grid-template-columns:1fr 180px;gap:9px;align-items:center;margin:8px 0} input,select{width:100%;background:#0d1711;color:white;border:1px solid #42594b;border-radius:7px;padding:8px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap} .muted{color:var(--muted);font-size:12px} .good{color:var(--ok)} .bad{color:#ff9e91}
+.playerchip{display:inline-flex;align-items:center;gap:6px;background:#23362b;border-radius:999px;padding:5px 9px;margin:3px} .playerchip.inactive{opacity:.45}
+.rank1{background:#4d421d} .rank2{background:#343a3c} .rank3{background:#4a3122}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:20;padding:20px} .modal.open{display:flex}
+.modalbox{width:min(1100px,96vw);max-height:92vh;overflow:auto;background:var(--panel);border:1px solid #456451;border-radius:14px;padding:18px}
+.place-row{display:grid;grid-template-columns:65px 1fr 1fr;gap:8px;align-items:center;margin:6px 0} .killgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.hero{padding:18px;background:linear-gradient(135deg,#173a2b,#253924);border-radius:14px;border:1px solid #436149} .hero h1{margin:0 0 5px;font-size:28px} .hero p{margin:0;color:#dce7df}
+.pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#31463a;color:#dce7df;font-size:12px}
+footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
+@media(max-width:1000px){.span3,.span4,.span5,.span6,.span7,.span8{grid-column:span 12}.field{grid-template-columns:1fr}.killgrid{grid-template-columns:1fr}}
+
+/* --- Suivi live intégré --- */
+#liveManager .live-screen{display:none}
+#liveManager .live-screen.active{display:block}
+#liveManager .live-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+#liveManager .live-title{font-size:18px;font-weight:800;color:#e8c39e}
+#liveManager .live-layout{display:grid;grid-template-columns:440px 1fr;gap:12px}
+#liveManager .live-stage{display:grid;grid-template-columns:1.15fr .85fr;gap:12px}
+#liveManager .live-timer-card{background:linear-gradient(145deg,#12251b,#1d3327);border:1px solid #42604d;border-radius:14px;padding:18px;text-align:center}
+#liveManager .live-level{font-size:18px;color:#d5e1d9;margin-top:10px}
+#liveManager .live-blinds{font-size:50px;font-weight:900;letter-spacing:.02em;margin:5px 0}
+#liveManager .live-ante{color:#e8c39e;font-weight:700}
+#liveManager .live-timer{font-size:76px;font-weight:900;line-height:1;margin:16px 0}
+#liveManager .live-next{color:#b9c5be}
+#liveManager .live-controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+#liveManager .live-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#liveManager .live-kpi{background:#22352a;border-radius:9px;padding:10px;text-align:center}
+#liveManager .live-kpi b{display:block;font-size:20px}
+#liveManager .live-kpi span{font-size:11px;color:#b7c3bb}
+#liveManager .live-players{max-height:270px;overflow:auto}
+#liveManager .live-structure{max-height:260px;overflow:auto}
+#liveManager .live-player-list{max-height:260px;overflow:auto;border:1px solid #304438;border-radius:8px;padding:6px}
+#liveManager .live-player-row{display:flex;align-items:center;gap:8px;padding:5px;border-bottom:1px solid #283b31}
+#liveManager .live-player-row:last-child{border-bottom:0}
+#liveManager .live-player-row input{width:auto}
+#liveManager .live-elim{display:grid;grid-template-columns:1fr 1fr auto;gap:8px}
+#liveManager .live-status{padding:8px 10px;border-radius:8px;background:#24392e;margin-top:8px}
+#liveManager .winner{background:#4d421d}
+#liveManager .out{opacity:.55}
+#liveManager .live-badge{display:inline-block;background:#c8952e;color:#17120b;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:800}
+@media(max-width:1100px){
+  #liveManager .live-layout,#liveManager .live-stage{grid-template-columns:1fr}
+  #liveManager .live-timer{font-size:58px}
+  #liveManager .live-blinds{font-size:40px}
+}
+
+#settings > .grid + .grid{margin-top:12px}
+#settings .settings-subtitle{margin:8px 0;color:#e8c39e;font-weight:800}
+
+#cloudStatus{
+  position:fixed;right:16px;bottom:14px;z-index:9999;
+  display:flex;gap:7px;align-items:center;
+  padding:8px 12px;border-radius:999px;
+  background:#17231d;border:1px solid #365445;
+  color:#e8eee9;font-size:12px;font-weight:700;
+  box-shadow:0 8px 24px rgba(0,0,0,.28)
+}
+#cloudStatusDot{color:#e3a83c}
+#cloudStatus.ok #cloudStatusDot{color:#5fd38b}
+#cloudStatus.busy #cloudStatusDot{color:#e3a83c}
+#cloudStatus.offline #cloudStatusDot{color:#ff7272}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><b>BPT — Championnat de poker</b><span>Gestion complète du championnat 2026-2027</span></div>
+  <div class="row">
+    <button class="btn ghost" id="backupBtn">Sauvegarder JSON</button>
+    <label class="btn ghost" style="cursor:pointer">Restaurer JSON<input id="restoreInput" type="file" accept=".json" hidden></label>
+  </div>
+</header>
+<nav id="nav">
+  <button data-view="live">Live</button>
+  <button data-view="newgame">Nouvelle partie</button>
+  <button data-view="ranking" class="active">Classement</button>
+  <button data-view="history">Historique</button>
+  <button data-view="settings">Paramètres</button>
+</nav>
+<main>
+<section id="live" class="view">
+  <div id="liveManager">
+    <div id="livePrepScreen" class="live-screen active">
+      <div class="live-head">
+        <div>
+          <div class="live-title">BPT — Préparation de la partie live</div>
+          <div class="muted">La partie terminée sera automatiquement enregistrée dans le championnat et le classement sera recalculé.</div>
+        </div>
+      </div>
+
+      <div class="live-layout">
+        <div class="card">
+          <h2>Partie</h2>
+          <div class="field"><label>Date</label><input id="liveDate" type="date"></div>
+          <div class="field"><label>Lieu</label><input id="liveLocation" placeholder="Lieu de la partie"></div>
+          <div class="field"><label>Stack de départ</label><input id="liveStartStack" type="number" min="100" step="500" value="20000"></div>
+          <div class="field"><label>SB minimale</label><input id="liveMinSB" type="number" min="1" step="25" value="25"></div>
+          <div class="field"><label>Durée cible</label>
+            <select id="liveDuration">
+              <option value="120">2h00</option><option value="150">2h30</option><option value="180">3h00</option>
+              <option value="210">3h30</option><option value="240" selected>4h00</option><option value="270">4h30</option>
+              <option value="300">5h00</option><option value="330">5h30</option><option value="360">6h00</option>
+            </select>
+          </div>
+<div class="field"><label>Antes</label><select id="liveUseAnte"><option value="no" selected>Non</option><option value="yes">Oui</option></select></div>
+          <div class="field"><label>Mise / joueur</label><input id="liveBuyIn" type="number" min="0" step="1" value="5"></div>
+
+          <h2 style="margin-top:18px">Joueurs actifs du championnat</h2>
+          <div class="row" style="margin-bottom:8px">
+            <button class="btn secondary" id="liveSelectAllBtn">Tous</button>
+            <button class="btn ghost" id="liveSelectNoneBtn">Aucun</button>
+            <span class="muted"><b id="liveSelectedCount">0</b> sélectionné(s)</span>
+          </div>
+          <div id="livePlayerList" class="live-player-list"></div>
+
+          <div class="row" style="margin-top:12px">
+            <button class="btn ghost" id="liveRecalcBtn">Recalculer la structure</button>
+            <button class="btn" id="liveLaunchBtn">Lancer la partie</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Structure calculée</h2><div class="muted" style="margin-bottom:8px">La durée des niveaux et la progression des blindes sont calculées automatiquement à partir de la durée totale souhaitée, du nombre de joueurs et du stack.</div>
+          <div id="liveStructureSummary" class="muted" style="margin-bottom:8px">Sélectionnez au moins 2 joueurs.</div>
+          <div class="live-structure">
+            <table>
+              <thead><tr><th>Niv.</th><th>Durée</th><th>SB</th><th>BB</th><th>Ante</th></tr></thead>
+              <tbody id="liveStructureBody"></tbody>
+            </table>
+          </div>
+          <h2 style="margin-top:18px">Gains championnat</h2>
+          <div class="live-status">1er : <b>60 %</b> • 2e : <b>30 %</b> • 3e : <b>10 %</b><br><span class="muted">Montants ajustés aux 5 € les plus proches ; le 3e reçoit le reliquat pour distribuer exactement toute la cagnotte.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="liveGameScreen" class="live-screen">
+      <div class="live-head">
+        <div>
+          <div class="live-title">Championnat BPT — Partie en cours</div>
+          <div id="liveGameMeta" class="muted"></div>
+        </div>
+        <div class="row">
+          <span class="live-badge" id="liveSyncBadge">NON SYNCHRONISÉE</span>
+          <button class="btn ghost" id="liveBackPrepBtn">Préparation</button>
+        </div>
+      </div>
+
+      <div class="live-stage">
+        <div class="live-timer-card">
+          <div id="liveStateBadge" class="pill">PRÊT</div>
+          <div id="liveLevelLabel" class="live-level">Niveau 1</div>
+          <div class="live-blinds"><span id="liveSB">—</span> / <span id="liveBB">—</span></div>
+          <div class="live-ante">Ante : <span id="liveAnte">—</span></div>
+          <div id="liveTimer" class="live-timer">00:00</div>
+          <div class="live-next">Niveau suivant : <strong id="liveNextBlinds">—</strong></div>
+          <div class="live-controls">
+            <button class="btn" id="liveStartBtn">Démarrer / Reprendre</button>
+            <button class="btn secondary" id="livePauseBtn">Pause</button>
+            <button class="btn ghost" id="livePrevLevelBtn">Niveau précédent</button>
+            <button class="btn ghost" id="liveNextLevelBtn">Niveau suivant</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Partie</h2>
+          <div class="live-kpis">
+            <div class="live-kpi"><b id="liveRemaining">0</b><span>joueurs restants</span></div>
+            <div class="live-kpi"><b id="liveAvgStack">0</b><span>stack moyen</span></div>
+            <div class="live-kpi"><b id="liveElapsed">00:00:00</b><span>durée écoulée</span></div>
+            <div class="live-kpi"><b id="livePrizePool">0 €</b><span>cagnotte</span></div>
+            <div class="live-kpi"><b id="liveGameNo">—</b><span>partie championnat</span></div>
+            <div class="live-kpi"><b id="livePaid">3</b><span>places payées</span></div>
+          </div>
+
+          <h2 style="margin-top:16px">Enregistrer un sortant</h2>
+          <div class="live-elim">
+            <select id="liveOutPlayer"></select>
+            <select id="liveKiller"></select>
+            <button class="btn danger" id="liveEliminateBtn">Éliminer</button>
+          </div>
+          <div class="muted" style="margin-top:5px">L'éliminateur est limité aux joueurs encore en jeu et ne peut pas être le sortant.</div>
+
+          <div id="liveSyncStatus" class="live-status">La synchronisation se fera automatiquement lorsque le vainqueur sera déterminé.</div>
+
+          <h2 style="margin-top:16px">Joueurs</h2>
+          <div class="live-players">
+            <table>
+              <thead><tr><th>Joueur</th><th>Statut</th><th>Place</th><th>Gain</th><th>Éliminé par</th></tr></thead>
+              <tbody id="livePlayersBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="newgame" class="view">
+  <div class="grid">
+    <div class="card span4">
+      <h2>Nouvelle partie</h2>
+      <div class="field"><label>Date</label><input id="gDate" type="date"></div>
+      <div class="field"><label>Lieu</label><input id="gLocation" placeholder="Lieu"></div>
+      <div class="field"><label>Mise / joueur</label><input id="gStake" type="number" min="0" step="1"></div><div class="muted">Gains BPT : 1er 60 % • 2e 30 % • 3e 10 % — ajustés aux 5 € les plus proches</div>
+      <div class="muted">Sélectionnez les joueurs actifs participant à la partie.</div>
+      <div id="gamePlayerChecks" style="margin-top:8px;max-height:340px;overflow:auto"></div>
+      <button class="btn secondary" id="buildGameBtn" style="width:100%;margin-top:10px">Préparer le classement</button>
+    </div>
+    <div class="card span8">
+      <h2>Saisie du classement</h2>
+      <div id="gameEntryEmpty" class="muted">Sélectionnez au moins 2 joueurs puis cliquez sur « Préparer le classement ».</div>
+      <div id="gameEntry"></div>
+    </div>
+  </div>
+</section>
+
+<section id="ranking" class="view active">
+  <div class="hero"><h1>Classement du championnat BPT</h1><p id="heroText"></p></div>
+  <div class="grid" style="margin-top:12px">
+    <div class="kpi span3"><b id="kGames">0</b><span>Parties jouées</span></div>
+    <div class="kpi span3"><b id="kPlayers">0</b><span>Joueurs classés</span></div>
+    <div class="kpi span3"><b id="kRecord">0</b><span>Record participants</span></div>
+    <div class="kpi span3"><b id="kPot">0 €</b><span>Total des mises</span></div>
+    <div class="card span8"><h2>Top 10</h2><div class="tablewrap"><table><thead><tr><th>Clt</th><th>Joueur</th><th>Points</th><th>Parties</th><th>Victoires</th><th>Kills</th><th>Solde</th></tr></thead><tbody id="dashTop"></tbody></table></div></div>
+    <div class="card span4"><h2>Dernière partie</h2><div id="lastGame"></div></div>
+  </div>
+
+  <div style="height:12px"></div>
+
+  <div class="card"><h2>Classement général détaillé</h2><div class="tablewrap"><table><thead><tr><th>Clt</th><th>Joueur</th><th>Points</th><th>Progression</th><th>Moy. pts</th><th>Parties</th><th>Victoires</th><th>Podiums</th><th>Tabliers</th><th>Kills</th><th>Kills/partie</th><th>Mises</th><th>Gains</th><th>Solde</th><th>Bourreau</th><th>Victime</th></tr></thead><tbody id="rankingBody"></tbody></table></div></div>
+</section>
+<section id="history" class="view">
+  <div class="card">
+    <div class="row" style="justify-content:space-between"><h2>Historique des parties</h2><button class="btn ghost" id="exportCsvBtn">Exporter CSV</button></div>
+    <div class="tablewrap"><table><thead><tr><th>Partie</th><th>Date</th><th>Lieu</th><th>Joueur</th><th>Place</th><th>Éliminé par</th><th>Tablier</th><th>Joueurs</th><th>Points</th><th>Mise</th><th>Gain</th><th>Net</th><th>Kills</th></tr></thead><tbody id="historyBody"></tbody></table></div>
+  </div>
+</section>
+
+<section id="settings" class="view">
+  <div id="settingsLock" class="card" style="max-width:520px;margin:20px auto">
+    <h2>Paramètres protégés</h2>
+    <p class="muted">Saisissez le mot de passe pour accéder aux paramètres du championnat.</p>
+    <div class="field"><label>Mot de passe</label><input id="settingsPassword" type="password" inputmode="numeric" placeholder="••••"></div>
+    <button class="btn secondary" id="unlockSettingsBtn" style="width:100%">Déverrouiller</button>
+    <div id="settingsPasswordError" class="bad" style="margin-top:8px"></div>
+  </div>
+  <div id="settingsProtectedContent" style="display:none">
+
+  <div class="grid" style="margin-bottom:12px">
+    <div class="card span12">
+      <h2>Gestion des joueurs</h2>
+      <div class="muted" style="margin-bottom:10px">Ajoutez, activez ou désactivez les joueurs utilisés dans le championnat et le Live.</div>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="card span5"><h2>Ajouter un joueur</h2><div class="row"><input id="newPlayer" placeholder="Nom du joueur" style="flex:1"><button class="btn secondary" id="addPlayerBtn">Ajouter</button></div></div>
+    <div class="card span7"><h2>Joueurs du BPT</h2><div id="playersAdmin"></div></div>
+  </div>
+
+  <div class="grid" style="margin:12px 0">
+    <div class="card span12">
+      <h2>Correction des parties</h2>
+      <div class="muted">Zone protégée permettant de corriger ou de supprimer la dernière partie enregistrée.</div>
+    </div>
+  </div>
+  <div id="correctionPanel">
+    <div class="grid">
+      <div class="card span4">
+        <h2>Parties enregistrées</h2>
+        <div class="field"><label>Partie</label><select id="correctionGameSelect"></select></div>
+        <div class="row" style="justify-content:space-between;margin-top:10px">
+          <button class="btn ghost" id="prevCorrectionGameBtn">← Précédente</button>
+          <button class="btn ghost" id="nextCorrectionGameBtn">Suivante →</button>
+        </div>
+        <div id="correctionGameSummary" class="muted" style="margin-top:12px"></div>
+      </div>
+
+      <div class="card span8">
+        <h2>Modifier la partie</h2>
+        <div id="correctionEmpty" class="muted">Aucune partie enregistrée.</div>
+        <div id="correctionEditor" style="display:none">
+          <div class="grid">
+            <div class="span6"><div class="field"><label>Date</label><input id="cDate" type="date"></div></div>
+            <div class="span6"><div class="field"><label>Lieu</label><input id="cLocation"></div></div>
+            <div class="span6"><div class="field"><label>Mise / joueur</label><input id="cStake" type="number" min="0" step="1"></div></div>
+            <div class="span6"><div class="field"><label>Participants</label><input id="cParticipants" disabled></div></div>
+          </div>
+          <div class="muted" style="margin:8px 0">Modifiez le classement et les éliminateurs. Les points, gains, kills, podiums et tablier seront recalculés à l'enregistrement.</div>
+          <div class="tablewrap">
+            <table>
+              <thead><tr><th>Place</th><th>Joueur</th><th>Éliminé par</th><th>Points</th><th>Gain</th></tr></thead>
+              <tbody id="correctionRows"></tbody>
+            </table>
+          </div>
+          <div class="row" style="margin-top:12px;justify-content:space-between">
+            <button class="btn danger" id="deleteCorrectionGameBtn">Supprimer cette partie</button>
+            <div class="row">
+              <button class="btn ghost" id="reloadCorrectionBtn">Annuler les modifications</button>
+              <button class="btn" id="saveCorrectionBtn">Enregistrer les corrections</button>
+            </div>
+          </div>
+          <div id="deleteCorrectionHint" class="muted" style="margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card span6">
+      <h2>Paramètres du championnat</h2>
+      <div class="field"><label>Nom</label><input id="sName"></div>
+      <div class="field"><label>Saison</label><input id="sSeason"></div>
+      <div class="field"><label>Mise par défaut</label><input id="sStake" type="number" step="1"></div>
+      <div class="field"><label>Gain 1er (%)</label><input id="sP1" type="number" min="0" max="100"></div>
+      <div class="field"><label>Gain 2e (%)</label><input id="sP2" type="number" min="0" max="100"></div>
+      <div class="field"><label>Gain 3e (%)</label><input id="sP3" type="number" min="0" max="100"></div>
+      <div class="field"><label>Tablier à partir de</label><input id="sTablier" type="number" min="2"></div>
+      <button class="btn secondary" id="saveSettingsBtn">Enregistrer les paramètres</button>
+    </div>
+    <div class="card span6">
+      <h2>Données</h2>
+      <p class="muted">Le fichier fonctionne sans serveur. Toutes les données sont stockées dans le navigateur. Faites régulièrement une sauvegarde JSON.</p>
+      <div class="row">
+        <button class="btn ghost" id="backupBtn2">Sauvegarder JSON</button>
+        <label class="btn ghost" style="cursor:pointer">Importer sauvegarde<input id="restoreInput2" type="file" accept=".json" hidden></label>
+      </div>
+      <hr style="border-color:#304438;margin:18px 0">
+      <button class="btn danger" id="resetDataBtn">Réinitialiser avec les données Excel d'origine</button>
+    </div>
+    <div class="card span12"><h2>Barème de points</h2><p class="muted">Le barème 6 à 30 joueurs a été repris du classeur BPT actuel. Il est utilisé automatiquement selon le nombre de participants.</p><div id="pointsPreview" class="tablewrap"></div></div>
+  </div>
+  </div>
+</section>
+</main>
+<footer>BPT — Gestion du championnat en HTML autonome</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SEED={"players":[{"name":"Alexis Volant","active":true},{"name":"Adrien Thiriez","active":true},{"name":"Anne BERA","active":false},{"name":"Areski AIT GHERBI","active":true},{"name":"Armell ARRAS","active":false},{"name":"Armelle BRAHIMI","active":false},{"name":"Arnaud HEDIN","active":false},{"name":"Clément MARAVAL","active":true},{"name":"Clément Thery","active":false},{"name":"Cyprien RIFFE","active":false},{"name":"David SAGALOWICZ","active":true},{"name":"ELEN","active":true},{"name":"Florence SAGALOWICZ","active":false},{"name":"Franck NAESSENS","active":true},{"name":"François CATTEAU","active":true},{"name":"Frédéric Tavernier","active":false},{"name":"Gérard CANDELIER","active":false},{"name":"Grégoire DUFORET","active":true},{"name":"Guillaume Molmy","active":false},{"name":"Hélène MORIZUR","active":false},{"name":"Jean Arnaud HEDIN OPIGEZ","active":false},{"name":"Jérémie CARPENTIER","active":true},{"name":"Jérémy COQUEL","active":true},{"name":"Jérôme BERA","active":true},{"name":"Jérôme BINOT","active":true},{"name":"Jérôme RIFFE","active":true},{"name":"joueur 74","active":false},{"name":"joueur 75","active":false},{"name":"Jules NAESSENS","active":true},{"name":"Laurent SAGALOWICZ","active":false},{"name":"LUC quebec","active":false},{"name":"MATTHIEU (Rimbaud)","active":false},{"name":"Maxence BINOT","active":false},{"name":"Mehdi BRAHIMI","active":true},{"name":"Mélanie BINOT","active":false},{"name":"Mélanie NAESSENS","active":false},{"name":"Michel SCHERPEREEL","active":true},{"name":"Nuno Tinoco","active":false},{"name":"Olivier HENGUELLE","active":true},{"name":"Philippe DUBOIS","active":true},{"name":"Quentin","active":true},{"name":"Romain Schepereel","active":false},{"name":"Solène BALLOIS","active":false},{"name":"Stéphane LEFIN","active":false},{"name":"Stéphane ROBERT","active":false},{"name":"Théo Maraval","active":false},{"name":"Thierry MONNIAUX","active":true},{"name":"Thomas DELVAL","active":false},{"name":"Valentin Naessens","active":false},{"name":"hélène fiona","active":false}],"history":[{"game":1,"date":"2026-09-11","location":"alexis","player":"Alexis Volant","place":1,"killer":"","tablier":true,"n":10,"points":30.0,"stake":5.0,"gross":30.0,"net":25.0,"kills":3,"win":true,"podium":true,"performance":123.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"Areski AIT GHERBI","place":2,"killer":"Alexis Volant","tablier":false,"n":10,"points":26.0,"stake":5.0,"gross":15.0,"net":10.0,"kills":5,"win":false,"podium":true,"performance":113.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"Jérôme RIFFE","place":3,"killer":"Alexis Volant","tablier":false,"n":10,"points":22.0,"stake":5.0,"gross":5.0,"net":0.0,"kills":1,"win":false,"podium":true,"performance":103.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"ELEN","place":4,"killer":"Alexis Volant","tablier":false,"n":10,"points":18.0,"stake":5.0,"gross":0.0,"net":-5.0,"kills":0,"win":false,"podium":false,"performance":93.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"David SAGALOWICZ","place":5,"killer":"Areski AIT GHERBI","tablier":false,"n":10,"points":15.0,"stake":5.0,"gross":0.0,"net":-5.0,"kills":0,"win":false,"podium":false,"performance":83.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"Franck NAESSENS","place":6,"killer":"Jérôme RIFFE","tablier":false,"n":10,"points":12.0,"stake":5.0,"gross":0.0,"net":-5.0,"kills":0,"win":false,"podium":false,"performance":73.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"Olivier HENGUELLE","place":7,"killer":"Areski AIT GHERBI","tablier":false,"n":10,"points":8.0,"stake":5.0,"gross":0.0,"net":-5.0,"kills":0,"win":false,"podium":false,"performance":63.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"Jérôme BINOT","place":8,"killer":"Areski AIT GHERBI","tablier":false,"n":10,"points":5.0,"stake":5.0,"gross":0.0,"net":-5.0,"kills":0,"win":false,"podium":false,"performance":53.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"Jérémy COQUEL","place":9,"killer":"Areski AIT GHERBI","tablier":false,"n":10,"points":3.0,"stake":5.0,"gross":0.0,"net":-5.0,"kills":0,"win":false,"podium":false,"performance":43.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"Jérôme BERA","place":10,"killer":"Areski AIT GHERBI","tablier":false,"n":10,"points":1.0,"stake":5.0,"gross":0.0,"net":-5.0,"kills":0,"win":false,"podium":false,"performance":33.02585092994046}],"points":{"6":{"1":18,"2":14,"3":10,"4":6,"5":3,"6":1,"7":0,"8":0,"9":0,"10":0,"11":0,"12":0,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"7":{"1":21,"2":17,"3":13,"4":9,"5":6,"6":3,"7":1,"8":0,"9":0,"10":0,"11":0,"12":0,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"8":{"1":24,"2":20,"3":16,"4":12,"5":9,"6":6,"7":3,"8":1,"9":0,"10":0,"11":0,"12":0,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"9":{"1":27,"2":23,"3":19,"4":15,"5":12,"6":9,"7":6,"8":3,"9":1,"10":0,"11":0,"12":0,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"10":{"1":30,"2":26,"3":22,"4":18,"5":15,"6":12,"7":8,"8":5,"9":3,"10":1,"11":0,"12":0,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"11":{"1":33,"2":29,"3":25,"4":21,"5":18,"6":14,"7":11,"8":8,"9":5,"10":3,"11":1,"12":0,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"12":{"1":36,"2":32,"3":28,"4":25,"5":21,"6":17,"7":14,"8":11,"9":8,"10":5,"11":3,"12":1,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"13":{"1":39,"2":35,"3":31,"4":28,"5":24,"6":20,"7":17,"8":14,"9":11,"10":8,"11":5,"12":3,"13":1,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"14":{"1":42,"2":38,"3":34,"4":31,"5":27,"6":23,"7":20,"8":17,"9":13,"10":10,"11":8,"12":5,"13":3,"14":1,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"15":{"1":45,"2":41,"3":37,"4":34,"5":30,"6":26,"7":23,"8":19,"9":16,"10":13,"11":10,"12":7,"13":5,"14":3,"15":1,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"16":{"1":48,"2":44,"3":40,"4":37,"5":33,"6":29,"7":26,"8":22,"9":19,"10":16,"11":13,"12":10,"13":7,"14":5,"15":3,"16":1,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"17":{"1":51,"2":47,"3":43,"4":40,"5":36,"6":32,"7":29,"8":25,"9":22,"10":19,"11":16,"12":13,"13":10,"14":7,"15":5,"16":3,"17":1,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"18":{"1":54,"2":50,"3":46,"4":43,"5":39,"6":35,"7":32,"8":28,"9":25,"10":22,"11":18,"12":15,"13":12,"14":10,"15":7,"16":5,"17":3,"18":1,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"19":{"1":57,"2":53,"3":49,"4":46,"5":42,"6":38,"7":35,"8":31,"9":28,"10":25,"11":21,"12":18,"13":15,"14":12,"15":10,"16":7,"17":5,"18":3,"19":1,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"20":{"1":60,"2":56,"3":52,"4":49,"5":45,"6":41,"7":38,"8":34,"9":31,"10":27,"11":24,"12":21,"13":18,"14":15,"15":12,"16":9,"17":7,"18":5,"19":2,"20":1,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"21":{"1":63,"2":59,"3":55,"4":52,"5":48,"6":44,"7":41,"8":37,"9":34,"10":30,"11":27,"12":24,"13":21,"14":18,"15":15,"16":12,"17":9,"18":7,"19":4,"20":2,"21":1,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"22":{"1":66,"2":62,"3":58,"4":55,"5":51,"6":47,"7":44,"8":40,"9":37,"10":33,"11":30,"12":27,"13":24,"14":20,"15":17,"16":15,"17":12,"18":9,"19":7,"20":4,"21":2,"22":1,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"23":{"1":69,"2":65,"3":61,"4":58,"5":54,"6":50,"7":47,"8":43,"9":40,"10":36,"11":33,"12":30,"13":26,"14":23,"15":20,"16":17,"17":14,"18":12,"19":9,"20":7,"21":4,"22":2,"23":1,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"24":{"1":72,"2":68,"3":64,"4":61,"5":57,"6":53,"7":50,"8":46,"9":43,"10":39,"11":36,"12":32,"13":29,"14":26,"15":23,"16":20,"17":17,"18":14,"19":12,"20":9,"21":7,"22":4,"23":2,"24":1,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"25":{"1":75,"2":71,"3":67,"4":64,"5":60,"6":56,"7":53,"8":49,"9":46,"10":42,"11":39,"12":35,"13":32,"14":29,"15":26,"16":23,"17":20,"18":17,"19":14,"20":11,"21":9,"22":7,"23":4,"24":2,"25":1,"26":0,"27":0,"28":0,"29":0,"30":0},"26":{"1":78,"2":74,"3":70,"4":67,"5":63,"6":59,"7":56,"8":52,"9":49,"10":45,"11":42,"12":38,"13":35,"14":32,"15":29,"16":25,"17":22,"18":20,"19":17,"20":14,"21":11,"22":9,"23":6,"24":4,"25":2,"26":1,"27":0,"28":0,"29":0,"30":0},"27":{"1":81,"2":77,"3":73,"4":70,"5":66,"6":62,"7":59,"8":55,"9":52,"10":48,"11":45,"12":41,"13":38,"14":35,"15":31,"16":28,"17":25,"18":22,"19":19,"20":17,"21":14,"22":11,"23":9,"24":6,"25":4,"26":2,"27":1,"28":0,"29":0,"30":0},"28":{"1":84,"2":80,"3":76,"4":73,"5":69,"6":65,"7":62,"8":58,"9":54,"10":51,"11":48,"12":44,"13":41,"14":38,"15":34,"16":31,"17":28,"18":25,"19":22,"20":19,"21":16,"22":14,"23":11,"24":9,"25":6,"26":4,"27":2,"28":1,"29":0,"30":0},"29":{"1":87,"2":83,"3":79,"4":76,"5":72,"6":68,"7":65,"8":61,"9":57,"10":54,"11":51,"12":47,"13":44,"14":40,"15":37,"16":34,"17":31,"18":28,"19":25,"20":22,"21":19,"22":16,"23":14,"24":11,"25":9,"26":6,"27":4,"28":2,"29":1,"30":0},"30":{"1":90,"2":86,"3":82,"4":79,"5":75,"6":71,"7":68,"8":64,"9":60,"10":57,"11":53,"12":50,"13":47,"14":43,"15":40,"16":37,"17":34,"18":31,"19":27,"20":25,"21":22,"22":19,"23":16,"24":13,"25":11,"26":8,"27":6,"28":4,"29":2,"30":1}},"settings":{"championshipName":"BPT","season":"2026-2027","stake":5,"payouts":[60,30,10],"roundTo5":false,"tablierMinPlayers":10}};
+const STORE="BPT_Championship_Manager_v1";
+
+const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
+const CLOUD_ROW_ID="main";
+
+let sbClient=null;
+let cloudReady=false;
+let cloudApplying=false;
+let cloudSaveTimer=null;
+let cloudLastRevision=0;
+let cloudChannel=null;
+
+function setCloudStatus(state,label){
+  const el=document.getElementById("cloudStatus");
+  const txt=document.getElementById("cloudStatusText");
+  if(!el||!txt)return;
+  el.classList.remove("ok","busy","offline");
+  if(state)el.classList.add(state);
+  txt.textContent=label;
+}
+
+function isValidBptState(x){
+  return !!(x && Array.isArray(x.players) && Array.isArray(x.history) && Array.isArray(x.points) && x.settings);
+}
+
+function saveLocalOnly(){
+  try{localStorage.setItem(STORE,JSON.stringify(db));}catch(e){}
+}
+
+async function cloudFetchState(){
+  if(!sbClient)return null;
+  const {data,error}=await sbClient
+    .from("bpt_state")
+    .select("data,revision,updated_at")
+    .eq("id",CLOUD_ROW_ID)
+    .maybeSingle();
+  if(error)throw error;
+  return data;
+}
+
+async function cloudPushNow(){
+  if(!sbClient || !cloudReady || cloudApplying)return;
+  setCloudStatus("busy","Synchronisation…");
+  try{
+    const payload=JSON.parse(JSON.stringify(db));
+    const {data,error}=await sbClient
+      .from("bpt_state")
+      .upsert({id:CLOUD_ROW_ID,data:payload},{onConflict:"id"})
+      .select("revision,updated_at")
+      .single();
+    if(error)throw error;
+    cloudLastRevision=Number(data?.revision||cloudLastRevision||0);
+    setCloudStatus("ok","Synchronisé");
+  }catch(e){
+    console.error("BPT cloud save:",e);
+    setCloudStatus("offline","Hors connexion");
+  }
+}
+
+function scheduleCloudSave(){
+  if(!cloudReady || cloudApplying)return;
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer=setTimeout(cloudPushNow,350);
+}
+
+async function applyCloudState(row){
+  if(!row || !isValidBptState(row.data))return false;
+  const rev=Number(row.revision||0);
+  if(rev && rev<=cloudLastRevision)return false;
+
+  cloudApplying=true;
+  try{
+    db=row.data;
+    db.history=dedupeHistory(db.history||[]);
+    cloudLastRevision=rev;
+    saveLocalOnly();
+    renderAll();
+    if(typeof liveRenderAll==="function")liveRenderAll();
+    setCloudStatus("ok","Synchronisé");
+  }finally{
+    cloudApplying=false;
+  }
+  return true;
+}
+
+async function initCloudSync(){
+  setCloudStatus("busy","Connexion…");
+
+  if(!window.supabase || !window.supabase.createClient){
+    setCloudStatus("offline","Supabase indisponible");
+    return;
+  }
+
+  try{
+    sbClient=window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY,
+      {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}}
+    );
+
+    const row=await cloudFetchState();
+
+    if(row && isValidBptState(row.data)){
+      cloudLastRevision=Number(row.revision||0);
+      cloudApplying=true;
+      db=row.data;
+      db.history=dedupeHistory(db.history||[]);
+      saveLocalOnly();
+      cloudApplying=false;
+      renderAll();
+      if(typeof liveRenderAll==="function")liveRenderAll();
+    }else{
+      // Première utilisation : le championnat local actuel devient l'état partagé.
+      const {data,error}=await sbClient
+        .from("bpt_state")
+        .upsert({id:CLOUD_ROW_ID,data:JSON.parse(JSON.stringify(db))},{onConflict:"id"})
+        .select("revision,updated_at")
+        .single();
+      if(error)throw error;
+      cloudLastRevision=Number(data?.revision||0);
+    }
+
+    cloudReady=true;
+    setCloudStatus("ok","Synchronisé");
+
+    // Mise à jour automatique des autres navigateurs.
+    cloudChannel=sbClient
+      .channel("bpt-shared-state")
+      .on(
+        "postgres_changes",
+        {event:"*",schema:"public",table:"bpt_state",filter:"id=eq."+CLOUD_ROW_ID},
+        async payload=>{
+          try{
+            const rev=Number(payload?.new?.revision||0);
+            if(rev && rev<=cloudLastRevision)return;
+            const row=await cloudFetchState();
+            await applyCloudState(row);
+          }catch(e){
+            console.error("BPT realtime:",e);
+          }
+        }
+      )
+      .subscribe();
+
+  }catch(e){
+    console.error("BPT cloud init:",e);
+    cloudReady=false;
+    setCloudStatus("offline","Hors connexion");
+  }
+}
+
+window.addEventListener("online",async()=>{
+  if(!sbClient){
+    await initCloudSync();
+  }else{
+    cloudReady=true;
+    await cloudPushNow();
+  }
+});
+window.addEventListener("offline",()=>setCloudStatus("offline","Hors connexion"));
+
+const $=id=>document.getElementById(id);
+let db=loadDB();
+
+function clone(o){return JSON.parse(JSON.stringify(o));}
+
+function dedupeHistory(history){
+  const byGame=new Map();
+  (history||[]).forEach(r=>{
+    if(!byGame.has(r.game))byGame.set(r.game,[]);
+    byGame.get(r.game).push(r);
+  });
+
+  const seen=new Set();
+  const kept=[];
+  const ordered=[...byGame.entries()].sort((a,b)=>Number(a[0])-Number(b[0]));
+
+  for(const [gameNo,rows] of ordered){
+    const sigRows=[...rows].sort((a,b)=>(a.place||999)-(b.place||999)||String(a.player||"").localeCompare(String(b.player||""),"fr"));
+    const first=sigRows[0]||{};
+    const sig=JSON.stringify({
+      date:first.date||"",
+      location:first.location||"",
+      rows:sigRows.map(r=>[r.player||"",r.place||0,r.killer||"",Number(r.points||0),Number(r.stake||0),Number(r.gross||0)])
+    });
+    if(seen.has(sig))continue;
+    seen.add(sig);
+    kept.push([gameNo,rows]);
+  }
+
+  // Renumérotation continue des parties conservées.
+  const renum=new Map(kept.map(([g],i)=>[g,i+1]));
+  return kept.flatMap(([g,rows])=>rows.map(r=>({...r,game:renum.get(g)})));
+}
+
+function loadDB(){
+  try{
+    const x=JSON.parse(localStorage.getItem(STORE));
+    if(x&&x.players&&x.history&&x.points){
+      const before=x.history.length;
+      x.history=dedupeHistory(x.history);
+      if(x.history.length!==before)localStorage.setItem(STORE,JSON.stringify(x));
+      return x;
+    }
+  }catch(e){}
+  const fresh=clone(SEED);
+  fresh.history=dedupeHistory(fresh.history);
+  return fresh;
+}
+function saveDB(){
+  saveLocalOnly();
+  scheduleCloudSave();
+}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
+function euro(n){return Number(n||0).toLocaleString("fr-FR",{minimumFractionDigits:0,maximumFractionDigits:2})+" €";}
+function num(n,d=1){return Number(n||0).toLocaleString("fr-FR",{maximumFractionDigits:d});}
+function pointsFor(place,n){return Number(db.points[String(n)]?.[String(place)]||0);}
+
+function groupedGames(){
+  const m=new Map();
+  for(const r of db.history){if(!m.has(r.game))m.set(r.game,[]);m.get(r.game).push(r);}
+  return [...m.entries()].sort((a,b)=>a[0]-b[0]);
+}
+function nextGameNo(){const gs=groupedGames();return gs.length?Math.max(...gs.map(x=>x[0]))+1:1;}
+
+function stats(excludeLatest=false){
+  let rows=db.history;
+  if(excludeLatest){
+    const games=groupedGames(); if(games.length){const last=games[games.length-1][0];rows=rows.filter(r=>r.game!==last);}
+  }
+  const by={};
+  for(const p of db.players)by[p.name]={name:p.name,points:0,games:new Set(),wins:0,podiums:0,tabliers:0,kills:0,stake:0,gross:0,net:0};
+  for(const r of rows){
+    if(!by[r.player])by[r.player]={name:r.player,points:0,games:new Set(),wins:0,podiums:0,tabliers:0,kills:0,stake:0,gross:0,net:0};
+    const s=by[r.player];s.points+=Number(r.points||0);s.games.add(r.game);
+    s.wins+=r.win?1:0;s.podiums+=r.podium?1:0;s.tabliers+=r.tablier?1:0;s.kills+=Number(r.kills||0);
+    s.stake+=Number(r.stake||0);s.gross+=Number(r.gross||0);s.net+=Number(r.net||0);
+  }
+  return Object.values(by).map(s=>({
+    ...s,
+    gamesCount:s.games.size,
+    avgPoints:s.games.size?s.points/s.games.size:0,
+    kpg:s.games.size?s.kills/s.games.size:0
+  }));
+}
+function ranking(){
+  const cur=stats(false).filter(s=>s.gamesCount>0).sort((a,b)=>b.points-a.points||b.avgPoints-a.avgPoints||a.name.localeCompare(b.name,"fr"));
+  const prev=stats(true).filter(s=>s.gamesCount>0).sort((a,b)=>b.points-a.points||b.avgPoints-a.avgPoints||a.name.localeCompare(b.name,"fr"));
+  const prevRank=new Map(prev.map((s,i)=>[s.name,i+1]));
+  return cur.map((s,i)=>({...s,rank:i+1,progress:prevRank.has(s.name)?prevRank.get(s.name)-(i+1):null}));
+}
+function killerStats(){
+  const pair={}, asK={}, asV={};
+  for(const r of db.history){
+    if(!r.killer)continue;
+    const key=r.killer+"|||"+r.player;pair[key]=(pair[key]||0)+1;
+    asK[r.killer]=asK[r.killer]||{};asK[r.killer][r.player]=(asK[r.killer][r.player]||0)+1;
+    asV[r.player]=asV[r.player]||{};asV[r.player][r.killer]=(asV[r.player][r.killer]||0)+1;
+  }
+  const top=o=>{if(!o)return "";return Object.entries(o).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],"fr"))[0]?.[0]||"";};
+  return {pair,mainVictim:n=>top(asK[n]),mainKiller:n=>top(asV[n])};
+}
+
+function renderAll(){
+  renderDashboard();renderRanking();renderHistory();renderPlayers();renderGamePlayers();renderSettings();renderPoints();if(correctionUnlocked)renderCorrectionGameList();if(document.getElementById("livePlayerList"))liveRenderPlayerList();
+}
+function renderDashboard(){
+  const games=groupedGames(),rank=ranking();
+  $("heroText").textContent=`${db.settings.season} • ${db.players.filter(p=>p.active).length} joueurs actifs • Mise par défaut ${euro(db.settings.stake)}`;
+  $("kGames").textContent=games.length;$("kPlayers").textContent=rank.length;
+  $("kRecord").textContent=games.length?Math.max(...games.map(g=>g[1].length)):0;
+  $("kPot").textContent=euro(db.history.reduce((a,r)=>a+Number(r.stake||0),0));
+  const ks=killerStats();
+  $("dashTop").innerHTML=rank.slice(0,10).map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}"><td>${s.rank}</td><td>${esc(s.name)}</td><td><b>${num(s.points,0)}</b></td><td>${s.gamesCount}</td><td>${s.wins}</td><td>${s.kills}</td><td>${euro(s.net)}</td></tr>`).join("");
+  if(!games.length){$("lastGame").innerHTML='<span class="muted">Aucune partie.</span>';return;}
+  const [gno,rows]=games[games.length-1],win=rows.find(r=>r.place===1);
+  $("lastGame").innerHTML=`<h3>Partie #${gno}</h3><p>${esc(rows[0].date)} • ${esc(rows[0].location)}</p><p><span class="pill">${rows.length} joueurs</span></p><p>Vainqueur : <b>${esc(win?.player||"")}</b></p><p>Points : <b>${num(win?.points||0,0)}</b></p>`;
+}
+function renderRanking(){
+  const ks=killerStats();
+  $("rankingBody").innerHTML=ranking().map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}">
+    <td>${s.rank}</td><td>${esc(s.name)}</td><td><b>${num(s.points,0)}</b></td>
+    <td>${s.progress===null?"Nouvelle entrée":s.progress>0?"+"+s.progress:s.progress===0?"=":String(s.progress)}</td>
+    <td>${num(s.avgPoints,1)}</td><td>${s.gamesCount}</td><td>${s.wins}</td><td>${s.podiums}</td><td>${s.tabliers}</td><td>${s.kills}</td><td>${num(s.kpg,2)}</td>
+    <td>${euro(s.stake)}</td><td>${euro(s.gross)}</td><td>${euro(s.net)}</td><td>${esc(ks.mainKiller(s.name))}</td><td>${esc(ks.mainVictim(s.name))}</td></tr>`).join("");
+}
+function renderHistory(){
+  $("historyBody").innerHTML=[...db.history].sort((a,b)=>b.game-a.game||a.place-b.place).map(r=>`<tr><td>${r.game}</td><td>${esc(r.date)}</td><td>${esc(r.location)}</td><td>${esc(r.player)}</td><td>${r.place}</td><td>${esc(r.killer)}</td><td>${r.tablier?"Oui":""}</td><td>${r.n}</td><td>${num(r.points,0)}</td><td>${euro(r.stake)}</td><td>${euro(r.gross)}</td><td>${euro(r.net)}</td><td>${r.kills}</td></tr>`).join("");
+}
+function renderPlayers(){
+  $("playersAdmin").innerHTML=db.players.sort((a,b)=>a.name.localeCompare(b.name,"fr")).map((p,i)=>`<div class="playerchip ${p.active?"":"inactive"}"><span>${esc(p.name)}</span><button class="btn ghost" style="padding:3px 6px" onclick="togglePlayer('${encodeURIComponent(p.name)}')">${p.active?"Actif":"Inactif"}</button><button class="btn danger" style="padding:3px 6px" onclick="deletePlayer('${encodeURIComponent(p.name)}')">×</button></div>`).join("");
+}
+function togglePlayer(enc){const n=decodeURIComponent(enc),p=db.players.find(x=>x.name===n);if(p){p.active=!p.active;saveDB();renderAll();}}
+function deletePlayer(enc){const n=decodeURIComponent(enc);if(db.history.some(r=>r.player===n||r.killer===n)){alert("Impossible : ce joueur est présent dans l'historique.");return;}if(confirm(`Supprimer ${n} ?`)){db.players=db.players.filter(p=>p.name!==n);saveDB();renderAll();}}
+function renderGamePlayers(){
+  $("gStake").value=db.settings.stake;
+  if(!$("gDate").value)$("gDate").value=new Date().toISOString().slice(0,10);
+  $("gamePlayerChecks").innerHTML=db.players.filter(p=>p.active).sort((a,b)=>a.name.localeCompare(b.name,"fr")).map(p=>`<label style="display:block;padding:5px 0"><input class="gp" type="checkbox" value="${esc(p.name)}" style="width:auto"> ${esc(p.name)}</label>`).join("");
+}
+function buildGameEntry(){
+  const names=[...document.querySelectorAll(".gp:checked")].map(x=>x.value);
+  if(names.length<2){alert("Sélectionnez au moins 2 joueurs.");return;}
+  const n=names.length;
+  $("gameEntryEmpty").style.display="none";
+
+  $("gameEntry").innerHTML=`<div class="muted" style="margin-bottom:8px">
+      Partie #${nextGameNo()} • ${n} joueurs • Répartition gains ${db.settings.payouts.join(" / ")} %
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Place</th><th>Joueur</th><th>Éliminé par</th><th>Points</th><th>Gain prévu</th></tr></thead>
+        <tbody>
+        ${Array.from({length:n},(_,i)=>`
+          <tr>
+            <td>${i+1}</td>
+            <td><select class="placePlayer" data-place="${i+1}"></select></td>
+            <td><select class="placeKiller" data-place="${i+1}"></select></td>
+            <td>${pointsFor(i+1,n)}</td>
+            <td>${euro(plannedGain(i+1,n,Number($("gStake").value)||0))}</td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
+    <button class="btn" id="saveGameBtn" style="margin-top:10px">Enregistrer la partie</button>`;
+
+  $("gameEntry").dataset.players=JSON.stringify(names);
+
+  document.querySelectorAll(".placePlayer").forEach(sel=>{
+    sel.addEventListener("change",refreshGameEntryOptions);
+  });
+
+  refreshGameEntryOptions();
+  $("saveGameBtn").onclick=saveGameFromEntry;
+}
+
+function refreshGameEntryOptions(){
+  const names=JSON.parse($("gameEntry").dataset.players||"[]");
+  const playerSelects=[...document.querySelectorAll(".placePlayer")];
+  const killerSelects=[...document.querySelectorAll(".placeKiller")];
+
+  // Sauvegarde des choix avant reconstruction.
+  const chosenPlayers=playerSelects.map(s=>s.value);
+  const chosenKillers=killerSelects.map(s=>s.value);
+
+  // 1) Joueurs : un joueur déjà positionné disparaît des autres lignes.
+  playerSelects.forEach((sel,idx)=>{
+    const current=chosenPlayers[idx];
+    const usedElsewhere=new Set(
+      chosenPlayers.filter((name,j)=>j!==idx && name)
+    );
+
+    const available=names.filter(name =>
+      name===current || !usedElsewhere.has(name)
+    );
+
+    sel.innerHTML=
+      '<option value="">— Joueur —</option>'+
+      available.map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join("");
+
+    if(current && available.includes(current)) sel.value=current;
+  });
+
+  // Classement final courant après mise à jour des joueurs.
+  const rankingPlayers=playerSelects.map(s=>s.value);
+
+  // 2) Éliminé par :
+  //    - jamais lui-même ;
+  //    - jamais un joueur classé derrière (donc déjà sorti) ;
+  //    - uniquement un joueur classé devant, donc encore en jeu.
+  killerSelects.forEach((sel,idx)=>{
+    const place=idx+1;
+    const eliminated=rankingPlayers[idx];
+    const previous=chosenKillers[idx];
+
+    if(place===1){
+      sel.disabled=true;
+      sel.innerHTML='<option value="">— Vainqueur —</option>';
+      sel.value="";
+      return;
+    }
+
+    sel.disabled=false;
+
+    if(!eliminated){
+      sel.innerHTML='<option value="">— Choisir d’abord le joueur —</option>';
+      sel.value="";
+      return;
+    }
+
+    const eligible=rankingPlayers
+      .slice(0,idx)
+      .filter(Boolean)
+      .filter(name=>name!==eliminated);
+
+    sel.innerHTML=
+      '<option value="">— Éliminé par… —</option>'+
+      eligible.map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join("");
+
+    if(previous && eligible.includes(previous)){
+      sel.value=previous;
+    }else{
+      sel.value="";
+    }
+  });
+}
+
+function payoutAmounts(n,stake){
+  const pot=Math.max(0,Number(n)||0)*Math.max(0,Number(stake)||0);
+  const payouts=db.settings.payouts||[60,30,10];
+
+  // BPT : les deux premiers gains sont arrondis aux 5 € les plus proches.
+  // Le 3e reçoit le reliquat afin que 100 % de la cagnotte soit distribué.
+  const round5=v=>Math.round(v/5)*5;
+  const first=round5(pot*(Number(payouts[0])||60)/100);
+  const second=round5(pot*(Number(payouts[1])||30)/100);
+  const third=Math.max(0,pot-first-second);
+
+  return [first,second,third];
+}
+
+function plannedGain(place,n,stake){
+  const gains=payoutAmounts(n,stake);
+  return place>=1&&place<=3 ? gains[place-1] : 0;
+}
+function saveGameFromEntry(){
+  const rows=[...document.querySelectorAll(".placePlayer")],names=rows.map(x=>x.value);
+  if(names.some(x=>!x)){alert("Chaque place doit avoir un joueur.");return;}
+  if(new Set(names).size!==names.length){alert("Un joueur apparaît plusieurs fois.");return;}
+  const n=names.length,game=nextGameNo(),date=$("gDate").value,location=$("gLocation").value.trim(),stake=Number($("gStake").value)||0;
+  const killers=[...document.querySelectorAll(".placeKiller")].map(x=>x.value);
+  for(let i=0;i<n;i++){
+    const place=i+1,player=names[i],killer=killers[i];
+
+    if(place===1 && killer){
+      alert("Le vainqueur ne peut pas avoir d’éliminateur.");
+      return;
+    }
+
+    if(killer===player){
+      alert(`Place ${place} : ${player} ne peut pas s’éliminer lui-même.`);
+      return;
+    }
+
+    if(killer && !names.includes(killer)){
+      alert(`Place ${place} : l’éliminateur n’a pas participé à la partie.`);
+      return;
+    }
+
+    if(killer){
+      const killerPlace=names.indexOf(killer)+1;
+      if(killerPlace>=place){
+        alert(`Place ${place} : ${killer} était déjà éliminé lorsque ${player} est sorti.`);
+        return;
+      }
+    }
+  }
+  const killCounts={};for(const k of killers)if(k)killCounts[k]=(killCounts[k]||0)+1;
+  for(let i=0;i<n;i++){
+    const place=i+1,player=names[i],gross=plannedGain(place,n,stake);
+    db.history.push({game,date,location,player,place,killer:killers[i],tablier:n>=db.settings.tablierMinPlayers&&place===1,n,
+      points:pointsFor(place,n),stake,gross,net:gross-stake,kills:killCounts[player]||0,win:place===1,podium:place<=3});
+  }
+  saveDB();$("gameEntry").innerHTML="";$("gameEntryEmpty").style.display="block";$("gLocation").value="";renderAll();showView("ranking");alert(`Partie #${game} enregistrée.`);
+}
+function renderSettings(){
+  $("sName").value=db.settings.championshipName;$("sSeason").value=db.settings.season;$("sStake").value=db.settings.stake;
+  $("sP1").value=db.settings.payouts[0]||0;$("sP2").value=db.settings.payouts[1]||0;$("sP3").value=db.settings.payouts[2]||0;$("sTablier").value=db.settings.tablierMinPlayers;
+}
+function renderPoints(){
+  const nums=Object.keys(db.points).map(Number).sort((a,b)=>a-b);
+  let h='<table><thead><tr><th>Place</th>'+nums.map(n=>`<th>${n} j.</th>`).join("")+'</tr></thead><tbody>';
+  for(let p=1;p<=30;p++)h+=`<tr><th>${p}</th>`+nums.map(n=>`<td>${db.points[n]?.[p]||""}</td>`).join("")+'</tr>';
+  $("pointsPreview").innerHTML=h+"</tbody></table>";
+}
+
+
+/* ==================== LIVE BPT INTÉGRÉ ==================== */
+let liveSelected=new Set();
+let liveTicker=null;
+
+function ensureLiveState(){
+  if(!db.liveState){
+    db.liveState={
+      prepared:false,running:false,synced:false,gameNo:null,date:"",location:"",
+      startStack:20000,minSB:25,targetMinutes:240,useAnte:false,buyIn:5,
+      levels:[],levelIndex:0,levelSeconds:0,remainingSeconds:0,endAt:null,
+      elapsedBeforeMs:0,runStartedAt:null,startedAt:null,players:[]
+    };
+  }
+  return db.liveState;
+}
+
+function liveActiveNames(){
+  return db.players.filter(p=>p.active).map(p=>p.name).sort((a,b)=>a.localeCompare(b,"fr"));
+}
+function liveAlive(){
+  const s=ensureLiveState();
+  return s.players.filter(p=>p.status==="En jeu");
+}
+function liveFmt(n){return Math.round(Number(n)||0).toLocaleString("fr-FR");}
+function liveTime(sec){
+  sec=Math.max(0,Math.floor(sec||0));
+  const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;
+  return h?`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`:`${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
+function liveElapsedSeconds(){
+  const s=ensureLiveState();
+  let ms=s.elapsedBeforeMs||0;
+  if(s.running && s.runStartedAt)ms+=Date.now()-s.runStartedAt;
+  return Math.floor(ms/1000);
+}
+function liveNice(v){
+  let step=25;
+  if(v>=10000)step=500;
+  else if(v>=5000)step=250;
+  else if(v>=1000)step=100;
+  else if(v>=500)step=50;
+  return Math.max(25,Math.round(v/step)*step);
+}
+function liveBuildStructure(n,stack,targetMin,useAnte,minSB){
+  n=Math.max(2,Number(n)||2);
+  stack=Math.max(100,Number(stack)||20000);
+  targetMin=Math.max(60,Number(targetMin)||240);
+  minSB=Math.max(1,Number(minSB)||25);
+
+  const totalChips=n*stack;
+  const firstSB=minSB;
+  const firstBB=minSB*2;
+
+  // Cible de fin : environ 8 BB de tapis moyen en heads-up.
+  const targetFinalBB=Math.max(firstBB*4,totalChips/16);
+
+  // Progression classique.
+  const classicBase=[
+    [25,50],[50,100],[75,150],[100,200],[150,300],[200,400],
+    [300,600],[400,800],[500,1000],[750,1500],[1000,2000],
+    [1500,3000],[2000,4000],[3000,6000],[4000,8000],
+    [5000,10000],[7500,15000],[10000,20000],[15000,30000],
+    [20000,40000],[30000,60000],[40000,80000],[50000,100000]
+  ];
+
+  const scale=firstSB/25;
+  let levelsRaw=classicBase.map(([sb,bb])=>({
+    sb:liveNice(sb*scale),
+    bb:liveNice(bb*scale)
+  }));
+
+  levelsRaw[0]={sb:firstSB,bb:firstBB};
+
+  // Conserver les niveaux nécessaires pour atteindre la cible finale.
+  let endIndex=levelsRaw.findIndex(x=>x.bb>=targetFinalBB);
+  if(endIndex<0)endIndex=levelsRaw.length-1;
+  levelsRaw=levelsRaw.slice(0,endIndex+1);
+
+  // Minimum 6 niveaux pour éviter une structure trop brutale.
+  while(levelsRaw.length<6){
+    const prev=levelsRaw[levelsRaw.length-1];
+    const nextBB=liveNice(prev.bb*1.5);
+    levelsRaw.push({sb:liveNice(nextBB/2),bb:nextBB});
+  }
+
+  // La durée de chaque niveau est déterminée automatiquement
+  // pour coller au mieux à la durée totale souhaitée.
+  const levelMin=Math.max(5,Math.round(targetMin/levelsRaw.length));
+
+  const levels=levelsRaw.map((x,i)=>({
+    level:i+1,
+    sb:x.sb,
+    bb:x.bb,
+    ante:(!useAnte||i<3)?0:liveNice(x.bb/10),
+    durationMin:levelMin
+  }));
+
+  return {
+    levels,
+    count:levels.length,
+    levelMin,
+    targetFinalBB,
+    actualMinutes:levels.length*levelMin
+  };
+}
+
+function liveRenderPlayerList(){
+  const names=liveActiveNames();
+  liveSelected=new Set([...liveSelected].filter(n=>names.includes(n)));
+  $("livePlayerList").innerHTML=names.map(name=>`
+    <label class="live-player-row">
+      <input type="checkbox" class="live-player-check" data-name="${esc(name)}" ${liveSelected.has(name)?"checked":""}>
+      <span>${esc(name)}</span>
+    </label>`).join("") || '<div class="muted">Aucun joueur actif.</div>';
+  document.querySelectorAll(".live-player-check").forEach(cb=>cb.onchange=()=>{
+    cb.checked?liveSelected.add(cb.dataset.name):liveSelected.delete(cb.dataset.name);
+    $("liveSelectedCount").textContent=liveSelected.size;
+    livePreviewStructure();
+  });
+  $("liveSelectedCount").textContent=liveSelected.size;
+}
+function livePreviewStructure(){
+  const n=liveSelected.size;
+  if(n<2){
+    $("liveStructureBody").innerHTML="";
+    $("liveStructureSummary").textContent="Sélectionnez au moins 2 joueurs.";
+    return;
+  }
+  const stack=Math.max(100,Number($("liveStartStack").value)||20000);
+  const minSB=Math.max(1,Number($("liveMinSB").value)||25);
+  const target=Number($("liveDuration").value)||240;
+  const ante=$("liveUseAnte").value==="yes";
+  const st=liveBuildStructure(n,stack,target,ante,minSB);
+  $("liveStructureBody").innerHTML=st.levels.map(l=>`<tr><td>${l.level}</td><td>${l.durationMin} min</td><td>${liveFmt(l.sb)}</td><td>${liveFmt(l.bb)}</td><td>${l.ante?liveFmt(l.ante):"—"}</td></tr>`).join("");
+  const first=st.levels[0],last=st.levels[st.levels.length-1];
+  $("liveStructureSummary").innerHTML=
+    `<strong>${n} joueurs</strong> • Stack ${liveFmt(stack)} • `+
+    `${st.count} niveaux × ${st.levelMin} min • `+
+    `Temps estimé ${Math.floor(st.actualMinutes/60)}h${String(st.actualMinutes%60).padStart(2,"0")} • `+
+    `Départ ${liveFmt(first.sb)}/${liveFmt(first.bb)} • Fin ${liveFmt(last.sb)}/${liveFmt(last.bb)}`;
+}
+function liveShowScreen(which){
+  $("livePrepScreen").classList.toggle("active",which==="prep");
+  $("liveGameScreen").classList.toggle("active",which==="game");
+  if(which==="game")liveRenderAll();
+}
+function liveLaunch(){
+  if(liveSelected.size<2){alert("Sélectionnez au moins 2 joueurs.");return;}
+  const old=ensureLiveState();
+  if(old.prepared && !old.synced && old.players.length && !confirm("Une partie live non synchronisée existe déjà. La remplacer ?"))return;
+  if(liveTicker){clearInterval(liveTicker);liveTicker=null;}
+  const names=[...liveSelected];
+  const stack=Math.max(100,Number($("liveStartStack").value)||20000);
+  const minSB=Math.max(1,Number($("liveMinSB").value)||25);
+  const target=Number($("liveDuration").value)||240;
+  const useAnte=$("liveUseAnte").value==="yes";
+  const buyIn=Math.max(0,Number($("liveBuyIn").value)||0);
+  const st=liveBuildStructure(names.length,stack,target,useAnte,minSB);
+  db.liveState={
+    prepared:true,running:false,synced:false,gameNo:nextGameNo(),
+    date:$("liveDate").value||new Date().toISOString().slice(0,10),
+    location:$("liveLocation").value.trim(),
+    startStack:stack,minSB,targetMinutes:target,useAnte,buyIn,
+    levels:st.levels,levelIndex:0,levelSeconds:st.levelMin*60,remainingSeconds:st.levelMin*60,
+    endAt:null,elapsedBeforeMs:0,runStartedAt:null,startedAt:null,
+    players:names.map(name=>({name,status:"En jeu",place:null,killer:"",outLevel:null,outTime:""}))
+  };
+  saveDB();liveShowScreen("game");liveRenderAll();
+}
+function liveStart(){
+  const s=ensureLiveState();if(!s.prepared)return;
+  if(s.running)return;
+  s.running=true;if(!s.startedAt)s.startedAt=Date.now();s.runStartedAt=Date.now();s.endAt=Date.now()+s.remainingSeconds*1000;
+  saveDB();liveRunTicker();liveRenderAll();
+}
+function livePause(){
+  const s=ensureLiveState();if(!s.running)return;
+  s.remainingSeconds=Math.max(0,Math.ceil((s.endAt-Date.now())/1000));
+  s.elapsedBeforeMs=(s.elapsedBeforeMs||0)+(Date.now()-(s.runStartedAt||Date.now()));
+  s.running=false;s.runStartedAt=null;s.endAt=null;saveDB();liveRenderAll();
+}
+function liveRunTicker(){
+  if(liveTicker)clearInterval(liveTicker);
+  liveTicker=setInterval(()=>{
+    const s=ensureLiveState();if(!s.running)return;
+    s.remainingSeconds=Math.max(0,Math.ceil((s.endAt-Date.now())/1000));
+    if(s.remainingSeconds<=0)liveChangeLevel(1,true);
+    liveRenderTimerOnly();
+  },250);
+}
+function liveChangeLevel(delta,auto=false){
+  const s=ensureLiveState();if(!s.prepared)return;
+  if(s.running){
+    s.elapsedBeforeMs=(s.elapsedBeforeMs||0)+(Date.now()-(s.runStartedAt||Date.now()));
+    s.runStartedAt=Date.now();
+  }
+  s.levelIndex=Math.max(0,Math.min(s.levels.length-1,s.levelIndex+delta));
+  s.remainingSeconds=s.levelSeconds;
+  if(s.running)s.endAt=Date.now()+s.remainingSeconds*1000;
+  saveDB();liveRenderAll();
+}
+function liveRenderTimerOnly(){
+  const s=ensureLiveState();
+  $("liveTimer").textContent=liveTime(s.remainingSeconds);
+  $("liveElapsed").textContent=liveTime(liveElapsedSeconds());
+}
+function liveRefreshElimLists(){
+  const s=ensureLiveState();if(!s.prepared)return;
+  const alive=liveAlive();
+  const prevOut=$("liveOutPlayer").value;
+  $("liveOutPlayer").innerHTML='<option value="">— Joueur sortant —</option>'+alive.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join("");
+  if(alive.some(p=>p.name===prevOut))$("liveOutPlayer").value=prevOut;
+  const out=$("liveOutPlayer").value,prevK=$("liveKiller").value;
+  const eligible=alive.filter(p=>p.name!==out);
+  $("liveKiller").innerHTML='<option value="">— Éliminé par… —</option>'+eligible.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join("");
+  if(eligible.some(p=>p.name===prevK))$("liveKiller").value=prevK;
+}
+function livePrize(place){
+  const s=ensureLiveState();
+  const gains=payoutAmounts(s.players.length,s.buyIn);
+  return place>=1&&place<=3 ? gains[place-1] : 0;
+}
+function liveEliminate(){
+  const s=ensureLiveState(),out=$("liveOutPlayer").value,killer=$("liveKiller").value;
+  if(!out){alert("Choisissez le joueur sortant.");return;}
+  const alive=liveAlive();if(alive.length<=1)return;
+  if(killer===out){alert("Un joueur ne peut pas s'éliminer lui-même.");return;}
+  if(killer&&!alive.some(p=>p.name===killer)){alert("L'éliminateur doit être encore en jeu.");return;}
+  const p=s.players.find(x=>x.name===out&&x.status==="En jeu");if(!p)return;
+  p.status="Sorti";p.place=alive.length;p.killer=killer;p.outLevel=s.levelIndex+1;p.outTime=new Date().toLocaleTimeString("fr-FR");
+  const left=liveAlive();
+  if(left.length===1){
+    left[0].status="Vainqueur";left[0].place=1;
+    livePause();
+    liveSyncChampionship();
+  }else{saveDB();}
+  liveRenderAll();
+}
+function liveSyncChampionship(){
+  const s=ensureLiveState();
+  if(!s.prepared||s.synced)return;
+  if(s.players.some(p=>!p.place))return;
+
+  const n=s.players.length;
+  const killCounts={};
+  s.players.forEach(p=>{if(p.killer)killCounts[p.killer]=(killCounts[p.killer]||0)+1;});
+
+  const rows=[...s.players].sort((a,b)=>a.place-b.place).map(p=>{
+    const place=p.place,gross=livePrize(place);
+    return {
+      game:s.gameNo,date:s.date,location:s.location,player:p.name,place,
+      killer:p.killer||"",tablier:n>=db.settings.tablierMinPlayers&&place===1,n,
+      points:pointsFor(place,n),stake:s.buyIn,gross,net:gross-s.buyIn,
+      kills:killCounts[p.name]||0,win:place===1,podium:place<=3
+    };
+  });
+
+  db.history=db.history.filter(r=>r.game!==s.gameNo).concat(rows);
+  s.synced=true;
+  saveDB();
+  renderAll();
+}
+function liveRenderAll(){
+  const s=ensureLiveState();
+  if(!s.prepared){liveShowScreen("prep");return;}
+  const level=s.levels[s.levelIndex],next=s.levels[s.levelIndex+1];
+  $("liveGameMeta").textContent=`Partie #${s.gameNo} • ${s.date}${s.location?" • "+s.location:""} • ${s.players.length} joueurs`;
+  $("liveGameNo").textContent="#"+s.gameNo;
+  $("liveLevelLabel").textContent=`Niveau ${level.level} — ${level.durationMin} min`;
+  $("liveSB").textContent=liveFmt(level.sb);$("liveBB").textContent=liveFmt(level.bb);$("liveAnte").textContent=level.ante?liveFmt(level.ante):"—";
+  $("liveNextBlinds").textContent=next?`${liveFmt(next.sb)} / ${liveFmt(next.bb)}${next.ante?" — ante "+liveFmt(next.ante):""}`:"—";
+  const alive=liveAlive(),total=s.players.length*s.startStack;
+  $("liveRemaining").textContent=alive.length;$("liveAvgStack").textContent=alive.length?liveFmt(total/alive.length):"0";
+  $("livePrizePool").textContent=euro(s.players.length*s.buyIn);$("livePaid").textContent=Math.min(3,s.players.length);
+  $("liveStateBadge").textContent=s.synced?"TERMINÉE":s.running?"EN COURS":(s.players.some(p=>p.place)?"PAUSE":"PRÊT");
+  $("liveSyncBadge").textContent=s.synced?"SYNCHRONISÉE":"NON SYNCHRONISÉE";
+  $("liveSyncBadge").style.background=s.synced?"#79c594":"#c8952e";
+  $("liveSyncStatus").innerHTML=s.synced
+    ? `<strong>Partie #${s.gameNo} synchronisée.</strong> Le dashboard et le classement général ont été recalculés automatiquement.`
+    : `La synchronisation se fera automatiquement lorsque le vainqueur sera déterminé.`;
+  $("livePlayersBody").innerHTML=[...s.players].sort((a,b)=>(a.place||999)-(b.place||999)).map(p=>`
+    <tr class="${p.status==="Sorti"?"out":p.status==="Vainqueur"?"winner":""}">
+      <td>${esc(p.name)}</td><td>${p.status}</td><td>${p.place||"—"}</td><td>${p.place?euro(livePrize(p.place)):"—"}</td><td>${esc(p.killer||"")}</td>
+    </tr>`).join("");
+  liveRenderTimerOnly();liveRefreshElimLists();
+}
+function liveResetForNew(){
+  const s=ensureLiveState();
+  if(s.prepared&&!s.synced&&!confirm("Abandonner la partie live en cours ?"))return;
+  if(liveTicker){clearInterval(liveTicker);liveTicker=null;}
+  db.liveState=null;saveDB();liveSelected.clear();liveRenderPlayerList();livePreviewStructure();liveShowScreen("prep");
+}
+function liveInit(){
+  ensureLiveState();
+  $("liveDate").value=new Date().toISOString().slice(0,10);
+  $("liveBuyIn").value=db.settings.stake||5;
+  liveRenderPlayerList();
+  if(db.liveState&&db.liveState.prepared){
+    if(db.liveState.running){
+      db.liveState.running=false;db.liveState.runStartedAt=null;db.liveState.endAt=null;saveDB();
+    }
+    liveShowScreen("game");liveRenderAll();
+  }else{
+    liveShowScreen("prep");livePreviewStructure();
+  }
+}
+let correctionUnlocked=true;
+
+function correctionGames(){
+  return groupedGames().sort((a,b)=>a[0]-b[0]);
+}
+
+function renderCorrectionGameList(preferredGame=null){
+  if(!correctionUnlocked)return;
+  const games=correctionGames();
+  const sel=$("correctionGameSelect");
+
+  if(!games.length){
+    sel.innerHTML="";
+    $("correctionEditor").style.display="none";
+    $("correctionEmpty").style.display="block";
+    $("correctionGameSummary").textContent="Aucune partie enregistrée.";
+    return;
+  }
+
+  const previous=(preferredGame ?? Number(sel.value)) || games[games.length-1][0];
+  sel.innerHTML=games.map(([g,rows])=>{
+    const d=rows[0]?.date||"";
+    const l=rows[0]?.location||"";
+    return `<option value="${g}">Partie #${g} — ${esc(d)}${l?" — "+esc(l):""}</option>`;
+  }).join("");
+
+  const exists=games.some(([g])=>g===Number(previous));
+  sel.value=String(exists?previous:games[games.length-1][0]);
+  loadCorrectionGame();
+}
+
+function loadCorrectionGame(){
+  if(!correctionUnlocked)return;
+  const gameNo=Number($("correctionGameSelect").value);
+  const rows=db.history.filter(r=>r.game===gameNo).sort((a,b)=>a.place-b.place);
+
+  if(!rows.length){
+    $("correctionEditor").style.display="none";
+    $("correctionEmpty").style.display="block";
+    return;
+  }
+
+  $("correctionEditor").style.display="block";
+  $("correctionEmpty").style.display="none";
+  $("cDate").value=rows[0].date||"";
+  $("cLocation").value=rows[0].location||"";
+  $("cStake").value=rows[0].stake ?? db.settings.stake;
+  $("cParticipants").value=rows.length;
+  $("correctionGameSummary").innerHTML=
+    `<strong>Partie #${gameNo}</strong><br>${esc(rows[0].date||"")} • ${esc(rows[0].location||"")}<br>${rows.length} joueurs`;
+
+  const allGames=correctionGames();
+  const lastGameNo=allGames.length?allGames[allGames.length-1][0]:null;
+  const canDelete=gameNo===lastGameNo;
+  $("deleteCorrectionGameBtn").disabled=!canDelete;
+  $("deleteCorrectionGameBtn").style.opacity=canDelete?"1":".45";
+  $("deleteCorrectionGameBtn").style.cursor=canDelete?"pointer":"not-allowed";
+  $("deleteCorrectionHint").textContent=canDelete
+    ? "Cette partie est la dernière enregistrée : elle peut être supprimée."
+    : `Seule la dernière partie (#${lastGameNo}) peut être supprimée. Supprimez-la d’abord pour pouvoir supprimer celle-ci.`;
+
+  $("correctionRows").innerHTML=rows.map((r,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td><select class="cPlacePlayer" data-place="${i+1}"></select></td>
+      <td><select class="cPlaceKiller" data-place="${i+1}"></select></td>
+      <td class="cPoints">${pointsFor(i+1,rows.length)}</td>
+      <td class="cGain">${euro(plannedGain(i+1,rows.length,Number($("cStake").value)||0))}</td>
+    </tr>`).join("");
+
+  $("correctionEditor").dataset.game=String(gameNo);
+  $("correctionEditor").dataset.players=JSON.stringify(rows.map(r=>r.player));
+  $("correctionEditor").dataset.killers=JSON.stringify(rows.map(r=>r.killer||""));
+
+  const playerSelects=[...document.querySelectorAll(".cPlacePlayer")];
+  playerSelects.forEach((sel,i)=>{
+    sel.value="";
+    sel.addEventListener("change",refreshCorrectionOptions);
+  });
+
+  // First populate then restore current ranking values.
+  refreshCorrectionOptions();
+  const currentPlayers=rows.map(r=>r.player);
+  playerSelects.forEach((sel,i)=>{ sel.value=currentPlayers[i]||""; });
+  refreshCorrectionOptions();
+
+  // Restore killers if still valid.
+  const killerSelects=[...document.querySelectorAll(".cPlaceKiller")];
+  rows.forEach((r,i)=>{
+    if(r.killer && [...killerSelects[i].options].some(o=>o.value===r.killer)){
+      killerSelects[i].value=r.killer;
+    }
+  });
+}
+
+function refreshCorrectionOptions(){
+  const originalPlayers=JSON.parse($("correctionEditor").dataset.players||"[]");
+  const playerSelects=[...document.querySelectorAll(".cPlacePlayer")];
+  const killerSelects=[...document.querySelectorAll(".cPlaceKiller")];
+  const currentPlayers=playerSelects.map(s=>s.value);
+  const currentKillers=killerSelects.map(s=>s.value);
+
+  playerSelects.forEach((sel,idx)=>{
+    const current=currentPlayers[idx];
+    const usedElsewhere=new Set(currentPlayers.filter((name,j)=>j!==idx && name));
+    const available=originalPlayers.filter(name=>name===current || !usedElsewhere.has(name));
+
+    sel.innerHTML='<option value="">— Joueur —</option>'+
+      available.map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join("");
+
+    if(current && available.includes(current))sel.value=current;
+  });
+
+  const rankingPlayers=playerSelects.map(s=>s.value);
+
+  killerSelects.forEach((sel,idx)=>{
+    const place=idx+1;
+    const eliminated=rankingPlayers[idx];
+    const current=currentKillers[idx];
+
+    if(place===1){
+      sel.disabled=true;
+      sel.innerHTML='<option value="">— Vainqueur —</option>';
+      sel.value="";
+      return;
+    }
+
+    sel.disabled=false;
+
+    if(!eliminated){
+      sel.innerHTML='<option value="">— Choisir d’abord le joueur —</option>';
+      sel.value="";
+      return;
+    }
+
+    const eligible=rankingPlayers
+      .slice(0,idx)
+      .filter(Boolean)
+      .filter(name=>name!==eliminated);
+
+    sel.innerHTML='<option value="">— Éliminé par… —</option>'+
+      eligible.map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join("");
+
+    if(current && eligible.includes(current))sel.value=current;
+  });
+
+  refreshCorrectionCalculatedValues();
+}
+
+function refreshCorrectionCalculatedValues(){
+  const n=document.querySelectorAll(".cPlacePlayer").length;
+  const stake=Number($("cStake").value)||0;
+  [...document.querySelectorAll(".cPoints")].forEach((td,i)=>td.textContent=pointsFor(i+1,n));
+  [...document.querySelectorAll(".cGain")].forEach((td,i)=>td.textContent=euro(plannedGain(i+1,n,stake)));
+}
+
+function saveCorrection(){
+  if(!correctionUnlocked)return;
+  const gameNo=Number($("correctionEditor").dataset.game);
+  const playerSelects=[...document.querySelectorAll(".cPlacePlayer")];
+  const killerSelects=[...document.querySelectorAll(".cPlaceKiller")];
+  const names=playerSelects.map(s=>s.value);
+  const killers=killerSelects.map(s=>s.value);
+  const n=names.length;
+
+  if(names.some(x=>!x)){
+    alert("Chaque place doit avoir un joueur.");
+    return;
+  }
+  if(new Set(names).size!==n){
+    alert("Un joueur apparaît plusieurs fois dans le classement.");
+    return;
+  }
+
+  for(let i=0;i<n;i++){
+    const place=i+1, player=names[i], killer=killers[i];
+
+    if(place===1 && killer){
+      alert("Le vainqueur ne peut pas avoir d’éliminateur.");
+      return;
+    }
+    if(killer===player){
+      alert(`Place ${place} : ${player} ne peut pas s’éliminer lui-même.`);
+      return;
+    }
+    if(killer){
+      const killerPlace=names.indexOf(killer)+1;
+      if(killerPlace<1 || killerPlace>=place){
+        alert(`Place ${place} : l’éliminateur doit être un joueur encore en jeu, donc classé devant.`);
+        return;
+      }
+    }
+  }
+
+  const date=$("cDate").value;
+  const location=$("cLocation").value.trim();
+  const stake=Number($("cStake").value)||0;
+  const killCounts={};
+  for(const k of killers)if(k)killCounts[k]=(killCounts[k]||0)+1;
+
+  const corrected=names.map((player,i)=>{
+    const place=i+1;
+    const gross=plannedGain(place,n,stake);
+    return {
+      game:gameNo,
+      date,
+      location,
+      player,
+      place,
+      killer:killers[i],
+      tablier:n>=db.settings.tablierMinPlayers && place===1,
+      n,
+      points:pointsFor(place,n),
+      stake,
+      gross,
+      net:gross-stake,
+      kills:killCounts[player]||0,
+      win:place===1,
+      podium:place<=3,
+      performance:performance(place,n)
+    };
+  });
+
+  db.history=db.history.filter(r=>r.game!==gameNo).concat(corrected);
+  saveDB();
+  renderAll();
+  renderCorrectionGameList(gameNo);
+  alert(`Partie #${gameNo} corrigée et recalculée.`);
+}
+
+
+function deleteCorrectionGame(){
+  if(!correctionUnlocked)return;
+
+  const games=correctionGames();
+  if(!games.length)return;
+
+  const current=Number($("correctionGameSelect").value);
+  const lastGameNo=games[games.length-1][0];
+
+  if(current!==lastGameNo){
+    alert(`Seule la dernière partie (#${lastGameNo}) peut être supprimée.`);
+    return;
+  }
+
+  const rows=db.history.filter(r=>r.game===current);
+  const label=rows.length
+    ? `Partie #${current} du ${rows[0].date||""}${rows[0].location?" — "+rows[0].location:""}`
+    : `Partie #${current}`;
+
+  if(!confirm(`Supprimer définitivement ${label} ?\n\nLe classement, le dashboard, les kills et les statistiques seront recalculés.`)){
+    return;
+  }
+
+  db.history=db.history.filter(r=>r.game!==current);
+
+  // Si le live conservé correspond à la partie supprimée,
+  // on le remet à zéro pour éviter une resynchronisation accidentelle.
+  if(db.liveState && Number(db.liveState.gameNo)===current){
+    db.liveState=null;
+  }
+
+  saveDB();
+  renderAll();
+
+  const remaining=correctionGames();
+  if(remaining.length){
+    const newLast=remaining[remaining.length-1][0];
+    renderCorrectionGameList(newLast);
+  }else{
+    renderCorrectionGameList();
+  }
+
+  alert(`Partie #${current} supprimée. Le classement a été recalculé.`);
+}
+
+function moveCorrectionGame(delta){
+  const games=correctionGames();
+  if(!games.length)return;
+  const current=Number($("correctionGameSelect").value);
+  const idx=games.findIndex(([g])=>g===current);
+  const next=Math.max(0,Math.min(games.length-1,idx+delta));
+  $("correctionGameSelect").value=String(games[next][0]);
+  loadCorrectionGame();
+}
+
+
+let settingsUnlocked=false;
+
+function unlockSettings(){
+  if($("settingsPassword").value==="7074"){
+    settingsUnlocked=true;
+    $("settingsLock").style.display="none";
+    $("settingsProtectedContent").style.display="block";
+    $("settingsPasswordError").textContent="";
+    $("settingsPassword").value="";
+    renderCorrectionGameList();
+  }else{
+    $("settingsPasswordError").textContent="Mot de passe incorrect.";
+  }
+}
+
+function lockSettings(){
+  settingsUnlocked=false;
+  $("settingsProtectedContent").style.display="none";
+  $("settingsLock").style.display="block";
+  $("settingsPassword").value="";
+  $("settingsPasswordError").textContent="";
+}
+
+function showView(id){
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===id));
+  if(id==="settings"){
+    if(settingsUnlocked){
+      $("settingsLock").style.display="none";
+      $("settingsProtectedContent").style.display="block";
+      renderCorrectionGameList();
+    }else{
+      $("settingsLock").style.display="block";
+      $("settingsProtectedContent").style.display="none";
+    }
+  }else if(settingsUnlocked){
+    lockSettings();
+  }
+};
+function backup(){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(db,null,2)],{type:"application/json"}));a.download=`BPT_sauvegarde_${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+$("backupBtn").onclick=backup;$("backupBtn2").onclick=backup;
+function restoreInput(input){const f=input.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const x=JSON.parse(rd.result);if(!x.players||!x.history||!x.points)throw 0;db=x;saveDB();renderAll();alert("Sauvegarde restaurée.");}catch(e){alert("Fichier de sauvegarde invalide.");}};rd.readAsText(f);}
+$("restoreInput").onchange=e=>restoreInput(e.target);$("restoreInput2").onchange=e=>restoreInput(e.target);
+$("resetDataBtn").onclick=()=>{if(confirm("Réinitialiser toutes les données avec celles du classeur Excel d'origine ?")){db=clone(SEED);saveDB();renderAll();showView("ranking");}};
+
+$("correctionGameSelect").onchange=loadCorrectionGame;
+$("prevCorrectionGameBtn").onclick=()=>moveCorrectionGame(-1);
+$("nextCorrectionGameBtn").onclick=()=>moveCorrectionGame(1);
+$("reloadCorrectionBtn").onclick=loadCorrectionGame;
+$("saveCorrectionBtn").onclick=saveCorrection;
+$("deleteCorrectionGameBtn").onclick=deleteCorrectionGame;
+$("cStake").addEventListener("input",refreshCorrectionCalculatedValues);
+
+$("exportCsvBtn").onclick=()=>{const rows=[["Partie","Date","Lieu","Joueur","Place","Éliminé par","Tablier","Nb joueurs","Points","Mise","Gain","Solde","Kills"]];db.history.forEach(r=>rows.push([r.game,r.date,r.location,r.player,r.place,r.killer,r.tablier?"Oui":"",r.n,r.points,r.stake,r.gross,r.net,r.kills]));const csv="\ufeff"+rows.map(r=>r.map(x=>`"${String(x??"").replaceAll('"','""')}"`).join(";")).join("\r\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download="BPT_historique.csv";a.click();};
+
+
+$("liveSelectAllBtn").onclick=()=>{liveSelected=new Set(liveActiveNames());liveRenderPlayerList();livePreviewStructure();};
+$("liveSelectNoneBtn").onclick=()=>{liveSelected.clear();liveRenderPlayerList();livePreviewStructure();};
+$("liveRecalcBtn").onclick=livePreviewStructure;
+["liveStartStack","liveMinSB","liveDuration","liveUseAnte"].forEach(id=>$(id).addEventListener("change",livePreviewStructure));
+$("liveLaunchBtn").onclick=liveLaunch;
+$("liveBackPrepBtn").onclick=()=>{const s=ensureLiveState();if(s.synced){liveResetForNew();}else liveShowScreen("prep");};
+$("liveStartBtn").onclick=liveStart;
+$("livePauseBtn").onclick=livePause;
+$("livePrevLevelBtn").onclick=()=>liveChangeLevel(-1,false);
+$("liveNextLevelBtn").onclick=()=>liveChangeLevel(1,false);
+$("liveOutPlayer").onchange=liveRefreshElimLists;
+$("liveEliminateBtn").onclick=liveEliminate;
+
+
+
+// Navigation principale
+document.querySelectorAll("nav button[data-view]").forEach(b=>{
+  b.addEventListener("click",()=>showView(b.dataset.view));
+});
+
+// Gestion des joueurs
+if($("addPlayerBtn")){
+  $("addPlayerBtn").onclick=()=>{
+    const n=$("newPlayer").value.trim();
+    if(!n)return;
+    if(db.players.some(p=>p.name.localeCompare(n,"fr",{sensitivity:"base"})===0)){
+      alert("Joueur déjà présent.");
+      return;
+    }
+    db.players.push({name:n,active:true});
+    $("newPlayer").value="";
+    saveDB();
+    renderAll();
+  };
+  $("newPlayer").addEventListener("keydown",e=>{
+    if(e.key==="Enter")$("addPlayerBtn").click();
+  });
+}
+
+// Nouvelle partie manuelle
+if($("buildGameBtn"))$("buildGameBtn").onclick=buildGameEntry;
+
+// Paramètres protégés
+$("unlockSettingsBtn").onclick=unlockSettings;
+$("settingsPassword").addEventListener("keydown",e=>{
+  if(e.key==="Enter")unlockSettings();
+});
+
+renderAll();
+liveInit();
+initCloudSync();
+</script>
+
+<div id="cloudStatus" title="État de la synchronisation partagée">
+  <span id="cloudStatusDot">●</span>
+  <span id="cloudStatusText">Connexion…</span>
+</div>
+</body>
+</html>
