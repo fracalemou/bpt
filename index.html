@@ -201,6 +201,7 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
             <select id="liveOutPlayer"></select>
             <select id="liveKiller"></select>
             <button class="btn danger" id="liveEliminateBtn">Éliminer</button>
+            <button class="btn" id="liveFinalizeBtn" style="display:none;margin-left:8px">Enregistrer la partie dans l’historique</button>
           </div>
           <div class="muted" style="margin-top:5px">L'éliminateur est limité aux joueurs encore en jeu et ne peut pas être le sortant.</div>
 
@@ -1060,7 +1061,7 @@ function livePrize(place){
   const gains=payoutAmounts(s.players.length,s.buyIn);
   return place>=1&&place<=3 ? gains[place-1] : 0;
 }
-function liveEliminate(){
+async function liveEliminate(){
   const s=ensureLiveState(),out=$("liveOutPlayer").value,killer=$("liveKiller").value;
   if(!out){alert("Choisissez le joueur sortant.");return;}
   const alive=liveAlive();if(alive.length<=1)return;
@@ -1072,34 +1073,76 @@ function liveEliminate(){
   if(left.length===1){
     left[0].status="Vainqueur";left[0].place=1;
     livePause();
-    liveSyncChampionship();
+    await liveSyncChampionship();
   }else{saveDB();}
   liveRenderAll();
 }
-function liveSyncChampionship(){
+async function liveSyncChampionship(force=false){
   const s=ensureLiveState();
-  if(!s.prepared||s.synced)return;
-  if(s.players.some(p=>!p.place))return;
+  if(!s.prepared)return false;
+  if(s.synced && !force)return true;
+
+  const alive=liveAlive();
+  if(alive.length!==1){
+    if(force)alert("La partie ne peut être enregistrée que lorsqu’il ne reste qu’un seul joueur en jeu.");
+    return false;
+  }
+
+  // Sécurise la place du vainqueur.
+  alive[0].status="Vainqueur";
+  alive[0].place=1;
+
+  if(s.players.some(p=>!p.place)){
+    if(force)alert("Toutes les places ne sont pas encore déterminées.");
+    return false;
+  }
 
   const n=s.players.length;
   const killCounts={};
-  s.players.forEach(p=>{if(p.killer)killCounts[p.killer]=(killCounts[p.killer]||0)+1;});
+  s.players.forEach(p=>{
+    if(p.killer)killCounts[p.killer]=(killCounts[p.killer]||0)+1;
+  });
+
+  // En environnement partagé, le numéro est attribué au dernier moment
+  // pour éviter qu'un autre navigateur ait créé une partie entre-temps.
+  const finalGameNo=nextGameNo();
+  s.gameNo=finalGameNo;
 
   const rows=[...s.players].sort((a,b)=>a.place-b.place).map(p=>{
     const place=p.place,gross=livePrize(place);
     return {
-      game:s.gameNo,date:s.date,location:s.location,player:p.name,place,
+      game:finalGameNo,date:s.date,location:s.location,player:p.name,place,
       killer:p.killer||"",tablier:n>=db.settings.tablierMinPlayers&&place===1,n,
       points:pointsFor(place,n),stake:s.buyIn,gross,net:gross-s.buyIn,
       kills:killCounts[p.name]||0,win:place===1,podium:place<=3
     };
   });
 
-  db.history=db.history.filter(r=>r.game!==s.gameNo).concat(rows);
+  // On ajoute explicitement les lignes à l'historique local.
+  db.history=db.history.concat(rows);
   s.synced=true;
-  saveDB();
+  saveLocalOnly();
   renderAll();
+  liveRenderAll();
+
+  // Écriture immédiate dans Supabase, sans attendre le debounce.
+  clearTimeout(cloudSaveTimer);
+  if(cloudReady && sbClient){
+    await cloudPushNow();
+  }else{
+    scheduleCloudSave();
+  }
+
+  return true;
 }
+
+async function liveFinalizeGame(){
+  const ok=await liveSyncChampionship(true);
+  if(ok){
+    alert(`Partie #${ensureLiveState().gameNo} enregistrée dans l'historique et synchronisée.`);
+  }
+}
+
 function liveRenderAll(){
   const s=ensureLiveState();
   if(!s.prepared){liveShowScreen("prep");return;}
@@ -1116,8 +1159,14 @@ function liveRenderAll(){
   $("liveSyncBadge").textContent=s.synced?"SYNCHRONISÉE":"NON SYNCHRONISÉE";
   $("liveSyncBadge").style.background=s.synced?"#79c594":"#c8952e";
   $("liveSyncStatus").innerHTML=s.synced
-    ? `<strong>Partie #${s.gameNo} synchronisée.</strong> Le dashboard et le classement général ont été recalculés automatiquement.`
-    : `La synchronisation se fera automatiquement lorsque le vainqueur sera déterminé.`;
+    ? `<strong>Partie #${s.gameNo} enregistrée dans l’historique et synchronisée.</strong> Le classement général a été recalculé.`
+    : (alive.length===1
+        ? `<strong>Le vainqueur est déterminé.</strong> La partie peut maintenant être enregistrée dans l’historique.`
+        : `La partie sera enregistrée automatiquement lorsque le vainqueur sera déterminé.`);
+
+  if($("liveFinalizeBtn")){
+    $("liveFinalizeBtn").style.display=(!s.synced && alive.length===1)?"inline-block":"none";
+  }
   $("livePlayersBody").innerHTML=[...s.players].sort((a,b)=>(a.place||999)-(b.place||999)).map(p=>`
     <tr class="${p.status==="Sorti"?"out":p.status==="Vainqueur"?"winner":""}">
       <td>${esc(p.name)}</td><td>${p.status}</td><td>${p.place||"—"}</td><td>${p.place?euro(livePrize(p.place)):"—"}</td><td>${esc(p.killer||"")}</td>
@@ -1499,6 +1548,7 @@ $("livePrevLevelBtn").onclick=()=>liveChangeLevel(-1,false);
 $("liveNextLevelBtn").onclick=()=>liveChangeLevel(1,false);
 $("liveOutPlayer").onchange=liveRefreshElimLists;
 $("liveEliminateBtn").onclick=liveEliminate;
+$("liveFinalizeBtn").onclick=liveFinalizeGame;
 
 
 
