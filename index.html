@@ -600,6 +600,7 @@ async function flushPendingGames(){
   }
 
   db.history=await cloudFetchGames();
+  normalizeHistoryGameNumbers();
   saveLocalOnly();
   renderAll();
   renderHistory();
@@ -633,6 +634,7 @@ async function cloudSyncGamesAdditive(){
   }
 
   db.history=await cloudFetchGames();
+  normalizeHistoryGameNumbers();
   saveLocalOnly();
 }
 
@@ -661,6 +663,7 @@ async function cloudPushNow(){
 
     // Recharge toujours l'historique officiel du serveur.
     db.history=await cloudFetchGames();
+    normalizeHistoryGameNumbers();
 
     cloudLastRevision=Number(data?.revision||cloudLastRevision||0);
     cloudLocalDirty=false;
@@ -705,6 +708,7 @@ async function applyCloudState(row){
     // mais impose toujours l'historique officiel depuis bpt_games.
     db=remoteState;
     db.history=await cloudFetchGames();
+    normalizeHistoryGameNumbers();
 
     cloudLastRevision=rev;
     saveLocalOnly();
@@ -813,6 +817,7 @@ async function initCloudSync(){
       }
 
       db.history=serverHistory;
+      normalizeHistoryGameNumbers();
       saveLocalOnly();
       cloudApplying=false;
       renderAll();
@@ -948,6 +953,23 @@ function euro(n){return Number(n||0).toLocaleString("fr-FR",{minimumFractionDigi
 function num(n,d=1){return Number(n||0).toLocaleString("fr-FR",{maximumFractionDigits:d});}
 function pointsFor(place,n){return Number(db.points[String(n)]?.[String(place)]||0);}
 
+function normalizeHistoryGameNumbers(){
+  if(!Array.isArray(db.history))db.history=[];
+  const groups=new Map();
+
+  for(const r of db.history){
+    const g=Number(r.game);
+    if(!Number.isFinite(g) || g<=0)continue;
+    if(!groups.has(g))groups.set(g,[]);
+    groups.get(g).push(r);
+  }
+
+  // Renumérote 1..N sans trou pour que Dashboard, Historique,
+  // Classement et "dernière partie" partagent exactement les mêmes numéros.
+  const ordered=[...groups.entries()].sort((a,b)=>a[0]-b[0]);
+  db.history=ordered.flatMap(([,rows],i)=>rows.map(r=>({...r,game:i+1})));
+}
+
 function groupedGames(){
   const m=new Map();
   for(const r of db.history){if(!m.has(r.game))m.set(r.game,[]);m.get(r.game).push(r);}
@@ -994,20 +1016,48 @@ function killerStats(){
 }
 
 function renderAll(){
+  normalizeHistoryGameNumbers();
   renderDashboard();renderRanking();renderHistory();renderPlayers();renderGamePlayers();renderSettings();renderPoints();if(correctionUnlocked)renderCorrectionGameList();if(document.getElementById("livePlayerList"))liveRenderPlayerList();
 }
 function renderDashboard(){
   const games=groupedGames(),rank=ranking();
+
+  // Source unique de vérité pour le nombre total de parties :
+  // exactement le même calcul que dans l'onglet Historique.
+  const totalGames=new Set(
+    (Array.isArray(db.history)?db.history:[])
+      .map(r=>Number(r.game))
+      .filter(n=>Number.isFinite(n) && n>0)
+  ).size;
+
   $("heroText").textContent=`${db.settings.season} • ${db.players.filter(p=>p.active).length} joueurs actifs • Mise par défaut ${euro(db.settings.stake)}`;
-  $("kGames").textContent=games.length;$("kPlayers").textContent=rank.length;
-  // Dashboard et tableau détaillé utilisent exactement le même objet ranking().
+  $("kGames").textContent=totalGames;
+  $("kPlayers").textContent=rank.length;
   $("kRecord").textContent=games.length?Math.max(...games.map(g=>g[1].length)):0;
   $("kPot").textContent=euro(db.history.reduce((a,r)=>a+Number(r.stake||0),0));
+
   const ks=killerStats();
-  $("dashTop").innerHTML=rank.slice(0,10).map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}"><td>${s.rank}</td><td>${esc(s.name)}</td><td><b>${num(s.points,0)}</b></td><td>${s.gamesCount}</td><td>${s.wins}</td><td>${s.kills}</td><td>${euro(s.net)}</td></tr>`).join("");
-  if(!games.length){$("lastGame").innerHTML='<span class="muted">Aucune partie.</span>';return;}
-  const [gno,rows]=games[games.length-1],win=rows.find(r=>r.place===1);
-  $("lastGame").innerHTML=`<h3>Partie #${gno}</h3><p>${esc(rows[0].date)} • ${esc(rows[0].location)}</p><p><span class="pill">${rows.length} joueurs</span></p><p>Vainqueur : <b>${esc(win?.player||"")}</b></p><p>Points : <b>${num(win?.points||0,0)}</b></p>`;
+  $("dashTop").innerHTML=rank.slice(0,10).map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}">
+    <td>${s.rank}</td>
+    <td>${esc(s.name)}</td>
+    <td><b>${num(s.points,0)}</b></td>
+    <td>${s.gamesCount}</td>
+    <td>${s.wins}</td>
+    <td>${s.kills}</td>
+    <td>${euro(s.net)}</td>
+  </tr>`).join("");
+
+  if(!games.length){
+    $("lastGame").innerHTML='<span class="muted">Aucune partie.</span>';
+    return;
+  }
+
+  const [gno,rows]=games[games.length-1],win=rows.find(r=>Number(r.place)===1);
+  $("lastGame").innerHTML=`<h3>Partie #${gno}</h3>
+    <p>${esc(rows[0].date||"")} • ${esc(rows[0].location||"")}</p>
+    <p><span class="pill">${rows.length} joueurs</span></p>
+    <p>Vainqueur : <b>${esc(win?.player||"")}</b></p>
+    <p>Points : <b>${num(win?.points||0,0)}</b></p>`;
 }
 function renderRanking(){
   const ks=killerStats();
@@ -1019,7 +1069,9 @@ function renderRanking(){
 }
 function renderHistory(){
   const rows=Array.isArray(db?.history)?[...db.history]:[];
-  const games=new Set(rows.map(r=>Number(r.game))).size;
+  const games=new Set(
+    rows.map(r=>Number(r.game)).filter(n=>Number.isFinite(n) && n>0)
+  ).size;
 
   if($("historySummary")){
     $("historySummary").textContent=
