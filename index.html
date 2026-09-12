@@ -331,6 +331,7 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
           </div>
           <div class="row" style="margin-top:12px;justify-content:space-between">
             <button class="btn danger" id="deleteCorrectionGameBtn">Supprimer cette partie</button>
+            <button class="btn danger" id="resetHistoryBtn" style="margin-left:8px">RAZ historique complet</button>
             <div class="row">
               <button class="btn ghost" id="reloadCorrectionBtn">Annuler les modifications</button>
               <button class="btn" id="saveCorrectionBtn">Enregistrer les corrections</button>
@@ -441,7 +442,13 @@ function historyGameSignature(rows){
   return JSON.stringify({
     date:first.date||"",
     location:first.location||"",
-    players:s.map(r=>[r.player||"",Number(r.place)||0,r.killer||""])
+    n:Number(first.n)||s.length,
+    stake:Number(first.stake)||0,
+    players:s.map(r=>[
+      r.player||"",
+      Number(r.place)||0,
+      r.killer||""
+    ])
   });
 }
 
@@ -504,15 +511,15 @@ async function cloudFetchState(){
 async function cloudFetchGames(){
   if(!sbClient)return [];
   const {data,error}=await sbClient
-    .from("bpt_games")
-    .select("id,game_data,created_at")
+    .from("bpt_games_v2")
+    .select("id,game_key,game_data,created_at")
     .order("created_at",{ascending:true});
   if(error)throw error;
 
   const history=[];
   (data||[]).forEach((g,index)=>{
     const rows=Array.isArray(g.game_data)?g.game_data:[];
-    rows.forEach(r=>history.push({...r,game:index+1,_cloudId:g.id}));
+    rows.forEach(r=>history.push({...r,game:index+1,_cloudId:g.id,_gameKey:g.game_key}));
   });
   return history;
 }
@@ -521,20 +528,27 @@ async function cloudInsertGame(rows){
   const clean=(rows||[]).map(r=>{
     const x={...r};
     delete x._cloudId;
+    delete x._gameKey;
+    delete x.game; // le numéro visible est attribué par ordre serveur
     return x;
   });
+
+  const gameKey=historyGameSignature(clean);
+
+  // UPSERT + contrainte UNIQUE côté Supabase :
+  // même si deux navigateurs enregistrent la même partie simultanément,
+  // une seule ligne officielle est conservée.
   const {data,error}=await sbClient
-    .from("bpt_games")
-    .insert({game_data:clean})
-    .select("id,created_at")
-    .single();
+    .from("bpt_games_v2")
+    .upsert({game_key:gameKey,game_data:clean},{onConflict:"game_key",ignoreDuplicates:true})
+    .select("id,game_key,created_at");
   if(error)throw error;
-  return data;
+  return data?.[0]||null;
 }
 
 async function cloudReplaceAllGames(localHistory){
   const {error:delErr}=await sbClient
-    .from("bpt_games")
+    .from("bpt_games_v2")
     .delete()
     .not("id","is",null);
   if(delErr)throw delErr;
@@ -600,7 +614,7 @@ async function cloudPushNow(){
     const hh=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
     const games=cloudGameCount(db);
     setCloudStatus("ok",`Synchronisé • ${games} partie${games>1?"s":""}`,
-      `Historique serveur : ${games} partie${games>1?"s":""} • ${hh}`);
+      `Historique officiel : ${games} partie${games>1?"s":""} • ${hh}`);
     return true;
   }catch(e){
     cloudLastError=e?.message||String(e);
@@ -640,7 +654,7 @@ async function applyCloudState(row){
     const hh=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
     const games=cloudGameCount(db);
     setCloudStatus("ok",`Synchronisé • ${games} partie${games>1?"s":""}`,
-      `Historique serveur : ${games} partie${games>1?"s":""} • révision ${rev} • ${hh}`);
+      `Historique officiel : ${games} partie${games>1?"s":""} • révision ${rev} • ${hh}`);
   }finally{
     cloudApplying=false;
   }
@@ -709,8 +723,26 @@ async function initCloudSync(){
       // Migration automatique : si bpt_games est vide,
       // le premier navigateur alimente la base à partir de son historique local.
       let serverHistory=await cloudFetchGames();
-      if(serverHistory.length===0 && localHistory.length>0){
-        for(const [,rows] of historyGroups(localHistory)){
+      if(serverHistory.length===0){
+        // Migration V11 -> V12 : priorité à l'ancienne table centrale bpt_games.
+        let migrationHistory=[];
+        try{
+          const {data:oldGames,error:oldErr}=await sbClient
+            .from("bpt_games")
+            .select("game_data,created_at")
+            .order("created_at",{ascending:true});
+          if(!oldErr && Array.isArray(oldGames)){
+            oldGames.forEach((g,index)=>{
+              (Array.isArray(g.game_data)?g.game_data:[]).forEach(r=>{
+                migrationHistory.push({...r,game:index+1});
+              });
+            });
+          }
+        }catch(e){}
+
+        if(migrationHistory.length===0)migrationHistory=localHistory;
+
+        for(const [,rows] of historyGroups(migrationHistory)){
           await cloudInsertGame(rows);
         }
         serverHistory=await cloudFetchGames();
@@ -903,6 +935,7 @@ function renderDashboard(){
   const games=groupedGames(),rank=ranking();
   $("heroText").textContent=`${db.settings.season} • ${db.players.filter(p=>p.active).length} joueurs actifs • Mise par défaut ${euro(db.settings.stake)}`;
   $("kGames").textContent=games.length;$("kPlayers").textContent=rank.length;
+  // Dashboard et tableau détaillé utilisent exactement le même objet ranking().
   $("kRecord").textContent=games.length?Math.max(...games.map(g=>g[1].length)):0;
   $("kPot").textContent=euro(db.history.reduce((a,r)=>a+Number(r.stake||0),0));
   const ks=killerStats();
@@ -1724,6 +1757,51 @@ function saveCorrection(){
 }
 
 
+
+async function resetFullHistory(){
+  if(!correctionUnlocked)return;
+
+  const games=correctionGames();
+  if(!games.length){
+    alert("L'historique est déjà vide.");
+    return;
+  }
+
+  const confirm1=confirm(
+    `Réinitialiser complètement l'historique BPT ?\n\n`+
+    `${games.length} partie${games.length>1?"s":""} seront supprimée${games.length>1?"s":""}.\n`+
+    `Le classement, les statistiques et les kills seront remis à zéro.`
+  );
+  if(!confirm1)return;
+
+  const confirm2=confirm(
+    "CONFIRMATION DÉFINITIVE\n\nCette action supprimera l'historique partagé pour tous les utilisateurs.\n\nContinuer ?"
+  );
+  if(!confirm2)return;
+
+  db.history=[];
+  db.liveState=null;
+  cloudHistoryReplaceOnce=true;
+
+  saveLocalOnly();
+  renderAll();
+  renderHistory();
+  renderCorrectionGameList();
+
+  if(cloudReady && sbClient){
+    setCloudStatus("busy","RAZ historique…");
+    const ok=await cloudPushNow();
+    if(ok){
+      alert("Historique complet supprimé. Le classement a été remis à zéro et la suppression a été synchronisée.");
+    }else{
+      alert("Historique supprimé localement, mais la synchronisation Supabase a échoué. Cliquez sur l'indicateur de synchronisation pour réessayer.");
+    }
+  }else{
+    scheduleCloudSave();
+    alert("Historique supprimé localement. La suppression sera synchronisée dès que la connexion sera disponible.");
+  }
+}
+
 function deleteCorrectionGame(){
   if(!correctionUnlocked)return;
 
@@ -1833,6 +1911,7 @@ $("nextCorrectionGameBtn").onclick=()=>moveCorrectionGame(1);
 $("reloadCorrectionBtn").onclick=loadCorrectionGame;
 $("saveCorrectionBtn").onclick=saveCorrection;
 $("deleteCorrectionGameBtn").onclick=deleteCorrectionGame;
+$("resetHistoryBtn").onclick=resetFullHistory;
 $("cStake").addEventListener("input",refreshCorrectionCalculatedValues);
 
 $("exportCsvBtn").onclick=()=>{const rows=[["Partie","Date","Lieu","Joueur","Place","Éliminé par","Tablier","Nb joueurs","Points","Mise","Gain","Solde","Kills"]];db.history.forEach(r=>rows.push([r.game,r.date,r.location,r.player,r.place,r.killer,r.tablier?"Oui":"",r.n,r.points,r.stake,r.gross,r.net,r.kills]));const csv="\ufeff"+rows.map(r=>r.map(x=>`"${String(x??"").replaceAll('"','""')}"`).join(";")).join("\r\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download="BPT_historique.csv";a.click();};
