@@ -201,8 +201,12 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
             <select id="liveOutPlayer"></select>
             <select id="liveKiller"></select>
             <button class="btn danger" id="liveEliminateBtn">Éliminer</button>
-            <button class="btn ghost" id="liveUndoEliminationBtn" style="margin-left:8px">Annuler dernière élimination</button>
             <button class="btn" id="liveFinalizeBtn" style="display:none;margin-left:8px">Enregistrer la partie dans l’historique</button>
+          </div>
+          <div style="display:flex;justify-content:flex-end;margin-top:8px">
+            <button class="btn ghost" id="liveUndoEliminationBtn" style="display:none">
+              ↶ Annuler la dernière élimination
+            </button>
           </div>
           <div class="muted" style="margin-top:5px">L'éliminateur est limité aux joueurs encore en jeu et ne peut pas être le sortant.</div>
 
@@ -1681,12 +1685,12 @@ function liveUndoLastElimination(){
     return;
   }
 
-  // La plus petite place parmi les joueurs sortis est la sortie la plus récente :
-  // ex. 6e, puis 5e, puis 4e...
   const lastOut=eliminated[0];
 
-  // Si un vainqueur avait déjà été déterminé mais pas encore synchronisé,
-  // on le remet également "En jeu" pour revenir à deux joueurs.
+  if(!confirm(`Annuler la dernière élimination ?\n\n${lastOut.name} sera remis en jeu.`)){
+    return;
+  }
+
   const winner=s.players.find(p=>p.status==="Vainqueur" || Number(p.place)===1);
   if(winner){
     winner.status="En jeu";
@@ -1704,8 +1708,6 @@ function liveUndoLastElimination(){
 
   saveDB();
   liveRenderAll();
-
-  alert(`Élimination annulée : ${lastOut.name} est remis en jeu.`);
 }
 
 async function liveEliminate(){
@@ -1916,9 +1918,8 @@ function liveRenderAll(){
 
   if($("liveUndoEliminationBtn")){
     const canUndo=!s.synced && s.players.some(p=>p.status==="Sorti" && Number(p.place)>1);
+    $("liveUndoEliminationBtn").style.display=canUndo?"inline-block":"none";
     $("liveUndoEliminationBtn").disabled=!canUndo;
-    $("liveUndoEliminationBtn").style.opacity=canUndo?"1":".45";
-    $("liveUndoEliminationBtn").style.cursor=canUndo?"pointer":"not-allowed";
   }
   $("livePlayersBody").innerHTML=[...s.players].sort((a,b)=>(a.place||999)-(b.place||999)).map(p=>`
     <tr class="${p.status==="Sorti"?"out":p.status==="Vainqueur"?"winner":""}">
