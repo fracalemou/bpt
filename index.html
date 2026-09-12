@@ -423,6 +423,69 @@ function comparableState(state){
   return JSON.stringify(copy);
 }
 
+let cloudHistoryReplaceOnce=false;
+
+function historyGroups(history){
+  const by=new Map();
+  (history||[]).forEach(r=>{
+    const g=Number(r.game)||0;
+    if(!by.has(g))by.set(g,[]);
+    by.get(g).push(r);
+  });
+  return [...by.entries()].sort((a,b)=>a[0]-b[0]);
+}
+
+function historyGameSignature(rows){
+  const s=[...(rows||[])].sort((a,b)=>(Number(a.place)||999)-(Number(b.place)||999)||String(a.player||"").localeCompare(String(b.player||""),"fr"));
+  const first=s[0]||{};
+  return JSON.stringify({
+    date:first.date||"",
+    location:first.location||"",
+    players:s.map(r=>[r.player||"",Number(r.place)||0,r.killer||""])
+  });
+}
+
+function mergeHistories(remoteHistory,localHistory){
+  const result=[];
+  const signatures=new Set();
+
+  const appendUnique=(rows)=>{
+    const sig=historyGameSignature(rows);
+    if(signatures.has(sig))return;
+    signatures.add(sig);
+    result.push(rows);
+  };
+
+  // La base distante est prioritaire, puis on ajoute uniquement les nouvelles parties locales.
+  historyGroups(remoteHistory).forEach(([,rows])=>appendUnique(rows));
+  historyGroups(localHistory).forEach(([,rows])=>appendUnique(rows));
+
+  // Renumérotation continue pour éviter deux "Partie 2" créées sur deux postes.
+  return result.flatMap((rows,i)=>rows.map(r=>({...r,game:i+1})));
+}
+
+function mergePlayers(remotePlayers,localPlayers){
+  const map=new Map();
+  (remotePlayers||[]).forEach(p=>map.set(String(p.name||"").toLocaleLowerCase("fr"),{...p}));
+  (localPlayers||[]).forEach(p=>map.set(String(p.name||"").toLocaleLowerCase("fr"),{...p}));
+  return [...map.values()];
+}
+
+function mergeStateForPush(remote,local){
+  if(!isValidBptState(remote))return JSON.parse(JSON.stringify(local));
+
+  const merged=JSON.parse(JSON.stringify(local));
+
+  if(cloudHistoryReplaceOnce){
+    merged.history=dedupeHistory(local.history||[]);
+  }else{
+    merged.history=mergeHistories(remote.history||[],local.history||[]);
+  }
+
+  merged.players=mergePlayers(remote.players||[],local.players||[]);
+  return merged;
+}
+
 function saveLocalOnly(){
   try{localStorage.setItem(STORE,JSON.stringify(db));}catch(e){}
 }
@@ -441,20 +504,26 @@ async function cloudFetchState(){
 async function cloudPushNow(){
   if(!sbClient || !cloudReady || cloudApplying)return false;
   setCloudStatus("busy","Synchronisation…");
+
   try{
-    const payload=JSON.parse(JSON.stringify(db));
+    // Toujours relire Supabase juste avant d'écrire.
+    // Cela évite qu'un navigateur avec un historique ancien efface une partie créée ailleurs.
+    const current=await cloudFetchState();
+    const payload=mergeStateForPush(current?.data||null,db);
+
     const {data,error}=await sbClient
       .from("bpt_state")
       .upsert({id:CLOUD_ROW_ID,data:payload},{onConflict:"id"})
       .select("data,revision,updated_at")
       .single();
+
     if(error)throw error;
 
     cloudLastRevision=Number(data?.revision||cloudLastRevision||0);
     cloudLocalDirty=false;
+    cloudHistoryReplaceOnce=false;
     cloudLastError="";
 
-    // On relit la version effectivement enregistrée par Supabase.
     if(data && isValidBptState(data.data)){
       cloudApplying=true;
       db=data.data;
@@ -462,6 +531,7 @@ async function cloudPushNow(){
       saveLocalOnly();
       cloudApplying=false;
       renderAll();
+      renderHistory();
       if(typeof liveRenderAll==="function")liveRenderAll();
     }
 
@@ -470,6 +540,7 @@ async function cloudPushNow(){
     setCloudStatus("ok",`Synchronisé • ${games} partie${games>1?"s":""}`,
       `Supabase révision ${cloudLastRevision} • ${games} partie${games>1?"s":""} • ${hh}`);
     return true;
+
   }catch(e){
     cloudLastError=e?.message||String(e);
     console.error("BPT cloud save:",e);
@@ -1569,6 +1640,7 @@ function saveCorrection(){
   });
 
   db.history=db.history.filter(r=>r.game!==gameNo).concat(corrected);
+  cloudHistoryReplaceOnce=true;
   saveDB();
   renderAll();
   renderCorrectionGameList(gameNo);
@@ -1600,6 +1672,7 @@ function deleteCorrectionGame(){
   }
 
   db.history=db.history.filter(r=>r.game!==current);
+  cloudHistoryReplaceOnce=true;
 
   // Si le live conservé correspond à la partie supprimée,
   // on le remet à zéro pour éviter une resynchronisation accidentelle.
@@ -1674,9 +1747,9 @@ function showView(id){
 };
 function backup(){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(db,null,2)],{type:"application/json"}));a.download=`BPT_sauvegarde_${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
 $("backupBtn").onclick=backup;$("backupBtn2").onclick=backup;
-function restoreInput(input){const f=input.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const x=JSON.parse(rd.result);if(!x.players||!x.history||!x.points)throw 0;db=x;saveDB();renderAll();alert("Sauvegarde restaurée.");}catch(e){alert("Fichier de sauvegarde invalide.");}};rd.readAsText(f);}
+function restoreInput(input){const f=input.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const x=JSON.parse(rd.result);if(!x.players||!x.history||!x.points)throw 0;db=x;cloudHistoryReplaceOnce=true;saveDB();renderAll();alert("Sauvegarde restaurée.");}catch(e){alert("Fichier de sauvegarde invalide.");}};rd.readAsText(f);}
 $("restoreInput").onchange=e=>restoreInput(e.target);$("restoreInput2").onchange=e=>restoreInput(e.target);
-$("resetDataBtn").onclick=()=>{if(confirm("Réinitialiser toutes les données avec celles du classeur Excel d'origine ?")){db=clone(SEED);saveDB();renderAll();showView("ranking");}};
+$("resetDataBtn").onclick=()=>{if(confirm("Réinitialiser toutes les données avec celles du classeur Excel d'origine ?")){db=clone(SEED);cloudHistoryReplaceOnce=true;saveDB();renderAll();showView("ranking");}};
 
 $("correctionGameSelect").onchange=loadCorrectionGame;
 $("prevCorrectionGameBtn").onclick=()=>moveCorrectionGame(-1);
