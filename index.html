@@ -256,8 +256,20 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
 </section>
 <section id="history" class="view">
   <div class="card">
-    <div class="row" style="justify-content:space-between"><h2>Historique des parties</h2><button class="btn ghost" id="exportCsvBtn">Exporter CSV</button></div>
-    <div class="tablewrap"><table><thead><tr><th>Partie</th><th>Date</th><th>Lieu</th><th>Joueur</th><th>Place</th><th>Éliminé par</th><th>Tablier</th><th>Joueurs</th><th>Points</th><th>Mise</th><th>Gain</th><th>Net</th><th>Kills</th></tr></thead><tbody id="historyBody"></tbody></table></div>
+    <div class="row" style="justify-content:space-between">
+      <div>
+        <h2>Historique des parties</h2>
+        <div id="historySummary" class="muted"></div>
+      </div>
+      <button class="btn ghost" id="exportCsvBtn">Exporter CSV</button>
+    </div>
+    <div id="historyEmpty" class="muted" style="display:none;padding:18px 0">Aucune partie enregistrée.</div>
+    <div class="tablewrap" id="historyTableWrap">
+      <table>
+        <thead><tr><th>Partie</th><th>Date</th><th>Lieu</th><th>Joueur</th><th>Place</th><th>Éliminé par</th><th>Tablier</th><th>Joueurs</th><th>Points</th><th>Mise</th><th>Gain</th><th>Net</th><th>Kills</th></tr></thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+    </div>
   </div>
 </section>
 
@@ -360,8 +372,13 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
 <footer>BPT — Gestion du championnat en HTML autonome</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<div id="cloudStatus" title="État de la synchronisation partagée — cliquer pour recharger depuis Supabase" style="cursor:pointer">
+  <span id="cloudStatusDot">●</span>
+  <span id="cloudStatusText">Connexion…</span>
+</div>
 <script>
 const $ = id => document.getElementById(id);
+function clone(o){return JSON.parse(JSON.stringify(o));}
 
 const SEED={"players":[{"name":"Alexis Volant","active":true},{"name":"Adrien Thiriez","active":true},{"name":"Anne BERA","active":false},{"name":"Areski AIT GHERBI","active":true},{"name":"Armell ARRAS","active":false},{"name":"Armelle BRAHIMI","active":false},{"name":"Arnaud HEDIN","active":false},{"name":"Clément MARAVAL","active":true},{"name":"Clément Thery","active":false},{"name":"Cyprien RIFFE","active":false},{"name":"David SAGALOWICZ","active":true},{"name":"ELEN","active":true},{"name":"Florence SAGALOWICZ","active":false},{"name":"Franck NAESSENS","active":true},{"name":"François CATTEAU","active":true},{"name":"Frédéric Tavernier","active":false},{"name":"Gérard CANDELIER","active":false},{"name":"Grégoire DUFORET","active":true},{"name":"Guillaume Molmy","active":false},{"name":"Hélène MORIZUR","active":false},{"name":"Jean Arnaud HEDIN OPIGEZ","active":false},{"name":"Jérémie CARPENTIER","active":true},{"name":"Jérémy COQUEL","active":true},{"name":"Jérôme BERA","active":true},{"name":"Jérôme BINOT","active":true},{"name":"Jérôme RIFFE","active":true},{"name":"joueur 74","active":false},{"name":"joueur 75","active":false},{"name":"Jules NAESSENS","active":true},{"name":"Laurent SAGALOWICZ","active":false},{"name":"LUC quebec","active":false},{"name":"MATTHIEU (Rimbaud)","active":false},{"name":"Maxence BINOT","active":false},{"name":"Mehdi BRAHIMI","active":true},{"name":"Mélanie BINOT","active":false},{"name":"Mélanie NAESSENS","active":false},{"name":"Michel SCHERPEREEL","active":true},{"name":"Nuno Tinoco","active":false},{"name":"Olivier HENGUELLE","active":true},{"name":"Philippe DUBOIS","active":true},{"name":"Quentin","active":true},{"name":"Romain Schepereel","active":false},{"name":"Solène BALLOIS","active":false},{"name":"Stéphane LEFIN","active":false},{"name":"Stéphane ROBERT","active":false},{"name":"Théo Maraval","active":false},{"name":"Thierry MONNIAUX","active":true},{"name":"Thomas DELVAL","active":false},{"name":"Valentin Naessens","active":false},{"name":"hélène fiona","active":false}],"history":[{"game":1,"date":"2026-09-11","location":"alexis","player":"Alexis Volant","place":1,"killer":"","tablier":true,"n":10,"points":30.0,"stake":5.0,"gross":30.0,"net":25.0,"kills":3,"win":true,"podium":true,"performance":123.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"Areski AIT GHERBI","place":2,"killer":"Alexis Volant","tablier":false,"n":10,"points":26.0,"stake":5.0,"gross":15.0,"net":10.0,"kills":5,"win":false,"podium":true,"performance":113.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"Jérôme RIFFE","place":3,"killer":"Alexis Volant","tablier":false,"n":10,"points":22.0,"stake":5.0,"gross":5.0,"net":0.0,"kills":1,"win":false,"podium":true,"performance":103.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"ELEN","place":4,"killer":"Alexis Volant","tablier":false,"n":10,"points":18.0,"stake":5.0,"gross":0.0,"net":-5.0,"kills":0,"win":false,"podium":false,"performance":93.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"David SAGALOWICZ","place":5,"killer":"Areski AIT GHERBI","tablier":false,"n":10,"points":15.0,"stake":5.0,"gross":0.0,"net":-5.0,"kills":0,"win":false,"podium":false,"performance":83.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"Franck NAESSENS","place":6,"killer":"Jérôme RIFFE","tablier":false,"n":10,"points":12.0,"stake":5.0,"gross":0.0,"net":-5.0,"kills":0,"win":false,"podium":false,"performance":73.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"Olivier HENGUELLE","place":7,"killer":"Areski AIT GHERBI","tablier":false,"n":10,"points":8.0,"stake":5.0,"gross":0.0,"net":-5.0,"kills":0,"win":false,"podium":false,"performance":63.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"Jérôme BINOT","place":8,"killer":"Areski AIT GHERBI","tablier":false,"n":10,"points":5.0,"stake":5.0,"gross":0.0,"net":-5.0,"kills":0,"win":false,"podium":false,"performance":53.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"Jérémy COQUEL","place":9,"killer":"Areski AIT GHERBI","tablier":false,"n":10,"points":3.0,"stake":5.0,"gross":0.0,"net":-5.0,"kills":0,"win":false,"podium":false,"performance":43.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"Jérôme BERA","place":10,"killer":"Areski AIT GHERBI","tablier":false,"n":10,"points":1.0,"stake":5.0,"gross":0.0,"net":-5.0,"kills":0,"win":false,"podium":false,"performance":33.02585092994046}],"points":{"6":{"1":18,"2":14,"3":10,"4":6,"5":3,"6":1,"7":0,"8":0,"9":0,"10":0,"11":0,"12":0,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"7":{"1":21,"2":17,"3":13,"4":9,"5":6,"6":3,"7":1,"8":0,"9":0,"10":0,"11":0,"12":0,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"8":{"1":24,"2":20,"3":16,"4":12,"5":9,"6":6,"7":3,"8":1,"9":0,"10":0,"11":0,"12":0,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"9":{"1":27,"2":23,"3":19,"4":15,"5":12,"6":9,"7":6,"8":3,"9":1,"10":0,"11":0,"12":0,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"10":{"1":30,"2":26,"3":22,"4":18,"5":15,"6":12,"7":8,"8":5,"9":3,"10":1,"11":0,"12":0,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"11":{"1":33,"2":29,"3":25,"4":21,"5":18,"6":14,"7":11,"8":8,"9":5,"10":3,"11":1,"12":0,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"12":{"1":36,"2":32,"3":28,"4":25,"5":21,"6":17,"7":14,"8":11,"9":8,"10":5,"11":3,"12":1,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"13":{"1":39,"2":35,"3":31,"4":28,"5":24,"6":20,"7":17,"8":14,"9":11,"10":8,"11":5,"12":3,"13":1,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"14":{"1":42,"2":38,"3":34,"4":31,"5":27,"6":23,"7":20,"8":17,"9":13,"10":10,"11":8,"12":5,"13":3,"14":1,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"15":{"1":45,"2":41,"3":37,"4":34,"5":30,"6":26,"7":23,"8":19,"9":16,"10":13,"11":10,"12":7,"13":5,"14":3,"15":1,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"16":{"1":48,"2":44,"3":40,"4":37,"5":33,"6":29,"7":26,"8":22,"9":19,"10":16,"11":13,"12":10,"13":7,"14":5,"15":3,"16":1,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"17":{"1":51,"2":47,"3":43,"4":40,"5":36,"6":32,"7":29,"8":25,"9":22,"10":19,"11":16,"12":13,"13":10,"14":7,"15":5,"16":3,"17":1,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"18":{"1":54,"2":50,"3":46,"4":43,"5":39,"6":35,"7":32,"8":28,"9":25,"10":22,"11":18,"12":15,"13":12,"14":10,"15":7,"16":5,"17":3,"18":1,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"19":{"1":57,"2":53,"3":49,"4":46,"5":42,"6":38,"7":35,"8":31,"9":28,"10":25,"11":21,"12":18,"13":15,"14":12,"15":10,"16":7,"17":5,"18":3,"19":1,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"20":{"1":60,"2":56,"3":52,"4":49,"5":45,"6":41,"7":38,"8":34,"9":31,"10":27,"11":24,"12":21,"13":18,"14":15,"15":12,"16":9,"17":7,"18":5,"19":2,"20":1,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"21":{"1":63,"2":59,"3":55,"4":52,"5":48,"6":44,"7":41,"8":37,"9":34,"10":30,"11":27,"12":24,"13":21,"14":18,"15":15,"16":12,"17":9,"18":7,"19":4,"20":2,"21":1,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"22":{"1":66,"2":62,"3":58,"4":55,"5":51,"6":47,"7":44,"8":40,"9":37,"10":33,"11":30,"12":27,"13":24,"14":20,"15":17,"16":15,"17":12,"18":9,"19":7,"20":4,"21":2,"22":1,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"23":{"1":69,"2":65,"3":61,"4":58,"5":54,"6":50,"7":47,"8":43,"9":40,"10":36,"11":33,"12":30,"13":26,"14":23,"15":20,"16":17,"17":14,"18":12,"19":9,"20":7,"21":4,"22":2,"23":1,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"24":{"1":72,"2":68,"3":64,"4":61,"5":57,"6":53,"7":50,"8":46,"9":43,"10":39,"11":36,"12":32,"13":29,"14":26,"15":23,"16":20,"17":17,"18":14,"19":12,"20":9,"21":7,"22":4,"23":2,"24":1,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"25":{"1":75,"2":71,"3":67,"4":64,"5":60,"6":56,"7":53,"8":49,"9":46,"10":42,"11":39,"12":35,"13":32,"14":29,"15":26,"16":23,"17":20,"18":17,"19":14,"20":11,"21":9,"22":7,"23":4,"24":2,"25":1,"26":0,"27":0,"28":0,"29":0,"30":0},"26":{"1":78,"2":74,"3":70,"4":67,"5":63,"6":59,"7":56,"8":52,"9":49,"10":45,"11":42,"12":38,"13":35,"14":32,"15":29,"16":25,"17":22,"18":20,"19":17,"20":14,"21":11,"22":9,"23":6,"24":4,"25":2,"26":1,"27":0,"28":0,"29":0,"30":0},"27":{"1":81,"2":77,"3":73,"4":70,"5":66,"6":62,"7":59,"8":55,"9":52,"10":48,"11":45,"12":41,"13":38,"14":35,"15":31,"16":28,"17":25,"18":22,"19":19,"20":17,"21":14,"22":11,"23":9,"24":6,"25":4,"26":2,"27":1,"28":0,"29":0,"30":0},"28":{"1":84,"2":80,"3":76,"4":73,"5":69,"6":65,"7":62,"8":58,"9":54,"10":51,"11":48,"12":44,"13":41,"14":38,"15":34,"16":31,"17":28,"18":25,"19":22,"20":19,"21":16,"22":14,"23":11,"24":9,"25":6,"26":4,"27":2,"28":1,"29":0,"30":0},"29":{"1":87,"2":83,"3":79,"4":76,"5":72,"6":68,"7":65,"8":61,"9":57,"10":54,"11":51,"12":47,"13":44,"14":40,"15":37,"16":34,"17":31,"18":28,"19":25,"20":22,"21":19,"22":16,"23":14,"24":11,"25":9,"26":6,"27":4,"28":2,"29":1,"30":0},"30":{"1":90,"2":86,"3":82,"4":79,"5":75,"6":71,"7":68,"8":64,"9":60,"10":57,"11":53,"12":50,"13":47,"14":43,"15":40,"16":37,"17":34,"18":31,"19":27,"20":25,"21":22,"22":19,"23":16,"24":13,"25":11,"26":8,"27":6,"28":4,"29":2,"30":1}},"settings":{"championshipName":"BPT","season":"2026-2027","stake":5,"payouts":[60,30,10],"roundTo5":false,"tablierMinPlayers":10}};
 const STORE="BPT_Championship_Manager_v1";
@@ -394,6 +411,18 @@ function isValidBptState(x){
   return !!(x && Array.isArray(x.players) && Array.isArray(x.history) && Array.isArray(x.points) && x.settings);
 }
 
+function cloudGameCount(state){
+  if(!state || !Array.isArray(state.history))return 0;
+  return new Set(state.history.map(r=>Number(r.game))).size;
+}
+
+function comparableState(state){
+  if(!state)return "";
+  const copy=JSON.parse(JSON.stringify(state));
+  // liveState contains volatile timer fields; keep it, but normalize undefined-like values via JSON.
+  return JSON.stringify(copy);
+}
+
 function saveLocalOnly(){
   try{localStorage.setItem(STORE,JSON.stringify(db));}catch(e){}
 }
@@ -417,15 +446,29 @@ async function cloudPushNow(){
     const {data,error}=await sbClient
       .from("bpt_state")
       .upsert({id:CLOUD_ROW_ID,data:payload},{onConflict:"id"})
-      .select("revision,updated_at")
+      .select("data,revision,updated_at")
       .single();
     if(error)throw error;
 
     cloudLastRevision=Number(data?.revision||cloudLastRevision||0);
     cloudLocalDirty=false;
     cloudLastError="";
+
+    // On relit la version effectivement enregistrée par Supabase.
+    if(data && isValidBptState(data.data)){
+      cloudApplying=true;
+      db=data.data;
+      db.history=dedupeHistory(db.history||[]);
+      saveLocalOnly();
+      cloudApplying=false;
+      renderAll();
+      if(typeof liveRenderAll==="function")liveRenderAll();
+    }
+
     const hh=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
-    setCloudStatus("ok",`Synchronisé ${hh}`,"Dernière écriture Supabase réussie");
+    const games=cloudGameCount(db);
+    setCloudStatus("ok",`Synchronisé • ${games} partie${games>1?"s":""}`,
+      `Supabase révision ${cloudLastRevision} • ${games} partie${games>1?"s":""} • ${hh}`);
     return true;
   }catch(e){
     cloudLastError=e?.message||String(e);
@@ -444,20 +487,35 @@ function scheduleCloudSave(){
 
 async function applyCloudState(row){
   if(!row || !isValidBptState(row.data))return false;
+  if(cloudLocalDirty)return false;
+
   const rev=Number(row.revision||0);
-  if(rev && rev<=cloudLastRevision)return false;
-  if(cloudLocalDirty)return false; // ne jamais écraser une modification locale en attente
+  const remote=row.data;
+  remote.history=dedupeHistory(remote.history||[]);
+
+  // Même si la révision est identique, on compare réellement les données.
+  // Cela corrige un navigateur qui aurait divergé localement tout en affichant "Synchronisé".
+  const different=comparableState(db)!==comparableState(remote);
+
+  if(!different && rev<=cloudLastRevision){
+    const games=cloudGameCount(db);
+    setCloudStatus("ok",`Synchronisé • ${games} partie${games>1?"s":""}`,
+      `Supabase révision ${cloudLastRevision} • données identiques`);
+    return false;
+  }
 
   cloudApplying=true;
   try{
-    db=row.data;
-    db.history=dedupeHistory(db.history||[]);
+    db=remote;
     cloudLastRevision=rev;
     saveLocalOnly();
     renderAll();
+    renderHistory();
     if(typeof liveRenderAll==="function")liveRenderAll();
     const hh=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
-    setCloudStatus("ok",`Synchronisé ${hh}`,"Données reçues depuis Supabase");
+    const games=cloudGameCount(db);
+    setCloudStatus("ok",`Synchronisé • ${games} partie${games>1?"s":""}`,
+      `Supabase révision ${cloudLastRevision} • ${games} partie${games>1?"s":""} • ${hh}`);
   }finally{
     cloudApplying=false;
   }
@@ -487,23 +545,19 @@ async function forceCloudSync(){
   }
   if(cloudLocalDirty){
     await cloudPushNow();
-  }else{
-    try{
-      setCloudStatus("busy","Actualisation…");
-      const row=await cloudFetchState();
-      if(row){
-        const rev=Number(row.revision||0);
-        if(rev>cloudLastRevision){
-          await applyCloudState(row);
-        }else{
-          const hh=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
-          setCloudStatus("ok",`Synchronisé ${hh}`);
-        }
-      }
-    }catch(e){
-      cloudLastError=e?.message||String(e);
-      setCloudStatus("offline","Erreur synchro",cloudLastError);
+    return;
+  }
+  try{
+    setCloudStatus("busy","Actualisation…");
+    const row=await cloudFetchState();
+    if(row){
+      // Forçage : la base Supabase est la référence.
+      cloudLastRevision=0;
+      await applyCloudState(row);
     }
+  }catch(e){
+    cloudLastError=e?.message||String(e);
+    setCloudStatus("offline","Erreur synchro",cloudLastError);
   }
 }
 
@@ -546,7 +600,11 @@ async function initCloudSync(){
     cloudReady=true;
     cloudLocalDirty=false;
     cloudLastError="";
-    setCloudStatus("ok","Synchronisé","Connexion Supabase opérationnelle");
+    {
+      const games=cloudGameCount(db);
+      setCloudStatus("ok",`Synchronisé • ${games} partie${games>1?"s":""}`,
+        `Connexion Supabase opérationnelle • révision ${cloudLastRevision}`);
+    }
 
     // Realtime : confort immédiat lorsqu'il fonctionne.
     try{
@@ -635,6 +693,8 @@ function loadDB(){
   fresh.history=dedupeHistory(fresh.history);
   return fresh;
 }
+let db = loadDB();
+
 function saveDB(){
   saveLocalOnly();
   scheduleCloudSave();
@@ -713,7 +773,36 @@ function renderRanking(){
     <td>${euro(s.stake)}</td><td>${euro(s.gross)}</td><td>${euro(s.net)}</td><td>${esc(ks.mainKiller(s.name))}</td><td>${esc(ks.mainVictim(s.name))}</td></tr>`).join("");
 }
 function renderHistory(){
-  $("historyBody").innerHTML=[...db.history].sort((a,b)=>b.game-a.game||a.place-b.place).map(r=>`<tr><td>${r.game}</td><td>${esc(r.date)}</td><td>${esc(r.location)}</td><td>${esc(r.player)}</td><td>${r.place}</td><td>${esc(r.killer)}</td><td>${r.tablier?"Oui":""}</td><td>${r.n}</td><td>${num(r.points,0)}</td><td>${euro(r.stake)}</td><td>${euro(r.gross)}</td><td>${euro(r.net)}</td><td>${r.kills}</td></tr>`).join("");
+  const rows=Array.isArray(db?.history)?[...db.history]:[];
+  const games=new Set(rows.map(r=>Number(r.game))).size;
+
+  if($("historySummary")){
+    $("historySummary").textContent=
+      `${games} partie${games>1?"s":""} • ${rows.length} résultat${rows.length>1?"s":""}`;
+  }
+
+  if($("historyEmpty"))$("historyEmpty").style.display=rows.length?"none":"block";
+  if($("historyTableWrap"))$("historyTableWrap").style.display=rows.length?"block":"none";
+
+  if(!$("historyBody"))return;
+
+  $("historyBody").innerHTML=rows
+    .sort((a,b)=>Number(b.game)-Number(a.game)||Number(a.place)-Number(b.place))
+    .map(r=>`<tr>
+      <td><b>${Number(r.game)||""}</b></td>
+      <td>${esc(r.date||"")}</td>
+      <td>${esc(r.location||"")}</td>
+      <td>${esc(r.player||"")}</td>
+      <td>${Number(r.place)||""}</td>
+      <td>${esc(r.killer||"")}</td>
+      <td>${r.tablier?"Oui":""}</td>
+      <td>${Number(r.n)||""}</td>
+      <td>${num(r.points,0)}</td>
+      <td>${euro(r.stake)}</td>
+      <td>${euro(r.gross)}</td>
+      <td>${euro(r.net)}</td>
+      <td>${Number(r.kills)||0}</td>
+    </tr>`).join("");
 }
 function renderPlayers(){
   $("playersAdmin").innerHTML=db.players.sort((a,b)=>a.name.localeCompare(b.name,"fr")).map((p,i)=>`<div class="playerchip ${p.active?"":"inactive"}"><span>${esc(p.name)}</span><button class="btn ghost" style="padding:3px 6px" onclick="togglePlayer('${encodeURIComponent(p.name)}')">${p.active?"Actif":"Inactif"}</button><button class="btn danger" style="padding:3px 6px" onclick="deletePlayer('${encodeURIComponent(p.name)}')">×</button></div>`).join("");
@@ -1569,6 +1658,7 @@ function lockSettings(){
 function showView(id){
   document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===id));
+  if(id==="history")renderHistory();
   if(id==="settings"){
     if(settingsUnlocked){
       $("settingsLock").style.display="none";
@@ -1650,13 +1740,10 @@ $("settingsPassword").addEventListener("keydown",e=>{
 
 renderAll();
 liveInit();
-document.getElementById("cloudStatus").onclick=forceCloudSync;
+if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 initCloudSync();
 </script>
 
-<div id="cloudStatus" title="État de la synchronisation partagée — cliquer pour forcer" style="cursor:pointer">
-  <span id="cloudStatusDot">●</span>
-  <span id="cloudStatusText">Connexion…</span>
-</div>
+
 </body>
 </html>
