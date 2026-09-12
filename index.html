@@ -635,6 +635,8 @@ function loadDB(){
   fresh.history=dedupeHistory(fresh.history);
   return fresh;
 }
+let db = loadDB();
+
 function saveDB(){
   saveLocalOnly();
   scheduleCloudSave();
