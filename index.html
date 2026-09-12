@@ -201,6 +201,7 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
             <select id="liveOutPlayer"></select>
             <select id="liveKiller"></select>
             <button class="btn danger" id="liveEliminateBtn">Éliminer</button>
+            <button class="btn ghost" id="liveUndoEliminationBtn" style="margin-left:8px">Annuler dernière élimination</button>
             <button class="btn" id="liveFinalizeBtn" style="display:none;margin-left:8px">Enregistrer la partie dans l’historique</button>
           </div>
           <div class="muted" style="margin-top:5px">L'éliminateur est limité aux joueurs encore en jeu et ne peut pas être le sortant.</div>
@@ -1661,6 +1662,52 @@ function livePrize(place){
   const gains=payoutAmounts(s.players.length,s.buyIn);
   return place>=1&&place<=3 ? gains[place-1] : 0;
 }
+
+function liveUndoLastElimination(){
+  const s=ensureLiveState();
+  if(!s.prepared)return;
+
+  if(s.synced){
+    alert("La partie est déjà synchronisée. Pour la modifier, utilisez Paramètres > Correction des parties.");
+    return;
+  }
+
+  const eliminated=s.players
+    .filter(p=>p.status==="Sorti" && Number(p.place)>1)
+    .sort((a,b)=>Number(a.place)-Number(b.place));
+
+  if(!eliminated.length){
+    alert("Aucune élimination à annuler.");
+    return;
+  }
+
+  // La plus petite place parmi les joueurs sortis est la sortie la plus récente :
+  // ex. 6e, puis 5e, puis 4e...
+  const lastOut=eliminated[0];
+
+  // Si un vainqueur avait déjà été déterminé mais pas encore synchronisé,
+  // on le remet également "En jeu" pour revenir à deux joueurs.
+  const winner=s.players.find(p=>p.status==="Vainqueur" || Number(p.place)===1);
+  if(winner){
+    winner.status="En jeu";
+    winner.place=null;
+    winner.killer="";
+  }
+
+  lastOut.status="En jeu";
+  lastOut.place=null;
+  lastOut.killer="";
+  lastOut.outLevel=null;
+  lastOut.outTime="";
+
+  s.synced=false;
+
+  saveDB();
+  liveRenderAll();
+
+  alert(`Élimination annulée : ${lastOut.name} est remis en jeu.`);
+}
+
 async function liveEliminate(){
   const s=ensureLiveState();
   const out=$("liveOutPlayer").value;
@@ -1865,6 +1912,13 @@ function liveRenderAll(){
 
   if($("liveFinalizeBtn")){
     $("liveFinalizeBtn").style.display=(!s.synced && winner)?"inline-block":"none";
+  }
+
+  if($("liveUndoEliminationBtn")){
+    const canUndo=!s.synced && s.players.some(p=>p.status==="Sorti" && Number(p.place)>1);
+    $("liveUndoEliminationBtn").disabled=!canUndo;
+    $("liveUndoEliminationBtn").style.opacity=canUndo?"1":".45";
+    $("liveUndoEliminationBtn").style.cursor=canUndo?"pointer":"not-allowed";
   }
   $("livePlayersBody").innerHTML=[...s.players].sort((a,b)=>(a.place||999)-(b.place||999)).map(p=>`
     <tr class="${p.status==="Sorti"?"out":p.status==="Vainqueur"?"winner":""}">
@@ -2307,6 +2361,7 @@ $("livePrevLevelBtn").onclick=()=>liveChangeLevel(-1,false);
 $("liveNextLevelBtn").onclick=()=>liveChangeLevel(1,false);
 $("liveOutPlayer").onchange=liveRefreshElimLists;
 $("liveEliminateBtn").onclick=liveEliminate;
+$("liveUndoEliminationBtn").onclick=liveUndoLastElimination;
 $("liveFinalizeBtn").onclick=liveFinalizeGame;
 
 
