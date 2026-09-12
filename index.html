@@ -546,6 +546,67 @@ async function cloudInsertGame(rows){
   return data?.[0]||null;
 }
 
+const PENDING_GAMES_STORE=STORE+"_pending_games_v1";
+
+function pendingGamesLoad(){
+  try{
+    const x=JSON.parse(localStorage.getItem(PENDING_GAMES_STORE)||"[]");
+    return Array.isArray(x)?x:[];
+  }catch(e){return [];}
+}
+
+function pendingGamesSave(list){
+  try{localStorage.setItem(PENDING_GAMES_STORE,JSON.stringify(list||[]));}catch(e){}
+}
+
+function queuePendingGame(rows){
+  const clean=(rows||[]).map(r=>{
+    const x={...r};
+    delete x._cloudId;
+    delete x._gameKey;
+    return x;
+  });
+  const sig=historyGameSignature(clean);
+  const q=pendingGamesLoad();
+  if(!q.some(item=>historyGameSignature(item)===sig)){
+    q.push(clean);
+    pendingGamesSave(q);
+  }
+}
+
+async function flushPendingGames(){
+  if(!sbClient || !cloudReady)return false;
+  const q=pendingGamesLoad();
+  if(!q.length)return true;
+
+  setCloudStatus("busy",`Envoi de ${q.length} partie${q.length>1?"s":""}…`);
+  const remaining=[];
+
+  for(const rows of q){
+    try{
+      await cloudInsertGame(rows);
+    }catch(e){
+      console.error("BPT pending game:",e);
+      remaining.push(rows);
+    }
+  }
+
+  pendingGamesSave(remaining);
+
+  if(remaining.length){
+    setCloudStatus("offline",`${remaining.length} partie${remaining.length>1?"s":""} en attente`,
+      "Certaines parties n'ont pas encore pu être envoyées à Supabase.");
+    return false;
+  }
+
+  db.history=await cloudFetchGames();
+  saveLocalOnly();
+  renderAll();
+  renderHistory();
+  return true;
+}
+
+
 async function cloudReplaceAllGames(localHistory){
   const {error:delErr}=await sbClient
     .from("bpt_games_v2")
@@ -664,6 +725,9 @@ async function applyCloudState(row){
 async function cloudPoll(){
   if(!sbClient || !cloudReady)return;
   try{
+    if(pendingGamesLoad().length){
+      await flushPendingGames();
+    }
     if(cloudLocalDirty){
       await cloudPushNow();
       return;
@@ -779,6 +843,7 @@ async function initCloudSync(){
     cloudReady=true;
     cloudLocalDirty=false;
     cloudLastError="";
+    await flushPendingGames();
     {
       const games=cloudGameCount(db);
       setCloudStatus("ok",`Synchronisé • ${games} partie${games>1?"s":""}`,
@@ -1119,12 +1184,14 @@ function plannedGain(place,n,stake){
   const gains=payoutAmounts(n,stake);
   return place>=1&&place<=3 ? gains[place-1] : 0;
 }
-function saveGameFromEntry(){
+async function saveGameFromEntry(){
   const rows=[...document.querySelectorAll(".placePlayer")],names=rows.map(x=>x.value);
   if(names.some(x=>!x)){alert("Chaque place doit avoir un joueur.");return;}
   if(new Set(names).size!==names.length){alert("Un joueur apparaît plusieurs fois.");return;}
+
   const n=names.length,game=nextGameNo(),date=$("gDate").value,location=$("gLocation").value.trim(),stake=Number($("gStake").value)||0;
   const killers=[...document.querySelectorAll(".placeKiller")].map(x=>x.value);
+
   for(let i=0;i<n;i++){
     const place=i+1,player=names[i],killer=killers[i];
 
@@ -1132,17 +1199,14 @@ function saveGameFromEntry(){
       alert("Le vainqueur ne peut pas avoir d’éliminateur.");
       return;
     }
-
     if(killer===player){
       alert(`Place ${place} : ${player} ne peut pas s’éliminer lui-même.`);
       return;
     }
-
     if(killer && !names.includes(killer)){
       alert(`Place ${place} : l’éliminateur n’a pas participé à la partie.`);
       return;
     }
-
     if(killer){
       const killerPlace=names.indexOf(killer)+1;
       if(killerPlace>=place){
@@ -1151,13 +1215,46 @@ function saveGameFromEntry(){
       }
     }
   }
-  const killCounts={};for(const k of killers)if(k)killCounts[k]=(killCounts[k]||0)+1;
+
+  const killCounts={};
+  for(const k of killers)if(k)killCounts[k]=(killCounts[k]||0)+1;
+
+  const newRows=[];
   for(let i=0;i<n;i++){
     const place=i+1,player=names[i],gross=plannedGain(place,n,stake);
-    db.history.push({game,date,location,player,place,killer:killers[i],tablier:n>=db.settings.tablierMinPlayers&&place===1,n,
-      points:pointsFor(place,n),stake,gross,net:gross-stake,kills:killCounts[player]||0,win:place===1,podium:place<=3});
+    newRows.push({
+      game,date,location,player,place,killer:killers[i],
+      tablier:n>=db.settings.tablierMinPlayers&&place===1,n,
+      points:pointsFor(place,n),stake,gross,net:gross-stake,
+      kills:killCounts[player]||0,win:place===1,podium:place<=3
+    });
   }
-  saveDB();$("gameEntry").innerHTML="";$("gameEntryEmpty").style.display="block";$("gLocation").value="";renderAll();showView("ranking");alert(`Partie #${game} enregistrée.`);
+
+  // 1. Sauvegarde immédiate locale + file d'attente persistante.
+  db.history=db.history.concat(newRows);
+  queuePendingGame(newRows);
+  saveLocalOnly();
+
+  $("gameEntry").innerHTML="";
+  $("gameEntryEmpty").style.display="block";
+  $("gLocation").value="";
+  renderAll();
+  renderHistory();
+  showView("ranking");
+
+  // 2. Envoi immédiat vers la table canonique Supabase.
+  if(cloudReady && sbClient){
+    const ok=await flushPendingGames();
+    if(ok){
+      await cloudPushNow();
+      alert(`Partie enregistrée et synchronisée. Historique partagé : ${cloudGameCount(db)} partie${cloudGameCount(db)>1?"s":""}.`);
+    }else{
+      alert("Partie enregistrée localement, mais son envoi vers Supabase reste en attente. La synchronisation réessaiera automatiquement.");
+    }
+  }else{
+    setCloudStatus("offline","Partie en attente","La partie sera envoyée automatiquement dès le retour de la connexion.");
+    alert("Partie enregistrée localement. Elle sera synchronisée automatiquement dès que Supabase sera disponible.");
+  }
 }
 function renderSettings(){
   $("sName").value=db.settings.championshipName;$("sSeason").value=db.settings.season;$("sStake").value=db.settings.stake;
@@ -1450,19 +1547,22 @@ async function liveSyncChampionship(force=false){
     };
   });
 
-  // On ajoute explicitement les lignes à l'historique local.
+  // Sauvegarde locale + file d'attente persistante.
   db.history=db.history.concat(rows);
+  queuePendingGame(rows);
   s.synced=true;
   saveLocalOnly();
   renderAll();
+  renderHistory();
   liveRenderAll();
 
-  // Écriture immédiate dans Supabase, sans attendre le debounce.
+  // Envoi direct vers l'historique canonique.
   clearTimeout(cloudSaveTimer);
   if(cloudReady && sbClient){
-    await cloudPushNow();
+    const ok=await flushPendingGames();
+    if(ok)await cloudPushNow();
   }else{
-    scheduleCloudSave();
+    setCloudStatus("offline","Partie en attente","La partie Live sera envoyée automatiquement dès le retour de la connexion.");
   }
 
   return true;
@@ -1781,6 +1881,7 @@ async function resetFullHistory(){
 
   db.history=[];
   db.liveState=null;
+  pendingGamesSave([]);
   cloudHistoryReplaceOnce=true;
 
   saveLocalOnly();
