@@ -986,7 +986,11 @@ function saveDB(){
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
 function euro(n){return Number(n||0).toLocaleString("fr-FR",{minimumFractionDigits:0,maximumFractionDigits:2})+" €";}
 function num(n,d=1){return Number(n||0).toLocaleString("fr-FR",{maximumFractionDigits:d});}
-function pointsFor(place,n){return Number(db.points[String(n)]?.[String(place)]||0);}
+function pointsFor(place,n){
+  n=Number(n)||0;
+  if(n<6)return 0;
+  return Number(db.points[String(n)]?.[String(place)]||0);
+}
 
 function normalizeHistoryGameNumbers(){
   if(!Array.isArray(db.history))db.history=[];
@@ -1146,6 +1150,88 @@ function renderGamePlayers(){
   if(!$("gDate").value)$("gDate").value=new Date().toISOString().slice(0,10);
   $("gamePlayerChecks").innerHTML=db.players.filter(p=>p.active).sort((a,b)=>a.name.localeCompare(b.name,"fr")).map(p=>`<label style="display:block;padding:5px 0"><input class="gp" type="checkbox" value="${esc(p.name)}" style="width:auto"> ${esc(p.name)}</label>`).join("");
 }
+
+function validateCompletedGameRows(rows){
+  if(!Array.isArray(rows) || rows.length<2){
+    return "La partie doit comporter au moins 2 joueurs.";
+  }
+
+  const sorted=[...rows].sort((a,b)=>Number(a.place)-Number(b.place));
+  const n=sorted.length;
+  const names=sorted.map(r=>String(r.player||"").trim());
+
+  if(names.some(n=>!n))return "Tous les joueurs doivent être renseignés.";
+  if(new Set(names).size!==names.length)return "Un joueur apparaît plusieurs fois dans la partie.";
+
+  for(let i=0;i<n;i++){
+    const r=sorted[i];
+    const place=i+1;
+    const actualPlace=Number(r.place)||0;
+    const killer=String(r.killer||"").trim();
+
+    if(actualPlace!==place){
+      return `Le classement est incomplet ou incohérent : la place ${place} est manquante.`;
+    }
+
+    if(place===1){
+      if(killer)return "Le vainqueur ne doit pas avoir d’éliminateur.";
+      continue;
+    }
+
+    if(!killer){
+      return `Place ${place} — ${r.player} : le champ « Éliminé par » est obligatoire.`;
+    }
+    if(killer===r.player){
+      return `Place ${place} — ${r.player} : un joueur ne peut pas s’éliminer lui-même.`;
+    }
+
+    const killerIndex=names.indexOf(killer);
+    if(killerIndex<0){
+      return `Place ${place} — ${r.player} : l’éliminateur ${killer} ne participe pas à la partie.`;
+    }
+    if(killerIndex>=i){
+      return `Place ${place} — ${r.player} : ${killer} était déjà éliminé au moment de cette sortie.`;
+    }
+  }
+
+  return "";
+}
+
+function championshipPointsNotice(n){
+  return Number(n)<6
+    ? "Partie enregistrée, mais aucun point championnat n’est attribué : le barème BPT commence à 6 joueurs."
+    : "";
+}
+
+async function persistCompletedGame(rows){
+  const validation=validateCompletedGameRows(rows);
+  if(validation)throw new Error(validation);
+
+  // Ajout local immédiat et file d'attente persistante.
+  db.history=db.history.concat(rows);
+  queuePendingGame(rows);
+  saveLocalOnly();
+  renderAll();
+  renderHistory();
+
+  // Même circuit de synchronisation pour Nouvelle partie ET Live.
+  if(cloudReady && sbClient){
+    const ok=await flushPendingGames();
+    if(!ok)return {synced:false};
+
+    await refreshCanonicalHistoryUI(false);
+
+    const sig=historyGameSignature(rows);
+    const canonicalGroups=historyGroups(db.history||[]);
+    const present=canonicalGroups.some(([,gameRows])=>historyGameSignature(gameRows)===sig);
+
+    return {synced:present};
+  }
+
+  setCloudStatus("offline","Partie en attente","La partie sera envoyée automatiquement dès que Supabase sera disponible.");
+  return {synced:false};
+}
+
 function buildGameEntry(){
   const names=[...document.querySelectorAll(".gp:checked")].map(x=>x.value);
   if(names.length<2){alert("Sélectionnez au moins 2 joueurs.");return;}
@@ -1153,7 +1239,7 @@ function buildGameEntry(){
   $("gameEntryEmpty").style.display="none";
 
   $("gameEntry").innerHTML=`<div class="muted" style="margin-bottom:8px">
-      Partie #${nextGameNo()} • ${n} joueurs • Répartition gains ${db.settings.payouts.join(" / ")} %
+      Partie #${nextGameNo()} • ${n} joueurs • Répartition gains ${db.settings.payouts.join(" / ")} %${n<6?" • Aucun point championnat (< 6 joueurs)":""}
     </div>
     <div class="tablewrap">
       <table>
@@ -1272,75 +1358,72 @@ function plannedGain(place,n,stake){
   return place>=1&&place<=3 ? gains[place-1] : 0;
 }
 async function saveGameFromEntry(){
-  const rows=[...document.querySelectorAll(".placePlayer")],names=rows.map(x=>x.value);
-  if(names.some(x=>!x)){alert("Chaque place doit avoir un joueur.");return;}
-  if(new Set(names).size!==names.length){alert("Un joueur apparaît plusieurs fois.");return;}
-
-  const n=names.length,game=nextGameNo(),date=$("gDate").value,location=$("gLocation").value.trim(),stake=Number($("gStake").value)||0;
+  const playerSelects=[...document.querySelectorAll(".placePlayer")];
+  const names=playerSelects.map(x=>x.value);
   const killers=[...document.querySelectorAll(".placeKiller")].map(x=>x.value);
 
-  for(let i=0;i<n;i++){
-    const place=i+1,player=names[i],killer=killers[i];
+  if(names.some(x=>!x)){
+    alert("Tous les joueurs du classement doivent être renseignés.");
+    return;
+  }
+  if(new Set(names).size!==names.length){
+    alert("Un joueur apparaît plusieurs fois.");
+    return;
+  }
 
-    if(place===1 && killer){
-      alert("Le vainqueur ne peut pas avoir d’éliminateur.");
+  const n=names.length;
+  const game=nextGameNo();
+  const date=$("gDate").value;
+  const location=$("gLocation").value.trim();
+  const stake=Number($("gStake").value)||0;
+
+  // Tous les joueurs classés 2e et suivants doivent avoir un éliminateur.
+  for(let i=1;i<n;i++){
+    if(!killers[i]){
+      alert(`Place ${i+1} — ${names[i]} : renseignez obligatoirement « Éliminé par ».`);
       return;
-    }
-    if(killer===player){
-      alert(`Place ${place} : ${player} ne peut pas s’éliminer lui-même.`);
-      return;
-    }
-    if(killer && !names.includes(killer)){
-      alert(`Place ${place} : l’éliminateur n’a pas participé à la partie.`);
-      return;
-    }
-    if(killer){
-      const killerPlace=names.indexOf(killer)+1;
-      if(killerPlace>=place){
-        alert(`Place ${place} : ${killer} était déjà éliminé lorsque ${player} est sorti.`);
-        return;
-      }
     }
   }
 
   const killCounts={};
   for(const k of killers)if(k)killCounts[k]=(killCounts[k]||0)+1;
 
-  const newRows=[];
-  for(let i=0;i<n;i++){
-    const place=i+1,player=names[i],gross=plannedGain(place,n,stake);
-    newRows.push({
-      game,date,location,player,place,killer:killers[i],
+  const newRows=names.map((player,i)=>{
+    const place=i+1;
+    const gross=plannedGain(place,n,stake);
+    return {
+      game,date,location,player,place,killer:killers[i]||"",
       tablier:n>=db.settings.tablierMinPlayers&&place===1,n,
       points:pointsFor(place,n),stake,gross,net:gross-stake,
       kills:killCounts[player]||0,win:place===1,podium:place<=3
-    });
+    };
+  });
+
+  const validation=validateCompletedGameRows(newRows);
+  if(validation){
+    alert(validation);
+    return;
   }
 
-  // 1. Sauvegarde immédiate locale + file d'attente persistante.
-  db.history=db.history.concat(newRows);
-  queuePendingGame(newRows);
-  saveLocalOnly();
+  $("saveGameBtn").disabled=true;
+  try{
+    const result=await persistCompletedGame(newRows);
 
-  $("gameEntry").innerHTML="";
-  $("gameEntryEmpty").style.display="block";
-  $("gLocation").value="";
-  renderAll();
-  renderHistory();
-  showView("ranking");
+    $("gameEntry").innerHTML="";
+    $("gameEntryEmpty").style.display="block";
+    $("gLocation").value="";
+    await showView("ranking");
 
-  // 2. Envoi immédiat vers la table canonique Supabase.
-  if(cloudReady && sbClient){
-    const ok=await flushPendingGames();
-    if(ok){
-      await cloudPushNow();
-      alert(`Partie enregistrée et synchronisée. Historique partagé : ${cloudGameCount(db)} partie${cloudGameCount(db)>1?"s":""}.`);
+    const ptsNotice=championshipPointsNotice(n);
+    if(result.synced){
+      alert(`Partie enregistrée et synchronisée.${ptsNotice?"\\n\\n"+ptsNotice:""}`);
     }else{
-      alert("Partie enregistrée localement, mais son envoi vers Supabase reste en attente. La synchronisation réessaiera automatiquement.");
+      alert(`Partie enregistrée localement et placée en attente de synchronisation.${ptsNotice?"\\n\\n"+ptsNotice:""}`);
     }
-  }else{
-    setCloudStatus("offline","Partie en attente","La partie sera envoyée automatiquement dès le retour de la connexion.");
-    alert("Partie enregistrée localement. Elle sera synchronisée automatiquement dès que Supabase sera disponible.");
+  }catch(e){
+    alert(e?.message||"Impossible d’enregistrer la partie.");
+  }finally{
+    if($("saveGameBtn"))$("saveGameBtn").disabled=false;
   }
 }
 function renderSettings(){
@@ -1494,7 +1577,8 @@ function livePreviewStructure(){
     `<strong>${n} joueurs</strong> • Stack ${liveFmt(stack)} • `+
     `${st.count} niveaux × ${st.levelMin} min • `+
     `Temps estimé ${Math.floor(st.actualMinutes/60)}h${String(st.actualMinutes%60).padStart(2,"0")} • `+
-    `Départ ${liveFmt(first.sb)}/${liveFmt(first.bb)} • Fin ${liveFmt(last.sb)}/${liveFmt(last.bb)}`;
+    `Départ ${liveFmt(first.sb)}/${liveFmt(first.bb)} • Fin ${liveFmt(last.sb)}/${liveFmt(last.bb)}`+
+    (n<6?` • <strong>Aucun point championnat : minimum 6 joueurs</strong>`:"");
 }
 function liveShowScreen(which){
   $("livePrepScreen").classList.toggle("active",which==="prep");
@@ -1578,19 +1662,51 @@ function livePrize(place){
   return place>=1&&place<=3 ? gains[place-1] : 0;
 }
 async function liveEliminate(){
-  const s=ensureLiveState(),out=$("liveOutPlayer").value,killer=$("liveKiller").value;
-  if(!out){alert("Choisissez le joueur sortant.");return;}
-  const alive=liveAlive();if(alive.length<=1)return;
-  if(killer===out){alert("Un joueur ne peut pas s'éliminer lui-même.");return;}
-  if(killer&&!alive.some(p=>p.name===killer)){alert("L'éliminateur doit être encore en jeu.");return;}
-  const p=s.players.find(x=>x.name===out&&x.status==="En jeu");if(!p)return;
-  p.status="Sorti";p.place=alive.length;p.killer=killer;p.outLevel=s.levelIndex+1;p.outTime=new Date().toLocaleTimeString("fr-FR");
+  const s=ensureLiveState();
+  const out=$("liveOutPlayer").value;
+  const killer=$("liveKiller").value;
+
+  if(!out){
+    alert("Choisissez le joueur sortant.");
+    return;
+  }
+  if(!killer){
+    alert("Renseignez obligatoirement le joueur qui a éliminé ce joueur.");
+    return;
+  }
+
+  const alive=liveAlive();
+  if(alive.length<=1)return;
+  if(killer===out){
+    alert("Un joueur ne peut pas s'éliminer lui-même.");
+    return;
+  }
+  if(!alive.some(p=>p.name===killer)){
+    alert("L'éliminateur doit être encore en jeu.");
+    return;
+  }
+
+  const p=s.players.find(x=>x.name===out&&x.status==="En jeu");
+  if(!p)return;
+
+  p.status="Sorti";
+  p.place=alive.length;
+  p.killer=killer;
+  p.outLevel=s.levelIndex+1;
+  p.outTime=new Date().toLocaleTimeString("fr-FR");
+
   const left=liveAlive();
+
   if(left.length===1){
-    left[0].status="Vainqueur";left[0].place=1;
+    left[0].status="Vainqueur";
+    left[0].place=1;
+    left[0].killer="";
     livePause();
     await liveSyncChampionship();
-  }else{saveDB();}
+  }else{
+    saveDB();
+  }
+
   liveRenderAll();
 }
 async function liveSyncChampionship(force=false){
@@ -1604,55 +1720,69 @@ async function liveSyncChampionship(force=false){
     return false;
   }
 
-  // Sécurise la place du vainqueur.
   alive[0].status="Vainqueur";
   alive[0].place=1;
+  alive[0].killer="";
 
-  if(s.players.some(p=>!p.place)){
-    if(force)alert("Toutes les places ne sont pas encore déterminées.");
+  const n=s.players.length;
+
+  // Vérification exhaustive de la complétude avant toute synchronisation.
+  const places=s.players.map(p=>Number(p.place)||0);
+  if(places.some(p=>p<1) || new Set(places).size!==n){
+    alert("Impossible d’enregistrer le Live : le classement final n’est pas complet.");
     return false;
   }
 
-  const n=s.players.length;
   const killCounts={};
   s.players.forEach(p=>{
     if(p.killer)killCounts[p.killer]=(killCounts[p.killer]||0)+1;
   });
 
-  // En environnement partagé, le numéro est attribué au dernier moment
-  // pour éviter qu'un autre navigateur ait créé une partie entre-temps.
   const finalGameNo=nextGameNo();
   s.gameNo=finalGameNo;
 
-  const rows=[...s.players].sort((a,b)=>a.place-b.place).map(p=>{
-    const place=p.place,gross=livePrize(place);
-    return {
-      game:finalGameNo,date:s.date,location:s.location,player:p.name,place,
-      killer:p.killer||"",tablier:n>=db.settings.tablierMinPlayers&&place===1,n,
-      points:pointsFor(place,n),stake:s.buyIn,gross,net:gross-s.buyIn,
-      kills:killCounts[p.name]||0,win:place===1,podium:place<=3
-    };
-  });
+  const rows=[...s.players]
+    .sort((a,b)=>a.place-b.place)
+    .map(p=>{
+      const place=Number(p.place);
+      const gross=livePrize(place);
+      return {
+        game:finalGameNo,date:s.date,location:s.location,player:p.name,place,
+        killer:p.killer||"",
+        tablier:n>=db.settings.tablierMinPlayers&&place===1,n,
+        points:pointsFor(place,n),stake:s.buyIn,gross,net:gross-s.buyIn,
+        kills:killCounts[p.name]||0,win:place===1,podium:place<=3
+      };
+    });
 
-  // Sauvegarde locale + file d'attente persistante.
-  db.history=db.history.concat(rows);
-  queuePendingGame(rows);
-  s.synced=true;
-  saveLocalOnly();
-  renderAll();
-  renderHistory();
-  liveRenderAll();
-
-  // Envoi direct vers l'historique canonique.
-  clearTimeout(cloudSaveTimer);
-  if(cloudReady && sbClient){
-    const ok=await flushPendingGames();
-    if(ok)await cloudPushNow();
-  }else{
-    setCloudStatus("offline","Partie en attente","La partie Live sera envoyée automatiquement dès le retour de la connexion.");
+  const validation=validateCompletedGameRows(rows);
+  if(validation){
+    alert(`Impossible d’enregistrer le Live : ${validation}`);
+    return false;
   }
 
-  return true;
+  try{
+    const result=await persistCompletedGame(rows);
+    s.synced=!!result.synced;
+    saveLocalOnly();
+    liveRenderAll();
+
+    const ptsNotice=championshipPointsNotice(n);
+
+    if(!result.synced){
+      setCloudStatus("offline","Partie Live en attente","La partie est conservée localement et sera renvoyée automatiquement vers Supabase.");
+      if(force)alert(`Partie Live enregistrée localement, en attente de synchronisation.${ptsNotice?"\\n\\n"+ptsNotice:""}`);
+      return false;
+    }
+
+    await refreshCanonicalHistoryUI(false);
+
+    if(force && ptsNotice)alert(ptsNotice);
+    return true;
+  }catch(e){
+    alert(e?.message||"Impossible de synchroniser la partie Live.");
+    return false;
+  }
 }
 
 async function liveFinalizeGame(){
@@ -1675,7 +1805,7 @@ function liveRenderAll(){
   $("liveRemaining").textContent=alive.length;$("liveAvgStack").textContent=alive.length?liveFmt(total/alive.length):"0";
   $("livePrizePool").textContent=euro(s.players.length*s.buyIn);$("livePaid").textContent=Math.min(3,s.players.length);
   $("liveStateBadge").textContent=s.synced?"TERMINÉE":s.running?"EN COURS":(s.players.some(p=>p.place)?"PAUSE":"PRÊT");
-  $("liveSyncBadge").textContent=s.synced?"SYNCHRONISÉE":"NON SYNCHRONISÉE";
+  $("liveSyncBadge").textContent=s.synced?"SYNCHRONISÉE":(pendingGamesLoad().length?"EN ATTENTE":"NON SYNCHRONISÉE");
   $("liveSyncBadge").style.background=s.synced?"#79c594":"#c8952e";
   $("liveSyncStatus").innerHTML=s.synced
     ? `<strong>Partie #${s.gameNo} enregistrée dans l’historique et synchronisée.</strong> Le classement général a été recalculé.`
