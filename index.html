@@ -1702,7 +1702,11 @@ async function liveEliminate(){
     left[0].place=1;
     left[0].killer="";
     livePause();
-    await liveSyncChampionship();
+    const synced=await liveSyncChampionship(true);
+    if(!synced){
+      // Le bouton manuel reste affiché pour permettre une nouvelle tentative.
+      liveRenderAll();
+    }
   }else{
     saveDB();
   }
@@ -1714,19 +1718,37 @@ async function liveSyncChampionship(force=false){
   if(!s.prepared)return false;
   if(s.synced && !force)return true;
 
-  const alive=liveAlive();
-  if(alive.length!==1){
-    if(force)alert("La partie ne peut être enregistrée que lorsqu’il ne reste qu’un seul joueur en jeu.");
+  // IMPORTANT :
+  // dès qu'un joueur devient "Vainqueur", il n'est plus renvoyé par liveAlive().
+  // On détermine donc explicitement le vainqueur par son statut / sa place.
+  let winner=s.players.find(p=>p.status==="Vainqueur" || Number(p.place)===1);
+
+  if(!winner){
+    const alive=s.players.filter(p=>p.status==="En jeu");
+    if(alive.length!==1){
+      if(force)alert("La partie ne peut être enregistrée que lorsqu’un vainqueur unique est déterminé.");
+      return false;
+    }
+    winner=alive[0];
+    winner.status="Vainqueur";
+    winner.place=1;
+    winner.killer="";
+  }
+
+  // Il ne doit y avoir qu'un seul vainqueur.
+  const winners=s.players.filter(p=>p.status==="Vainqueur" || Number(p.place)===1);
+  if(winners.length!==1){
+    alert("Impossible d’enregistrer le Live : le vainqueur n’est pas déterminé de façon unique.");
     return false;
   }
 
-  alive[0].status="Vainqueur";
-  alive[0].place=1;
-  alive[0].killer="";
+  winner.status="Vainqueur";
+  winner.place=1;
+  winner.killer="";
 
   const n=s.players.length;
 
-  // Vérification exhaustive de la complétude avant toute synchronisation.
+  // Vérification exhaustive du classement final.
   const places=s.players.map(p=>Number(p.place)||0);
   if(places.some(p=>p<1) || new Set(places).size!==n){
     alert("Impossible d’enregistrer le Live : le classement final n’est pas complet.");
@@ -1742,16 +1764,26 @@ async function liveSyncChampionship(force=false){
   s.gameNo=finalGameNo;
 
   const rows=[...s.players]
-    .sort((a,b)=>a.place-b.place)
+    .sort((a,b)=>Number(a.place)-Number(b.place))
     .map(p=>{
       const place=Number(p.place);
       const gross=livePrize(place);
       return {
-        game:finalGameNo,date:s.date,location:s.location,player:p.name,place,
+        game:finalGameNo,
+        date:s.date,
+        location:s.location,
+        player:p.name,
+        place,
         killer:p.killer||"",
-        tablier:n>=db.settings.tablierMinPlayers&&place===1,n,
-        points:pointsFor(place,n),stake:s.buyIn,gross,net:gross-s.buyIn,
-        kills:killCounts[p.name]||0,win:place===1,podium:place<=3
+        tablier:n>=db.settings.tablierMinPlayers&&place===1,
+        n,
+        points:pointsFor(place,n),
+        stake:s.buyIn,
+        gross,
+        net:gross-s.buyIn,
+        kills:killCounts[p.name]||0,
+        win:place===1,
+        podium:place<=3
       };
     });
 
@@ -1762,24 +1794,40 @@ async function liveSyncChampionship(force=false){
   }
 
   try{
+    // Le Live emprunte exactement le même circuit que "Nouvelle partie".
     const result=await persistCompletedGame(rows);
-    s.synced=!!result.synced;
-    saveLocalOnly();
-    liveRenderAll();
 
-    const ptsNotice=championshipPointsNotice(n);
+    if(result.synced){
+      s.synced=true;
+      saveLocalOnly();
+      await refreshCanonicalHistoryUI(false);
+      liveRenderAll();
 
-    if(!result.synced){
-      setCloudStatus("offline","Partie Live en attente","La partie est conservée localement et sera renvoyée automatiquement vers Supabase.");
-      if(force)alert(`Partie Live enregistrée localement, en attente de synchronisation.${ptsNotice?"\\n\\n"+ptsNotice:""}`);
-      return false;
+      const ptsNotice=championshipPointsNotice(n);
+      if(force && ptsNotice)alert(ptsNotice);
+      return true;
     }
 
-    await refreshCanonicalHistoryUI(false);
+    // La partie est bien conservée dans la file d'attente persistante.
+    s.synced=false;
+    saveLocalOnly();
+    liveRenderAll();
+    setCloudStatus(
+      "offline",
+      "Partie Live en attente",
+      "La partie Live est conservée localement et sera renvoyée automatiquement vers Supabase."
+    );
 
-    if(force && ptsNotice)alert(ptsNotice);
-    return true;
+    if(force){
+      const ptsNotice=championshipPointsNotice(n);
+      alert(`Partie Live enregistrée localement, en attente de synchronisation.${ptsNotice?"\n\n"+ptsNotice:""}`);
+    }
+    return false;
+
   }catch(e){
+    s.synced=false;
+    saveLocalOnly();
+    liveRenderAll();
     alert(e?.message||"Impossible de synchroniser la partie Live.");
     return false;
   }
@@ -1801,20 +1849,22 @@ function liveRenderAll(){
   $("liveLevelLabel").textContent=`Niveau ${level.level} — ${level.durationMin} min`;
   $("liveSB").textContent=liveFmt(level.sb);$("liveBB").textContent=liveFmt(level.bb);$("liveAnte").textContent=level.ante?liveFmt(level.ante):"—";
   $("liveNextBlinds").textContent=next?`${liveFmt(next.sb)} / ${liveFmt(next.bb)}${next.ante?" — ante "+liveFmt(next.ante):""}`:"—";
-  const alive=liveAlive(),total=s.players.length*s.startStack;
-  $("liveRemaining").textContent=alive.length;$("liveAvgStack").textContent=alive.length?liveFmt(total/alive.length):"0";
+  const alive=liveAlive(),winner=s.players.find(p=>p.status==="Vainqueur"||Number(p.place)===1),total=s.players.length*s.startStack;
+  const remainingCount=alive.length || (winner?1:0);
+  $("liveRemaining").textContent=remainingCount;
+  $("liveAvgStack").textContent=remainingCount?liveFmt(total/remainingCount):"0";
   $("livePrizePool").textContent=euro(s.players.length*s.buyIn);$("livePaid").textContent=Math.min(3,s.players.length);
   $("liveStateBadge").textContent=s.synced?"TERMINÉE":s.running?"EN COURS":(s.players.some(p=>p.place)?"PAUSE":"PRÊT");
   $("liveSyncBadge").textContent=s.synced?"SYNCHRONISÉE":(pendingGamesLoad().length?"EN ATTENTE":"NON SYNCHRONISÉE");
   $("liveSyncBadge").style.background=s.synced?"#79c594":"#c8952e";
   $("liveSyncStatus").innerHTML=s.synced
     ? `<strong>Partie #${s.gameNo} enregistrée dans l’historique et synchronisée.</strong> Le classement général a été recalculé.`
-    : (alive.length===1
-        ? `<strong>Le vainqueur est déterminé.</strong> La partie peut maintenant être enregistrée dans l’historique.`
+    : (winner
+        ? `<strong>Le vainqueur est déterminé.</strong> La synchronisation de la partie peut être relancée.`
         : `La partie sera enregistrée automatiquement lorsque le vainqueur sera déterminé.`);
 
   if($("liveFinalizeBtn")){
-    $("liveFinalizeBtn").style.display=(!s.synced && alive.length===1)?"inline-block":"none";
+    $("liveFinalizeBtn").style.display=(!s.synced && winner)?"inline-block":"none";
   }
   $("livePlayersBody").innerHTML=[...s.players].sort((a,b)=>(a.place||999)-(b.place||999)).map(p=>`
     <tr class="${p.status==="Sorti"?"out":p.status==="Vainqueur"?"winner":""}">
