@@ -501,46 +501,107 @@ async function cloudFetchState(){
   return data;
 }
 
+async function cloudFetchGames(){
+  if(!sbClient)return [];
+  const {data,error}=await sbClient
+    .from("bpt_games")
+    .select("id,game_data,created_at")
+    .order("created_at",{ascending:true});
+  if(error)throw error;
+
+  const history=[];
+  (data||[]).forEach((g,index)=>{
+    const rows=Array.isArray(g.game_data)?g.game_data:[];
+    rows.forEach(r=>history.push({...r,game:index+1,_cloudId:g.id}));
+  });
+  return history;
+}
+
+async function cloudInsertGame(rows){
+  const clean=(rows||[]).map(r=>{
+    const x={...r};
+    delete x._cloudId;
+    return x;
+  });
+  const {data,error}=await sbClient
+    .from("bpt_games")
+    .insert({game_data:clean})
+    .select("id,created_at")
+    .single();
+  if(error)throw error;
+  return data;
+}
+
+async function cloudReplaceAllGames(localHistory){
+  const {error:delErr}=await sbClient
+    .from("bpt_games")
+    .delete()
+    .not("id","is",null);
+  if(delErr)throw delErr;
+
+  const groups=historyGroups(localHistory);
+  for(const [,rows] of groups){
+    await cloudInsertGame(rows);
+  }
+}
+
+async function cloudSyncGamesAdditive(){
+  const remoteHistory=await cloudFetchGames();
+  const remoteSigs=new Set(historyGroups(remoteHistory).map(([,rows])=>historyGameSignature(rows)));
+
+  for(const [,rows] of historyGroups(db.history||[])){
+    const sig=historyGameSignature(rows);
+    if(!remoteSigs.has(sig)){
+      await cloudInsertGame(rows);
+      remoteSigs.add(sig);
+    }
+  }
+
+  db.history=await cloudFetchGames();
+  saveLocalOnly();
+}
+
 async function cloudPushNow(){
   if(!sbClient || !cloudReady || cloudApplying)return false;
   setCloudStatus("busy","Synchronisation…");
 
   try{
-    // Toujours relire Supabase juste avant d'écrire.
-    // Cela évite qu'un navigateur avec un historique ancien efface une partie créée ailleurs.
-    const current=await cloudFetchState();
-    const payload=mergeStateForPush(current?.data||null,db);
+    if(cloudHistoryReplaceOnce){
+      await cloudReplaceAllGames(db.history||[]);
+    }else{
+      await cloudSyncGamesAdditive();
+    }
+
+    // La table d'état conserve joueurs/paramètres/live.
+    // L'historique officiel est désormais uniquement dans bpt_games.
+    const payload=JSON.parse(JSON.stringify(db));
+    payload.history=[];
 
     const {data,error}=await sbClient
       .from("bpt_state")
       .upsert({id:CLOUD_ROW_ID,data:payload},{onConflict:"id"})
-      .select("data,revision,updated_at")
+      .select("revision,updated_at")
       .single();
-
     if(error)throw error;
+
+    // Recharge toujours l'historique officiel du serveur.
+    db.history=await cloudFetchGames();
 
     cloudLastRevision=Number(data?.revision||cloudLastRevision||0);
     cloudLocalDirty=false;
     cloudHistoryReplaceOnce=false;
     cloudLastError="";
+    saveLocalOnly();
 
-    if(data && isValidBptState(data.data)){
-      cloudApplying=true;
-      db=data.data;
-      db.history=dedupeHistory(db.history||[]);
-      saveLocalOnly();
-      cloudApplying=false;
-      renderAll();
-      renderHistory();
-      if(typeof liveRenderAll==="function")liveRenderAll();
-    }
+    renderAll();
+    renderHistory();
+    if(typeof liveRenderAll==="function")liveRenderAll();
 
     const hh=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
     const games=cloudGameCount(db);
     setCloudStatus("ok",`Synchronisé • ${games} partie${games>1?"s":""}`,
-      `Supabase révision ${cloudLastRevision} • ${games} partie${games>1?"s":""} • ${hh}`);
+      `Historique serveur : ${games} partie${games>1?"s":""} • ${hh}`);
     return true;
-
   }catch(e){
     cloudLastError=e?.message||String(e);
     console.error("BPT cloud save:",e);
@@ -561,32 +622,25 @@ async function applyCloudState(row){
   if(cloudLocalDirty)return false;
 
   const rev=Number(row.revision||0);
-  const remote=row.data;
-  remote.history=dedupeHistory(remote.history||[]);
-
-  // Même si la révision est identique, on compare réellement les données.
-  // Cela corrige un navigateur qui aurait divergé localement tout en affichant "Synchronisé".
-  const different=comparableState(db)!==comparableState(remote);
-
-  if(!different && rev<=cloudLastRevision){
-    const games=cloudGameCount(db);
-    setCloudStatus("ok",`Synchronisé • ${games} partie${games>1?"s":""}`,
-      `Supabase révision ${cloudLastRevision} • données identiques`);
-    return false;
-  }
+  const remoteState=JSON.parse(JSON.stringify(row.data));
 
   cloudApplying=true;
   try{
-    db=remote;
+    // Garde l'état partagé (joueurs, paramètres, live...)
+    // mais impose toujours l'historique officiel depuis bpt_games.
+    db=remoteState;
+    db.history=await cloudFetchGames();
+
     cloudLastRevision=rev;
     saveLocalOnly();
     renderAll();
     renderHistory();
     if(typeof liveRenderAll==="function")liveRenderAll();
+
     const hh=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
     const games=cloudGameCount(db);
     setCloudStatus("ok",`Synchronisé • ${games} partie${games>1?"s":""}`,
-      `Supabase révision ${cloudLastRevision} • ${games} partie${games>1?"s":""} • ${hh}`);
+      `Historique serveur : ${games} partie${games>1?"s":""} • révision ${rev} • ${hh}`);
   }finally{
     cloudApplying=false;
   }
@@ -597,7 +651,7 @@ async function cloudPoll(){
   if(!sbClient || !cloudReady)return;
   try{
     if(cloudLocalDirty){
-      await cloudPushNow(); // retry automatique d'une écriture en attente
+      await cloudPushNow();
       return;
     }
     const row=await cloudFetchState();
@@ -621,11 +675,7 @@ async function forceCloudSync(){
   try{
     setCloudStatus("busy","Actualisation…");
     const row=await cloudFetchState();
-    if(row){
-      // Forçage : la base Supabase est la référence.
-      cloudLastRevision=0;
-      await applyCloudState(row);
-    }
+    if(row)await applyCloudState(row);
   }catch(e){
     cloudLastError=e?.message||String(e);
     setCloudStatus("offline","Erreur synchro",cloudLastError);
@@ -652,20 +702,46 @@ async function initCloudSync(){
     if(row && isValidBptState(row.data)){
       cloudLastRevision=Number(row.revision||0);
       cloudApplying=true;
+
+      const localHistory=Array.isArray(db.history)?db.history:[];
       db=row.data;
-      db.history=dedupeHistory(db.history||[]);
+
+      // Migration automatique : si bpt_games est vide,
+      // le premier navigateur alimente la base à partir de son historique local.
+      let serverHistory=await cloudFetchGames();
+      if(serverHistory.length===0 && localHistory.length>0){
+        for(const [,rows] of historyGroups(localHistory)){
+          await cloudInsertGame(rows);
+        }
+        serverHistory=await cloudFetchGames();
+      }
+
+      db.history=serverHistory;
       saveLocalOnly();
       cloudApplying=false;
       renderAll();
+      renderHistory();
       if(typeof liveRenderAll==="function")liveRenderAll();
     }else{
+      // Première initialisation globale.
+      const payload=JSON.parse(JSON.stringify(db));
+      const initialHistory=Array.isArray(payload.history)?payload.history:[];
+      payload.history=[];
+
       const {data,error}=await sbClient
         .from("bpt_state")
-        .upsert({id:CLOUD_ROW_ID,data:JSON.parse(JSON.stringify(db))},{onConflict:"id"})
+        .upsert({id:CLOUD_ROW_ID,data:payload},{onConflict:"id"})
         .select("revision,updated_at")
         .single();
       if(error)throw error;
       cloudLastRevision=Number(data?.revision||0);
+
+      if((await cloudFetchGames()).length===0 && initialHistory.length>0){
+        for(const [,rows] of historyGroups(initialHistory)){
+          await cloudInsertGame(rows);
+        }
+      }
+      db.history=await cloudFetchGames();
     }
 
     cloudReady=true;
@@ -701,7 +777,7 @@ async function initCloudSync(){
 
     // Polling de secours : garantit la synchronisation même si Realtime est mal configuré.
     clearInterval(cloudPollTimer);
-    cloudPollTimer=setInterval(cloudPoll,4000);
+    cloudPollTimer=setInterval(cloudPoll,2000);
 
   }catch(e){
     cloudLastError=e?.message||String(e);
