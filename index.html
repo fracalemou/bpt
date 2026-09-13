@@ -1361,7 +1361,7 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
 }
 .premium-bottom-grid{
   display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  grid-template-columns:minmax(0,1.2fr) minmax(280px,.8fr);
   gap:22px;
   margin-top:22px;
 }
@@ -1426,37 +1426,38 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
 .premium-record-item{
   position:relative;
   display:grid;
-  grid-template-columns:auto 1fr auto;
-  gap:12px;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  gap:10px;
   align-items:center;
-  padding:14px 12px;
+  padding:12px 12px;
   border:1px solid rgba(255,255,255,.08);
   border-radius:14px;
   background:rgba(255,255,255,.025);
 }
-.premium-record-item:last-child{padding-bottom:14px}
-.premium-record-icon{font-size:22px;width:30px;text-align:center}
-.premium-record-copy strong{display:block;font-size:16px;margin-top:3px}
-.premium-record-item b{font-size:16px;color:#f0d08b}
+.premium-record-item:last-child{padding-bottom:12px}
+.premium-record-icon{font-size:21px;width:28px;text-align:center}
+.premium-record-copy span{display:block;font-size:12px;line-height:1.15;color:#c6cfdd}
+.premium-record-copy strong{display:block;font-size:14px;line-height:1.15;margin-top:3px}
+.premium-record-item b{font-size:13px;line-height:1.1;color:#f0d08b;text-align:right;max-width:92px}
 .premium-record-badge{position:absolute;top:10px;right:10px;padding:2px 8px;border-radius:999px;background:rgba(225,81,81,.16);border:1px solid rgba(225,81,81,.32);color:#ff8e8e;font-size:11px;font-weight:800;letter-spacing:.04em}
 
-.premium-achievements-list{display:grid;gap:12px}
+.premium-achievements-list{display:grid;gap:8px}
 .premium-achievement-player{
   display:grid;
-  grid-template-columns:minmax(130px,180px) 1fr;
-  gap:14px;
+  grid-template-columns:minmax(100px,135px) 1fr;
+  gap:10px;
   align-items:start;
-  padding:10px 0;
+  padding:8px 0;
   border-bottom:1px solid rgba(255,255,255,.08);
 }
 .premium-achievement-player:last-child{border-bottom:0;padding-bottom:0}
-.premium-achievement-name{font-size:16px;font-weight:800;text-align:left}
-.premium-achievement-badges{display:flex;flex-wrap:wrap;gap:8px}
+.premium-achievement-name{font-size:14px;font-weight:800;text-align:left;line-height:1.15}
+.premium-achievement-badges{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .premium-achievement-badge{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:6px 10px;border-radius:999px;
+  display:inline-flex;align-items:center;gap:5px;
+  padding:4px 8px;border-radius:999px;
   background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);
-  font-size:12px;font-weight:700
+  font-size:11px;font-weight:700;line-height:1.1
 }
 
 @media(max-width:1000px){
@@ -2061,7 +2062,7 @@ td{border-bottom-color:#273140 !important}
       <span>Gestion du championnat 2026-2027</span>
     </div>
   </div>
-  <div class="app-version">Version 13/09/26 14h16</div>
+  <div class="app-version">Version 13/09/26 14h23</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
