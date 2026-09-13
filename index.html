@@ -2062,7 +2062,7 @@ td{border-bottom-color:#273140 !important}
       <span>Gestion du championnat 2026-2027</span>
     </div>
   </div>
-  <div class="app-version">Version 13/09/26 16h27</div>
+  <div class="app-version">Version 13/09/26 16h32</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -2275,6 +2275,10 @@ td{border-bottom-color:#273140 !important}
       <div class="premium-hero-metric">
         <span>Joueurs actifs</span>
         <strong id="heroActivePlayers">0</strong>
+      </div>
+      <div class="premium-hero-metric">
+        <span>Participations cumulées</span>
+        <strong id="heroTotalParticipations">0</strong>
       </div>
     </div>
   </div>
@@ -4534,9 +4538,14 @@ function renderDashboard(){
       .filter(n=>Number.isFinite(n) && n>0)
   ).size;
 
+  const totalParticipations=(Array.isArray(db.history)?db.history:[])
+    .filter(r=>String(r.player||"").trim() && Number.isFinite(Number(r.game)) && Number(r.game)>0)
+    .length;
+
   $("heroText").textContent=`${db.settings.season} · ${playedPlayers.size} joueurs actifs · championnat partagé`;
   $("heroGames").textContent=totalGames;
   $("heroActivePlayers").textContent=playedPlayers.size;
+  $("heroTotalParticipations").textContent=totalParticipations;
 
 
   const lastGroupedGame=games.length?games[games.length-1][1].slice().sort((a,b)=>Number(a.place)-Number(b.place)):[];
