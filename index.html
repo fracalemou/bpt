@@ -393,11 +393,29 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
 @media(max-width:620px){
   .correction-participant-list{grid-template-columns:1fr}
 }
+
+header .app-version{
+  margin-left:auto;
+  align-self:center;
+  text-align:right;
+  color:#9fb3c8;
+  font-size:12px;
+  font-weight:700;
+  white-space:nowrap;
+}
+@media(max-width:700px){
+  header .app-version{
+    width:100%;
+    margin-top:6px;
+    text-align:left;
+  }
+}
 </style>
 </head>
 <body>
 <header>
   <div class="brand"><b>BPT — Championnat de poker</b><span>Gestion complète du championnat 2026-2027</span></div>
+  <div class="app-version">Version 13/09/26 08h17</div>
 </header>
 <nav id="nav">
   <button data-view="live">Live</button>
@@ -763,7 +781,10 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
             <div id="correctionParticipantChecks" class="correction-participant-list"></div>
           </div>
 
-          <div class="muted" style="margin:8px 0">Vous pouvez modifier le lieu, ajouter ou retirer des participants, puis modifier leur classement et les éliminateurs. Les points, gains, kills, podiums et tablier seront recalculés à l’enregistrement.</div>
+          <div class="muted" style="margin:8px 0">
+            Vous pouvez modifier le lieu, ajouter ou retirer des participants, puis modifier leur classement et les éliminateurs. Les points, gains, kills, podiums et tablier seront recalculés à l’enregistrement.
+            <span id="correctionUnsaved" style="display:none;margin-left:8px;color:#e8c39e;font-weight:800">• Modifications non enregistrées</span>
+          </div>
           <div class="tablewrap">
             <table>
               <thead><tr><th>Place</th><th>Joueur</th><th>Éliminé par</th><th>Points</th><th>Gain</th></tr></thead>
@@ -993,7 +1014,7 @@ async function refreshCanonicalHistoryUI(showBusy=true){
     renderVersus();
     renderHistory();
 
-    if(correctionUnlocked)renderCorrectionGameList();
+    if(correctionUnlocked)renderCorrectionGameList(null,false);
     cloudApplying=false;
 
     const games=cloudGameCount(db);
@@ -1546,7 +1567,7 @@ function killerStats(){
 
 function renderAll(){
   normalizeHistoryGameNumbers();
-  renderDashboard();renderRanking();renderVersus();renderHistory();renderPlayers();renderGamePlayers();renderSettings();renderPoints();if(correctionUnlocked)renderCorrectionGameList();if(document.getElementById("livePlayerList"))liveRenderPlayerList();
+  renderDashboard();renderRanking();renderVersus();renderHistory();renderPlayers();renderGamePlayers();renderSettings();renderPoints();if(correctionUnlocked)renderCorrectionGameList(null,false);if(document.getElementById("livePlayerList"))liveRenderPlayerList();
 }
 
 function dashRankList(items,valueFn,formatFn){
@@ -3105,12 +3126,19 @@ function liveInit(){
   }
 }
 let correctionUnlocked=true;
+let correctionFormDirty=false;
+
+function setCorrectionDirty(dirty=true){
+  correctionFormDirty=!!dirty;
+  const el=$("correctionUnsaved");
+  if(el)el.style.display=correctionFormDirty?"inline-block":"none";
+}
 
 function correctionGames(){
   return groupedGames().sort((a,b)=>a[0]-b[0]);
 }
 
-function renderCorrectionGameList(preferredGame=null){
+function renderCorrectionGameList(preferredGame=null,forceLoad=false){
   if(!correctionUnlocked)return;
   const games=correctionGames();
   const sel=$("correctionGameSelect");
@@ -3120,10 +3148,13 @@ function renderCorrectionGameList(preferredGame=null){
     $("correctionEditor").style.display="none";
     $("correctionEmpty").style.display="block";
     $("correctionGameSummary").textContent="Aucune partie enregistrée.";
+    setCorrectionDirty(false);
     return;
   }
 
-  const previous=(preferredGame ?? Number(sel.value)) || games[games.length-1][0];
+  const currentBefore=Number(sel.value)||null;
+  const previous=(preferredGame ?? currentBefore) || games[games.length-1][0];
+
   sel.innerHTML=games.map(([g,rows])=>{
     const d=rows[0]?.date||"";
     const l=rows[0]?.location||"";
@@ -3131,7 +3162,15 @@ function renderCorrectionGameList(preferredGame=null){
   }).join("");
 
   const exists=games.some(([g])=>g===Number(previous));
-  sel.value=String(exists?previous:games[games.length-1][0]);
+  const target=exists?Number(previous):games[games.length-1][0];
+  sel.value=String(target);
+
+  // La synchronisation Supabase tourne toutes les 2 secondes.
+  // Ne jamais recharger l'éditeur pendant une saisie en cours :
+  // sinon le lieu et les participants sont remis à leur ancienne valeur.
+  const sameGame=currentBefore===target;
+  if(correctionFormDirty && sameGame && !forceLoad)return;
+
   loadCorrectionGame();
 }
 
@@ -3174,7 +3213,7 @@ function buildCorrectionRanking(selectedNames, currentRows=[]){
 
   const playerSelects=[...document.querySelectorAll(".cPlacePlayer")];
   playerSelects.forEach((sel,i)=>{
-    sel.addEventListener("change",refreshCorrectionOptions);
+    sel.addEventListener("change",()=>{setCorrectionDirty(true);refreshCorrectionOptions();});
   });
 
   // Populate options, then restore the requested ranking order.
@@ -3183,6 +3222,7 @@ function buildCorrectionRanking(selectedNames, currentRows=[]){
   refreshCorrectionOptions();
 
   const killerSelects=[...document.querySelectorAll(".cPlaceKiller")];
+  killerSelects.forEach(sel=>sel.addEventListener("change",()=>setCorrectionDirty(true)));
   names.forEach((name,i)=>{
     const killer=killerByPlayer.get(name)||"";
     if(killer && killerSelects[i] && [...killerSelects[i].options].some(o=>o.value===killer)){
@@ -3195,6 +3235,7 @@ function buildCorrectionRanking(selectedNames, currentRows=[]){
 
 function loadCorrectionGame(){
   if(!correctionUnlocked)return;
+  setCorrectionDirty(false);
   const gameNo=Number($("correctionGameSelect").value);
   const rows=db.history.filter(r=>Number(r.game)===gameNo).sort((a,b)=>Number(a.place)-Number(b.place));
 
@@ -3228,9 +3269,21 @@ function loadCorrectionGame(){
   $("correctionEditor").dataset.game=String(gameNo);
   renderCorrectionParticipantChecks(rows.map(r=>r.player));
   buildCorrectionRanking(rows.map(r=>r.player),rows);
+
+  ["cDate","cLocation","cStake"].forEach(id=>{
+    const el=$(id);
+    if(el){
+      el.oninput=()=>setCorrectionDirty(true);
+      el.onchange=()=>setCorrectionDirty(true);
+    }
+  });
+  document.querySelectorAll(".cParticipantCheck").forEach(cb=>{
+    cb.onchange=()=>setCorrectionDirty(true);
+  });
 }
 
 function applyCorrectionParticipants(){
+  setCorrectionDirty(true);
   const checked=[...document.querySelectorAll(".cParticipantCheck:checked")].map(x=>x.value);
   if(checked.length<2){
     alert("Une partie doit comporter au moins 2 participants.");
@@ -3431,9 +3484,9 @@ async function saveCorrection(){
       scheduleCloudSave();
     }
 
+    setCorrectionDirty(false);
     renderAll();
-    renderCorrectionGameList(gameNo);
-    loadCorrectionGame();
+    renderCorrectionGameList(gameNo,true);
 
     alert(
       `Partie #${gameNo} corrigée et enregistrée.\n\n`+
@@ -3442,8 +3495,9 @@ async function saveCorrection(){
   }catch(e){
     db=backup;
     saveLocalOnly();
-    renderAll();
-    renderCorrectionGameList(gameNo);
+    setCorrectionDirty(true);
+    // Conserve les champs saisis afin de permettre une nouvelle tentative.
+    renderDashboard();renderRanking();renderVersus();renderHistory();renderPlayers();renderGamePlayers();renderSettings();renderPoints();
     console.error("BPT save correction:",e);
     setCloudStatus("offline","Erreur correction",e?.message||String(e));
     alert("La correction n’a pas pu être enregistrée.\n\n"+(e?.message||String(e)));
@@ -3611,11 +3665,17 @@ function restoreInput(input){const f=input.files[0];if(!f)return;const rd=new Fi
 if($("restoreInput"))$("restoreInput").onchange=e=>restoreInput(e.target);if($("restoreInput2"))$("restoreInput2").onchange=e=>restoreInput(e.target);
 $("resetDataBtn").onclick=()=>{if(confirm("Réinitialiser toutes les données avec celles du classeur Excel d'origine ?")){db=clone(SEED);cloudHistoryReplaceOnce=true;saveDB();renderAll();showView("dashboard");}};
 
-$("correctionGameSelect").onchange=loadCorrectionGame;
+$("correctionGameSelect").onchange=()=>{
+  if(correctionFormDirty && !confirm("Abandonner les modifications non enregistrées de cette partie ?")){
+    return;
+  }
+  setCorrectionDirty(false);
+  loadCorrectionGame();
+};
 if($("applyCorrectionParticipantsBtn"))$("applyCorrectionParticipantsBtn").onclick=applyCorrectionParticipants;
 $("prevCorrectionGameBtn").onclick=()=>moveCorrectionGame(-1);
 $("nextCorrectionGameBtn").onclick=()=>moveCorrectionGame(1);
-$("reloadCorrectionBtn").onclick=loadCorrectionGame;
+$("reloadCorrectionBtn").onclick=()=>{setCorrectionDirty(false);loadCorrectionGame();};
 $("saveCorrectionBtn").onclick=saveCorrection;
 $("deleteCorrectionGameBtn").onclick=deleteCorrectionGame;
 $("resetHistoryBtn").onclick=resetFullHistory;
