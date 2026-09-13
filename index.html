@@ -790,6 +790,88 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
 .profile-rank-history-chip strong{
   color:#e8c39e;
 }
+
+/* Classement : centrer toutes les colonnes à partir de la 4e */
+#ranking table th:nth-child(n+4),
+#ranking table td:nth-child(n+4){
+  text-align:center;
+  vertical-align:middle;
+}
+
+.dashboard-hero{
+  display:flex;
+  align-items:center;
+  gap:20px;
+  padding:24px 28px;
+  border-radius:18px;
+  background:linear-gradient(135deg,#173a2b,#101b15 68%);
+  border:1px solid #315441;
+}
+.dashboard-hero h1{
+  margin:3px 0 6px;
+  font-size:32px;
+}
+.dashboard-hero p{
+  margin:0;
+  color:#cad5ce;
+}
+.dashboard-hero-logo svg{
+  width:78px;
+  height:78px;
+}
+.dashboard-hero-logo circle{
+  fill:#0e1712;
+  stroke:#c8952e;
+  stroke-width:4;
+}
+.dashboard-hero-logo path{
+  fill:#c8952e;
+}
+.dashboard-highlights{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+  margin-top:12px;
+}
+.last-game-achievements{
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+}
+.last-game-achievement{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:9px 11px;
+  border-radius:11px;
+  background:#26382e;
+  border:1px solid #3b5143;
+}
+.last-game-achievement .ico{
+  font-size:22px;
+}
+.last-game-achievement b{
+  display:block;
+}
+.last-game-achievement span{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+}
+@media(max-width:850px){
+  .dashboard-highlights{grid-template-columns:1fr}
+  .dashboard-hero-logo{display:none}
+}
+
+.dashboard-light-card{
+  min-height:150px;
+}
+.dashboard-light-card h2{
+  margin-bottom:12px;
+}
+@media(max-width:900px){
+  .dashboard-light-card{grid-column:span 12}
+}
 </style>
 </head>
 <body>
@@ -807,12 +889,11 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
       <span>Gestion du championnat 2026-2027</span>
     </div>
   </div>
-  <div class="app-version">Version 13/09/26 12h53</div>
+  <div class="app-version">Version 13/09/26 15h10</div>
 </header>
 <nav id="nav">
-  <button data-view="home" class="active">⌂ Accueil</button>
   <button data-view="live">● Live</button>
-  <button data-view="dashboard">▦ Tableau de bord</button>
+  <button data-view="dashboard" class="active">▦ Tableau de bord</button>
   <button data-view="ranking">♛ Classement</button>
   <button data-view="versus">⚔ Versus</button>
   <button data-view="records">★ Records</button>
@@ -822,52 +903,6 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
   <button data-view="settings">⚙ Paramètres</button>
 </nav>
 <main>
-
-<section id="home" class="view active">
-  <div class="home-hero">
-    <div class="home-logo-mark">
-      <svg viewBox="0 0 96 96" aria-hidden="true">
-        <circle cx="48" cy="48" r="44"></circle>
-        <path d="M48 17c-10 16-27 24-27 40 0 11 8 18 17 18 5 0 8-2 10-7-1 8-5 13-11 16h22c-6-3-10-8-11-16 3 5 6 7 11 7 9 0 17-7 17-18 0-16-18-24-28-40z"></path>
-      </svg>
-    </div>
-    <div>
-      <div class="home-kicker">BPT · Poker Championship</div>
-      <h1>Championnat 2026–2027</h1>
-      <p>Live, classement, confrontations, records et historique dans un seul espace.</p>
-    </div>
-  </div>
-
-  <div class="home-grid">
-    <div class="home-highlight leader">
-      <span>Leader actuel</span>
-      <strong id="homeLeader">—</strong>
-      <small id="homeLeaderMeta">Aucune partie enregistrée</small>
-    </div>
-    <div class="home-highlight">
-      <span>Dernier vainqueur</span>
-      <strong id="homeLastWinner">—</strong>
-      <small id="homeLastWinnerMeta">—</small>
-    </div>
-    <div class="home-highlight">
-      <span>Championnat</span>
-      <strong id="homeGamesCount">0 partie</strong>
-      <small id="homePlayersCount">0 joueur classé</small>
-    </div>
-  </div>
-
-  <div class="home-actions">
-    <button class="home-action primary" data-go="live"><b>● Lancer / reprendre un Live</b><span>Timer, blinds, annonces et éliminations</span></button>
-    <button class="home-action" data-go="ranking"><b>♛ Voir le classement</b><span>Points, podiums, kills et progression</span></button>
-    <button class="home-action" data-go="versus"><b>⚔ Comparer deux joueurs</b><span>Face-à-face et performances individuelles</span></button>
-    <button class="home-action" data-go="records"><b>★ Voir les records</b><span>Les meilleures performances du BPT</span></button>
-  </div>
-
-  <div class="card" style="margin-top:14px">
-    <h2>Podium actuel</h2>
-    <div id="homePodium" class="home-podium"></div>
-  </div>
-</section>
 
 <section id="live" class="view">
   <div id="liveManager">
@@ -1046,8 +1081,38 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
   </div>
 </section>
 
-<section id="dashboard" class="view">
-  <div class="hero"><h1>Tableau de bord BPT</h1><p id="heroText"></p></div>
+<section id="dashboard" class="view active">
+  <div class="dashboard-hero">
+    <div class="dashboard-hero-logo">
+      <svg viewBox="0 0 96 96" aria-hidden="true">
+        <circle cx="48" cy="48" r="44"></circle>
+        <path d="M48 17c-10 16-27 24-27 40 0 11 8 18 17 18 5 0 8-2 10-7-1 8-5 13-11 16h22c-6-3-10-8-11-16 3 5 6 7 11 7 9 0 17-7 17-18 0-16-18-24-28-40z"></path>
+      </svg>
+    </div>
+    <div>
+      <div class="home-kicker">BPT · Poker Championship</div>
+      <h1>Championnat 2026–2027</h1>
+      <p id="heroText"></p>
+    </div>
+  </div>
+
+  <div class="dashboard-highlights">
+    <div class="home-highlight leader">
+      <span>Leader actuel</span>
+      <strong id="dashLeader">—</strong>
+      <small id="dashLeaderMeta">—</small>
+    </div>
+    <div class="home-highlight">
+      <span>Dernier vainqueur</span>
+      <strong id="dashLastWinner">—</strong>
+      <small id="dashLastWinnerMeta">—</small>
+    </div>
+    <div class="home-highlight">
+      <span>🔥 On Fire</span>
+      <strong id="dashOnFire">—</strong>
+      <small id="dashOnFireMeta">—</small>
+    </div>
+  </div>
 
   <div class="grid" style="margin-top:12px">
     <div class="kpi span3"><b id="kGames">0</b><span>Parties jouées</span></div>
@@ -1055,31 +1120,15 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
     <div class="kpi span3"><b id="kRecord">0</b><span>Record participants</span></div>
     <div class="kpi span3"><b id="kPot">0 €</b><span>Total des mises</span></div>
 
-    <div class="card span12">
+    <div class="card span6 dashboard-light-card">
       <h2>Dernière partie</h2>
       <div id="lastGame"></div>
     </div>
 
-    <div class="card span12">
-      <h2>Top 3 du championnat</h2>
-      <div class="tablewrap"><table>
-        <thead><tr><th>Clt</th><th>Joueur</th><th>Points</th><th>Participations</th><th>Victoires</th><th>Kills</th><th>Solde net</th></tr></thead>
-        <tbody id="dashTop"></tbody>
-      </table></div>
+    <div class="card span6 dashboard-light-card">
+      <h2>Accomplissements débloqués lors de la dernière partie</h2>
+      <div id="lastGameAchievements" class="last-game-achievements"></div>
     </div>
-
-    <div class="card span12">
-      <h2>Évolution cumulée des points du Top 3</h2>
-      <div id="dashTop3Chart"></div>
-    </div>
-  </div>
-
-  <div style="height:12px"></div>
-
-  <div class="card">
-    <h2>Comparatif Top / Flop</h2>
-    <div class="muted" style="margin-bottom:10px">Pour chaque critère, les 3 meilleurs sont à gauche et les 3 moins performants à droite.</div>
-    <div id="dashCompareTable"></div>
   </div>
 </section>
 
@@ -1678,7 +1727,6 @@ async function refreshCanonicalHistoryUI(showBusy=true){
 
     // IMPORTANT : les deux écrans sont recalculés dans le même passage,
     // à partir du même snapshot de l'historique serveur.
-    renderHome();
     renderDashboard();
     renderRanking();
     renderVersus();
@@ -2243,32 +2291,6 @@ function medalForRank(rank){
   return rank===1?"🥇":rank===2?"🥈":rank===3?"🥉":"";
 }
 
-function renderHome(){
-  const ranked=ranking();
-  const games=groupedGames();
-  const leader=ranked[0];
-  const last=games.length?games[games.length-1][1].slice().sort((a,b)=>Number(a.place)-Number(b.place)):null;
-  const winner=last?.find(r=>Number(r.place)===1);
-
-  if($("homeLeader")){
-    $("homeLeader").textContent=leader?leader.name:"—";
-    $("homeLeaderMeta").textContent=leader?`${num(leader.points,0)} pts · ${leader.gamesCount} partie${leader.gamesCount>1?"s":""}`:"Aucune partie enregistrée";
-    $("homeLastWinner").textContent=winner?.player||"—";
-    $("homeLastWinnerMeta").textContent=winner?`${shortDate(winner.date)}${winner.location?" · "+winner.location:""} · ${num(winner.points,0)} pts`:"—";
-    $("homeGamesCount").textContent=`${games.length} partie${games.length>1?"s":""}`;
-    $("homePlayersCount").textContent=`${ranked.length} joueur${ranked.length>1?"s":""} classé${ranked.length>1?"s":""}`;
-  }
-
-  if($("homePodium")){
-    $("homePodium").innerHTML=ranked.slice(0,3).map((p,i)=>`
-      <div class="podium-card">
-        <div class="medal">${medalForRank(i+1)}</div>
-        <button class="player-link" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(p.name)}'))">${esc(p.name)}</button>
-        <span class="muted">${num(p.points,0)} pts · ${p.wins} victoire${p.wins>1?"s":""}</span>
-      </div>`).join("") || '<div class="muted">Le podium apparaîtra après la première partie.</div>';
-  }
-}
-
 function rankSnapshotUntil(maxGame){
   const old=db.history;
   const rows=old.filter(r=>Number(r.game)<=Number(maxGame));
@@ -2805,8 +2827,8 @@ function testLiveSound(){
   setTimeout(()=>liveSpeakBlinds(),1900);
 }
 
-function achievementPlayers(){
-  const rows=Array.isArray(db.history)?db.history:[];
+function achievementPlayers(rowsOverride=null){
+  const rows=Array.isArray(rowsOverride)?rowsOverride:(Array.isArray(db.history)?db.history:[]);
   const ranked=ranking();
   const names=[...new Set(rows.map(r=>String(r.player||"")).filter(Boolean))];
 
@@ -2903,6 +2925,45 @@ function achievementPlayers(){
   return result;
 }
 
+
+function latestGameUnlockedAchievements(){
+  const history=Array.isArray(db.history)?db.history:[];
+  if(!history.length)return [];
+
+  const latestGame=Math.max(
+    ...history.map(r=>Number(r.game)).filter(g=>Number.isFinite(g)&&g>0)
+  );
+  if(!Number.isFinite(latestGame))return [];
+
+  const latestRows=history.filter(r=>Number(r.game)===latestGame);
+  const previousRows=history.filter(r=>Number(r.game)!==latestGame);
+
+  const before=achievementPlayers(previousRows);
+  const after=achievementPlayers(history);
+  const beforeMap=new Map(before.map(a=>[a.name,new Set(a.players)]));
+
+  const latestPlayers=new Set(latestRows.map(r=>String(r.player||"")).filter(Boolean));
+  const unlocked=[];
+
+  for(const a of after){
+    if(a.dynamic)continue; // On Fire est dynamique, pas un accomplissement permanent "débloqué".
+    const prev=beforeMap.get(a.name)||new Set();
+    for(const player of a.players){
+      if(latestPlayers.has(player) && !prev.has(player)){
+        unlocked.push({
+          icon:a.icon,
+          name:a.name,
+          desc:a.desc,
+          player,
+          game:latestGame
+        });
+      }
+    }
+  }
+
+  return unlocked;
+}
+
 function renderAchievements(){
   const holder=$("achievementsGrid");
   if(!holder)return;
@@ -2927,81 +2988,7 @@ function renderAchievements(){
 
 function renderAll(){
   normalizeHistoryGameNumbers();
-  renderHome();renderDashboard();renderRanking();renderVersus();renderRecords();renderAchievements();renderProfile();renderHistory();renderPlayers();renderGamePlayers();renderSettings();renderPoints();if(correctionUnlocked)renderCorrectionGameList(null,false);if(document.getElementById("livePlayerList"))liveRenderPlayerList();
-}
-
-function dashRankList(items,valueFn,formatFn){
-  if(!items.length)return '<span class="muted">—</span>';
-  return `<ol style="margin:0;padding-left:20px">${items.map(s=>`<li style="margin:4px 0">
-    <strong>${esc(s.name)}</strong> <span class="muted">(${formatFn(valueFn(s))})</span>
-  </li>`).join("")}</ol>`;
-}
-
-function renderTop3PointsChart(topPlayers){
-  const holder=$("dashTop3Chart");
-  if(!holder)return;
-
-  const gameNos=[...new Set((db.history||[]).map(r=>Number(r.game)).filter(n=>Number.isFinite(n)&&n>0))].sort((a,b)=>a-b);
-  if(gameNos.length===0 || topPlayers.length===0){
-    holder.innerHTML='<div class="muted">Pas encore assez de données pour afficher le graphique.</div>';
-    return;
-  }
-
-  const colorMap=["#0099B2","#B9725C","#7CC36B"];
-  const series=topPlayers.map((p,idx)=>{
-    let cum=0;
-    const points=gameNos.map(g=>{
-      const row=(db.history||[]).find(r=>Number(r.game)===g && String(r.player||"")===p.name);
-      cum += Number(row?.points||0);
-      return {game:g,value:cum};
-    });
-    return {name:p.name,color:colorMap[idx%colorMap.length],points};
-  });
-
-  const maxY=Math.max(1,...series.flatMap(s=>s.points.map(p=>p.value)));
-  const width=920, height=320, padL=55, padR=20, padT=20, padB=40;
-  const iw=width-padL-padR, ih=height-padT-padB;
-
-  const xOf=(game)=> gameNos.length===1
-    ? padL + iw/2
-    : padL + ((gameNos.indexOf(game))/(gameNos.length-1))*iw;
-
-  const yOf=(val)=> padT + ih - (val/maxY)*ih;
-
-  const yTicks=5;
-  const yGrid=[...Array(yTicks+1)].map((_,i)=>{
-    const val=maxY*i/yTicks;
-    const y=yOf(val);
-    return `<line x1="${padL}" y1="${y}" x2="${width-padR}" y2="${y}" stroke="rgba(255,255,255,.10)"/>
-            <text x="${padL-8}" y="${y+4}" fill="#9fb3c8" font-size="11" text-anchor="end">${Math.round(val)}</text>`;
-  }).join("");
-
-  const xLabels=gameNos.map(g=>{
-    const x=xOf(g);
-    return `<line x1="${x}" y1="${height-padB}" x2="${x}" y2="${height-padB+5}" stroke="rgba(255,255,255,.25)"/>
-            <text x="${x}" y="${height-padB+18}" fill="#9fb3c8" font-size="11" text-anchor="middle">P${g}</text>`;
-  }).join("");
-
-  const lines=series.map(s=>{
-    const pts=s.points.map(p=>`${xOf(p.game)},${yOf(p.value)}`).join(" ");
-    const circles=s.points.map(p=>`<circle cx="${xOf(p.game)}" cy="${yOf(p.value)}" r="4" fill="${s.color}"><title>${esc(s.name)} — Partie ${p.game} : ${p.value} pts cumulés</title></circle>`).join("");
-    return `<polyline fill="none" stroke="${s.color}" stroke-width="3" points="${pts}" stroke-linecap="round" stroke-linejoin="round"/>${circles}`;
-  }).join("");
-
-  const legend=series.map(s=>`<div class="chart-legend-item"><span class="chart-legend-dot" style="background:${s.color}"></span>${esc(s.name)}</div>`).join("");
-
-  holder.innerHTML=`
-    <div class="chart-legend">${legend}</div>
-    <svg viewBox="0 0 ${width} ${height}" class="top3-chart" role="img" aria-label="Évolution cumulée des points du Top 3">
-      <rect x="0" y="0" width="${width}" height="${height}" fill="transparent"/>
-      ${yGrid}
-      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${height-padB}" stroke="rgba(255,255,255,.25)"/>
-      <line x1="${padL}" y1="${height-padB}" x2="${width-padR}" y2="${height-padB}" stroke="rgba(255,255,255,.25)"/>
-      ${xLabels}
-      ${lines}
-      <text x="${width/2}" y="${height-5}" fill="#9fb3c8" font-size="12" text-anchor="middle">Historique des parties</text>
-      <text x="16" y="${height/2}" fill="#9fb3c8" font-size="12" text-anchor="middle" transform="rotate(-90 16 ${height/2})">Points cumulés</text>
-    </svg>`;
+  renderDashboard();renderRanking();renderVersus();renderRecords();renderAchievements();renderProfile();renderHistory();renderPlayers();renderGamePlayers();renderSettings();renderPoints();if(correctionUnlocked)renderCorrectionGameList(null,false);if(document.getElementById("livePlayerList"))liveRenderPlayerList();
 }
 
 function renderDashboard(){
@@ -3016,21 +3003,41 @@ function renderDashboard(){
   ).size;
 
   $("heroText").textContent=`${db.settings.season} • ${db.players.filter(p=>p.active).length} joueurs actifs • Mise par défaut ${euro(db.settings.stake)}`;
+
+  const leader=rank[0];
+  if($("dashLeader")){
+    $("dashLeader").textContent=leader?.name||"—";
+    $("dashLeaderMeta").textContent=leader?`${num(leader.points,0)} pts · ${leader.gamesCount} partie${leader.gamesCount>1?"s":""}`:"Aucun classement";
+  }
+
+  const lastGameRows=games.length?games[games.length-1][1].slice().sort((a,b)=>Number(a.place)-Number(b.place)):[];
+  const lastWinner=lastGameRows.find(r=>Number(r.place)===1);
+  if($("dashLastWinner")){
+    $("dashLastWinner").textContent=lastWinner?.player||"—";
+    $("dashLastWinnerMeta").textContent=lastWinner
+      ? `${shortDate(lastWinner.date)}${lastWinner.location?" · "+lastWinner.location:""} · ${num(lastWinner.points,0)} pts`
+      : "Aucune partie";
+  }
+
+  const allAchievements=achievementPlayers();
+  const onFire=allAchievements.find(a=>a.name==="On Fire");
+  if($("dashOnFire")){
+    $("dashOnFire").textContent=onFire?.players?.length?onFire.players.join(", "):"—";
+    $("dashOnFireMeta").textContent=onFire?.players?.length
+      ? "Meilleur total de points sur les 3 dernières parties"
+      : "Pas encore disponible";
+  }
+
+  if($("lastGameAchievements")){
+    const unlocked=latestGameUnlockedAchievements();
+    $("lastGameAchievements").innerHTML=unlocked.length
+      ? unlocked.map(a=>`<div class="last-game-achievement"><span class="ico">${a.icon}</span><div><b>${esc(a.player)} — ${esc(a.name)}</b><span>${esc(a.desc)}</span></div></div>`).join("")
+      : '<span class="muted">Aucun nouvel accomplissement débloqué lors de la dernière partie.</span>';
+  }
   $("kGames").textContent=totalGames;
   $("kPlayers").textContent=rank.length;
   $("kRecord").textContent=games.length?Math.max(...games.map(g=>g[1].length)):0;
   $("kPot").textContent=euro(db.history.reduce((a,r)=>a+Number(r.stake||0),0));
-
-  const top3=rank.slice(0,3);
-  $("dashTop").innerHTML=top3.map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}">
-    <td>${s.rank}</td>
-    <td>${esc(s.name)}</td>
-    <td><b>${num(s.points,0)}</b></td>
-    <td>${s.gamesCount}</td>
-    <td>${s.wins}</td>
-    <td>${s.kills}</td>
-    <td>${euro(s.net)}</td>
-  </tr>`).join("");
 
   const best3=(fn)=>[...classified].sort((a,b)=>fn(b)-fn(a)||b.points-a.points||a.name.localeCompare(b.name,"fr")).slice(0,3);
   const worst3=(fn)=>[...classified].sort((a,b)=>fn(a)-fn(b)||a.points-b.points||a.name.localeCompare(b.name,"fr")).slice(0,3);
@@ -3053,7 +3060,6 @@ function renderDashboard(){
     </tr>`).join("")}</tbody>
   </table></div>`;
 
-  renderTop3PointsChart(top3);
 
   if(!games.length){
     $("lastGame").innerHTML='<span class="muted">Aucune partie.</span>';
@@ -5244,10 +5250,9 @@ async function showView(id){
   document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===id));
 
-  if((id==="home" || id==="dashboard" || id==="ranking" || id==="versus" || id==="records" || id==="achievements" || id==="profile" || id==="history") && cloudReady && sbClient){
+  if((id==="dashboard" || id==="ranking" || id==="versus" || id==="records" || id==="achievements" || id==="profile" || id==="history") && cloudReady && sbClient){
     await refreshCanonicalHistoryUI(true);
   }else{
-    if(id==="home")renderHome();
     if(id==="dashboard")renderDashboard();
     if(id==="ranking")renderRanking();
     if(id==="versus")renderVersus();
@@ -5317,9 +5322,6 @@ $("liveFinalizeBtn").onclick=liveFinalizeGame;
 
 
 
-
-// Navigation rapide Accueil
-document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.go)));
 
 // Fiche joueur
 if($("profilePlayerSelect"))$("profilePlayerSelect").onchange=()=>renderProfile($("profilePlayerSelect").value);
