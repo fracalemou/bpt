@@ -2285,6 +2285,295 @@ body.archive-season .season-cumul-btn.active{
   }
 }
 
+
+/* ===== V106 — optimisation téléphone en mode horizontal ===== */
+
+/* Base safeguards for narrow / short screens */
+html,body{max-width:100%;overflow-x:hidden}
+.view{min-width:0}
+table{max-width:100%}
+.table-wrap,.table-scroll,.responsive-table{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+/* Landscape phones: typical viewport width 568–932 px, short height */
+@media screen and (orientation:landscape) and (max-height:520px) and (max-width:1000px){
+
+  body{
+    font-size:13px;
+  }
+
+  /* Header */
+  .bpt-header{
+    min-height:auto;
+    padding:8px 12px;
+    gap:8px;
+  }
+  .brand b{
+    font-size:15px;
+  }
+  .brand span{
+    font-size:10px;
+  }
+  .app-version{
+    font-size:9px;
+  }
+
+  /* Main navigation remains on one usable horizontal line */
+  nav{
+    display:flex;
+    gap:5px;
+    padding:6px 8px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    white-space:nowrap;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:thin;
+  }
+  nav button{
+    flex:0 0 auto;
+    min-height:34px;
+    padding:7px 10px;
+    font-size:11px;
+    border-radius:8px;
+  }
+
+  main,.container,.app-main{
+    padding-left:10px !important;
+    padding-right:10px !important;
+  }
+
+  /* Dashboard hero */
+  #dashboard .premium-hero{
+    grid-template-columns:minmax(0,1.25fr) minmax(250px,.75fr);
+    gap:12px;
+    padding:14px 16px;
+  }
+  #dashboard .premium-hero h1{
+    font-size:24px;
+    line-height:1.05;
+    margin-bottom:5px;
+  }
+  #dashboard .premium-hero p,
+  #dashboard .premium-hero .muted{
+    font-size:11px;
+  }
+  #dashboard .premium-hero-metrics{
+    gap:7px;
+  }
+  #dashboard .premium-hero-metric{
+    padding:9px 10px;
+  }
+  #dashboard .premium-hero-metric span{
+    font-size:10px;
+  }
+  #dashboard .premium-hero-metric strong{
+    font-size:19px;
+  }
+
+  /* Season controls: compact single line when possible */
+  #dashboard .dashboard-season-nav{
+    padding-top:10px;
+    margin-top:0;
+  }
+  #dashboard .dashboard-season-nav-label,
+  .tab-season-nav::before{
+    font-size:9px;
+    margin-bottom:5px;
+  }
+  .season-nav-toolbar{
+    gap:6px;
+  }
+  .season-nav-btn,
+  .season-cumul-btn{
+    min-height:32px;
+    height:32px;
+    padding:0 9px;
+    font-size:10px;
+    border-radius:8px;
+  }
+
+  /* Common tab heroes */
+  .hero,
+  .tab-premium-hero{
+    padding:12px 14px !important;
+    margin-bottom:8px !important;
+  }
+  .hero h1,
+  .tab-premium-hero h1{
+    font-size:22px !important;
+    line-height:1.08;
+    margin:0 0 4px;
+  }
+  .hero p,
+  .tab-premium-hero p{
+    font-size:11px;
+    margin:3px 0;
+  }
+  .tab-season-nav{
+    margin-top:4px;
+    padding-top:6px;
+  }
+
+  /* Dashboard grids */
+  .premium-main-grid,
+  .premium-bottom-grid{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+    gap:10px !important;
+  }
+  .premium-panel{
+    padding:12px !important;
+  }
+  .premium-panel h2{
+    font-size:17px !important;
+  }
+  .premium-panel-note,
+  .premium-eyebrow{
+    font-size:9px !important;
+  }
+
+  /* Podium */
+  .premium-podium{
+    gap:7px !important;
+  }
+  .premium-podium-card{
+    padding:10px 8px !important;
+    min-width:0;
+  }
+  .premium-podium-medal{
+    font-size:24px !important;
+  }
+  .premium-podium-name{
+    font-size:13px !important;
+    line-height:1.1;
+    overflow-wrap:anywhere;
+  }
+  .premium-podium-points{
+    font-size:18px !important;
+  }
+
+  /* Dashboard records / achievements */
+  .premium-records-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    gap:7px !important;
+  }
+  .premium-record-item{
+    padding:8px !important;
+    gap:6px !important;
+  }
+  .premium-record-copy strong{
+    font-size:12px !important;
+  }
+  .premium-record-copy span,
+  .premium-record-item b{
+    font-size:10px !important;
+  }
+  .premium-achievement-player{
+    grid-template-columns:minmax(90px,120px) 1fr !important;
+    padding:5px 0 !important;
+  }
+  .premium-achievement-name{
+    font-size:12px !important;
+  }
+  .premium-achievement-badge{
+    font-size:9px !important;
+    padding:3px 6px !important;
+  }
+
+  /* Forms and filters */
+  input,select,button,textarea{
+    font-size:12px;
+  }
+  input,select{
+    min-height:34px;
+  }
+  .form-grid,
+  .filters,
+  .filter-grid{
+    gap:7px !important;
+  }
+
+  /* Tables: readable and horizontally scrollable instead of crushing columns */
+  .table-wrap,
+  .table-scroll,
+  .card:has(table),
+  .panel:has(table),
+  .premium-panel:has(table){
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  table{
+    width:max-content;
+    min-width:100%;
+    font-size:11px;
+  }
+  th,td{
+    padding:7px 8px !important;
+    white-space:nowrap;
+  }
+
+  /* Profile / versus / records cards */
+  .kpi-grid,
+  .profile-kpis,
+  .record-grid,
+  .records-grid,
+  .versus-grid,
+  .stats-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    gap:8px !important;
+  }
+  .kpi,.stat,.record-card,.profile-kpi{
+    padding:9px !important;
+  }
+
+  /* History cards */
+  .history-game,
+  .history-card{
+    padding:10px !important;
+  }
+  .history-game-title{
+    font-size:14px !important;
+  }
+
+  /* Avoid huge vertical gaps */
+  section.view{
+    padding-top:8px !important;
+    padding-bottom:16px !important;
+  }
+  h2,h3{
+    margin-top:8px;
+    margin-bottom:6px;
+  }
+}
+
+/* Extra-small landscape phones */
+@media screen and (orientation:landscape) and (max-height:430px) and (max-width:850px){
+  nav button{
+    padding:6px 8px;
+    font-size:10px;
+  }
+  #dashboard .premium-hero{
+    grid-template-columns:1fr 1fr;
+    padding:10px 12px;
+  }
+  #dashboard .premium-hero h1{
+    font-size:20px;
+  }
+  .premium-main-grid,
+  .premium-bottom-grid{
+    grid-template-columns:1fr 1fr !important;
+  }
+  .premium-records-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+  .kpi-grid,
+  .profile-kpis,
+  .record-grid,
+  .records-grid,
+  .versus-grid,
+  .stats-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -2302,7 +2591,7 @@ body.archive-season .season-cumul-btn.active{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 13/09/26 18h50</div>
+  <div class="app-version">Version 13/09/26 19h10</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
