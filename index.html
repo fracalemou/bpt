@@ -611,6 +611,80 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
 #liveTimer.live-warning-30{color:#e7a93d}#liveTimer.live-warning-10{color:#ff6b6b;text-shadow:0 0 20px rgba(255,70,70,.35)}
 @media(max-width:1000px){.home-actions{grid-template-columns:repeat(2,1fr)}.records-grid{grid-template-columns:repeat(2,1fr)}.profile-kpis{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:700px){.home-grid,.home-podium,.summary-podium{grid-template-columns:1fr}.home-actions,.records-grid{grid-template-columns:1fr}.home-hero{padding:20px}.home-logo-mark{display:none}.home-hero h1{font-size:28px}.profile-kpis{grid-template-columns:repeat(2,1fr)}.history-game summary{grid-template-columns:1fr}.bpt-brand-wrap .brand{display:none}}
+
+.achievements-toolbar{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:center;
+  margin:12px 0;
+  padding:12px 14px;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:12px;
+}
+.achievements-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.achievement-card{
+  position:relative;
+  min-height:180px;
+  padding:16px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:linear-gradient(180deg,#18231d,#121c17);
+  overflow:hidden;
+}
+.achievement-card.locked{
+  opacity:.58;
+  filter:saturate(.45);
+}
+.achievement-icon{
+  font-size:34px;
+  line-height:1;
+  margin-bottom:10px;
+}
+.achievement-card h3{
+  margin:0 0 5px;
+  font-size:18px;
+}
+.achievement-desc{
+  color:var(--muted);
+  font-size:13px;
+  min-height:38px;
+}
+.achievement-status{
+  margin-top:12px;
+  font-size:12px;
+  font-weight:800;
+  color:#e8c39e;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+.achievement-players{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:9px;
+}
+.achievement-player{
+  display:inline-block;
+  border-radius:999px;
+  padding:5px 8px;
+  background:#26382e;
+  color:#fff;
+  font-size:12px;
+  font-weight:700;
+}
+.achievement-locked{
+  margin-top:10px;
+  color:#849389;
+  font-weight:700;
+}
+@media(max-width:1000px){.achievements-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.achievements-grid{grid-template-columns:1fr}.achievements-toolbar{align-items:flex-start;flex-direction:column}}
 </style>
 </head>
 <body>
@@ -628,7 +702,7 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
       <span>Gestion du championnat 2026-2027</span>
     </div>
   </div>
-  <div class="app-version">Version 13/09/26 11h43</div>
+  <div class="app-version">Version 13/09/26 12h10</div>
 </header>
 <nav id="nav">
   <button data-view="home" class="active">⌂ Accueil</button>
@@ -637,6 +711,7 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
   <button data-view="ranking">♛ Classement</button>
   <button data-view="versus">⚔ Versus</button>
   <button data-view="records">★ Records</button>
+  <button data-view="achievements">◆ Accomplissements</button>
   <button data-view="history">≡ Historique</button>
   <button data-view="settings">⚙ Paramètres</button>
 </nav>
@@ -975,6 +1050,21 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
   </div>
 </section>
 
+
+<section id="achievements" class="view">
+  <div class="hero">
+    <h1>Accomplissements BPT</h1>
+    <p>Les performances spéciales débloquées au fil du championnat.</p>
+  </div>
+
+  <div class="achievements-toolbar">
+    <div><strong id="achievementUnlockedCount">0</strong> accomplissement(s) débloqué(s)</div>
+    <div class="muted">Un accomplissement peut être obtenu par plusieurs joueurs.</div>
+  </div>
+
+  <div id="achievementsGrid" class="achievements-grid"></div>
+</section>
+
 <section id="history" class="view">
   <div class="card">
     <div class="row" style="justify-content:space-between">
@@ -1000,7 +1090,7 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
 
 
 <section id="records" class="view">
-  <div class="hero"><h1>Records BPT</h1><p>Les performances marquantes du championnat. <strong>🔥 On Fire</strong> : meilleur total de points sur les 3 dernières parties · <strong>💔 Bad Beat</strong> : plus de 4e places · <strong>🐢 Loser</strong> : plus de dernières places.</p></div>
+  <div class="hero"><h1>Records BPT</h1><p>Les performances marquantes du championnat.</p></div>
   <div id="recordsGrid" class="records-grid" style="margin-top:12px"></div>
 </section>
 
@@ -1454,6 +1544,7 @@ async function refreshCanonicalHistoryUI(showBusy=true){
     renderRanking();
     renderVersus();
     renderRecords();
+    renderAchievements();
     renderHistory();
 
     if(correctionUnlocked)renderCorrectionGameList(null,false);
@@ -2076,6 +2167,7 @@ function renderRecords(){
 
   const maxBy=(key)=>[...ranked].sort((a,b)=>Number(b[key]||0)-Number(a[key]||0)||a.name.localeCompare(b.name,"fr"))[0];
   const wins=maxBy("wins"),podiums=maxBy("podiums"),kills=maxBy("kills"),avg=maxBy("avgPoints"),net=maxBy("net");
+  const worstNet=[...ranked].sort((a,b)=>Number(a.net||0)-Number(b.net||0)||a.name.localeCompare(b.name,"fr"))[0];
 
   let bestGameKill={name:"—",value:0,game:null};
   for(const r of db.history||[])if(Number(r.kills||0)>bestGameKill.value)bestGameKill={name:r.player,value:Number(r.kills||0),game:r.game};
@@ -2145,19 +2237,56 @@ function renderRecords(){
     .sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],"fr"))[0];
   if(bestLast)loser={name:bestLast[0],value:bestLast[1]};
 
+
+  // Séries de victoires et de tabliers, calculées sur les participations successives du joueur.
+  let winStreak={name:"—",value:0};
+  let tablierCount={name:"—",value:0};
+  let tablierStreak={name:"—",value:0};
+
+  for(const p of ranked){
+    const playerRows=(db.history||[])
+      .filter(r=>r.player===p.name)
+      .sort((a,b)=>Number(a.game)-Number(b.game));
+
+    let curWin=0,bestWin=0;
+    let curTab=0,bestTab=0;
+    let totalTab=0;
+
+    for(const r of playerRows){
+      const isWin=Number(r.place)===1;
+      const isTablier=!!r.tablier || (isWin && Number(r.n)>=10);
+
+      curWin=isWin?curWin+1:0;
+      if(curWin>bestWin)bestWin=curWin;
+
+      if(isTablier)totalTab++;
+
+      curTab=isTablier?curTab+1:0;
+      if(curTab>bestTab)bestTab=curTab;
+    }
+
+    if(bestWin>winStreak.value)winStreak={name:p.name,value:bestWin};
+    if(totalTab>tablierCount.value)tablierCount={name:p.name,value:totalTab};
+    if(bestTab>tablierStreak.value)tablierStreak={name:p.name,value:bestTab};
+  }
+
   const cards=[
     ["🏆","Plus de victoires",wins.name,`${wins.wins} victoire${wins.wins>1?"s":""}`],
+    ["⚡","Série de victoires",winStreak.name,winStreak.value?`${winStreak.value} victoire${winStreak.value>1?"s":""} de suite`:"Aucune série"],
+    ["🧥","Plus de tabliers",tablierCount.name,tablierCount.value?`${tablierCount.value} tablier${tablierCount.value>1?"s":""} · victoire avec au moins 10 joueurs`:"Aucun tablier"],
+    ["👑","Série de tabliers",tablierStreak.name,tablierStreak.value?`${tablierStreak.value} tablier${tablierStreak.value>1?"s":""} de suite`:"Aucune série"],
     ["🥉","Plus de podiums",podiums.name,`${podiums.podiums} podium${podiums.podiums>1?"s":""}`],
+    ["🏅","Série de podiums",streakPod.name,`${streakPod.value} de suite`],
     ["💥","Plus de kills",kills.name,`${kills.kills} kill${kills.kills>1?"s":""}`],
     ["🎯","Kills sur une partie",bestGameKill.name,`${bestGameKill.value} · partie #${bestGameKill.game||"—"}`],
     ["📈","Meilleure moyenne",avg.name,`${num(avg.avgPoints,1)} pts / partie`],
-    ["💶","Meilleur solde",net.name,euro(net.net)],
-    ["🏅","Série de podiums",streakPod.name,`${streakPod.value} de suite`],
+    ["💶","Plus gros gains",net.name,euro(net.net)],
+    ["📉","Plus grosse perte d’argent",worstNet?.name||"—",worstNet?euro(worstNet.net):"—"],
     ["🎟","Série de participations",streakPart.name,`${streakPart.value} partie${streakPart.value>1?"s":""} de suite`],
     ["🔥","On Fire",onFire.name,onFire.details?`${onFire.details} · joueur le plus performant sur les 3 dernières parties`:"—"],
     ["💔","Bad Beat",badBeat.name,badBeat.value?`${badBeat.value} quatrième${badBeat.value>1?"s":""} place${badBeat.value>1?"s":""}`:"Aucune 4e place enregistrée"],
     ["🐢","Loser",loser.name,loser.value?`${loser.value} dernière${loser.value>1?"s":""} place${loser.value>1?"s":""}`:"Aucune dernière place enregistrée"],
-    ["⚔","Duel le plus fréquent",pairData?`${pairData.names[0]} → ${pairData.names[1]}`:"—",pairData?`${pairData.value} élimination${pairData.value>1?"s":""}`:"—"]
+    ["🎯","Kill le plus fréquent",pairData?`${pairData.names[0]} a éliminé ${pairData.names[1]}`:"—",pairData?`${pairData.value} fois`:"—"]
   ];
   holder.innerHTML=cards.map(c=>`<div class="record-card"><div class="record-icon">${c[0]}</div><span>${esc(c[1])}</span><strong>${esc(c[2])}</strong><small>${esc(c[3])}</small></div>`).join("");
 }
@@ -2287,9 +2416,130 @@ function testLiveSound(){
   setTimeout(()=>liveSpeakThirtySeconds(),800);
   setTimeout(()=>liveSpeakBlinds(),1900);
 }
+
+function achievementPlayers(){
+  const rows=Array.isArray(db.history)?db.history:[];
+  const ranked=ranking();
+  const names=[...new Set(rows.map(r=>String(r.player||"")).filter(Boolean))];
+
+  const byPlayer={};
+  for(const name of names){
+    const pr=rows.filter(r=>r.player===name).sort((a,b)=>Number(a.game)-Number(b.game));
+    const wins=pr.filter(r=>Number(r.place)===1).length;
+    const podiums=pr.filter(r=>Number(r.place)<=3).length;
+    const lastPlaces=pr.filter(r=>Number(r.n)>0 && Number(r.place)===Number(r.n)).length;
+    const net=pr.reduce((s,r)=>s+Number(r.net||0),0);
+    const maxKills=pr.reduce((m,r)=>Math.max(m,Number(r.kills||0)),0);
+    const tabliers=pr.filter(r=>r.tablier || (Number(r.place)===1 && Number(r.n)>=10)).length;
+    const participationCount=new Set(pr.map(r=>Number(r.game))).size;
+
+    let winStreak=0,curWin=0;
+    for(const r of pr){
+      if(Number(r.place)===1){curWin++;winStreak=Math.max(winStreak,curWin);}
+      else curWin=0;
+    }
+
+    let strike=false;
+    for(const r of pr){
+      const n=Number(r.n)||0;
+      if(n>=2 && Number(r.kills||0)===n-1){
+        strike=true;
+        break;
+      }
+    }
+
+    const sameVictim={};
+    for(const r of rows){
+      if(r.killer===name && r.player){
+        sameVictim[r.player]=(sameVictim[r.player]||0)+1;
+      }
+    }
+    const maxSameVictim=Math.max(0,...Object.values(sameVictim));
+
+    byPlayer[name]={
+      wins,podiums,lastPlaces,net,maxKills,tabliers,participationCount,
+      winStreak,strike,maxSameVictim
+    };
+  }
+
+  const achievementDefs=[
+    {icon:"🏆",name:"Première victoire",desc:"Remporter au moins 1 partie.",test:s=>s.wins>=1},
+    {icon:"👑",name:"Patron de la table",desc:"Atteindre 5 victoires.",test:s=>s.wins>=5},
+    {icon:"💰",name:"Dans le vert",desc:"Atteindre un solde net cumulé d’au moins +30 €.",test:s=>s.net>=30},
+    {icon:"💎",name:"High Roller BPT",desc:"Atteindre un solde net cumulé d’au moins +100 €.",test:s=>s.net>=100},
+    {icon:"🐢",name:"Dernier de la classe",desc:"Terminer dernier au moins une fois.",test:s=>s.lastPlaces>=1},
+    {icon:"🥄",name:"Cuillère de bois",desc:"Terminer dernier au moins 3 fois.",test:s=>s.lastPlaces>=3},
+    {icon:"💥",name:"Premier sang",desc:"Réaliser au moins 1 kill dans une même partie.",test:s=>s.maxKills>=1},
+    {icon:"🔫",name:"Serial Killer",desc:"Réaliser au moins 3 kills dans une même partie.",test:s=>s.maxKills>=3},
+    {icon:"☠️",name:"Massacre",desc:"Réaliser au moins 5 kills dans une même partie.",test:s=>s.maxKills>=5},
+    {icon:"🎳",name:"Strike",desc:"Éliminer personnellement tous les autres joueurs d’une même partie.",test:s=>s.strike},
+    {icon:"🧥",name:"Tablier",desc:"Gagner une partie avec au moins 10 joueurs.",test:s=>s.tabliers>=1},
+    {icon:"🧥",name:"Collectionneur de tabliers",desc:"Obtenir au moins 3 tabliers.",test:s=>s.tabliers>=3},
+    {icon:"🥉",name:"Premier podium",desc:"Terminer dans le Top 3 au moins une fois.",test:s=>s.podiums>=1},
+    {icon:"🏅",name:"Habitué du podium",desc:"Atteindre 5 podiums.",test:s=>s.podiums>=5},
+    {icon:"🚂",name:"Invincible",desc:"Gagner 2 participations consécutives.",test:s=>s.winStreak>=2},
+    {icon:"⚡",name:"Hat-trick",desc:"Gagner 3 participations consécutives.",test:s=>s.winStreak>=3},
+    {icon:"🎯",name:"Bourreau",desc:"Éliminer le même adversaire au moins 3 fois.",test:s=>s.maxSameVictim>=3},
+    {icon:"🎟",name:"Fidèle",desc:"Participer à au moins 10 parties.",test:s=>s.participationCount>=10},
+    {icon:"🏁",name:"Marathonien",desc:"Participer à au moins 20 parties.",test:s=>s.participationCount>=20}
+  ];
+
+  // Badge dynamique On Fire : meilleur total de points sur les 3 dernières parties.
+  const gameNos=[...new Set(rows.map(r=>Number(r.game)).filter(Number.isFinite))].sort((a,b)=>a-b);
+  const last3=gameNos.slice(-3);
+  let onFireNames=[];
+  if(last3.length){
+    const totals={};
+    for(const r of rows){
+      if(last3.includes(Number(r.game))){
+        totals[r.player]=(totals[r.player]||0)+Number(r.points||0);
+      }
+    }
+    const maxPts=Math.max(...Object.values(totals),-Infinity);
+    if(Number.isFinite(maxPts))onFireNames=Object.entries(totals).filter(([,v])=>v===maxPts).map(([n])=>n);
+  }
+
+  const result=achievementDefs.map(a=>({
+    ...a,
+    players:names.filter(n=>a.test(byPlayer[n]))
+  }));
+
+  result.push({
+    icon:"🔥",
+    name:"On Fire",
+    desc:"Meilleur total de points cumulés sur les 3 dernières parties.",
+    players:onFireNames,
+    dynamic:true
+  });
+
+  return result;
+}
+
+function renderAchievements(){
+  const holder=$("achievementsGrid");
+  if(!holder)return;
+
+  const items=achievementPlayers();
+  const unlocked=items.filter(a=>a.players.length>0).length;
+  if($("achievementUnlockedCount"))$("achievementUnlockedCount").textContent=String(unlocked);
+
+  holder.innerHTML=items.map(a=>{
+    const unlocked=a.players.length>0;
+    return `<div class="achievement-card ${unlocked?"":"locked"}">
+      <div class="achievement-icon">${a.icon}</div>
+      <h3>${esc(a.name)}</h3>
+      <div class="achievement-desc">${esc(a.desc)}</div>
+      <div class="achievement-status">${a.dynamic?"Accomplissement dynamique":unlocked?"Débloqué":"À débloquer"}</div>
+      ${unlocked
+        ? `<div class="achievement-players">${a.players.map(n=>`<span class="achievement-player">${esc(n)}</span>`).join("")}</div>`
+        : `<div class="achievement-locked">🔒 Aucun joueur</div>`}
+    </div>`;
+  }).join("");
+}
+
 function renderAll(){
   normalizeHistoryGameNumbers();
-  renderHome();renderDashboard();renderRanking();renderVersus();renderRecords();renderHistory();renderPlayers();renderGamePlayers();renderSettings();renderPoints();if(correctionUnlocked)renderCorrectionGameList(null,false);if(document.getElementById("livePlayerList"))liveRenderPlayerList();
+  renderHome();renderDashboard();renderRanking();renderVersus();renderRecords();renderAchievements();renderHistory();renderPlayers();renderGamePlayers();renderSettings();renderPoints();if(correctionUnlocked)renderCorrectionGameList(null,false);if(document.getElementById("livePlayerList"))liveRenderPlayerList();
 }
 
 function dashRankList(items,valueFn,formatFn){
@@ -4606,7 +4856,7 @@ async function showView(id){
   document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===id));
 
-  if((id==="home" || id==="dashboard" || id==="ranking" || id==="versus" || id==="records" || id==="history" || id==="playerprofile") && cloudReady && sbClient){
+  if((id==="home" || id==="dashboard" || id==="ranking" || id==="versus" || id==="records" || id==="achievements" || id==="history" || id==="playerprofile") && cloudReady && sbClient){
     await refreshCanonicalHistoryUI(true);
   }else{
     if(id==="home")renderHome();
@@ -4614,6 +4864,7 @@ async function showView(id){
     if(id==="ranking")renderRanking();
     if(id==="versus")renderVersus();
     if(id==="records")renderRecords();
+    if(id==="achievements")renderAchievements();
     if(id==="history")renderHistory();
   }
 
