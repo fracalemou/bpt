@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>BPT — Gestion du championnat</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23173a2b'/%3E%3Cpath d='M32 10c-6 10-18 15-18 26 0 7 5 12 11 12 3 0 5-1 7-4-1 5-3 8-7 10h14c-4-2-6-5-7-10 2 3 4 4 7 4 6 0 11-5 11-12 0-11-12-16-18-26z' fill='%23c8952e'/%3E%3C/svg%3E">
 <style>
 :root{--bg:#0e1712;--panel:#18231d;--panel2:#213128;--line:#32473a;--green:#173a2b;--green2:#2f6d50;--gold:#c8952e;--cream:#fff8ea;--text:#f7f4ec;--muted:#b7c3bb;--danger:#a94343;--ok:#79c594}
 *{box-sizing:border-box} body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
@@ -447,22 +448,121 @@ header .app-version{
   justify-content:flex-end;
   margin-top:18px;
 }
+
+.live-level-nav{
+  display:flex;
+  gap:8px;
+  flex:1 1 100%;
+}
+.live-level-nav .btn{
+  flex:1 1 0;
+  min-width:0;
+}
+
+/* ===== BPT Club Edition ===== */
+.bpt-header{height:auto;min-height:72px;padding:8px 18px}
+.bpt-brand-wrap{display:flex;align-items:center;gap:12px}
+.bpt-logo{display:flex;align-items:center;gap:8px;font-weight:950;letter-spacing:.06em;font-size:27px}
+.bpt-logo svg{width:48px;height:48px}
+.bpt-logo circle{fill:#0f2118;stroke:#c8952e;stroke-width:3}
+.bpt-logo path{fill:#c8952e}
+header .app-version{opacity:.72;font-size:11px}
+nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
+.home-hero{display:flex;align-items:center;gap:24px;padding:32px;border-radius:20px;background:linear-gradient(135deg,#173a2b,#101b15 65%);border:1px solid #315441}
+.home-hero h1{font-size:36px;margin:3px 0 7px}.home-hero p{color:#cad5ce;margin:0}.home-kicker{color:#e8c39e;font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:12px}
+.home-logo-mark svg{width:100px;height:100px}.home-logo-mark circle{fill:#0e1712;stroke:#c8952e;stroke-width:4}.home-logo-mark path{fill:#c8952e}
+.home-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:14px}
+.home-highlight{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}.home-highlight.leader{border-color:#8e6b22;background:linear-gradient(180deg,#252315,#18231d)}
+.home-highlight span,.home-highlight small{display:block;color:var(--muted)}.home-highlight strong{display:block;font-size:24px;margin:6px 0}
+.home-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}.home-action{border:1px solid var(--line);background:#17231d;color:#fff;border-radius:14px;padding:16px;text-align:left;cursor:pointer}.home-action.primary{background:#2f6d50;border-color:#418769}.home-action b,.home-action span{display:block}.home-action span{color:#b7c3bb;font-size:12px;margin-top:5px}
+.home-podium{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.podium-card{padding:14px;border-radius:12px;background:#121d17;border:1px solid #34483c;text-align:center}.podium-card .medal{font-size:28px}.podium-card b{display:block;font-size:18px;margin:4px 0}
+.player-link{background:none;border:0;color:#f7f4ec;font-weight:800;cursor:pointer;padding:0;text-decoration:underline;text-decoration-color:rgba(200,149,46,.35);text-underline-offset:3px}
+.records-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.record-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;min-height:130px}.record-card .record-icon{font-size:24px}.record-card strong{display:block;font-size:21px;margin:8px 0 3px}.record-card span{color:#e8c39e;font-weight:700}.record-card small{display:block;color:var(--muted);margin-top:4px}
+.history-cards{display:grid;gap:10px;margin-top:12px}.history-game{border:1px solid var(--line);border-radius:12px;background:#121d17;overflow:hidden}.history-game summary{cursor:pointer;list-style:none;padding:14px 16px;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}.history-game summary::-webkit-details-marker{display:none}.history-game-title{font-weight:900}.history-game-meta{color:var(--muted);font-size:13px}.history-winner{color:#e8c39e;font-weight:800}.history-game-body{padding:0 14px 14px}.history-raw{margin-top:14px}.history-raw>summary{cursor:pointer;color:var(--muted)}
+.player-profile-hero{display:flex;justify-content:space-between;align-items:center}.profile-rank{font-size:52px;font-weight:950;color:#c8952e}.profile-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:12px}.profile-kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}.profile-kpi b{display:block;font-size:20px}.profile-kpi span{display:block;color:var(--muted);font-size:12px;margin-top:3px}.place-chip{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;margin:4px;background:#26382e;font-weight:900}.place-chip.win{background:#8d6c22;color:white}.place-chip.podium{background:#425646}
+.versus-scoreboard{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin:12px 0}.versus-score{background:#121d17;border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}.versus-score b{display:block;font-size:28px}.versus-center{text-align:center;color:#e8c39e;font-weight:900}
+.bpt-summary-backdrop{position:fixed;inset:0;z-index:11000;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:18px}.bpt-summary-modal{width:min(850px,100%);max-height:90vh;overflow:auto;background:#15201a;border:1px solid #4b654f;border-radius:18px;padding:20px;box-shadow:0 30px 90px rgba(0,0,0,.65)}.summary-podium{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}.summary-place{background:#101a15;border:1px solid #34483c;border-radius:13px;padding:14px;text-align:center}.summary-place:first-child{border-color:#c8952e}.summary-place .big{font-size:30px}.summary-table{width:100%}
+body.live-presentation header,body.live-presentation nav{display:none}body.live-presentation main{max-width:none;padding:0}body.live-presentation #liveGameScreen{min-height:100vh;padding:14px}body.live-presentation .live-admin-panel,body.live-presentation .live-admin-only{display:none!important}body.live-presentation .live-stage{grid-template-columns:1fr}body.live-presentation .live-timer-card{min-height:calc(100vh - 100px);display:flex;flex-direction:column;align-items:center;justify-content:center}body.live-presentation .live-level{font-size:42px}body.live-presentation .live-blinds{font-size:92px}body.live-presentation .live-timer{font-size:100px}
+#liveTimer.live-warning-30{color:#e7a93d}#liveTimer.live-warning-10{color:#ff6b6b;text-shadow:0 0 20px rgba(255,70,70,.35)}
+@media(max-width:1000px){.home-actions{grid-template-columns:repeat(2,1fr)}.records-grid{grid-template-columns:repeat(2,1fr)}.profile-kpis{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){.home-grid,.home-podium,.summary-podium{grid-template-columns:1fr}.home-actions,.records-grid{grid-template-columns:1fr}.home-hero{padding:20px}.home-logo-mark{display:none}.home-hero h1{font-size:28px}.profile-kpis{grid-template-columns:repeat(2,1fr)}.history-game summary{grid-template-columns:1fr}.bpt-brand-wrap .brand{display:none}}
 </style>
 </head>
 <body>
-<header>
-  <div class="brand"><b>BPT — Championnat de poker</b><span>Gestion complète du championnat 2026-2027</span></div>
-  <div class="app-version">Version 13/09/26 09h40</div>
+<header class="bpt-header">
+  <div class="bpt-brand-wrap">
+    <div class="bpt-logo" aria-label="BPT">
+      <svg viewBox="0 0 72 72" aria-hidden="true">
+        <circle cx="36" cy="36" r="33"></circle>
+        <path d="M36 13c-7 12-20 18-20 30 0 8 6 14 13 14 3 0 6-2 7-5-1 6-4 10-8 12h16c-4-2-7-6-8-12 2 3 4 5 8 5 7 0 13-6 13-14 0-12-14-18-21-30z"></path>
+      </svg>
+      <span>BPT</span>
+    </div>
+    <div class="brand">
+      <b>Championnat de poker</b>
+      <span>Gestion du championnat 2026-2027</span>
+    </div>
+  </div>
+  <div class="app-version">Version 13/09/26 11h08</div>
 </header>
 <nav id="nav">
-  <button data-view="live">Live</button>
-  <button data-view="dashboard" class="active">Tableau de bord</button>
-  <button data-view="ranking">Classement</button>
-  <button data-view="versus">Versus</button>
-  <button data-view="history">Historique</button>
-  <button data-view="settings">Paramètres</button>
+  <button data-view="home" class="active">⌂ Accueil</button>
+  <button data-view="live">● Live</button>
+  <button data-view="dashboard">▦ Tableau de bord</button>
+  <button data-view="ranking">♛ Classement</button>
+  <button data-view="versus">⚔ Versus</button>
+  <button data-view="records">★ Records</button>
+  <button data-view="history">≡ Historique</button>
+  <button data-view="settings">⚙ Paramètres</button>
 </nav>
 <main>
+
+<section id="home" class="view active">
+  <div class="home-hero">
+    <div class="home-logo-mark">
+      <svg viewBox="0 0 96 96" aria-hidden="true">
+        <circle cx="48" cy="48" r="44"></circle>
+        <path d="M48 17c-10 16-27 24-27 40 0 11 8 18 17 18 5 0 8-2 10-7-1 8-5 13-11 16h22c-6-3-10-8-11-16 3 5 6 7 11 7 9 0 17-7 17-18 0-16-18-24-28-40z"></path>
+      </svg>
+    </div>
+    <div>
+      <div class="home-kicker">BPT · Poker Championship</div>
+      <h1>Championnat 2026–2027</h1>
+      <p>Live, classement, confrontations, records et historique dans un seul espace.</p>
+    </div>
+  </div>
+
+  <div class="home-grid">
+    <div class="home-highlight leader">
+      <span>Leader actuel</span>
+      <strong id="homeLeader">—</strong>
+      <small id="homeLeaderMeta">Aucune partie enregistrée</small>
+    </div>
+    <div class="home-highlight">
+      <span>Dernier vainqueur</span>
+      <strong id="homeLastWinner">—</strong>
+      <small id="homeLastWinnerMeta">—</small>
+    </div>
+    <div class="home-highlight">
+      <span>Championnat</span>
+      <strong id="homeGamesCount">0 partie</strong>
+      <small id="homePlayersCount">0 joueur classé</small>
+    </div>
+  </div>
+
+  <div class="home-actions">
+    <button class="home-action primary" data-go="live"><b>● Lancer / reprendre un Live</b><span>Timer, blinds, annonces et éliminations</span></button>
+    <button class="home-action" data-go="ranking"><b>♛ Voir le classement</b><span>Points, podiums, kills et progression</span></button>
+    <button class="home-action" data-go="versus"><b>⚔ Comparer deux joueurs</b><span>Face-à-face et performances individuelles</span></button>
+    <button class="home-action" data-go="records"><b>★ Voir les records</b><span>Les meilleures performances du BPT</span></button>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <h2>Podium actuel</h2>
+    <div id="homePodium" class="home-podium"></div>
+  </div>
+</section>
+
 <section id="live" class="view">
   <div id="liveManager">
     <div id="livePrepScreen" class="live-screen active">
@@ -532,7 +632,10 @@ header .app-version{
         </div>
         <div class="row">
           <span class="live-badge" id="liveSyncBadge">NON SYNCHRONISÉE</span>
-          <button class="btn ghost" id="liveBackPrepBtn">Préparation</button>
+          <button class="btn ghost" id="liveTestSoundBtn" type="button">Tester le son</button>
+          <button class="btn ghost" id="liveDisplayModeBtn" type="button">Mode affichage</button>
+          <button class="btn ghost" id="liveFullscreenBtn" type="button">Plein écran</button>
+          <button class="btn ghost live-admin-only" id="liveBackPrepBtn">Préparation</button>
         </div>
       </div>
 
@@ -544,18 +647,20 @@ header .app-version{
           <div class="live-ante">Ante : <span id="liveAnte">—</span></div>
           <div id="liveTimer" class="live-timer">00:00</div>
           <div class="live-next">Niveau suivant : <strong id="liveNextBlinds">—</strong></div>
-          <div class="live-controls">
+          <div class="live-controls live-admin-only">
             <button class="btn" id="liveStartBtn">Démarrer / Reprendre</button>
             <button class="btn secondary" id="livePauseBtn">Pause</button>
             <button class="btn ghost" id="liveTimerBackBtn">⏪ − 1 min</button>
             <button class="btn ghost" id="liveTimerForwardBtn">+ 1 min ⏩</button>
-            <button class="btn ghost" id="livePrevLevelBtn">Niveau précédent</button>
-            <button class="btn ghost" id="liveNextLevelBtn">Niveau suivant</button>
+            <div class="live-level-nav">
+              <button class="btn ghost" id="livePrevLevelBtn">Niveau précédent</button>
+              <button class="btn ghost" id="liveNextLevelBtn">Niveau suivant</button>
+            </div>
           </div>
-          <div id="liveSoundStatus" class="muted" style="margin-top:8px">🔊 Alertes sonores : annonce « 30 secondes » à 30 s, 3 bips à 10 s, puis annonce vocale distincte des deux blinds.</div>
+          <div id="liveSoundStatus" class="muted live-admin-only" style="margin-top:8px">🔊 Alertes sonores : annonce « 30 secondes » à 30 s, 3 bips à 10 s, puis annonce vocale distincte des deux blinds.</div>
         </div>
 
-        <div class="card">
+        <div class="card live-admin-panel">
           <h2>Partie</h2>
           <div class="live-kpis">
             <div class="live-kpi"><b id="liveRemaining">0</b><span>joueurs restants</span></div>
@@ -599,7 +704,7 @@ header .app-version{
   </div>
 </section>
 
-<section id="dashboard" class="view active">
+<section id="dashboard" class="view">
   <div class="hero"><h1>Tableau de bord BPT</h1><p id="heroText"></p></div>
 
   <div class="grid" style="margin-top:12px">
@@ -676,6 +781,7 @@ header .app-version{
   </div>
 
   <div id="versusContent" style="display:none">
+    <div id="versusScoreboard" class="versus-scoreboard"></div>
     <div class="versus-headcards">
       <div class="card versus-player-card">
         <div class="muted">Joueur 1</div>
@@ -718,11 +824,51 @@ header .app-version{
       <button class="btn ghost" id="exportCsvBtn">Exporter CSV</button>
     </div>
     <div id="historyEmpty" class="muted" style="display:none;padding:18px 0">Aucune partie enregistrée.</div>
-    <div class="tablewrap" id="historyTableWrap">
-      <table>
-        <thead><tr><th>Partie</th><th>Date</th><th>Lieu</th><th>Joueur</th><th>Place</th><th>Éliminé par</th><th>Tablier</th><th>Joueurs</th><th>Points</th><th>Mise</th><th>Gain</th><th>Net</th><th>Kills</th></tr></thead>
-        <tbody id="historyBody"></tbody>
-      </table>
+    <div id="historyCards" class="history-cards"></div>
+    <details class="history-raw">
+      <summary>Afficher le tableau détaillé complet</summary>
+      <div class="tablewrap" id="historyTableWrap">
+        <table>
+          <thead><tr><th>Partie</th><th>Date</th><th>Lieu</th><th>Joueur</th><th>Place</th><th>Éliminé par</th><th>Tablier</th><th>Joueurs</th><th>Points</th><th>Mise</th><th>Gain</th><th>Net</th><th>Kills</th></tr></thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
+    </details>
+  </div>
+</section>
+
+
+<section id="records" class="view">
+  <div class="hero"><h1>Records BPT</h1><p>Les performances marquantes du championnat.</p></div>
+  <div id="recordsGrid" class="records-grid" style="margin-top:12px"></div>
+</section>
+
+<section id="playerprofile" class="view">
+  <div class="row" style="justify-content:space-between;margin-bottom:12px">
+    <button class="btn ghost" id="playerProfileBackBtn">← Retour au classement</button>
+    <button class="btn secondary" id="playerProfileVersusBtn">Comparer dans Versus</button>
+  </div>
+  <div class="hero player-profile-hero">
+    <div>
+      <div class="muted">Fiche joueur</div>
+      <h1 id="playerProfileName">—</h1>
+      <p id="playerProfileMeta"></p>
+    </div>
+    <div class="profile-rank" id="playerProfileRank">#—</div>
+  </div>
+  <div id="playerProfileKpis" class="profile-kpis"></div>
+  <div class="grid" style="margin-top:12px">
+    <div class="card span7">
+      <h2>Historique des places</h2>
+      <div id="playerProfilePlaces"></div>
+    </div>
+    <div class="card span5">
+      <h2>Face-à-face</h2>
+      <div id="playerProfileRivals"></div>
+    </div>
+    <div class="card span12">
+      <h2>Parties du joueur</h2>
+      <div id="playerProfileHistory" class="tablewrap"></div>
     </div>
   </div>
 </section>
@@ -887,6 +1033,20 @@ header .app-version{
       <button class="btn ghost" id="bptModalCancelBtn" type="button">Annuler</button>
       <button class="btn danger" id="bptModalConfirmBtn" type="button">Confirmer</button>
     </div>
+  </div>
+</div>
+
+
+<div id="gameSummaryBackdrop" class="bpt-summary-backdrop" style="display:none">
+  <div class="bpt-summary-modal">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <div>
+        <div class="muted">Partie terminée</div>
+        <h2 style="margin:2px 0 0">Résumé de la partie</h2>
+      </div>
+      <button class="btn ghost" id="gameSummaryCloseBtn">Fermer</button>
+    </div>
+    <div id="gameSummaryContent"></div>
   </div>
 </div>
 
@@ -1115,9 +1275,11 @@ async function refreshCanonicalHistoryUI(showBusy=true){
 
     // IMPORTANT : les deux écrans sont recalculés dans le même passage,
     // à partir du même snapshot de l'historique serveur.
+    renderHome();
     renderDashboard();
     renderRanking();
     renderVersus();
+    renderRecords();
     renderHistory();
 
     if(correctionUnlocked)renderCorrectionGameList(null,false);
@@ -1671,9 +1833,218 @@ function killerStats(){
   return {pair,mainVictim:n=>top(asK[n]),mainKiller:n=>top(asV[n])};
 }
 
+
+function medalForRank(rank){
+  return rank===1?"🥇":rank===2?"🥈":rank===3?"🥉":"";
+}
+
+function renderHome(){
+  const ranked=ranking();
+  const games=groupedGames();
+  const leader=ranked[0];
+  const last=games.length?games[games.length-1][1].slice().sort((a,b)=>Number(a.place)-Number(b.place)):null;
+  const winner=last?.find(r=>Number(r.place)===1);
+
+  if($("homeLeader")){
+    $("homeLeader").textContent=leader?leader.name:"—";
+    $("homeLeaderMeta").textContent=leader?`${num(leader.points,0)} pts · ${leader.gamesCount} partie${leader.gamesCount>1?"s":""}`:"Aucune partie enregistrée";
+    $("homeLastWinner").textContent=winner?.player||"—";
+    $("homeLastWinnerMeta").textContent=winner?`${shortDate(winner.date)}${winner.location?" · "+winner.location:""} · ${num(winner.points,0)} pts`:"—";
+    $("homeGamesCount").textContent=`${games.length} partie${games.length>1?"s":""}`;
+    $("homePlayersCount").textContent=`${ranked.length} joueur${ranked.length>1?"s":""} classé${ranked.length>1?"s":""}`;
+  }
+
+  if($("homePodium")){
+    $("homePodium").innerHTML=ranked.slice(0,3).map((p,i)=>`
+      <div class="podium-card">
+        <div class="medal">${medalForRank(i+1)}</div>
+        <button class="player-link" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(p.name)}'))">${esc(p.name)}</button>
+        <span class="muted">${num(p.points,0)} pts · ${p.wins} victoire${p.wins>1?"s":""}</span>
+      </div>`).join("") || '<div class="muted">Le podium apparaîtra après la première partie.</div>';
+  }
+}
+
+function rankSnapshotUntil(maxGame){
+  const old=db.history;
+  const rows=old.filter(r=>Number(r.game)<=Number(maxGame));
+  const by={};
+  for(const r of rows){
+    const n=r.player;
+    if(!by[n])by[n]={name:n,points:0,games:0};
+    by[n].points+=Number(r.points||0);
+  }
+  const seen={};
+  for(const r of rows){
+    const k=r.player+"|"+r.game;
+    if(!seen[k]){seen[k]=1;by[r.player].games++;}
+  }
+  return Object.values(by).sort((a,b)=>b.points-a.points||a.name.localeCompare(b.name,"fr")).map((x,i)=>({...x,rank:i+1}));
+}
+
+function longestPlayerStreak(name,predicate){
+  const rows=(db.history||[]).filter(r=>r.player===name).sort((a,b)=>Number(a.game)-Number(b.game));
+  let best=0,cur=0;
+  for(const r of rows){cur=predicate(r)?cur+1:0;if(cur>best)best=cur;}
+  return best;
+}
+
+function longestParticipationRun(name){
+  const gs=[...new Set((db.history||[]).filter(r=>r.player===name).map(r=>Number(r.game)))].sort((a,b)=>a-b);
+  let best=0,cur=0,prev=null;
+  for(const g of gs){cur=(prev!==null&&g===prev+1)?cur+1:1;best=Math.max(best,cur);prev=g;}
+  return best;
+}
+
+function renderRecords(){
+  const holder=$("recordsGrid"); if(!holder)return;
+  const ranked=ranking();
+  if(!ranked.length){holder.innerHTML='<div class="card muted">Aucun record disponible pour le moment.</div>';return;}
+
+  const maxBy=(key)=>[...ranked].sort((a,b)=>Number(b[key]||0)-Number(a[key]||0)||a.name.localeCompare(b.name,"fr"))[0];
+  const wins=maxBy("wins"),podiums=maxBy("podiums"),kills=maxBy("kills"),avg=maxBy("avgPoints"),net=maxBy("net");
+
+  let bestGameKill={name:"—",value:0,game:null};
+  for(const r of db.history||[])if(Number(r.kills||0)>bestGameKill.value)bestGameKill={name:r.player,value:Number(r.kills||0),game:r.game};
+
+  let streakPod={name:"—",value:0}, streakPart={name:"—",value:0};
+  for(const p of ranked){
+    const a=longestPlayerStreak(p.name,r=>Number(r.place)<=3);
+    if(a>streakPod.value)streakPod={name:p.name,value:a};
+    const b=longestParticipationRun(p.name);
+    if(b>streakPart.value)streakPart={name:p.name,value:b};
+  }
+
+  let comeback={name:"—",value:0,from:null,to:null};
+  const gameNos=[...new Set((db.history||[]).map(r=>Number(r.game)))].sort((a,b)=>a-b);
+  for(let i=1;i<gameNos.length;i++){
+    const prev=rankSnapshotUntil(gameNos[i-1]),cur=rankSnapshotUntil(gameNos[i]);
+    const pm=new Map(prev.map(x=>[x.name,x.rank]));
+    for(const x of cur){
+      if(pm.has(x.name)){
+        const gain=pm.get(x.name)-x.rank;
+        if(gain>comeback.value)comeback={name:x.name,value:gain,from:pm.get(x.name),to:x.rank};
+      }
+    }
+  }
+
+  const pairs={};
+  for(const r of db.history||[])if(r.killer){
+    const k=`${r.killer}|||${r.player}`; pairs[k]=(pairs[k]||0)+1;
+  }
+  const topPair=Object.entries(pairs).sort((a,b)=>b[1]-a[1])[0];
+  const pairData=topPair?{names:topPair[0].split("|||"),value:topPair[1]}:null;
+
+  const cards=[
+    ["🏆","Plus de victoires",wins.name,`${wins.wins} victoire${wins.wins>1?"s":""}`],
+    ["🥉","Plus de podiums",podiums.name,`${podiums.podiums} podium${podiums.podiums>1?"s":""}`],
+    ["💥","Plus de kills",kills.name,`${kills.kills} kill${kills.kills>1?"s":""}`],
+    ["🎯","Kills sur une partie",bestGameKill.name,`${bestGameKill.value} · partie #${bestGameKill.game||"—"}`],
+    ["📈","Meilleure moyenne",avg.name,`${num(avg.avgPoints,1)} pts / partie`],
+    ["💶","Meilleur solde",net.name,euro(net.net)],
+    ["🔥","Série de podiums",streakPod.name,`${streakPod.value} de suite`],
+    ["🎟","Série de participations",streakPart.name,`${streakPart.value} partie${streakPart.value>1?"s":""} de suite`],
+    ["🚀","Plus gros comeback",comeback.name,comeback.value?`+${comeback.value} place${comeback.value>1?"s":""} (${comeback.from} → ${comeback.to})`:"—"],
+    ["⚔","Duel le plus fréquent",pairData?`${pairData.names[0]} → ${pairData.names[1]}`:"—",pairData?`${pairData.value} élimination${pairData.value>1?"s":""}`:"—"]
+  ];
+  holder.innerHTML=cards.map(c=>`<div class="record-card"><div class="record-icon">${c[0]}</div><span>${esc(c[1])}</span><strong>${esc(c[2])}</strong><small>${esc(c[3])}</small></div>`).join("");
+}
+
+function openPlayerProfile(name){
+  const s=ranking().find(x=>x.name===name) || stats(false).find(x=>x.name===name);
+  if(!s)return;
+  const rows=(db.history||[]).filter(r=>r.player===name).sort((a,b)=>Number(a.game)-Number(b.game));
+  const ks=killerStats();
+  const bestPlace=rows.length?Math.min(...rows.map(r=>Number(r.place)||999)):null;
+
+  $("playerProfileName").textContent=name;
+  $("playerProfileRank").textContent=s.rank?`#${s.rank}`:"#—";
+  $("playerProfileMeta").textContent=`${s.gamesCount||rows.length} participation${(s.gamesCount||rows.length)>1?"s":""} · meilleure place ${bestPlace?bestPlace+"e":"—"} · bourreau : ${ks.mainKiller(name)||"—"}`;
+
+  const kpis=[
+    ["Points",num(s.points,0)],["Moy. pts",num(s.avgPoints,1)],["Victoires",s.wins],["Podiums",s.podiums],["Kills",s.kills],["Solde",euro(s.net)]
+  ];
+  $("playerProfileKpis").innerHTML=kpis.map(([l,v])=>`<div class="profile-kpi"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join("");
+
+  $("playerProfilePlaces").innerHTML=rows.map(r=>`<span class="place-chip ${Number(r.place)===1?"win":Number(r.place)<=3?"podium":""}" title="Partie #${r.game}">${r.place}</span>`).join("") || '<span class="muted">Aucune partie.</span>';
+
+  const rivals={};
+  for(const r of db.history||[]){
+    if(r.player===name && r.killer)rivals[r.killer]=(rivals[r.killer]||0)-1;
+    if(r.killer===name)rivals[r.player]=(rivals[r.player]||0)+1;
+  }
+  const rv=Object.entries(rivals).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,6);
+  $("playerProfileRivals").innerHTML=rv.length?rv.map(([n,v])=>`<div class="row" style="justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span>${esc(n)}</span><b>${v>0?"+":""}${v}</b></div>`).join(""):'<span class="muted">Pas encore de confrontation directe.</span>';
+
+  $("playerProfileHistory").innerHTML=`<table><thead><tr><th>Partie</th><th>Date</th><th>Place</th><th>Pts</th><th>Kills</th><th>Éliminé par</th><th>Net</th></tr></thead><tbody>${rows.slice().reverse().map(r=>`<tr><td>#${r.game}</td><td>${esc(shortDate(r.date))}</td><td>${r.place}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${esc(r.killer||"—")}</td><td>${euro(r.net)}</td></tr>`).join("")}</tbody></table>`;
+
+  $("playerProfileVersusBtn").dataset.player=name;
+  showView("playerprofile");
+}
+
+function showEndGameSummary(rows){
+  const backdrop=$("gameSummaryBackdrop"),content=$("gameSummaryContent");
+  if(!backdrop||!content||!Array.isArray(rows)||!rows.length)return;
+  const sorted=rows.slice().sort((a,b)=>Number(a.place)-Number(b.place));
+  const first=sorted[0];
+  content.innerHTML=`
+    <div class="muted" style="margin-top:6px">Partie #${first.game} · ${esc(shortDate(first.date))}${first.location?" · "+esc(first.location):""} · ${sorted.length} joueurs</div>
+    <div class="summary-podium">
+      ${sorted.slice(0,3).map((r,i)=>`<div class="summary-place"><div class="big">${medalForRank(i+1)}</div><b>${esc(r.player)}</b><div>${num(r.points,0)} pts · ${euro(r.gross)}</div><div class="muted">${r.kills||0} kill${Number(r.kills||0)>1?"s":""}</div></div>`).join("")}
+    </div>
+    <div class="tablewrap"><table class="summary-table"><thead><tr><th>Place</th><th>Joueur</th><th>Points</th><th>Kills</th><th>Net</th></tr></thead><tbody>
+      ${sorted.map(r=>`<tr><td>${r.place}</td><td>${esc(r.player)}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${euro(r.net)}</td></tr>`).join("")}
+    </tbody></table></div>`;
+  backdrop.style.display="flex";
+}
+
+function renderHistoryCards(){
+  const holder=$("historyCards");if(!holder)return;
+  const games=groupedGames().slice().reverse();
+  holder.innerHTML=games.map(([g,rows])=>{
+    const sorted=rows.slice().sort((a,b)=>Number(a.place)-Number(b.place));
+    const f=sorted[0]||{},win=sorted.find(r=>Number(r.place)===1);
+    return `<details class="history-game">
+      <summary>
+        <div class="history-game-title">Partie #${g}</div>
+        <div><div>${esc(shortDate(f.date||""))}${f.location?" · "+esc(f.location):""} · ${rows.length} joueurs</div><div class="history-game-meta">Cagnotte ${euro(rows.length*Number(f.stake||0))}</div></div>
+        <div class="history-winner">🏆 ${esc(win?.player||"—")} · ${num(win?.points||0,0)} pts</div>
+      </summary>
+      <div class="history-game-body"><div class="tablewrap"><table><thead><tr><th>Place</th><th>Joueur</th><th>Pts</th><th>Kills</th><th>Éliminé par</th><th>Gain</th><th>Net</th></tr></thead><tbody>
+        ${sorted.map(r=>`<tr><td>${r.place}</td><td><button class="player-link" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(r.player)}</button></td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${esc(r.killer||"—")}</td><td>${euro(r.gross)}</td><td>${euro(r.net)}</td></tr>`).join("")}
+      </tbody></table></div></div>
+    </details>`;
+  }).join("");
+}
+
+function updateLiveTimerUrgency(){
+  const s=ensureLiveState(),el=$("liveTimer");if(!el)return;
+  el.classList.toggle("live-warning-30",s.remainingSeconds<=30 && s.remainingSeconds>10);
+  el.classList.toggle("live-warning-10",s.remainingSeconds<=10);
+}
+
+async function toggleLiveFullscreen(){
+  try{
+    const target=$("liveGameScreen");
+    if(!document.fullscreenElement)await target.requestFullscreen?.();
+    else await document.exitFullscreen?.();
+  }catch(e){}
+}
+
+function toggleLivePresentation(){
+  document.body.classList.toggle("live-presentation");
+  const btn=$("liveDisplayModeBtn");
+  if(btn)btn.textContent=document.body.classList.contains("live-presentation")?"Quitter affichage":"Mode affichage";
+}
+
+function testLiveSound(){
+  liveEnsureAudio();
+  liveWarningSound();
+  setTimeout(()=>liveSpeakThirtySeconds(),800);
+  setTimeout(()=>liveSpeakBlinds(),1900);
+}
 function renderAll(){
   normalizeHistoryGameNumbers();
-  renderDashboard();renderRanking();renderVersus();renderHistory();renderPlayers();renderGamePlayers();renderSettings();renderPoints();if(correctionUnlocked)renderCorrectionGameList(null,false);if(document.getElementById("livePlayerList"))liveRenderPlayerList();
+  renderHome();renderDashboard();renderRanking();renderVersus();renderRecords();renderHistory();renderPlayers();renderGamePlayers();renderSettings();renderPoints();if(correctionUnlocked)renderCorrectionGameList(null,false);if(document.getElementById("livePlayerList"))liveRenderPlayerList();
 }
 
 function dashRankList(items,valueFn,formatFn){
@@ -1820,8 +2191,8 @@ function renderDashboard(){
 function renderRanking(){
   const ks=killerStats();
   $("rankingBody").innerHTML=ranking().map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}">
-    <td>${s.rank}</td>
-    <td>${esc(s.name)}</td>
+    <td>${medalForRank(s.rank)} ${s.rank}</td>
+    <td><button class="player-link" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(s.name)}'))">${esc(s.name)}</button></td>
     <td><b>${num(s.points,0)}</b></td>
     <td>${s.progress===null?"Nouvelle entrée":s.progress>0?"+"+s.progress:s.progress===0?"=":String(s.progress)}</td>
     <td>${num(s.avgPoints,1)}</td>
@@ -1954,6 +2325,13 @@ function renderVersus(){
 
   const h2h=versusHeadToHead(name1,name2);
 
+  if($("versusScoreboard")){
+    $("versusScoreboard").innerHTML=`
+      <div class="versus-score"><span class="muted">${esc(name1)}</span><b>${h2h.better1}</b><small>duels gagnés</small></div>
+      <div class="versus-center">${h2h.commonGames} partie${h2h.commonGames>1?"s":""} commune${h2h.commonGames>1?"s":""}<br><span class="muted">${h2h.elim2By1}–${h2h.elim1By2} éliminations directes</span></div>
+      <div class="versus-score"><span class="muted">${esc(name2)}</span><b>${h2h.better2}</b><small>duels gagnés</small></div>`;
+  }
+
   const criteria=[
     {label:"Points",a:m1.points,b:m2.points,fmt:v=>num(v,0)},
     {label:"Moyenne de points",a:m1.avgPoints,b:m2.avgPoints,fmt:v=>num(v,1)},
@@ -2005,6 +2383,7 @@ function renderHistory(){
 
   if($("historyEmpty"))$("historyEmpty").style.display=rows.length?"none":"block";
   if($("historyTableWrap"))$("historyTableWrap").style.display=rows.length?"block":"none";
+  renderHistoryCards();
 
   if(!$("historyBody"))return;
 
@@ -2465,11 +2844,12 @@ async function persistCompletedGame(rows){
     const sig=historyGameSignature(rows);
     const canonicalGroups=historyGroups(db.history||[]);
     const present=canonicalGroups.some(([,gameRows])=>historyGameSignature(gameRows)===sig);
-
+    setTimeout(()=>showEndGameSummary(rows),80);
     return {synced:present};
   }
 
   setCloudStatus("offline","Partie en attente","La partie sera envoyée automatiquement dès que Supabase sera disponible.");
+  setTimeout(()=>showEndGameSummary(rows),80);
   return {synced:false};
 }
 
@@ -3040,6 +3420,7 @@ function liveRenderTimerOnly(){
   const s=ensureLiveState();
   $("liveTimer").textContent=liveTime(s.remainingSeconds);
   $("liveElapsed").textContent=liveTime(liveElapsedSeconds());
+  updateLiveTimerUrgency();
 }
 function liveRefreshElimLists(resetKiller=false){
   const s=ensureLiveState();
@@ -3881,12 +4262,14 @@ async function showView(id){
   document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===id));
 
-  if((id==="dashboard" || id==="ranking" || id==="versus" || id==="history") && cloudReady && sbClient){
+  if((id==="home" || id==="dashboard" || id==="ranking" || id==="versus" || id==="records" || id==="history" || id==="playerprofile") && cloudReady && sbClient){
     await refreshCanonicalHistoryUI(true);
   }else{
+    if(id==="home")renderHome();
     if(id==="dashboard")renderDashboard();
     if(id==="ranking")renderRanking();
     if(id==="versus")renderVersus();
+    if(id==="records")renderRecords();
     if(id==="history")renderHistory();
   }
 
@@ -3949,6 +4332,32 @@ $("liveUndoEliminationBtn").onclick=liveUndoLastElimination;
 $("liveFinalizeBtn").onclick=liveFinalizeGame;
 
 
+
+
+// Navigation rapide Accueil
+document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.go)));
+
+// Fiche joueur
+if($("playerProfileBackBtn"))$("playerProfileBackBtn").onclick=()=>showView("ranking");
+if($("playerProfileVersusBtn"))$("playerProfileVersusBtn").onclick=()=>{
+  const name=$("playerProfileVersusBtn").dataset.player||"";
+  showView("versus").then?.(()=>{});
+  setTimeout(()=>{
+    if($("versusPlayer1")){$("versusPlayer1").value=name;renderVersus();}
+  },0);
+};
+
+// Résumé de fin de partie
+if($("gameSummaryCloseBtn"))$("gameSummaryCloseBtn").onclick=()=>$("gameSummaryBackdrop").style.display="none";
+if($("gameSummaryBackdrop"))$("gameSummaryBackdrop").onclick=e=>{if(e.target===$("gameSummaryBackdrop"))e.currentTarget.style.display="none";};
+
+// Live : affichage, plein écran et test audio
+if($("liveFullscreenBtn"))$("liveFullscreenBtn").onclick=toggleLiveFullscreen;
+if($("liveDisplayModeBtn"))$("liveDisplayModeBtn").onclick=toggleLivePresentation;
+if($("liveTestSoundBtn"))$("liveTestSoundBtn").onclick=testLiveSound;
+document.addEventListener("fullscreenchange",()=>{
+  if($("liveFullscreenBtn"))$("liveFullscreenBtn").textContent=document.fullscreenElement?"Quitter plein écran":"Plein écran";
+});
 
 // Navigation principale
 document.querySelectorAll("nav button[data-view]").forEach(b=>{
