@@ -48,7 +48,7 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
 #liveManager .live-timer{font-size:76px;font-weight:900;line-height:1;margin:16px 0}
 #liveManager .live-next{color:#b9c5be}
 #liveManager .live-controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}
-#liveManager .live-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#liveManager .live-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 #liveManager .live-kpi{background:#22352a;border-radius:9px;padding:10px;text-align:center}
 #liveManager .live-kpi b{display:block;font-size:20px}
 #liveManager .live-kpi span{font-size:11px;color:#b7c3bb}
@@ -863,14 +863,1170 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
   .dashboard-hero-logo{display:none}
 }
 
-.dashboard-light-card{
-  min-height:150px;
+
+.dashboard-podium-card{
+  margin-top:12px;
 }
-.dashboard-light-card h2{
+.dashboard-podium-card h2{
+  margin-bottom:10px;
+}
+.last-game-achievements{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+}
+.last-game-achievement{
+  align-items:flex-start;
+}
+.last-game-achievement .achievement-names{
+  margin-top:3px;
+  color:#fff;
+  font-weight:700;
+  font-size:13px;
+}
+@media(max-width:700px){
+  .last-game-achievements{grid-template-columns:1fr}
+}
+
+.dashboard-lastgame-card{
+  margin-top:0;
+}
+.dashboard-lastgame-row{
+  width:100%;
+}
+.dashboard-lastgame-row h2{
   margin-bottom:12px;
 }
+.dashboard-lastgame-achievements-row{
+  border-top:1px solid rgba(255,255,255,.08);
+  margin-top:18px;
+  padding-top:18px;
+}
+.last-game-achievements{
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+}
+.last-game-achievement{
+  flex:1 1 280px;
+  max-width:420px;
+}
+
+.dashboard-section-label{
+  margin-top:14px;
+  color:#c9a35e;
+  font-size:12px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.10em;
+}
+.dashboard-section-label-spaced{
+  margin-top:18px;
+}
+.dashboard-section-divider{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:8px 0 2px;
+  color:#c9a35e;
+  font-size:12px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.10em;
+}
+.dashboard-section-divider::before,
+.dashboard-section-divider::after{
+  content:"";
+  height:1px;
+  flex:1;
+  background:linear-gradient(90deg,transparent,rgba(200,149,46,.5));
+}
+.dashboard-section-divider::after{
+  background:linear-gradient(90deg,rgba(200,149,46,.5),transparent);
+}
+.dashboard-lastgame-card{
+  border-color:rgba(200,149,46,.25);
+  background:linear-gradient(180deg,rgba(200,149,46,.035),rgba(255,255,255,.01));
+}
+
+/* Palette différenciée du tableau de bord */
+#dashboard .dashboard-highlights .home-highlight{
+  border-width:1px;
+  border-style:solid;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03);
+}
+#dashboard .dashboard-highlights .home-highlight:nth-child(1){
+  background:linear-gradient(180deg, rgba(200,149,46,.16), rgba(200,149,46,.06));
+  border-color:rgba(200,149,46,.35);
+}
+#dashboard .dashboard-highlights .home-highlight:nth-child(2){
+  background:linear-gradient(180deg, rgba(74,144,226,.18), rgba(74,144,226,.06));
+  border-color:rgba(74,144,226,.35);
+}
+#dashboard .dashboard-highlights .home-highlight:nth-child(3){
+  background:linear-gradient(180deg, rgba(255,107,53,.16), rgba(255,107,53,.06));
+  border-color:rgba(255,107,53,.35);
+}
+
+#dashboard .dashboard-podium-card{
+  background:linear-gradient(180deg, rgba(46,98,74,.22), rgba(26,41,32,.9));
+  border-color:rgba(121,197,148,.28);
+}
+
+#dashboard .kpi:nth-child(1){
+  background:linear-gradient(180deg, rgba(44,87,122,.28), rgba(18,27,35,.92));
+  border-color:rgba(91,149,196,.32);
+}
+#dashboard .kpi:nth-child(2){
+  background:linear-gradient(180deg, rgba(58,108,76,.28), rgba(18,31,23,.92));
+  border-color:rgba(121,197,148,.32);
+}
+#dashboard .kpi:nth-child(3){
+  background:linear-gradient(180deg, rgba(112,82,34,.28), rgba(34,25,14,.92));
+  border-color:rgba(200,149,46,.34);
+}
+#dashboard .kpi:nth-child(4){
+  background:linear-gradient(180deg, rgba(120,58,92,.24), rgba(36,19,29,.92));
+  border-color:rgba(199,116,163,.30);
+}
+
+#dashboard .dashboard-lastgame-card{
+  border-color:rgba(255,107,53,.28);
+  background:linear-gradient(180deg, rgba(255,107,53,.05), rgba(255,255,255,.015));
+}
+#dashboard .dashboard-lastgame-row:first-child{
+  background:rgba(255,255,255,.01);
+  border-radius:12px;
+  padding:2px 4px 6px;
+}
+#dashboard .dashboard-lastgame-achievements-row{
+  background:rgba(255,255,255,.015);
+  border-radius:12px;
+  padding:18px 4px 4px;
+}
+
+#dashboard .last-game-achievement:nth-child(odd){
+  background:linear-gradient(180deg, rgba(38,56,46,1), rgba(23,34,28,1));
+  border-color:#3b5143;
+}
+#dashboard .last-game-achievement:nth-child(even){
+  background:linear-gradient(180deg, rgba(54,44,29,1), rgba(34,27,19,1));
+  border-color:#6f5a36;
+}
+
+/* Dashboard plus léger : moins de rectangles, plus de lignes et de symboles */
+.dashboard-facts{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px;
+  margin-top:10px;
+}
+.dashboard-fact{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:8px 2px 10px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.dashboard-fact-icon{
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  font-size:22px;
+  flex:0 0 46px;
+}
+.dashboard-fact.leader .dashboard-fact-icon{
+  background:rgba(200,149,46,.16);
+  color:#f1d089;
+}
+.dashboard-fact.winner .dashboard-fact-icon{
+  background:rgba(74,144,226,.14);
+  color:#98c4ff;
+}
+.dashboard-fact.fire .dashboard-fact-icon{
+  background:rgba(255,107,53,.14);
+  color:#ffb08d;
+}
+.dashboard-fact-copy span,
+.dashboard-fact-copy small{
+  display:block;
+  color:var(--muted);
+}
+.dashboard-fact-copy strong{
+  display:block;
+  margin:4px 0;
+  font-size:24px;
+}
+.podium-medals{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px;
+  margin-top:10px;
+}
+.podium-medal-item{
+  text-align:center;
+  padding:2px 0 4px;
+}
+.medal-badge{
+  width:68px;
+  height:68px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  margin:0 auto 10px;
+  font-size:31px;
+  background:linear-gradient(180deg,#1f2a23,#121913);
+  border:1px solid rgba(255,255,255,.08);
+}
+.podium-medal-item.rank-1 .medal-badge{
+  background:linear-gradient(180deg,#3a2f13,#17140d);
+  border-color:rgba(200,149,46,.35);
+}
+.podium-medal-item.rank-2 .medal-badge{
+  background:linear-gradient(180deg,#32373b,#171a1c);
+  border-color:rgba(181,190,201,.28);
+}
+.podium-medal-item.rank-3 .medal-badge{
+  background:linear-gradient(180deg,#3a2a1b,#1a1410);
+  border-color:rgba(175,120,78,.32);
+}
+.podium-medal-item .player-link{
+  display:block;
+  margin:0 auto 3px;
+  font-size:16px;
+}
+.podium-medal-item small{
+  display:block;
+  color:var(--muted);
+}
+.dashboard-kpi-band{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:0;
+  margin-top:8px;
+  border-top:1px solid rgba(255,255,255,.08);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.kpi-inline{
+  text-align:center;
+  padding:14px 10px;
+  position:relative;
+}
+.kpi-inline + .kpi-inline::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:18%;
+  bottom:18%;
+  width:1px;
+  background:rgba(255,255,255,.08);
+}
+.kpi-inline b{
+  display:block;
+  font-size:28px;
+  margin-bottom:4px;
+}
+.kpi-inline span{
+  display:block;
+  color:var(--muted);
+  font-size:13px;
+}
+.dashboard-lastgame-card{
+  border-color:rgba(255,255,255,.08);
+  background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+}
+.dashboard-lastgame-row:first-child{
+  background:transparent;
+  padding:0;
+}
+.dashboard-lastgame-achievements-row{
+  background:transparent;
+  border-top:1px dashed rgba(255,255,255,.14);
+  border-radius:0;
+}
+.last-game-achievements{
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+}
+.last-game-achievement{
+  flex:1 1 290px;
+  max-width:430px;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.08);
+}
+#dashboard .dashboard-highlights,
+#dashboard .home-highlight,
+#dashboard .dashboard-podium-card,
+#dashboard .kpi{
+  all:unset;
+}
 @media(max-width:900px){
-  .dashboard-light-card{grid-column:span 12}
+  .dashboard-facts,
+  .podium-medals,
+  .dashboard-kpi-band{
+    grid-template-columns:1fr;
+  }
+  .kpi-inline + .kpi-inline::before{
+    display:none;
+  }
+  .kpi-inline{
+    border-top:1px solid rgba(255,255,255,.08);
+  }
+}
+
+.latestgame-hero{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+}
+.latestgame-winner{
+  text-align:right;
+  min-width:220px;
+}
+.latestgame-winner span,
+.latestgame-winner small{
+  display:block;
+  color:var(--muted);
+}
+.latestgame-winner strong{
+  display:block;
+  margin:5px 0;
+  font-size:28px;
+  color:#f1d089;
+}
+.latestgame-summary-line{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:0;
+  margin:14px 0 18px;
+  border-top:1px solid rgba(255,255,255,.08);
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.latestgame-summary-item{
+  padding:13px 14px;
+  text-align:center;
+  position:relative;
+}
+.latestgame-summary-item + .latestgame-summary-item::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:22%;
+  bottom:22%;
+  width:1px;
+  background:rgba(255,255,255,.08);
+}
+.latestgame-summary-item span{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+}
+.latestgame-summary-item strong{
+  display:block;
+  margin-top:4px;
+  font-size:18px;
+}
+.latestgame-podium-wrap{
+  margin:6px 0 18px;
+}
+.latestgame-details{
+  display:grid;
+  gap:10px;
+}
+.latestgame-detail{
+  border-top:1px solid rgba(255,255,255,.10);
+  border-bottom:1px solid rgba(255,255,255,.06);
+  background:transparent;
+}
+.latestgame-detail summary{
+  list-style:none;
+  cursor:pointer;
+  padding:13px 2px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+}
+.latestgame-detail summary::-webkit-details-marker{display:none}
+.latestgame-detail summary::after{
+  content:"▾";
+  color:#c9a35e;
+  font-size:18px;
+  transition:transform .15s ease;
+}
+.latestgame-detail[open] summary::after{transform:rotate(180deg)}
+.latestgame-detail summary span{
+  font-size:17px;
+  font-weight:800;
+}
+.latestgame-detail summary small{
+  color:var(--muted);
+  margin-left:auto;
+}
+.latestgame-detail-body{
+  padding:2px 0 16px;
+}
+.latest-achievement-player{
+  display:grid;
+  grid-template-columns:minmax(150px,220px) 1fr;
+  gap:18px;
+  align-items:start;
+  padding:14px 0;
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+.latest-achievement-player:last-child{border-bottom:0}
+.latest-achievement-player-name{
+  font-size:18px;
+  font-weight:900;
+}
+.latest-achievement-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.latest-achievement-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:6px 9px;
+  border-radius:999px;
+  background:#26382e;
+  border:1px solid #3b5143;
+  font-size:12px;
+  font-weight:700;
+}
+.latest-kills-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px 18px;
+}
+.latest-kill-row{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:8px 0;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.latest-kill-arrow{
+  color:#c9a35e;
+  font-weight:900;
+}
+@media(max-width:850px){
+  .latestgame-hero{align-items:flex-start;flex-direction:column}
+  .latestgame-winner{text-align:left}
+  .latestgame-summary-line{grid-template-columns:1fr 1fr}
+  .latestgame-summary-item + .latestgame-summary-item::before{display:none}
+  .latest-achievement-player{grid-template-columns:1fr}
+  .latest-kills-list{grid-template-columns:1fr}
+}
+
+/* ===== Dashboard V84 — premium / éditorial ===== */
+.premium-hero{
+  display:grid;
+  grid-template-columns:minmax(0,1.35fr) minmax(280px,.9fr);
+  gap:24px;
+  align-items:center;
+  padding:28px 30px;
+  border-radius:22px;
+  background:linear-gradient(135deg,rgba(32,49,73,.96),rgba(16,26,41,.98));
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 10px 28px rgba(0,0,0,.15);
+}
+.premium-hero h1{margin:4px 0 8px;font-size:34px;line-height:1.06}
+.premium-hero p{margin:0;color:#c7d2e2;font-size:15px}
+.premium-hero-metrics{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+.premium-hero-metric{
+  text-align:center;
+  padding:14px 10px;
+  border-radius:16px;
+  background:rgba(255,255,255,.055);
+  border:1px solid rgba(255,255,255,.08);
+}
+.premium-hero-metric span{display:block;color:var(--muted);font-size:12px;margin-bottom:6px}
+.premium-hero-metric strong{display:block;font-size:24px;color:#fff}
+
+.premium-main-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.45fr) minmax(310px,.85fr);
+  gap:22px;
+  margin-top:22px;
+}
+.premium-bottom-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:22px;
+  margin-top:22px;
+}
+.premium-panel{
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:20px;
+  padding:20px 22px;
+}
+.premium-panel-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-end;margin-bottom:14px}
+.premium-panel-head.solo{align-items:flex-start}
+.premium-eyebrow{color:#b6c0cf;font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:800}
+.premium-panel-head h2{margin:4px 0 0;font-size:24px;line-height:1.05}
+.premium-panel-note{color:var(--muted);font-size:12px;white-space:nowrap}
+
+.premium-podium{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+  align-items:stretch;
+}
+.premium-podium-card{
+  position:relative;
+  text-align:center;
+  padding:20px 14px 16px;
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02));
+}
+.premium-podium-card.rank-1{transform:translateY(-8px);background:linear-gradient(180deg,rgba(201,163,94,.18),rgba(255,255,255,.03))}
+.premium-podium-medal{font-size:32px;line-height:1;margin-bottom:8px}
+.premium-podium-rank{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.premium-podium-name{display:block;margin:0 auto 8px;font-size:18px;font-weight:800}
+.premium-podium-points{font-size:28px;font-weight:900;line-height:1.05}
+
+.premium-story-list{display:grid;gap:12px}
+.premium-story-item{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:12px;
+  align-items:center;
+  padding:12px 0;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.premium-story-item:last-child{border-bottom:0;padding-bottom:2px}
+.premium-story-item.actionable{cursor:pointer}
+.premium-story-icon{
+  width:42px;height:42px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);font-size:19px
+}
+.premium-story-item span,.premium-record-copy span{display:block;color:var(--muted);font-size:12px}
+.premium-story-item strong{display:block;font-size:19px;line-height:1.1;margin:2px 0 3px}
+.premium-story-item small{display:block;color:#c1cad7;font-size:12px}
+.ghost-btn{
+  border:1px solid rgba(255,255,255,.14);background:transparent;color:#fff;
+  padding:8px 12px;border-radius:999px;cursor:pointer;font-size:12px;font-weight:700
+}
+.ghost-btn:hover{background:rgba(255,255,255,.06)}
+
+
+.premium-records-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.premium-record-item{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:12px;
+  align-items:center;
+  padding:14px 12px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:14px;
+  background:rgba(255,255,255,.025);
+}
+.premium-record-item:last-child{padding-bottom:14px}
+.premium-record-icon{font-size:22px;width:30px;text-align:center}
+.premium-record-copy strong{display:block;font-size:16px;margin-top:3px}
+.premium-record-item b{font-size:16px;color:#f0d08b}
+
+.premium-achievements-list{display:grid;gap:12px}
+.premium-achievement-player{
+  display:grid;
+  grid-template-columns:minmax(130px,180px) 1fr;
+  gap:14px;
+  align-items:start;
+  padding:10px 0;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.premium-achievement-player:last-child{border-bottom:0;padding-bottom:0}
+.premium-achievement-name{font-size:16px;font-weight:800;text-align:left}
+.premium-achievement-badges{display:flex;flex-wrap:wrap;gap:8px}
+.premium-achievement-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 10px;border-radius:999px;
+  background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);
+  font-size:12px;font-weight:700
+}
+
+@media(max-width:1000px){
+  .premium-hero,.premium-main-grid,.premium-bottom-grid{grid-template-columns:1fr}
+}
+@media(max-width:760px){
+  .premium-hero-metrics,.premium-podium{grid-template-columns:1fr 1fr}
+  .premium-podium-card.rank-1{transform:none}
+  .premium-achievement-player{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+  .premium-hero{padding:22px 20px}
+  .premium-hero h1{font-size:28px}
+  .premium-hero-metrics,.premium-podium{grid-template-columns:1fr}
+  .premium-story-item{grid-template-columns:auto 1fr}
+  .premium-story-item .ghost-btn{grid-column:2;justify-self:start;margin-top:4px}
+}
+
+/* ===== V87 — Harmonisation premium de tous les onglets ===== */
+:root{
+  --premium-blue-1:#203149;
+  --premium-blue-2:#101a29;
+  --premium-panel:rgba(255,255,255,.035);
+  --premium-panel-strong:rgba(255,255,255,.05);
+  --premium-line:rgba(255,255,255,.08);
+  --premium-muted:#aeb9c9;
+  --premium-gold:#f0d08b;
+}
+
+/* Navigation plus sobre et cohérente */
+#nav{
+  gap:4px;
+  padding:8px 12px;
+  border-bottom:1px solid var(--premium-line);
+  background:rgba(14,22,34,.96);
+}
+#nav button{
+  border-radius:10px;
+  padding:9px 12px;
+  color:#c6d0dd;
+}
+#nav button:hover{background:rgba(255,255,255,.05);color:#fff}
+#nav button.active{
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  box-shadow:inset 0 -2px 0 #d7b36a;
+}
+
+/* Header / hero commun */
+.tab-premium-hero{
+  padding:26px 30px;
+  border-radius:22px;
+  background:linear-gradient(135deg,var(--premium-blue-1),var(--premium-blue-2));
+  border:1px solid var(--premium-line);
+  box-shadow:0 10px 28px rgba(0,0,0,.14);
+}
+.tab-premium-hero h1{
+  margin:4px 0 7px;
+  font-size:32px;
+  line-height:1.08;
+  letter-spacing:-.02em;
+}
+.tab-premium-hero p{margin:0;color:#c7d2e2;max-width:850px}
+.tab-premium-hero .home-kicker{
+  color:#aeb9c9;
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.09em;
+  font-weight:800;
+}
+
+/* Cartes et panneaux */
+.view > .card,
+.view .card,
+.tab-primary-panel{
+  background:var(--premium-panel);
+  border:1px solid var(--premium-line);
+  border-radius:18px;
+  box-shadow:none;
+}
+.view .card h2{
+  margin-top:0;
+  font-size:21px;
+  letter-spacing:-.01em;
+}
+
+/* Champs */
+.field label{color:#c7d0dc;font-size:12px;font-weight:700}
+input,select{
+  background:#0f1825;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;
+  color:#fff;
+  padding:9px 10px;
+}
+input:focus,select:focus{
+  outline:2px solid rgba(200,149,46,.22);
+  border-color:rgba(200,149,46,.48);
+}
+
+/* Boutons */
+.btn{
+  border-radius:10px;
+  box-shadow:none;
+}
+.btn.secondary{
+  background:#294865;
+  border-color:#365b7d;
+}
+.btn.ghost{
+  background:transparent;
+  border-color:rgba(255,255,255,.13);
+  color:#d5deea;
+}
+
+/* Tables */
+.tablewrap{
+  border:1px solid var(--premium-line);
+  border-radius:14px;
+  background:rgba(0,0,0,.08);
+}
+table{font-size:13px}
+th{
+  background:#1a2a3e;
+  color:#eef3f8;
+  padding:10px 9px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+td{
+  border-bottom:1px solid rgba(255,255,255,.055);
+  padding:9px;
+}
+.rank1{background:rgba(201,163,94,.12)}
+.rank2{background:rgba(174,184,197,.07)}
+.rank3{background:rgba(169,105,70,.08)}
+
+/* Dernière partie */
+.latestgame-summary-line{
+  margin-top:18px;
+  border-top:1px solid var(--premium-line);
+  border-bottom:1px solid var(--premium-line);
+}
+.latestgame-summary-item{padding:15px 14px}
+.latestgame-detail{
+  border-top:1px solid var(--premium-line);
+  border-bottom:0;
+}
+.latestgame-detail summary{padding:15px 2px}
+.latestgame-winner strong{color:var(--premium-gold)}
+
+/* Versus */
+.versus-headcards{gap:16px;margin-top:16px}
+.versus-player-card{
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.025));
+}
+.versus-scoreboard{margin-top:16px}
+.versus-best{color:#88d39c}
+.versus-vs{color:var(--premium-gold)}
+
+/* Records */
+.records-grid{
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:14px;
+  margin-top:16px!important;
+}
+.record-card{
+  min-height:122px;
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.022));
+  border:1px solid var(--premium-line);
+  border-radius:18px;
+  padding:18px;
+}
+.record-card .record-icon{font-size:26px}
+.record-card strong{font-size:20px}
+.record-card span{color:var(--premium-gold)}
+
+/* Accomplissements */
+.achievements-toolbar{
+  margin-top:16px;
+  padding:12px 2px;
+  border-bottom:1px solid var(--premium-line);
+}
+.achievements-grid{gap:14px;margin-top:16px}
+.achievement-card{
+  background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.022));
+  border:1px solid var(--premium-line);
+  border-radius:18px;
+  padding:18px;
+}
+.achievement-card.locked{opacity:.48;background:rgba(255,255,255,.018)}
+.achievement-player{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.07);
+}
+
+/* Profil joueur */
+#profile > .row{margin:16px 0!important}
+.premium-profile-identity{
+  margin-top:0;
+  background:linear-gradient(135deg,#1b2d43,#101a29);
+  border:1px solid var(--premium-line);
+}
+.profile-kpis{
+  gap:10px;
+  margin-top:16px;
+}
+.profile-kpi{
+  background:rgba(255,255,255,.035);
+  border:1px solid var(--premium-line);
+  border-radius:14px;
+}
+#profile .grid{gap:16px!important;margin-top:16px!important}
+.profile-feat,
+.profile-achievement,
+.profile-rival-row{
+  border-color:var(--premium-line)!important;
+}
+
+/* Historique */
+#history > .card{margin-top:16px}
+.history-cards{gap:12px;margin-top:16px}
+.history-game{
+  background:rgba(255,255,255,.025);
+  border:1px solid var(--premium-line);
+  border-radius:16px;
+}
+.history-game summary{padding:15px 16px}
+.history-raw{
+  margin-top:16px;
+  border-top:1px solid var(--premium-line);
+  padding-top:12px;
+}
+
+/* Paramètres */
+#settingsLock{margin-top:16px!important}
+.settings-block{
+  margin:14px 0;
+  border:1px solid var(--premium-line);
+  border-radius:18px;
+  background:rgba(255,255,255,.025);
+}
+.settings-block > summary{
+  background:rgba(255,255,255,.035);
+  padding:15px 18px;
+  color:#eef3f8;
+}
+.settings-block-content{padding:16px}
+#settings .grid{gap:14px}
+
+/* Live */
+.live-tab-hero{margin-bottom:16px}
+#liveManager .live-title{color:#eef3f8;font-size:20px}
+#liveManager .live-layout{gap:16px}
+#liveManager .live-timer-card{
+  background:linear-gradient(145deg,#16283a,#0f1c2a);
+  border:1px solid var(--premium-line);
+  border-radius:18px;
+}
+#liveManager .live-kpi{
+  background:rgba(255,255,255,.045);
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:12px;
+}
+#liveManager .live-player-list,
+#liveManager .live-players,
+#liveManager .live-structure{
+  border-color:var(--premium-line)!important;
+}
+
+/* Liens joueurs */
+.player-link{
+  color:#f4f7fb;
+  text-decoration-color:rgba(200,149,46,.38);
+}
+
+@media(max-width:760px){
+  .tab-premium-hero{padding:22px 20px}
+  .tab-premium-hero h1{font-size:27px}
+  .records-grid{grid-template-columns:1fr}
+}
+
+/* ===== V88 — identité poker premium, moins "vert casino" ===== */
+:root{
+  --bg:#0b0f17;
+  --panel:#141923;
+  --panel2:#1b2230;
+  --line:#2b3444;
+  --green:#1c2635;
+  --green2:#34455e;
+  --gold:#c8a15c;
+  --cream:#f3efe7;
+  --text:#f2f4f7;
+  --muted:#9da9b8;
+  --danger:#9f4d4d;
+  --ok:#6fa889;
+}
+
+body{
+  background:
+    radial-gradient(circle at 85% -10%,rgba(63,82,112,.18),transparent 28%),
+    var(--bg);
+  color:var(--text);
+}
+
+/* En-tête / navigation */
+header{
+  background:linear-gradient(90deg,#111722,#1a2331) !important;
+  border-bottom:1px solid #303a4a !important;
+}
+.brand span{color:#aeb8c5 !important}
+.bpt-logo circle{
+  fill:#0d121b !important;
+  stroke:var(--gold) !important;
+}
+.bpt-logo path{fill:var(--gold) !important}
+nav{
+  background:#0f141d !important;
+  border-bottom:1px solid #262f3d !important;
+}
+nav button{
+  border-color:#303a49 !important;
+  color:#cfd6df !important;
+  background:transparent !important;
+}
+nav button:hover{
+  background:#171e29 !important;
+  border-color:#46546a !important;
+}
+nav button.active{
+  background:#26364b !important;
+  border-color:#516783 !important;
+  color:#fff !important;
+}
+
+/* Cartes, champs, tableaux */
+.card,
+.settings-block,
+.correction-participants-box,
+.record-card,
+.achievement-card,
+.history-game{
+  background:#141923 !important;
+  border-color:#2b3444 !important;
+}
+.card h2,
+.live-title,
+.home-kicker,
+.premium-eyebrow,
+.achievement-status,
+.record-card span{
+  color:#d6b676 !important;
+}
+input,select{
+  background:#0e131c !important;
+  border-color:#364153 !important;
+  color:#f3f5f8 !important;
+}
+input:focus,select:focus{
+  outline:2px solid rgba(200,161,92,.30) !important;
+  border-color:#8d7447 !important;
+}
+.tablewrap{border-color:#2b3444 !important}
+th{
+  background:#202b3b !important;
+  color:#f7f8fa !important;
+}
+td{border-bottom-color:#273140 !important}
+
+/* Boutons */
+.btn{background:var(--gold) !important;color:#17130d !important}
+.btn.secondary{background:#34455e !important;color:#fff !important}
+.btn.ghost{background:#242d3a !important;color:#fff !important}
+.btn.danger{background:#8f4545 !important;color:#fff !important}
+
+/* Héros / bandeaux */
+.hero,
+.home-hero,
+.premium-hero{
+  position:relative;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 86% 35%,rgba(200,161,92,.10),transparent 22%),
+    linear-gradient(135deg,#202d42,#121925 72%) !important;
+  border-color:#35445a !important;
+}
+.hero::after,
+.premium-hero::after{
+  content:"♠";
+  position:absolute;
+  right:28px;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:112px;
+  line-height:1;
+  color:rgba(255,255,255,.035);
+  pointer-events:none;
+  font-family:Georgia,serif;
+}
+.hero > *,
+.premium-hero > *{
+  position:relative;
+  z-index:1;
+}
+.hero p,.home-hero p,.premium-hero p{color:#c2cbd8 !important}
+
+/* Dashboard premium */
+.premium-panel{
+  background:#141923 !important;
+  border-color:#2c3545 !important;
+}
+.premium-hero-metric{
+  background:rgba(255,255,255,.045) !important;
+  border-color:rgba(255,255,255,.08) !important;
+}
+.premium-podium-card{
+  background:linear-gradient(180deg,#1c2330,#141923) !important;
+  border-color:#303a4a !important;
+}
+.premium-podium-card.rank-1{
+  background:linear-gradient(180deg,rgba(200,161,92,.16),#171a20) !important;
+  border-color:rgba(200,161,92,.30) !important;
+}
+.premium-story-icon{
+  background:#1c2431 !important;
+  border-color:#303a4a !important;
+}
+.premium-record-item{
+  background:#171d28 !important;
+  border-color:#2c3545 !important;
+}
+.premium-achievement-badge{
+  background:#1b2230 !important;
+  border-color:#303a4a !important;
+}
+
+/* Rang : conserver or / argent / bronze, sans fond vert */
+.rank1{background:rgba(160,126,49,.22) !important}
+.rank2{background:rgba(132,143,157,.15) !important}
+.rank3{background:rgba(133,84,54,.18) !important}
+
+/* Profil / Versus */
+.versus-player-card,
+.player-profile-card,
+.player-profile-hero{
+  background:#151b25 !important;
+  border-color:#2d3747 !important;
+}
+.versus-vs{color:#d6b676 !important}
+.versus-best{color:#7fb49a !important}
+
+/* Historique */
+.history-game summary{
+  background:#171d27 !important;
+}
+.history-game[open] summary{
+  background:#1d2532 !important;
+}
+.pill,.playerchip{
+  background:#202938 !important;
+  color:#d9e0e9 !important;
+}
+
+/* Accomplissements */
+.achievement-card{
+  background:linear-gradient(180deg,#171d27,#131821) !important;
+}
+.achievement-card.locked{
+  filter:saturate(.35);
+  opacity:.58;
+}
+.achievement-player{
+  background:#222b39 !important;
+  border-color:#354154 !important;
+}
+
+/* Paramètres */
+.settings-block > summary{
+  background:#171d27 !important;
+  color:#eef1f5 !important;
+}
+.settings-block > summary::after{color:#9ca9bb !important}
+.settings-subtitle{color:#d6b676 !important}
+
+/* Live : conserver l'identité poker, sans tapis vert */
+#liveManager .live-timer-card{
+  background:
+    radial-gradient(circle at 50% 0%,rgba(200,161,92,.08),transparent 35%),
+    linear-gradient(145deg,#111925,#1a2331) !important;
+  border-color:#35445a !important;
+}
+#liveManager .live-kpi{
+  background:#1a2230 !important;
+}
+#liveManager .live-player-list{
+  border-color:#2f3949 !important;
+}
+#liveManager .live-player-row{
+  border-bottom-color:#252e3c !important;
+}
+#liveManager .live-status{
+  background:#1c2532 !important;
+}
+#liveManager .winner{
+  background:rgba(160,126,49,.22) !important;
+}
+#liveManager .live-badge{
+  background:var(--gold) !important;
+  color:#17130d !important;
+}
+.live-display-shell{
+  background:
+    radial-gradient(circle at 50% 10%,rgba(200,161,92,.10),transparent 34%),
+    #090d13 !important;
+}
+
+/* Logo / symbolique poker : as de pique discret */
+.bpt-header .bpt-logo::after{
+  content:"A";
+  position:absolute;
+  font-family:Georgia,serif;
+  font-size:10px;
+  font-weight:900;
+  color:#c8a15c;
+  transform:translate(36px,-13px);
+  opacity:.95;
+}
+.bpt-logo{position:relative}
+
+/* Séparateurs et détails */
+.dashboard-section-divider,
+.dashboard-section-label{
+  color:#d0b174 !important;
+}
+.dashboard-section-divider::before,
+.dashboard-section-divider::after{
+  background:linear-gradient(90deg,transparent,rgba(200,161,92,.38)) !important;
+}
+.dashboard-section-divider::after{
+  background:linear-gradient(90deg,rgba(200,161,92,.38),transparent) !important;
+}
+.latestgame-detail{
+  border-color:#283241 !important;
+}
+.latestgame-detail summary::after{
+  color:#c8a15c !important;
+}
+.latest-achievement-pill{
+  background:#1c2532 !important;
+  border-color:#344155 !important;
+}
+.latest-kill-arrow{color:#c8a15c !important}
+
+/* Statut cloud */
+#cloudStatus{
+  background:#141b25 !important;
+  border-color:#344155 !important;
+}
+#cloudStatus.ok #cloudStatusDot{color:#7fb49a !important}
+
+/* Modales */
+.modalbox,.bpt-modal{
+  background:#141923 !important;
+  border-color:#354154 !important;
+}
+
+/* Petites touches poker sans surcharge */
+#ranking .hero h1::before,
+#records .hero h1::before,
+#achievements .hero h1::before,
+#profile .hero h1::before{
+  content:"♠ ";
+  color:#c8a15c;
 }
 </style>
 </head>
@@ -889,22 +2045,28 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
       <span>Gestion du championnat 2026-2027</span>
     </div>
   </div>
-  <div class="app-version">Version 13/09/26 15h10</div>
+  <div class="app-version">Version 13/09/26 16h02</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
   <button data-view="dashboard" class="active">▦ Tableau de bord</button>
+  <button data-view="latestgame">◷ Dernière partie</button>
   <button data-view="ranking">♛ Classement</button>
   <button data-view="versus">⚔ Versus</button>
   <button data-view="records">★ Records</button>
   <button data-view="achievements">◆ Accomplissements</button>
-  <button data-view="profile">♤ Profil</button>
+  <button data-view="profile">♤ Profil joueur</button>
   <button data-view="history">≡ Historique</button>
   <button data-view="settings">⚙ Paramètres</button>
 </nav>
 <main>
 
 <section id="live" class="view">
+  <div class="hero tab-premium-hero live-tab-hero">
+    <div class="home-kicker">BPT · Live</div>
+    <h1>Gestion de la partie en direct</h1>
+    <p>Préparez, lancez et suivez la partie jusqu’à son enregistrement dans le championnat.</p>
+  </div>
   <div id="liveManager">
     <div id="livePrepScreen" class="live-screen active">
       <div class="live-head">
@@ -1082,59 +2244,151 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
 </section>
 
 <section id="dashboard" class="view active">
-  <div class="dashboard-hero">
-    <div class="dashboard-hero-logo">
-      <svg viewBox="0 0 96 96" aria-hidden="true">
-        <circle cx="48" cy="48" r="44"></circle>
-        <path d="M48 17c-10 16-27 24-27 40 0 11 8 18 17 18 5 0 8-2 10-7-1 8-5 13-11 16h22c-6-3-10-8-11-16 3 5 6 7 11 7 9 0 17-7 17-18 0-16-18-24-28-40z"></path>
-      </svg>
-    </div>
-    <div>
-      <div class="home-kicker">BPT · Poker Championship</div>
+  <div class="premium-hero">
+    <div class="premium-hero-copy">
+      <div class="home-kicker">BPT · Tableau de bord</div>
       <h1>Championnat 2026–2027</h1>
       <p id="heroText"></p>
     </div>
-  </div>
-
-  <div class="dashboard-highlights">
-    <div class="home-highlight leader">
-      <span>Leader actuel</span>
-      <strong id="dashLeader">—</strong>
-      <small id="dashLeaderMeta">—</small>
-    </div>
-    <div class="home-highlight">
-      <span>Dernier vainqueur</span>
-      <strong id="dashLastWinner">—</strong>
-      <small id="dashLastWinnerMeta">—</small>
-    </div>
-    <div class="home-highlight">
-      <span>🔥 On Fire</span>
-      <strong id="dashOnFire">—</strong>
-      <small id="dashOnFireMeta">—</small>
+    <div class="premium-hero-metrics">
+      <div class="premium-hero-metric">
+        <span>Parties</span>
+        <strong id="heroGames">0</strong>
+      </div>
+      <div class="premium-hero-metric">
+        <span>Joueurs actifs</span>
+        <strong id="heroActivePlayers">0</strong>
+      </div>
     </div>
   </div>
 
-  <div class="grid" style="margin-top:12px">
-    <div class="kpi span3"><b id="kGames">0</b><span>Parties jouées</span></div>
-    <div class="kpi span3"><b id="kPlayers">0</b><span>Joueurs classés</span></div>
-    <div class="kpi span3"><b id="kRecord">0</b><span>Record participants</span></div>
-    <div class="kpi span3"><b id="kPot">0 €</b><span>Total des mises</span></div>
+  <div class="premium-main-grid">
+    <section class="premium-panel premium-podium-panel">
+      <div class="premium-panel-head">
+        <div>
+          <div class="premium-eyebrow">Podium actuel</div>
+          <h2>Le haut du classement</h2>
+        </div>
+        
+      </div>
+      <div id="dashPodium" class="premium-podium"></div>
+    </section>
 
-    <div class="card span6 dashboard-light-card">
-      <h2>Dernière partie</h2>
-      <div id="lastGame"></div>
+    <section class="premium-panel premium-story-panel">
+      <div class="premium-panel-head solo">
+        <div>
+          <div class="premium-eyebrow">À retenir</div>
+          <h2>Temps forts</h2>
+        </div>
+      </div>
+      <div class="premium-story-list">
+        <div class="premium-story-item">
+          <div class="premium-story-icon">★</div>
+          <div>
+            <span>Dernier vainqueur</span>
+            <strong id="dashLastWinner">—</strong>
+            <small id="dashLastWinnerMeta">—</small>
+          </div>
+        </div>
+        <div class="premium-story-item">
+          <div class="premium-story-icon">🔥</div>
+          <div>
+            <span>On Fire</span>
+            <strong id="dashOnFire">—</strong>
+            <small id="dashOnFireMeta">—</small>
+          </div>
+        </div>
+        <div class="premium-story-item actionable" onclick="showView('latestgame')">
+          <div class="premium-story-icon">◷</div>
+          <div>
+            <span>Dernière partie</span>
+            <strong id="dashLatestGameLabel">—</strong>
+            <small id="dashLatestGameTeaser">—</small>
+          </div>
+          <button class="ghost-btn" type="button">Voir</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="premium-bottom-grid">
+    <section class="premium-panel">
+      <div class="premium-panel-head solo">
+        <div>
+          <div class="premium-eyebrow">Repères</div>
+          <h2>Records express</h2>
+        </div>
+      </div>
+      <div id="dashQuickRecords" class="premium-records-list"></div>
+    </section>
+
+    <section class="premium-panel">
+      <div class="premium-panel-head">
+        <div>
+          <div class="premium-eyebrow">Dernière partie</div>
+          <h2>Accomplissements débloqués</h2>
+        </div>
+        <div class="premium-panel-note">Regroupés par joueur</div>
+      </div>
+      <div id="dashLatestAchievements" class="premium-achievements-list"></div>
+    </section>
+  </div>
+</section>
+
+
+<section id="latestgame" class="view">
+  <div class="hero latestgame-hero tab-premium-hero">
+    <div>
+      <div class="home-kicker">BPT · Dernière partie</div>
+      <h1 id="latestGameTitle">Dernière partie</h1>
+      <p id="latestGameMeta">Aucune partie enregistrée.</p>
+    </div>
+    <div class="latestgame-winner">
+      <span>Vainqueur</span>
+      <strong id="latestGameWinner">—</strong>
+      <small id="latestGameWinnerMeta">—</small>
+    </div>
+  </div>
+
+  <div id="latestGameEmpty" class="card muted" style="display:none;margin-top:12px">
+    Aucune partie enregistrée.
+  </div>
+
+  <div id="latestGameContent" style="display:none">
+    <div class="latestgame-summary-line" id="latestGameSummary"></div>
+
+    <div class="latestgame-podium-wrap">
+      <div class="dashboard-section-label">Podium de la partie</div>
+      <div id="latestGamePodium" class="podium-medals"></div>
     </div>
 
-    <div class="card span6 dashboard-light-card">
-      <h2>Accomplissements débloqués lors de la dernière partie</h2>
-      <div id="lastGameAchievements" class="last-game-achievements"></div>
+    <div class="latestgame-details">
+      <details class="latestgame-detail" open>
+        <summary>
+          <span>Résultat complet</span>
+          <small>Classement, points, kills et gains</small>
+        </summary>
+        <div class="latestgame-detail-body">
+          <div id="latestGameResults" class="tablewrap"></div>
+        </div>
+      </details>
+
+      <details class="latestgame-detail" open>
+        <summary>
+          <span>Accomplissements débloqués</span>
+          <small>Regroupés par joueur</small>
+        </summary>
+        <div class="latestgame-detail-body">
+          <div id="latestGameAchievementsByPlayer"></div>
+        </div>
+      </details>
     </div>
   </div>
 </section>
 
 <section id="ranking" class="view">
-  <div class="hero"><h1>Classement détaillé du championnat BPT</h1><p>Classement général et statistiques individuelles.</p></div>
-  <div class="card" style="margin-top:12px">
+  <div class="hero tab-premium-hero"><h1>Classement détaillé du championnat BPT</h1><p>Classement général et statistiques individuelles.</p></div>
+  <div class="card tab-primary-panel" style="margin-top:16px">
     <h2>Classement général détaillé</h2>
     <div class="tablewrap"><table>
       <thead><tr>
@@ -1148,12 +2402,12 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
 </section>
 
 <section id="versus" class="view">
-  <div class="hero">
+  <div class="hero tab-premium-hero">
     <h1>Versus</h1>
     <p>Comparez les performances individuelles de deux joueurs du BPT sur les principaux indicateurs du championnat.</p>
   </div>
 
-  <div class="card" style="margin-top:12px">
+  <div class="card tab-primary-panel" style="margin-top:16px">
     <div class="versus-selectors">
       <div class="field">
         <label>Joueur 1</label>
@@ -1207,7 +2461,7 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
 
 
 <section id="achievements" class="view">
-  <div class="hero">
+  <div class="hero tab-premium-hero">
     <h1>Accomplissements BPT</h1>
     <p>Les performances spéciales débloquées au fil du championnat.</p>
   </div>
@@ -1221,7 +2475,12 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
 </section>
 
 <section id="history" class="view">
-  <div class="card">
+  <div class="hero tab-premium-hero">
+    <div class="home-kicker">BPT · Historique</div>
+    <h1>Historique des parties</h1>
+    <p>Retrouvez les parties jouées, leurs résultats et le détail complet du championnat.</p>
+  </div>
+  <div class="card tab-primary-panel">
     <div class="row" style="justify-content:space-between">
       <div>
         <h2>Historique des parties</h2>
@@ -1245,12 +2504,12 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
 
 
 <section id="records" class="view">
-  <div class="hero"><h1>Records BPT</h1><p>Les performances marquantes du championnat.</p></div>
+  <div class="hero tab-premium-hero"><h1>Records BPT</h1><p>Les performances marquantes du championnat.</p></div>
   <div id="recordsGrid" class="records-grid" style="margin-top:12px"></div>
 </section>
 
 <section id="profile" class="view">
-  <div class="hero">
+  <div class="hero tab-premium-hero">
     <div class="profile-topbar">
       <div>
         <h1>Profil joueur</h1>
@@ -1267,7 +2526,7 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
     <button class="btn secondary" id="playerProfileVersusBtn">Comparer dans Versus</button>
   </div>
 
-  <div class="hero player-profile-hero profile-identity">
+  <div class="hero player-profile-hero profile-identity premium-profile-identity">
     <div>
       <div class="muted">Fiche joueur BPT</div>
       <h1 id="playerProfileName">—</h1>
@@ -1313,7 +2572,12 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
   </div>
 </section>
 <section id="settings" class="view">
-  <div id="settingsLock" class="card" style="max-width:520px;margin:20px auto">
+  <div class="hero tab-premium-hero">
+    <div class="home-kicker">BPT · Administration</div>
+    <h1>Paramètres du championnat</h1>
+    <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
+  </div>
+  <div id="settingsLock" class="card tab-primary-panel" style="max-width:520px;margin:20px auto">
     <h2>Paramètres protégés</h2>
     <p class="muted">Saisissez le mot de passe pour accéder aux paramètres du championnat.</p>
     <div class="field"><label>Mot de passe</label><input id="settingsPassword" type="password" inputmode="numeric" placeholder="••••"></div>
@@ -1728,6 +2992,7 @@ async function refreshCanonicalHistoryUI(showBusy=true){
     // IMPORTANT : les deux écrans sont recalculés dans le même passage,
     // à partir du même snapshot de l'historique serveur.
     renderDashboard();
+    renderLatestGame();
     renderRanking();
     renderVersus();
     renderRecords();
@@ -2941,23 +4206,23 @@ function latestGameUnlockedAchievements(){
   const before=achievementPlayers(previousRows);
   const after=achievementPlayers(history);
   const beforeMap=new Map(before.map(a=>[a.name,new Set(a.players)]));
-
   const latestPlayers=new Set(latestRows.map(r=>String(r.player||"")).filter(Boolean));
+
   const unlocked=[];
 
   for(const a of after){
-    if(a.dynamic)continue; // On Fire est dynamique, pas un accomplissement permanent "débloqué".
+    if(a.dynamic)continue;
     const prev=beforeMap.get(a.name)||new Set();
-    for(const player of a.players){
-      if(latestPlayers.has(player) && !prev.has(player)){
-        unlocked.push({
-          icon:a.icon,
-          name:a.name,
-          desc:a.desc,
-          player,
-          game:latestGame
-        });
-      }
+    const players=a.players.filter(player=>latestPlayers.has(player) && !prev.has(player));
+
+    if(players.length){
+      unlocked.push({
+        icon:a.icon,
+        name:a.name,
+        desc:a.desc,
+        players,
+        game:latestGame
+      });
     }
   }
 
@@ -2988,13 +4253,14 @@ function renderAchievements(){
 
 function renderAll(){
   normalizeHistoryGameNumbers();
-  renderDashboard();renderRanking();renderVersus();renderRecords();renderAchievements();renderProfile();renderHistory();renderPlayers();renderGamePlayers();renderSettings();renderPoints();if(correctionUnlocked)renderCorrectionGameList(null,false);if(document.getElementById("livePlayerList"))liveRenderPlayerList();
+  renderDashboard();renderLatestGame();renderRanking();renderVersus();renderRecords();renderAchievements();renderProfile();renderHistory();renderPlayers();renderGamePlayers();renderSettings();renderPoints();if(correctionUnlocked)renderCorrectionGameList(null,false);if(document.getElementById("livePlayerList"))liveRenderPlayerList();
 }
 
 function renderDashboard(){
   const games=groupedGames();
   const rank=ranking();
-  const classified=stats(false).filter(s=>s.gamesCount>0);
+  const playerStats=stats(false).filter(s=>s.gamesCount>0);
+  const activePlayers=db.players.filter(p=>p.active);
 
   const totalGames=new Set(
     (Array.isArray(db.history)?db.history:[])
@@ -3002,81 +4268,167 @@ function renderDashboard(){
       .filter(n=>Number.isFinite(n) && n>0)
   ).size;
 
-  $("heroText").textContent=`${db.settings.season} • ${db.players.filter(p=>p.active).length} joueurs actifs • Mise par défaut ${euro(db.settings.stake)}`;
+  $("heroText").textContent=`${db.settings.season} · ${activePlayers.length} joueurs actifs · championnat partagé`;
+  $("heroGames").textContent=totalGames;
+  $("heroActivePlayers").textContent=activePlayers.length;
 
-  const leader=rank[0];
-  if($("dashLeader")){
-    $("dashLeader").textContent=leader?.name||"—";
-    $("dashLeaderMeta").textContent=leader?`${num(leader.points,0)} pts · ${leader.gamesCount} partie${leader.gamesCount>1?"s":""}`:"Aucun classement";
-  }
 
-  const lastGameRows=games.length?games[games.length-1][1].slice().sort((a,b)=>Number(a.place)-Number(b.place)):[];
-  const lastWinner=lastGameRows.find(r=>Number(r.place)===1);
-  if($("dashLastWinner")){
-    $("dashLastWinner").textContent=lastWinner?.player||"—";
-    $("dashLastWinnerMeta").textContent=lastWinner
-      ? `${shortDate(lastWinner.date)}${lastWinner.location?" · "+lastWinner.location:""} · ${num(lastWinner.points,0)} pts`
-      : "Aucune partie";
-  }
+  const lastGroupedGame=games.length?games[games.length-1][1].slice().sort((a,b)=>Number(a.place)-Number(b.place)):[];
+  const lastWinner=lastGroupedGame.find(r=>Number(r.place)===1);
+  $("dashLastWinner").textContent=lastWinner?.player||"—";
+  $("dashLastWinnerMeta").textContent=lastWinner
+    ? `${shortDate(lastWinner.date)}${lastWinner.location?" · "+lastWinner.location:""}`
+    : "Aucune partie";
 
   const allAchievements=achievementPlayers();
   const onFire=allAchievements.find(a=>a.name==="On Fire");
-  if($("dashOnFire")){
-    $("dashOnFire").textContent=onFire?.players?.length?onFire.players.join(", "):"—";
-    $("dashOnFireMeta").textContent=onFire?.players?.length
-      ? "Meilleur total de points sur les 3 dernières parties"
-      : "Pas encore disponible";
+  $("dashOnFire").textContent=onFire?.players?.length?onFire.players.join(", "):"—";
+  $("dashOnFireMeta").textContent=onFire?.players?.length
+    ? "Meilleur total de points sur les 3 dernières parties"
+    : "Pas encore disponible";
+
+  const podium=rank.slice(0,3);
+  $("dashPodium").innerHTML=podium.length ? podium.map((p,i)=>`
+    <div class="premium-podium-card rank-${i+1}">
+      <div class="premium-podium-medal">${medalForRank(i+1)}</div>
+      <div class="premium-podium-rank">${i+1}</div>
+      <button class="player-link premium-podium-name" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(p.name)}'))">${esc(p.name)}</button>
+      <div class="premium-podium-points">${num(p.points,0)} pts</div>
+    </div>`).join("")
+    : '<div class="muted" style="padding:18px 0">Le podium apparaîtra après la première partie classée.</div>';
+
+
+  if(games.length){
+    const [gameNo,rows]=games[games.length-1];
+    const sorted=rows.slice().sort((a,b)=>Number(a.place)-Number(b.place));
+    const winner=sorted.find(r=>Number(r.place)===1);
+    $("dashLatestGameLabel").textContent=`Partie #${gameNo}`;
+    $("dashLatestGameTeaser").textContent=`${shortDate(sorted[0]?.date||"")}${sorted[0]?.location?` · ${sorted[0].location}`:''} · ${winner?.player||'—'}`;
+  }else{
+    $("dashLatestGameLabel").textContent="Aucune partie";
+    $("dashLatestGameTeaser").textContent="Le résumé apparaîtra ici.";
   }
 
-  if($("lastGameAchievements")){
-    const unlocked=latestGameUnlockedAchievements();
-    $("lastGameAchievements").innerHTML=unlocked.length
-      ? unlocked.map(a=>`<div class="last-game-achievement"><span class="ico">${a.icon}</span><div><b>${esc(a.player)} — ${esc(a.name)}</b><span>${esc(a.desc)}</span></div></div>`).join("")
-      : '<span class="muted">Aucun nouvel accomplissement débloqué lors de la dernière partie.</span>';
-  }
-  $("kGames").textContent=totalGames;
-  $("kPlayers").textContent=rank.length;
-  $("kRecord").textContent=games.length?Math.max(...games.map(g=>g[1].length)):0;
-  $("kPot").textContent=euro(db.history.reduce((a,r)=>a+Number(r.stake||0),0));
-
-  const best3=(fn)=>[...classified].sort((a,b)=>fn(b)-fn(a)||b.points-a.points||a.name.localeCompare(b.name,"fr")).slice(0,3);
-  const worst3=(fn)=>[...classified].sort((a,b)=>fn(a)-fn(b)||a.points-b.points||a.name.localeCompare(b.name,"fr")).slice(0,3);
-
-  const criteria=[
-    {label:"Moyenne de points", fn:s=>s.avgPoints, fmt:v=>num(v,1)},
-    {label:"Solde net", fn:s=>s.net, fmt:v=>euro(v)},
-    {label:"Nombre de kills", fn:s=>s.kills, fmt:v=>num(v,0)},
-    {label:"Kills / partie", fn:s=>s.kpg, fmt:v=>num(v,2)},
-    {label:"Taux de victoire", fn:s=>s.winRate, fmt:v=>num(v,1)+" %"},
-    {label:"Taux de podium", fn:s=>s.podiumRate, fmt:v=>num(v,1)+" %"}
+  const maxBy=(arr,fn)=>arr.length?[...arr].sort((a,b)=>fn(b)-fn(a)||Number(b.points||0)-Number(a.points||0)||a.name.localeCompare(b.name,'fr'))[0]:null;
+  const mostWins=maxBy(playerStats,s=>Number(s.wins||0));
+  const mostKills=maxBy(playerStats,s=>Number(s.kills||0));
+  const bestAvg=maxBy(playerStats,s=>Number(s.avgPoints||0));
+  const bestNet=maxBy(playerStats,s=>Number(s.net||0));
+  const participantRecord=games.length?Math.max(...games.map(g=>g[1].length)):0;
+  const records=[
+    {icon:'🏆', label:'Plus de victoires', player:mostWins?.name||'—', value:mostWins?`${mostWins.wins}`:'—'},
+    {icon:'🎯', label:'Plus de kills', player:mostKills?.name||'—', value:mostKills?`${mostKills.kills}`:'—'},
+    {icon:'📈', label:'Meilleure moyenne', player:bestAvg?.name||'—', value:bestAvg?num(mostAvgFix(bestAvg.avgPoints),2):'—'},
+    {icon:'💰', label:'Meilleur solde', player:bestNet?.name||'—', value:bestNet?euro(bestNet.net):'—'},
+    {icon:'👥', label:'Record de participants', player:games.length?'Championnat':'—', value:participantRecord?`${participantRecord}`:'—'}
   ];
+  $("dashQuickRecords").innerHTML=records.map(r=>`
+    <div class="premium-record-item">
+      <div class="premium-record-icon">${r.icon}</div>
+      <div class="premium-record-copy">
+        <span>${esc(r.label)}</span>
+        <strong>${esc(r.player)}</strong>
+      </div>
+      <b>${esc(r.value)}</b>
+    </div>`).join('');
 
-  $("dashCompareTable").innerHTML=`<div class="tablewrap"><table class="dash-compare">
-    <thead><tr><th>Top 3</th><th>Critère</th><th>Flop 3</th></tr></thead>
-    <tbody>${criteria.map(c=>`<tr>
-      <td>${dashRankList(best3(c.fn),c.fn,c.fmt)}</td>
-      <td class="dash-criterion"><strong>${c.label}</strong></td>
-      <td>${dashRankList(worst3(c.fn),c.fn,c.fmt)}</td>
-    </tr>`).join("")}</tbody>
-  </table></div>`;
+  const unlocked=latestGameUnlockedAchievements();
+  const byPlayer=new Map();
+  for(const a of unlocked){
+    for(const player of a.players){
+      if(!byPlayer.has(player))byPlayer.set(player,[]);
+      byPlayer.get(player).push(a);
+    }
+  }
+  $("dashLatestAchievements").innerHTML=byPlayer.size
+    ? [...byPlayer.entries()].sort((a,b)=>a[0].localeCompare(b[0],'fr')).map(([player,items])=>`
+      <div class="premium-achievement-player">
+        <button class="player-link premium-achievement-name" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(player)}'))">${esc(player)}</button>
+        <div class="premium-achievement-badges">${items.map(a=>`<span class="premium-achievement-badge" title="${esc(a.desc)}">${a.icon} ${esc(a.name)}</span>`).join('')}</div>
+      </div>`).join('')
+    : '<div class="muted">Aucun accomplissement débloqué sur la dernière partie.</div>';
+}
 
+function mostAvgFix(v){ return Number.isFinite(Number(v)) ? Number(v) : 0; }
+
+function renderLatestGame(){
+  const games=groupedGames();
+  const empty=$("latestGameEmpty");
+  const content=$("latestGameContent");
+  if(!empty || !content)return;
 
   if(!games.length){
-    $("lastGame").innerHTML='<span class="muted">Aucune partie.</span>';
+    empty.style.display="block";
+    content.style.display="none";
+    $("latestGameTitle").textContent="Dernière partie";
+    $("latestGameMeta").textContent="Aucune partie enregistrée.";
+    $("latestGameWinner").textContent="—";
+    $("latestGameWinnerMeta").textContent="—";
     return;
   }
 
-  const [gno,rows]=games[games.length-1];
-  const win=rows.find(r=>Number(r.place)===1);
-  $("lastGame").innerHTML=`<div class="lastgame-inline">
-    <div class="lastgame-item"><span class="muted">Partie</span><strong>#${gno}</strong></div>
-    <div class="lastgame-item"><span class="muted">Date</span><strong>${esc(rows[0].date||"")}</strong></div>
-    <div class="lastgame-item"><span class="muted">Lieu</span><strong>${esc(rows[0].location||"—")}</strong></div>
-    <div class="lastgame-item"><span class="muted">Participants</span><strong>${rows.length} joueurs</strong></div>
-    <div class="lastgame-item"><span class="muted">Vainqueur</span><strong>${esc(win?.player||"")}</strong></div>
-    <div class="lastgame-item"><span class="muted">Points gagnés</span><strong>${num(win?.points||0,0)}</strong></div>
-  </div>`;
+  empty.style.display="none";
+  content.style.display="block";
+
+  const [gameNo,gameRows]=games[games.length-1];
+  const rows=gameRows.slice().sort((a,b)=>Number(a.place)-Number(b.place));
+  const first=rows[0]||{};
+  const winner=rows.find(r=>Number(r.place)===1);
+  const pot=rows.length*Number(first.stake||0);
+
+  $("latestGameTitle").textContent=`Partie #${gameNo}`;
+  $("latestGameMeta").textContent=`${shortDate(first.date||"")}${first.location?" · "+first.location:""} · ${rows.length} joueurs`;
+  $("latestGameWinner").textContent=winner?.player||"—";
+  $("latestGameWinnerMeta").textContent=winner?`${num(winner.points||0,0)} pts · ${euro(winner.gross||0)} de gain`:"—";
+
+  $("latestGameSummary").innerHTML=[
+    ["Date",shortDate(first.date||"")],
+    ["Lieu",first.location||"—"],
+    ["Participants",`${rows.length}`],
+    ["Cagnotte",euro(pot)]
+  ].map(([label,value])=>`<div class="latestgame-summary-item"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join("");
+
+  $("latestGamePodium").innerHTML=rows.slice(0,3).map((r,i)=>`
+    <div class="podium-medal-item rank-${i+1}">
+      <div class="medal-badge">${medalForRank(i+1)}</div>
+      <button class="player-link" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(r.player)}</button>
+      <small>${num(r.points||0,0)} pts · ${euro(r.gross||0)}</small>
+    </div>`).join("");
+
+  $("latestGameResults").innerHTML=`<table>
+    <thead><tr><th>Place</th><th>Joueur</th><th>Points</th><th>Kills</th><th>Éliminé par</th><th>Gain</th><th>Net</th></tr></thead>
+    <tbody>${rows.map(r=>`<tr>
+      <td>${r.place}</td>
+      <td><button class="player-link" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(r.player)}</button></td>
+      <td>${num(r.points||0,0)}</td>
+      <td>${num(r.kills||0,0)}</td>
+      <td>${esc(r.killer||"—")}</td>
+      <td>${euro(r.gross||0)}</td>
+      <td>${euro(r.net||0)}</td>
+    </tr>`).join("")}</tbody>
+  </table>`;
+
+  const unlocked=latestGameUnlockedAchievements();
+  const byPlayer=new Map();
+  for(const a of unlocked){
+    for(const player of a.players){
+      if(!byPlayer.has(player))byPlayer.set(player,[]);
+      byPlayer.get(player).push(a);
+    }
+  }
+
+  $("latestGameAchievementsByPlayer").innerHTML=byPlayer.size
+    ? [...byPlayer.entries()]
+        .sort((a,b)=>a[0].localeCompare(b[0],"fr"))
+        .map(([player,items])=>`<div class="latest-achievement-player">
+          <button class="player-link latest-achievement-player-name" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(player)}'))">${esc(player)}</button>
+          <div class="latest-achievement-list">
+            ${items.map(a=>`<span class="latest-achievement-pill" title="${esc(a.desc)}">${a.icon} ${esc(a.name)}</span>`).join("")}
+          </div>
+        </div>`).join("")
+    : '<span class="muted">Aucun nouvel accomplissement débloqué lors de cette partie.</span>';
 }
+
 function renderRanking(){
   const ks=killerStats();
   $("rankingBody").innerHTML=ranking().map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}">
@@ -5250,10 +6602,11 @@ async function showView(id){
   document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===id));
 
-  if((id==="dashboard" || id==="ranking" || id==="versus" || id==="records" || id==="achievements" || id==="profile" || id==="history") && cloudReady && sbClient){
+  if((id==="dashboard" || id==="latestgame" || id==="ranking" || id==="versus" || id==="records" || id==="achievements" || id==="profile" || id==="history") && cloudReady && sbClient){
     await refreshCanonicalHistoryUI(true);
   }else{
     if(id==="dashboard")renderDashboard();
+    if(id==="latestgame")renderLatestGame();
     if(id==="ranking")renderRanking();
     if(id==="versus")renderVersus();
     if(id==="records")renderRecords();
