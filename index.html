@@ -452,7 +452,7 @@ header .app-version{
 <body>
 <header>
   <div class="brand"><b>BPT — Championnat de poker</b><span>Gestion complète du championnat 2026-2027</span></div>
-  <div class="app-version">Version 13/09/26 09h34</div>
+  <div class="app-version">Version 13/09/26 09h40</div>
 </header>
 <nav id="nav">
   <button data-view="live">Live</button>
@@ -552,7 +552,7 @@ header .app-version{
             <button class="btn ghost" id="livePrevLevelBtn">Niveau précédent</button>
             <button class="btn ghost" id="liveNextLevelBtn">Niveau suivant</button>
           </div>
-          <div id="liveSoundStatus" class="muted" style="margin-top:8px">🔊 Alertes sonores : annonce « 30 secondes » à 30 s, 3 bips à 10 s, puis annonce vocale du type « Nouveau niveau 300 600 ».</div>
+          <div id="liveSoundStatus" class="muted" style="margin-top:8px">🔊 Alertes sonores : annonce « 30 secondes » à 30 s, 3 bips à 10 s, puis annonce vocale distincte des deux blinds.</div>
         </div>
 
         <div class="card">
@@ -2746,9 +2746,12 @@ function liveSpeakBlinds(){
 
     window.speechSynthesis.cancel();
 
-    let msg=`Nouveau niveau ${liveFmt(level.sb)} ${liveFmt(level.bb)}.`;
+    const sb=Math.round(Number(level.sb)||0);
+    const bb=Math.round(Number(level.bb)||0);
+    let msg=`Nouveau niveau. ${sb}. ${bb}.`;
     if(Number(level.ante)>0){
-      msg+=` Ante ${liveFmt(level.ante)}.`;
+      const ante=Math.round(Number(level.ante)||0);
+      msg+=` Ante ${ante}.`;
     }
 
     const u=new SpeechSynthesisUtterance(msg);
