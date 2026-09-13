@@ -267,21 +267,115 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
   border-color:#0099B2;
 }
 
+
+.settings-block{
+  margin:12px 0 14px 0;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:16px;
+  background:rgba(255,255,255,.025);
+  overflow:hidden;
+}
+.settings-block > summary{
+  list-style:none;
+  cursor:pointer;
+  padding:14px 18px;
+  font-weight:800;
+  font-size:18px;
+  color:#f1f5fb;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:rgba(255,255,255,.03);
+  user-select:none;
+}
+.settings-block > summary::-webkit-details-marker{display:none}
+.settings-block > summary::after{
+  content:"▾";
+  font-size:18px;
+  color:#9fb3c8;
+  transition:transform .15s ease;
+}
+.settings-block[open] > summary::after{
+  transform:rotate(180deg);
+}
+.settings-block-content{
+  padding:14px 14px 10px 14px;
+}
+
+.versus-selectors{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+  gap:16px;
+  align-items:end;
+}
+.versus-vs{
+  align-self:center;
+  justify-self:center;
+  font-size:26px;
+  font-weight:900;
+  letter-spacing:.08em;
+  color:#e8c39e;
+  padding:0 4px 8px;
+}
+.versus-headcards{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:12px;
+}
+.versus-player-card{
+  text-align:center;
+}
+.versus-player-name{
+  font-size:24px;
+  font-weight:900;
+  margin-top:3px;
+}
+.versus-player-rank{
+  margin-top:6px;
+  color:#9fb3c8;
+  font-weight:700;
+}
+.versus-table{
+  table-layout:fixed;
+  width:100%;
+}
+.versus-table th:nth-child(1),
+.versus-table td:nth-child(1){width:34%;text-align:center}
+.versus-table th:nth-child(2),
+.versus-table td:nth-child(2){width:32%;text-align:center}
+.versus-table th:nth-child(3),
+.versus-table td:nth-child(3){width:34%;text-align:center}
+.versus-value{
+  font-size:18px;
+  font-weight:800;
+}
+.versus-best{
+  color:#7CC36B;
+}
+.versus-equal{
+  color:#dce7f4;
+}
+.versus-criterion{
+  font-weight:800;
+  color:#dce7f4;
+}
+@media(max-width:760px){
+  .versus-selectors{grid-template-columns:1fr}
+  .versus-vs{padding:0;align-self:center}
+  .versus-headcards{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 <header>
   <div class="brand"><b>BPT — Championnat de poker</b><span>Gestion complète du championnat 2026-2027</span></div>
-  <div class="row">
-    <button class="btn ghost" id="backupBtn">Sauvegarder JSON</button>
-    <label class="btn ghost" style="cursor:pointer">Restaurer JSON<input id="restoreInput" type="file" accept=".json" hidden></label>
-  </div>
 </header>
 <nav id="nav">
   <button data-view="live">Live</button>
-  <button data-view="newgame">Nouvelle partie</button>
   <button data-view="dashboard" class="active">Tableau de bord</button>
   <button data-view="ranking">Classement</button>
+  <button data-view="versus">Versus</button>
   <button data-view="history">Historique</button>
   <button data-view="settings">Paramètres</button>
 </nav>
@@ -421,30 +515,6 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
   </div>
 </section>
 
-<section id="newgame" class="view">
-  <div class="grid">
-    <div class="card span4">
-      <h2>Nouvelle partie</h2>
-      <div class="field"><label>Date</label><input id="gDate" type="date"></div>
-      <div class="field"><label>Lieu</label><input id="gLocation" placeholder="Lieu"></div>
-      <div class="field"><label>Mise / joueur</label><input id="gStake" type="number" min="0" step="1"></div><div class="muted">Gains BPT : 1er 60 % • 2e 30 % • 3e 10 % — ajustés aux 5 € les plus proches</div>
-      <div class="muted">Sélectionnez les joueurs actifs participant à la partie.</div>
-      <div id="gamePlayerChecks" style="margin-top:8px;max-height:340px;overflow:auto"></div>
-      <div class="row" style="margin-top:10px">
-        <input id="gameNewPlayer" placeholder="Nouveau joueur" style="flex:1">
-        <button class="btn secondary" id="gameAddPlayerBtn">Ajouter et sélectionner</button>
-      </div>
-      <div class="muted" style="margin-top:5px">Le joueur ajouté devient automatiquement actif dans le championnat.</div>
-      <button class="btn secondary" id="buildGameBtn" style="width:100%;margin-top:10px">Préparer le classement</button>
-    </div>
-    <div class="card span8">
-      <h2>Saisie du classement</h2>
-      <div id="gameEntryEmpty" class="muted">Sélectionnez au moins 2 joueurs puis cliquez sur « Préparer le classement ».</div>
-      <div id="gameEntry"></div>
-    </div>
-  </div>
-</section>
-
 <section id="dashboard" class="view active">
   <div class="hero"><h1>Tableau de bord BPT</h1><p id="heroText"></p></div>
 
@@ -496,6 +566,64 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
     </table></div>
   </div>
 </section>
+
+<section id="versus" class="view">
+  <div class="hero">
+    <h1>Versus</h1>
+    <p>Comparez les performances individuelles de deux joueurs du BPT sur les principaux indicateurs du championnat.</p>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="versus-selectors">
+      <div class="field">
+        <label>Joueur 1</label>
+        <select id="versusPlayer1"></select>
+      </div>
+      <div class="versus-vs">VS</div>
+      <div class="field">
+        <label>Joueur 2</label>
+        <select id="versusPlayer2"></select>
+      </div>
+    </div>
+  </div>
+
+  <div id="versusEmpty" class="card muted" style="display:none;margin-top:12px">
+    Sélectionnez deux joueurs différents disposant d’un historique.
+  </div>
+
+  <div id="versusContent" style="display:none">
+    <div class="versus-headcards">
+      <div class="card versus-player-card">
+        <div class="muted">Joueur 1</div>
+        <div class="versus-player-name" id="versusName1">—</div>
+        <div class="versus-player-rank" id="versusRank1">—</div>
+      </div>
+      <div class="card versus-player-card">
+        <div class="muted">Joueur 2</div>
+        <div class="versus-player-name" id="versusName2">—</div>
+        <div class="versus-player-rank" id="versusRank2">—</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h2>Comparaison des performances</h2>
+      <div class="tablewrap">
+        <table class="versus-table">
+          <thead>
+            <tr>
+              <th id="versusHeader1">Joueur 1</th>
+              <th>Critère</th>
+              <th id="versusHeader2">Joueur 2</th>
+            </tr>
+          </thead>
+          <tbody id="versusBody"></tbody>
+        </table>
+      </div>
+      <div class="muted" style="margin-top:10px">La meilleure valeur de chaque critère est mise en évidence. Les parties communes correspondent aux parties auxquelles les deux joueurs ont participé. Les éliminations directes comptent uniquement lorsqu’un joueur a éliminé l’autre.</div>
+    </div>
+  </div>
+</section>
+
 <section id="history" class="view">
   <div class="card">
     <div class="row" style="justify-content:space-between">
@@ -524,8 +652,38 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
     <div id="settingsPasswordError" class="bad" style="margin-top:8px"></div>
   </div>
   <div id="settingsProtectedContent" style="display:none">
+  <details class="settings-block" open>
+    <summary>Nouvelle partie</summary>
+    <div class="settings-block-content">
+      <div class="muted" style="margin:0 0 12px 2px">Utilisez ce module pour saisir manuellement une partie terminée. Pour une partie en cours, utilisez l’onglet Live.</div>
+<div class="grid" style="margin:12px 0">
+    <div class="card span4">
+      <h2>Nouvelle partie manuelle</h2>
+      <div class="field"><label>Date</label><input id="gDate" type="date"></div>
+      <div class="field"><label>Lieu</label><input id="gLocation" placeholder="Lieu"></div>
+      <div class="field"><label>Mise / joueur</label><input id="gStake" type="number" min="0" step="1"></div><div class="muted">Gains BPT : 1er 60 % • 2e 30 % • 3e 10 % — ajustés aux 5 € les plus proches</div>
+      <div class="muted">Sélectionnez les joueurs actifs participant à la partie.</div>
+      <div id="gamePlayerChecks" style="margin-top:8px;max-height:340px;overflow:auto"></div>
+      <div class="row" style="margin-top:10px">
+        <input id="gameNewPlayer" placeholder="Nouveau joueur" style="flex:1">
+        <button class="btn secondary" id="gameAddPlayerBtn">Ajouter et sélectionner</button>
+      </div>
+      <div class="muted" style="margin-top:5px">Le joueur ajouté devient automatiquement actif dans le championnat.</div>
+      <button class="btn secondary" id="buildGameBtn" style="width:100%;margin-top:10px">Préparer le classement</button>
+    </div>
+    <div class="card span8">
+      <h2>Saisie du classement</h2>
+      <div id="gameEntryEmpty" class="muted">Sélectionnez au moins 2 joueurs puis cliquez sur « Préparer le classement ».</div>
+      <div id="gameEntry"></div>
+    </div>
+  </div>
+    </div>
+  </details>
 
-  <div class="grid" style="margin-bottom:12px">
+  <details class="settings-block">
+    <summary>Gestion des joueurs</summary>
+    <div class="settings-block-content">
+      <div class="grid" style="margin-bottom:12px">
     <div class="card span12">
       <h2>Gestion des joueurs</h2>
       <div class="muted" style="margin-bottom:12px">Ajoutez et gérez les joueurs du championnat. Le nom se modifie directement dans la liste. Le bouton Actif/Inactif permet de masquer un joueur des nouvelles parties. Le bouton Supprimer reste disponible : s’il possède des participations dans l’historique, un message indique que la suppression est interdite.</div>
@@ -539,14 +697,14 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
       <div id="playersAdmin"></div>
     </div>
   </div>
-
-  <div class="grid" style="margin:12px 0">
-    <div class="card span12">
-      <h2>Correction des parties</h2>
-      <div class="muted">Zone protégée permettant de corriger ou de supprimer la dernière partie enregistrée.</div>
     </div>
-  </div>
-  <div id="correctionPanel">
+  </details>
+
+  <details class="settings-block">
+    <summary>Correction des parties</summary>
+    <div class="settings-block-content">
+      <div class="muted" style="margin:0 0 12px 2px">Zone permettant de corriger ou de supprimer la dernière partie enregistrée.</div>
+<div id="correctionPanel">
     <div class="grid">
       <div class="card span4">
         <h2>Parties enregistrées</h2>
@@ -588,8 +746,13 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
       </div>
     </div>
   </div>
+    </div>
+  </details>
 
-  <div class="grid">
+  <details class="settings-block">
+    <summary>Paramètres du championnat</summary>
+    <div class="settings-block-content">
+      <div class="grid">
     <div class="card span6">
       <h2>Paramètres du championnat</h2>
       <div class="field"><label>Nom</label><input id="sName"></div>
@@ -613,6 +776,9 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
     </div>
     <div class="card span12"><h2>Barème de points</h2><p class="muted">Le barème 6 à 30 joueurs a été repris du classeur BPT actuel. Il est utilisé automatiquement selon le nombre de participants.</p><div id="pointsPreview" class="tablewrap"></div></div>
   </div>
+    </div>
+  </details>
+
   </div>
 </section>
 </main>
@@ -787,6 +953,7 @@ async function refreshCanonicalHistoryUI(showBusy=true){
     // à partir du même snapshot de l'historique serveur.
     renderDashboard();
     renderRanking();
+    renderVersus();
     renderHistory();
 
     if(correctionUnlocked)renderCorrectionGameList();
@@ -1304,7 +1471,7 @@ function killerStats(){
 
 function renderAll(){
   normalizeHistoryGameNumbers();
-  renderDashboard();renderRanking();renderHistory();renderPlayers();renderGamePlayers();renderSettings();renderPoints();if(correctionUnlocked)renderCorrectionGameList();if(document.getElementById("livePlayerList"))liveRenderPlayerList();
+  renderDashboard();renderRanking();renderVersus();renderHistory();renderPlayers();renderGamePlayers();renderSettings();renderPoints();if(correctionUnlocked)renderCorrectionGameList();if(document.getElementById("livePlayerList"))liveRenderPlayerList();
 }
 
 function dashRankList(items,valueFn,formatFn){
@@ -1467,6 +1634,162 @@ function renderRanking(){
     <td>${esc(ks.mainVictim(s.name))}</td>
   </tr>`).join("");
 }
+
+
+function versusPlayerMetrics(name){
+  const base=stats(false).find(s=>s.name===name);
+  const rows=(db.history||[])
+    .filter(r=>String(r.player||"")===name)
+    .sort((a,b)=>Number(a.game)-Number(b.game));
+
+  if(!base || !rows.length)return null;
+
+  const places=rows.map(r=>Number(r.place)||0).filter(n=>n>0);
+  const bestPlace=places.length?Math.min(...places):null;
+  const avgPlace=places.length?places.reduce((a,b)=>a+b,0)/places.length:null;
+  const rankRow=ranking().find(r=>r.name===name);
+
+  return {
+    ...base,
+    rank:rankRow?.rank||null,
+    bestPlace,
+    avgPlace
+  };
+}
+
+function versusHeadToHead(name1,name2){
+  const history=Array.isArray(db.history)?db.history:[];
+  const byGame=new Map();
+
+  for(const r of history){
+    const g=Number(r.game);
+    if(!Number.isFinite(g))continue;
+    if(!byGame.has(g))byGame.set(g,[]);
+    byGame.get(g).push(r);
+  }
+
+  let commonGames=0;
+  let better1=0;
+  let better2=0;
+  let ties=0;
+
+  for(const rows of byGame.values()){
+    const r1=rows.find(r=>String(r.player||"")===name1);
+    const r2=rows.find(r=>String(r.player||"")===name2);
+    if(!r1 || !r2)continue;
+
+    commonGames++;
+    const p1=Number(r1.place)||0;
+    const p2=Number(r2.place)||0;
+
+    if(p1 && p2){
+      if(p1<p2)better1++;
+      else if(p2<p1)better2++;
+      else ties++;
+    }
+  }
+
+  // Nombre de fois où l'un a directement éliminé l'autre.
+  const elim1By2=history.filter(
+    r=>String(r.player||"")===name1 && String(r.killer||"")===name2
+  ).length;
+
+  const elim2By1=history.filter(
+    r=>String(r.player||"")===name2 && String(r.killer||"")===name1
+  ).length;
+
+  return {
+    commonGames,
+    better1,
+    better2,
+    ties,
+    elim1By2,
+    elim2By1
+  };
+}
+
+function renderVersus(){
+  const s1=$("versusPlayer1");
+  const s2=$("versusPlayer2");
+  if(!s1 || !s2)return;
+
+  const previous1=s1.value;
+  const previous2=s2.value;
+
+  const ranked=ranking();
+  const names=[...new Set([
+    ...ranked.map(r=>r.name),
+    ...(db.history||[]).map(r=>String(r.player||"")).filter(Boolean)
+  ])].sort((a,b)=>a.localeCompare(b,"fr",{sensitivity:"base"}));
+
+  const options=names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+  s1.innerHTML='<option value="">— Choisir —</option>'+options;
+  s2.innerHTML='<option value="">— Choisir —</option>'+options;
+
+  if(previous1 && names.includes(previous1))s1.value=previous1;
+  else if(ranked[0])s1.value=ranked[0].name;
+
+  if(previous2 && names.includes(previous2) && previous2!==s1.value)s2.value=previous2;
+  else if(ranked[1])s2.value=ranked[1].name;
+  else if(ranked[0] && names.length>1)s2.value=names.find(n=>n!==s1.value)||"";
+
+  const name1=s1.value;
+  const name2=s2.value;
+  const m1=versusPlayerMetrics(name1);
+  const m2=versusPlayerMetrics(name2);
+
+  const valid=!!(name1 && name2 && name1!==name2 && m1 && m2);
+  $("versusEmpty").style.display=valid?"none":"block";
+  $("versusContent").style.display=valid?"block":"none";
+  if(!valid)return;
+
+  $("versusName1").textContent=name1;
+  $("versusName2").textContent=name2;
+  $("versusHeader1").textContent=name1;
+  $("versusHeader2").textContent=name2;
+  $("versusRank1").textContent=m1.rank?`Classement général : #${m1.rank}`:"Non classé";
+  $("versusRank2").textContent=m2.rank?`Classement général : #${m2.rank}`:"Non classé";
+
+  const h2h=versusHeadToHead(name1,name2);
+
+  const criteria=[
+    {label:"Points",a:m1.points,b:m2.points,fmt:v=>num(v,0)},
+    {label:"Moyenne de points",a:m1.avgPoints,b:m2.avgPoints,fmt:v=>num(v,1)},
+    {label:"Participations",a:m1.gamesCount,b:m2.gamesCount,fmt:v=>num(v,0)},
+    {label:"Parties communes",a:h2h.commonGames,b:h2h.commonGames,fmt:v=>num(v,0),neutral:true},
+    {label:"Mieux classé sur les parties communes",a:h2h.better1,b:h2h.better2,fmt:v=>num(v,0)},
+    {label:"Éliminations directes de l’adversaire",a:h2h.elim2By1,b:h2h.elim1By2,fmt:v=>num(v,0)},
+    {label:"Victoires",a:m1.wins,b:m2.wins,fmt:v=>num(v,0)},
+    {label:"Taux de victoire",a:m1.winRate,b:m2.winRate,fmt:v=>num(v,1)+" %"},
+    {label:"Podiums",a:m1.podiums,b:m2.podiums,fmt:v=>num(v,0)},
+    {label:"Taux de podium",a:m1.podiumRate,b:m2.podiumRate,fmt:v=>num(v,1)+" %"},
+    {label:"Kills",a:m1.kills,b:m2.kills,fmt:v=>num(v,0)},
+    {label:"Kills / partie",a:m1.kpg,b:m2.kpg,fmt:v=>num(v,2)},
+    {label:"Meilleure place",a:m1.bestPlace,b:m2.bestPlace,fmt:v=>v?`${num(v,0)}e`:"—",lowerBetter:true},
+    {label:"Place moyenne",a:m1.avgPlace,b:m2.avgPlace,fmt:v=>v?num(v,2):"—",lowerBetter:true},
+    {label:"Tabliers",a:m1.tabliers,b:m2.tabliers,fmt:v=>num(v,0)},
+    {label:"Solde net",a:m1.net,b:m2.net,fmt:v=>euro(v)}
+  ];
+
+  $("versusBody").innerHTML=criteria.map(c=>{
+    const a=Number(c.a);
+    const b=Number(c.b);
+    let aClass="versus-equal",bClass="versus-equal";
+
+    if(!c.neutral && Number.isFinite(a) && Number.isFinite(b) && a!==b){
+      const aWins=c.lowerBetter?a<b:a>b;
+      aClass=aWins?"versus-best":"";
+      bClass=aWins?"":"versus-best";
+    }
+
+    return `<tr>
+      <td><span class="versus-value ${aClass}">${c.fmt(c.a)}</span></td>
+      <td><span class="versus-criterion">${esc(c.label)}</span></td>
+      <td><span class="versus-value ${bClass}">${c.fmt(c.b)}</span></td>
+    </tr>`;
+  }).join("");
+}
+
 function renderHistory(){
   const rows=Array.isArray(db?.history)?[...db.history]:[];
   const games=new Set(
@@ -3041,14 +3364,16 @@ function lockSettings(){
 }
 
 async function showView(id){
+  if(id==="newgame")id="settings";
   document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===id));
 
-  if((id==="dashboard" || id==="ranking" || id==="history") && cloudReady && sbClient){
+  if((id==="dashboard" || id==="ranking" || id==="versus" || id==="history") && cloudReady && sbClient){
     await refreshCanonicalHistoryUI(true);
   }else{
     if(id==="dashboard")renderDashboard();
     if(id==="ranking")renderRanking();
+    if(id==="versus")renderVersus();
     if(id==="history")renderHistory();
   }
 
@@ -3066,9 +3391,9 @@ async function showView(id){
   }
 };
 function backup(){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(db,null,2)],{type:"application/json"}));a.download=`BPT_sauvegarde_${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
-$("backupBtn").onclick=backup;$("backupBtn2").onclick=backup;
+if($("backupBtn"))$("backupBtn").onclick=backup;if($("backupBtn2"))$("backupBtn2").onclick=backup;
 function restoreInput(input){const f=input.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const x=JSON.parse(rd.result);if(!x.players||!x.history||!x.points)throw 0;db=x;cloudHistoryReplaceOnce=true;saveDB();renderAll();alert("Sauvegarde restaurée.");}catch(e){alert("Fichier de sauvegarde invalide.");}};rd.readAsText(f);}
-$("restoreInput").onchange=e=>restoreInput(e.target);$("restoreInput2").onchange=e=>restoreInput(e.target);
+if($("restoreInput"))$("restoreInput").onchange=e=>restoreInput(e.target);if($("restoreInput2"))$("restoreInput2").onchange=e=>restoreInput(e.target);
 $("resetDataBtn").onclick=()=>{if(confirm("Réinitialiser toutes les données avec celles du classeur Excel d'origine ?")){db=clone(SEED);cloudHistoryReplaceOnce=true;saveDB();renderAll();showView("dashboard");}};
 
 $("correctionGameSelect").onchange=loadCorrectionGame;
@@ -3079,6 +3404,9 @@ $("saveCorrectionBtn").onclick=saveCorrection;
 $("deleteCorrectionGameBtn").onclick=deleteCorrectionGame;
 $("resetHistoryBtn").onclick=resetFullHistory;
 $("cStake").addEventListener("input",refreshCorrectionCalculatedValues);
+
+if($("versusPlayer1"))$("versusPlayer1").onchange=renderVersus;
+if($("versusPlayer2"))$("versusPlayer2").onchange=renderVersus;
 
 $("exportCsvBtn").onclick=()=>{const rows=[["Partie","Date","Lieu","Joueur","Place","Éliminé par","Tablier","Nb joueurs","Points","Mise","Gain","Solde","Kills"]];db.history.forEach(r=>rows.push([r.game,r.date,r.location,r.player,r.place,r.killer,r.tablier?"Oui":"",r.n,r.points,r.stake,r.gross,r.net,r.kills]));const csv="\ufeff"+rows.map(r=>r.map(x=>`"${String(x??"").replaceAll('"','""')}"`).join(";")).join("\r\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download="BPT_historique.csv";a.click();};
 
