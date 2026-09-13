@@ -365,6 +365,34 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
   .versus-vs{padding:0;align-self:center}
   .versus-headcards{grid-template-columns:1fr}
 }
+
+.correction-participants-box{
+  margin:12px 0;
+  padding:12px;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:12px;
+  background:rgba(255,255,255,.025);
+}
+.correction-participant-list{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:6px 12px;
+  max-height:240px;
+  overflow:auto;
+}
+.correction-participant-list label{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  padding:4px 0;
+}
+.correction-participant-list input{width:auto}
+@media(max-width:900px){
+  .correction-participant-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:620px){
+  .correction-participant-list{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
@@ -726,7 +754,16 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
             <div class="span6"><div class="field"><label>Mise / joueur</label><input id="cStake" type="number" min="0" step="1"></div></div>
             <div class="span6"><div class="field"><label>Participants</label><input id="cParticipants" disabled></div></div>
           </div>
-          <div class="muted" style="margin:8px 0">Modifiez le lieu, les joueurs présents, leur classement et les éliminateurs. Les points, gains, kills, podiums et tablier seront recalculés à l’enregistrement.</div>
+
+          <div class="correction-participants-box">
+            <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px">
+              <strong>Joueurs présents</strong>
+              <button class="btn secondary" id="applyCorrectionParticipantsBtn" type="button">Appliquer la sélection</button>
+            </div>
+            <div id="correctionParticipantChecks" class="correction-participant-list"></div>
+          </div>
+
+          <div class="muted" style="margin:8px 0">Vous pouvez modifier le lieu, ajouter ou retirer des participants, puis modifier leur classement et les éliminateurs. Les points, gains, kills, podiums et tablier seront recalculés à l’enregistrement.</div>
           <div class="tablewrap">
             <table>
               <thead><tr><th>Place</th><th>Joueur</th><th>Éliminé par</th><th>Points</th><th>Gain</th></tr></thead>
@@ -1070,6 +1107,39 @@ async function cloudReplaceAllGames(localHistory){
   }
 }
 
+async function cloudUpdateSingleGame(gameNo, rows){
+  if(!sbClient)throw new Error("Supabase indisponible.");
+
+  const current=(db.history||[]).filter(r=>Number(r.game)===Number(gameNo));
+  const cloudId=current.find(r=>r._cloudId)?._cloudId;
+
+  // Si l'identifiant serveur n'est pas disponible, relecture ciblée de l'historique.
+  let id=cloudId;
+  if(!id){
+    const remote=await cloudFetchGames();
+    id=remote.find(r=>Number(r.game)===Number(gameNo) && r._cloudId)?._cloudId;
+  }
+  if(!id)throw new Error("Impossible d’identifier la partie sur le serveur.");
+
+  const clean=(rows||[]).map(r=>{
+    const x={...r};
+    delete x._cloudId;
+    delete x._gameKey;
+    delete x.game;
+    return x;
+  });
+
+  const gameKey=historyGameSignature(rows);
+
+  const {error}=await sbClient
+    .from("bpt_games_v2")
+    .update({game_key:gameKey,game_data:clean})
+    .eq("id",id);
+
+  if(error)throw error;
+  return true;
+}
+
 async function cloudSyncGamesAdditive(){
   const remoteHistory=await cloudFetchGames();
   const remoteSigs=new Set(historyGroups(remoteHistory).map(([,rows])=>historyGameSignature(rows)));
@@ -1398,6 +1468,11 @@ function saveDB(){
 }
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
 function euro(n){return Number(n||0).toLocaleString("fr-FR",{minimumFractionDigits:0,maximumFractionDigits:2})+" €";}
+function shortDate(v){
+  const s=String(v||"").trim();
+  const m=s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  return m ? `${m[3]}/${m[2]}/${m[1].slice(2)}` : s;
+}
 function num(n,d=1){return Number(n||0).toLocaleString("fr-FR",{maximumFractionDigits:d});}
 function pointsFor(place,n){
   n=Number(n)||0;
@@ -1810,7 +1885,7 @@ function renderHistory(){
     .sort((a,b)=>Number(b.game)-Number(a.game)||Number(a.place)-Number(b.place))
     .map(r=>`<tr>
       <td><b>${Number(r.game)||""}</b></td>
-      <td>${esc(r.date||"")}</td>
+      <td>${esc(shortDate(r.date||""))}</td>
       <td>${esc(r.location||"")}</td>
       <td>${esc(r.player||"")}</td>
       <td>${Number(r.place)||""}</td>
@@ -3060,10 +3135,68 @@ function renderCorrectionGameList(preferredGame=null){
   loadCorrectionGame();
 }
 
+
+function renderCorrectionParticipantChecks(selectedNames){
+  const holder=$("correctionParticipantChecks");
+  if(!holder)return;
+
+  const selected=new Set(selectedNames||[]);
+  const allNames=[...new Set([
+    ...(db.players||[]).filter(p=>p.active).map(p=>p.name),
+    ...selectedNames
+  ])].sort((a,b)=>a.localeCompare(b,"fr",{sensitivity:"base"}));
+
+  holder.innerHTML=allNames.map(name=>`
+    <label>
+      <input type="checkbox" class="cParticipantCheck" value="${esc(name)}" ${selected.has(name)?"checked":""}>
+      <span>${esc(name)}</span>
+    </label>`).join("");
+}
+
+function buildCorrectionRanking(selectedNames, currentRows=[]){
+  const names=[...(selectedNames||[])];
+  const n=names.length;
+
+  $("cParticipants").value=n;
+  $("correctionRows").innerHTML=names.map((name,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td><select class="cPlacePlayer" data-place="${i+1}"></select></td>
+      <td><select class="cPlaceKiller" data-place="${i+1}"></select></td>
+      <td class="cPoints">${pointsFor(i+1,n)}</td>
+      <td class="cGain">${euro(plannedGain(i+1,n,Number($("cStake").value)||0))}</td>
+    </tr>`).join("");
+
+  $("correctionEditor").dataset.players=JSON.stringify(names);
+
+  const killerByPlayer=new Map(currentRows.map(r=>[r.player,r.killer||""]));
+  $("correctionEditor").dataset.killers=JSON.stringify(names.map(n=>killerByPlayer.get(n)||""));
+
+  const playerSelects=[...document.querySelectorAll(".cPlacePlayer")];
+  playerSelects.forEach((sel,i)=>{
+    sel.addEventListener("change",refreshCorrectionOptions);
+  });
+
+  // Populate options, then restore the requested ranking order.
+  refreshCorrectionOptions();
+  playerSelects.forEach((sel,i)=>{sel.value=names[i]||"";});
+  refreshCorrectionOptions();
+
+  const killerSelects=[...document.querySelectorAll(".cPlaceKiller")];
+  names.forEach((name,i)=>{
+    const killer=killerByPlayer.get(name)||"";
+    if(killer && killerSelects[i] && [...killerSelects[i].options].some(o=>o.value===killer)){
+      killerSelects[i].value=killer;
+    }
+  });
+
+  refreshCorrectionCalculatedValues();
+}
+
 function loadCorrectionGame(){
   if(!correctionUnlocked)return;
   const gameNo=Number($("correctionGameSelect").value);
-  const rows=db.history.filter(r=>r.game===gameNo).sort((a,b)=>a.place-b.place);
+  const rows=db.history.filter(r=>Number(r.game)===gameNo).sort((a,b)=>Number(a.place)-Number(b.place));
 
   if(!rows.length){
     $("correctionEditor").style.display="none";
@@ -3074,7 +3207,9 @@ function loadCorrectionGame(){
   $("correctionEditor").style.display="block";
   $("correctionEmpty").style.display="none";
   $("cDate").value=rows[0].date||"";
-  $("cLocation").disabled=false;$("cLocation").readOnly=false;$("cLocation").value=rows[0].location||"";
+  $("cLocation").disabled=false;
+  $("cLocation").readOnly=false;
+  $("cLocation").value=rows[0].location||"";
   $("cStake").value=rows[0].stake ?? db.settings.stake;
   $("cParticipants").value=rows.length;
   $("correctionGameSummary").innerHTML=
@@ -3090,58 +3225,42 @@ function loadCorrectionGame(){
     ? "Cette partie est la dernière enregistrée : elle peut être supprimée."
     : `Seule la dernière partie (#${lastGameNo}) peut être supprimée. Supprimez-la d’abord pour pouvoir supprimer celle-ci.`;
 
-  $("correctionRows").innerHTML=rows.map((r,i)=>`
-    <tr>
-      <td>${i+1}</td>
-      <td><select class="cPlacePlayer" data-place="${i+1}"></select></td>
-      <td><select class="cPlaceKiller" data-place="${i+1}"></select></td>
-      <td class="cPoints">${pointsFor(i+1,rows.length)}</td>
-      <td class="cGain">${euro(plannedGain(i+1,rows.length,Number($("cStake").value)||0))}</td>
-    </tr>`).join("");
-
   $("correctionEditor").dataset.game=String(gameNo);
-  $("correctionEditor").dataset.players=JSON.stringify(rows.map(r=>r.player));
-  $("correctionEditor").dataset.killers=JSON.stringify(rows.map(r=>r.killer||""));
+  renderCorrectionParticipantChecks(rows.map(r=>r.player));
+  buildCorrectionRanking(rows.map(r=>r.player),rows);
+}
 
-  const playerSelects=[...document.querySelectorAll(".cPlacePlayer")];
-  playerSelects.forEach((sel,i)=>{
-    sel.value="";
-    sel.addEventListener("change",refreshCorrectionOptions);
-  });
+function applyCorrectionParticipants(){
+  const checked=[...document.querySelectorAll(".cParticipantCheck:checked")].map(x=>x.value);
+  if(checked.length<2){
+    alert("Une partie doit comporter au moins 2 participants.");
+    return;
+  }
 
-  // First populate then restore current ranking values.
-  refreshCorrectionOptions();
-  const currentPlayers=rows.map(r=>r.player);
-  playerSelects.forEach((sel,i)=>{ sel.value=currentPlayers[i]||""; });
-  refreshCorrectionOptions();
+  const currentPlayers=[...document.querySelectorAll(".cPlacePlayer")].map(s=>s.value).filter(Boolean);
+  const currentRows=currentPlayers.map((player,i)=>({
+    player,
+    killer:document.querySelectorAll(".cPlaceKiller")[i]?.value||""
+  }));
 
-  // Restore killers if still valid.
-  const killerSelects=[...document.querySelectorAll(".cPlaceKiller")];
-  rows.forEach((r,i)=>{
-    if(r.killer && [...killerSelects[i].options].some(o=>o.value===r.killer)){
-      killerSelects[i].value=r.killer;
-    }
-  });
+  // Conserve l'ordre actuel, retire les joueurs décochés, ajoute les nouveaux à la fin.
+  const ordered=currentPlayers.filter(n=>checked.includes(n));
+  for(const n of checked)if(!ordered.includes(n))ordered.push(n);
+
+  buildCorrectionRanking(ordered,currentRows);
 }
 
 function refreshCorrectionOptions(){
-  const originalPlayers=JSON.parse($("correctionEditor").dataset.players||"[]");
+  const selectedPlayers=JSON.parse($("correctionEditor").dataset.players||"[]");
   const playerSelects=[...document.querySelectorAll(".cPlacePlayer")];
   const killerSelects=[...document.querySelectorAll(".cPlaceKiller")];
   const currentPlayers=playerSelects.map(s=>s.value);
   const currentKillers=killerSelects.map(s=>s.value);
 
-  // En correction, on peut remplacer un participant par n'importe quel joueur actif.
-  // Les joueurs d'origine restent aussi disponibles même s'ils ont été désactivés depuis.
-  const selectablePlayers=[...new Set([
-    ...originalPlayers,
-    ...db.players.filter(p=>p.active).map(p=>p.name)
-  ])].sort((a,b)=>a.localeCompare(b,"fr",{sensitivity:"base"}));
-
   playerSelects.forEach((sel,idx)=>{
     const current=currentPlayers[idx];
     const usedElsewhere=new Set(currentPlayers.filter((name,j)=>j!==idx && name));
-    const available=selectablePlayers.filter(name=>name===current || !usedElsewhere.has(name));
+    const available=selectedPlayers.filter(name=>name===current || !usedElsewhere.has(name));
 
     sel.innerHTML='<option value="">— Joueur —</option>'+
       available.map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join("");
@@ -3164,23 +3283,18 @@ function refreshCorrectionOptions(){
     }
 
     sel.disabled=false;
-
     if(!eliminated){
       sel.innerHTML='<option value="">— Choisir d’abord le joueur —</option>';
       sel.value="";
       return;
     }
 
-    const eligible=rankingPlayers
-      .slice(0,idx)
-      .filter(Boolean)
-      .filter(name=>name!==eliminated);
-
+    const eligible=rankingPlayers.slice(0,idx).filter(Boolean).filter(name=>name!==eliminated);
     sel.innerHTML='<option value="">— Éliminé par… —</option>'+
       eligible.map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join("");
 
     if(current && eligible.includes(current))sel.value=current;
-    else sel.value="";
+    else if(!eligible.includes(current))sel.value="";
   });
 
   refreshCorrectionCalculatedValues();
@@ -3203,6 +3317,10 @@ async function saveCorrection(){
   const killers=killerSelects.map(s=>s.value);
   const n=names.length;
 
+  if(n<2){
+    alert("Une partie doit comporter au moins 2 joueurs.");
+    return;
+  }
   if(names.some(x=>!x)){
     alert("Chaque place doit avoir un joueur.");
     return;
@@ -3213,10 +3331,13 @@ async function saveCorrection(){
   }
 
   for(let i=0;i<n;i++){
-    const place=i+1, player=names[i], killer=killers[i];
-
+    const place=i+1,player=names[i],killer=killers[i]||"";
     if(place===1 && killer){
       alert("Le vainqueur ne peut pas avoir d’éliminateur.");
+      return;
+    }
+    if(place>1 && !killer){
+      alert(`Place ${place} — ${player} : renseignez obligatoirement « Éliminé par ».`);
       return;
     }
     if(killer===player){
@@ -3226,7 +3347,7 @@ async function saveCorrection(){
     if(killer){
       const killerPlace=names.indexOf(killer)+1;
       if(killerPlace<1 || killerPlace>=place){
-        alert(`Place ${place} : l’éliminateur doit être un joueur encore en jeu, donc classé devant.`);
+        alert(`Place ${place} : l’éliminateur doit être classé devant le joueur éliminé.`);
         return;
       }
     }
@@ -3238,34 +3359,25 @@ async function saveCorrection(){
   const killCounts={};
   for(const k of killers)if(k)killCounts[k]=(killCounts[k]||0)+1;
 
-  // Tout joueur ajouté à une partie corrigée est automatiquement présent
-  // dans le référentiel et marqué Actif.
   for(const name of names){
     const existing=findPlayerInsensitive(name);
     if(existing)existing.active=true;
     else db.players.push({name:String(name).trim(),active:true});
   }
 
+  const oldRows=db.history.filter(r=>Number(r.game)===gameNo);
+  const cloudId=oldRows.find(r=>r._cloudId)?._cloudId;
+  const gameKey=oldRows.find(r=>r._gameKey)?._gameKey;
+
   const corrected=names.map((player,i)=>{
     const place=i+1;
     const gross=plannedGain(place,n,stake);
     return {
-      game:gameNo,
-      date,
-      location,
-      player,
-      place,
-      killer:killers[i],
-      tablier:n>=db.settings.tablierMinPlayers && place===1,
-      n,
-      points:pointsFor(place,n),
-      stake,
-      gross,
-      net:gross-stake,
-      kills:killCounts[player]||0,
-      win:place===1,
-      podium:place<=3,
-      performance:performance(place,n)
+      game:gameNo,date,location,player,place,killer:killers[i]||"",
+      tablier:n>=db.settings.tablierMinPlayers&&place===1,n,
+      points:pointsFor(place,n),stake,gross,net:gross-stake,
+      kills:killCounts[player]||0,win:place===1,podium:place<=3,
+      _cloudId:cloudId,_gameKey:gameKey
     };
   });
 
@@ -3274,33 +3386,59 @@ async function saveCorrection(){
   if(btn)btn.disabled=true;
 
   try{
-    db.history=db.history.filter(r=>r.game!==gameNo).concat(corrected);
+    // Mise à jour locale.
+    db.history=db.history.filter(r=>Number(r.game)!==gameNo).concat(corrected);
     normalizeHistoryGameNumbers();
     saveLocalOnly();
-    renderAll();
 
     if(cloudReady && sbClient){
       setCloudStatus("busy","Correction de la partie…");
-      cloudHistoryReplaceOnce=true;
-      cloudLocalDirty=true;
 
-      const ok=await cloudPushNow();
-      if(!ok)throw new Error(cloudLastError||"La synchronisation Supabase a échoué.");
+      // Mise à jour UNIQUEMENT de la partie concernée, sans supprimer/recréer tout l'historique.
+      await cloudUpdateSingleGame(gameNo,corrected);
 
-      // Vérifie que le lieu relu depuis le serveur correspond à la saisie.
-      const serverRows=(db.history||[]).filter(r=>Number(r.game)===gameNo);
-      const persistedLocation=serverRows[0]?.location||"";
-      if(persistedLocation!==location){
-        throw new Error(`Le lieu n’a pas été enregistré correctement sur le serveur.`);
+      // Sauvegarde du référentiel joueurs/paramètres.
+      const payload=JSON.parse(JSON.stringify(db));
+      payload.history=[];
+      const {error:stateErr}=await sbClient
+        .from("bpt_state")
+        .upsert({id:CLOUD_ROW_ID,data:payload},{onConflict:"id"});
+      if(stateErr)throw stateErr;
+
+      // Relecture serveur et contrôle précis.
+      db.history=await cloudFetchGames();
+      normalizeHistoryGameNumbers();
+
+      const serverRows=db.history.filter(r=>Number(r.game)===gameNo);
+      const serverNames=serverRows
+        .sort((a,b)=>Number(a.place)-Number(b.place))
+        .map(r=>String(r.player||""));
+
+      if((serverRows[0]?.location||"")!==location){
+        throw new Error("Le nouveau lieu n’a pas été conservé par le serveur.");
       }
+      if(JSON.stringify(serverNames)!==JSON.stringify(names)){
+        throw new Error("La nouvelle liste des participants n’a pas été conservée par le serveur.");
+      }
+
+      cloudLocalDirty=false;
+      cloudHistoryReplaceOnce=false;
+      saveLocalOnly();
+      setCloudStatus("ok","Correction synchronisée");
     }else{
+      // Hors connexion : conserver la correction locale et forcer un remplacement à la prochaine synchro.
       cloudHistoryReplaceOnce=true;
       scheduleCloudSave();
     }
 
+    renderAll();
     renderCorrectionGameList(gameNo);
     loadCorrectionGame();
-    alert(`Partie #${gameNo} corrigée.${location?`\\nLieu : ${location}`:""}`);
+
+    alert(
+      `Partie #${gameNo} corrigée et enregistrée.\n\n`+
+      `Lieu : ${location||"—"}\nParticipants : ${names.length}`
+    );
   }catch(e){
     db=backup;
     saveLocalOnly();
@@ -3308,7 +3446,7 @@ async function saveCorrection(){
     renderCorrectionGameList(gameNo);
     console.error("BPT save correction:",e);
     setCloudStatus("offline","Erreur correction",e?.message||String(e));
-    alert("La correction n’a pas pu être enregistrée.\\n\\n"+(e?.message||String(e)));
+    alert("La correction n’a pas pu être enregistrée.\n\n"+(e?.message||String(e)));
   }finally{
     if(btn)btn.disabled=false;
   }
@@ -3474,6 +3612,7 @@ if($("restoreInput"))$("restoreInput").onchange=e=>restoreInput(e.target);if($("
 $("resetDataBtn").onclick=()=>{if(confirm("Réinitialiser toutes les données avec celles du classeur Excel d'origine ?")){db=clone(SEED);cloudHistoryReplaceOnce=true;saveDB();renderAll();showView("dashboard");}};
 
 $("correctionGameSelect").onchange=loadCorrectionGame;
+if($("applyCorrectionParticipantsBtn"))$("applyCorrectionParticipantsBtn").onclick=applyCorrectionParticipants;
 $("prevCorrectionGameBtn").onclick=()=>moveCorrectionGame(-1);
 $("nextCorrectionGameBtn").onclick=()=>moveCorrectionGame(1);
 $("reloadCorrectionBtn").onclick=loadCorrectionGame;
