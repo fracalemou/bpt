@@ -482,7 +482,132 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
 .player-profile-hero{display:flex;justify-content:space-between;align-items:center}.profile-rank{font-size:52px;font-weight:950;color:#c8952e}.profile-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-top:12px}.profile-kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;text-align:center}.profile-kpi b{display:block;font-size:20px}.profile-kpi span{display:block;color:var(--muted);font-size:12px;margin-top:3px}.place-chip{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;margin:4px;background:#26382e;font-weight:900}.place-chip.win{background:#8d6c22;color:white}.place-chip.podium{background:#425646}
 .versus-scoreboard{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin:12px 0}.versus-score{background:#121d17;border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}.versus-score b{display:block;font-size:28px}.versus-center{text-align:center;color:#e8c39e;font-weight:900}
 .bpt-summary-backdrop{position:fixed;inset:0;z-index:11000;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:18px}.bpt-summary-modal{width:min(850px,100%);max-height:90vh;overflow:auto;background:#15201a;border:1px solid #4b654f;border-radius:18px;padding:20px;box-shadow:0 30px 90px rgba(0,0,0,.65)}.summary-podium{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}.summary-place{background:#101a15;border:1px solid #34483c;border-radius:13px;padding:14px;text-align:center}.summary-place:first-child{border-color:#c8952e}.summary-place .big{font-size:30px}.summary-table{width:100%}
-body.live-presentation header,body.live-presentation nav{display:none}body.live-presentation main{max-width:none;padding:0}body.live-presentation #liveGameScreen{min-height:100vh;padding:14px}body.live-presentation .live-admin-panel,body.live-presentation .live-admin-only{display:none!important}body.live-presentation .live-stage{grid-template-columns:1fr}body.live-presentation .live-timer-card{min-height:calc(100vh - 100px);display:flex;flex-direction:column;align-items:center;justify-content:center}body.live-presentation .live-level{font-size:42px}body.live-presentation .live-blinds{font-size:92px}body.live-presentation .live-timer{font-size:100px}
+
+.live-fullscreen-display{
+  display:none;
+  background:
+    radial-gradient(circle at 50% 25%,rgba(47,109,80,.22),transparent 42%),
+    linear-gradient(180deg,#0b120e,#101b15);
+  color:#f7f4ec;
+}
+.live-fullscreen-display:fullscreen{
+  display:flex;
+  width:100vw;
+  height:100vh;
+  aspect-ratio:16/9;
+  overflow:hidden;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:3.5vh 4vw;
+  box-sizing:border-box;
+}
+.live-fullscreen-display:-webkit-full-screen{
+  display:flex;
+  width:100vw;
+  height:100vh;
+  overflow:hidden;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:3.5vh 4vw;
+  box-sizing:border-box;
+}
+.live-fullscreen-brand{
+  position:absolute;
+  top:2.5vh;
+  left:3vw;
+  font-size:clamp(15px,1.3vw,24px);
+  color:#e8c39e;
+  font-weight:900;
+  letter-spacing:.16em;
+}
+.live-fullscreen-exit{
+  position:absolute;
+  top:2.2vh;
+  right:2.5vw;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(20,32,25,.78);
+  color:#dce7f4;
+  border-radius:9px;
+  padding:8px 12px;
+  font-weight:700;
+  cursor:pointer;
+  opacity:.62;
+}
+.live-fullscreen-exit:hover{opacity:1}
+.live-fullscreen-level{
+  font-size:clamp(28px,3.2vw,62px);
+  font-weight:950;
+  letter-spacing:.08em;
+  color:#e8c39e;
+  line-height:1;
+  margin-bottom:1.5vh;
+}
+.live-fullscreen-blinds{
+  font-size:clamp(72px,10vw,190px);
+  line-height:.95;
+  font-weight:950;
+  letter-spacing:-.035em;
+  white-space:nowrap;
+}
+.live-fullscreen-ante{
+  min-height:1.5em;
+  margin-top:1vh;
+  font-size:clamp(20px,2vw,38px);
+  color:#b7c3bb;
+  font-weight:700;
+}
+.live-fullscreen-timer-label{
+  margin-top:2.2vh;
+  font-size:clamp(12px,1.15vw,22px);
+  letter-spacing:.16em;
+  color:#93a59a;
+  font-weight:800;
+}
+.live-fullscreen-timer{
+  font-size:clamp(90px,12vw,225px);
+  font-variant-numeric:tabular-nums;
+  line-height:.92;
+  font-weight:950;
+  margin-top:.2vh;
+}
+.live-fullscreen-timer.warning30{color:#e7a93d}
+.live-fullscreen-timer.warning10{color:#ff6b6b;text-shadow:0 0 28px rgba(255,90,90,.35)}
+.live-fullscreen-kpis{
+  width:min(1180px,92vw);
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1.2vw;
+  margin-top:2.8vh;
+}
+.live-fullscreen-kpi{
+  text-align:center;
+  padding:1.3vh .8vw;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.035);
+  border-radius:14px;
+}
+.live-fullscreen-kpi span{
+  display:block;
+  color:#9fb3a7;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  font-size:clamp(10px,.95vw,17px);
+  font-weight:750;
+}
+.live-fullscreen-kpi strong{
+  display:block;
+  margin-top:.5vh;
+  font-size:clamp(22px,2.7vw,52px);
+  line-height:1;
+}
+.live-fullscreen-next{
+  margin-top:2vh;
+  color:#b7c3bb;
+  font-size:clamp(15px,1.35vw,25px);
+}
+.live-fullscreen-next strong{color:#f7f4ec}
 #liveTimer.live-warning-30{color:#e7a93d}#liveTimer.live-warning-10{color:#ff6b6b;text-shadow:0 0 20px rgba(255,70,70,.35)}
 @media(max-width:1000px){.home-actions{grid-template-columns:repeat(2,1fr)}.records-grid{grid-template-columns:repeat(2,1fr)}.profile-kpis{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:700px){.home-grid,.home-podium,.summary-podium{grid-template-columns:1fr}.home-actions,.records-grid{grid-template-columns:1fr}.home-hero{padding:20px}.home-logo-mark{display:none}.home-hero h1{font-size:28px}.profile-kpis{grid-template-columns:repeat(2,1fr)}.history-game summary{grid-template-columns:1fr}.bpt-brand-wrap .brand{display:none}}
@@ -503,7 +628,7 @@ body.live-presentation header,body.live-presentation nav{display:none}body.live-
       <span>Gestion du championnat 2026-2027</span>
     </div>
   </div>
-  <div class="app-version">Version 13/09/26 11h08</div>
+  <div class="app-version">Version 13/09/26 11h27</div>
 </header>
 <nav id="nav">
   <button data-view="home" class="active">⌂ Accueil</button>
@@ -633,9 +758,46 @@ body.live-presentation header,body.live-presentation nav{display:none}body.live-
         <div class="row">
           <span class="live-badge" id="liveSyncBadge">NON SYNCHRONISÉE</span>
           <button class="btn ghost" id="liveTestSoundBtn" type="button">Tester le son</button>
-          <button class="btn ghost" id="liveDisplayModeBtn" type="button">Mode affichage</button>
+          <button class="btn ghost" id="liveDisplayModeBtn" type="button">Masquer les commandes</button>
           <button class="btn ghost" id="liveFullscreenBtn" type="button">Plein écran</button>
+          <button class="btn danger live-admin-only" id="liveCancelGameBtn" type="button">Annuler la partie</button>
           <button class="btn ghost live-admin-only" id="liveBackPrepBtn">Préparation</button>
+        </div>
+      </div>
+
+
+      <div id="liveFullscreenDisplay" class="live-fullscreen-display" aria-label="Affichage plein écran du Live">
+        <button id="liveFullscreenExitBtn" class="live-fullscreen-exit" type="button">Quitter plein écran</button>
+        <div class="live-fullscreen-brand">BPT · LIVE</div>
+
+        <div class="live-fullscreen-level" id="liveFsLevel">NIVEAU 1</div>
+        <div class="live-fullscreen-blinds" id="liveFsBlinds">— / —</div>
+        <div class="live-fullscreen-ante" id="liveFsAnte">Ante —</div>
+
+        <div class="live-fullscreen-timer-label">TEMPS RESTANT</div>
+        <div class="live-fullscreen-timer" id="liveFsTimer">00:00</div>
+
+        <div class="live-fullscreen-kpis">
+          <div class="live-fullscreen-kpi">
+            <span>Durée du niveau</span>
+            <strong id="liveFsLevelDuration">—</strong>
+          </div>
+          <div class="live-fullscreen-kpi">
+            <span>Stack moyen</span>
+            <strong id="liveFsAvgStack">—</strong>
+          </div>
+          <div class="live-fullscreen-kpi">
+            <span>Joueurs restants</span>
+            <strong id="liveFsRemaining">—</strong>
+          </div>
+          <div class="live-fullscreen-kpi">
+            <span>Durée écoulée</span>
+            <strong id="liveFsElapsed">00:00:00</strong>
+          </div>
+        </div>
+
+        <div class="live-fullscreen-next">
+          Niveau suivant : <strong id="liveFsNext">—</strong>
         </div>
       </div>
 
@@ -1047,6 +1209,19 @@ body.live-presentation header,body.live-presentation nav{display:none}body.live-
       <button class="btn ghost" id="gameSummaryCloseBtn">Fermer</button>
     </div>
     <div id="gameSummaryContent"></div>
+  </div>
+</div>
+
+
+<div id="liveResumeBackdrop" class="bpt-summary-backdrop" style="display:none">
+  <div class="bpt-summary-modal" style="max-width:560px">
+    <div class="muted">Partie Live interrompue</div>
+    <h2 style="margin:4px 0 10px">Reprendre la partie ?</h2>
+    <div id="liveResumeMessage" style="line-height:1.5"></div>
+    <div class="row" style="justify-content:flex-end;margin-top:18px">
+      <button class="btn danger" id="liveResumeCancelBtn" type="button">Annuler la partie</button>
+      <button class="btn" id="liveResumeContinueBtn" type="button">Reprendre le Live</button>
+    </div>
   </div>
 </div>
 
@@ -2023,17 +2198,55 @@ function updateLiveTimerUrgency(){
 }
 
 async function toggleLiveFullscreen(){
+  const target=$("liveFullscreenDisplay");
+  if(!target)return;
+
   try{
-    const target=$("liveGameScreen");
-    if(!document.fullscreenElement)await target.requestFullscreen?.();
-    else await document.exitFullscreen?.();
-  }catch(e){}
+    if(document.fullscreenElement){
+      await document.exitFullscreen?.();
+      return;
+    }
+
+    liveRenderFullscreen();
+    await target.requestFullscreen?.();
+  }catch(e){
+    console.warn("Plein écran indisponible :",e);
+  }
+}
+
+function liveRenderFullscreen(){
+  const s=ensureLiveState();
+  if(!s.prepared)return;
+
+  const level=s.levels?.[s.levelIndex];
+  const next=s.levels?.[s.levelIndex+1];
+  if(!level)return;
+
+  const alive=liveAlive();
+  const winner=s.players.find(p=>p.status==="Vainqueur"||Number(p.place)===1);
+  const remainingCount=alive.length || (winner?1:0);
+  const total=s.players.length*s.startStack;
+
+  $("liveFsLevel").textContent=`NIVEAU ${level.level}`;
+  $("liveFsBlinds").textContent=`${liveFmt(level.sb)} / ${liveFmt(level.bb)}`;
+  $("liveFsAnte").textContent=Number(level.ante)>0?`ANTE ${liveFmt(level.ante)}`:"";
+  $("liveFsTimer").textContent=liveTime(s.remainingSeconds);
+  $("liveFsLevelDuration").textContent=`${level.durationMin} min`;
+  $("liveFsAvgStack").textContent=remainingCount?liveFmt(total/remainingCount):"0";
+  $("liveFsRemaining").textContent=String(remainingCount);
+  $("liveFsElapsed").textContent=liveTime(liveElapsedSeconds());
+  $("liveFsNext").textContent=next
+    ? `${liveFmt(next.sb)} / ${liveFmt(next.bb)}${next.ante?" · ante "+liveFmt(next.ante):""}`
+    : "Dernier niveau";
+
+  $("liveFsTimer").classList.toggle("warning30",s.remainingSeconds<=30 && s.remainingSeconds>10);
+  $("liveFsTimer").classList.toggle("warning10",s.remainingSeconds<=10);
 }
 
 function toggleLivePresentation(){
   document.body.classList.toggle("live-presentation");
   const btn=$("liveDisplayModeBtn");
-  if(btn)btn.textContent=document.body.classList.contains("live-presentation")?"Quitter affichage":"Mode affichage";
+  if(btn)btn.textContent=document.body.classList.contains("live-presentation")?"Afficher les commandes":"Masquer les commandes";
 }
 
 function testLiveSound(){
@@ -3421,6 +3634,7 @@ function liveRenderTimerOnly(){
   $("liveTimer").textContent=liveTime(s.remainingSeconds);
   $("liveElapsed").textContent=liveTime(liveElapsedSeconds());
   updateLiveTimerUrgency();
+  if(document.fullscreenElement===$("liveFullscreenDisplay"))liveRenderFullscreen();
 }
 function liveRefreshElimLists(resetKiller=false){
   const s=ensureLiveState();
@@ -3729,25 +3943,123 @@ function liveRenderAll(){
       <td>${esc(p.name)}</td><td>${p.status}</td><td>${p.place||"—"}</td><td>${p.place?euro(livePrize(p.place)):"—"}</td><td>${esc(p.killer||"")}</td>
     </tr>`).join("");
   liveRenderTimerOnly();liveRefreshElimLists();
+  if(document.fullscreenElement===$("liveFullscreenDisplay"))liveRenderFullscreen();
 }
-function liveResetForNew(){
+
+async function liveCancelCurrentGame({ask=true,showMessage=true}={}){
   const s=ensureLiveState();
-  if(s.prepared&&!s.synced&&!confirm("Abandonner la partie live en cours ?"))return;
-  if(liveTicker){clearInterval(liveTicker);liveTicker=null;}
-  db.liveState=null;saveDB();liveSelected.clear();liveRenderPlayerList();livePreviewStructure();liveShowScreen("prep");
+  if(!s.prepared){
+    db.liveState=null;
+    saveDB();
+    liveSelected.clear();
+    liveRenderPlayerList();
+    livePreviewStructure();
+    liveShowScreen("prep");
+    return true;
+  }
+
+  if(ask){
+    const ok=confirm(
+      "Annuler définitivement la partie Live en cours ?\n\n"+
+      "La partie ne sera pas enregistrée dans l’historique et les données Live seront supprimées."
+    );
+    if(!ok)return false;
+  }
+
+  if(liveTicker){
+    clearInterval(liveTicker);
+    liveTicker=null;
+  }
+
+  db.liveState=null;
+  saveDB();
+  liveSelected.clear();
+  liveRenderPlayerList();
+  livePreviewStructure();
+  liveShowScreen("prep");
+
+  if(showMessage)alert("Partie Live annulée.");
+  return true;
+}
+
+function liveInterruptedState(){
+  const s=db.liveState;
+  if(!s || !s.prepared || s.synced)return null;
+
+  const hasProgress=
+    !!s.startedAt ||
+    !!s.running ||
+    Number(s.levelIndex||0)>0 ||
+    (Array.isArray(s.players) && s.players.some(p=>p.place || p.status==="Sorti" || p.status==="Vainqueur"));
+
+  return hasProgress?s:null;
+}
+
+function showLiveResumePrompt(){
+  const s=liveInterruptedState();
+  if(!s)return false;
+
+  // À la fermeture du navigateur, le ticker disparaît. On considère donc la partie comme interrompue.
+  s.running=false;
+  s.runStartedAt=null;
+  s.endAt=null;
+  saveLocalOnly();
+
+  const winner=s.players?.find(p=>p.status==="Vainqueur" || Number(p.place)===1);
+  const remaining=s.players?.filter(p=>p.status==="En jeu").length || (winner?1:0);
+  const level=s.levels?.[s.levelIndex];
+
+  if($("liveResumeMessage")){
+    $("liveResumeMessage").innerHTML=
+      `<strong>Partie #${s.gameNo||"—"}</strong><br>`+
+      `${esc(shortDate(s.date||""))}${s.location?" · "+esc(s.location):""}<br>`+
+      `${s.players?.length||0} joueurs au départ · ${remaining} restant${remaining>1?"s":""}<br>`+
+      `${level?`Niveau ${level.level} · ${liveFmt(level.sb)} / ${liveFmt(level.bb)} · ${liveTime(s.remainingSeconds)}`:""}`;
+  }
+
+  $("liveResumeBackdrop").style.display="flex";
+  return true;
+}
+
+async function liveResetForNew(){
+  const s=ensureLiveState();
+  if(s.prepared && !s.synced){
+    const ok=await liveCancelCurrentGame({ask:true,showMessage:false});
+    if(!ok)return;
+  }else{
+    if(liveTicker){clearInterval(liveTicker);liveTicker=null;}
+    db.liveState=null;
+    saveDB();
+    liveSelected.clear();
+    liveRenderPlayerList();
+    livePreviewStructure();
+    liveShowScreen("prep");
+  }
 }
 function liveInit(){
   ensureLiveState();
   $("liveDate").value=new Date().toISOString().slice(0,10);
   $("liveBuyIn").value=db.settings.stake||5;
   liveRenderPlayerList();
+
+  const interrupted=liveInterruptedState();
+
   if(db.liveState&&db.liveState.prepared){
-    if(db.liveState.running){
-      db.liveState.running=false;db.liveState.runStartedAt=null;db.liveState.endAt=null;saveDB();
+    // Un live existant est restauré visuellement, mais jamais relancé automatiquement.
+    db.liveState.running=false;
+    db.liveState.runStartedAt=null;
+    db.liveState.endAt=null;
+    saveLocalOnly();
+
+    liveShowScreen("game");
+    liveRenderAll();
+
+    if(interrupted){
+      setTimeout(showLiveResumePrompt,80);
     }
-    liveShowScreen("game");liveRenderAll();
   }else{
-    liveShowScreen("prep");livePreviewStructure();
+    liveShowScreen("prep");
+    livePreviewStructure();
   }
 }
 let correctionUnlocked=true;
@@ -4353,10 +4665,35 @@ if($("gameSummaryBackdrop"))$("gameSummaryBackdrop").onclick=e=>{if(e.target===$
 
 // Live : affichage, plein écran et test audio
 if($("liveFullscreenBtn"))$("liveFullscreenBtn").onclick=toggleLiveFullscreen;
+if($("liveFullscreenExitBtn"))$("liveFullscreenExitBtn").onclick=()=>document.exitFullscreen?.();
+if($("liveCancelGameBtn"))$("liveCancelGameBtn").onclick=()=>liveCancelCurrentGame({ask:true,showMessage:true});
+if($("liveResumeContinueBtn"))$("liveResumeContinueBtn").onclick=()=>{
+  $("liveResumeBackdrop").style.display="none";
+  showView("live");
+  liveShowScreen("game");
+  liveRenderAll();
+};
+if($("liveResumeCancelBtn"))$("liveResumeCancelBtn").onclick=async()=>{
+  $("liveResumeBackdrop").style.display="none";
+  await liveCancelCurrentGame({ask:false,showMessage:true});
+  showView("live");
+};
 if($("liveDisplayModeBtn"))$("liveDisplayModeBtn").onclick=toggleLivePresentation;
 if($("liveTestSoundBtn"))$("liveTestSoundBtn").onclick=testLiveSound;
 document.addEventListener("fullscreenchange",()=>{
-  if($("liveFullscreenBtn"))$("liveFullscreenBtn").textContent=document.fullscreenElement?"Quitter plein écran":"Plein écran";
+  const inLiveFullscreen=document.fullscreenElement===$("liveFullscreenDisplay");
+  if($("liveFullscreenBtn"))$("liveFullscreenBtn").textContent=inLiveFullscreen?"Quitter plein écran":"Plein écran";
+  if(inLiveFullscreen){
+    liveRenderFullscreen();
+  }else{
+    // Retour automatique à l'écran Live de gestion :
+    // éliminations, timer +/- 1 min, niveaux précédent/suivant.
+    if(db.liveState?.prepared){
+      showView("live");
+      liveShowScreen("game");
+      liveRenderAll();
+    }
+  }
 });
 
 // Navigation principale
