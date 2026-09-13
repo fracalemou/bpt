@@ -418,12 +418,41 @@ header .app-version{
   0%{box-shadow:0 0 0 0 rgba(232,195,158,.85);background:rgba(232,195,158,.18)}
   100%{box-shadow:0 0 0 22px rgba(232,195,158,0);background:transparent}
 }
+
+.bpt-modal-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:10000;
+  background:rgba(0,0,0,.68);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.bpt-modal{
+  width:min(520px,100%);
+  background:#15202b;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:16px;
+  box-shadow:0 24px 70px rgba(0,0,0,.55);
+  padding:20px;
+}
+.bpt-modal h2{margin:0 0 12px}
+.bpt-modal-message{
+  white-space:pre-line;
+  line-height:1.5;
+  color:#dce7f4;
+}
+.bpt-modal-actions{
+  justify-content:flex-end;
+  margin-top:18px;
+}
 </style>
 </head>
 <body>
 <header>
   <div class="brand"><b>BPT — Championnat de poker</b><span>Gestion complète du championnat 2026-2027</span></div>
-  <div class="app-version">Version 13/09/26 08h28</div>
+  <div class="app-version">Version 13/09/26 09h18</div>
 </header>
 <nav id="nav">
   <button data-view="live">Live</button>
@@ -523,7 +552,7 @@ header .app-version{
             <button class="btn ghost" id="livePrevLevelBtn">Niveau précédent</button>
             <button class="btn ghost" id="liveNextLevelBtn">Niveau suivant</button>
           </div>
-          <div id="liveSoundStatus" class="muted" style="margin-top:8px">🔊 Alertes sonores : 3 bips à 10 s, son au changement de niveau puis annonce vocale des nouvelles blinds.</div>
+          <div id="liveSoundStatus" class="muted" style="margin-top:8px">🔊 Alertes sonores : annonce « 30 secondes » à 30 s, 3 bips à 10 s, puis annonce vocale des nouvelles blinds.</div>
         </div>
 
         <div class="card">
@@ -849,6 +878,18 @@ header .app-version{
   </div>
 </section>
 </main>
+
+<div id="bptModalBackdrop" class="bpt-modal-backdrop" style="display:none">
+  <div class="bpt-modal" role="dialog" aria-modal="true" aria-labelledby="bptModalTitle">
+    <h2 id="bptModalTitle">Confirmation</h2>
+    <div id="bptModalMessage" class="bpt-modal-message"></div>
+    <div class="row bpt-modal-actions">
+      <button class="btn ghost" id="bptModalCancelBtn" type="button">Annuler</button>
+      <button class="btn danger" id="bptModalConfirmBtn" type="button">Confirmer</button>
+    </div>
+  </div>
+</div>
+
 <footer>BPT — Gestion du championnat en HTML autonome</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -858,6 +899,62 @@ header .app-version{
 </div>
 <script>
 const $ = id => document.getElementById(id);
+
+function bptDialog({title="Information",message="",confirmText="OK",cancelText=null,danger=false}={}){
+  return new Promise(resolve=>{
+    const backdrop=$("bptModalBackdrop");
+    const titleEl=$("bptModalTitle");
+    const messageEl=$("bptModalMessage");
+    const cancelBtn=$("bptModalCancelBtn");
+    const confirmBtn=$("bptModalConfirmBtn");
+
+    if(!backdrop || !titleEl || !messageEl || !cancelBtn || !confirmBtn){
+      resolve(true);
+      return;
+    }
+
+    titleEl.textContent=title;
+    messageEl.textContent=message;
+    confirmBtn.textContent=confirmText;
+    cancelBtn.textContent=cancelText||"Annuler";
+    cancelBtn.style.display=cancelText?"inline-block":"none";
+
+    confirmBtn.className=danger?"btn danger":"btn";
+    backdrop.style.display="flex";
+
+    let settled=false;
+    const finish=value=>{
+      if(settled)return;
+      settled=true;
+      backdrop.style.display="none";
+      confirmBtn.onclick=null;
+      cancelBtn.onclick=null;
+      backdrop.onclick=null;
+      document.removeEventListener("keydown",onKey);
+      resolve(value);
+    };
+
+    const onKey=e=>{
+      if(e.key==="Escape")finish(false);
+      if(e.key==="Enter")finish(true);
+    };
+
+    confirmBtn.onclick=()=>finish(true);
+    cancelBtn.onclick=()=>finish(false);
+    backdrop.onclick=e=>{if(e.target===backdrop && cancelText)finish(false);};
+    document.addEventListener("keydown",onKey);
+    setTimeout(()=>confirmBtn.focus(),0);
+  });
+}
+
+function bptConfirm(message,title="Confirmation",confirmText="Confirmer"){
+  return bptDialog({title,message,confirmText,cancelText:"Annuler",danger:true});
+}
+
+function bptMessage(message,title="Information"){
+  return bptDialog({title,message,confirmText:"OK"});
+}
+
 function clone(o){return JSON.parse(JSON.stringify(o));}
 
 const SEED={"players":[{"name":"Alexis Volant","active":true},{"name":"Adrien Thiriez","active":true},{"name":"Anne BERA","active":false},{"name":"Areski AIT GHERBI","active":true},{"name":"Armell ARRAS","active":false},{"name":"Armelle BRAHIMI","active":false},{"name":"Arnaud HEDIN","active":false},{"name":"Clément MARAVAL","active":true},{"name":"Clément Thery","active":false},{"name":"Cyprien RIFFE","active":false},{"name":"David SAGALOWICZ","active":true},{"name":"ELEN","active":true},{"name":"Florence SAGALOWICZ","active":false},{"name":"Franck NAESSENS","active":true},{"name":"François CATTEAU","active":true},{"name":"Frédéric Tavernier","active":false},{"name":"Gérard CANDELIER","active":false},{"name":"Grégoire DUFORET","active":true},{"name":"Guillaume Molmy","active":false},{"name":"Hélène MORIZUR","active":false},{"name":"Jean Arnaud HEDIN OPIGEZ","active":false},{"name":"Jérémie CARPENTIER","active":true},{"name":"Jérémy COQUEL","active":true},{"name":"Jérôme BERA","active":true},{"name":"Jérôme BINOT","active":true},{"name":"Jérôme RIFFE","active":true},{"name":"joueur 74","active":false},{"name":"joueur 75","active":false},{"name":"Jules NAESSENS","active":true},{"name":"Laurent SAGALOWICZ","active":false},{"name":"LUC quebec","active":false},{"name":"MATTHIEU (Rimbaud)","active":false},{"name":"Maxence BINOT","active":false},{"name":"Mehdi BRAHIMI","active":true},{"name":"Mélanie BINOT","active":false},{"name":"Mélanie NAESSENS","active":false},{"name":"Michel SCHERPEREEL","active":true},{"name":"Nuno Tinoco","active":false},{"name":"Olivier HENGUELLE","active":true},{"name":"Philippe DUBOIS","active":true},{"name":"Quentin","active":true},{"name":"Romain Schepereel","active":false},{"name":"Solène BALLOIS","active":false},{"name":"Stéphane LEFIN","active":false},{"name":"Stéphane ROBERT","active":false},{"name":"Théo Maraval","active":false},{"name":"Thierry MONNIAUX","active":true},{"name":"Thomas DELVAL","active":false},{"name":"Valentin Naessens","active":false},{"name":"hélène fiona","active":false}],"history":[{"game":1,"date":"2026-09-11","location":"alexis","player":"Alexis Volant","place":1,"killer":"","tablier":true,"n":10,"points":30.0,"stake":5.0,"gross":30.0,"net":25.0,"kills":3,"win":true,"podium":true,"performance":123.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"Areski AIT GHERBI","place":2,"killer":"Alexis Volant","tablier":false,"n":10,"points":26.0,"stake":5.0,"gross":15.0,"net":10.0,"kills":5,"win":false,"podium":true,"performance":113.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"Jérôme RIFFE","place":3,"killer":"Alexis Volant","tablier":false,"n":10,"points":22.0,"stake":5.0,"gross":5.0,"net":0.0,"kills":1,"win":false,"podium":true,"performance":103.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"ELEN","place":4,"killer":"Alexis Volant","tablier":false,"n":10,"points":18.0,"stake":5.0,"gross":0.0,"net":-5.0,"kills":0,"win":false,"podium":false,"performance":93.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"David SAGALOWICZ","place":5,"killer":"Areski AIT GHERBI","tablier":false,"n":10,"points":15.0,"stake":5.0,"gross":0.0,"net":-5.0,"kills":0,"win":false,"podium":false,"performance":83.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"Franck NAESSENS","place":6,"killer":"Jérôme RIFFE","tablier":false,"n":10,"points":12.0,"stake":5.0,"gross":0.0,"net":-5.0,"kills":0,"win":false,"podium":false,"performance":73.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"Olivier HENGUELLE","place":7,"killer":"Areski AIT GHERBI","tablier":false,"n":10,"points":8.0,"stake":5.0,"gross":0.0,"net":-5.0,"kills":0,"win":false,"podium":false,"performance":63.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"Jérôme BINOT","place":8,"killer":"Areski AIT GHERBI","tablier":false,"n":10,"points":5.0,"stake":5.0,"gross":0.0,"net":-5.0,"kills":0,"win":false,"podium":false,"performance":53.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"Jérémy COQUEL","place":9,"killer":"Areski AIT GHERBI","tablier":false,"n":10,"points":3.0,"stake":5.0,"gross":0.0,"net":-5.0,"kills":0,"win":false,"podium":false,"performance":43.02585092994046},{"game":1,"date":"2026-09-11","location":"alexis","player":"Jérôme BERA","place":10,"killer":"Areski AIT GHERBI","tablier":false,"n":10,"points":1.0,"stake":5.0,"gross":0.0,"net":-5.0,"kills":0,"win":false,"podium":false,"performance":33.02585092994046}],"points":{"6":{"1":18,"2":14,"3":10,"4":6,"5":3,"6":1,"7":0,"8":0,"9":0,"10":0,"11":0,"12":0,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"7":{"1":21,"2":17,"3":13,"4":9,"5":6,"6":3,"7":1,"8":0,"9":0,"10":0,"11":0,"12":0,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"8":{"1":24,"2":20,"3":16,"4":12,"5":9,"6":6,"7":3,"8":1,"9":0,"10":0,"11":0,"12":0,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"9":{"1":27,"2":23,"3":19,"4":15,"5":12,"6":9,"7":6,"8":3,"9":1,"10":0,"11":0,"12":0,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"10":{"1":30,"2":26,"3":22,"4":18,"5":15,"6":12,"7":8,"8":5,"9":3,"10":1,"11":0,"12":0,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"11":{"1":33,"2":29,"3":25,"4":21,"5":18,"6":14,"7":11,"8":8,"9":5,"10":3,"11":1,"12":0,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"12":{"1":36,"2":32,"3":28,"4":25,"5":21,"6":17,"7":14,"8":11,"9":8,"10":5,"11":3,"12":1,"13":0,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"13":{"1":39,"2":35,"3":31,"4":28,"5":24,"6":20,"7":17,"8":14,"9":11,"10":8,"11":5,"12":3,"13":1,"14":0,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"14":{"1":42,"2":38,"3":34,"4":31,"5":27,"6":23,"7":20,"8":17,"9":13,"10":10,"11":8,"12":5,"13":3,"14":1,"15":0,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"15":{"1":45,"2":41,"3":37,"4":34,"5":30,"6":26,"7":23,"8":19,"9":16,"10":13,"11":10,"12":7,"13":5,"14":3,"15":1,"16":0,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"16":{"1":48,"2":44,"3":40,"4":37,"5":33,"6":29,"7":26,"8":22,"9":19,"10":16,"11":13,"12":10,"13":7,"14":5,"15":3,"16":1,"17":0,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"17":{"1":51,"2":47,"3":43,"4":40,"5":36,"6":32,"7":29,"8":25,"9":22,"10":19,"11":16,"12":13,"13":10,"14":7,"15":5,"16":3,"17":1,"18":0,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"18":{"1":54,"2":50,"3":46,"4":43,"5":39,"6":35,"7":32,"8":28,"9":25,"10":22,"11":18,"12":15,"13":12,"14":10,"15":7,"16":5,"17":3,"18":1,"19":0,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"19":{"1":57,"2":53,"3":49,"4":46,"5":42,"6":38,"7":35,"8":31,"9":28,"10":25,"11":21,"12":18,"13":15,"14":12,"15":10,"16":7,"17":5,"18":3,"19":1,"20":0,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"20":{"1":60,"2":56,"3":52,"4":49,"5":45,"6":41,"7":38,"8":34,"9":31,"10":27,"11":24,"12":21,"13":18,"14":15,"15":12,"16":9,"17":7,"18":5,"19":2,"20":1,"21":0,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"21":{"1":63,"2":59,"3":55,"4":52,"5":48,"6":44,"7":41,"8":37,"9":34,"10":30,"11":27,"12":24,"13":21,"14":18,"15":15,"16":12,"17":9,"18":7,"19":4,"20":2,"21":1,"22":0,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"22":{"1":66,"2":62,"3":58,"4":55,"5":51,"6":47,"7":44,"8":40,"9":37,"10":33,"11":30,"12":27,"13":24,"14":20,"15":17,"16":15,"17":12,"18":9,"19":7,"20":4,"21":2,"22":1,"23":0,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"23":{"1":69,"2":65,"3":61,"4":58,"5":54,"6":50,"7":47,"8":43,"9":40,"10":36,"11":33,"12":30,"13":26,"14":23,"15":20,"16":17,"17":14,"18":12,"19":9,"20":7,"21":4,"22":2,"23":1,"24":0,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"24":{"1":72,"2":68,"3":64,"4":61,"5":57,"6":53,"7":50,"8":46,"9":43,"10":39,"11":36,"12":32,"13":29,"14":26,"15":23,"16":20,"17":17,"18":14,"19":12,"20":9,"21":7,"22":4,"23":2,"24":1,"25":0,"26":0,"27":0,"28":0,"29":0,"30":0},"25":{"1":75,"2":71,"3":67,"4":64,"5":60,"6":56,"7":53,"8":49,"9":46,"10":42,"11":39,"12":35,"13":32,"14":29,"15":26,"16":23,"17":20,"18":17,"19":14,"20":11,"21":9,"22":7,"23":4,"24":2,"25":1,"26":0,"27":0,"28":0,"29":0,"30":0},"26":{"1":78,"2":74,"3":70,"4":67,"5":63,"6":59,"7":56,"8":52,"9":49,"10":45,"11":42,"12":38,"13":35,"14":32,"15":29,"16":25,"17":22,"18":20,"19":17,"20":14,"21":11,"22":9,"23":6,"24":4,"25":2,"26":1,"27":0,"28":0,"29":0,"30":0},"27":{"1":81,"2":77,"3":73,"4":70,"5":66,"6":62,"7":59,"8":55,"9":52,"10":48,"11":45,"12":41,"13":38,"14":35,"15":31,"16":28,"17":25,"18":22,"19":19,"20":17,"21":14,"22":11,"23":9,"24":6,"25":4,"26":2,"27":1,"28":0,"29":0,"30":0},"28":{"1":84,"2":80,"3":76,"4":73,"5":69,"6":65,"7":62,"8":58,"9":54,"10":51,"11":48,"12":44,"13":41,"14":38,"15":34,"16":31,"17":28,"18":25,"19":22,"20":19,"21":16,"22":14,"23":11,"24":9,"25":6,"26":4,"27":2,"28":1,"29":0,"30":0},"29":{"1":87,"2":83,"3":79,"4":76,"5":72,"6":68,"7":65,"8":61,"9":57,"10":54,"11":51,"12":47,"13":44,"14":40,"15":37,"16":34,"17":31,"18":28,"19":25,"20":22,"21":19,"22":16,"23":14,"24":11,"25":9,"26":6,"27":4,"28":2,"29":1,"30":0},"30":{"1":90,"2":86,"3":82,"4":79,"5":75,"6":71,"7":68,"8":64,"9":60,"10":57,"11":53,"12":50,"13":47,"14":43,"15":40,"16":37,"17":34,"18":31,"19":27,"20":25,"21":22,"22":19,"23":16,"24":13,"25":11,"26":8,"27":6,"28":4,"29":2,"30":1}},"settings":{"championshipName":"BPT","season":"2026-2027","stake":5,"payouts":[60,30,10],"roundTo5":false,"tablierMinPlayers":10}};
@@ -2179,7 +2276,7 @@ function togglePlayerByName(name){
 async function deletePlayerByName(name){
   const p=db.players.find(x=>x.name===name);
   if(!p){
-    alert("Joueur introuvable dans la liste.");
+    await bptMessage("Joueur introuvable dans la liste.","Suppression impossible");
     return;
   }
 
@@ -2195,19 +2292,28 @@ async function deletePlayerByName(name){
     db.liveState.players.some(x=>norm(x.name)===key && (x.status==="En jeu" || x.status==="Vainqueur"));
 
   if(inHistory){
-    alert(
+    await bptMessage(
       `Impossible de supprimer « ${name} » : ce joueur possède un historique de ${historyRows.length} participation${historyRows.length>1?"s":""}.\n\n`+
-      `Vous pouvez uniquement le passer en Inactif avec le bouton Actif/Inactif.`
+      `Vous pouvez uniquement le passer en Inactif avec le bouton Actif/Inactif.`,
+      "Suppression impossible"
     );
     return;
   }
 
   if(inLive){
-    alert(`Impossible de supprimer « ${name} » : ce joueur participe actuellement à une partie Live.`);
+    await bptMessage(
+      `Impossible de supprimer « ${name} » : ce joueur participe actuellement à une partie Live.`,
+      "Suppression impossible"
+    );
     return;
   }
 
-  if(!confirm(`Supprimer définitivement « ${name} » de la liste des joueurs ?`))return;
+  const confirmed=await bptConfirm(
+    `Supprimer définitivement « ${name} » de la liste des joueurs ?`,
+    "Supprimer le joueur",
+    "Supprimer"
+  );
+  if(!confirmed)return;
 
   const backup=JSON.parse(JSON.stringify(db));
 
@@ -2235,11 +2341,14 @@ async function deletePlayerByName(name){
       saveLocalOnly();
       renderAll();
       setCloudStatus("ok","Joueur supprimé");
-      alert(`« ${name} » a été supprimé de la liste des joueurs.`);
+      await bptMessage(`« ${name} » a été supprimé de la liste des joueurs.`,"Joueur supprimé");
     }else{
       // Hors ligne : conserve la suppression localement et programme la synchro.
       scheduleCloudSave();
-      alert(`« ${name} » a été supprimé localement. La synchronisation sera faite dès que possible.`);
+      await bptMessage(
+        `« ${name} » a été supprimé localement. La synchronisation sera faite dès que possible.`,
+        "Joueur supprimé"
+      );
     }
   }catch(e){
     db=backup;
@@ -2247,7 +2356,10 @@ async function deletePlayerByName(name){
     renderAll();
     console.error("BPT delete player:",e);
     setCloudStatus("offline","Erreur suppression",e?.message||String(e));
-    alert("La suppression a échoué.\n\n"+(e?.message||String(e)));
+    await bptMessage(
+      "La suppression a échoué.\n\n"+(e?.message||String(e)),
+      "Erreur de suppression"
+    );
   }
 }
 
@@ -2583,6 +2695,7 @@ let liveSelected=new Set();
 let liveTicker=null;
 let liveAudioCtx=null;
 let liveTenSecondWarningKey="";
+let liveThirtySecondWarningKey="";
 
 function liveEnsureAudio(){
   try{
@@ -2639,6 +2752,21 @@ function liveSpeakBlinds(){
     }
 
     const u=new SpeechSynthesisUtterance(msg);
+    u.lang="fr-FR";
+    u.rate=0.95;
+    u.pitch=1;
+    u.volume=1;
+    window.speechSynthesis.speak(u);
+  }catch(e){
+    console.warn("Annonce vocale indisponible :",e);
+  }
+}
+
+function liveSpeakThirtySeconds(){
+  try{
+    if(!("speechSynthesis" in window))return;
+    window.speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance("30 secondes");
     u.lang="fr-FR";
     u.rate=0.95;
     u.pitch=1;
@@ -2813,6 +2941,7 @@ function liveLaunch(){
   const buyIn=Math.max(0,Number($("liveBuyIn").value)||0);
   const st=liveBuildStructure(names.length,stack,target,useAnte,minSB);
   liveTenSecondWarningKey="";
+  liveThirtySecondWarningKey="";
   db.liveState={
     prepared:true,running:false,synced:false,gameNo:nextGameNo(),
     date:$("liveDate").value||new Date().toISOString().slice(0,10),
@@ -2844,6 +2973,12 @@ function liveRunTicker(){
     s.remainingSeconds=Math.max(0,Math.ceil((s.endAt-Date.now())/1000));
 
     const warningKey=`${s.gameNo||0}:${s.levelIndex}`;
+
+    if(s.remainingSeconds<=30 && s.remainingSeconds>10 && liveThirtySecondWarningKey!==warningKey){
+      liveThirtySecondWarningKey=warningKey;
+      liveSpeakThirtySeconds();
+    }
+
     if(s.remainingSeconds<=10 && s.remainingSeconds>0 && liveTenSecondWarningKey!==warningKey){
       liveTenSecondWarningKey=warningKey;
       liveWarningSound();
@@ -2887,6 +3022,7 @@ function liveChangeLevel(delta,auto=false){
   s.levelIndex=Math.max(0,Math.min(s.levels.length-1,s.levelIndex+delta));
   s.remainingSeconds=s.levelSeconds;
   liveTenSecondWarningKey="";
+  liveThirtySecondWarningKey="";
 
   if(s.running)s.endAt=Date.now()+s.remainingSeconds*1000;
   saveDB();liveRenderAll();
