@@ -628,7 +628,7 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
       <span>Gestion du championnat 2026-2027</span>
     </div>
   </div>
-  <div class="app-version">Version 13/09/26 11h27</div>
+  <div class="app-version">Version 13/09/26 11h43</div>
 </header>
 <nav id="nav">
   <button data-view="home" class="active">⌂ Accueil</button>
@@ -758,7 +758,6 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
         <div class="row">
           <span class="live-badge" id="liveSyncBadge">NON SYNCHRONISÉE</span>
           <button class="btn ghost" id="liveTestSoundBtn" type="button">Tester le son</button>
-          <button class="btn ghost" id="liveDisplayModeBtn" type="button">Masquer les commandes</button>
           <button class="btn ghost" id="liveFullscreenBtn" type="button">Plein écran</button>
           <button class="btn danger live-admin-only" id="liveCancelGameBtn" type="button">Annuler la partie</button>
           <button class="btn ghost live-admin-only" id="liveBackPrepBtn">Préparation</button>
@@ -1001,7 +1000,7 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
 
 
 <section id="records" class="view">
-  <div class="hero"><h1>Records BPT</h1><p>Les performances marquantes du championnat.</p></div>
+  <div class="hero"><h1>Records BPT</h1><p>Les performances marquantes du championnat. <strong>🔥 On Fire</strong> : meilleur total de points sur les 3 dernières parties · <strong>💔 Bad Beat</strong> : plus de 4e places · <strong>🐢 Loser</strong> : plus de dernières places.</p></div>
   <div id="recordsGrid" class="records-grid" style="margin-top:12px"></div>
 </section>
 
@@ -2089,16 +2088,22 @@ function renderRecords(){
     if(b>streakPart.value)streakPart={name:p.name,value:b};
   }
 
-  let comeback={name:"—",value:0,from:null,to:null};
   const gameNos=[...new Set((db.history||[]).map(r=>Number(r.game)))].sort((a,b)=>a-b);
-  for(let i=1;i<gameNos.length;i++){
-    const prev=rankSnapshotUntil(gameNos[i-1]),cur=rankSnapshotUntil(gameNos[i]);
-    const pm=new Map(prev.map(x=>[x.name,x.rank]));
-    for(const x of cur){
-      if(pm.has(x.name)){
-        const gain=pm.get(x.name)-x.rank;
-        if(gain>comeback.value)comeback={name:x.name,value:gain,from:pm.get(x.name),to:x.rank};
-      }
+  const last3Games=gameNos.slice(-3);
+  let onFire={name:"—",value:0,details:""};
+  if(last3Games.length){
+    const totals={};
+    for(const r of db.history||[]){
+      if(!last3Games.includes(Number(r.game)))continue;
+      totals[r.player]=(totals[r.player]||0)+Number(r.points||0);
+    }
+    const best=Object.entries(totals).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],"fr"))[0];
+    if(best){
+      onFire={
+        name:best[0],
+        value:best[1],
+        details:`${best[1]} pts sur ${last3Games.length} dernière${last3Games.length>1?"s":""} partie${last3Games.length>1?"s":""}`
+      };
     }
   }
 
@@ -2109,6 +2114,37 @@ function renderRecords(){
   const topPair=Object.entries(pairs).sort((a,b)=>b[1]-a[1])[0];
   const pairData=topPair?{names:topPair[0].split("|||"),value:topPair[1]}:null;
 
+
+  // Bad Beat : joueur avec le plus de 4e places.
+  let badBeat={name:"—",value:0};
+  // Loser : joueur avec le plus de dernières places.
+  let loser={name:"—",value:0};
+
+  const fourthCounts={};
+  const lastPlaceCounts={};
+
+  for(const r of db.history||[]){
+    const player=String(r.player||"");
+    const place=Number(r.place)||0;
+    const n=Number(r.n)||0;
+    if(!player || !place)continue;
+
+    if(place===4){
+      fourthCounts[player]=(fourthCounts[player]||0)+1;
+    }
+    if(n>0 && place===n){
+      lastPlaceCounts[player]=(lastPlaceCounts[player]||0)+1;
+    }
+  }
+
+  const bestFourth=Object.entries(fourthCounts)
+    .sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],"fr"))[0];
+  if(bestFourth)badBeat={name:bestFourth[0],value:bestFourth[1]};
+
+  const bestLast=Object.entries(lastPlaceCounts)
+    .sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],"fr"))[0];
+  if(bestLast)loser={name:bestLast[0],value:bestLast[1]};
+
   const cards=[
     ["🏆","Plus de victoires",wins.name,`${wins.wins} victoire${wins.wins>1?"s":""}`],
     ["🥉","Plus de podiums",podiums.name,`${podiums.podiums} podium${podiums.podiums>1?"s":""}`],
@@ -2116,9 +2152,11 @@ function renderRecords(){
     ["🎯","Kills sur une partie",bestGameKill.name,`${bestGameKill.value} · partie #${bestGameKill.game||"—"}`],
     ["📈","Meilleure moyenne",avg.name,`${num(avg.avgPoints,1)} pts / partie`],
     ["💶","Meilleur solde",net.name,euro(net.net)],
-    ["🔥","Série de podiums",streakPod.name,`${streakPod.value} de suite`],
+    ["🏅","Série de podiums",streakPod.name,`${streakPod.value} de suite`],
     ["🎟","Série de participations",streakPart.name,`${streakPart.value} partie${streakPart.value>1?"s":""} de suite`],
-    ["🚀","Plus gros comeback",comeback.name,comeback.value?`+${comeback.value} place${comeback.value>1?"s":""} (${comeback.from} → ${comeback.to})`:"—"],
+    ["🔥","On Fire",onFire.name,onFire.details?`${onFire.details} · joueur le plus performant sur les 3 dernières parties`:"—"],
+    ["💔","Bad Beat",badBeat.name,badBeat.value?`${badBeat.value} quatrième${badBeat.value>1?"s":""} place${badBeat.value>1?"s":""}`:"Aucune 4e place enregistrée"],
+    ["🐢","Loser",loser.name,loser.value?`${loser.value} dernière${loser.value>1?"s":""} place${loser.value>1?"s":""}`:"Aucune dernière place enregistrée"],
     ["⚔","Duel le plus fréquent",pairData?`${pairData.names[0]} → ${pairData.names[1]}`:"—",pairData?`${pairData.value} élimination${pairData.value>1?"s":""}`:"—"]
   ];
   holder.innerHTML=cards.map(c=>`<div class="record-card"><div class="record-icon">${c[0]}</div><span>${esc(c[1])}</span><strong>${esc(c[2])}</strong><small>${esc(c[3])}</small></div>`).join("");
@@ -2241,12 +2279,6 @@ function liveRenderFullscreen(){
 
   $("liveFsTimer").classList.toggle("warning30",s.remainingSeconds<=30 && s.remainingSeconds>10);
   $("liveFsTimer").classList.toggle("warning10",s.remainingSeconds<=10);
-}
-
-function toggleLivePresentation(){
-  document.body.classList.toggle("live-presentation");
-  const btn=$("liveDisplayModeBtn");
-  if(btn)btn.textContent=document.body.classList.contains("live-presentation")?"Afficher les commandes":"Masquer les commandes";
 }
 
 function testLiveSound(){
@@ -4678,7 +4710,6 @@ if($("liveResumeCancelBtn"))$("liveResumeCancelBtn").onclick=async()=>{
   await liveCancelCurrentGame({ask:false,showMessage:true});
   showView("live");
 };
-if($("liveDisplayModeBtn"))$("liveDisplayModeBtn").onclick=toggleLivePresentation;
 if($("liveTestSoundBtn"))$("liveTestSoundBtn").onclick=testLiveSound;
 document.addEventListener("fullscreenchange",()=>{
   const inLiveFullscreen=document.fullscreenElement===$("liveFullscreenDisplay");
