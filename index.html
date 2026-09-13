@@ -1424,6 +1424,7 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
 
 .premium-records-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
 .premium-record-item{
+  position:relative;
   display:grid;
   grid-template-columns:auto 1fr auto;
   gap:12px;
@@ -1437,6 +1438,7 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
 .premium-record-icon{font-size:22px;width:30px;text-align:center}
 .premium-record-copy strong{display:block;font-size:16px;margin-top:3px}
 .premium-record-item b{font-size:16px;color:#f0d08b}
+.premium-record-badge{position:absolute;top:10px;right:10px;padding:2px 8px;border-radius:999px;background:rgba(225,81,81,.16);border:1px solid rgba(225,81,81,.32);color:#ff8e8e;font-size:11px;font-weight:800;letter-spacing:.04em}
 
 .premium-achievements-list{display:grid;gap:12px}
 .premium-achievement-player{
@@ -2028,6 +2030,20 @@ td{border-bottom-color:#273140 !important}
   content:"♠ ";
   color:#c8a15c;
 }
+
+/* V91 — 9 records express aléatoires */
+#dashboard .premium-records-list{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+#dashboard .premium-record-item{
+  min-height:76px;
+}
+@media(max-width:1050px){
+  #dashboard .premium-records-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:680px){
+  #dashboard .premium-records-list{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
@@ -2045,7 +2061,7 @@ td{border-bottom-color:#273140 !important}
       <span>Gestion du championnat 2026-2027</span>
     </div>
   </div>
-  <div class="app-version">Version 13/09/26 16h02</div>
+  <div class="app-version">Version 13/09/26 14h16</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -2313,11 +2329,12 @@ td{border-bottom-color:#273140 !important}
 
   <div class="premium-bottom-grid">
     <section class="premium-panel">
-      <div class="premium-panel-head solo">
+      <div class="premium-panel-head">
         <div>
           <div class="premium-eyebrow">Repères</div>
           <h2>Records express</h2>
         </div>
+        <div class="premium-panel-note">9 records au hasard · NEW si battu lors de la dernière partie</div>
       </div>
       <div id="dashQuickRecords" class="premium-records-list"></div>
     </section>
@@ -4256,6 +4273,250 @@ function renderAll(){
   renderDashboard();renderLatestGame();renderRanking();renderVersus();renderRecords();renderAchievements();renderProfile();renderHistory();renderPlayers();renderGamePlayers();renderSettings();renderPoints();if(correctionUnlocked)renderCorrectionGameList(null,false);if(document.getElementById("livePlayerList"))liveRenderPlayerList();
 }
 
+
+let dashboardRecordSelection=null;
+
+function shuffleCopy(list){
+  const a=[...list];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function groupedGamesFromRows(rows){
+  const m=new Map();
+  for(const r of (rows||[])){
+    const g=Number(r.game);
+    if(!Number.isFinite(g) || g<=0)continue;
+    if(!m.has(g))m.set(g,[]);
+    m.get(g).push(r);
+  }
+  return [...m.entries()].sort((a,b)=>a[0]-b[0]);
+}
+
+function statsFromRows(rows){
+  const by={};
+  for(const p of (db.players||[]))by[p.name]={name:p.name,points:0,games:new Set(),wins:0,podiums:0,tabliers:0,kills:0,stake:0,gross:0,net:0};
+  for(const r of (rows||[])){
+    if(!by[r.player])by[r.player]={name:r.player,points:0,games:new Set(),wins:0,podiums:0,tabliers:0,kills:0,stake:0,gross:0,net:0};
+    const s=by[r.player];
+    s.points+=Number(r.points||0);
+    s.games.add(r.game);
+    s.wins+=r.win?1:0;
+    s.podiums+=r.podium?1:0;
+    s.tabliers+=r.tablier?1:0;
+    s.kills+=Number(r.kills||0);
+    s.stake+=Number(r.stake||0);
+    s.gross+=Number(r.gross||0);
+    s.net+=Number(r.net||0);
+  }
+  return Object.values(by).map(s=>({
+    ...s,
+    gamesCount:s.games.size,
+    avgPoints:s.games.size?s.points/s.games.size:0,
+    winRate:s.games.size?(s.wins/s.games.size)*100:0,
+    podiumRate:s.games.size?(s.podiums/s.games.size)*100:0,
+    kpg:s.games.size?s.kills/s.games.size:0
+  }));
+}
+
+function rankingFromRows(rows){
+  return statsFromRows(rows)
+    .filter(s=>s.gamesCount>0)
+    .sort((a,b)=>Number(b.points||0)-Number(a.points||0)||Number(b.avgPoints||0)-Number(a.avgPoints||0)||a.name.localeCompare(b.name,'fr'));
+}
+
+function longestPlayerStreakFromRows(name,predicate,rows){
+  const filtered=(rows||[]).filter(r=>r.player===name).sort((a,b)=>Number(a.game)-Number(b.game));
+  let best=0,cur=0;
+  for(const r of filtered){
+    cur=predicate(r)?cur+1:0;
+    if(cur>best)best=cur;
+  }
+  return best;
+}
+
+function longestParticipationRunFromRows(name,rows){
+  const gs=[...new Set((rows||[]).filter(r=>r.player===name).map(r=>Number(r.game)).filter(g=>Number.isFinite(g)&&g>0))].sort((a,b)=>a-b);
+  let best=0,cur=0,prev=null;
+  for(const g of gs){
+    cur=(prev!==null && g===prev+1)?cur+1:1;
+    best=Math.max(best,cur);
+    prev=g;
+  }
+  return best;
+}
+
+function buildDashboardRecordPool(games,ranked,sourceRows){
+  const rows=Array.isArray(sourceRows)?sourceRows:(Array.isArray(db.history)?db.history:[]);
+  const computedGames=Array.isArray(games)?games:groupedGamesFromRows(rows);
+  const computedRank=Array.isArray(ranked)?ranked:rankingFromRows(rows);
+  if(!computedRank.length)return [];
+
+  const maxBy=(key)=>[...computedRank].sort((a,b)=>Number(b[key]||0)-Number(a[key]||0)||a.name.localeCompare(b.name,'fr'))[0];
+  const wins=maxBy('wins');
+  const podiums=maxBy('podiums');
+  const kills=maxBy('kills');
+  const avg=maxBy('avgPoints');
+  const net=maxBy('net');
+  const worstNet=[...computedRank].sort((a,b)=>Number(a.net||0)-Number(b.net||0)||a.name.localeCompare(b.name,'fr'))[0];
+
+  let bestGameKill={name:'—',value:0,game:null};
+  for(const r of rows){
+    if(Number(r.kills||0)>bestGameKill.value){
+      bestGameKill={name:r.player,value:Number(r.kills||0),game:Number(r.game||0)};
+    }
+  }
+
+  let streakPod={name:'—',value:0};
+  let streakPart={name:'—',value:0};
+  let winStreak={name:'—',value:0};
+  let tablierCount={name:'—',value:0};
+  let tablierStreak={name:'—',value:0};
+
+  for(const p of computedRank){
+    const pod=longestPlayerStreakFromRows(p.name,r=>Number(r.place)<=3,rows);
+    if(pod>streakPod.value)streakPod={name:p.name,value:pod};
+
+    const part=longestParticipationRunFromRows(p.name,rows);
+    if(part>streakPart.value)streakPart={name:p.name,value:part};
+
+    const playerRows=rows.filter(r=>r.player===p.name).sort((a,b)=>Number(a.game)-Number(b.game));
+    let curWin=0,bestWin=0,curTab=0,bestTab=0,totalTab=0;
+    for(const r of playerRows){
+      const isWin=Number(r.place)===1;
+      const isTablier=!!r.tablier || (isWin && Number(r.n)>=10);
+      curWin=isWin?curWin+1:0;
+      if(curWin>bestWin)bestWin=curWin;
+      if(isTablier)totalTab++;
+      curTab=isTablier?curTab+1:0;
+      if(curTab>bestTab)bestTab=curTab;
+    }
+    if(bestWin>winStreak.value)winStreak={name:p.name,value:bestWin};
+    if(totalTab>tablierCount.value)tablierCount={name:p.name,value:totalTab};
+    if(bestTab>tablierStreak.value)tablierStreak={name:p.name,value:bestTab};
+  }
+
+  const gameNos=[...new Set(rows.map(r=>Number(r.game)).filter(g=>Number.isFinite(g)&&g>0))].sort((a,b)=>a-b);
+  const last3Games=gameNos.slice(-3);
+  let onFire={name:'—',value:0,details:''};
+  if(last3Games.length){
+    const totals={};
+    for(const r of rows){
+      if(!last3Games.includes(Number(r.game)))continue;
+      totals[r.player]=(totals[r.player]||0)+Number(r.points||0);
+    }
+    const best=Object.entries(totals).sort((a,b)=>Number(b[1]||0)-Number(a[1]||0)||a[0].localeCompare(b[0],'fr'))[0];
+    if(best)onFire={name:best[0],value:Number(best[1]||0),details:`${best[1]} pts sur ${last3Games.length} partie${last3Games.length>1?'s':''}`};
+  }
+
+  const pairs={};
+  for(const r of rows){
+    if(!r.killer)continue;
+    const k=`${r.killer}|||${r.player}`;
+    pairs[k]=(pairs[k]||0)+1;
+  }
+  const topPair=Object.entries(pairs).sort((a,b)=>Number(b[1]||0)-Number(a[1]||0)||String(a[0]).localeCompare(String(b[0]),'fr'))[0];
+  const pairData=topPair?{names:topPair[0].split('|||'),value:Number(topPair[1]||0)}:null;
+
+  const fourthCounts={},lastPlaceCounts={};
+  for(const r of rows){
+    const player=String(r.player||'');
+    const place=Number(r.place)||0;
+    const n=Number(r.n)||0;
+    if(!player||!place)continue;
+    if(place===4)fourthCounts[player]=(fourthCounts[player]||0)+1;
+    if(n>0 && place===n)lastPlaceCounts[player]=(lastPlaceCounts[player]||0)+1;
+  }
+  const fourth=Object.entries(fourthCounts).sort((a,b)=>Number(b[1]||0)-Number(a[1]||0)||a[0].localeCompare(b[0],'fr'))[0];
+  const last=Object.entries(lastPlaceCounts).sort((a,b)=>Number(b[1]||0)-Number(a[1]||0)||a[0].localeCompare(b[0],'fr'))[0];
+  const badBeat=fourth?{name:fourth[0],value:Number(fourth[1]||0)}:{name:'—',value:0};
+  const loser=last?{name:last[0],value:Number(last[1]||0)}:{name:'—',value:0};
+
+  const biggestGross=rows.reduce((best,row)=>{
+    const gross=Number(row.gross||0);
+    if(!best || gross>best.gross || (gross===best.gross && String(row.player||'').localeCompare(String(best.player||''),'fr')<0)){
+      return {player:row.player||'—',gross,game:Number(row.game||0)};
+    }
+    return best;
+  },null);
+
+  const participantRecord=computedGames.length?Math.max(...computedGames.map(g=>g[1].length)):0;
+
+  return [
+    {id:'wins',icon:'🏆',label:'Plus de victoires',player:wins?.name||'—',value:wins?`${wins.wins}`:'—',metric:Number(wins?.wins||0),better:'max'},
+    {id:'winStreak',icon:'⚡',label:'Série de victoires',player:winStreak.name,value:winStreak.value?`${winStreak.value} de suite`:'—',metric:Number(winStreak.value||0),better:'max'},
+    {id:'tablierCount',icon:'🧥',label:'Plus de tabliers',player:tablierCount.name,value:tablierCount.value?`${tablierCount.value}`:'—',metric:Number(tablierCount.value||0),better:'max'},
+    {id:'tablierStreak',icon:'👑',label:'Série de tabliers',player:tablierStreak.name,value:tablierStreak.value?`${tablierStreak.value} de suite`:'—',metric:Number(tablierStreak.value||0),better:'max'},
+    {id:'podiums',icon:'🥉',label:'Plus de podiums',player:podiums?.name||'—',value:podiums?`${podiums.podiums}`:'—',metric:Number(podiums?.podiums||0),better:'max'},
+    {id:'podiumStreak',icon:'🏅',label:'Série de podiums',player:streakPod.name,value:streakPod.value?`${streakPod.value} de suite`:'—',metric:Number(streakPod.value||0),better:'max'},
+    {id:'kills',icon:'💥',label:'Plus de kills',player:kills?.name||'—',value:kills?`${kills.kills}`:'—',metric:Number(kills?.kills||0),better:'max'},
+    {id:'bestGameKill',icon:'🎯',label:'Kills sur une partie',player:bestGameKill.name,value:bestGameKill.value?`${bestGameKill.value} · P${bestGameKill.game||'—'}`:'—',metric:Number(bestGameKill.value||0),better:'max'},
+    {id:'avg',icon:'📈',label:'Meilleure moyenne',player:avg?.name||'—',value:avg?`${num(avg.avgPoints,1)} pts`:'—',metric:Number(avg?.avgPoints||0),better:'max'},
+    {id:'net',icon:'💰',label:'Meilleur solde',player:net?.name||'—',value:net?euro(net.net):'—',metric:Number(net?.net||0),better:'max'},
+    {id:'worstNet',icon:'📉',label:'Plus grosse perte',player:worstNet?.name||'—',value:worstNet?euro(worstNet.net):'—',metric:Number(worstNet?.net||0),better:'min'},
+    {id:'participationStreak',icon:'🎟',label:'Série de participations',player:streakPart.name,value:streakPart.value?`${streakPart.value} de suite`:'—',metric:Number(streakPart.value||0),better:'max'},
+    {id:'onFire',icon:'🔥',label:'On Fire',player:onFire.name,value:onFire.details||'—',metric:Number(onFire.value||0),better:'max'},
+    {id:'badBeat',icon:'💔',label:'Bad Beat',player:badBeat.name,value:badBeat.value?`${badBeat.value} fois 4e`:'—',metric:Number(badBeat.value||0),better:'max'},
+    {id:'lastPlaces',icon:'🐢',label:'Dernières places',player:loser.name,value:loser.value?`${loser.value}`:'—',metric:Number(loser.value||0),better:'max'},
+    {id:'killPair',icon:'🎯',label:'Kill le plus fréquent',player:pairData?`${pairData.names[0]} → ${pairData.names[1]}`:'—',value:pairData?`${pairData.value} fois`:'—',metric:Number(pairData?.value||0),better:'max'},
+    {id:'biggestGross',icon:'🪙',label:'Plus gros gain',player:biggestGross?.player||'—',value:biggestGross?euro(biggestGross.gross):'—',metric:Number(biggestGross?.gross||0),better:'max'},
+    {id:'participants',icon:'👥',label:'Record de participants',player:computedGames.length?'Championnat':'—',value:participantRecord?`${participantRecord} joueurs`:'—',metric:Number(participantRecord||0),better:'max'}
+  ];
+}
+
+function latestBrokenDashboardRecords(){
+  const rows=Array.isArray(db.history)?db.history:[];
+  const games=groupedGamesFromRows(rows);
+  if(games.length<2)return [];
+  const latestGameNo=games[games.length-1][0];
+  const previousRows=rows.filter(r=>Number(r.game)!==Number(latestGameNo));
+  const currentPool=buildDashboardRecordPool(games, rankingFromRows(rows), rows);
+  const previousPool=buildDashboardRecordPool(groupedGamesFromRows(previousRows), rankingFromRows(previousRows), previousRows);
+  const previousMap=new Map(previousPool.map(r=>[r.id,r]));
+
+  return currentPool.filter(cur=>{
+    const prev=previousMap.get(cur.id);
+    if(!prev)return false;
+    const curMetric=Number(cur.metric);
+    const prevMetric=Number(prev.metric);
+    if(!Number.isFinite(curMetric) || !Number.isFinite(prevMetric))return false;
+    if(cur.better==='min')return curMetric<prevMetric;
+    return curMetric>prevMetric;
+  }).map(r=>({...r,isNew:true}));
+}
+
+function randomDashboardRecords(pool,count=9,forcedRecords=[]){
+  const available=pool.filter(r=>r && r.label);
+  const byId=new Map(available.map(r=>[(r.id||r.label),r]));
+  const wanted=Math.min(count,available.length);
+
+  const forcedIds=[];
+  for(const r of (forcedRecords||[])){
+    const id=r && (r.id||r.label);
+    if(id && byId.has(id) && !forcedIds.includes(id))forcedIds.push(id);
+  }
+
+  const remaining=available.filter(r=>!forcedIds.includes(r.id||r.label));
+  const remainingIds=new Set(remaining.map(r=>r.id||r.label));
+  const targetExtra=Math.max(0,wanted-forcedIds.length);
+  const currentExtra=Array.isArray(dashboardRecordSelection)
+    ? dashboardRecordSelection.filter(id=>!forcedIds.includes(id) && remainingIds.has(id))
+    : [];
+
+  if(currentExtra.length!==targetExtra){
+    dashboardRecordSelection=forcedIds.concat(
+      shuffleCopy(remaining).slice(0,targetExtra).map(r=>r.id||r.label)
+    );
+  }else{
+    dashboardRecordSelection=forcedIds.concat(currentExtra.slice(0,targetExtra));
+  }
+
+  return dashboardRecordSelection.map(id=>byId.get(id)).filter(Boolean);
+}
+
 function renderDashboard(){
   const games=groupedGames();
   const rank=ranking();
@@ -4309,21 +4570,18 @@ function renderDashboard(){
     $("dashLatestGameTeaser").textContent="Le résumé apparaîtra ici.";
   }
 
-  const maxBy=(arr,fn)=>arr.length?[...arr].sort((a,b)=>fn(b)-fn(a)||Number(b.points||0)-Number(a.points||0)||a.name.localeCompare(b.name,'fr'))[0]:null;
-  const mostWins=maxBy(playerStats,s=>Number(s.wins||0));
-  const mostKills=maxBy(playerStats,s=>Number(s.kills||0));
-  const bestAvg=maxBy(playerStats,s=>Number(s.avgPoints||0));
-  const bestNet=maxBy(playerStats,s=>Number(s.net||0));
-  const participantRecord=games.length?Math.max(...games.map(g=>g[1].length)):0;
-  const records=[
-    {icon:'🏆', label:'Plus de victoires', player:mostWins?.name||'—', value:mostWins?`${mostWins.wins}`:'—'},
-    {icon:'🎯', label:'Plus de kills', player:mostKills?.name||'—', value:mostKills?`${mostKills.kills}`:'—'},
-    {icon:'📈', label:'Meilleure moyenne', player:bestAvg?.name||'—', value:bestAvg?num(mostAvgFix(bestAvg.avgPoints),2):'—'},
-    {icon:'💰', label:'Meilleur solde', player:bestNet?.name||'—', value:bestNet?euro(bestNet.net):'—'},
-    {icon:'👥', label:'Record de participants', player:games.length?'Championnat':'—', value:participantRecord?`${participantRecord}`:'—'}
-  ];
+  const recordPool=buildDashboardRecordPool(games,rank,db.history||[]);
+  const latestRecordBreaks=latestBrokenDashboardRecords();
+  const latestRecordIds=new Set(latestRecordBreaks.map(r=>r.id));
+  const decoratedRecordPool=recordPool.map(r=>({
+    ...r,
+    isNew:latestRecordIds.has(r.id)
+  }));
+  const forcedRecords=decoratedRecordPool.filter(r=>r.isNew);
+  const records=randomDashboardRecords(decoratedRecordPool,9,forcedRecords);
   $("dashQuickRecords").innerHTML=records.map(r=>`
-    <div class="premium-record-item">
+    <div class="premium-record-item${r.isNew?' is-new':''}">
+      ${r.isNew?'<div class="premium-record-badge">NEW</div>':''}
       <div class="premium-record-icon">${r.icon}</div>
       <div class="premium-record-copy">
         <span>${esc(r.label)}</span>
@@ -6599,6 +6857,7 @@ function lockSettings(){
 
 async function showView(id){
   if(id==="newgame")id="settings";
+  if(id==="dashboard")dashboardRecordSelection=null;
   document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===id));
 
