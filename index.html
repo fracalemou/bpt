@@ -756,6 +756,40 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
   .profile-selector-field,.profile-selector-field select{min-width:0;width:100%}
   .profile-feats{grid-template-columns:1fr}
 }
+
+.profile-rank-history-chart{
+  width:100%;
+  overflow-x:auto;
+}
+.profile-rank-history-chart svg{
+  display:block;
+  width:100%;
+  min-width:680px;
+  height:auto;
+}
+.profile-rank-history-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  margin-top:9px;
+}
+.profile-rank-history-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  padding:5px 8px;
+  border-radius:999px;
+  background:#26382e;
+  border:1px solid #3b5143;
+  font-size:12px;
+}
+.profile-rank-history-chip.played{
+  border-color:#8a6a2a;
+  background:#282315;
+}
+.profile-rank-history-chip strong{
+  color:#e8c39e;
+}
 </style>
 </head>
 <body>
@@ -773,7 +807,7 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
       <span>Gestion du championnat 2026-2027</span>
     </div>
   </div>
-  <div class="app-version">Version 13/09/26 12h15</div>
+  <div class="app-version">Version 13/09/26 12h53</div>
 </header>
 <nav id="nav">
   <button data-view="home" class="active">⌂ Accueil</button>
@@ -1207,13 +1241,20 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
     </div>
 
     <div class="card span7">
-      <h2>Historique des places</h2>
+      <h2>Historique des places en partie</h2>
       <div id="playerProfilePlaces"></div>
     </div>
 
     <div class="card span5">
-      <h2>Face-à-face</h2>
+      <h2>Confrontations directes — Kills</h2>
+      <div class="muted" style="margin-bottom:8px">Bilan des éliminations entre ce joueur et ses adversaires.</div>
       <div id="playerProfileRivals"></div>
+    </div>
+
+    <div class="card span12">
+      <h2>Évolution au classement général</h2>
+      <div class="muted" style="margin-bottom:8px">Rang du joueur après chaque partie du championnat, à partir de sa première participation.</div>
+      <div id="playerProfileRankHistory"></div>
     </div>
 
     <div class="card span12">
@@ -2391,6 +2432,136 @@ function renderRecords(){
 }
 
 
+
+function playerRankHistory(name){
+  const history=Array.isArray(db.history)?db.history:[];
+  const gameNos=[...new Set(
+    history.map(r=>Number(r.game)).filter(g=>Number.isFinite(g)&&g>0)
+  )].sort((a,b)=>a-b);
+
+  const firstGame=Math.min(
+    ...history
+      .filter(r=>String(r.player||"")===name)
+      .map(r=>Number(r.game))
+      .filter(g=>Number.isFinite(g)&&g>0)
+  );
+
+  if(!Number.isFinite(firstGame))return [];
+
+  const result=[];
+
+  for(const gameNo of gameNos){
+    if(gameNo<firstGame)continue;
+
+    const rows=history.filter(r=>Number(r.game)<=gameNo);
+    const by={};
+
+    for(const r of rows){
+      const player=String(r.player||"");
+      if(!player)continue;
+      if(!by[player]){
+        by[player]={
+          name:player,
+          points:0,
+          games:new Set()
+        };
+      }
+      by[player].points+=Number(r.points||0);
+      by[player].games.add(Number(r.game));
+    }
+
+    const ranked=Object.values(by)
+      .filter(s=>s.games.size>0)
+      .map(s=>({
+        ...s,
+        gamesCount:s.games.size,
+        avgPoints:s.games.size?s.points/s.games.size:0
+      }))
+      .sort((a,b)=>
+        b.points-a.points ||
+        b.avgPoints-a.avgPoints ||
+        a.name.localeCompare(b.name,"fr")
+      );
+
+    const rank=ranked.findIndex(s=>s.name===name)+1;
+    const playerState=ranked.find(s=>s.name===name);
+    const played=history.some(r=>Number(r.game)===gameNo && String(r.player||"")===name);
+
+    if(rank>0){
+      result.push({
+        game:gameNo,
+        rank,
+        points:Number(playerState?.points||0),
+        played
+      });
+    }
+  }
+
+  return result;
+}
+
+function renderPlayerRankHistory(name){
+  const holder=$("playerProfileRankHistory");
+  if(!holder)return;
+
+  const data=playerRankHistory(name);
+  if(!data.length){
+    holder.innerHTML='<span class="muted">Aucun historique de classement disponible.</span>';
+    return;
+  }
+
+  const width=Math.max(760,data.length*78);
+  const height=300;
+  const padL=50,padR=24,padT=26,padB=44;
+  const innerW=width-padL-padR;
+  const innerH=height-padT-padB;
+  const maxRank=Math.max(1,...data.map(d=>d.rank));
+
+  const xOf=i=>data.length===1
+    ? padL+innerW/2
+    : padL+(i/(data.length-1))*innerW;
+
+  // Rang 1 en haut du graphique.
+  const yOf=rank=>maxRank===1
+    ? padT+innerH/2
+    : padT+((rank-1)/(maxRank-1))*innerH;
+
+  const grid=[...Array(maxRank)].map((_,i)=>{
+    const rank=i+1;
+    const y=yOf(rank);
+    return `<line x1="${padL}" y1="${y}" x2="${width-padR}" y2="${y}" stroke="rgba(255,255,255,.08)"/>
+            <text x="${padL-9}" y="${y+4}" fill="#9fb3c8" font-size="11" text-anchor="end">#${rank}</text>`;
+  }).join("");
+
+  const points=data.map((d,i)=>`${xOf(i)},${yOf(d.rank)}`).join(" ");
+  const dots=data.map((d,i)=>{
+    const x=xOf(i),y=yOf(d.rank);
+    return `<circle cx="${x}" cy="${y}" r="${d.played?5:4}" fill="${d.played?"#c8952e":"#79c594"}">
+      <title>Partie #${d.game} — classement #${d.rank} — ${d.points} pts${d.played?" — a joué":" — n’a pas joué"}</title>
+    </circle>`;
+  }).join("");
+
+  const labels=data.map((d,i)=>{
+    const x=xOf(i);
+    return `<text x="${x}" y="${height-18}" fill="#9fb3c8" font-size="11" text-anchor="middle">P${d.game}</text>`;
+  }).join("");
+
+  holder.innerHTML=`
+    <div class="profile-rank-history-chart">
+      <svg viewBox="0 0 ${width} ${height}" role="img" aria-label="Évolution du classement général de ${esc(name)}">
+        ${grid}
+        <polyline fill="none" stroke="#c8952e" stroke-width="3" points="${points}" stroke-linecap="round" stroke-linejoin="round"/>
+        ${dots}
+        ${labels}
+      </svg>
+    </div>
+    <div class="profile-rank-history-list">
+      ${data.map(d=>`<span class="profile-rank-history-chip ${d.played?"played":""}">
+        P${d.game} <strong>#${d.rank}</strong>${d.played?" · joué":""}
+      </span>`).join("")}
+    </div>`;
+}
+
 function playerProfileData(name){
   const allStats=stats(false);
   const ranked=ranking();
@@ -2460,6 +2631,7 @@ function renderProfile(preferredName=null){
     $("playerProfileFeats").innerHTML="";
     $("playerProfileAchievements").innerHTML='<span class="profile-no-achievement">Aucun accomplissement.</span>';
     $("playerProfilePlaces").innerHTML="";
+    if($("playerProfileRankHistory"))$("playerProfileRankHistory").innerHTML="";
     $("playerProfileRivals").innerHTML="";
     $("playerProfileHistory").innerHTML="";
     return;
@@ -2513,6 +2685,8 @@ function renderProfile(preferredName=null){
   $("playerProfilePlaces").innerHTML=rows
     .map(r=>`<span class="place-chip ${Number(r.place)===1?"win":Number(r.place)<=3?"podium":""}" title="Partie #${r.game}">${r.place}</span>`)
     .join("") || '<span class="muted">Aucune partie.</span>';
+
+  renderPlayerRankHistory(name);
 
   const rivals={};
   for(const r of db.history||[]){
