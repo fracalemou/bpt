@@ -685,6 +685,77 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
 }
 @media(max-width:1000px){.achievements-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:700px){.achievements-grid{grid-template-columns:1fr}.achievements-toolbar{align-items:flex-start;flex-direction:column}}
+
+.profile-topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:18px;
+}
+.profile-selector-field{
+  min-width:280px;
+  margin:0;
+}
+.profile-selector-field select{
+  min-width:280px;
+}
+.profile-identity{
+  margin-top:0;
+}
+.profile-feats{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+}
+.profile-feat{
+  border:1px solid rgba(255,255,255,.08);
+  background:#121d17;
+  border-radius:11px;
+  padding:11px;
+}
+.profile-feat span{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+.profile-feat strong{
+  display:block;
+  margin-top:4px;
+  font-size:17px;
+}
+.profile-achievements{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.profile-achievement{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  padding:8px 10px;
+  border-radius:10px;
+  background:#26382e;
+  border:1px solid #3b5143;
+  font-weight:700;
+  font-size:13px;
+}
+.profile-achievement .ico{
+  font-size:20px;
+}
+.profile-achievement.dynamic{
+  border-color:#8a6a2a;
+  background:#272317;
+}
+.profile-no-achievement{
+  color:var(--muted);
+}
+@media(max-width:800px){
+  .profile-topbar{align-items:stretch;flex-direction:column}
+  .profile-selector-field,.profile-selector-field select{min-width:0;width:100%}
+  .profile-feats{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
@@ -702,7 +773,7 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
       <span>Gestion du championnat 2026-2027</span>
     </div>
   </div>
-  <div class="app-version">Version 13/09/26 12h10</div>
+  <div class="app-version">Version 13/09/26 12h15</div>
 </header>
 <nav id="nav">
   <button data-view="home" class="active">⌂ Accueil</button>
@@ -712,6 +783,7 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
   <button data-view="versus">⚔ Versus</button>
   <button data-view="records">★ Records</button>
   <button data-view="achievements">◆ Accomplissements</button>
+  <button data-view="profile">♤ Profil</button>
   <button data-view="history">≡ Historique</button>
   <button data-view="settings">⚙ Paramètres</button>
 </nav>
@@ -1094,36 +1166,62 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
   <div id="recordsGrid" class="records-grid" style="margin-top:12px"></div>
 </section>
 
-<section id="playerprofile" class="view">
-  <div class="row" style="justify-content:space-between;margin-bottom:12px">
-    <button class="btn ghost" id="playerProfileBackBtn">← Retour au classement</button>
+<section id="profile" class="view">
+  <div class="hero">
+    <div class="profile-topbar">
+      <div>
+        <h1>Profil joueur</h1>
+        <p>Statistiques, faits d’armes et accomplissements individuels.</p>
+      </div>
+      <div class="field profile-selector-field">
+        <label>Joueur</label>
+        <select id="profilePlayerSelect"></select>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" style="justify-content:flex-end;margin:12px 0">
     <button class="btn secondary" id="playerProfileVersusBtn">Comparer dans Versus</button>
   </div>
-  <div class="hero player-profile-hero">
+
+  <div class="hero player-profile-hero profile-identity">
     <div>
-      <div class="muted">Fiche joueur</div>
+      <div class="muted">Fiche joueur BPT</div>
       <h1 id="playerProfileName">—</h1>
       <p id="playerProfileMeta"></p>
     </div>
     <div class="profile-rank" id="playerProfileRank">#—</div>
   </div>
+
   <div id="playerProfileKpis" class="profile-kpis"></div>
+
   <div class="grid" style="margin-top:12px">
+    <div class="card span6">
+      <h2>Faits d’armes principaux</h2>
+      <div id="playerProfileFeats" class="profile-feats"></div>
+    </div>
+
+    <div class="card span6">
+      <h2>Accomplissements débloqués</h2>
+      <div id="playerProfileAchievements" class="profile-achievements"></div>
+    </div>
+
     <div class="card span7">
       <h2>Historique des places</h2>
       <div id="playerProfilePlaces"></div>
     </div>
+
     <div class="card span5">
       <h2>Face-à-face</h2>
       <div id="playerProfileRivals"></div>
     </div>
+
     <div class="card span12">
       <h2>Parties du joueur</h2>
       <div id="playerProfileHistory" class="tablewrap"></div>
     </div>
   </div>
 </section>
-
 <section id="settings" class="view">
   <div id="settingsLock" class="card" style="max-width:520px;margin:20px auto">
     <h2>Paramètres protégés</h2>
@@ -1545,6 +1643,7 @@ async function refreshCanonicalHistoryUI(showBusy=true){
     renderVersus();
     renderRecords();
     renderAchievements();
+    renderProfile();
     renderHistory();
 
     if(correctionUnlocked)renderCorrectionGameList(null,false);
@@ -2291,23 +2390,129 @@ function renderRecords(){
   holder.innerHTML=cards.map(c=>`<div class="record-card"><div class="record-icon">${c[0]}</div><span>${esc(c[1])}</span><strong>${esc(c[2])}</strong><small>${esc(c[3])}</small></div>`).join("");
 }
 
-function openPlayerProfile(name){
-  const s=ranking().find(x=>x.name===name) || stats(false).find(x=>x.name===name);
-  if(!s)return;
-  const rows=(db.history||[]).filter(r=>r.player===name).sort((a,b)=>Number(a.game)-Number(b.game));
+
+function playerProfileData(name){
+  const allStats=stats(false);
+  const ranked=ranking();
+  const s=ranked.find(x=>x.name===name) || allStats.find(x=>x.name===name);
+  if(!s)return null;
+
+  const rows=(db.history||[])
+    .filter(r=>String(r.player||"")===name)
+    .sort((a,b)=>Number(a.game)-Number(b.game));
+
   const ks=killerStats();
   const bestPlace=rows.length?Math.min(...rows.map(r=>Number(r.place)||999)):null;
+  const avgPlace=rows.length?rows.reduce((a,r)=>a+Number(r.place||0),0)/rows.length:0;
+  const lastPlaces=rows.filter(r=>Number(r.n)>0 && Number(r.place)===Number(r.n)).length;
+  const fourthPlaces=rows.filter(r=>Number(r.place)===4).length;
+  const bestKillsGame=rows.reduce((best,r)=>Number(r.kills||0)>Number(best?.kills||0)?r:best,null);
+  const bestNetGame=rows.reduce((best,r)=>Number(r.net||0)>Number(best?.net??-Infinity)?r:best,null);
 
+  let winStreak=0,curWin=0,podiumStreak=0,curPod=0;
+  for(const r of rows){
+    if(Number(r.place)===1){curWin++;winStreak=Math.max(winStreak,curWin);}else curWin=0;
+    if(Number(r.place)<=3){curPod++;podiumStreak=Math.max(podiumStreak,curPod);}else curPod=0;
+  }
+
+  const victimCounts={},killerCounts={};
+  for(const r of db.history||[]){
+    if(r.killer===name && r.player)victimCounts[r.player]=(victimCounts[r.player]||0)+1;
+    if(r.player===name && r.killer)killerCounts[r.killer]=(killerCounts[r.killer]||0)+1;
+  }
+  const topEntry=o=>Object.entries(o).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],"fr"))[0]||null;
+  const favoriteVictim=topEntry(victimCounts);
+  const nemesis=topEntry(killerCounts);
+
+  const achievements=achievementPlayers()
+    .filter(a=>a.players.includes(name));
+
+  return {
+    s,rows,bestPlace,avgPlace,lastPlaces,fourthPlaces,bestKillsGame,bestNetGame,
+    winStreak,podiumStreak,favoriteVictim,nemesis,achievements,ks
+  };
+}
+
+function renderProfile(preferredName=null){
+  const sel=$("profilePlayerSelect");
+  if(!sel)return;
+
+  const ranked=ranking();
+  const historical=[...new Set((db.history||[]).map(r=>String(r.player||"")).filter(Boolean))];
+  const allNames=[...new Set([...ranked.map(r=>r.name),...historical])]
+    .sort((a,b)=>a.localeCompare(b,"fr",{sensitivity:"base"}));
+
+  const previous=preferredName || sel.value;
+  sel.innerHTML=allNames.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+
+  if(previous && allNames.includes(previous))sel.value=previous;
+  else if(ranked[0])sel.value=ranked[0].name;
+  else if(allNames[0])sel.value=allNames[0];
+
+  const name=sel.value;
+  const d=playerProfileData(name);
+
+  if(!d){
+    $("playerProfileName").textContent="—";
+    $("playerProfileRank").textContent="#—";
+    $("playerProfileMeta").textContent="Aucune donnée disponible.";
+    $("playerProfileKpis").innerHTML="";
+    $("playerProfileFeats").innerHTML="";
+    $("playerProfileAchievements").innerHTML='<span class="profile-no-achievement">Aucun accomplissement.</span>';
+    $("playerProfilePlaces").innerHTML="";
+    $("playerProfileRivals").innerHTML="";
+    $("playerProfileHistory").innerHTML="";
+    return;
+  }
+
+  const {s,rows}=d;
   $("playerProfileName").textContent=name;
   $("playerProfileRank").textContent=s.rank?`#${s.rank}`:"#—";
-  $("playerProfileMeta").textContent=`${s.gamesCount||rows.length} participation${(s.gamesCount||rows.length)>1?"s":""} · meilleure place ${bestPlace?bestPlace+"e":"—"} · bourreau : ${ks.mainKiller(name)||"—"}`;
+  $("playerProfileMeta").textContent=
+    `${s.gamesCount||rows.length} participation${(s.gamesCount||rows.length)>1?"s":""} · `+
+    `${s.wins} victoire${s.wins>1?"s":""} · ${s.podiums} podium${s.podiums>1?"s":""} · `+
+    `${s.kills} kill${s.kills>1?"s":""}`;
 
   const kpis=[
-    ["Points",num(s.points,0)],["Moy. pts",num(s.avgPoints,1)],["Victoires",s.wins],["Podiums",s.podiums],["Kills",s.kills],["Solde",euro(s.net)]
+    ["Points",num(s.points,0)],
+    ["Moy. pts",num(s.avgPoints,1)],
+    ["Classement",s.rank?`#${s.rank}`:"—"],
+    ["Victoires",s.wins],
+    ["Podiums",s.podiums],
+    ["Tabliers",s.tabliers],
+    ["Kills",s.kills],
+    ["Kills / partie",num(s.kpg,2)],
+    ["Place moyenne",d.avgPlace?num(d.avgPlace,2):"—"],
+    ["Solde",euro(s.net)],
+    ["Taux victoire",num(s.winRate,1)+" %"],
+    ["Taux podium",num(s.podiumRate,1)+" %"]
   ];
-  $("playerProfileKpis").innerHTML=kpis.map(([l,v])=>`<div class="profile-kpi"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join("");
+  $("playerProfileKpis").innerHTML=kpis
+    .map(([l,v])=>`<div class="profile-kpi"><b>${esc(v)}</b><span>${esc(l)}</span></div>`)
+    .join("");
 
-  $("playerProfilePlaces").innerHTML=rows.map(r=>`<span class="place-chip ${Number(r.place)===1?"win":Number(r.place)<=3?"podium":""}" title="Partie #${r.game}">${r.place}</span>`).join("") || '<span class="muted">Aucune partie.</span>';
+  const feats=[
+    ["Meilleure place",d.bestPlace?`${d.bestPlace}e`:"—"],
+    ["Meilleure partie en kills",d.bestKillsGame?`${d.bestKillsGame.kills||0} kill${Number(d.bestKillsGame.kills||0)>1?"s":""} · P#${d.bestKillsGame.game}`:"—"],
+    ["Meilleur résultat financier",d.bestNetGame?`${euro(d.bestNetGame.net)} · P#${d.bestNetGame.game}`:"—"],
+    ["Série de victoires",`${d.winStreak} de suite`],
+    ["Série de podiums",`${d.podiumStreak} de suite`],
+    ["4e places",String(d.fourthPlaces)],
+    ["Dernières places",String(d.lastPlaces)],
+    ["Victime favorite",d.favoriteVictim?`${d.favoriteVictim[0]} · ${d.favoriteVictim[1]} fois`:"—"],
+    ["Bourreau principal",d.nemesis?`${d.nemesis[0]} · ${d.nemesis[1]} fois`:"—"]
+  ];
+  $("playerProfileFeats").innerHTML=feats
+    .map(([l,v])=>`<div class="profile-feat"><span>${esc(l)}</span><strong>${esc(v)}</strong></div>`)
+    .join("");
+
+  $("playerProfileAchievements").innerHTML=d.achievements.length
+    ? d.achievements.map(a=>`<div class="profile-achievement ${a.dynamic?"dynamic":""}" title="${esc(a.desc)}"><span class="ico">${a.icon}</span><span>${esc(a.name)}</span></div>`).join("")
+    : '<span class="profile-no-achievement">Aucun accomplissement débloqué pour le moment.</span>';
+
+  $("playerProfilePlaces").innerHTML=rows
+    .map(r=>`<span class="place-chip ${Number(r.place)===1?"win":Number(r.place)<=3?"podium":""}" title="Partie #${r.game}">${r.place}</span>`)
+    .join("") || '<span class="muted">Aucune partie.</span>';
 
   const rivals={};
   for(const r of db.history||[]){
@@ -2315,12 +2520,21 @@ function openPlayerProfile(name){
     if(r.killer===name)rivals[r.player]=(rivals[r.player]||0)+1;
   }
   const rv=Object.entries(rivals).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,6);
-  $("playerProfileRivals").innerHTML=rv.length?rv.map(([n,v])=>`<div class="row" style="justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span>${esc(n)}</span><b>${v>0?"+":""}${v}</b></div>`).join(""):'<span class="muted">Pas encore de confrontation directe.</span>';
+  $("playerProfileRivals").innerHTML=rv.length
+    ? rv.map(([n,v])=>`<div class="row" style="justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span>${esc(n)}</span><b>${v>0?"+":""}${v}</b></div>`).join("")
+    : '<span class="muted">Pas encore de confrontation directe.</span>';
 
-  $("playerProfileHistory").innerHTML=`<table><thead><tr><th>Partie</th><th>Date</th><th>Place</th><th>Pts</th><th>Kills</th><th>Éliminé par</th><th>Net</th></tr></thead><tbody>${rows.slice().reverse().map(r=>`<tr><td>#${r.game}</td><td>${esc(shortDate(r.date))}</td><td>${r.place}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${esc(r.killer||"—")}</td><td>${euro(r.net)}</td></tr>`).join("")}</tbody></table>`;
+  $("playerProfileHistory").innerHTML=
+    `<table><thead><tr><th>Partie</th><th>Date</th><th>Lieu</th><th>Place</th><th>Pts</th><th>Kills</th><th>Éliminé par</th><th>Net</th></tr></thead><tbody>`+
+    rows.slice().reverse().map(r=>`<tr><td>#${r.game}</td><td>${esc(shortDate(r.date))}</td><td>${esc(r.location||"")}</td><td>${r.place}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${esc(r.killer||"—")}</td><td>${euro(r.net)}</td></tr>`).join("")+
+    `</tbody></table>`;
 
   $("playerProfileVersusBtn").dataset.player=name;
-  showView("playerprofile");
+}
+
+function openPlayerProfile(name){
+  showView("profile");
+  setTimeout(()=>renderProfile(name),0);
 }
 
 function showEndGameSummary(rows){
@@ -2539,7 +2753,7 @@ function renderAchievements(){
 
 function renderAll(){
   normalizeHistoryGameNumbers();
-  renderHome();renderDashboard();renderRanking();renderVersus();renderRecords();renderAchievements();renderHistory();renderPlayers();renderGamePlayers();renderSettings();renderPoints();if(correctionUnlocked)renderCorrectionGameList(null,false);if(document.getElementById("livePlayerList"))liveRenderPlayerList();
+  renderHome();renderDashboard();renderRanking();renderVersus();renderRecords();renderAchievements();renderProfile();renderHistory();renderPlayers();renderGamePlayers();renderSettings();renderPoints();if(correctionUnlocked)renderCorrectionGameList(null,false);if(document.getElementById("livePlayerList"))liveRenderPlayerList();
 }
 
 function dashRankList(items,valueFn,formatFn){
@@ -4856,7 +5070,7 @@ async function showView(id){
   document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===id));
 
-  if((id==="home" || id==="dashboard" || id==="ranking" || id==="versus" || id==="records" || id==="achievements" || id==="history" || id==="playerprofile") && cloudReady && sbClient){
+  if((id==="home" || id==="dashboard" || id==="ranking" || id==="versus" || id==="records" || id==="achievements" || id==="profile" || id==="history") && cloudReady && sbClient){
     await refreshCanonicalHistoryUI(true);
   }else{
     if(id==="home")renderHome();
@@ -4865,6 +5079,7 @@ async function showView(id){
     if(id==="versus")renderVersus();
     if(id==="records")renderRecords();
     if(id==="achievements")renderAchievements();
+    if(id==="profile")renderProfile();
     if(id==="history")renderHistory();
   }
 
@@ -4933,7 +5148,7 @@ $("liveFinalizeBtn").onclick=liveFinalizeGame;
 document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>showView(b.dataset.go)));
 
 // Fiche joueur
-if($("playerProfileBackBtn"))$("playerProfileBackBtn").onclick=()=>showView("ranking");
+if($("profilePlayerSelect"))$("profilePlayerSelect").onchange=()=>renderProfile($("profilePlayerSelect").value);
 if($("playerProfileVersusBtn"))$("playerProfileVersusBtn").onclick=()=>{
   const name=$("playerProfileVersusBtn").dataset.player||"";
   showView("versus").then?.(()=>{});
