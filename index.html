@@ -722,11 +722,11 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
         <div id="correctionEditor" style="display:none">
           <div class="grid">
             <div class="span6"><div class="field"><label>Date</label><input id="cDate" type="date"></div></div>
-            <div class="span6"><div class="field"><label>Lieu</label><input id="cLocation"></div></div>
+            <div class="span6"><div class="field"><label>Lieu</label><input id="cLocation" type="text" autocomplete="off" placeholder="Lieu de la partie"></div></div>
             <div class="span6"><div class="field"><label>Mise / joueur</label><input id="cStake" type="number" min="0" step="1"></div></div>
             <div class="span6"><div class="field"><label>Participants</label><input id="cParticipants" disabled></div></div>
           </div>
-          <div class="muted" style="margin:8px 0">Modifiez le classement et les éliminateurs. Les points, gains, kills, podiums et tablier seront recalculés à l'enregistrement.</div>
+          <div class="muted" style="margin:8px 0">Modifiez le lieu, les joueurs présents, leur classement et les éliminateurs. Les points, gains, kills, podiums et tablier seront recalculés à l’enregistrement.</div>
           <div class="tablewrap">
             <table>
               <thead><tr><th>Place</th><th>Joueur</th><th>Éliminé par</th><th>Points</th><th>Gain</th></tr></thead>
@@ -2218,6 +2218,19 @@ async function persistCompletedGame(rows){
   const validation=validateCompletedGameRows(rows);
   if(validation)throw new Error(validation);
 
+  // Règle BPT : tout joueur présent dans une partie enregistrée
+  // doit exister dans le référentiel et être automatiquement ACTIF.
+  for(const r of rows){
+    const name=String(r.player||"").trim();
+    if(!name)continue;
+    const existing=findPlayerInsensitive(name);
+    if(existing){
+      existing.active=true;
+    }else{
+      db.players.push({name,active:true});
+    }
+  }
+
   // Ajout local immédiat et file d'attente persistante.
   db.history=db.history.concat(rows);
   queuePendingGame(rows);
@@ -2303,16 +2316,20 @@ function refreshGameEntryOptions(){
       '<option value="">— Joueur —</option>'+
       available.map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join("");
 
-    if(current && available.includes(current)) sel.value=current;
+    if(current && available.includes(current))sel.value=current;
   });
 
-  // Classement final courant après mise à jour des joueurs.
+  // Classement courant après mise à jour des joueurs.
   const rankingPlayers=playerSelects.map(s=>s.value);
 
   // 2) Éliminé par :
-  //    - jamais lui-même ;
-  //    - jamais un joueur classé derrière (donc déjà sorti) ;
-  //    - uniquement un joueur classé devant, donc encore en jeu.
+  // - le vainqueur n'a jamais d'éliminateur ;
+  // - si les places précédentes sont déjà renseignées, on propose uniquement
+  //   les joueurs encore en jeu à ce moment-là ;
+  // - si le classement n'est pas encore entièrement saisi au-dessus,
+  //   on laisse choisir parmi les autres participants afin de permettre
+  //   une saisie dans n'importe quel ordre. La validation finale vérifiera
+  //   que l'éliminateur termine bien devant le joueur éliminé.
   killerSelects.forEach((sel,idx)=>{
     const place=idx+1;
     const eliminated=rankingPlayers[idx];
@@ -2333,10 +2350,17 @@ function refreshGameEntryOptions(){
       return;
     }
 
-    const eligible=rankingPlayers
-      .slice(0,idx)
-      .filter(Boolean)
-      .filter(name=>name!==eliminated);
+    const ahead=rankingPlayers.slice(0,idx).filter(Boolean);
+    const previousSlotsComplete=rankingPlayers.slice(0,idx).every(Boolean);
+
+    let eligible;
+    if(previousSlotsComplete){
+      // Classement au-dessus connu : seulement les joueurs mieux classés.
+      eligible=ahead.filter(name=>name!==eliminated);
+    }else{
+      // Classement encore incomplet : autoriser tous les autres participants.
+      eligible=names.filter(name=>name!==eliminated);
+    }
 
     sel.innerHTML=
       '<option value="">— Éliminé par… —</option>'+
@@ -3050,7 +3074,7 @@ function loadCorrectionGame(){
   $("correctionEditor").style.display="block";
   $("correctionEmpty").style.display="none";
   $("cDate").value=rows[0].date||"";
-  $("cLocation").value=rows[0].location||"";
+  $("cLocation").disabled=false;$("cLocation").readOnly=false;$("cLocation").value=rows[0].location||"";
   $("cStake").value=rows[0].stake ?? db.settings.stake;
   $("cParticipants").value=rows.length;
   $("correctionGameSummary").innerHTML=
@@ -3107,10 +3131,17 @@ function refreshCorrectionOptions(){
   const currentPlayers=playerSelects.map(s=>s.value);
   const currentKillers=killerSelects.map(s=>s.value);
 
+  // En correction, on peut remplacer un participant par n'importe quel joueur actif.
+  // Les joueurs d'origine restent aussi disponibles même s'ils ont été désactivés depuis.
+  const selectablePlayers=[...new Set([
+    ...originalPlayers,
+    ...db.players.filter(p=>p.active).map(p=>p.name)
+  ])].sort((a,b)=>a.localeCompare(b,"fr",{sensitivity:"base"}));
+
   playerSelects.forEach((sel,idx)=>{
     const current=currentPlayers[idx];
     const usedElsewhere=new Set(currentPlayers.filter((name,j)=>j!==idx && name));
-    const available=originalPlayers.filter(name=>name===current || !usedElsewhere.has(name));
+    const available=selectablePlayers.filter(name=>name===current || !usedElsewhere.has(name));
 
     sel.innerHTML='<option value="">— Joueur —</option>'+
       available.map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join("");
@@ -3149,6 +3180,7 @@ function refreshCorrectionOptions(){
       eligible.map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join("");
 
     if(current && eligible.includes(current))sel.value=current;
+    else sel.value="";
   });
 
   refreshCorrectionCalculatedValues();
@@ -3161,8 +3193,9 @@ function refreshCorrectionCalculatedValues(){
   [...document.querySelectorAll(".cGain")].forEach((td,i)=>td.textContent=euro(plannedGain(i+1,n,stake)));
 }
 
-function saveCorrection(){
+async function saveCorrection(){
   if(!correctionUnlocked)return;
+
   const gameNo=Number($("correctionEditor").dataset.game);
   const playerSelects=[...document.querySelectorAll(".cPlacePlayer")];
   const killerSelects=[...document.querySelectorAll(".cPlaceKiller")];
@@ -3200,10 +3233,18 @@ function saveCorrection(){
   }
 
   const date=$("cDate").value;
-  const location=$("cLocation").value.trim();
+  const location=String($("cLocation").value||"").trim();
   const stake=Number($("cStake").value)||0;
   const killCounts={};
   for(const k of killers)if(k)killCounts[k]=(killCounts[k]||0)+1;
+
+  // Tout joueur ajouté à une partie corrigée est automatiquement présent
+  // dans le référentiel et marqué Actif.
+  for(const name of names){
+    const existing=findPlayerInsensitive(name);
+    if(existing)existing.active=true;
+    else db.players.push({name:String(name).trim(),active:true});
+  }
 
   const corrected=names.map((player,i)=>{
     const place=i+1;
@@ -3228,14 +3269,50 @@ function saveCorrection(){
     };
   });
 
-  db.history=db.history.filter(r=>r.game!==gameNo).concat(corrected);
-  cloudHistoryReplaceOnce=true;
-  saveDB();
-  renderAll();
-  renderCorrectionGameList(gameNo);
-  alert(`Partie #${gameNo} corrigée et recalculée.`);
-}
+  const backup=JSON.parse(JSON.stringify(db));
+  const btn=$("saveCorrectionBtn");
+  if(btn)btn.disabled=true;
 
+  try{
+    db.history=db.history.filter(r=>r.game!==gameNo).concat(corrected);
+    normalizeHistoryGameNumbers();
+    saveLocalOnly();
+    renderAll();
+
+    if(cloudReady && sbClient){
+      setCloudStatus("busy","Correction de la partie…");
+      cloudHistoryReplaceOnce=true;
+      cloudLocalDirty=true;
+
+      const ok=await cloudPushNow();
+      if(!ok)throw new Error(cloudLastError||"La synchronisation Supabase a échoué.");
+
+      // Vérifie que le lieu relu depuis le serveur correspond à la saisie.
+      const serverRows=(db.history||[]).filter(r=>Number(r.game)===gameNo);
+      const persistedLocation=serverRows[0]?.location||"";
+      if(persistedLocation!==location){
+        throw new Error(`Le lieu n’a pas été enregistré correctement sur le serveur.`);
+      }
+    }else{
+      cloudHistoryReplaceOnce=true;
+      scheduleCloudSave();
+    }
+
+    renderCorrectionGameList(gameNo);
+    loadCorrectionGame();
+    alert(`Partie #${gameNo} corrigée.${location?`\\nLieu : ${location}`:""}`);
+  }catch(e){
+    db=backup;
+    saveLocalOnly();
+    renderAll();
+    renderCorrectionGameList(gameNo);
+    console.error("BPT save correction:",e);
+    setCloudStatus("offline","Erreur correction",e?.message||String(e));
+    alert("La correction n’a pas pu être enregistrée.\\n\\n"+(e?.message||String(e)));
+  }finally{
+    if(btn)btn.disabled=false;
+  }
+}
 
 
 async function resetFullHistory(){
