@@ -83,6 +83,190 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
 #cloudStatus.ok #cloudStatusDot{color:#5fd38b}
 #cloudStatus.busy #cloudStatusDot{color:#e3a83c}
 #cloudStatus.offline #cloudStatusDot{color:#ff7272}
+
+#dashboard .card h2{margin-bottom:10px}
+#dashboard .tablewrap table{min-width:0}
+#dashboard .tablewrap th,#dashboard .tablewrap td{white-space:nowrap}
+#dashboard .span6{min-height:220px}
+
+#dashboard .dash-compare{min-width:900px}
+#dashboard .dash-compare th:nth-child(1),
+#dashboard .dash-compare th:nth-child(3){width:38%}
+#dashboard .dash-compare th:nth-child(2){width:24%}
+#dashboard .dash-compare td{vertical-align:top}
+#dashboard .dash-criterion{text-align:center;vertical-align:middle!important;font-size:15px}
+#dashboard .dash-compare td:first-child{text-align:left}
+#dashboard .dash-compare td:last-child{text-align:left}
+
+#dashboard .dash-compare th:nth-child(2),
+#dashboard .dash-compare td:nth-child(2){
+  text-align:center !important;
+  vertical-align:middle !important;
+}
+#dashboard .dash-criterion{
+  text-align:center !important;
+  vertical-align:middle !important;
+}
+
+#dashboard .dash-compare{
+  width:100%;
+  table-layout:fixed;
+}
+#dashboard .dash-compare th:nth-child(1),
+#dashboard .dash-compare td:nth-child(1){
+  width:40% !important;
+}
+#dashboard .dash-compare th:nth-child(2),
+#dashboard .dash-compare td:nth-child(2){
+  width:20% !important;
+  text-align:center !important;
+  vertical-align:middle !important;
+}
+#dashboard .dash-compare th:nth-child(3),
+#dashboard .dash-compare td:nth-child(3){
+  width:40% !important;
+}
+
+#dashboard .top3-chart{width:100%;height:auto;display:block}
+#dashboard .chart-legend{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:10px}
+#dashboard .chart-legend-item{display:flex;align-items:center;gap:8px;font-weight:700;color:#dce7f4}
+#dashboard .chart-legend-dot{width:12px;height:12px;border-radius:50%;display:inline-block}
+
+#dashboard .dash-compare{
+  width:100%;
+  table-layout:fixed;
+}
+#dashboard .dash-compare th:nth-child(1),
+#dashboard .dash-compare td:nth-child(1){
+  width:42% !important;
+}
+#dashboard .dash-compare th:nth-child(2),
+#dashboard .dash-compare td:nth-child(2){
+  width:16% !important;
+  text-align:center !important;
+  vertical-align:middle !important;
+}
+#dashboard .dash-compare th:nth-child(3),
+#dashboard .dash-compare td:nth-child(3){
+  width:42% !important;
+}
+#dashboard .dash-compare ol{
+  margin:0;
+  padding-left:18px;
+}
+#dashboard .dash-criterion{
+  text-align:center !important;
+  vertical-align:middle !important;
+  font-size:15px;
+}
+
+#dashboard .dash-compare th:nth-child(3),
+#dashboard .dash-compare td:nth-child(3){
+  text-align:right !important;
+}
+#dashboard .dash-compare th:nth-child(3){
+  padding-right:8px !important;
+}
+#dashboard .dash-compare td:nth-child(3) ol{
+  margin:0 0 0 auto !important;
+  padding-left:0 !important;
+  padding-right:18px !important;
+  list-style-position:inside !important;
+  text-align:right !important;
+}
+#dashboard .dash-compare td:nth-child(3) li{
+  text-align:right !important;
+}
+
+#dashboard .lastgame-inline{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:10px;
+}
+#dashboard .lastgame-item{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:12px;
+  padding:12px 14px;
+}
+#dashboard .lastgame-item .muted{
+  display:block;
+  margin-bottom:4px;
+}
+#dashboard .lastgame-item strong{
+  display:block;
+  font-size:16px;
+}
+@media (max-width:1100px){
+  #dashboard .lastgame-inline{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+}
+@media (max-width:700px){
+  #dashboard .lastgame-inline{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
+#playersAdmin .playerchip{gap:6px}
+
+.player-add-wide{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:10px;
+  width:100%;
+}
+.player-add-wide input{width:100%}
+.player-alpha-group{
+  margin-top:14px;
+}
+.player-alpha-letter{
+  font-size:18px;
+  font-weight:900;
+  color:#e8c39e;
+  padding:7px 4px;
+  border-bottom:1px solid rgba(255,255,255,.10);
+}
+.player-admin-list{
+  display:block;
+  width:100%;
+}
+.player-admin-row{
+  display:grid;
+  grid-template-columns:minmax(240px,1fr) auto;
+  gap:12px;
+  align-items:center;
+  width:100%;
+  padding:9px 0;
+  border-bottom:1px solid rgba(255,255,255,.07);
+}
+.player-admin-row.inactive{
+  opacity:.62;
+}
+.player-rename-input{
+  width:100%;
+  min-width:0;
+}
+.player-admin-actions{
+  display:flex;
+  gap:7px;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+}
+@media(max-width:760px){
+  .player-add-wide{grid-template-columns:1fr}
+  .player-admin-row{grid-template-columns:1fr}
+  .player-admin-actions{justify-content:flex-start}
+}
+
+.player-rename-input{
+  font-weight:700;
+}
+.player-rename-input:focus{
+  outline:2px solid rgba(0,153,178,.55);
+  border-color:#0099B2;
+}
+
 </style>
 </head>
 <body>
@@ -96,7 +280,8 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
 <nav id="nav">
   <button data-view="live">Live</button>
   <button data-view="newgame">Nouvelle partie</button>
-  <button data-view="ranking" class="active">Classement</button>
+  <button data-view="dashboard" class="active">Tableau de bord</button>
+  <button data-view="ranking">Classement</button>
   <button data-view="history">Historique</button>
   <button data-view="settings">Paramètres</button>
 </nav>
@@ -135,6 +320,11 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
             <span class="muted"><b id="liveSelectedCount">0</b> sélectionné(s)</span>
           </div>
           <div id="livePlayerList" class="live-player-list"></div>
+          <div class="row" style="margin-top:10px">
+            <input id="liveNewPlayer" placeholder="Nouveau joueur" style="flex:1">
+            <button class="btn secondary" id="liveAddPlayerBtn">Ajouter et sélectionner</button>
+          </div>
+          <div class="muted" style="margin-top:5px">Le joueur ajouté devient automatiquement actif dans le championnat.</div>
 
           <div class="row" style="margin-top:12px">
             <button class="btn ghost" id="liveRecalcBtn">Recalculer la structure</button>
@@ -180,6 +370,8 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
           <div class="live-controls">
             <button class="btn" id="liveStartBtn">Démarrer / Reprendre</button>
             <button class="btn secondary" id="livePauseBtn">Pause</button>
+            <button class="btn ghost" id="liveTimerBackBtn">⏪ − 1 min</button>
+            <button class="btn ghost" id="liveTimerForwardBtn">+ 1 min ⏩</button>
             <button class="btn ghost" id="livePrevLevelBtn">Niveau précédent</button>
             <button class="btn ghost" id="liveNextLevelBtn">Niveau suivant</button>
           </div>
@@ -203,10 +395,14 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
             <button class="btn danger" id="liveEliminateBtn">Éliminer</button>
             <button class="btn" id="liveFinalizeBtn" style="display:none;margin-left:8px">Enregistrer la partie dans l’historique</button>
           </div>
-          <div style="display:flex;justify-content:flex-end;margin-top:8px">
-            <button class="btn ghost" id="liveUndoEliminationBtn" style="display:none">
+          <div id="liveUndoBox" style="margin-top:10px;padding:10px;border:1px solid #6f5d2b;border-radius:10px;background:#241f12">
+            <div style="font-weight:800;margin-bottom:7px">Correction d’une élimination</div>
+            <button class="btn secondary" id="liveUndoEliminationBtn" style="width:100%">
               ↶ Annuler la dernière élimination
             </button>
+            <div id="liveUndoHint" class="muted" style="margin-top:6px">
+              Disponible dès qu’un joueur a été éliminé.
+            </div>
           </div>
           <div class="muted" style="margin-top:5px">L'éliminateur est limité aux joueurs encore en jeu et ne peut pas être le sortant.</div>
 
@@ -234,6 +430,11 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
       <div class="field"><label>Mise / joueur</label><input id="gStake" type="number" min="0" step="1"></div><div class="muted">Gains BPT : 1er 60 % • 2e 30 % • 3e 10 % — ajustés aux 5 € les plus proches</div>
       <div class="muted">Sélectionnez les joueurs actifs participant à la partie.</div>
       <div id="gamePlayerChecks" style="margin-top:8px;max-height:340px;overflow:auto"></div>
+      <div class="row" style="margin-top:10px">
+        <input id="gameNewPlayer" placeholder="Nouveau joueur" style="flex:1">
+        <button class="btn secondary" id="gameAddPlayerBtn">Ajouter et sélectionner</button>
+      </div>
+      <div class="muted" style="margin-top:5px">Le joueur ajouté devient automatiquement actif dans le championnat.</div>
       <button class="btn secondary" id="buildGameBtn" style="width:100%;margin-top:10px">Préparer le classement</button>
     </div>
     <div class="card span8">
@@ -244,20 +445,56 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
   </div>
 </section>
 
-<section id="ranking" class="view active">
-  <div class="hero"><h1>Classement du championnat BPT</h1><p id="heroText"></p></div>
+<section id="dashboard" class="view active">
+  <div class="hero"><h1>Tableau de bord BPT</h1><p id="heroText"></p></div>
+
   <div class="grid" style="margin-top:12px">
     <div class="kpi span3"><b id="kGames">0</b><span>Parties jouées</span></div>
     <div class="kpi span3"><b id="kPlayers">0</b><span>Joueurs classés</span></div>
     <div class="kpi span3"><b id="kRecord">0</b><span>Record participants</span></div>
     <div class="kpi span3"><b id="kPot">0 €</b><span>Total des mises</span></div>
-    <div class="card span8"><h2>Top 10</h2><div class="tablewrap"><table><thead><tr><th>Clt</th><th>Joueur</th><th>Points</th><th>Participations</th><th>Victoires</th><th>Kills</th><th>Solde</th></tr></thead><tbody id="dashTop"></tbody></table></div></div>
-    <div class="card span4"><h2>Dernière partie</h2><div id="lastGame"></div></div>
+
+    <div class="card span12">
+      <h2>Dernière partie</h2>
+      <div id="lastGame"></div>
+    </div>
+
+    <div class="card span12">
+      <h2>Top 3 du championnat</h2>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Clt</th><th>Joueur</th><th>Points</th><th>Participations</th><th>Victoires</th><th>Kills</th><th>Solde net</th></tr></thead>
+        <tbody id="dashTop"></tbody>
+      </table></div>
+    </div>
+
+    <div class="card span12">
+      <h2>Évolution cumulée des points du Top 3</h2>
+      <div id="dashTop3Chart"></div>
+    </div>
   </div>
 
   <div style="height:12px"></div>
 
-  <div class="card"><h2>Classement général détaillé</h2><div class="tablewrap"><table><thead><tr><th>Clt</th><th>Joueur</th><th>Points</th><th>Progression</th><th>Moy. pts</th><th>Participations</th><th>Victoires</th><th>Podiums</th><th>Tabliers</th><th>Kills</th><th>Kills/partie</th><th>Mises</th><th>Gains</th><th>Solde</th><th>Bourreau</th><th>Victime</th></tr></thead><tbody id="rankingBody"></tbody></table></div></div>
+  <div class="card">
+    <h2>Comparatif Top / Flop</h2>
+    <div class="muted" style="margin-bottom:10px">Pour chaque critère, les 3 meilleurs sont à gauche et les 3 moins performants à droite.</div>
+    <div id="dashCompareTable"></div>
+  </div>
+</section>
+
+<section id="ranking" class="view">
+  <div class="hero"><h1>Classement détaillé du championnat BPT</h1><p>Classement général et statistiques individuelles.</p></div>
+  <div class="card" style="margin-top:12px">
+    <h2>Classement général détaillé</h2>
+    <div class="tablewrap"><table>
+      <thead><tr>
+        <th>Clt</th><th>Joueur</th><th>Points</th><th>Progression</th><th>Moy. pts</th>
+        <th>Participations</th><th>Victoires</th><th>Podiums</th><th>Tabliers</th>
+        <th>Kills</th><th>Kills/partie</th><th>Solde net</th><th>Bourreau</th><th>Victime</th>
+      </tr></thead>
+      <tbody id="rankingBody"></tbody>
+    </table></div>
+  </div>
 </section>
 <section id="history" class="view">
   <div class="card">
@@ -291,12 +528,16 @@ footer{text-align:center;color:#74877b;font-size:11px;padding:10px}
   <div class="grid" style="margin-bottom:12px">
     <div class="card span12">
       <h2>Gestion des joueurs</h2>
-      <div class="muted" style="margin-bottom:10px">Ajoutez, activez ou désactivez les joueurs utilisés dans le championnat et le Live.</div>
+      <div class="muted" style="margin-bottom:12px">Ajoutez et gérez les joueurs du championnat. Le nom se modifie directement dans la liste. Le bouton Actif/Inactif permet de masquer un joueur des nouvelles parties. Le bouton Supprimer reste disponible : s’il possède des participations dans l’historique, un message indique que la suppression est interdite.</div>
+
+      <div class="player-add-wide">
+        <input id="newPlayer" placeholder="Nom du nouveau joueur">
+        <button class="btn secondary" id="addPlayerBtn">Ajouter le joueur</button>
+      </div>
+
+      <div style="height:14px"></div>
+      <div id="playersAdmin"></div>
     </div>
-  </div>
-  <div class="grid">
-    <div class="card span5"><h2>Ajouter un joueur</h2><div class="row"><input id="newPlayer" placeholder="Nom du joueur" style="flex:1"><button class="btn secondary" id="addPlayerBtn">Ajouter</button></div></div>
-    <div class="card span7"><h2>Joueurs du BPT</h2><div id="playersAdmin"></div></div>
   </div>
 
   <div class="grid" style="margin:12px 0">
@@ -1038,6 +1279,8 @@ function stats(excludeLatest=false){
     ...s,
     gamesCount:s.games.size,
     avgPoints:s.games.size?s.points/s.games.size:0,
+    winRate:s.games.size?(s.wins/s.games.size)*100:0,
+    podiumRate:s.games.size?(s.podiums/s.games.size)*100:0,
     kpg:s.games.size?s.kills/s.games.size:0
   }));
 }
@@ -1063,11 +1306,86 @@ function renderAll(){
   normalizeHistoryGameNumbers();
   renderDashboard();renderRanking();renderHistory();renderPlayers();renderGamePlayers();renderSettings();renderPoints();if(correctionUnlocked)renderCorrectionGameList();if(document.getElementById("livePlayerList"))liveRenderPlayerList();
 }
-function renderDashboard(){
-  const games=groupedGames(),rank=ranking();
 
-  // Source unique de vérité pour le nombre total de parties :
-  // exactement le même calcul que dans l'onglet Historique.
+function dashRankList(items,valueFn,formatFn){
+  if(!items.length)return '<span class="muted">—</span>';
+  return `<ol style="margin:0;padding-left:20px">${items.map(s=>`<li style="margin:4px 0">
+    <strong>${esc(s.name)}</strong> <span class="muted">(${formatFn(valueFn(s))})</span>
+  </li>`).join("")}</ol>`;
+}
+
+function renderTop3PointsChart(topPlayers){
+  const holder=$("dashTop3Chart");
+  if(!holder)return;
+
+  const gameNos=[...new Set((db.history||[]).map(r=>Number(r.game)).filter(n=>Number.isFinite(n)&&n>0))].sort((a,b)=>a-b);
+  if(gameNos.length===0 || topPlayers.length===0){
+    holder.innerHTML='<div class="muted">Pas encore assez de données pour afficher le graphique.</div>';
+    return;
+  }
+
+  const colorMap=["#0099B2","#B9725C","#7CC36B"];
+  const series=topPlayers.map((p,idx)=>{
+    let cum=0;
+    const points=gameNos.map(g=>{
+      const row=(db.history||[]).find(r=>Number(r.game)===g && String(r.player||"")===p.name);
+      cum += Number(row?.points||0);
+      return {game:g,value:cum};
+    });
+    return {name:p.name,color:colorMap[idx%colorMap.length],points};
+  });
+
+  const maxY=Math.max(1,...series.flatMap(s=>s.points.map(p=>p.value)));
+  const width=920, height=320, padL=55, padR=20, padT=20, padB=40;
+  const iw=width-padL-padR, ih=height-padT-padB;
+
+  const xOf=(game)=> gameNos.length===1
+    ? padL + iw/2
+    : padL + ((gameNos.indexOf(game))/(gameNos.length-1))*iw;
+
+  const yOf=(val)=> padT + ih - (val/maxY)*ih;
+
+  const yTicks=5;
+  const yGrid=[...Array(yTicks+1)].map((_,i)=>{
+    const val=maxY*i/yTicks;
+    const y=yOf(val);
+    return `<line x1="${padL}" y1="${y}" x2="${width-padR}" y2="${y}" stroke="rgba(255,255,255,.10)"/>
+            <text x="${padL-8}" y="${y+4}" fill="#9fb3c8" font-size="11" text-anchor="end">${Math.round(val)}</text>`;
+  }).join("");
+
+  const xLabels=gameNos.map(g=>{
+    const x=xOf(g);
+    return `<line x1="${x}" y1="${height-padB}" x2="${x}" y2="${height-padB+5}" stroke="rgba(255,255,255,.25)"/>
+            <text x="${x}" y="${height-padB+18}" fill="#9fb3c8" font-size="11" text-anchor="middle">P${g}</text>`;
+  }).join("");
+
+  const lines=series.map(s=>{
+    const pts=s.points.map(p=>`${xOf(p.game)},${yOf(p.value)}`).join(" ");
+    const circles=s.points.map(p=>`<circle cx="${xOf(p.game)}" cy="${yOf(p.value)}" r="4" fill="${s.color}"><title>${esc(s.name)} — Partie ${p.game} : ${p.value} pts cumulés</title></circle>`).join("");
+    return `<polyline fill="none" stroke="${s.color}" stroke-width="3" points="${pts}" stroke-linecap="round" stroke-linejoin="round"/>${circles}`;
+  }).join("");
+
+  const legend=series.map(s=>`<div class="chart-legend-item"><span class="chart-legend-dot" style="background:${s.color}"></span>${esc(s.name)}</div>`).join("");
+
+  holder.innerHTML=`
+    <div class="chart-legend">${legend}</div>
+    <svg viewBox="0 0 ${width} ${height}" class="top3-chart" role="img" aria-label="Évolution cumulée des points du Top 3">
+      <rect x="0" y="0" width="${width}" height="${height}" fill="transparent"/>
+      ${yGrid}
+      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${height-padB}" stroke="rgba(255,255,255,.25)"/>
+      <line x1="${padL}" y1="${height-padB}" x2="${width-padR}" y2="${height-padB}" stroke="rgba(255,255,255,.25)"/>
+      ${xLabels}
+      ${lines}
+      <text x="${width/2}" y="${height-5}" fill="#9fb3c8" font-size="12" text-anchor="middle">Historique des parties</text>
+      <text x="16" y="${height/2}" fill="#9fb3c8" font-size="12" text-anchor="middle" transform="rotate(-90 16 ${height/2})">Points cumulés</text>
+    </svg>`;
+}
+
+function renderDashboard(){
+  const games=groupedGames();
+  const rank=ranking();
+  const classified=stats(false).filter(s=>s.gamesCount>0);
+
   const totalGames=new Set(
     (Array.isArray(db.history)?db.history:[])
       .map(r=>Number(r.game))
@@ -1080,8 +1398,8 @@ function renderDashboard(){
   $("kRecord").textContent=games.length?Math.max(...games.map(g=>g[1].length)):0;
   $("kPot").textContent=euro(db.history.reduce((a,r)=>a+Number(r.stake||0),0));
 
-  const ks=killerStats();
-  $("dashTop").innerHTML=rank.slice(0,10).map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}">
+  const top3=rank.slice(0,3);
+  $("dashTop").innerHTML=top3.map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}">
     <td>${s.rank}</td>
     <td>${esc(s.name)}</td>
     <td><b>${num(s.points,0)}</b></td>
@@ -1091,25 +1409,63 @@ function renderDashboard(){
     <td>${euro(s.net)}</td>
   </tr>`).join("");
 
+  const best3=(fn)=>[...classified].sort((a,b)=>fn(b)-fn(a)||b.points-a.points||a.name.localeCompare(b.name,"fr")).slice(0,3);
+  const worst3=(fn)=>[...classified].sort((a,b)=>fn(a)-fn(b)||a.points-b.points||a.name.localeCompare(b.name,"fr")).slice(0,3);
+
+  const criteria=[
+    {label:"Moyenne de points", fn:s=>s.avgPoints, fmt:v=>num(v,1)},
+    {label:"Solde net", fn:s=>s.net, fmt:v=>euro(v)},
+    {label:"Nombre de kills", fn:s=>s.kills, fmt:v=>num(v,0)},
+    {label:"Kills / partie", fn:s=>s.kpg, fmt:v=>num(v,2)},
+    {label:"Taux de victoire", fn:s=>s.winRate, fmt:v=>num(v,1)+" %"},
+    {label:"Taux de podium", fn:s=>s.podiumRate, fmt:v=>num(v,1)+" %"}
+  ];
+
+  $("dashCompareTable").innerHTML=`<div class="tablewrap"><table class="dash-compare">
+    <thead><tr><th>Top 3</th><th>Critère</th><th>Flop 3</th></tr></thead>
+    <tbody>${criteria.map(c=>`<tr>
+      <td>${dashRankList(best3(c.fn),c.fn,c.fmt)}</td>
+      <td class="dash-criterion"><strong>${c.label}</strong></td>
+      <td>${dashRankList(worst3(c.fn),c.fn,c.fmt)}</td>
+    </tr>`).join("")}</tbody>
+  </table></div>`;
+
+  renderTop3PointsChart(top3);
+
   if(!games.length){
     $("lastGame").innerHTML='<span class="muted">Aucune partie.</span>';
     return;
   }
 
-  const [gno,rows]=games[games.length-1],win=rows.find(r=>Number(r.place)===1);
-  $("lastGame").innerHTML=`<h3>Partie #${gno}</h3>
-    <p>${esc(rows[0].date||"")} • ${esc(rows[0].location||"")}</p>
-    <p><span class="pill">${rows.length} joueurs</span></p>
-    <p>Vainqueur : <b>${esc(win?.player||"")}</b></p>
-    <p>Points : <b>${num(win?.points||0,0)}</b></p>`;
+  const [gno,rows]=games[games.length-1];
+  const win=rows.find(r=>Number(r.place)===1);
+  $("lastGame").innerHTML=`<div class="lastgame-inline">
+    <div class="lastgame-item"><span class="muted">Partie</span><strong>#${gno}</strong></div>
+    <div class="lastgame-item"><span class="muted">Date</span><strong>${esc(rows[0].date||"")}</strong></div>
+    <div class="lastgame-item"><span class="muted">Lieu</span><strong>${esc(rows[0].location||"—")}</strong></div>
+    <div class="lastgame-item"><span class="muted">Participants</span><strong>${rows.length} joueurs</strong></div>
+    <div class="lastgame-item"><span class="muted">Vainqueur</span><strong>${esc(win?.player||"")}</strong></div>
+    <div class="lastgame-item"><span class="muted">Points gagnés</span><strong>${num(win?.points||0,0)}</strong></div>
+  </div>`;
 }
 function renderRanking(){
   const ks=killerStats();
   $("rankingBody").innerHTML=ranking().map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}">
-    <td>${s.rank}</td><td>${esc(s.name)}</td><td><b>${num(s.points,0)}</b></td>
+    <td>${s.rank}</td>
+    <td>${esc(s.name)}</td>
+    <td><b>${num(s.points,0)}</b></td>
     <td>${s.progress===null?"Nouvelle entrée":s.progress>0?"+"+s.progress:s.progress===0?"=":String(s.progress)}</td>
-    <td>${num(s.avgPoints,1)}</td><td>${s.gamesCount}</td><td>${s.wins}</td><td>${s.podiums}</td><td>${s.tabliers}</td><td>${s.kills}</td><td>${num(s.kpg,2)}</td>
-    <td>${euro(s.stake)}</td><td>${euro(s.gross)}</td><td>${euro(s.net)}</td><td>${esc(ks.mainKiller(s.name))}</td><td>${esc(ks.mainVictim(s.name))}</td></tr>`).join("");
+    <td>${num(s.avgPoints,1)}</td>
+    <td>${s.gamesCount}</td>
+    <td>${s.wins}</td>
+    <td>${s.podiums}</td>
+    <td>${s.tabliers}</td>
+    <td>${s.kills}</td>
+    <td>${num(s.kpg,2)}</td>
+    <td>${euro(s.net)}</td>
+    <td>${esc(ks.mainKiller(s.name))}</td>
+    <td>${esc(ks.mainVictim(s.name))}</td>
+  </tr>`).join("");
 }
 function renderHistory(){
   const rows=Array.isArray(db?.history)?[...db.history]:[];
@@ -1146,14 +1502,341 @@ function renderHistory(){
     </tr>`).join("");
 }
 function renderPlayers(){
-  $("playersAdmin").innerHTML=db.players.sort((a,b)=>a.name.localeCompare(b.name,"fr")).map((p,i)=>`<div class="playerchip ${p.active?"":"inactive"}"><span>${esc(p.name)}</span><button class="btn ghost" style="padding:3px 6px" onclick="togglePlayer('${encodeURIComponent(p.name)}')">${p.active?"Actif":"Inactif"}</button><button class="btn danger" style="padding:3px 6px" onclick="deletePlayer('${encodeURIComponent(p.name)}')">×</button></div>`).join("");
+  const wrap=$("playersAdmin");
+  if(!wrap)return;
+
+  const players=[...db.players].sort((a,b)=>a.name.localeCompare(b.name,"fr",{sensitivity:"base"}));
+  if(!players.length){
+    wrap.innerHTML='<div class="muted">Aucun joueur.</div>';
+    return;
+  }
+
+  const groups=new Map();
+  for(const p of players){
+    const letter=(String(p.name||"").trim().charAt(0)||"#").toUpperCase();
+    if(!groups.has(letter))groups.set(letter,[]);
+    groups.get(letter).push(p);
+  }
+
+  wrap.innerHTML=[...groups.entries()].map(([letter,list])=>`
+    <div class="player-alpha-group">
+      <div class="player-alpha-letter">${esc(letter)}</div>
+      <div class="player-admin-list">
+        ${list.map(p=>`
+          <div class="player-admin-row ${p.active?"":"inactive"}" data-player="${encodeURIComponent(p.name)}">
+            <input class="player-rename-input" value="${esc(p.name)}"
+                   aria-label="Nom du joueur ${esc(p.name)}"
+                   title="Modifiez le nom puis validez avec Entrée ou en quittant le champ">
+            <div class="player-admin-actions">
+              <button class="btn ghost player-active-btn" type="button">${p.active?"Actif":"Inactif"}</button>
+              <button class="btn danger player-delete-btn" type="button">Supprimer</button>
+            </div>
+          </div>`).join("")}
+      </div>
+    </div>`).join("");
+
+  wrap.querySelectorAll(".player-admin-row").forEach(row=>{
+    const oldName=decodeURIComponent(row.dataset.player||"");
+    const input=row.querySelector(".player-rename-input");
+    const activeBtn=row.querySelector(".player-active-btn");
+    const deleteBtn=row.querySelector(".player-delete-btn");
+
+    let renameInProgress=false;
+    const commitRename=async ()=>{
+      if(renameInProgress)return;
+      const candidate=String(input.value||"").trim().replace(/\s+/g," ");
+      if(candidate===oldName)return;
+      renameInProgress=true;
+      try{
+        await renamePlayerInline(oldName,input,null);
+      }finally{
+        renameInProgress=false;
+      }
+    };
+
+    input.addEventListener("change",commitRename);
+    input.addEventListener("keydown",e=>{
+      if(e.key==="Enter"){
+        e.preventDefault();
+        input.blur();
+      }
+      if(e.key==="Escape"){
+        input.value=oldName;
+        input.blur();
+      }
+    });
+
+    activeBtn.onclick=()=>togglePlayerByName(oldName);
+    deleteBtn.onclick=()=>deletePlayerByName(oldName);
+  });
 }
-function togglePlayer(enc){const n=decodeURIComponent(enc),p=db.players.find(x=>x.name===n);if(p){p.active=!p.active;saveDB();renderAll();}}
-function deletePlayer(enc){const n=decodeURIComponent(enc);if(db.history.some(r=>r.player===n||r.killer===n)){alert("Impossible : ce joueur est présent dans l'historique.");return;}if(confirm(`Supprimer ${n} ?`)){db.players=db.players.filter(p=>p.name!==n);saveDB();renderAll();}}
+
+function findPlayerInsensitive(name){
+  const target=String(name||"").trim();
+  return db.players.find(p=>p.name.localeCompare(target,"fr",{sensitivity:"base"})===0);
+}
+
+function addActivePlayer(name){
+  const clean=String(name||"").trim().replace(/\s+/g," ");
+  if(!clean)return {ok:false,message:"Saisissez le nom du joueur."};
+
+  const existing=findPlayerInsensitive(clean);
+  if(existing){
+    existing.active=true;
+    saveDB();
+    renderAll();
+    return {ok:true,name:existing.name,existing:true};
+  }
+
+  db.players.push({name:clean,active:true});
+  saveDB();
+  renderAll();
+  return {ok:true,name:clean,existing:false};
+}
+
+function addPlayerFromGame(){
+  const input=$("gameNewPlayer");
+  const result=addActivePlayer(input.value);
+  if(!result.ok){alert(result.message);return;}
+
+  input.value="";
+  renderGamePlayers();
+
+  const cb=[...document.querySelectorAll(".gp")].find(x=>x.value===result.name);
+  if(cb)cb.checked=true;
+}
+
+function addPlayerFromLive(){
+  const input=$("liveNewPlayer");
+  const result=addActivePlayer(input.value);
+  if(!result.ok){alert(result.message);return;}
+
+  input.value="";
+  liveSelected.add(result.name);
+  liveRenderPlayerList();
+  livePreviewStructure();
+}
+
+async function renamePlayerInline(oldName,input,button){
+  if(!settingsUnlocked)return;
+
+  const newName=String(input?.value||"").trim().replace(/\s+/g," ");
+  if(!newName){
+    alert("Le nom du joueur ne peut pas être vide.");
+    input.value=oldName;
+    return;
+  }
+  if(newName===oldName)return;
+
+  const duplicate=db.players.find(
+    p=>p.name!==oldName &&
+    p.name.localeCompare(newName,"fr",{sensitivity:"base"})===0
+  );
+  if(duplicate){
+    alert("Un joueur portant déjà ce nom existe.");
+    input.value=oldName;
+    return;
+  }
+
+  if(!confirm(
+    `Renommer « ${oldName} » en « ${newName} » ?\n\n`+
+    `Le nouveau nom remplacera l’ancien dans tout l’historique et dans les champs « Éliminé par ».`
+  )){
+    input.value=oldName;
+    return;
+  }
+
+  const player=db.players.find(p=>p.name===oldName);
+  if(!player){
+    alert("Joueur introuvable.");
+    renderPlayers();
+    return;
+  }
+
+  const backup=JSON.parse(JSON.stringify(db));
+  const backupPending=pendingGamesLoad();
+  if(button)button.disabled=true;
+
+  try{
+    setCloudStatus("busy","Renommage en cours…");
+
+    player.name=newName;
+
+    db.history=(db.history||[]).map(r=>({
+      ...r,
+      player:r.player===oldName?newName:r.player,
+      killer:r.killer===oldName?newName:r.killer
+    }));
+
+    if(db.liveState && Array.isArray(db.liveState.players)){
+      db.liveState.players=db.liveState.players.map(p=>({
+        ...p,
+        name:p.name===oldName?newName:p.name,
+        killer:p.killer===oldName?newName:p.killer
+      }));
+    }
+
+    if(liveSelected.has(oldName)){
+      liveSelected.delete(oldName);
+      liveSelected.add(newName);
+    }
+
+    const pending=backupPending.map(rows=>(rows||[]).map(r=>({
+      ...r,
+      player:r.player===oldName?newName:r.player,
+      killer:r.killer===oldName?newName:r.killer
+    })));
+    pendingGamesSave(pending);
+
+    saveLocalOnly();
+    renderAll();
+
+    if(cloudReady && sbClient){
+      // Replace the canonical history immediately, then write the shared player state.
+      await cloudReplaceAllGames(db.history||[]);
+
+      const payload=JSON.parse(JSON.stringify(db));
+      payload.history=[];
+
+      const {error}=await sbClient
+        .from("bpt_state")
+        .upsert({id:CLOUD_ROW_ID,data:payload},{onConflict:"id"});
+      if(error)throw error;
+
+      db.history=await cloudFetchGames();
+      normalizeHistoryGameNumbers();
+      saveLocalOnly();
+
+      const oldStillPresent=(db.history||[]).some(
+        r=>r.player===oldName || r.killer===oldName
+      );
+      if(oldStillPresent)throw new Error("L'ancien nom est encore présent dans l'historique partagé.");
+
+      cloudLocalDirty=false;
+      cloudHistoryReplaceOnce=false;
+      renderAll();
+      setCloudStatus("ok","Renommage synchronisé");
+      alert(`Joueur renommé : « ${oldName} » → « ${newName} ».`);
+    }else{
+      cloudHistoryReplaceOnce=true;
+      cloudLocalDirty=true;
+      saveLocalOnly();
+      renderAll();
+      setCloudStatus("offline","Renommage en attente","La modification sera synchronisée dès le retour de la connexion.");
+      alert(`Joueur renommé localement : « ${oldName} » → « ${newName} ».`);
+    }
+  }catch(e){
+    db=backup;
+    pendingGamesSave(backupPending);
+    cloudLocalDirty=false;
+    cloudHistoryReplaceOnce=false;
+    saveLocalOnly();
+    renderAll();
+    console.error("BPT rename player:",e);
+    setCloudStatus("offline","Erreur renommage",e?.message||String(e));
+    alert("Le renommage a échoué.\n\n"+(e?.message||String(e)));
+  }finally{
+    if(button)button.disabled=false;
+  }
+}
+
+function togglePlayerByName(name){
+  const p=db.players.find(x=>x.name===name);
+  if(!p)return;
+  p.active=!p.active;
+  saveDB();
+  renderAll();
+}
+
+async function deletePlayerByName(name){
+  const p=db.players.find(x=>x.name===name);
+  if(!p){
+    alert("Joueur introuvable dans la liste.");
+    return;
+  }
+
+  const norm=s=>String(s||"").trim().toLocaleLowerCase("fr-FR");
+  const key=norm(name);
+
+  // Un historique de joueur signifie qu'il a réellement participé à une partie.
+  // Une simple mention comme éliminateur ne bloque pas la suppression du référentiel.
+  const historyRows=(db.history||[]).filter(r=>norm(r.player)===key);
+  const inHistory=historyRows.length>0;
+
+  const inLive=db.liveState && Array.isArray(db.liveState.players) &&
+    db.liveState.players.some(x=>norm(x.name)===key && (x.status==="En jeu" || x.status==="Vainqueur"));
+
+  if(inHistory){
+    alert(
+      `Impossible de supprimer « ${name} » : ce joueur possède un historique de ${historyRows.length} participation${historyRows.length>1?"s":""}.\n\n`+
+      `Vous pouvez uniquement le passer en Inactif avec le bouton Actif/Inactif.`
+    );
+    return;
+  }
+
+  if(inLive){
+    alert(`Impossible de supprimer « ${name} » : ce joueur participe actuellement à une partie Live.`);
+    return;
+  }
+
+  if(!confirm(`Supprimer définitivement « ${name} » de la liste des joueurs ?`))return;
+
+  const backup=JSON.parse(JSON.stringify(db));
+
+  try{
+    db.players=db.players.filter(x=>norm(x.name)!==key);
+    liveSelected.delete(name);
+
+    // Ne touche jamais à l'historique officiel.
+    saveLocalOnly();
+    renderAll();
+
+    if(cloudReady && sbClient){
+      setCloudStatus("busy","Suppression du joueur…");
+
+      // Écrit explicitement l'état partagé sans attendre le debounce.
+      const payload=JSON.parse(JSON.stringify(db));
+      payload.history=[];
+
+      const {error}=await sbClient
+        .from("bpt_state")
+        .upsert({id:CLOUD_ROW_ID,data:payload},{onConflict:"id"});
+      if(error)throw error;
+
+      cloudLocalDirty=false;
+      saveLocalOnly();
+      renderAll();
+      setCloudStatus("ok","Joueur supprimé");
+      alert(`« ${name} » a été supprimé de la liste des joueurs.`);
+    }else{
+      // Hors ligne : conserve la suppression localement et programme la synchro.
+      scheduleCloudSave();
+      alert(`« ${name} » a été supprimé localement. La synchronisation sera faite dès que possible.`);
+    }
+  }catch(e){
+    db=backup;
+    saveLocalOnly();
+    renderAll();
+    console.error("BPT delete player:",e);
+    setCloudStatus("offline","Erreur suppression",e?.message||String(e));
+    alert("La suppression a échoué.\n\n"+(e?.message||String(e)));
+  }
+}
+
 function renderGamePlayers(){
+  const selected=new Set(
+    [...document.querySelectorAll(".gp:checked")].map(x=>x.value)
+  );
+
   $("gStake").value=db.settings.stake;
   if(!$("gDate").value)$("gDate").value=new Date().toISOString().slice(0,10);
-  $("gamePlayerChecks").innerHTML=db.players.filter(p=>p.active).sort((a,b)=>a.name.localeCompare(b.name,"fr")).map(p=>`<label style="display:block;padding:5px 0"><input class="gp" type="checkbox" value="${esc(p.name)}" style="width:auto"> ${esc(p.name)}</label>`).join("");
+
+  $("gamePlayerChecks").innerHTML=db.players
+    .filter(p=>p.active)
+    .sort((a,b)=>a.name.localeCompare(b.name,"fr"))
+    .map(p=>`<label style="display:block;padding:5px 0">
+      <input class="gp" type="checkbox" value="${esc(p.name)}" style="width:auto" ${selected.has(p.name)?"checked":""}> ${esc(p.name)}
+    </label>`).join("");
 }
 
 function validateCompletedGameRows(rows){
@@ -1417,7 +2100,7 @@ async function saveGameFromEntry(){
     $("gameEntry").innerHTML="";
     $("gameEntryEmpty").style.display="block";
     $("gLocation").value="";
-    await showView("ranking");
+    await showView("dashboard");
 
     const ptsNotice=championshipPointsNotice(n);
     if(result.synced){
@@ -1634,6 +2317,27 @@ function liveRunTicker(){
     liveRenderTimerOnly();
   },250);
 }
+function liveAdjustTimer(deltaSeconds){
+  const s=ensureLiveState();
+  if(!s.prepared)return;
+
+  const maxSeconds=Math.max(Number(s.levelSeconds)||0,1);
+  let current=Number(s.remainingSeconds)||0;
+
+  if(s.running && s.endAt){
+    current=Math.max(0,Math.ceil((s.endAt-Date.now())/1000));
+  }
+
+  s.remainingSeconds=Math.max(0,Math.min(maxSeconds,current+deltaSeconds));
+
+  if(s.running){
+    s.endAt=Date.now()+s.remainingSeconds*1000;
+  }
+
+  saveDB();
+  liveRenderTimerOnly();
+}
+
 function liveChangeLevel(delta,auto=false){
   const s=ensureLiveState();if(!s.prepared)return;
   if(s.running){
@@ -1650,16 +2354,33 @@ function liveRenderTimerOnly(){
   $("liveTimer").textContent=liveTime(s.remainingSeconds);
   $("liveElapsed").textContent=liveTime(liveElapsedSeconds());
 }
-function liveRefreshElimLists(){
-  const s=ensureLiveState();if(!s.prepared)return;
+function liveRefreshElimLists(resetKiller=false){
+  const s=ensureLiveState();
+  if(!s.prepared)return;
+
   const alive=liveAlive();
   const prevOut=$("liveOutPlayer").value;
-  $("liveOutPlayer").innerHTML='<option value="">— Joueur sortant —</option>'+alive.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join("");
-  if(alive.some(p=>p.name===prevOut))$("liveOutPlayer").value=prevOut;
-  const out=$("liveOutPlayer").value,prevK=$("liveKiller").value;
+  const outStillAlive=alive.some(p=>p.name===prevOut);
+
+  $("liveOutPlayer").innerHTML=
+    '<option value="">— Joueur sortant —</option>'+
+    alive.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join("");
+
+  if(outStillAlive)$("liveOutPlayer").value=prevOut;
+
+  const out=$("liveOutPlayer").value;
+  const previousKiller=(!resetKiller && outStillAlive)?$("liveKiller").value:"";
   const eligible=alive.filter(p=>p.name!==out);
-  $("liveKiller").innerHTML='<option value="">— Éliminé par… —</option>'+eligible.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join("");
-  if(eligible.some(p=>p.name===prevK))$("liveKiller").value=prevK;
+
+  $("liveKiller").innerHTML=
+    '<option value="">— Éliminé par… —</option>'+
+    eligible.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join("");
+
+  if(previousKiller && eligible.some(p=>p.name===previousKiller)){
+    $("liveKiller").value=previousKiller;
+  }else{
+    $("liveKiller").value="";
+  }
 }
 function livePrize(place){
   const s=ensureLiveState();
@@ -1917,9 +2638,23 @@ function liveRenderAll(){
   }
 
   if($("liveUndoEliminationBtn")){
-    const canUndo=!s.synced && s.players.some(p=>p.status==="Sorti" && Number(p.place)>1);
-    $("liveUndoEliminationBtn").style.display=canUndo?"inline-block":"none";
+    const outs=s.players
+      .filter(p=>p.status==="Sorti" && Number(p.place)>1)
+      .sort((a,b)=>Number(a.place)-Number(b.place));
+    const canUndo=!s.synced && outs.length>0;
+
+    $("liveUndoEliminationBtn").style.display="block";
     $("liveUndoEliminationBtn").disabled=!canUndo;
+
+    if($("liveUndoHint")){
+      if(s.synced){
+        $("liveUndoHint").textContent="Partie déjà synchronisée : utilisez Paramètres > Correction des parties.";
+      }else if(outs.length){
+        $("liveUndoHint").textContent=`Dernière élimination : ${outs[0].name} — cliquer pour la corriger.`;
+      }else{
+        $("liveUndoHint").textContent="Aucune élimination enregistrée pour le moment.";
+      }
+    }
   }
   $("livePlayersBody").innerHTML=[...s.players].sort((a,b)=>(a.place||999)-(b.place||999)).map(p=>`
     <tr class="${p.status==="Sorti"?"out":p.status==="Vainqueur"?"winner":""}">
@@ -2309,13 +3044,11 @@ async function showView(id){
   document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===id));
 
-  if((id==="ranking" || id==="history") && cloudReady && sbClient){
+  if((id==="dashboard" || id==="ranking" || id==="history") && cloudReady && sbClient){
     await refreshCanonicalHistoryUI(true);
   }else{
-    if(id==="ranking"){
-      renderDashboard();
-      renderRanking();
-    }
+    if(id==="dashboard")renderDashboard();
+    if(id==="ranking")renderRanking();
     if(id==="history")renderHistory();
   }
 
@@ -2336,7 +3069,7 @@ function backup(){const a=document.createElement("a");a.href=URL.createObjectURL
 $("backupBtn").onclick=backup;$("backupBtn2").onclick=backup;
 function restoreInput(input){const f=input.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const x=JSON.parse(rd.result);if(!x.players||!x.history||!x.points)throw 0;db=x;cloudHistoryReplaceOnce=true;saveDB();renderAll();alert("Sauvegarde restaurée.");}catch(e){alert("Fichier de sauvegarde invalide.");}};rd.readAsText(f);}
 $("restoreInput").onchange=e=>restoreInput(e.target);$("restoreInput2").onchange=e=>restoreInput(e.target);
-$("resetDataBtn").onclick=()=>{if(confirm("Réinitialiser toutes les données avec celles du classeur Excel d'origine ?")){db=clone(SEED);cloudHistoryReplaceOnce=true;saveDB();renderAll();showView("ranking");}};
+$("resetDataBtn").onclick=()=>{if(confirm("Réinitialiser toutes les données avec celles du classeur Excel d'origine ?")){db=clone(SEED);cloudHistoryReplaceOnce=true;saveDB();renderAll();showView("dashboard");}};
 
 $("correctionGameSelect").onchange=loadCorrectionGame;
 $("prevCorrectionGameBtn").onclick=()=>moveCorrectionGame(-1);
@@ -2358,9 +3091,11 @@ $("liveLaunchBtn").onclick=liveLaunch;
 $("liveBackPrepBtn").onclick=()=>{const s=ensureLiveState();if(s.synced){liveResetForNew();}else liveShowScreen("prep");};
 $("liveStartBtn").onclick=liveStart;
 $("livePauseBtn").onclick=livePause;
+$("liveTimerBackBtn").onclick=()=>liveAdjustTimer(60);
+$("liveTimerForwardBtn").onclick=()=>liveAdjustTimer(-60);
 $("livePrevLevelBtn").onclick=()=>liveChangeLevel(-1,false);
 $("liveNextLevelBtn").onclick=()=>liveChangeLevel(1,false);
-$("liveOutPlayer").onchange=liveRefreshElimLists;
+$("liveOutPlayer").onchange=()=>liveRefreshElimLists(true);
 $("liveEliminateBtn").onclick=liveEliminate;
 $("liveUndoEliminationBtn").onclick=liveUndoLastElimination;
 $("liveFinalizeBtn").onclick=liveFinalizeGame;
@@ -2375,21 +3110,27 @@ document.querySelectorAll("nav button[data-view]").forEach(b=>{
 // Gestion des joueurs
 if($("addPlayerBtn")){
   $("addPlayerBtn").onclick=()=>{
-    const n=$("newPlayer").value.trim();
-    if(!n)return;
-    if(db.players.some(p=>p.name.localeCompare(n,"fr",{sensitivity:"base"})===0)){
-      alert("Joueur déjà présent.");
-      return;
-    }
-    db.players.push({name:n,active:true});
+    const n=$("newPlayer").value;
+    const result=addActivePlayer(n);
+    if(!result.ok){alert(result.message);return;}
+    if(result.existing)alert("Ce joueur existait déjà : il a été réactivé.");
     $("newPlayer").value="";
-    saveDB();
-    renderAll();
   };
   $("newPlayer").addEventListener("keydown",e=>{
     if(e.key==="Enter")$("addPlayerBtn").click();
   });
 }
+
+
+// Ajout rapide de joueurs depuis Nouvelle partie / Live
+if($("gameAddPlayerBtn"))$("gameAddPlayerBtn").onclick=addPlayerFromGame;
+if($("gameNewPlayer"))$("gameNewPlayer").addEventListener("keydown",e=>{
+  if(e.key==="Enter")addPlayerFromGame();
+});
+if($("liveAddPlayerBtn"))$("liveAddPlayerBtn").onclick=addPlayerFromLive;
+if($("liveNewPlayer"))$("liveNewPlayer").addEventListener("keydown",e=>{
+  if(e.key==="Enter")addPlayerFromLive();
+});
 
 // Nouvelle partie manuelle
 if($("buildGameBtn"))$("buildGameBtn").onclick=buildGameEntry;
