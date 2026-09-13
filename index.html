@@ -2045,6 +2045,247 @@ td{border-bottom-color:#273140 !important}
 @media(max-width:680px){
   #dashboard .premium-records-list{grid-template-columns:1fr}
 }
+
+/* ===== V96 — multi-saisons ===== */
+.season-switcher-wrap{display:flex;align-items:center;gap:6px;margin-left:10px}
+.season-selector{
+  min-width:190px;
+  height:38px;
+  padding:0 34px 0 12px;
+  border-radius:999px;
+  border:1px solid #46546a !important;
+  background:#171e29 !important;
+  color:#f3f5f8 !important;
+  font-weight:800;
+  font-size:13px;
+}
+.season-arrow{
+  width:34px;height:34px;border-radius:50%;border:1px solid #3a4658;
+  background:#161d28;color:#d7dde6;font-size:22px;line-height:1;cursor:pointer
+}
+.season-arrow:hover{background:#222c3a;border-color:#586980}
+body.archive-season nav button[data-view="live"],
+body.archive-season nav button[data-view="settings"]{
+  opacity:.32;pointer-events:none;filter:saturate(.3)
+}
+body.archive-season #cloudStatus::after{
+  content:" · consultation archives";color:#c8a15c;font-size:11px
+}
+.archive-season-badge{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;
+  background:rgba(200,161,92,.10);border:1px solid rgba(200,161,92,.25);
+  color:#d6b676;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em
+}
+@media(max-width:700px){
+  .season-switcher-wrap{width:100%;margin:8px 0 0}
+  .season-selector{flex:1;min-width:0}
+  .bpt-header{flex-wrap:wrap}
+}
+
+body.archive-season .season-selector{border-color:#6e5b39 !important}
+body.archive-season .season-arrow{border-color:#504632}
+
+/* ===== V101 — navigation de saison plus visible ===== */
+.season-switcher-wrap{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-left:16px;
+  flex-wrap:wrap;
+}
+.season-current-box{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  min-width:188px;
+}
+.season-current-box > span{
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.07em;
+  color:#9da9b8;
+  font-weight:800;
+  padding-left:10px;
+}
+.season-selector{
+  height:38px;
+  min-width:188px;
+  border-radius:10px !important;
+  border:1px solid #46546a !important;
+  background:#171e29 !important;
+  color:#f3f5f8 !important;
+  font-weight:850;
+  font-size:13px;
+  padding:0 32px 0 11px;
+}
+.season-nav-btn,
+.season-cumul-btn{
+  height:38px;
+  border-radius:10px;
+  padding:0 12px;
+  border:1px solid #3a4658;
+  background:#171e29;
+  color:#e4e9ef;
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.season-nav-btn:hover{
+  background:#222c3a;
+  border-color:#5a6b83;
+}
+.season-cumul-btn{
+  border-color:rgba(200,161,92,.38);
+  background:rgba(200,161,92,.08);
+  color:#dec081;
+}
+.season-cumul-btn:hover{
+  background:rgba(200,161,92,.15);
+  border-color:rgba(200,161,92,.55);
+}
+body.archive-season .season-nav-btn{
+  border-color:#514731;
+}
+body.archive-season .season-cumul-btn.active{
+  background:#c8a15c;
+  color:#17130d;
+  border-color:#c8a15c;
+}
+@media(max-width:1100px){
+  .season-switcher-wrap{
+    width:100%;
+    margin:10px 0 0;
+  }
+  .season-current-box{min-width:170px;flex:1}
+  .season-selector{width:100%;min-width:0}
+}
+@media(max-width:700px){
+  .season-nav-btn,.season-cumul-btn{flex:1 1 45%;padding:0 8px}
+  .season-current-box{order:-1;flex-basis:100%}
+}
+
+
+/* ===== V102 — navigation saisons dans le bandeau du tableau de bord ===== */
+#dashboard .premium-hero{
+  grid-template-columns:minmax(0,1.35fr) minmax(280px,.9fr);
+}
+#dashboard .dashboard-season-nav{
+  grid-column:1 / -1;
+  margin-top:2px;
+  padding-top:16px;
+  border-top:1px solid rgba(255,255,255,.10);
+}
+#dashboard .dashboard-season-nav-label{
+  margin-bottom:8px;
+  color:#aeb9c8;
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  font-weight:850;
+}
+#dashboard .season-switcher-wrap{
+  margin:0;
+  width:100%;
+  display:flex;
+  align-items:flex-end;
+  gap:8px;
+  flex-wrap:wrap;
+}
+#dashboard .season-current-box{
+  min-width:190px;
+}
+#dashboard .season-current-box > span{
+  color:#aeb9c8;
+}
+#dashboard .season-nav-btn,
+#dashboard .season-cumul-btn{
+  background:rgba(12,18,27,.48);
+  border-color:rgba(255,255,255,.14);
+}
+#dashboard .season-nav-btn:hover{
+  background:rgba(255,255,255,.08);
+}
+#dashboard .season-cumul-btn{
+  background:rgba(200,161,92,.09);
+  border-color:rgba(200,161,92,.36);
+  color:#e0c17d;
+}
+#dashboard .season-cumul-btn.active{
+  background:#c8a15c;
+  border-color:#c8a15c;
+  color:#17130d;
+}
+@media(max-width:900px){
+  #dashboard .season-switcher-wrap{align-items:stretch}
+  #dashboard .season-current-box{flex:1 1 220px}
+  #dashboard .season-nav-btn,
+  #dashboard .season-cumul-btn{flex:1 1 180px}
+}
+
+
+/* ===== V103 — navigation saison sans sélecteur central, réutilisée dans les onglets ===== */
+.season-current-box,.season-selector{display:none !important}
+
+.season-nav-toolbar{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.season-nav-btn,
+.season-cumul-btn{
+  height:36px;
+  border-radius:10px;
+  padding:0 12px;
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.season-nav-btn:disabled,
+.season-nav-btn.disabled{
+  opacity:.30;
+  cursor:default;
+  pointer-events:none;
+}
+.tab-season-nav{
+  margin-top:10px;
+  padding:10px 2px 2px;
+}
+.tab-season-nav::before{
+  content:"Changer de saison";
+  width:100%;
+  color:#8f9bab;
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  font-weight:850;
+  margin-bottom:1px;
+}
+.tab-season-nav .season-nav-btn{
+  background:#171e29;
+  border:1px solid #344052;
+  color:#e3e8ef;
+}
+.tab-season-nav .season-cumul-btn{
+  background:rgba(200,161,92,.07);
+  border:1px solid rgba(200,161,92,.30);
+  color:#d9ba78;
+}
+.tab-season-nav .season-cumul-btn.active,
+#dashboard .season-cumul-btn.active{
+  background:#c8a15c !important;
+  border-color:#c8a15c !important;
+  color:#17130d !important;
+}
+@media(max-width:700px){
+  .season-nav-toolbar .season-nav-btn,
+  .season-nav-toolbar .season-cumul-btn{
+    flex:1 1 140px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -2059,10 +2300,10 @@ td{border-bottom-color:#273140 !important}
     </div>
     <div class="brand">
       <b>Championnat de poker</b>
-      <span>Gestion du championnat 2026-2027</span>
+      <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 13/09/26 16h32</div>
+  <div class="app-version">Version 13/09/26 18h41</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -2264,7 +2505,7 @@ td{border-bottom-color:#273140 !important}
   <div class="premium-hero">
     <div class="premium-hero-copy">
       <div class="home-kicker">BPT · Tableau de bord</div>
-      <h1>Championnat 2026–2027</h1>
+      <h1 id="dashboardSeasonTitle">Championnat BPT saison 2026–2027</h1>
       <p id="heroText"></p>
     </div>
     <div class="premium-hero-metrics">
@@ -2279,6 +2520,15 @@ td{border-bottom-color:#273140 !important}
       <div class="premium-hero-metric">
         <span>Participations cumulées</span>
         <strong id="heroTotalParticipations">0</strong>
+      </div>
+    </div>
+
+    <div class="dashboard-season-nav">
+      <div class="dashboard-season-nav-label">Changer de saison</div>
+      <div class="season-switcher-wrap season-nav-toolbar">
+        <button class="season-nav-btn" type="button" data-season-action="prev" onclick="changeSeasonFromToolbar('prev')">← Saison précédente</button>
+        <button class="season-nav-btn" type="button" data-season-action="next" onclick="changeSeasonFromToolbar('next')">Saison suivante →</button>
+        <button class="season-cumul-btn" type="button" data-season-action="all" onclick="changeSeasonFromToolbar('all')">Cumul toutes saisons</button>
       </div>
     </div>
   </div>
@@ -2371,6 +2621,12 @@ td{border-bottom-color:#273140 !important}
       <small id="latestGameWinnerMeta">—</small>
     </div>
   </div>
+  <div class="tab-season-nav season-nav-toolbar">
+    <button class="season-nav-btn" type="button" data-season-action="prev" onclick="changeSeasonFromToolbar('prev')">← Saison précédente</button>
+    <button class="season-nav-btn" type="button" data-season-action="next" onclick="changeSeasonFromToolbar('next')">Saison suivante →</button>
+    <button class="season-cumul-btn" type="button" data-season-action="all" onclick="changeSeasonFromToolbar('all')">Cumul toutes saisons</button>
+  </div>
+
 
   <div id="latestGameEmpty" class="card muted" style="display:none;margin-top:12px">
     Aucune partie enregistrée.
@@ -2409,7 +2665,13 @@ td{border-bottom-color:#273140 !important}
 </section>
 
 <section id="ranking" class="view">
-  <div class="hero tab-premium-hero"><h1>Classement détaillé du championnat BPT</h1><p>Classement général et statistiques individuelles.</p></div>
+  <div class="hero tab-premium-hero"><h1 id="rankingSeasonTitle">Classement BPT</h1><p>Classement général et statistiques individuelles.</p></div>
+  <div class="tab-season-nav season-nav-toolbar">
+    <button class="season-nav-btn" type="button" data-season-action="prev" onclick="changeSeasonFromToolbar('prev')">← Saison précédente</button>
+    <button class="season-nav-btn" type="button" data-season-action="next" onclick="changeSeasonFromToolbar('next')">Saison suivante →</button>
+    <button class="season-cumul-btn" type="button" data-season-action="all" onclick="changeSeasonFromToolbar('all')">Cumul toutes saisons</button>
+  </div>
+
   <div class="card tab-primary-panel" style="margin-top:16px">
     <h2>Classement général détaillé</h2>
     <div class="tablewrap"><table>
@@ -2425,9 +2687,15 @@ td{border-bottom-color:#273140 !important}
 
 <section id="versus" class="view">
   <div class="hero tab-premium-hero">
-    <h1>Versus</h1>
+    <h1 id="versusSeasonTitle">Versus</h1>
     <p>Comparez les performances individuelles de deux joueurs du BPT sur les principaux indicateurs du championnat.</p>
   </div>
+  <div class="tab-season-nav season-nav-toolbar">
+    <button class="season-nav-btn" type="button" data-season-action="prev" onclick="changeSeasonFromToolbar('prev')">← Saison précédente</button>
+    <button class="season-nav-btn" type="button" data-season-action="next" onclick="changeSeasonFromToolbar('next')">Saison suivante →</button>
+    <button class="season-cumul-btn" type="button" data-season-action="all" onclick="changeSeasonFromToolbar('all')">Cumul toutes saisons</button>
+  </div>
+
 
   <div class="card tab-primary-panel" style="margin-top:16px">
     <div class="versus-selectors">
@@ -2484,9 +2752,15 @@ td{border-bottom-color:#273140 !important}
 
 <section id="achievements" class="view">
   <div class="hero tab-premium-hero">
-    <h1>Accomplissements BPT</h1>
+    <h1 id="achievementsSeasonTitle">Accomplissements BPT</h1>
     <p>Les performances spéciales débloquées au fil du championnat.</p>
   </div>
+  <div class="tab-season-nav season-nav-toolbar">
+    <button class="season-nav-btn" type="button" data-season-action="prev" onclick="changeSeasonFromToolbar('prev')">← Saison précédente</button>
+    <button class="season-nav-btn" type="button" data-season-action="next" onclick="changeSeasonFromToolbar('next')">Saison suivante →</button>
+    <button class="season-cumul-btn" type="button" data-season-action="all" onclick="changeSeasonFromToolbar('all')">Cumul toutes saisons</button>
+  </div>
+
 
   <div class="achievements-toolbar">
     <div><strong id="achievementUnlockedCount">0</strong> accomplissement(s) débloqué(s)</div>
@@ -2499,9 +2773,15 @@ td{border-bottom-color:#273140 !important}
 <section id="history" class="view">
   <div class="hero tab-premium-hero">
     <div class="home-kicker">BPT · Historique</div>
-    <h1>Historique des parties</h1>
+    <h1 id="historySeasonTitle">Historique BPT</h1>
     <p>Retrouvez les parties jouées, leurs résultats et le détail complet du championnat.</p>
   </div>
+  <div class="tab-season-nav season-nav-toolbar">
+    <button class="season-nav-btn" type="button" data-season-action="prev" onclick="changeSeasonFromToolbar('prev')">← Saison précédente</button>
+    <button class="season-nav-btn" type="button" data-season-action="next" onclick="changeSeasonFromToolbar('next')">Saison suivante →</button>
+    <button class="season-cumul-btn" type="button" data-season-action="all" onclick="changeSeasonFromToolbar('all')">Cumul toutes saisons</button>
+  </div>
+
   <div class="card tab-primary-panel">
     <div class="row" style="justify-content:space-between">
       <div>
@@ -2526,7 +2806,13 @@ td{border-bottom-color:#273140 !important}
 
 
 <section id="records" class="view">
-  <div class="hero tab-premium-hero"><h1>Records BPT</h1><p>Les performances marquantes du championnat.</p></div>
+  <div class="hero tab-premium-hero"><h1 id="recordsSeasonTitle">Records BPT</h1><p>Les performances marquantes du championnat.</p></div>
+  <div class="tab-season-nav season-nav-toolbar">
+    <button class="season-nav-btn" type="button" data-season-action="prev" onclick="changeSeasonFromToolbar('prev')">← Saison précédente</button>
+    <button class="season-nav-btn" type="button" data-season-action="next" onclick="changeSeasonFromToolbar('next')">Saison suivante →</button>
+    <button class="season-cumul-btn" type="button" data-season-action="all" onclick="changeSeasonFromToolbar('all')">Cumul toutes saisons</button>
+  </div>
+
   <div id="recordsGrid" class="records-grid" style="margin-top:12px"></div>
 </section>
 
@@ -2534,7 +2820,7 @@ td{border-bottom-color:#273140 !important}
   <div class="hero tab-premium-hero">
     <div class="profile-topbar">
       <div>
-        <h1>Profil joueur</h1>
+        <h1 id="profileSeasonTitle">Profil joueur</h1>
         <p>Statistiques, faits d’armes et accomplissements individuels.</p>
       </div>
       <div class="field profile-selector-field">
@@ -2543,6 +2829,12 @@ td{border-bottom-color:#273140 !important}
       </div>
     </div>
   </div>
+  <div class="tab-season-nav season-nav-toolbar">
+    <button class="season-nav-btn" type="button" data-season-action="prev" onclick="changeSeasonFromToolbar('prev')">← Saison précédente</button>
+    <button class="season-nav-btn" type="button" data-season-action="next" onclick="changeSeasonFromToolbar('next')">Saison suivante →</button>
+    <button class="season-cumul-btn" type="button" data-season-action="all" onclick="changeSeasonFromToolbar('all')">Cumul toutes saisons</button>
+  </div>
+
 
   <div class="row" style="justify-content:flex-end;margin:12px 0">
     <button class="btn secondary" id="playerProfileVersusBtn">Comparer dans Versus</button>
@@ -2593,6 +2885,7 @@ td{border-bottom-color:#273140 !important}
     </div>
   </div>
 </section>
+
 <section id="settings" class="view">
   <div class="hero tab-premium-hero">
     <div class="home-kicker">BPT · Administration</div>
@@ -3007,6 +3300,20 @@ async function refreshCanonicalHistoryUI(showBusy=true){
     const serverHistory=await cloudFetchGames();
 
     cloudApplying=true;
+    if(typeof isArchiveSeason==="function" && isArchiveSeason()){
+      currentSeasonHistoryCache=clone(serverHistory);
+      if(typeof isAllSeasons==="function" && isAllSeasons()){
+        db.history=buildAllSeasonsHistory();
+        cloudApplying=false;
+        renderAll();
+      }else{
+        cloudApplying=false;
+      }
+      const games=new Set(serverHistory.map(r=>Number(r.game))).size;
+      setCloudStatus("ok",`Synchronisé • ${games} partie${games>1?"s":""}`,
+        isAllSeasons()?`Saison courante synchronisée · cumul mis à jour`:`Saison courante synchronisée en arrière-plan · archives affichées`);
+      return true;
+    }
     db.history=serverHistory;
     normalizeHistoryGameNumbers();
     saveLocalOnly();
@@ -3187,6 +3494,7 @@ async function cloudSyncGamesAdditive(){
 }
 
 async function cloudPushNow(){
+  if(typeof isArchiveSeason==="function" && isArchiveSeason())return false;
   if(!sbClient || !cloudReady || cloudApplying)return false;
   setCloudStatus("busy","Synchronisation…");
 
@@ -3252,22 +3560,36 @@ async function applyCloudState(row){
 
   cloudApplying=true;
   try{
-    // Garde l'état partagé (joueurs, paramètres, live...)
-    // mais impose toujours l'historique officiel depuis bpt_games.
+    // L'état partagé continue d'être actualisé, mais la saison choisie
+    // par l'utilisateur reste affichée pendant toute la visite.
+    const liveSeasonKey=selectedSeasonKey;
+    const serverHistory=await cloudFetchGames();
+    currentSeasonHistoryCache=clone(serverHistory);
+
     db=remoteState;
-    db.history=await cloudFetchGames();
-    normalizeHistoryGameNumbers();
+
+    if(liveSeasonKey==="2023-2024"){
+      db.history=clone(ARCHIVE_2023_2024);
+    }else if(liveSeasonKey==="2025-2026"){
+      db.history=clone(ARCHIVE_2025_2026);
+    }else if(liveSeasonKey==="all"){
+      db.history=buildAllSeasonsHistory();
+    }else{
+      db.history=serverHistory;
+      normalizeHistoryGameNumbers();
+      saveLocalOnly();
+    }
 
     cloudLastRevision=rev;
-    saveLocalOnly();
     renderAll();
-    renderHistory();
-    if(typeof liveRenderAll==="function")liveRenderAll();
+    if(typeof liveRenderAll==="function" && liveSeasonKey===CURRENT_SEASON_KEY)liveRenderAll();
 
     const hh=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
-    const games=cloudGameCount(db);
+    const games=new Set(serverHistory.map(r=>Number(r.game))).size;
     setCloudStatus("ok",`Synchronisé • ${games} partie${games>1?"s":""}`,
-      `Historique officiel : ${games} partie${games>1?"s":""} • révision ${rev} • ${hh}`);
+      liveSeasonKey===CURRENT_SEASON_KEY
+        ? `Historique officiel : ${games} partie${games>1?"s":""} • révision ${rev} • ${hh}`
+        : `Saison courante synchronisée en arrière-plan • saison affichée conservée`);
   }finally{
     cloudApplying=false;
   }
@@ -3546,7 +3868,7 @@ function stats(excludeLatest=false){
     s.wins+=r.win?1:0;s.podiums+=r.podium?1:0;s.tabliers+=r.tablier?1:0;s.kills+=Number(r.kills||0);
     s.stake+=Number(r.stake||0);s.gross+=Number(r.gross||0);s.net+=Number(r.net||0);
   }
-  return Object.values(by).map(s=>({
+  const out=Object.values(by).map(s=>({
     ...s,
     gamesCount:s.games.size,
     avgPoints:s.games.size?s.points/s.games.size:0,
@@ -3554,9 +3876,21 @@ function stats(excludeLatest=false){
     podiumRate:s.games.size?(s.podiums/s.games.size)*100:0,
     kpg:s.games.size?s.kills/s.games.size:0
   }));
+  if(!excludeLatest && typeof isAllSeasons==="function" && isAllSeasons())return mergeAllSeasonsOfficialStats(out);
+  return (!excludeLatest && typeof mergeArchiveOfficialStats==="function") ? mergeArchiveOfficialStats(out) : out;
 }
 function ranking(){
   const cur=stats(false).filter(s=>s.gamesCount>0).sort((a,b)=>b.points-a.points||b.avgPoints-a.avgPoints||a.name.localeCompare(b.name,"fr"));
+  if(typeof isAllSeasons==="function" && isAllSeasons()){
+    return cur.map((s,i)=>({...s,rank:i+1,progress:null}));
+  }
+  if(typeof isArchiveSeason==="function" && isArchiveSeason()){
+    const official=archiveOfficialRanking();
+    if(Array.isArray(official)){
+      const byName=new Map(cur.map(s=>[s.name,s]));
+      return official.map(o=>({...byName.get(o.name),...o,progress:null}));
+    }
+  }
   const prev=stats(true).filter(s=>s.gamesCount>0).sort((a,b)=>b.points-a.points||b.avgPoints-a.avgPoints||a.name.localeCompare(b.name,"fr"));
   const prevRank=new Map(prev.map((s,i)=>[s.name,i+1]));
   return cur.map((s,i)=>({...s,rank:i+1,progress:prevRank.has(s.name)?prevRank.get(s.name)-(i+1):null}));
@@ -3619,7 +3953,7 @@ function renderRecords(){
   const worstNet=[...ranked].sort((a,b)=>Number(a.net||0)-Number(b.net||0)||a.name.localeCompare(b.name,"fr"))[0];
 
   let bestGameKill={name:"—",value:0,game:null};
-  for(const r of db.history||[])if(Number(r.kills||0)>bestGameKill.value)bestGameKill={name:r.player,value:Number(r.kills||0),game:r.game};
+  for(const r of db.history||[])if(Number(r.kills||0)>bestGameKill.value)bestGameKill={name:r.player,value:Number(r.kills||0),game:r.game,sourceGame:r.sourceGame,seasonKey:r.seasonKey,seasonLabel:r.seasonLabel};
 
   let streakPod={name:"—",value:0}, streakPart={name:"—",value:0};
   for(const p of ranked){
@@ -3727,7 +4061,7 @@ function renderRecords(){
     ["🥉","Plus de podiums",podiums.name,`${podiums.podiums} podium${podiums.podiums>1?"s":""}`],
     ["🏅","Série de podiums",streakPod.name,`${streakPod.value} de suite`],
     ["💥","Plus de kills",kills.name,`${kills.kills} kill${kills.kills>1?"s":""}`],
-    ["🎯","Kills sur une partie",bestGameKill.name,`${bestGameKill.value} · partie #${bestGameKill.game||"—"}`],
+    ["🎯","Kills sur une partie",bestGameKill.name,`${bestGameKill.value} · ${formatGameReference(bestGameKill)}`],
     ["📈","Meilleure moyenne",avg.name,`${num(avg.avgPoints,1)} pts / partie`],
     ["💶","Plus gros gains",net.name,euro(net.net)],
     ["📉","Plus grosse perte d’argent",worstNet?.name||"—",worstNet?euro(worstNet.net):"—"],
@@ -3974,8 +4308,8 @@ function renderProfile(preferredName=null){
 
   const feats=[
     ["Meilleure place",d.bestPlace?`${d.bestPlace}e`:"—"],
-    ["Meilleure partie en kills",d.bestKillsGame?`${d.bestKillsGame.kills||0} kill${Number(d.bestKillsGame.kills||0)>1?"s":""} · P#${d.bestKillsGame.game}`:"—"],
-    ["Meilleur résultat financier",d.bestNetGame?`${euro(d.bestNetGame.net)} · P#${d.bestNetGame.game}`:"—"],
+    ["Meilleure partie en kills",d.bestKillsGame?`${d.bestKillsGame.kills||0} kill${Number(d.bestKillsGame.kills||0)>1?"s":""} · ${formatGameReference(d.bestKillsGame)}`:"—"],
+    ["Meilleur résultat financier",d.bestNetGame?`${euro(d.bestNetGame.net)} · ${formatGameReference(d.bestNetGame)}`:"—"],
     ["Série de victoires",`${d.winStreak} de suite`],
     ["Série de podiums",`${d.podiumStreak} de suite`],
     ["4e places",String(d.fourthPlaces)],
@@ -4044,7 +4378,7 @@ function renderHistoryCards(){
     const f=sorted[0]||{},win=sorted.find(r=>Number(r.place)===1);
     return `<details class="history-game">
       <summary>
-        <div class="history-game-title">Partie #${g}</div>
+        <div class="history-game-title">${esc(gameDisplayTitle(f,g))}</div>
         <div><div>${esc(shortDate(f.date||""))}${f.location?" · "+esc(f.location):""} · ${rows.length} joueurs</div><div class="history-game-meta">Cagnotte ${euro(rows.length*Number(f.stake||0))}</div></div>
         <div class="history-winner">🏆 ${esc(win?.player||"—")} · ${num(win?.points||0,0)} pts</div>
       </summary>
@@ -4273,9 +4607,295 @@ function renderAchievements(){
   }).join("");
 }
 
+
+const CURRENT_SEASON_KEY="2026-2027";
+const ARCHIVE_2023_2024=[{"game":1,"date":"2023-09-01","location":"Michel","player":"Michel SCHERPEREEL","place":1,"killer":"","tablier":false,"n":10,"points":32,"stake":5,"gross":30,"net":25,"kills":4,"win":true,"podium":true},{"game":1,"date":"2023-09-01","location":"Michel","player":"François CATTEAU","place":2,"killer":"Michel SCHERPEREEL","tablier":false,"n":10,"points":26,"stake":5,"gross":15,"net":10,"kills":2,"win":false,"podium":true},{"game":1,"date":"2023-09-01","location":"Michel","player":"Jérôme RIFFE","place":3,"killer":"Michel SCHERPEREEL","tablier":false,"n":10,"points":21,"stake":5,"gross":5,"net":0,"kills":1,"win":false,"podium":true},{"game":1,"date":"2023-09-01","location":"Michel","player":"Romain Schepereel","place":4,"killer":"François CATTEAU","tablier":false,"n":10,"points":17,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":1,"date":"2023-09-01","location":"Michel","player":"Thierry MONNIAUX","place":5,"killer":"Romain Schepereel","tablier":false,"n":10,"points":14,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":1,"date":"2023-09-01","location":"Michel","player":"Jérôme BERA","place":6,"killer":"Michel SCHERPEREEL","tablier":false,"n":10,"points":11,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":1,"date":"2023-09-01","location":"Michel","player":"Jérôme BINOT","place":7,"killer":"Michel SCHERPEREEL","tablier":false,"n":10,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":1,"date":"2023-09-01","location":"Michel","player":"David SAGALOWICZ","place":8,"killer":"Jérôme RIFFE","tablier":false,"n":10,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":1,"date":"2023-09-01","location":"Michel","player":"Jérémy COQUEL","place":9,"killer":"Romain Schepereel","tablier":false,"n":10,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":1,"date":"2023-09-01","location":"Michel","player":"Franck NAESSENS","place":10,"killer":"François CATTEAU","tablier":false,"n":10,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":2,"date":"2023-09-09","location":"François","player":"Franck NAESSENS","place":1,"killer":"","tablier":false,"n":8,"points":23,"stake":5,"gross":25,"net":20,"kills":5,"win":true,"podium":true},{"game":2,"date":"2023-09-09","location":"François","player":"Jérémy COQUEL","place":2,"killer":"Franck NAESSENS","tablier":false,"n":8,"points":18,"stake":5,"gross":10,"net":5,"kills":1,"win":false,"podium":true},{"game":2,"date":"2023-09-09","location":"François","player":"Jérôme BERA","place":3,"killer":"Franck NAESSENS","tablier":false,"n":8,"points":14,"stake":5,"gross":5,"net":0,"kills":1,"win":false,"podium":true},{"game":2,"date":"2023-09-09","location":"François","player":"Alexis Volant","place":4,"killer":"Franck NAESSENS","tablier":false,"n":8,"points":11,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":2,"date":"2023-09-09","location":"François","player":"Stéphane LEFIN","place":5,"killer":"Franck NAESSENS","tablier":false,"n":8,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":2,"date":"2023-09-09","location":"François","player":"ELEN","place":6,"killer":"Franck NAESSENS","tablier":false,"n":8,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":2,"date":"2023-09-09","location":"François","player":"François CATTEAU","place":7,"killer":"Jérémy COQUEL","tablier":false,"n":8,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":2,"date":"2023-09-09","location":"François","player":"Michel SCHERPEREEL","place":8,"killer":"Jérôme BERA","tablier":false,"n":8,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":3,"date":"2023-09-15","location":"Franck NAESSENS","player":"Grégoire DUFORET","place":1,"killer":"","tablier":true,"n":14,"points":39,"stake":5,"gross":40,"net":35,"kills":5,"win":true,"podium":true},{"game":3,"date":"2023-09-15","location":"Franck NAESSENS","player":"François CATTEAU","place":2,"killer":"Grégoire DUFORET","tablier":false,"n":14,"points":33,"stake":5,"gross":20,"net":15,"kills":4,"win":false,"podium":true},{"game":3,"date":"2023-09-15","location":"Franck NAESSENS","player":"Jérôme BINOT","place":3,"killer":"Grégoire DUFORET","tablier":false,"n":14,"points":28,"stake":5,"gross":10,"net":5,"kills":1,"win":false,"podium":true},{"game":3,"date":"2023-09-15","location":"Franck NAESSENS","player":"Jérémie CARPENTIER","place":4,"killer":"François CATTEAU","tablier":false,"n":14,"points":24,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":3,"date":"2023-09-15","location":"Franck NAESSENS","player":"Thierry MONNIAUX","place":5,"killer":"Grégoire DUFORET","tablier":false,"n":14,"points":21,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":3,"date":"2023-09-15","location":"Franck NAESSENS","player":"Mehdi BRAHIMI","place":6,"killer":"François CATTEAU","tablier":false,"n":14,"points":18,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":3,"date":"2023-09-15","location":"Franck NAESSENS","player":"Stéphane LEFIN","place":7,"killer":"François CATTEAU","tablier":false,"n":14,"points":15,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":3,"date":"2023-09-15","location":"Franck NAESSENS","player":"Romain Schepereel","place":8,"killer":"Grégoire DUFORET","tablier":false,"n":14,"points":12,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":3,"date":"2023-09-15","location":"Franck NAESSENS","player":"Clément MARAVAL","place":9,"killer":"François CATTEAU","tablier":false,"n":14,"points":10,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":3,"date":"2023-09-15","location":"Franck NAESSENS","player":"Franck NAESSENS","place":10,"killer":"THIERRY","tablier":false,"n":14,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":3,"date":"2023-09-15","location":"Franck NAESSENS","player":"David SAGALOWICZ","place":11,"killer":"Romain Schepereel","tablier":false,"n":14,"points":6,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":3,"date":"2023-09-15","location":"Franck NAESSENS","player":"Solène BALLOIS","place":12,"killer":"Grégoire DUFORET","tablier":false,"n":14,"points":4,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":3,"date":"2023-09-15","location":"Franck NAESSENS","player":"Alexis Volant","place":13,"killer":"JEREMIE TRADER","tablier":false,"n":14,"points":2,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":3,"date":"2023-09-15","location":"Franck NAESSENS","player":"Michel SCHERPEREEL","place":14,"killer":"Jérôme BINOT","tablier":false,"n":14,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":4,"date":"2023-09-29","location":"Michel SCHERPEREEL","player":"Olivier HENGUELLE","place":1,"killer":"","tablier":true,"n":12,"points":36,"stake":5,"gross":35,"net":30,"kills":6,"win":true,"podium":true},{"game":4,"date":"2023-09-29","location":"Michel SCHERPEREEL","player":"Jérémy COQUEL","place":2,"killer":"Olivier HENGUELLE","tablier":false,"n":12,"points":30,"stake":5,"gross":20,"net":15,"kills":0,"win":false,"podium":true},{"game":4,"date":"2023-09-29","location":"Michel SCHERPEREEL","player":"Mehdi BRAHIMI","place":3,"killer":"Olivier HENGUELLE","tablier":false,"n":12,"points":25,"stake":5,"gross":5,"net":0,"kills":0,"win":false,"podium":true},{"game":4,"date":"2023-09-29","location":"Michel SCHERPEREEL","player":"David SAGALOWICZ","place":4,"killer":"Olivier HENGUELLE","tablier":false,"n":12,"points":21,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":4,"date":"2023-09-29","location":"Michel SCHERPEREEL","player":"Michel SCHERPEREEL","place":5,"killer":"Olivier HENGUELLE","tablier":false,"n":12,"points":18,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":4,"date":"2023-09-29","location":"Michel SCHERPEREEL","player":"Alexis Volant","place":6,"killer":"David SAGALOWICZ","tablier":false,"n":12,"points":15,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":4,"date":"2023-09-29","location":"Michel SCHERPEREEL","player":"Franck NAESSENS","place":7,"killer":"Olivier HENGUELLE","tablier":false,"n":12,"points":12,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":4,"date":"2023-09-29","location":"Michel SCHERPEREEL","player":"Solène BALLOIS","place":8,"killer":"Mehdi BRAHIMI EL ESPANOL","tablier":false,"n":12,"points":9,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":4,"date":"2023-09-29","location":"Michel SCHERPEREEL","player":"Jérémie CARPENTIER","place":9,"killer":"David SAGALOWICZ","tablier":false,"n":12,"points":7,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":4,"date":"2023-09-29","location":"Michel SCHERPEREEL","player":"Jérôme RIFFE","place":10,"killer":"Mehdi BRAHIMI EL ESPANOL","tablier":false,"n":12,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":4,"date":"2023-09-29","location":"Michel SCHERPEREEL","player":"François CATTEAU","place":11,"killer":"Olivier HENGUELLE","tablier":false,"n":12,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":4,"date":"2023-09-29","location":"Michel SCHERPEREEL","player":"Romain Schepereel","place":12,"killer":"Solène BALLOIS","tablier":false,"n":12,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":5,"date":"2023-10-06","location":"Areski AIT GHERBI","player":"Mehdi BRAHIMI","place":1,"killer":"","tablier":false,"n":7,"points":19,"stake":5,"gross":20,"net":15,"kills":0,"win":true,"podium":true},{"game":5,"date":"2023-10-06","location":"Areski AIT GHERBI","player":"Stéphane ROBERT","place":2,"killer":"Mehdi BRAHIMI EL ESPANOL","tablier":false,"n":7,"points":15,"stake":5,"gross":10,"net":5,"kills":0,"win":false,"podium":true},{"game":5,"date":"2023-10-06","location":"Areski AIT GHERBI","player":"Jérémy COQUEL","place":3,"killer":"Mehdi BRAHIMI EL ESPANOL","tablier":false,"n":7,"points":11,"stake":5,"gross":5,"net":0,"kills":2,"win":false,"podium":true},{"game":5,"date":"2023-10-06","location":"Areski AIT GHERBI","player":"Areski AIT GHERBI","place":4,"killer":"Jérémy COQUEL","tablier":false,"n":7,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":5,"date":"2023-10-06","location":"Areski AIT GHERBI","player":"Frédéric Tavernier","place":5,"killer":"Jérémy COQUEL","tablier":false,"n":7,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":5,"date":"2023-10-06","location":"Areski AIT GHERBI","player":"Michel SCHERPEREEL","place":6,"killer":"STEPH RIMBAUD","tablier":false,"n":7,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":5,"date":"2023-10-06","location":"Areski AIT GHERBI","player":"François CATTEAU","place":7,"killer":"STEPH RIMBAUD","tablier":false,"n":7,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":6,"date":"2023-10-13","location":"Areski AIT GHERBI","player":"Romain Schepereel","place":1,"killer":"","tablier":false,"n":8,"points":23,"stake":5,"gross":25,"net":20,"kills":0,"win":true,"podium":true},{"game":6,"date":"2023-10-13","location":"Areski AIT GHERBI","player":"Solène BALLOIS","place":2,"killer":"Romain Schepereel","tablier":false,"n":8,"points":18,"stake":5,"gross":10,"net":5,"kills":0,"win":false,"podium":true},{"game":6,"date":"2023-10-13","location":"Areski AIT GHERBI","player":"Michel SCHERPEREEL","place":3,"killer":"Romain Schepereel","tablier":false,"n":8,"points":14,"stake":5,"gross":5,"net":0,"kills":0,"win":false,"podium":true},{"game":6,"date":"2023-10-13","location":"Areski AIT GHERBI","player":"Alexis Volant","place":4,"killer":"Romain Schepereel","tablier":false,"n":8,"points":11,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":6,"date":"2023-10-13","location":"Areski AIT GHERBI","player":"Jérémy COQUEL","place":5,"killer":"Romain Schepereel","tablier":false,"n":8,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":6,"date":"2023-10-13","location":"Areski AIT GHERBI","player":"Areski AIT GHERBI","place":6,"killer":"Romain Schepereel","tablier":false,"n":8,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":6,"date":"2023-10-13","location":"Areski AIT GHERBI","player":"François CATTEAU","place":7,"killer":"Romain Schepereel","tablier":false,"n":8,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":6,"date":"2023-10-13","location":"Areski AIT GHERBI","player":"Franck NAESSENS","place":8,"killer":"Alexis Volant","tablier":false,"n":8,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":7,"date":"2023-10-20","location":"Mehdi BRAHIMI","player":"Jérôme BERA","place":1,"killer":"","tablier":true,"n":12,"points":36,"stake":5,"gross":35,"net":30,"kills":6,"win":true,"podium":true},{"game":7,"date":"2023-10-20","location":"Mehdi BRAHIMI","player":"Michel SCHERPEREEL","place":2,"killer":"Jérôme BERA","tablier":false,"n":12,"points":30,"stake":5,"gross":20,"net":15,"kills":2,"win":false,"podium":true},{"game":7,"date":"2023-10-20","location":"Mehdi BRAHIMI","player":"Jérémy COQUEL","place":3,"killer":"Jérôme BERA","tablier":false,"n":12,"points":25,"stake":5,"gross":5,"net":0,"kills":1,"win":false,"podium":true},{"game":7,"date":"2023-10-20","location":"Mehdi BRAHIMI","player":"David SAGALOWICZ","place":4,"killer":"Jérôme BERA","tablier":false,"n":12,"points":21,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":7,"date":"2023-10-20","location":"Mehdi BRAHIMI","player":"Jérémie CARPENTIER","place":5,"killer":"Michel SCHERPEREEL","tablier":false,"n":12,"points":18,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":7,"date":"2023-10-20","location":"Mehdi BRAHIMI","player":"Olivier HENGUELLE","place":6,"killer":"Jérôme BERA","tablier":false,"n":12,"points":15,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":7,"date":"2023-10-20","location":"Mehdi BRAHIMI","player":"Philippe DUBOIS","place":7,"killer":"Jérémy COQUEL","tablier":false,"n":12,"points":12,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":7,"date":"2023-10-20","location":"Mehdi BRAHIMI","player":"Mehdi BRAHIMI","place":8,"killer":"Olivier HENGUELLE","tablier":false,"n":12,"points":9,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":7,"date":"2023-10-20","location":"Mehdi BRAHIMI","player":"Franck NAESSENS","place":9,"killer":"","tablier":false,"n":12,"points":7,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":7,"date":"2023-10-20","location":"Mehdi BRAHIMI","player":"Stéphane ROBERT","place":10,"killer":"Jérôme BERA","tablier":false,"n":12,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":7,"date":"2023-10-20","location":"Mehdi BRAHIMI","player":"Areski AIT GHERBI","place":11,"killer":"Jérôme BERA","tablier":false,"n":12,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":7,"date":"2023-10-20","location":"Mehdi BRAHIMI","player":"Thierry MONNIAUX","place":12,"killer":"Michel SCHERPEREEL","tablier":false,"n":12,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":8,"date":"2023-10-27","location":"Alexis Volant","player":"Franck NAESSENS","place":1,"killer":"","tablier":false,"n":7,"points":19,"stake":5,"gross":20,"net":15,"kills":4,"win":true,"podium":true},{"game":8,"date":"2023-10-27","location":"Alexis Volant","player":"Jérôme RIFFE","place":2,"killer":"Franck NAESSENS","tablier":false,"n":7,"points":15,"stake":5,"gross":10,"net":5,"kills":1,"win":false,"podium":true},{"game":8,"date":"2023-10-27","location":"Alexis Volant","player":"Alexis Volant","place":3,"killer":"Franck NAESSENS","tablier":false,"n":7,"points":11,"stake":5,"gross":5,"net":0,"kills":1,"win":false,"podium":true},{"game":8,"date":"2023-10-27","location":"Alexis Volant","player":"Thomas DELVAL","place":4,"killer":"Franck NAESSENS","tablier":false,"n":7,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":8,"date":"2023-10-27","location":"Alexis Volant","player":"Solène BALLOIS","place":5,"killer":"Alexis Volant","tablier":false,"n":7,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":8,"date":"2023-10-27","location":"Alexis Volant","player":"Jérôme BERA","place":6,"killer":"Jérôme RIFFE","tablier":false,"n":7,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":8,"date":"2023-10-27","location":"Alexis Volant","player":"Jérémy COQUEL","place":7,"killer":"Franck NAESSENS","tablier":false,"n":7,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":9,"date":"2023-11-03","location":"françois","player":"Mehdi BRAHIMI","place":1,"killer":"","tablier":true,"n":12,"points":36,"stake":5,"gross":35,"net":30,"kills":3,"win":true,"podium":true},{"game":9,"date":"2023-11-03","location":"françois","player":"Jérôme BINOT","place":2,"killer":"Mehdi BRAHIMI","tablier":false,"n":12,"points":30,"stake":5,"gross":20,"net":15,"kills":1,"win":false,"podium":true},{"game":9,"date":"2023-11-03","location":"françois","player":"Stéphane LEFIN","place":3,"killer":"Mehdi BRAHIMI","tablier":false,"n":12,"points":25,"stake":5,"gross":5,"net":0,"kills":5,"win":false,"podium":true},{"game":9,"date":"2023-11-03","location":"françois","player":"Alexis Volant","place":4,"killer":"Stéphane LEFIN","tablier":false,"n":12,"points":21,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":9,"date":"2023-11-03","location":"françois","player":"Franck NAESSENS","place":5,"killer":"Stéphane LEFIN","tablier":false,"n":12,"points":18,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":9,"date":"2023-11-03","location":"françois","player":"Areski AIT GHERBI","place":6,"killer":"Jérôme BINOT","tablier":false,"n":12,"points":15,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":9,"date":"2023-11-03","location":"françois","player":"Michel SCHERPEREEL","place":7,"killer":"Stéphane LEFIN","tablier":false,"n":12,"points":12,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":9,"date":"2023-11-03","location":"françois","player":"Jérémy COQUEL","place":8,"killer":"Alexis Volant","tablier":false,"n":12,"points":9,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":9,"date":"2023-11-03","location":"françois","player":"Jérôme RIFFE","place":9,"killer":"Mehdi BRAHIMI","tablier":false,"n":12,"points":7,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":9,"date":"2023-11-03","location":"françois","player":"Jérôme BERA","place":10,"killer":"Stéphane LEFIN","tablier":false,"n":12,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":9,"date":"2023-11-03","location":"françois","player":"François CATTEAU","place":11,"killer":"Alexis Volant","tablier":false,"n":12,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":9,"date":"2023-11-03","location":"françois","player":"Jérémie CARPENTIER","place":12,"killer":"Stéphane LEFIN","tablier":false,"n":12,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":10,"date":"2023-11-11","location":"Areski AIT GHERBI","player":"David SAGALOWICZ","place":1,"killer":"","tablier":true,"n":12,"points":36,"stake":5,"gross":35,"net":30,"kills":2,"win":true,"podium":true},{"game":10,"date":"2023-11-11","location":"Areski AIT GHERBI","player":"Olivier HENGUELLE","place":2,"killer":"David SAGALOWICZ","tablier":false,"n":12,"points":30,"stake":5,"gross":20,"net":15,"kills":4,"win":false,"podium":true},{"game":10,"date":"2023-11-11","location":"Areski AIT GHERBI","player":"Romain Schepereel","place":3,"killer":"Olivier HENGUELLE","tablier":false,"n":12,"points":25,"stake":5,"gross":5,"net":0,"kills":0,"win":false,"podium":true},{"game":10,"date":"2023-11-11","location":"Areski AIT GHERBI","player":"Franck NAESSENS","place":4,"killer":"Olivier HENGUELLE","tablier":false,"n":12,"points":21,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":10,"date":"2023-11-11","location":"Areski AIT GHERBI","player":"Mehdi BRAHIMI","place":5,"killer":"Olivier HENGUELLE","tablier":false,"n":12,"points":18,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":10,"date":"2023-11-11","location":"Areski AIT GHERBI","player":"Solène BALLOIS","place":6,"killer":"Olivier HENGUELLE","tablier":false,"n":12,"points":15,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":10,"date":"2023-11-11","location":"Areski AIT GHERBI","player":"Areski AIT GHERBI","place":7,"killer":"Romain Schepereel","tablier":false,"n":12,"points":12,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":10,"date":"2023-11-11","location":"Areski AIT GHERBI","player":"Jérôme BERA","place":8,"killer":"David SAGALOWICZ","tablier":false,"n":12,"points":9,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":10,"date":"2023-11-11","location":"Areski AIT GHERBI","player":"Alexis Volant","place":9,"killer":"Solène BALLOIS","tablier":false,"n":12,"points":7,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":10,"date":"2023-11-11","location":"Areski AIT GHERBI","player":"François CATTEAU","place":10,"killer":"Mehdi BRAHIMI","tablier":false,"n":12,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":10,"date":"2023-11-11","location":"Areski AIT GHERBI","player":"Michel SCHERPEREEL","place":11,"killer":"Franck NAESSENS","tablier":false,"n":12,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":10,"date":"2023-11-11","location":"Areski AIT GHERBI","player":"Thierry MONNIAUX","place":12,"killer":"Romain Schepereel","tablier":false,"n":12,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":11,"date":"2023-11-17","location":"Alexis Volant","player":"Mehdi BRAHIMI","place":1,"killer":"","tablier":true,"n":14,"points":39,"stake":5,"gross":40,"net":35,"kills":4,"win":true,"podium":true},{"game":11,"date":"2023-11-17","location":"Alexis Volant","player":"Jérémy COQUEL","place":2,"killer":"Mehdi BRAHIMI","tablier":false,"n":14,"points":33,"stake":5,"gross":20,"net":15,"kills":3,"win":false,"podium":true},{"game":11,"date":"2023-11-17","location":"Alexis Volant","player":"Jérôme BINOT","place":3,"killer":"Mehdi BRAHIMI","tablier":false,"n":14,"points":28,"stake":5,"gross":10,"net":5,"kills":2,"win":false,"podium":true},{"game":11,"date":"2023-11-17","location":"Alexis Volant","player":"Solène BALLOIS","place":4,"killer":"Jérôme BINOT","tablier":false,"n":14,"points":24,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":11,"date":"2023-11-17","location":"Alexis Volant","player":"Areski AIT GHERBI","place":5,"killer":"Jérémy COQUEL","tablier":false,"n":14,"points":21,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":11,"date":"2023-11-17","location":"Alexis Volant","player":"Michel SCHERPEREEL","place":6,"killer":"Jérôme BINOT","tablier":false,"n":14,"points":18,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":11,"date":"2023-11-17","location":"Alexis Volant","player":"Olivier HENGUELLE","place":7,"killer":"Mehdi BRAHIMI","tablier":false,"n":14,"points":15,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":11,"date":"2023-11-17","location":"Alexis Volant","player":"Thierry MONNIAUX","place":8,"killer":"Mehdi BRAHIMI","tablier":false,"n":14,"points":12,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":11,"date":"2023-11-17","location":"Alexis Volant","player":"Jérôme BERA","place":9,"killer":"Solène BALLOIS","tablier":false,"n":14,"points":10,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":11,"date":"2023-11-17","location":"Alexis Volant","player":"Franck NAESSENS","place":10,"killer":"Areski AIT GHERBI","tablier":false,"n":14,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":11,"date":"2023-11-17","location":"Alexis Volant","player":"Romain Schepereel","place":11,"killer":"Jérémy COQUEL","tablier":false,"n":14,"points":6,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":11,"date":"2023-11-17","location":"Alexis Volant","player":"Jérôme RIFFE","place":12,"killer":"Jérémy COQUEL","tablier":false,"n":14,"points":4,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":11,"date":"2023-11-17","location":"Alexis Volant","player":"Alexis Volant","place":13,"killer":"Areski AIT GHERBI","tablier":false,"n":14,"points":2,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":11,"date":"2023-11-17","location":"Alexis Volant","player":"François CATTEAU","place":14,"killer":"Olivier HENGUELLE","tablier":false,"n":14,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":12,"date":"2023-11-24","location":"Olivier HENGUELLE","player":"Jérôme BINOT","place":1,"killer":"","tablier":false,"n":10,"points":32,"stake":5,"gross":30,"net":25,"kills":4,"win":true,"podium":true},{"game":12,"date":"2023-11-24","location":"Olivier HENGUELLE","player":"Alexis Volant","place":2,"killer":"Jérôme BINOT","tablier":false,"n":10,"points":26,"stake":5,"gross":15,"net":10,"kills":3,"win":false,"podium":true},{"game":12,"date":"2023-11-24","location":"Olivier HENGUELLE","player":"Romain Schepereel","place":3,"killer":"Alexis Volant","tablier":false,"n":10,"points":21,"stake":5,"gross":5,"net":0,"kills":0,"win":false,"podium":true},{"game":12,"date":"2023-11-24","location":"Olivier HENGUELLE","player":"Michel SCHERPEREEL","place":4,"killer":"Alexis Volant","tablier":false,"n":10,"points":17,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":12,"date":"2023-11-24","location":"Olivier HENGUELLE","player":"Solène BALLOIS","place":5,"killer":"Jérôme BINOT","tablier":false,"n":10,"points":14,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":12,"date":"2023-11-24","location":"Olivier HENGUELLE","player":"Mehdi BRAHIMI","place":6,"killer":"Solène BALLOIS","tablier":false,"n":10,"points":11,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":12,"date":"2023-11-24","location":"Olivier HENGUELLE","player":"Philippe DUBOIS","place":7,"killer":"Alexis Volant","tablier":false,"n":10,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":12,"date":"2023-11-24","location":"Olivier HENGUELLE","player":"Olivier HENGUELLE","place":8,"killer":"Solène BALLOIS","tablier":false,"n":10,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":12,"date":"2023-11-24","location":"Olivier HENGUELLE","player":"Jérémy COQUEL","place":9,"killer":"Jérôme BINOT","tablier":false,"n":10,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":12,"date":"2023-11-24","location":"Olivier HENGUELLE","player":"Franck NAESSENS","place":10,"killer":"Jérôme BINOT","tablier":false,"n":10,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":13,"date":"2023-12-01","location":"Jérôme BERA","player":"Frédéric Tavernier","place":1,"killer":"","tablier":true,"n":15,"points":40,"stake":5,"gross":45,"net":40,"kills":7,"win":true,"podium":true},{"game":13,"date":"2023-12-01","location":"Jérôme BERA","player":"Jérôme BINOT","place":2,"killer":"Frédéric Tavernier","tablier":false,"n":15,"points":34,"stake":5,"gross":25,"net":20,"kills":4,"win":false,"podium":true},{"game":13,"date":"2023-12-01","location":"Jérôme BERA","player":"Jérôme BERA","place":3,"killer":"Frédéric Tavernier","tablier":false,"n":15,"points":29,"stake":5,"gross":5,"net":0,"kills":1,"win":false,"podium":true},{"game":13,"date":"2023-12-01","location":"Jérôme BERA","player":"Franck NAESSENS","place":4,"killer":"Frédéric Tavernier","tablier":false,"n":15,"points":25,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":13,"date":"2023-12-01","location":"Jérôme BERA","player":"Mehdi BRAHIMI","place":5,"killer":"Frédéric Tavernier","tablier":false,"n":15,"points":22,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":13,"date":"2023-12-01","location":"Jérôme BERA","player":"Clément MARAVAL","place":6,"killer":"Frédéric Tavernier","tablier":false,"n":15,"points":19,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":13,"date":"2023-12-01","location":"Jérôme BERA","player":"Romain Schepereel","place":7,"killer":"Jérôme BINOT","tablier":false,"n":15,"points":16,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":13,"date":"2023-12-01","location":"Jérôme BERA","player":"Jérémy COQUEL","place":8,"killer":"Frédéric Tavernier","tablier":false,"n":15,"points":13,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":13,"date":"2023-12-01","location":"Jérôme BERA","player":"Michel SCHERPEREEL","place":9,"killer":"Frédéric Tavernier","tablier":false,"n":15,"points":11,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":13,"date":"2023-12-01","location":"Jérôme BERA","player":"Areski AIT GHERBI","place":10,"killer":"","tablier":false,"n":15,"points":9,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":13,"date":"2023-12-01","location":"Jérôme BERA","player":"Jérémie CARPENTIER","place":11,"killer":"Romain Schepereel","tablier":false,"n":15,"points":7,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":13,"date":"2023-12-01","location":"Jérôme BERA","player":"Thierry MONNIAUX","place":12,"killer":"Jérôme BINOT","tablier":false,"n":15,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":13,"date":"2023-12-01","location":"Jérôme BERA","player":"François CATTEAU","place":13,"killer":"Jérôme BINOT","tablier":false,"n":15,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":13,"date":"2023-12-01","location":"Jérôme BERA","player":"Jérôme RIFFE","place":14,"killer":"Jérôme BINOT","tablier":false,"n":15,"points":2,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":13,"date":"2023-12-01","location":"Jérôme BERA","player":"Alexis Volant","place":15,"killer":"Jérôme BERA","tablier":false,"n":15,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":14,"date":"2023-12-08","location":"Jerome Riffe","player":"Jérôme RIFFE","place":1,"killer":"","tablier":true,"n":14,"points":39,"stake":5,"gross":40,"net":35,"kills":4,"win":true,"podium":true},{"game":14,"date":"2023-12-08","location":"Jerome Riffe","player":"Franck NAESSENS","place":2,"killer":"Jérôme RIFFE","tablier":false,"n":14,"points":33,"stake":5,"gross":20,"net":15,"kills":4,"win":false,"podium":true},{"game":14,"date":"2023-12-08","location":"Jerome Riffe","player":"Clément MARAVAL","place":3,"killer":"Jérôme RIFFE","tablier":false,"n":14,"points":28,"stake":5,"gross":10,"net":5,"kills":0,"win":false,"podium":true},{"game":14,"date":"2023-12-08","location":"Jerome Riffe","player":"Jérôme BERA","place":4,"killer":"Franck NAESSENS","tablier":false,"n":14,"points":24,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":14,"date":"2023-12-08","location":"Jerome Riffe","player":"Romain Schepereel","place":5,"killer":"Franck NAESSENS","tablier":false,"n":14,"points":21,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":14,"date":"2023-12-08","location":"Jerome Riffe","player":"Olivier HENGUELLE","place":6,"killer":"Franck NAESSENS","tablier":false,"n":14,"points":18,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":14,"date":"2023-12-08","location":"Jerome Riffe","player":"Jérémie CARPENTIER","place":7,"killer":"Jérôme RIFFE","tablier":false,"n":14,"points":15,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":14,"date":"2023-12-08","location":"Jerome Riffe","player":"Mehdi BRAHIMI","place":8,"killer":"Jérôme RIFFE","tablier":false,"n":14,"points":12,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":14,"date":"2023-12-08","location":"Jerome Riffe","player":"Arnaud HEDIN","place":9,"killer":"Jérôme BERA","tablier":false,"n":14,"points":10,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":14,"date":"2023-12-08","location":"Jerome Riffe","player":"David SAGALOWICZ","place":10,"killer":"Franck NAESSENS","tablier":false,"n":14,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":14,"date":"2023-12-08","location":"Jerome Riffe","player":"Thierry MONNIAUX","place":11,"killer":"Romain Schepereel","tablier":false,"n":14,"points":6,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":14,"date":"2023-12-08","location":"Jerome Riffe","player":"Jérôme BINOT","place":12,"killer":"Jérôme BERA","tablier":false,"n":14,"points":4,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":14,"date":"2023-12-08","location":"Jerome Riffe","player":"Solène BALLOIS","place":13,"killer":"Alexis Volant","tablier":false,"n":14,"points":2,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":14,"date":"2023-12-08","location":"Jerome Riffe","player":"Alexis Volant","place":14,"killer":"Alexis Volant","tablier":false,"n":14,"points":1,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":15,"date":"2023-12-15","location":"Alexis Volant","player":"Mehdi BRAHIMI","place":1,"killer":"","tablier":false,"n":11,"points":34,"stake":5,"gross":35,"net":30,"kills":6,"win":true,"podium":true},{"game":15,"date":"2023-12-15","location":"Alexis Volant","player":"Stéphane LEFIN","place":2,"killer":"Mehdi BRAHIMI","tablier":false,"n":11,"points":28,"stake":5,"gross":15,"net":10,"kills":1,"win":false,"podium":true},{"game":15,"date":"2023-12-15","location":"Alexis Volant","player":"Jérôme BINOT","place":3,"killer":"Mehdi BRAHIMI","tablier":false,"n":11,"points":23,"stake":5,"gross":5,"net":0,"kills":1,"win":false,"podium":true},{"game":15,"date":"2023-12-15","location":"Alexis Volant","player":"Michel SCHERPEREEL","place":4,"killer":"Mehdi BRAHIMI","tablier":false,"n":11,"points":19,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":15,"date":"2023-12-15","location":"Alexis Volant","player":"Thierry MONNIAUX","place":5,"killer":"Mehdi BRAHIMI","tablier":false,"n":11,"points":16,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":15,"date":"2023-12-15","location":"Alexis Volant","player":"Romain Schepereel","place":6,"killer":"Mehdi BRAHIMI","tablier":false,"n":11,"points":13,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":15,"date":"2023-12-15","location":"Alexis Volant","player":"Jérôme BERA","place":7,"killer":"Mehdi BRAHIMI","tablier":false,"n":11,"points":10,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":15,"date":"2023-12-15","location":"Alexis Volant","player":"Jules NAESSENS","place":8,"killer":"Stéphane LEFIN","tablier":false,"n":11,"points":7,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":15,"date":"2023-12-15","location":"Alexis Volant","player":"Alexis Volant","place":9,"killer":"Jérôme BINOT","tablier":false,"n":11,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":15,"date":"2023-12-15","location":"Alexis Volant","player":"Franck NAESSENS","place":10,"killer":"Michel SCHERPEREEL","tablier":false,"n":11,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":15,"date":"2023-12-15","location":"Alexis Volant","player":"Solène BALLOIS","place":11,"killer":"Jules","tablier":false,"n":11,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":16,"date":"2023-12-22","location":"Franck NAESSENS","player":"Michel SCHERPEREEL","place":1,"killer":"","tablier":true,"n":16,"points":41,"stake":5,"gross":50,"net":45,"kills":4,"win":true,"podium":true},{"game":16,"date":"2023-12-22","location":"Franck NAESSENS","player":"Jérôme RIFFE","place":2,"killer":"Michel SCHERPEREEL","tablier":false,"n":16,"points":35,"stake":5,"gross":25,"net":20,"kills":3,"win":false,"podium":true},{"game":16,"date":"2023-12-22","location":"Franck NAESSENS","player":"Franck NAESSENS","place":3,"killer":"Michel SCHERPEREEL","tablier":false,"n":16,"points":30,"stake":5,"gross":5,"net":0,"kills":4,"win":false,"podium":true},{"game":16,"date":"2023-12-22","location":"Franck NAESSENS","player":"Mélanie BINOT","place":4,"killer":"Franck NAESSENS","tablier":false,"n":16,"points":26,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":16,"date":"2023-12-22","location":"Franck NAESSENS","player":"David SAGALOWICZ","place":5,"killer":"Franck NAESSENS","tablier":false,"n":16,"points":23,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":16,"date":"2023-12-22","location":"Franck NAESSENS","player":"Alexis Volant","place":6,"killer":"Jérôme RIFFE","tablier":false,"n":16,"points":20,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":16,"date":"2023-12-22","location":"Franck NAESSENS","player":"Stéphane LEFIN","place":7,"killer":"Michel SCHERPEREEL","tablier":false,"n":16,"points":17,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":16,"date":"2023-12-22","location":"Franck NAESSENS","player":"Jules NAESSENS","place":8,"killer":"Jérôme RIFFE","tablier":false,"n":16,"points":14,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":16,"date":"2023-12-22","location":"Franck NAESSENS","player":"Clément MARAVAL","place":9,"killer":"Alexis Volant","tablier":false,"n":16,"points":12,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":16,"date":"2023-12-22","location":"Franck NAESSENS","player":"Jérémy COQUEL","place":10,"killer":"Jérôme RIFFE","tablier":false,"n":16,"points":10,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":16,"date":"2023-12-22","location":"Franck NAESSENS","player":"Jérémie CARPENTIER","place":11,"killer":"Jérôme BINOT","tablier":false,"n":16,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":16,"date":"2023-12-22","location":"Franck NAESSENS","player":"Solène BALLOIS","place":12,"killer":"Franck NAESSENS","tablier":false,"n":16,"points":6,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":16,"date":"2023-12-22","location":"Franck NAESSENS","player":"Jérôme BINOT","place":13,"killer":"Clément MARAVAL","tablier":false,"n":16,"points":4,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":16,"date":"2023-12-22","location":"Franck NAESSENS","player":"Olivier HENGUELLE","place":14,"killer":"Franck NAESSENS","tablier":false,"n":16,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":16,"date":"2023-12-22","location":"Franck NAESSENS","player":"Romain Schepereel","place":15,"killer":"Michel SCHERPEREEL","tablier":false,"n":16,"points":2,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":16,"date":"2023-12-22","location":"Franck NAESSENS","player":"Mehdi BRAHIMI","place":16,"killer":"Jérôme BINOT","tablier":false,"n":16,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":17,"date":"2023-12-29","location":"Jérôme RIFFE","player":"Romain Schepereel","place":1,"killer":"","tablier":false,"n":9,"points":27,"stake":5,"gross":25,"net":20,"kills":1,"win":true,"podium":true},{"game":17,"date":"2023-12-29","location":"Jérôme RIFFE","player":"Mehdi BRAHIMI","place":2,"killer":"Romain Schepereel","tablier":false,"n":9,"points":22,"stake":5,"gross":15,"net":10,"kills":0,"win":false,"podium":true},{"game":17,"date":"2023-12-29","location":"Jérôme RIFFE","player":"Jérôme RIFFE","place":3,"killer":"Romain Schepereel","tablier":false,"n":9,"points":17,"stake":5,"gross":5,"net":0,"kills":3,"win":false,"podium":true},{"game":17,"date":"2023-12-29","location":"Jérôme RIFFE","player":"Alexis Volant","place":4,"killer":"Romain Schepereel","tablier":false,"n":9,"points":13,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":17,"date":"2023-12-29","location":"Jérôme RIFFE","player":"Franck NAESSENS","place":5,"killer":"Jérôme RIFFE","tablier":false,"n":9,"points":10,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":17,"date":"2023-12-29","location":"Jérôme RIFFE","player":"Solène BALLOIS","place":6,"killer":"Jérôme RIFFE","tablier":false,"n":9,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":17,"date":"2023-12-29","location":"Jérôme RIFFE","player":"Areski AIT GHERBI","place":7,"killer":"Romain Schepereel","tablier":false,"n":9,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":17,"date":"2023-12-29","location":"Jérôme RIFFE","player":"Cyprien RIFFE","place":8,"killer":"Alexis Volant","tablier":false,"n":9,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":17,"date":"2023-12-29","location":"Jérôme RIFFE","player":"Jules NAESSENS","place":9,"killer":"Jérôme RIFFE","tablier":false,"n":9,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":18,"date":"2024-01-05","location":"Mehdi BRAHIMI","player":"Jérémy COQUEL","place":1,"killer":"","tablier":true,"n":18,"points":43,"stake":5,"gross":55,"net":50,"kills":3,"win":true,"podium":true},{"game":18,"date":"2024-01-05","location":"Mehdi BRAHIMI","player":"Nuno Tinoco","place":2,"killer":"Jérémy COQUEL","tablier":false,"n":18,"points":37,"stake":5,"gross":25,"net":20,"kills":2,"win":false,"podium":true},{"game":18,"date":"2024-01-05","location":"Mehdi BRAHIMI","player":"Mehdi BRAHIMI","place":3,"killer":"Nuno","tablier":false,"n":18,"points":32,"stake":5,"gross":10,"net":5,"kills":1,"win":false,"podium":true},{"game":18,"date":"2024-01-05","location":"Mehdi BRAHIMI","player":"Romain Schepereel","place":4,"killer":"Jérémy COQUEL","tablier":false,"n":18,"points":28,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":18,"date":"2024-01-05","location":"Mehdi BRAHIMI","player":"Stéphane LEFIN","place":5,"killer":"Jérémy COQUEL","tablier":false,"n":18,"points":25,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":18,"date":"2024-01-05","location":"Mehdi BRAHIMI","player":"Hélène MORIZUR","place":6,"killer":"Stéphane LEFIN","tablier":false,"n":18,"points":22,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":18,"date":"2024-01-05","location":"Mehdi BRAHIMI","player":"Philippe DUBOIS","place":7,"killer":"Nuno Tinoco","tablier":false,"n":18,"points":19,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":18,"date":"2024-01-05","location":"Mehdi BRAHIMI","player":"Franck NAESSENS","place":8,"killer":"Romain Schepereel","tablier":false,"n":18,"points":16,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":18,"date":"2024-01-05","location":"Mehdi BRAHIMI","player":"Olivier HENGUELLE","place":9,"killer":"Philippe DUBOI","tablier":false,"n":18,"points":14,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":18,"date":"2024-01-05","location":"Mehdi BRAHIMI","player":"Michel SCHERPEREEL","place":10,"killer":"Romain Schepereel","tablier":false,"n":18,"points":12,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":18,"date":"2024-01-05","location":"Mehdi BRAHIMI","player":"Areski AIT GHERBI","place":11,"killer":"Romain Schepereel","tablier":false,"n":18,"points":10,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":18,"date":"2024-01-05","location":"Mehdi BRAHIMI","player":"Jérôme BERA","place":12,"killer":"Nuno Tinoco","tablier":false,"n":18,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":18,"date":"2024-01-05","location":"Mehdi BRAHIMI","player":"Alexis Volant","place":13,"killer":"Olivier HENGUELLE","tablier":false,"n":18,"points":6,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":18,"date":"2024-01-05","location":"Mehdi BRAHIMI","player":"Solène BALLOIS","place":14,"killer":"Hélène MORIZUR","tablier":false,"n":18,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":18,"date":"2024-01-05","location":"Mehdi BRAHIMI","player":"Grégoire DUFORET","place":15,"killer":"Mehdi BRAHIMI","tablier":false,"n":18,"points":4,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":18,"date":"2024-01-05","location":"Mehdi BRAHIMI","player":"Armelle BRAHIMI","place":16,"killer":"Franck NAESSENS","tablier":false,"n":18,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":18,"date":"2024-01-05","location":"Mehdi BRAHIMI","player":"Thierry MONNIAUX","place":17,"killer":"Franck NAESSENS","tablier":false,"n":18,"points":2,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":18,"date":"2024-01-05","location":"Mehdi BRAHIMI","player":"Jérôme BINOT","place":18,"killer":"Romain Schepereel","tablier":false,"n":18,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":19,"date":"2024-01-24","location":"Jérémy COQUEL","player":"Jérôme BINOT","place":1,"killer":"","tablier":false,"n":11,"points":34,"stake":5,"gross":35,"net":30,"kills":5,"win":true,"podium":true},{"game":19,"date":"2024-01-24","location":"Jérémy COQUEL","player":"Thierry MONNIAUX","place":2,"killer":"Jérôme BINOT","tablier":false,"n":11,"points":28,"stake":5,"gross":15,"net":10,"kills":1,"win":false,"podium":true},{"game":19,"date":"2024-01-24","location":"Jérémy COQUEL","player":"Franck NAESSENS","place":3,"killer":"Jérôme BINOT","tablier":false,"n":11,"points":23,"stake":5,"gross":5,"net":0,"kills":2,"win":false,"podium":true},{"game":19,"date":"2024-01-24","location":"Jérémy COQUEL","player":"ELEN","place":4,"killer":"Jérôme BINOT","tablier":false,"n":11,"points":19,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":19,"date":"2024-01-24","location":"Jérémy COQUEL","player":"Jérôme RIFFE","place":5,"killer":"Jérôme BINOT","tablier":false,"n":11,"points":16,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":19,"date":"2024-01-24","location":"Jérémy COQUEL","player":"Jérémy COQUEL","place":6,"killer":"Jérôme RIFFE","tablier":false,"n":11,"points":13,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":19,"date":"2024-01-24","location":"Jérémy COQUEL","player":"Frédéric Tavernier","place":7,"killer":"Thierry MONNIAUX","tablier":false,"n":11,"points":10,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":19,"date":"2024-01-24","location":"Jérémy COQUEL","player":"Romain Schepereel","place":8,"killer":"Jérôme BINOT","tablier":false,"n":11,"points":7,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":19,"date":"2024-01-24","location":"Jérémy COQUEL","player":"Jérôme BERA","place":9,"killer":"Jérôme RIFFE","tablier":false,"n":11,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":19,"date":"2024-01-24","location":"Jérémy COQUEL","player":"Jules NAESSENS","place":10,"killer":"Franck NAESSENS","tablier":false,"n":11,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":19,"date":"2024-01-24","location":"Jérémy COQUEL","player":"Areski AIT GHERBI","place":11,"killer":"Franck NAESSENS","tablier":false,"n":11,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":20,"date":"2024-02-02","location":"françois","player":"Jules NAESSENS","place":1,"killer":"","tablier":false,"n":11,"points":34,"stake":5,"gross":35,"net":30,"kills":5,"win":true,"podium":true},{"game":20,"date":"2024-02-02","location":"françois","player":"Jérémie CARPENTIER","place":2,"killer":"Jules NAESSENS","tablier":false,"n":11,"points":28,"stake":5,"gross":15,"net":10,"kills":1,"win":false,"podium":true},{"game":20,"date":"2024-02-02","location":"françois","player":"Solène BALLOIS","place":3,"killer":"Jules NAESSENS","tablier":false,"n":11,"points":23,"stake":5,"gross":5,"net":0,"kills":1,"win":false,"podium":true},{"game":20,"date":"2024-02-02","location":"françois","player":"Thierry MONNIAUX","place":4,"killer":"Solène BALLOIS","tablier":false,"n":11,"points":19,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":20,"date":"2024-02-02","location":"françois","player":"Alexis Volant","place":5,"killer":"Jules NAESSENS","tablier":false,"n":11,"points":16,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":20,"date":"2024-02-02","location":"françois","player":"Franck NAESSENS","place":6,"killer":"Jérémie CARPENTIER","tablier":false,"n":11,"points":13,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":20,"date":"2024-02-02","location":"françois","player":"Stéphane LEFIN","place":7,"killer":"Alexis Volant","tablier":false,"n":11,"points":10,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":20,"date":"2024-02-02","location":"françois","player":"François CATTEAU","place":8,"killer":"Jules NAESSENS","tablier":false,"n":11,"points":7,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":20,"date":"2024-02-02","location":"françois","player":"Romain Schepereel","place":9,"killer":"Alexis Volant","tablier":false,"n":11,"points":5,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":20,"date":"2024-02-02","location":"françois","player":"Guillaume Molmy","place":10,"killer":"Jules NAESSENS","tablier":false,"n":11,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":20,"date":"2024-02-02","location":"françois","player":"Jérémy COQUEL","place":11,"killer":"Romain Schepereel","tablier":false,"n":11,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":21,"date":"2024-02-09","location":"jeremie","player":"Jules NAESSENS","place":1,"killer":"","tablier":false,"n":9,"points":27,"stake":5,"gross":25,"net":20,"kills":8,"win":true,"podium":true},{"game":21,"date":"2024-02-09","location":"jeremie","player":"Mehdi BRAHIMI","place":2,"killer":"Jules NAESSENS","tablier":false,"n":9,"points":22,"stake":5,"gross":15,"net":10,"kills":1,"win":false,"podium":true},{"game":21,"date":"2024-02-09","location":"jeremie","player":"Jérémie CARPENTIER","place":3,"killer":"Jules NAESSENS","tablier":false,"n":9,"points":17,"stake":5,"gross":5,"net":0,"kills":0,"win":false,"podium":true},{"game":21,"date":"2024-02-09","location":"jeremie","player":"Stéphane LEFIN","place":4,"killer":"Mehdi BRAHIMI","tablier":false,"n":9,"points":13,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":21,"date":"2024-02-09","location":"jeremie","player":"Romain Schepereel","place":5,"killer":"Jules NAESSENS","tablier":false,"n":9,"points":10,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":21,"date":"2024-02-09","location":"jeremie","player":"François CATTEAU","place":6,"killer":"Jules NAESSENS","tablier":false,"n":9,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":21,"date":"2024-02-09","location":"jeremie","player":"Jérôme BERA","place":7,"killer":"Jules NAESSENS","tablier":false,"n":9,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":21,"date":"2024-02-09","location":"jeremie","player":"Michel SCHERPEREEL","place":8,"killer":"Jules NAESSENS","tablier":false,"n":9,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":21,"date":"2024-02-09","location":"jeremie","player":"Franck NAESSENS","place":9,"killer":"Jules NAESSENS","tablier":false,"n":9,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":22,"date":"2024-02-16","location":"franck","player":"Jérémy COQUEL","place":1,"killer":"","tablier":true,"n":13,"points":38,"stake":5,"gross":40,"net":35,"kills":5,"win":true,"podium":true},{"game":22,"date":"2024-02-16","location":"franck","player":"Stéphane LEFIN","place":2,"killer":"Jérémy COQUEL","tablier":false,"n":13,"points":32,"stake":5,"gross":20,"net":15,"kills":3,"win":false,"podium":true},{"game":22,"date":"2024-02-16","location":"franck","player":"Franck NAESSENS","place":3,"killer":"Jérémy COQUEL","tablier":false,"n":13,"points":27,"stake":5,"gross":5,"net":0,"kills":3,"win":false,"podium":true},{"game":22,"date":"2024-02-16","location":"franck","player":"Alexis Volant","place":4,"killer":"Jérémy COQUEL","tablier":false,"n":13,"points":23,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":22,"date":"2024-02-16","location":"franck","player":"David SAGALOWICZ","place":5,"killer":"Jérémy COQUEL","tablier":false,"n":13,"points":20,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":22,"date":"2024-02-16","location":"franck","player":"Clément MARAVAL","place":6,"killer":"Stéphane LEFIN","tablier":false,"n":13,"points":17,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":22,"date":"2024-02-16","location":"franck","player":"Michel SCHERPEREEL","place":7,"killer":"Franck NAESSENS","tablier":false,"n":13,"points":14,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":22,"date":"2024-02-16","location":"franck","player":"Jérôme BINOT","place":8,"killer":"Clément MARAVAL","tablier":false,"n":13,"points":11,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":22,"date":"2024-02-16","location":"franck","player":"Solène BALLOIS","place":9,"killer":"Jérémy COQUEL","tablier":false,"n":13,"points":9,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":22,"date":"2024-02-16","location":"franck","player":"Jules NAESSENS","place":10,"killer":"Franck NAESSENS","tablier":false,"n":13,"points":7,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":22,"date":"2024-02-16","location":"franck","player":"Jérôme BERA","place":11,"killer":"Stéphane LEFIN","tablier":false,"n":13,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":22,"date":"2024-02-16","location":"franck","player":"Areski AIT GHERBI","place":12,"killer":"Stéphane LEFIN","tablier":false,"n":13,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":22,"date":"2024-02-16","location":"franck","player":"Thierry MONNIAUX","place":13,"killer":"Franck NAESSENS","tablier":false,"n":13,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":23,"date":"2024-02-23","location":"jerome béra","player":"Mehdi BRAHIMI","place":1,"killer":"","tablier":true,"n":13,"points":38,"stake":5,"gross":40,"net":35,"kills":0,"win":true,"podium":true},{"game":23,"date":"2024-02-23","location":"jerome béra","player":"Jérôme RIFFE","place":2,"killer":"","tablier":false,"n":13,"points":32,"stake":5,"gross":20,"net":15,"kills":0,"win":false,"podium":true},{"game":23,"date":"2024-02-23","location":"jerome béra","player":"Michel SCHERPEREEL","place":3,"killer":"","tablier":false,"n":13,"points":27,"stake":5,"gross":5,"net":0,"kills":0,"win":false,"podium":true},{"game":23,"date":"2024-02-23","location":"jerome béra","player":"Jérémy COQUEL","place":4,"killer":"","tablier":false,"n":13,"points":23,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":23,"date":"2024-02-23","location":"jerome béra","player":"Areski AIT GHERBI","place":5,"killer":"","tablier":false,"n":13,"points":20,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":23,"date":"2024-02-23","location":"jerome béra","player":"Alexis Volant","place":6,"killer":"","tablier":false,"n":13,"points":17,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":23,"date":"2024-02-23","location":"jerome béra","player":"Thierry MONNIAUX","place":7,"killer":"","tablier":false,"n":13,"points":14,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":23,"date":"2024-02-23","location":"jerome béra","player":"François CATTEAU","place":8,"killer":"","tablier":false,"n":13,"points":11,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":23,"date":"2024-02-23","location":"jerome béra","player":"Jules NAESSENS","place":9,"killer":"","tablier":false,"n":13,"points":9,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":23,"date":"2024-02-23","location":"jerome béra","player":"Grégoire DUFORET","place":10,"killer":"","tablier":false,"n":13,"points":7,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":23,"date":"2024-02-23","location":"jerome béra","player":"Romain Schepereel","place":11,"killer":"","tablier":false,"n":13,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":23,"date":"2024-02-23","location":"jerome béra","player":"Franck NAESSENS","place":12,"killer":"","tablier":false,"n":13,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":23,"date":"2024-02-23","location":"jerome béra","player":"Jérôme BERA","place":13,"killer":"","tablier":false,"n":13,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":24,"date":"2024-03-07","location":"françois","player":"David SAGALOWICZ","place":1,"killer":"","tablier":false,"n":6,"points":16,"stake":5,"gross":20,"net":15,"kills":2,"win":true,"podium":true},{"game":24,"date":"2024-03-07","location":"françois","player":"Michel SCHERPEREEL","place":2,"killer":"David SAGALOWICZ","tablier":false,"n":6,"points":12,"stake":5,"gross":10,"net":5,"kills":1,"win":false,"podium":true},{"game":24,"date":"2024-03-07","location":"françois","player":"Franck NAESSENS","place":3,"killer":"David SAGALOWICZ","tablier":false,"n":6,"points":8,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":true},{"game":24,"date":"2024-03-07","location":"françois","player":"Areski AIT GHERBI","place":4,"killer":"Michel SCHERPEREEL","tablier":false,"n":6,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":24,"date":"2024-03-07","location":"françois","player":"François CATTEAU","place":5,"killer":"Franck NAESSENS","tablier":false,"n":6,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":24,"date":"2024-03-07","location":"françois","player":"Jules NAESSENS","place":6,"killer":"Franck NAESSENS","tablier":false,"n":6,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":25,"date":"2024-03-23","location":"tchobin","player":"David SAGALOWICZ","place":1,"killer":"","tablier":true,"n":12,"points":36,"stake":5,"gross":35,"net":30,"kills":4,"win":true,"podium":true},{"game":25,"date":"2024-03-23","location":"tchobin","player":"Areski AIT GHERBI","place":2,"killer":"David SAGALOWICZ","tablier":false,"n":12,"points":30,"stake":5,"gross":20,"net":15,"kills":4,"win":false,"podium":true},{"game":25,"date":"2024-03-23","location":"tchobin","player":"Jérémy COQUEL","place":3,"killer":"Areski AIT GHERBI","tablier":false,"n":12,"points":25,"stake":5,"gross":5,"net":0,"kills":1,"win":false,"podium":true},{"game":25,"date":"2024-03-23","location":"tchobin","player":"Stéphane LEFIN","place":4,"killer":"David SAGALOWICZ","tablier":false,"n":12,"points":21,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":25,"date":"2024-03-23","location":"tchobin","player":"Grégoire DUFORET","place":5,"killer":"David SAGALOWICZ","tablier":false,"n":12,"points":18,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":25,"date":"2024-03-23","location":"tchobin","player":"Mehdi BRAHIMI","place":6,"killer":"David SAGALOWICZ","tablier":false,"n":12,"points":15,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":25,"date":"2024-03-23","location":"tchobin","player":"Jérôme BERA","place":7,"killer":"Areski AIT GHERBI","tablier":false,"n":12,"points":12,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":25,"date":"2024-03-23","location":"tchobin","player":"Franck NAESSENS","place":8,"killer":"Jérémy COQUEL","tablier":false,"n":12,"points":9,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":25,"date":"2024-03-23","location":"tchobin","player":"Jérôme RIFFE","place":9,"killer":"Areski AIT GHERBI","tablier":false,"n":12,"points":7,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":25,"date":"2024-03-23","location":"tchobin","player":"Olivier HENGUELLE","place":10,"killer":"Areski AIT GHERBI","tablier":false,"n":12,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":25,"date":"2024-03-23","location":"tchobin","player":"Alexis Volant","place":11,"killer":"Grégoire DUFORET","tablier":false,"n":12,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":25,"date":"2024-03-23","location":"tchobin","player":"Jérôme BINOT","place":12,"killer":"Grégoire DUFORET","tablier":false,"n":12,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":26,"date":"2024-03-29","location":"gg riffe","player":"Franck NAESSENS","place":1,"killer":"","tablier":false,"n":6,"points":16,"stake":5,"gross":20,"net":15,"kills":4,"win":true,"podium":true},{"game":26,"date":"2024-03-29","location":"gg riffe","player":"Jérôme BINOT","place":2,"killer":"Franck NAESSENS","tablier":false,"n":6,"points":12,"stake":5,"gross":10,"net":5,"kills":0,"win":false,"podium":true},{"game":26,"date":"2024-03-29","location":"gg riffe","player":"Jérôme RIFFE","place":3,"killer":"Franck NAESSENS","tablier":false,"n":6,"points":8,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":true},{"game":26,"date":"2024-03-29","location":"gg riffe","player":"David SAGALOWICZ","place":4,"killer":"Jérôme RIFFE","tablier":false,"n":6,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":26,"date":"2024-03-29","location":"gg riffe","player":"Jérôme BERA","place":5,"killer":"Franck NAESSENS","tablier":false,"n":6,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":26,"date":"2024-03-29","location":"gg riffe","player":"Mehdi BRAHIMI","place":6,"killer":"Franck NAESSENS","tablier":false,"n":6,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":27,"date":"2024-04-05","location":"areski","player":"Michel SCHERPEREEL","place":1,"killer":"","tablier":false,"n":11,"points":34,"stake":5,"gross":35,"net":30,"kills":7,"win":true,"podium":true},{"game":27,"date":"2024-04-05","location":"areski","player":"David SAGALOWICZ","place":2,"killer":"Michel SCHERPEREEL","tablier":false,"n":11,"points":28,"stake":5,"gross":15,"net":10,"kills":1,"win":false,"podium":true},{"game":27,"date":"2024-04-05","location":"areski","player":"Stéphane ROBERT","place":3,"killer":"Michel SCHERPEREEL","tablier":false,"n":11,"points":23,"stake":5,"gross":5,"net":0,"kills":1,"win":false,"podium":true},{"game":27,"date":"2024-04-05","location":"areski","player":"Jérémie CARPENTIER","place":4,"killer":"David SAGALOWICZ","tablier":false,"n":11,"points":19,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":27,"date":"2024-04-05","location":"areski","player":"Thierry MONNIAUX","place":5,"killer":"Michel SCHERPEREEL","tablier":false,"n":11,"points":16,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":27,"date":"2024-04-05","location":"areski","player":"Jérôme BERA","place":6,"killer":"Michel SCHERPEREEL","tablier":false,"n":11,"points":13,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":27,"date":"2024-04-05","location":"areski","player":"Areski AIT GHERBI","place":7,"killer":"Michel SCHERPEREEL","tablier":false,"n":11,"points":10,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":27,"date":"2024-04-05","location":"areski","player":"Jérôme BINOT","place":8,"killer":"Stéphane ROBERT","tablier":false,"n":11,"points":7,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":27,"date":"2024-04-05","location":"areski","player":"Stéphane LEFIN","place":9,"killer":"Michel SCHERPEREEL","tablier":false,"n":11,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":27,"date":"2024-04-05","location":"areski","player":"Mehdi BRAHIMI","place":10,"killer":"Michel SCHERPEREEL","tablier":false,"n":11,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":27,"date":"2024-04-05","location":"areski","player":"Jérémy COQUEL","place":11,"killer":"Jérôme BINOT","tablier":false,"n":11,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":28,"date":"2024-04-12","location":"Michel","player":"Jérôme RIFFE","place":1,"killer":"","tablier":true,"n":14,"points":39,"stake":5,"gross":40,"net":35,"kills":4,"win":true,"podium":true},{"game":28,"date":"2024-04-12","location":"Michel","player":"Franck NAESSENS","place":2,"killer":"Jérôme RIFFE","tablier":false,"n":14,"points":33,"stake":5,"gross":20,"net":15,"kills":0,"win":false,"podium":true},{"game":28,"date":"2024-04-12","location":"Michel","player":"Thierry MONNIAUX","place":3,"killer":"Grégoire DUFORET","tablier":false,"n":14,"points":28,"stake":5,"gross":10,"net":5,"kills":2,"win":false,"podium":true},{"game":28,"date":"2024-04-12","location":"Michel","player":"Grégoire DUFORET","place":4,"killer":"Jérôme RIFFE","tablier":false,"n":14,"points":24,"stake":5,"gross":0,"net":-5,"kills":4,"win":false,"podium":false},{"game":28,"date":"2024-04-12","location":"Michel","player":"David SAGALOWICZ","place":5,"killer":"Jérôme RIFFE","tablier":false,"n":14,"points":21,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":28,"date":"2024-04-12","location":"Michel","player":"Jérôme BINOT","place":6,"killer":"Thierry MONNIAUX","tablier":false,"n":14,"points":18,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":28,"date":"2024-04-12","location":"Michel","player":"Romain Schepereel","place":7,"killer":"Grégoire DUFORET","tablier":false,"n":14,"points":15,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":28,"date":"2024-04-12","location":"Michel","player":"Stéphane LEFIN","place":8,"killer":"Jérôme BINOT","tablier":false,"n":14,"points":12,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":28,"date":"2024-04-12","location":"Michel","player":"Mehdi BRAHIMI","place":9,"killer":"Romain Schepereel","tablier":false,"n":14,"points":10,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":28,"date":"2024-04-12","location":"Michel","player":"Michel SCHERPEREEL","place":10,"killer":"Thierry MONNIAUX","tablier":false,"n":14,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":28,"date":"2024-04-12","location":"Michel","player":"Jérémy COQUEL","place":11,"killer":"Grégoire DUFORET","tablier":false,"n":14,"points":6,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":28,"date":"2024-04-12","location":"Michel","player":"Jules NAESSENS","place":12,"killer":"Romain Schepereel","tablier":false,"n":14,"points":4,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":28,"date":"2024-04-12","location":"Michel","player":"Clément MARAVAL","place":13,"killer":"Grégoire DUFORET","tablier":false,"n":14,"points":2,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":28,"date":"2024-04-12","location":"Michel","player":"Areski AIT GHERBI","place":14,"killer":"Jérôme RIFFE","tablier":false,"n":14,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":29,"date":"2024-04-19","location":"michel","player":"David SAGALOWICZ","place":1,"killer":"","tablier":false,"n":10,"points":32,"stake":5,"gross":30,"net":25,"kills":4,"win":true,"podium":true},{"game":29,"date":"2024-04-19","location":"michel","player":"Gérard CANDELIER","place":2,"killer":"David SAGALOWICZ","tablier":false,"n":10,"points":26,"stake":5,"gross":15,"net":10,"kills":1,"win":false,"podium":true},{"game":29,"date":"2024-04-19","location":"michel","player":"Jérôme BINOT","place":3,"killer":"David SAGALOWICZ","tablier":false,"n":10,"points":21,"stake":5,"gross":5,"net":0,"kills":2,"win":false,"podium":true},{"game":29,"date":"2024-04-19","location":"michel","player":"Franck NAESSENS","place":4,"killer":"Jérôme BINOT","tablier":false,"n":10,"points":17,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":29,"date":"2024-04-19","location":"michel","player":"Jérôme RIFFE","place":5,"killer":"David SAGALOWICZ","tablier":false,"n":10,"points":14,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":29,"date":"2024-04-19","location":"michel","player":"Mehdi BRAHIMI","place":6,"killer":"David SAGALOWICZ","tablier":false,"n":10,"points":11,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":29,"date":"2024-04-19","location":"michel","player":"Olivier HENGUELLE","place":7,"killer":"Franck NAESSENS","tablier":false,"n":10,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":29,"date":"2024-04-19","location":"michel","player":"Jules NAESSENS","place":8,"killer":"Gérard CANDELIER","tablier":false,"n":10,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":29,"date":"2024-04-19","location":"michel","player":"Michel SCHERPEREEL","place":9,"killer":"Jérôme BINOT","tablier":false,"n":10,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":29,"date":"2024-04-19","location":"michel","player":"Jérémie CARPENTIER","place":10,"killer":"Franck NAESSENS","tablier":false,"n":10,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":30,"date":"2024-05-04","location":"Franck NAESSENS","player":"David SAGALOWICZ","place":1,"killer":"","tablier":false,"n":10,"points":32,"stake":5,"gross":30,"net":25,"kills":1,"win":true,"podium":true},{"game":30,"date":"2024-05-04","location":"Franck NAESSENS","player":"Thierry MONNIAUX","place":2,"killer":"","tablier":false,"n":10,"points":26,"stake":5,"gross":15,"net":10,"kills":3,"win":false,"podium":true},{"game":30,"date":"2024-05-04","location":"Franck NAESSENS","player":"Franck NAESSENS","place":3,"killer":"","tablier":false,"n":10,"points":21,"stake":5,"gross":5,"net":0,"kills":1,"win":false,"podium":true},{"game":30,"date":"2024-05-04","location":"Franck NAESSENS","player":"Jérôme RIFFE","place":4,"killer":"Thierry MONNIAUX","tablier":false,"n":10,"points":17,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":30,"date":"2024-05-04","location":"Franck NAESSENS","player":"Olivier HENGUELLE","place":5,"killer":"","tablier":false,"n":10,"points":14,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":30,"date":"2024-05-04","location":"Franck NAESSENS","player":"Jérôme BERA","place":6,"killer":"Jérôme RIFFE","tablier":false,"n":10,"points":11,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":30,"date":"2024-05-04","location":"Franck NAESSENS","player":"Jules NAESSENS","place":7,"killer":"David SAGALOWICZ","tablier":false,"n":10,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":30,"date":"2024-05-04","location":"Franck NAESSENS","player":"François CATTEAU","place":8,"killer":"","tablier":false,"n":10,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":30,"date":"2024-05-04","location":"Franck NAESSENS","player":"Mehdi BRAHIMI","place":9,"killer":"Thierry MONNIAUX","tablier":false,"n":10,"points":3,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":30,"date":"2024-05-04","location":"Franck NAESSENS","player":"Jérôme BINOT","place":10,"killer":"","tablier":false,"n":10,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":31,"date":"2024-05-07","location":"mehdi","player":"Thierry MONNIAUX","place":1,"killer":"","tablier":false,"n":10,"points":32,"stake":5,"gross":30,"net":25,"kills":3,"win":true,"podium":true},{"game":31,"date":"2024-05-07","location":"mehdi","player":"Jérôme RIFFE","place":2,"killer":"Thierry MONNIAUX","tablier":false,"n":10,"points":26,"stake":5,"gross":15,"net":10,"kills":2,"win":false,"podium":true},{"game":31,"date":"2024-05-07","location":"mehdi","player":"Jérôme BERA","place":3,"killer":"Jérôme RIFFE","tablier":false,"n":10,"points":21,"stake":5,"gross":5,"net":0,"kills":0,"win":false,"podium":true},{"game":31,"date":"2024-05-07","location":"mehdi","player":"David SAGALOWICZ","place":4,"killer":"Jérôme RIFFE","tablier":false,"n":10,"points":17,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":31,"date":"2024-05-07","location":"mehdi","player":"Mehdi BRAHIMI","place":5,"killer":"Thierry MONNIAUX","tablier":false,"n":10,"points":14,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":31,"date":"2024-05-07","location":"mehdi","player":"Franck NAESSENS","place":6,"killer":"David SAGALOWICZ","tablier":false,"n":10,"points":11,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":31,"date":"2024-05-07","location":"mehdi","player":"Stéphane ROBERT","place":7,"killer":"Thierry MONNIAUX","tablier":false,"n":10,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":31,"date":"2024-05-07","location":"mehdi","player":"Jules NAESSENS","place":8,"killer":"David SAGALOWICZ","tablier":false,"n":10,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":31,"date":"2024-05-07","location":"mehdi","player":"Michel SCHERPEREEL","place":9,"killer":"Mehdi BRAHIMI","tablier":false,"n":10,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":31,"date":"2024-05-07","location":"mehdi","player":"Jérémy COQUEL","place":10,"killer":"Franck NAESSENS","tablier":false,"n":10,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":32,"date":"2024-05-24","location":"alexis","player":"Jérôme RIFFE","place":1,"killer":"","tablier":true,"n":13,"points":38,"stake":5,"gross":40,"net":35,"kills":2,"win":true,"podium":true},{"game":32,"date":"2024-05-24","location":"alexis","player":"Alexis Volant","place":2,"killer":"Jérôme RIFFE","tablier":false,"n":13,"points":32,"stake":5,"gross":20,"net":15,"kills":3,"win":false,"podium":true},{"game":32,"date":"2024-05-24","location":"alexis","player":"ELEN","place":3,"killer":"Alexis Volant","tablier":false,"n":13,"points":27,"stake":5,"gross":5,"net":0,"kills":3,"win":false,"podium":true},{"game":32,"date":"2024-05-24","location":"alexis","player":"Franck NAESSENS","place":4,"killer":"Jérôme RIFFE","tablier":false,"n":13,"points":23,"stake":5,"gross":0,"net":-5,"kills":4,"win":false,"podium":false},{"game":32,"date":"2024-05-24","location":"alexis","player":"Mehdi BRAHIMI","place":5,"killer":"Franck NAESSENS","tablier":false,"n":13,"points":20,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":32,"date":"2024-05-24","location":"alexis","player":"David SAGALOWICZ","place":6,"killer":"Franck NAESSENS","tablier":false,"n":13,"points":17,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":32,"date":"2024-05-24","location":"alexis","player":"Areski AIT GHERBI","place":7,"killer":"ELEN","tablier":false,"n":13,"points":14,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":32,"date":"2024-05-24","location":"alexis","player":"Jérémy COQUEL","place":8,"killer":"ELEN","tablier":false,"n":13,"points":11,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":32,"date":"2024-05-24","location":"alexis","player":"Jules NAESSENS","place":9,"killer":"Alexis Volant","tablier":false,"n":13,"points":9,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":32,"date":"2024-05-24","location":"alexis","player":"Romain Schepereel","place":10,"killer":"Franck NAESSENS","tablier":false,"n":13,"points":7,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":32,"date":"2024-05-24","location":"alexis","player":"Jérémie CARPENTIER","place":11,"killer":"Franck NAESSENS","tablier":false,"n":13,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":32,"date":"2024-05-24","location":"alexis","player":"François CATTEAU","place":12,"killer":"ELEN","tablier":false,"n":13,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":32,"date":"2024-05-24","location":"alexis","player":"Clément MARAVAL","place":13,"killer":"Alexis Volant","tablier":false,"n":13,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":33,"date":"2024-06-07","location":"areski","player":"Mehdi BRAHIMI","place":1,"killer":"","tablier":false,"n":11,"points":34,"stake":5,"gross":35,"net":30,"kills":4,"win":true,"podium":true},{"game":33,"date":"2024-06-07","location":"areski","player":"Alexis Volant","place":2,"killer":"Mehdi BRAHIMI","tablier":false,"n":11,"points":28,"stake":5,"gross":15,"net":10,"kills":1,"win":false,"podium":true},{"game":33,"date":"2024-06-07","location":"areski","player":"Franck NAESSENS","place":3,"killer":"Mehdi BRAHIMI","tablier":false,"n":11,"points":23,"stake":5,"gross":5,"net":0,"kills":3,"win":false,"podium":true},{"game":33,"date":"2024-06-07","location":"areski","player":"Jérémie CARPENTIER","place":4,"killer":"Mehdi BRAHIMI","tablier":false,"n":11,"points":19,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":33,"date":"2024-06-07","location":"areski","player":"Areski AIT GHERBI","place":5,"killer":"Franck NAESSENS","tablier":false,"n":11,"points":16,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":33,"date":"2024-06-07","location":"areski","player":"Michel SCHERPEREEL","place":6,"killer":"Mehdi BRAHIMI","tablier":false,"n":11,"points":13,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":33,"date":"2024-06-07","location":"areski","player":"Jules NAESSENS","place":7,"killer":"Alexis Volant","tablier":false,"n":11,"points":10,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":33,"date":"2024-06-07","location":"areski","player":"Jérôme RIFFE","place":8,"killer":"Areski AIT GHERBI","tablier":false,"n":11,"points":7,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":33,"date":"2024-06-07","location":"areski","player":"Jérôme BINOT","place":9,"killer":"Franck NAESSENS","tablier":false,"n":11,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":33,"date":"2024-06-07","location":"areski","player":"Thierry MONNIAUX","place":10,"killer":"Franck NAESSENS","tablier":false,"n":11,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":33,"date":"2024-06-07","location":"areski","player":"Stéphane ROBERT","place":11,"killer":"Areski AIT GHERBI","tablier":false,"n":11,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":34,"date":"2024-06-21","location":"jeremy","player":"Thierry MONNIAUX","place":1,"killer":"","tablier":false,"n":10,"points":32,"stake":5,"gross":30,"net":25,"kills":4,"win":true,"podium":true},{"game":34,"date":"2024-06-21","location":"jeremy","player":"Jérôme RIFFE","place":2,"killer":"Thierry MONNIAUX","tablier":false,"n":10,"points":26,"stake":5,"gross":15,"net":10,"kills":0,"win":false,"podium":true},{"game":34,"date":"2024-06-21","location":"jeremy","player":"Jérémy COQUEL","place":3,"killer":"Thierry MONNIAUX","tablier":false,"n":10,"points":21,"stake":5,"gross":5,"net":0,"kills":2,"win":false,"podium":true},{"game":34,"date":"2024-06-21","location":"jeremy","player":"Franck NAESSENS","place":4,"killer":"Thierry MONNIAUX","tablier":false,"n":10,"points":17,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":34,"date":"2024-06-21","location":"jeremy","player":"joueur new 1","place":5,"killer":"","tablier":false,"n":10,"points":14,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":34,"date":"2024-06-21","location":"jeremy","player":"Alexis Volant","place":6,"killer":"Jérémy COQUEL","tablier":false,"n":10,"points":11,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":34,"date":"2024-06-21","location":"jeremy","player":"Jules NAESSENS","place":7,"killer":"Jérémy COQUEL","tablier":false,"n":10,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":34,"date":"2024-06-21","location":"jeremy","player":"joueur new 2","place":8,"killer":"","tablier":false,"n":10,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":34,"date":"2024-06-21","location":"jeremy","player":"Mehdi BRAHIMI","place":9,"killer":"Thierry MONNIAUX","tablier":false,"n":10,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":34,"date":"2024-06-21","location":"jeremy","player":"ELEN","place":10,"killer":"","tablier":false,"n":10,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":35,"date":"2024-06-28","location":"mehdi","player":"Mehdi BRAHIMI","place":1,"killer":"","tablier":false,"n":7,"points":19,"stake":5,"gross":20,"net":15,"kills":2,"win":true,"podium":true},{"game":35,"date":"2024-06-28","location":"mehdi","player":"Jérôme BERA","place":2,"killer":"Mehdi BRAHIMI","tablier":false,"n":7,"points":15,"stake":5,"gross":10,"net":5,"kills":3,"win":false,"podium":true},{"game":35,"date":"2024-06-28","location":"mehdi","player":"Stéphane ROBERT","place":3,"killer":"Mehdi BRAHIMI","tablier":false,"n":7,"points":11,"stake":5,"gross":5,"net":0,"kills":0,"win":false,"podium":true},{"game":35,"date":"2024-06-28","location":"mehdi","player":"Armelle BRAHIMI","place":4,"killer":"Jérôme BERA","tablier":false,"n":7,"points":8,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":35,"date":"2024-06-28","location":"mehdi","player":"Michel SCHERPEREEL","place":5,"killer":"Jérôme BERA","tablier":false,"n":7,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":35,"date":"2024-06-28","location":"mehdi","player":"David SAGALOWICZ","place":6,"killer":"Jérôme BERA","tablier":false,"n":7,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":35,"date":"2024-06-28","location":"mehdi","player":"Areski AIT GHERBI","place":7,"killer":"Armelle BRAHIMI","tablier":false,"n":7,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false}];
+const ARCHIVE_2023_2024_RANKING=[{"rank":1,"name":"Mehdi BRAHIMI","points":491,"gamesCount":27,"wins":7,"tabliers":3,"kills":25},{"rank":2,"name":"Franck NAESSENS","points":481,"gamesCount":32,"wins":3,"tabliers":0,"kills":43},{"rank":3,"name":"Jérôme RIFFE","points":375,"gamesCount":20,"wins":3,"tabliers":2,"kills":25},{"rank":4,"name":"Michel SCHERPEREEL","points":354,"gamesCount":25,"wins":3,"tabliers":1,"kills":20},{"rank":5,"name":"Jérémy COQUEL","points":347,"gamesCount":23,"wins":2,"tabliers":2,"kills":19},{"rank":6,"name":"David SAGALOWICZ","points":347,"gamesCount":18,"wins":5,"tabliers":2,"kills":19},{"rank":7,"name":"Jérôme BINOT","points":302,"gamesCount":19,"wins":2,"tabliers":0,"kills":25},{"rank":8,"name":"Alexis Volant","points":282,"gamesCount":22,"wins":0,"tabliers":0,"kills":18},{"rank":9,"name":"Thierry MONNIAUX","points":277,"gamesCount":19,"wins":2,"tabliers":0,"kills":14},{"rank":10,"name":"Romain Schepereel","points":261,"gamesCount":19,"wins":2,"tabliers":0,"kills":8},{"rank":11,"name":"Jérôme BERA","points":250,"gamesCount":21,"wins":1,"tabliers":1,"kills":14},{"rank":12,"name":"Stéphane LEFIN","points":211,"gamesCount":12,"wins":0,"tabliers":0,"kills":11},{"rank":13,"name":"Areski AIT GHERBI","points":189,"gamesCount":19,"wins":0,"tabliers":0,"kills":9},{"rank":14,"name":"Jérémie CARPENTIER","points":169,"gamesCount":13,"wins":0,"tabliers":0,"kills":2},{"rank":15,"name":"Olivier HENGUELLE","points":163,"gamesCount":11,"wins":1,"tabliers":1,"kills":14},{"rank":16,"name":"Jules NAESSENS","points":152,"gamesCount":16,"wins":2,"tabliers":0,"kills":14},{"rank":17,"name":"Solène BALLOIS","points":143,"gamesCount":14,"wins":0,"tabliers":0,"kills":7},{"rank":18,"name":"François CATTEAU","points":118,"gamesCount":16,"wins":0,"tabliers":0,"kills":7},{"rank":19,"name":"Grégoire DUFORET","points":92,"gamesCount":5,"wins":1,"tabliers":1,"kills":12},{"rank":20,"name":"Clément MARAVAL","points":89,"gamesCount":7,"wins":0,"tabliers":0,"kills":3},{"rank":21,"name":"Stéphane ROBERT","points":63,"gamesCount":6,"wins":0,"tabliers":0,"kills":2},{"rank":22,"name":"Frédéric Tavernier","points":55,"gamesCount":3,"wins":1,"tabliers":1,"kills":8},{"rank":23,"name":"ELEN","points":52,"gamesCount":4,"wins":0,"tabliers":0,"kills":4},{"rank":24,"name":"Philippe DUBOIS","points":39,"gamesCount":3,"wins":0,"tabliers":0,"kills":1},{"rank":25,"name":"Nuno Tinoco","points":37,"gamesCount":1,"wins":0,"tabliers":0,"kills":3},{"rank":26,"name":"Mélanie BINOT","points":26,"gamesCount":1,"wins":0,"tabliers":0,"kills":1},{"rank":27,"name":"Gérard CANDELIER","points":26,"gamesCount":1,"wins":0,"tabliers":0,"kills":2},{"rank":28,"name":"Hélène MORIZUR","points":22,"gamesCount":1,"wins":0,"tabliers":0,"kills":2},{"rank":29,"name":"Armelle BRAHIMI","points":11,"gamesCount":2,"wins":0,"tabliers":0,"kills":2},{"rank":30,"name":"Arnaud HEDIN","points":10,"gamesCount":1,"wins":0,"tabliers":0,"kills":1},{"rank":31,"name":"Thomas DELVAL","points":8,"gamesCount":1,"wins":0,"tabliers":0,"kills":1},{"rank":32,"name":"Guillaume Molmy","points":3,"gamesCount":1,"wins":0,"tabliers":0,"kills":1},{"rank":33,"name":"Cyprien RIFFE","points":3,"gamesCount":1,"wins":0,"tabliers":0,"kills":1},{"rank":999,"name":"max","points":0,"gamesCount":32,"wins":7,"tabliers":14,"kills":43}];
+const ARCHIVE_2023_2024_META={"season":"2023–2024","games":35,"participations":386,"players":35,"tabliers":15,"champion":"Mehdi BRAHIMI"};
+const ARCHIVE_2025_2026=[{"game":1,"date":"2025-09-05","location":"alexis","player":"Jérôme RIFFE","place":1,"killer":"","tablier":true,"n":12,"points":36,"stake":5,"gross":35,"net":30,"kills":3,"win":true,"podium":true},{"game":1,"date":"2025-09-05","location":"alexis","player":"Thierry MONNIAUX","place":2,"killer":"","tablier":false,"n":12,"points":30,"stake":5,"gross":20,"net":15,"kills":3,"win":false,"podium":true},{"game":1,"date":"2025-09-05","location":"alexis","player":"Alexis Volant","place":3,"killer":"Jérôme RIFFE","tablier":false,"n":12,"points":25,"stake":5,"gross":5,"net":0,"kills":0,"win":false,"podium":true},{"game":1,"date":"2025-09-05","location":"alexis","player":"Jérémy COQUEL","place":4,"killer":"","tablier":false,"n":12,"points":21,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":1,"date":"2025-09-05","location":"alexis","player":"Mehdi BRAHIMI","place":5,"killer":"","tablier":false,"n":12,"points":18,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":1,"date":"2025-09-05","location":"alexis","player":"Areski AIT GHERBI","place":6,"killer":"","tablier":false,"n":12,"points":15,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":1,"date":"2025-09-05","location":"alexis","player":"Grégoire DUFORET","place":7,"killer":"","tablier":false,"n":12,"points":12,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":1,"date":"2025-09-05","location":"alexis","player":"Jules NAESSENS","place":8,"killer":"","tablier":false,"n":12,"points":9,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":1,"date":"2025-09-05","location":"alexis","player":"Jérôme BERA","place":9,"killer":"","tablier":false,"n":12,"points":7,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":1,"date":"2025-09-05","location":"alexis","player":"Franck NAESSENS","place":10,"killer":"","tablier":false,"n":12,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":1,"date":"2025-09-05","location":"alexis","player":"David SAGALOWICZ","place":11,"killer":"","tablier":false,"n":12,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":1,"date":"2025-09-05","location":"alexis","player":"Jérôme BINOT","place":12,"killer":"Thierry MONNIAUX","tablier":false,"n":12,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":2,"date":"2025-09-12","location":"jérome Riffe","player":"François CATTEAU","place":1,"killer":"","tablier":false,"n":8,"points":23,"stake":5,"gross":25,"net":20,"kills":4,"win":true,"podium":true},{"game":2,"date":"2025-09-12","location":"jérome Riffe","player":"Clément MARAVAL","place":2,"killer":"François CATTEAU","tablier":false,"n":8,"points":18,"stake":5,"gross":10,"net":5,"kills":0,"win":false,"podium":true},{"game":2,"date":"2025-09-12","location":"jérome Riffe","player":"Jérôme RIFFE","place":3,"killer":"","tablier":false,"n":8,"points":14,"stake":5,"gross":5,"net":0,"kills":0,"win":false,"podium":true},{"game":2,"date":"2025-09-12","location":"jérome Riffe","player":"David SAGALOWICZ","place":4,"killer":"","tablier":false,"n":8,"points":11,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":2,"date":"2025-09-12","location":"jérome Riffe","player":"Franck NAESSENS","place":5,"killer":"","tablier":false,"n":8,"points":8,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":2,"date":"2025-09-12","location":"jérome Riffe","player":"Michel SCHERPEREEL","place":6,"killer":"","tablier":false,"n":8,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":2,"date":"2025-09-12","location":"jérome Riffe","player":"Mehdi BRAHIMI","place":7,"killer":"","tablier":false,"n":8,"points":3,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":2,"date":"2025-09-12","location":"jérome Riffe","player":"Jérémy COQUEL","place":8,"killer":"","tablier":false,"n":8,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":3,"date":"2025-09-19","location":"franck","player":"Quentin","place":1,"killer":"","tablier":true,"n":15,"points":40,"stake":5,"gross":45,"net":40,"kills":5,"win":true,"podium":true},{"game":3,"date":"2025-09-19","location":"franck","player":"Mehdi BRAHIMI","place":2,"killer":"","tablier":false,"n":15,"points":34,"stake":5,"gross":25,"net":20,"kills":2,"win":false,"podium":true},{"game":3,"date":"2025-09-19","location":"franck","player":"Jérémie CARPENTIER","place":3,"killer":"Grégoire DUFORET","tablier":false,"n":15,"points":29,"stake":5,"gross":5,"net":0,"kills":0,"win":false,"podium":true},{"game":3,"date":"2025-09-19","location":"franck","player":"Clément MARAVAL","place":4,"killer":"Quentin","tablier":false,"n":15,"points":25,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":3,"date":"2025-09-19","location":"franck","player":"Grégoire DUFORET","place":5,"killer":"Franck NAESSENS","tablier":false,"n":15,"points":22,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":3,"date":"2025-09-19","location":"franck","player":"Franck NAESSENS","place":6,"killer":"","tablier":false,"n":15,"points":19,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":3,"date":"2025-09-19","location":"franck","player":"François CATTEAU","place":7,"killer":"Quentin","tablier":false,"n":15,"points":16,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":3,"date":"2025-09-19","location":"franck","player":"Thierry MONNIAUX","place":8,"killer":"","tablier":false,"n":15,"points":13,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":3,"date":"2025-09-19","location":"franck","player":"Jérôme RIFFE","place":9,"killer":"","tablier":false,"n":15,"points":11,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":3,"date":"2025-09-19","location":"franck","player":"Jérôme BERA","place":10,"killer":"","tablier":false,"n":15,"points":9,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":3,"date":"2025-09-19","location":"franck","player":"Jules NAESSENS","place":11,"killer":"Thierry MONNIAUX","tablier":false,"n":15,"points":7,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":3,"date":"2025-09-19","location":"franck","player":"Olivier HENGUELLE","place":12,"killer":"","tablier":false,"n":15,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":3,"date":"2025-09-19","location":"franck","player":"Philippe DUBOIS","place":13,"killer":"","tablier":false,"n":15,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":3,"date":"2025-09-19","location":"franck","player":"Michel SCHERPEREEL","place":14,"killer":"","tablier":false,"n":15,"points":2,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":3,"date":"2025-09-19","location":"franck","player":"David SAGALOWICZ","place":15,"killer":"","tablier":false,"n":15,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":4,"date":"2025-09-26","location":"françois","player":"Jérôme BERA","place":1,"killer":"","tablier":true,"n":12,"points":36,"stake":5,"gross":35,"net":30,"kills":3,"win":true,"podium":true},{"game":4,"date":"2025-09-26","location":"françois","player":"Jérémy COQUEL","place":2,"killer":"Jérôme BERA","tablier":false,"n":12,"points":30,"stake":5,"gross":20,"net":15,"kills":3,"win":false,"podium":true},{"game":4,"date":"2025-09-26","location":"françois","player":"Thierry MONNIAUX","place":3,"killer":"","tablier":false,"n":12,"points":25,"stake":5,"gross":5,"net":0,"kills":2,"win":false,"podium":true},{"game":4,"date":"2025-09-26","location":"françois","player":"Franck NAESSENS","place":4,"killer":"Thierry MONNIAUX","tablier":false,"n":12,"points":21,"stake":5,"gross":0,"net":-5,"kills":3,"win":false,"podium":false},{"game":4,"date":"2025-09-26","location":"françois","player":"François CATTEAU","place":5,"killer":"Jérémy COQUEL","tablier":false,"n":12,"points":18,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":4,"date":"2025-09-26","location":"françois","player":"Jérôme RIFFE","place":6,"killer":"Thierry MONNIAUX","tablier":false,"n":12,"points":15,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":4,"date":"2025-09-26","location":"françois","player":"David SAGALOWICZ","place":7,"killer":"Jérémy COQUEL","tablier":false,"n":12,"points":12,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":4,"date":"2025-09-26","location":"françois","player":"Jérôme BINOT","place":8,"killer":"Jérémy COQUEL","tablier":false,"n":12,"points":9,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":4,"date":"2025-09-26","location":"françois","player":"Grégoire DUFORET","place":9,"killer":"Franck NAESSENS","tablier":false,"n":12,"points":7,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":4,"date":"2025-09-26","location":"françois","player":"Mehdi BRAHIMI","place":10,"killer":"Jérôme BERA","tablier":false,"n":12,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":4,"date":"2025-09-26","location":"françois","player":"Olivier HENGUELLE","place":11,"killer":"Quentin","tablier":false,"n":12,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":4,"date":"2025-09-26","location":"françois","player":"Alexis Volant","place":12,"killer":"Franck NAESSENS","tablier":false,"n":12,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":5,"date":"2025-10-11","location":"David","player":"David SAGALOWICZ","place":1,"killer":"","tablier":false,"n":8,"points":23,"stake":5,"gross":25,"net":20,"kills":1,"win":true,"podium":true},{"game":5,"date":"2025-10-11","location":"David","player":"Mehdi BRAHIMI","place":2,"killer":"David SAGALOWICZ","tablier":false,"n":8,"points":18,"stake":5,"gross":10,"net":5,"kills":2,"win":false,"podium":true},{"game":5,"date":"2025-10-11","location":"David","player":"Grégoire DUFORET","place":3,"killer":"Mehdi BRAHIMI","tablier":false,"n":8,"points":14,"stake":5,"gross":5,"net":0,"kills":2,"win":false,"podium":true},{"game":5,"date":"2025-10-11","location":"David","player":"Jérôme BERA","place":4,"killer":"Grégoire DUFORET","tablier":false,"n":8,"points":11,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":5,"date":"2025-10-11","location":"David","player":"François CATTEAU","place":5,"killer":"Jérôme BERA","tablier":false,"n":8,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":5,"date":"2025-10-11","location":"David","player":"Jérôme RIFFE","place":6,"killer":"Mehdi BRAHIMI","tablier":false,"n":8,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":5,"date":"2025-10-11","location":"David","player":"Jérémy COQUEL","place":7,"killer":"Jérôme BERA","tablier":false,"n":8,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":5,"date":"2025-10-11","location":"David","player":"Alexis Volant","place":8,"killer":"Grégoire DUFORET","tablier":false,"n":8,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":6,"date":"2025-10-25","location":"jérome Bera","player":"Alexis Volant","place":1,"killer":"","tablier":false,"n":10,"points":32,"stake":5,"gross":30,"net":25,"kills":0,"win":true,"podium":true},{"game":6,"date":"2025-10-25","location":"jérome Bera","player":"Mehdi BRAHIMI","place":2,"killer":"","tablier":false,"n":10,"points":26,"stake":5,"gross":15,"net":10,"kills":0,"win":false,"podium":true},{"game":6,"date":"2025-10-25","location":"jérome Bera","player":"Michel SCHERPEREEL","place":3,"killer":"","tablier":false,"n":10,"points":21,"stake":5,"gross":5,"net":0,"kills":0,"win":false,"podium":true},{"game":6,"date":"2025-10-25","location":"jérome Bera","player":"Franck NAESSENS","place":4,"killer":"","tablier":false,"n":10,"points":17,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":6,"date":"2025-10-25","location":"jérome Bera","player":"David SAGALOWICZ","place":5,"killer":"","tablier":false,"n":10,"points":14,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":6,"date":"2025-10-25","location":"jérome Bera","player":"Thierry MONNIAUX","place":6,"killer":"","tablier":false,"n":10,"points":11,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":6,"date":"2025-10-25","location":"jérome Bera","player":"Romain Schepereel","place":7,"killer":"","tablier":false,"n":10,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":6,"date":"2025-10-25","location":"jérome Bera","player":"Jérôme BERA","place":8,"killer":"","tablier":false,"n":10,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":6,"date":"2025-10-25","location":"jérome Bera","player":"Jérôme RIFFE","place":9,"killer":"","tablier":false,"n":10,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":6,"date":"2025-10-25","location":"jérome Bera","player":"Jérémy COQUEL","place":10,"killer":"","tablier":false,"n":10,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":7,"date":"2025-11-07","location":"jérome Riffe","player":"Grégoire DUFORET","place":1,"killer":"","tablier":false,"n":11,"points":34,"stake":5,"gross":35,"net":30,"kills":3,"win":true,"podium":true},{"game":7,"date":"2025-11-07","location":"jérome Riffe","player":"Alexis Volant","place":2,"killer":"Grégoire DUFORET","tablier":false,"n":11,"points":28,"stake":5,"gross":15,"net":10,"kills":1,"win":false,"podium":true},{"game":7,"date":"2025-11-07","location":"jérome Riffe","player":"Jérôme RIFFE","place":3,"killer":"Grégoire DUFORET","tablier":false,"n":11,"points":23,"stake":5,"gross":5,"net":0,"kills":2,"win":false,"podium":true},{"game":7,"date":"2025-11-07","location":"jérome Riffe","player":"Mehdi BRAHIMI","place":4,"killer":"Jérôme RIFFE","tablier":false,"n":11,"points":19,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":7,"date":"2025-11-07","location":"jérome Riffe","player":"Olivier HENGUELLE","place":5,"killer":"","tablier":false,"n":11,"points":16,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":7,"date":"2025-11-07","location":"jérome Riffe","player":"Franck NAESSENS","place":6,"killer":"Mehdi BRAHIMI","tablier":false,"n":11,"points":13,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":7,"date":"2025-11-07","location":"jérome Riffe","player":"Jérémy COQUEL","place":7,"killer":"Franck NAESSENS","tablier":false,"n":11,"points":10,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":7,"date":"2025-11-07","location":"jérome Riffe","player":"Jérôme BERA","place":8,"killer":"Jérôme RIFFE","tablier":false,"n":11,"points":7,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":7,"date":"2025-11-07","location":"jérome Riffe","player":"François CATTEAU","place":9,"killer":"Franck NAESSENS","tablier":false,"n":11,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":7,"date":"2025-11-07","location":"jérome Riffe","player":"Michel SCHERPEREEL","place":10,"killer":"","tablier":false,"n":11,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":7,"date":"2025-11-07","location":"jérome Riffe","player":"Areski AIT GHERBI","place":11,"killer":"Alexis Volant","tablier":false,"n":11,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":8,"date":"2025-11-14","location":"michel","player":"David SAGALOWICZ","place":1,"killer":"","tablier":false,"n":11,"points":34,"stake":5,"gross":35,"net":30,"kills":3,"win":true,"podium":true},{"game":8,"date":"2025-11-14","location":"michel","player":"Michel SCHERPEREEL","place":2,"killer":"Jérôme BERA","tablier":false,"n":11,"points":28,"stake":5,"gross":15,"net":10,"kills":2,"win":false,"podium":true},{"game":8,"date":"2025-11-14","location":"michel","player":"Jérémie CARPENTIER","place":3,"killer":"David SAGALOWICZ","tablier":false,"n":11,"points":23,"stake":5,"gross":5,"net":0,"kills":0,"win":false,"podium":true},{"game":8,"date":"2025-11-14","location":"michel","player":"Thierry MONNIAUX","place":4,"killer":"","tablier":false,"n":11,"points":19,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":8,"date":"2025-11-14","location":"michel","player":"Jérémy COQUEL","place":5,"killer":"Michel SCHERPEREEL","tablier":false,"n":11,"points":16,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":8,"date":"2025-11-14","location":"michel","player":"Franck NAESSENS","place":6,"killer":"David SAGALOWICZ","tablier":false,"n":11,"points":13,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":8,"date":"2025-11-14","location":"michel","player":"Grégoire DUFORET","place":7,"killer":"Thierry MONNIAUX","tablier":false,"n":11,"points":10,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":8,"date":"2025-11-14","location":"michel","player":"Jérôme BINOT","place":8,"killer":"Grégoire DUFORET","tablier":false,"n":11,"points":7,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":8,"date":"2025-11-14","location":"michel","player":"Jules NAESSENS","place":9,"killer":"Franck NAESSENS","tablier":false,"n":11,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":8,"date":"2025-11-14","location":"michel","player":"Areski AIT GHERBI","place":10,"killer":"Grégoire DUFORET","tablier":false,"n":11,"points":3,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":8,"date":"2025-11-14","location":"michel","player":"Alexis Volant","place":11,"killer":"Areski AIT GHERBI","tablier":false,"n":11,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":9,"date":"2025-11-29","location":"mehdi","player":"Franck NAESSENS","place":1,"killer":"","tablier":false,"n":11,"points":34,"stake":5,"gross":35,"net":30,"kills":2,"win":true,"podium":true},{"game":9,"date":"2025-11-29","location":"mehdi","player":"Jérôme RIFFE","place":2,"killer":"Franck NAESSENS","tablier":false,"n":11,"points":28,"stake":5,"gross":15,"net":10,"kills":5,"win":false,"podium":true},{"game":9,"date":"2025-11-29","location":"mehdi","player":"Olivier HENGUELLE","place":3,"killer":"","tablier":false,"n":11,"points":23,"stake":5,"gross":5,"net":0,"kills":0,"win":false,"podium":true},{"game":9,"date":"2025-11-29","location":"mehdi","player":"Areski AIT GHERBI","place":4,"killer":"Jérôme RIFFE","tablier":false,"n":11,"points":19,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":9,"date":"2025-11-29","location":"mehdi","player":"Gérard CANDELIER","place":5,"killer":"Franck NAESSENS","tablier":false,"n":11,"points":16,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":9,"date":"2025-11-29","location":"mehdi","player":"Grégoire DUFORET","place":6,"killer":"Gérard CANDELIER","tablier":false,"n":11,"points":13,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":9,"date":"2025-11-29","location":"mehdi","player":"Michel SCHERPEREEL","place":7,"killer":"David SAGALOWICZ","tablier":false,"n":11,"points":10,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":9,"date":"2025-11-29","location":"mehdi","player":"Mehdi BRAHIMI","place":8,"killer":"Jérôme RIFFE","tablier":false,"n":11,"points":7,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":9,"date":"2025-11-29","location":"mehdi","player":"Alexis Volant","place":9,"killer":"Jérôme RIFFE","tablier":false,"n":11,"points":5,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":9,"date":"2025-11-29","location":"mehdi","player":"Jérôme BERA","place":10,"killer":"Alexis Volant","tablier":false,"n":11,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":9,"date":"2025-11-29","location":"mehdi","player":"Jérémy COQUEL","place":11,"killer":"Jérôme RIFFE","tablier":false,"n":11,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":10,"date":"2026-01-10","location":"areski","player":"Thierry MONNIAUX","place":1,"killer":"","tablier":true,"n":13,"points":38,"stake":5,"gross":40,"net":35,"kills":4,"win":true,"podium":true},{"game":10,"date":"2026-01-10","location":"areski","player":"Areski AIT GHERBI","place":2,"killer":"Thierry MONNIAUX","tablier":false,"n":13,"points":32,"stake":5,"gross":20,"net":15,"kills":5,"win":false,"podium":true},{"game":10,"date":"2026-01-10","location":"areski","player":"Jérémy COQUEL","place":3,"killer":"Thierry MONNIAUX","tablier":false,"n":13,"points":27,"stake":5,"gross":5,"net":0,"kills":2,"win":false,"podium":true},{"game":10,"date":"2026-01-10","location":"areski","player":"Grégoire DUFORET","place":4,"killer":"Areski AIT GHERBI","tablier":false,"n":13,"points":23,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":10,"date":"2026-01-10","location":"areski","player":"Jérémie CARPENTIER","place":5,"killer":"Jérémy COQUEL","tablier":false,"n":13,"points":20,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":10,"date":"2026-01-10","location":"areski","player":"Jérôme RIFFE","place":6,"killer":"Jérémy COQUEL","tablier":false,"n":13,"points":17,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":10,"date":"2026-01-10","location":"areski","player":"David SAGALOWICZ","place":7,"killer":"Areski AIT GHERBI","tablier":false,"n":13,"points":14,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":10,"date":"2026-01-10","location":"areski","player":"Alexis Volant","place":8,"killer":"Areski AIT GHERBI","tablier":false,"n":13,"points":11,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":10,"date":"2026-01-10","location":"areski","player":"Jérôme BERA","place":9,"killer":"Thierry MONNIAUX","tablier":false,"n":13,"points":9,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":10,"date":"2026-01-10","location":"areski","player":"Franck NAESSENS","place":10,"killer":"Areski AIT GHERBI","tablier":false,"n":13,"points":7,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":10,"date":"2026-01-10","location":"areski","player":"Michel SCHERPEREEL","place":11,"killer":"Areski AIT GHERBI","tablier":false,"n":13,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":10,"date":"2026-01-10","location":"areski","player":"François CATTEAU","place":12,"killer":"David SAGALOWICZ","tablier":false,"n":13,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":10,"date":"2026-01-10","location":"areski","player":"Mehdi BRAHIMI","place":13,"killer":"Thierry MONNIAUX","tablier":false,"n":13,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":11,"date":"2026-01-17","location":"jerome Riffe","player":"Jules NAESSENS","place":1,"killer":"","tablier":false,"n":8,"points":23,"stake":5,"gross":25,"net":20,"kills":3,"win":true,"podium":true},{"game":11,"date":"2026-01-17","location":"jerome Riffe","player":"Thierry MONNIAUX","place":2,"killer":"","tablier":false,"n":8,"points":18,"stake":5,"gross":10,"net":5,"kills":3,"win":false,"podium":true},{"game":11,"date":"2026-01-17","location":"jerome Riffe","player":"Mehdi BRAHIMI","place":3,"killer":"Jules NAESSENS","tablier":false,"n":8,"points":14,"stake":5,"gross":5,"net":0,"kills":1,"win":false,"podium":true},{"game":11,"date":"2026-01-17","location":"jerome Riffe","player":"Michel SCHERPEREEL","place":4,"killer":"Areski AIT GHERBI","tablier":false,"n":8,"points":11,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":11,"date":"2026-01-17","location":"jerome Riffe","player":"Jérôme RIFFE","place":5,"killer":"Mehdi BRAHIMI","tablier":false,"n":8,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":11,"date":"2026-01-17","location":"jerome Riffe","player":"Franck NAESSENS","place":6,"killer":"Thierry MONNIAUX","tablier":false,"n":8,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":11,"date":"2026-01-17","location":"jerome Riffe","player":"Jérémy COQUEL","place":7,"killer":"Thierry MONNIAUX","tablier":false,"n":8,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":11,"date":"2026-01-17","location":"jerome Riffe","player":"Alexis Volant","place":8,"killer":"Jules NAESSENS","tablier":false,"n":8,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":12,"date":"2026-01-24","location":"michel","player":"Jérôme BINOT","place":1,"killer":"","tablier":false,"n":8,"points":23,"stake":5,"gross":25,"net":20,"kills":2,"win":true,"podium":true},{"game":12,"date":"2026-01-24","location":"michel","player":"Jérémy COQUEL","place":2,"killer":"Jérôme BINOT","tablier":false,"n":8,"points":18,"stake":5,"gross":10,"net":5,"kills":1,"win":false,"podium":true},{"game":12,"date":"2026-01-24","location":"michel","player":"Thierry MONNIAUX","place":3,"killer":"Jules NAESSENS","tablier":false,"n":8,"points":14,"stake":5,"gross":5,"net":0,"kills":1,"win":false,"podium":true},{"game":12,"date":"2026-01-24","location":"michel","player":"David SAGALOWICZ","place":4,"killer":"Jérémy COQUEL","tablier":false,"n":8,"points":11,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":12,"date":"2026-01-24","location":"michel","player":"Michel SCHERPEREEL","place":5,"killer":"Thierry MONNIAUX","tablier":false,"n":8,"points":8,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":12,"date":"2026-01-24","location":"michel","player":"Mehdi BRAHIMI","place":6,"killer":"David SAGALOWICZ","tablier":false,"n":8,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":12,"date":"2026-01-24","location":"michel","player":"Franck NAESSENS","place":7,"killer":"David SAGALOWICZ","tablier":false,"n":8,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":12,"date":"2026-01-24","location":"michel","player":"François CATTEAU","place":8,"killer":"Michel SCHERPEREEL","tablier":false,"n":8,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":13,"date":"2026-01-30","location":"franck","player":"Jérôme BERA","place":1,"killer":"","tablier":true,"n":15,"points":40,"stake":5,"gross":45,"net":40,"kills":5,"win":true,"podium":true},{"game":13,"date":"2026-01-30","location":"franck","player":"Jérôme RIFFE","place":2,"killer":"Jérôme BERA","tablier":false,"n":15,"points":34,"stake":5,"gross":25,"net":20,"kills":0,"win":false,"podium":true},{"game":13,"date":"2026-01-30","location":"franck","player":"Quentin","place":3,"killer":"","tablier":false,"n":15,"points":29,"stake":5,"gross":5,"net":0,"kills":4,"win":false,"podium":true},{"game":13,"date":"2026-01-30","location":"franck","player":"Jules NAESSENS","place":4,"killer":"Jérôme BERA","tablier":false,"n":15,"points":25,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":13,"date":"2026-01-30","location":"franck","player":"Stéphane LEFIN","place":5,"killer":"","tablier":false,"n":15,"points":22,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":13,"date":"2026-01-30","location":"franck","player":"Clément Thery","place":6,"killer":"Quentin","tablier":false,"n":15,"points":19,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":13,"date":"2026-01-30","location":"franck","player":"Areski AIT GHERBI","place":7,"killer":"Quentin","tablier":false,"n":15,"points":16,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":13,"date":"2026-01-30","location":"franck","player":"Adrien Thiriez","place":8,"killer":"Quentin","tablier":false,"n":15,"points":13,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":13,"date":"2026-01-30","location":"franck","player":"Franck NAESSENS","place":9,"killer":"Quentin","tablier":false,"n":15,"points":11,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":13,"date":"2026-01-30","location":"franck","player":"David SAGALOWICZ","place":10,"killer":"Jérôme BERA","tablier":false,"n":15,"points":9,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":13,"date":"2026-01-30","location":"franck","player":"Jérôme BINOT","place":11,"killer":"Areski AIT GHERBI","tablier":false,"n":15,"points":7,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":13,"date":"2026-01-30","location":"franck","player":"Mehdi BRAHIMI","place":12,"killer":"Areski AIT GHERBI","tablier":false,"n":15,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":13,"date":"2026-01-30","location":"franck","player":"Alexis Volant","place":13,"killer":"Jules NAESSENS","tablier":false,"n":15,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":13,"date":"2026-01-30","location":"franck","player":"Thierry MONNIAUX","place":14,"killer":"Jérôme BINOT","tablier":false,"n":15,"points":2,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":13,"date":"2026-01-30","location":"franck","player":"Grégoire DUFORET","place":15,"killer":"Jérôme BINOT","tablier":false,"n":15,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":14,"date":"2026-02-14","location":"jéremy","player":"David SAGALOWICZ","place":1,"killer":"","tablier":false,"n":10,"points":32,"stake":5,"gross":30,"net":25,"kills":2,"win":true,"podium":true},{"game":14,"date":"2026-02-14","location":"jéremy","player":"Thierry MONNIAUX","place":2,"killer":"Clément Thery","tablier":false,"n":10,"points":26,"stake":5,"gross":15,"net":10,"kills":1,"win":false,"podium":true},{"game":14,"date":"2026-02-14","location":"jéremy","player":"hélène fiona","place":3,"killer":"","tablier":false,"n":10,"points":21,"stake":5,"gross":5,"net":0,"kills":0,"win":false,"podium":true},{"game":14,"date":"2026-02-14","location":"jéremy","player":"François CATTEAU","place":4,"killer":"David SAGALOWICZ","tablier":false,"n":10,"points":17,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":14,"date":"2026-02-14","location":"jéremy","player":"Jérôme RIFFE","place":5,"killer":"hélène fiona","tablier":false,"n":10,"points":14,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":14,"date":"2026-02-14","location":"jéremy","player":"Alexis Volant","place":6,"killer":"Thierry MONNIAUX","tablier":false,"n":10,"points":11,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":14,"date":"2026-02-14","location":"jéremy","player":"Frédéric Tavernier","place":7,"killer":"Jérôme RIFFE","tablier":false,"n":10,"points":8,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":14,"date":"2026-02-14","location":"jéremy","player":"Mehdi BRAHIMI","place":8,"killer":"Frédéric Tavernier","tablier":false,"n":10,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":14,"date":"2026-02-14","location":"jéremy","player":"Franck NAESSENS","place":9,"killer":"hélène fiona","tablier":false,"n":10,"points":3,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":14,"date":"2026-02-14","location":"jéremy","player":"Jérémy COQUEL","place":10,"killer":"Franck NAESSENS","tablier":false,"n":10,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":15,"date":"2026-02-21","location":"David SAGALOWICZ","player":"David SAGALOWICZ","place":1,"killer":"","tablier":false,"n":9,"points":27,"stake":5,"gross":25,"net":20,"kills":3,"win":true,"podium":true},{"game":15,"date":"2026-02-21","location":"David SAGALOWICZ","player":"Jérôme RIFFE","place":2,"killer":"David SAGALOWICZ","tablier":false,"n":9,"points":22,"stake":5,"gross":15,"net":10,"kills":3,"win":false,"podium":true},{"game":15,"date":"2026-02-21","location":"David SAGALOWICZ","player":"Mehdi BRAHIMI","place":3,"killer":"Jérôme RIFFE","tablier":false,"n":9,"points":17,"stake":5,"gross":5,"net":0,"kills":1,"win":false,"podium":true},{"game":15,"date":"2026-02-21","location":"David SAGALOWICZ","player":"Jérémy COQUEL","place":4,"killer":"Jérôme RIFFE","tablier":false,"n":9,"points":13,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":15,"date":"2026-02-21","location":"David SAGALOWICZ","player":"Jérôme BERA","place":5,"killer":"Jérémy COQUEL","tablier":false,"n":9,"points":10,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":15,"date":"2026-02-21","location":"David SAGALOWICZ","player":"Jérôme BINOT","place":6,"killer":"Jérôme RIFFE","tablier":false,"n":9,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":15,"date":"2026-02-21","location":"David SAGALOWICZ","player":"Jules NAESSENS","place":7,"killer":"David SAGALOWICZ","tablier":false,"n":9,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":15,"date":"2026-02-21","location":"David SAGALOWICZ","player":"Franck NAESSENS","place":8,"killer":"Mehdi BRAHIMI","tablier":false,"n":9,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":15,"date":"2026-02-21","location":"David SAGALOWICZ","player":"Areski AIT GHERBI","place":9,"killer":"David SAGALOWICZ","tablier":false,"n":9,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":16,"date":"2026-03-13","location":"François CATTEAU","player":"Grégoire DUFORET","place":1,"killer":"","tablier":false,"n":9,"points":27,"stake":5,"gross":25,"net":20,"kills":2,"win":true,"podium":true},{"game":16,"date":"2026-03-13","location":"François CATTEAU","player":"Jérémy COQUEL","place":2,"killer":"Grégoire DUFORET","tablier":false,"n":9,"points":22,"stake":5,"gross":15,"net":10,"kills":2,"win":false,"podium":true},{"game":16,"date":"2026-03-13","location":"François CATTEAU","player":"François CATTEAU","place":3,"killer":"Jérémy COQUEL","tablier":false,"n":9,"points":17,"stake":5,"gross":5,"net":0,"kills":2,"win":false,"podium":true},{"game":16,"date":"2026-03-13","location":"François CATTEAU","player":"David SAGALOWICZ","place":4,"killer":"François CATTEAU","tablier":false,"n":9,"points":13,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":16,"date":"2026-03-13","location":"François CATTEAU","player":"Frédéric Tavernier","place":5,"killer":"David SAGALOWICZ","tablier":false,"n":9,"points":10,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":16,"date":"2026-03-13","location":"François CATTEAU","player":"Franck NAESSENS","place":6,"killer":"Grégoire DUFORET","tablier":false,"n":9,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":16,"date":"2026-03-13","location":"François CATTEAU","player":"Jérôme RIFFE","place":7,"killer":"David SAGALOWICZ","tablier":false,"n":9,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":16,"date":"2026-03-13","location":"François CATTEAU","player":"Thierry MONNIAUX","place":8,"killer":"","tablier":false,"n":9,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":16,"date":"2026-03-13","location":"François CATTEAU","player":"Alexis Volant","place":9,"killer":"François CATTEAU","tablier":false,"n":9,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":17,"date":"2026-03-27","location":"superman","player":"Philippe DUBOIS","place":1,"killer":"","tablier":false,"n":9,"points":27,"stake":5,"gross":25,"net":20,"kills":0,"win":true,"podium":true},{"game":17,"date":"2026-03-27","location":"superman","player":"Alexis Volant","place":2,"killer":"","tablier":false,"n":9,"points":22,"stake":5,"gross":15,"net":10,"kills":0,"win":false,"podium":true},{"game":17,"date":"2026-03-27","location":"superman","player":"Mehdi BRAHIMI","place":3,"killer":"","tablier":false,"n":9,"points":17,"stake":5,"gross":5,"net":0,"kills":0,"win":false,"podium":true},{"game":17,"date":"2026-03-27","location":"superman","player":"David SAGALOWICZ","place":4,"killer":"","tablier":false,"n":9,"points":13,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":17,"date":"2026-03-27","location":"superman","player":"Franck NAESSENS","place":5,"killer":"","tablier":false,"n":9,"points":10,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":17,"date":"2026-03-27","location":"superman","player":"Thierry MONNIAUX","place":6,"killer":"Jérémy COQUEL","tablier":false,"n":9,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":17,"date":"2026-03-27","location":"superman","player":"Areski AIT GHERBI","place":7,"killer":"","tablier":false,"n":9,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":17,"date":"2026-03-27","location":"superman","player":"Jérôme RIFFE","place":8,"killer":"","tablier":false,"n":9,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":17,"date":"2026-03-27","location":"superman","player":"Jérôme BERA","place":9,"killer":"","tablier":false,"n":9,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":18,"date":"2026-04-10","location":"franck","player":"Jérémy COQUEL","place":1,"killer":"","tablier":false,"n":14,"points":39,"stake":5,"gross":40,"net":35,"kills":3,"win":true,"podium":true},{"game":18,"date":"2026-04-10","location":"franck","player":"Jérémy COQUEL","place":2,"killer":"","tablier":false,"n":14,"points":39,"stake":5,"gross":20,"net":15,"kills":3,"win":false,"podium":true},{"game":18,"date":"2026-04-10","location":"franck","player":"Mehdi BRAHIMI","place":3,"killer":"Jérémy COQUEL","tablier":false,"n":14,"points":33,"stake":5,"gross":10,"net":5,"kills":2,"win":false,"podium":true},{"game":18,"date":"2026-04-10","location":"franck","player":"Jules NAESSENS","place":4,"killer":"Jérémy COQUEL","tablier":false,"n":14,"points":28,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":18,"date":"2026-04-10","location":"franck","player":"Théo Maraval","place":5,"killer":"","tablier":false,"n":14,"points":24,"stake":5,"gross":0,"net":-5,"kills":2,"win":false,"podium":false},{"game":18,"date":"2026-04-10","location":"franck","player":"David SAGALOWICZ","place":6,"killer":"Jérémy COQUEL","tablier":false,"n":14,"points":21,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":18,"date":"2026-04-10","location":"franck","player":"Areski AIT GHERBI","place":7,"killer":"Mehdi BRAHIMI","tablier":false,"n":14,"points":18,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":18,"date":"2026-04-10","location":"franck","player":"Clément Thery","place":8,"killer":"Théo Maraval","tablier":false,"n":14,"points":15,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":18,"date":"2026-04-10","location":"franck","player":"Jérôme RIFFE","place":9,"killer":"Jules NAESSENS","tablier":false,"n":14,"points":12,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":18,"date":"2026-04-10","location":"franck","player":"Franck NAESSENS","place":10,"killer":"David SAGALOWICZ","tablier":false,"n":14,"points":10,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":18,"date":"2026-04-10","location":"franck","player":"Grégoire DUFORET","place":11,"killer":"Franck NAESSENS","tablier":false,"n":14,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":18,"date":"2026-04-10","location":"franck","player":"François CATTEAU","place":12,"killer":"Jules NAESSENS","tablier":false,"n":14,"points":6,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":18,"date":"2026-04-10","location":"franck","player":"Quentin","place":13,"killer":"","tablier":false,"n":14,"points":4,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":18,"date":"2026-04-10","location":"franck","player":"Alexis Volant","place":14,"killer":"François CATTEAU","tablier":false,"n":14,"points":2,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":19,"date":"2026-04-18","location":"tchobin","player":"Alexis Volant","place":1,"killer":"","tablier":false,"n":7,"points":19,"stake":5,"gross":20,"net":15,"kills":1,"win":true,"podium":true},{"game":19,"date":"2026-04-18","location":"tchobin","player":"Franck NAESSENS","place":2,"killer":"Alexis Volant","tablier":false,"n":7,"points":15,"stake":5,"gross":10,"net":5,"kills":3,"win":false,"podium":true},{"game":19,"date":"2026-04-18","location":"tchobin","player":"Jérôme BERA","place":3,"killer":"Franck NAESSENS","tablier":false,"n":7,"points":11,"stake":5,"gross":5,"net":0,"kills":0,"win":false,"podium":true},{"game":19,"date":"2026-04-18","location":"tchobin","player":"François CATTEAU","place":4,"killer":"Franck NAESSENS","tablier":false,"n":7,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":19,"date":"2026-04-18","location":"tchobin","player":"Areski AIT GHERBI","place":5,"killer":"Franck NAESSENS","tablier":false,"n":7,"points":5,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":19,"date":"2026-04-18","location":"tchobin","player":"Jérôme BINOT","place":6,"killer":"Areski AIT GHERBI","tablier":false,"n":7,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":19,"date":"2026-04-18","location":"tchobin","player":"Jérôme BERA","place":7,"killer":"Franck NAESSENS","tablier":false,"n":7,"points":11,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":20,"date":"2026-05-08","location":"jérome Riffe","player":"François CATTEAU","place":1,"killer":"","tablier":false,"n":8,"points":23,"stake":5,"gross":25,"net":20,"kills":4,"win":true,"podium":true},{"game":20,"date":"2026-05-08","location":"jérome Riffe","player":"David SAGALOWICZ","place":2,"killer":"François CATTEAU","tablier":false,"n":8,"points":18,"stake":5,"gross":10,"net":5,"kills":2,"win":false,"podium":true},{"game":20,"date":"2026-05-08","location":"jérome Riffe","player":"Jérôme RIFFE","place":3,"killer":"David SAGALOWICZ","tablier":false,"n":8,"points":14,"stake":5,"gross":5,"net":0,"kills":0,"win":false,"podium":true},{"game":20,"date":"2026-05-08","location":"jérome Riffe","player":"Alexis Volant","place":4,"killer":"François CATTEAU","tablier":false,"n":8,"points":11,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":20,"date":"2026-05-08","location":"jérome Riffe","player":"Grégoire DUFORET","place":5,"killer":"David SAGALOWICZ","tablier":false,"n":8,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":20,"date":"2026-05-08","location":"jérome Riffe","player":"Mehdi BRAHIMI","place":6,"killer":"François CATTEAU","tablier":false,"n":8,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":20,"date":"2026-05-08","location":"jérome Riffe","player":"Jérémy COQUEL","place":7,"killer":"François CATTEAU","tablier":false,"n":8,"points":3,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":20,"date":"2026-05-08","location":"jérome Riffe","player":"Franck NAESSENS","place":8,"killer":"Jérémy COQUEL","tablier":false,"n":8,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":21,"date":"2026-05-13","location":"alexis","player":"Jérôme BINOT","place":1,"killer":"","tablier":false,"n":8,"points":23,"stake":5,"gross":25,"net":20,"kills":1,"win":true,"podium":true},{"game":21,"date":"2026-05-13","location":"alexis","player":"Jérémy COQUEL","place":2,"killer":"François CATTEAU","tablier":false,"n":8,"points":18,"stake":5,"gross":10,"net":5,"kills":7,"win":false,"podium":true},{"game":21,"date":"2026-05-13","location":"alexis","player":"David SAGALOWICZ","place":3,"killer":"François CATTEAU","tablier":false,"n":8,"points":14,"stake":5,"gross":5,"net":0,"kills":0,"win":false,"podium":true},{"game":21,"date":"2026-05-13","location":"alexis","player":"Michel SCHERPEREEL","place":4,"killer":"","tablier":false,"n":8,"points":11,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":21,"date":"2026-05-13","location":"alexis","player":"Mehdi BRAHIMI","place":5,"killer":"François CATTEAU","tablier":false,"n":8,"points":8,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":21,"date":"2026-05-13","location":"alexis","player":"Jérôme RIFFE","place":6,"killer":"David SAGALOWICZ","tablier":false,"n":8,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":21,"date":"2026-05-13","location":"alexis","player":"Jérôme BERA","place":7,"killer":"","tablier":false,"n":8,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":21,"date":"2026-05-13","location":"alexis","player":"Alexis Volant","place":8,"killer":"","tablier":false,"n":8,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":22,"date":"2026-06-05","location":"jerôme Riffe","player":"ELEN","place":1,"killer":"","tablier":false,"n":11,"points":34,"stake":5,"gross":35,"net":30,"kills":5,"win":true,"podium":true},{"game":22,"date":"2026-06-05","location":"jerôme Riffe","player":"Franck NAESSENS","place":2,"killer":"","tablier":false,"n":11,"points":28,"stake":5,"gross":15,"net":10,"kills":0,"win":false,"podium":true},{"game":22,"date":"2026-06-05","location":"jerôme Riffe","player":"Jérémy COQUEL","place":3,"killer":"Jérôme BINOT","tablier":false,"n":11,"points":23,"stake":5,"gross":5,"net":0,"kills":2,"win":false,"podium":true},{"game":22,"date":"2026-06-05","location":"jerôme Riffe","player":"David SAGALOWICZ","place":4,"killer":"Jérémy COQUEL","tablier":false,"n":11,"points":19,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":22,"date":"2026-06-05","location":"jerôme Riffe","player":"Areski AIT GHERBI","place":5,"killer":"","tablier":false,"n":11,"points":16,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":22,"date":"2026-06-05","location":"jerôme Riffe","player":"Mehdi BRAHIMI","place":6,"killer":"Jérémy COQUEL","tablier":false,"n":11,"points":13,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":22,"date":"2026-06-05","location":"jerôme Riffe","player":"François CATTEAU","place":7,"killer":"","tablier":false,"n":11,"points":10,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":22,"date":"2026-06-05","location":"jerôme Riffe","player":"Jérôme RIFFE","place":8,"killer":"Jérémy COQUEL","tablier":false,"n":11,"points":7,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":22,"date":"2026-06-05","location":"jerôme Riffe","player":"Thierry MONNIAUX","place":9,"killer":"","tablier":false,"n":11,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":22,"date":"2026-06-05","location":"jerôme Riffe","player":"Jérôme BERA","place":10,"killer":"Jérémy COQUEL","tablier":false,"n":11,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":22,"date":"2026-06-05","location":"jerôme Riffe","player":"Alexis Volant","place":11,"killer":"Jérémy COQUEL","tablier":false,"n":11,"points":1,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":23,"date":"2026-06-13","location":"jéremy shrek","player":"Thierry MONNIAUX","place":1,"killer":"","tablier":false,"n":7,"points":19,"stake":5,"gross":20,"net":15,"kills":3,"win":true,"podium":true},{"game":23,"date":"2026-06-13","location":"jéremy shrek","player":"David SAGALOWICZ","place":2,"killer":"ELEN","tablier":false,"n":7,"points":15,"stake":5,"gross":10,"net":5,"kills":0,"win":false,"podium":true},{"game":23,"date":"2026-06-13","location":"jéremy shrek","player":"eliot","place":3,"killer":"","tablier":false,"n":7,"points":11,"stake":5,"gross":5,"net":0,"kills":0,"win":false,"podium":true},{"game":23,"date":"2026-06-13","location":"jéremy shrek","player":"Franck NAESSENS","place":4,"killer":"ELEN","tablier":false,"n":7,"points":8,"stake":5,"gross":0,"net":-5,"kills":1,"win":false,"podium":false},{"game":23,"date":"2026-06-13","location":"jéremy shrek","player":"Jérôme RIFFE","place":5,"killer":"","tablier":false,"n":7,"points":5,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":23,"date":"2026-06-13","location":"jéremy shrek","player":"Jérémy COQUEL","place":6,"killer":"","tablier":false,"n":7,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false},{"game":23,"date":"2026-06-13","location":"jéremy shrek","player":"Frédéric Tavernier","place":7,"killer":"ELEN","tablier":false,"n":7,"points":3,"stake":5,"gross":0,"net":-5,"kills":0,"win":false,"podium":false}];
+const ARCHIVE_2025_2026_RANKING=[{"rank":1,"name":"David SAGALOWICZ","points":304,"gamesCount":19,"wins":4,"tabliers":0,"kills":17},{"rank":2,"name":"Jérôme RIFFE","points":281,"gamesCount":20,"wins":1,"tabliers":1,"kills":15},{"rank":3,"name":"Jérémy COQUEL","points":253,"gamesCount":19,"wins":1,"tabliers":0,"kills":22},{"rank":3,"name":"Mehdi BRAHIMI","points":253,"gamesCount":19,"wins":0,"tabliers":0,"kills":13},{"rank":5,"name":"Franck NAESSENS","points":242,"gamesCount":21,"wins":1,"tabliers":0,"kills":16},{"rank":6,"name":"Thierry MONNIAUX","points":231,"gamesCount":14,"wins":2,"tabliers":1,"kills":19},{"rank":7,"name":"Grégoire DUFORET","points":179,"gamesCount":12,"wins":2,"tabliers":0,"kills":11},{"rank":8,"name":"Alexis Volant","points":176,"gamesCount":18,"wins":2,"tabliers":0,"kills":3},{"rank":9,"name":"François CATTEAU","points":155,"gamesCount":13,"wins":2,"tabliers":0,"kills":14},{"rank":9,"name":"Jérôme BERA","points":155,"gamesCount":14,"wins":2,"tabliers":2,"kills":12},{"rank":11,"name":"Areski AIT GHERBI","points":131,"gamesCount":11,"wins":0,"tabliers":0,"kills":12},{"rank":12,"name":"Michel SCHERPEREEL","points":104,"gamesCount":10,"wins":0,"tabliers":0,"kills":3},{"rank":13,"name":"Jules NAESSENS","points":102,"gamesCount":7,"wins":1,"tabliers":0,"kills":8},{"rank":14,"name":"Jérôme BINOT","points":81,"gamesCount":8,"wins":2,"tabliers":0,"kills":4},{"rank":15,"name":"Quentin","points":73,"gamesCount":3,"wins":1,"tabliers":1,"kills":9},{"rank":16,"name":"Jérémie CARPENTIER","points":72,"gamesCount":3,"wins":0,"tabliers":0,"kills":0},{"rank":17,"name":"Olivier HENGUELLE","points":47,"gamesCount":4,"wins":0,"tabliers":0,"kills":0},{"rank":18,"name":"Clément MARAVAL","points":44,"gamesCount":3,"wins":0,"tabliers":0,"kills":0},{"rank":19,"name":"Clément Thery","points":34,"gamesCount":2,"wins":0,"tabliers":0,"kills":2},{"rank":19,"name":"ELEN","points":34,"gamesCount":1,"wins":1,"tabliers":0,"kills":5},{"rank":21,"name":"Philippe DUBOIS","points":30,"gamesCount":2,"wins":1,"tabliers":0,"kills":0},{"rank":22,"name":"Théo Maraval","points":24,"gamesCount":1,"wins":0,"tabliers":0,"kills":2},{"rank":23,"name":"Stéphane LEFIN","points":22,"gamesCount":1,"wins":0,"tabliers":0,"kills":0},{"rank":24,"name":"Frédéric Tavernier","points":19,"gamesCount":3,"wins":0,"tabliers":0,"kills":1},{"rank":25,"name":"Gérard CANDELIER","points":16,"gamesCount":1,"wins":0,"tabliers":0,"kills":1},{"rank":26,"name":"Adrien Thiriez","points":13,"gamesCount":1,"wins":0,"tabliers":0,"kills":0},{"rank":27,"name":"Romain Schepereel","points":8,"gamesCount":1,"wins":0,"tabliers":0,"kills":0}];
+const ARCHIVE_2025_2026_META={"season":"2025–2026","source":"Classeur BPT 2025-2026","games":23,"participations":234,"players":29,"tabliers":5,"ranking":[{"rank":1,"name":"David SAGALOWICZ","points":304,"gamesCount":19,"wins":4,"tabliers":0,"kills":17},{"rank":2,"name":"Jérôme RIFFE","points":281,"gamesCount":20,"wins":1,"tabliers":1,"kills":15},{"rank":3,"name":"Jérémy COQUEL","points":253,"gamesCount":19,"wins":1,"tabliers":0,"kills":22},{"rank":3,"name":"Mehdi BRAHIMI","points":253,"gamesCount":19,"wins":0,"tabliers":0,"kills":13},{"rank":5,"name":"Franck NAESSENS","points":242,"gamesCount":21,"wins":1,"tabliers":0,"kills":16},{"rank":6,"name":"Thierry MONNIAUX","points":231,"gamesCount":14,"wins":2,"tabliers":1,"kills":19},{"rank":7,"name":"Grégoire DUFORET","points":179,"gamesCount":12,"wins":2,"tabliers":0,"kills":11},{"rank":8,"name":"Alexis Volant","points":176,"gamesCount":18,"wins":2,"tabliers":0,"kills":3},{"rank":9,"name":"François CATTEAU","points":155,"gamesCount":13,"wins":2,"tabliers":0,"kills":14},{"rank":9,"name":"Jérôme BERA","points":155,"gamesCount":14,"wins":2,"tabliers":2,"kills":12},{"rank":11,"name":"Areski AIT GHERBI","points":131,"gamesCount":11,"wins":0,"tabliers":0,"kills":12},{"rank":12,"name":"Michel SCHERPEREEL","points":104,"gamesCount":10,"wins":0,"tabliers":0,"kills":3},{"rank":13,"name":"Jules NAESSENS","points":102,"gamesCount":7,"wins":1,"tabliers":0,"kills":8},{"rank":14,"name":"Jérôme BINOT","points":81,"gamesCount":8,"wins":2,"tabliers":0,"kills":4},{"rank":15,"name":"Quentin","points":73,"gamesCount":3,"wins":1,"tabliers":1,"kills":9},{"rank":16,"name":"Jérémie CARPENTIER","points":72,"gamesCount":3,"wins":0,"tabliers":0,"kills":0},{"rank":17,"name":"Olivier HENGUELLE","points":47,"gamesCount":4,"wins":0,"tabliers":0,"kills":0},{"rank":18,"name":"Clément MARAVAL","points":44,"gamesCount":3,"wins":0,"tabliers":0,"kills":0},{"rank":19,"name":"Clément Thery","points":34,"gamesCount":2,"wins":0,"tabliers":0,"kills":2},{"rank":19,"name":"ELEN","points":34,"gamesCount":1,"wins":1,"tabliers":0,"kills":5},{"rank":21,"name":"Philippe DUBOIS","points":30,"gamesCount":2,"wins":1,"tabliers":0,"kills":0},{"rank":22,"name":"Théo Maraval","points":24,"gamesCount":1,"wins":0,"tabliers":0,"kills":2},{"rank":23,"name":"Stéphane LEFIN","points":22,"gamesCount":1,"wins":0,"tabliers":0,"kills":0},{"rank":24,"name":"Frédéric Tavernier","points":19,"gamesCount":3,"wins":0,"tabliers":0,"kills":1},{"rank":25,"name":"Gérard CANDELIER","points":16,"gamesCount":1,"wins":0,"tabliers":0,"kills":1},{"rank":26,"name":"Adrien Thiriez","points":13,"gamesCount":1,"wins":0,"tabliers":0,"kills":0},{"rank":27,"name":"Romain Schepereel","points":8,"gamesCount":1,"wins":0,"tabliers":0,"kills":0}]};
+const BPT_PAST_CHAMPIONS=[{"season":"2023–2024","champion":"Mehdi BRAHIMI"},{"season":"2022–2023","champion":"Franck NAESSENS"},{"season":"2021–2022","champion":"Franck NAESSENS"},{"season":"2020–2021","champion":"Alexis Volant"},{"season":"2019–2020","champion":"Franck NAESSENS"},{"season":"2018–2019","champion":"Franck NAESSENS"},{"season":"2017–2018","champion":"François CATTEAU"},{"season":"2016–2017","champion":"Jérémy COQUEL"},{"season":"2015–2016","champion":"Franck NAESSENS"},{"season":"2014–2015","champion":"Franck NAESSENS"},{"season":"2013–2014","champion":"Franck NAESSENS"},{"season":"2012–2013","champion":"Franck NAESSENS"},{"season":"2011–2012","champion":"Jérôme BINOT"},{"season":"2010–2011","champion":"Jérôme BINOT"}];
+let selectedSeasonKey=CURRENT_SEASON_KEY; // défaut à chaque chargement : saison en cours ; conservation uniquement durant la visite
+let currentSeasonHistoryCache=null;
+
+function isAllSeasons(){return selectedSeasonKey==="all";}
+function isArchiveSeason(){return selectedSeasonKey!=="2026-2027";}
+
+function seasonDisplayName(key){
+  if(key==="2023-2024")return "2023–2024";
+  if(key==="2025-2026")return "2025–2026";
+  if(key==="2026-2027")return "2026–2027";
+  if(key==="all")return "Toutes les saisons";
+  return String(key||"").replace("-","–");
+}
+
+function currentRowsForCumulative(){
+  if(Array.isArray(currentSeasonHistoryCache))return clone(currentSeasonHistoryCache);
+  if(selectedSeasonKey===CURRENT_SEASON_KEY)return clone(db.history||[]);
+  return [];
+}
+
+function buildAllSeasonsHistory(){
+  const seasons=[
+    ["2023-2024",ARCHIVE_2023_2024],
+    ["2025-2026",ARCHIVE_2025_2026],
+    ["2026-2027",currentRowsForCumulative()]
+  ];
+  let globalGame=0;
+  const out=[];
+
+  for(const [seasonKey,seasonRows] of seasons){
+    const groups=new Map();
+    for(const raw of seasonRows||[]){
+      const sourceGame=Number(raw.sourceGame||raw.game||0);
+      if(!Number.isFinite(sourceGame)||sourceGame<=0)continue;
+      if(!groups.has(sourceGame))groups.set(sourceGame,[]);
+      groups.get(sourceGame).push(raw);
+    }
+    for(const sourceGame of [...groups.keys()].sort((a,b)=>a-b)){
+      globalGame++;
+      for(const raw of groups.get(sourceGame)){
+        out.push({
+          ...clone(raw),
+          game:globalGame,
+          sourceGame,
+          seasonKey,
+          seasonLabel:seasonDisplayName(seasonKey)
+        });
+      }
+    }
+  }
+  return out;
+}
+
+function formatGameReference(row,fallbackGame=null){
+  const g=Number(row?.sourceGame||fallbackGame||row?.game||0);
+  return isAllSeasons() && row?.seasonLabel
+    ? `${row.seasonLabel} · P#${g||"—"}`
+    : `P#${g||"—"}`;
+}
+
+function gameDisplayTitle(row,fallbackGame=null){
+  const g=Number(row?.sourceGame||fallbackGame||row?.game||0);
+  return isAllSeasons() && row?.seasonLabel
+    ? `${row.seasonLabel} · Partie #${g||"—"}`
+    : `Partie #${g||"—"}`;
+}
+
+function mergeAllSeasonsOfficialStats(rawItems){
+  if(!isAllSeasons())return rawItems;
+
+  const official=new Map();
+  const ensure=name=>{
+    if(!official.has(name))official.set(name,{name,points:0,gamesCount:0,wins:0,tabliers:0,kills:0});
+    return official.get(name);
+  };
+
+  for(const seasonRanking of [ARCHIVE_2023_2024_RANKING,ARCHIVE_2025_2026_RANKING]){
+    for(const r of seasonRanking||[]){
+      const s=ensure(r.name);
+      s.points+=Number(r.points||0);
+      s.gamesCount+=Number(r.gamesCount||0);
+      s.wins+=Number(r.wins||0);
+      s.tabliers+=Number(r.tabliers||0);
+      s.kills+=Number(r.kills||0);
+    }
+  }
+
+  const currentStats=statsFromRows(currentRowsForCumulative()).filter(s=>s.gamesCount>0);
+  for(const r of currentStats){
+    const s=ensure(r.name);
+    s.points+=Number(r.points||0);
+    s.gamesCount+=Number(r.gamesCount||0);
+    s.wins+=Number(r.wins||0);
+    s.tabliers+=Number(r.tabliers||0);
+    s.kills+=Number(r.kills||0);
+  }
+
+  const rawMap=new Map((rawItems||[]).map(r=>[r.name,r]));
+  const names=new Set([...rawMap.keys(),...official.keys()]);
+
+  return [...names].map(name=>{
+    const raw=rawMap.get(name)||{
+      name,points:0,gamesCount:0,wins:0,podiums:0,tabliers:0,kills:0,
+      stake:0,gross:0,net:0,avgPoints:0,winRate:0,podiumRate:0,kpg:0
+    };
+    const o=official.get(name);
+    if(!o)return raw;
+
+    const gamesCount=Number(o.gamesCount||0);
+    const points=Number(o.points||0);
+    const wins=Number(o.wins||0);
+    const kills=Number(o.kills||0);
+
+    return {
+      ...raw,
+      points,
+      gamesCount,
+      wins,
+      tabliers:Number(o.tabliers||0),
+      kills,
+      avgPoints:gamesCount?points/gamesCount:0,
+      winRate:gamesCount?wins/gamesCount*100:0,
+      kpg:gamesCount?kills/gamesCount:0
+    };
+  });
+}
+function archiveOfficialRanking(){
+  if(selectedSeasonKey==="2025-2026")return ARCHIVE_2025_2026_RANKING;
+  if(selectedSeasonKey==="2023-2024")return ARCHIVE_2023_2024_RANKING;
+  return null;
+}
+
+function mergeArchiveOfficialStats(items){
+  const archiveRanking=archiveOfficialRanking();
+  if(!Array.isArray(archiveRanking))return items;
+  const official=new Map(archiveRanking.map(r=>[r.name,r]));
+  return items.map(s=>{
+    const o=official.get(s.name);
+    if(!o)return s;
+    const gamesCount=Number(o.gamesCount||0);
+    const points=Number(o.points||0);
+    return {
+      ...s,
+      points,
+      gamesCount,
+      wins:Number(o.wins||0),
+      tabliers:Number(o.tabliers||0),
+      kills:Number(o.kills||0),
+      avgPoints:gamesCount?points/gamesCount:0,
+      winRate:gamesCount?(Number(o.wins||0)/gamesCount)*100:0,
+      podiumRate:s.podiumRate,
+      kpg:gamesCount?(Number(o.kills||0)/gamesCount):0
+    };
+  });
+}
+
+function setArchiveUiState(){
+  const archive=isArchiveSeason();
+  document.body.classList.toggle("archive-season",archive);
+  const label=document.getElementById("headerSeasonLabel");
+  if(label)label.textContent=isAllSeasons()
+    ? "Cumul de toutes les saisons disponibles"
+    : archive
+      ? `Saison ${seasonDisplayName(selectedSeasonKey)} · archives`
+      : "Gestion du championnat 2026–2027";
+  document.querySelectorAll('[data-season-action="all"]').forEach(btn=>btn.classList.toggle("active",isAllSeasons()));
+  updateSeasonNavigationState();
+  updateSeasonContextTitles();
+}
+
+async function selectSeason(key){
+  if(key===selectedSeasonKey)return;
+  const leavingCurrent=selectedSeasonKey===CURRENT_SEASON_KEY;
+  if(leavingCurrent)currentSeasonHistoryCache=clone(db.history||[]);
+
+  selectedSeasonKey=key;
+  dashboardRecordSelection=null;
+
+  if(key==="all"){
+    db.history=buildAllSeasonsHistory();
+    setArchiveUiState();
+    const active=document.querySelector(".view.active")?.id;
+    if(active==="live" || active==="settings"){
+      await showView("dashboard");
+    }else{
+      renderAll();
+      if(active)await showView(active);
+    }
+    return;
+  }
+
+  if(key==="2025-2026" || key==="2023-2024"){
+    db.history=clone(key==="2025-2026" ? ARCHIVE_2025_2026 : ARCHIVE_2023_2024);
+    setArchiveUiState();
+    const active=document.querySelector(".view.active")?.id;
+    if(active==="live" || active==="settings"){
+      await showView("dashboard");
+    }else{
+      renderAll();
+      if(active)await showView(active);
+    }
+    return;
+  }
+
+  setArchiveUiState();
+  if(Array.isArray(currentSeasonHistoryCache))db.history=clone(currentSeasonHistoryCache);
+  const active=document.querySelector(".view.active")?.id;
+  if(cloudReady && sbClient)await refreshCanonicalHistoryUI(true);
+  else renderAll();
+  if(active && active!=="live" && active!=="settings")await showView(active);
+}
+
+function stepSeason(delta){
+  const order=["2023-2024","2025-2026","2026-2027","all"];
+  const i=order.indexOf(selectedSeasonKey);
+  const ni=Math.max(0,Math.min(order.length-1,i+delta));
+  if(ni!==i)selectSeason(order[ni]);
+}
+
+function seasonNavigationOrder(){
+  return ["2023-2024","2025-2026","2026-2027"];
+}
+
+function seasonNeighbor(delta){
+  if(isAllSeasons())return null;
+  const order=seasonNavigationOrder();
+  const i=order.indexOf(selectedSeasonKey);
+  if(i<0)return null;
+  const ni=i+delta;
+  return ni>=0 && ni<order.length ? order[ni] : null;
+}
+
+function changeSeasonFromToolbar(action){
+  if(action==="all"){
+    return selectSeason("all");
+  }
+  if(action==="prev"){
+    const target=seasonNeighbor(-1);
+    if(target)return selectSeason(target);
+    return;
+  }
+  if(action==="next"){
+    const target=seasonNeighbor(1);
+    if(target)return selectSeason(target);
+  }
+}
+
+function updateSeasonNavigationState(){
+  const prev=seasonNeighbor(-1);
+  const next=seasonNeighbor(1);
+
+  document.querySelectorAll('[data-season-action="prev"]').forEach(btn=>{
+    btn.disabled=!prev;
+    btn.classList.toggle("disabled",!prev);
+    btn.title=prev?`Afficher la saison ${seasonDisplayName(prev)}`:"Aucune saison précédente disponible";
+  });
+  document.querySelectorAll('[data-season-action="next"]').forEach(btn=>{
+    btn.disabled=!next;
+    btn.classList.toggle("disabled",!next);
+    btn.title=next?`Afficher la saison ${seasonDisplayName(next)}`:"Aucune saison suivante disponible";
+  });
+}
+
+function updateSeasonContextTitles(){
+  const suffix=isAllSeasons() ? "— cumul toutes saisons" : `saison ${seasonDisplayName(selectedSeasonKey)}`;
+  const set=(id,label)=>{
+    const el=document.getElementById(id);
+    if(el)el.textContent=`${label} ${suffix}`;
+  };
+  set("rankingSeasonTitle","Classement BPT");
+  set("versusSeasonTitle","Versus BPT");
+  set("recordsSeasonTitle","Records BPT");
+  set("achievementsSeasonTitle","Accomplissements BPT");
+  set("profileSeasonTitle","Profil joueur BPT");
+  set("historySeasonTitle","Historique BPT");
+}
+
 function renderAll(){
   normalizeHistoryGameNumbers();
-  renderDashboard();renderLatestGame();renderRanking();renderVersus();renderRecords();renderAchievements();renderProfile();renderHistory();renderPlayers();renderGamePlayers();renderSettings();renderPoints();if(correctionUnlocked)renderCorrectionGameList(null,false);if(document.getElementById("livePlayerList"))liveRenderPlayerList();
+  updateSeasonContextTitles();renderDashboard();renderLatestGame();renderRanking();renderVersus();renderRecords();renderAchievements();renderProfile();renderHistory();renderPlayers();renderGamePlayers();renderSettings();renderPoints();if(correctionUnlocked)renderCorrectionGameList(null,false);if(document.getElementById("livePlayerList"))liveRenderPlayerList();
 }
 
 
@@ -4371,7 +4991,7 @@ function buildDashboardRecordPool(games,ranked,sourceRows){
   let bestGameKill={name:'—',value:0,game:null};
   for(const r of rows){
     if(Number(r.kills||0)>bestGameKill.value){
-      bestGameKill={name:r.player,value:Number(r.kills||0),game:Number(r.game||0)};
+      bestGameKill={name:r.player,value:Number(r.kills||0),game:Number(r.game||0),sourceGame:r.sourceGame,seasonKey:r.seasonKey,seasonLabel:r.seasonLabel};
     }
   }
 
@@ -4458,7 +5078,7 @@ function buildDashboardRecordPool(games,ranked,sourceRows){
     {id:'podiums',icon:'🥉',label:'Plus de podiums',player:podiums?.name||'—',value:podiums?`${podiums.podiums}`:'—',metric:Number(podiums?.podiums||0),better:'max'},
     {id:'podiumStreak',icon:'🏅',label:'Série de podiums',player:streakPod.name,value:streakPod.value?`${streakPod.value} de suite`:'—',metric:Number(streakPod.value||0),better:'max'},
     {id:'kills',icon:'💥',label:'Plus de kills',player:kills?.name||'—',value:kills?`${kills.kills}`:'—',metric:Number(kills?.kills||0),better:'max'},
-    {id:'bestGameKill',icon:'🎯',label:'Kills sur une partie',player:bestGameKill.name,value:bestGameKill.value?`${bestGameKill.value} · P${bestGameKill.game||'—'}`:'—',metric:Number(bestGameKill.value||0),better:'max'},
+    {id:'bestGameKill',icon:'🎯',label:'Kills sur une partie',player:bestGameKill.name,value:bestGameKill.value?`${bestGameKill.value} · ${formatGameReference(bestGameKill)}`:'—',metric:Number(bestGameKill.value||0),better:'max'},
     {id:'avg',icon:'📈',label:'Meilleure moyenne',player:avg?.name||'—',value:avg?`${num(avg.avgPoints,1)} pts`:'—',metric:Number(avg?.avgPoints||0),better:'max'},
     {id:'net',icon:'💰',label:'Meilleur solde',player:net?.name||'—',value:net?euro(net.net):'—',metric:Number(net?.net||0),better:'max'},
     {id:'worstNet',icon:'📉',label:'Plus grosse perte',player:worstNet?.name||'—',value:worstNet?euro(worstNet.net):'—',metric:Number(worstNet?.net||0),better:'min'},
@@ -4473,6 +5093,7 @@ function buildDashboardRecordPool(games,ranked,sourceRows){
 }
 
 function latestBrokenDashboardRecords(){
+  if(typeof isArchiveSeason==="function" && isArchiveSeason())return [];
   const rows=Array.isArray(db.history)?db.history:[];
   const games=groupedGamesFromRows(rows);
   if(games.length<2)return [];
@@ -4542,7 +5163,15 @@ function renderDashboard(){
     .filter(r=>String(r.player||"").trim() && Number.isFinite(Number(r.game)) && Number(r.game)>0)
     .length;
 
-  $("heroText").textContent=`${db.settings.season} · ${playedPlayers.size} joueurs actifs · championnat partagé`;
+  $("dashboardSeasonTitle").textContent=isAllSeasons()
+    ? "Championnat BPT — cumul toutes saisons"
+    : `Championnat BPT saison ${seasonDisplayName(selectedSeasonKey)}`;
+
+  $("heroText").textContent=isAllSeasons()
+    ? `Cumul des 3 saisons disponibles · ${playedPlayers.size} joueurs différents`
+    : isArchiveSeason()
+      ? `${seasonDisplayName(selectedSeasonKey)} · saison archivée · consultation historique`
+      : `${db.settings.season} · ${playedPlayers.size} joueurs actifs · championnat partagé`;
   $("heroGames").textContent=totalGames;
   $("heroActivePlayers").textContent=playedPlayers.size;
   $("heroTotalParticipations").textContent=totalParticipations;
@@ -4648,7 +5277,7 @@ function renderLatestGame(){
   const winner=rows.find(r=>Number(r.place)===1);
   const pot=rows.length*Number(first.stake||0);
 
-  $("latestGameTitle").textContent=`Partie #${gameNo}`;
+  $("latestGameTitle").textContent=gameDisplayTitle(first,gameNo);
   $("latestGameMeta").textContent=`${shortDate(first.date||"")}${first.location?" · "+first.location:""} · ${rows.length} joueurs`;
   $("latestGameWinner").textContent=winner?.player||"—";
   $("latestGameWinnerMeta").textContent=winner?`${num(winner.points||0,0)} pts · ${euro(winner.gross||0)} de gain`:"—";
@@ -4707,7 +5336,7 @@ function renderRanking(){
     <td>${medalForRank(s.rank)} ${s.rank}</td>
     <td><button class="player-link" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(s.name)}'))">${esc(s.name)}</button></td>
     <td><b>${num(s.points,0)}</b></td>
-    <td>${s.progress===null?"Nouvelle entrée":s.progress>0?"+"+s.progress:s.progress===0?"=":String(s.progress)}</td>
+    <td>${s.progress===null?(isArchiveSeason()?"—":"Nouvelle entrée"):s.progress>0?"+"+s.progress:s.progress===0?"=":String(s.progress)}</td>
     <td>${num(s.avgPoints,1)}</td>
     <td>${s.gamesCount}</td>
     <td>${s.wins}</td>
@@ -6870,12 +7499,13 @@ function lockSettings(){
 }
 
 async function showView(id){
+  if(typeof isArchiveSeason==="function" && isArchiveSeason() && (id==="live" || id==="settings"))id="dashboard";
   if(id==="newgame")id="settings";
   if(id==="dashboard")dashboardRecordSelection=null;
   document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===id));
 
-  if((id==="dashboard" || id==="latestgame" || id==="ranking" || id==="versus" || id==="records" || id==="achievements" || id==="profile" || id==="history") && cloudReady && sbClient){
+  if((id==="dashboard" || id==="latestgame" || id==="ranking" || id==="versus" || id==="records" || id==="achievements" || id==="profile" || id==="history") && cloudReady && sbClient && !(typeof isArchiveSeason==="function" && isArchiveSeason())){
     await refreshCanonicalHistoryUI(true);
   }else{
     if(id==="dashboard")renderDashboard();
@@ -6901,6 +7531,8 @@ async function showView(id){
     lockSettings();
   }
 };
+
+setArchiveUiState();
 function backup(){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(db,null,2)],{type:"application/json"}));a.download=`BPT_sauvegarde_${new Date().toISOString().slice(0,10)}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
 if($("backupBtn"))$("backupBtn").onclick=backup;if($("backupBtn2"))$("backupBtn2").onclick=backup;
 function restoreInput(input){const f=input.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const x=JSON.parse(rd.result);if(!x.players||!x.history||!x.points)throw 0;db=x;cloudHistoryReplaceOnce=true;saveDB();renderAll();alert("Sauvegarde restaurée.");}catch(e){alert("Fichier de sauvegarde invalide.");}};rd.readAsText(f);}
