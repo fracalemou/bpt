@@ -410,12 +410,20 @@ header .app-version{
     text-align:left;
   }
 }
+
+.live-level-flash{
+  animation:bptLevelFlash .9s ease-out 1;
+}
+@keyframes bptLevelFlash{
+  0%{box-shadow:0 0 0 0 rgba(232,195,158,.85);background:rgba(232,195,158,.18)}
+  100%{box-shadow:0 0 0 22px rgba(232,195,158,0);background:transparent}
+}
 </style>
 </head>
 <body>
 <header>
   <div class="brand"><b>BPT — Championnat de poker</b><span>Gestion complète du championnat 2026-2027</span></div>
-  <div class="app-version">Version 13/09/26 08h17</div>
+  <div class="app-version">Version 13/09/26 08h28</div>
 </header>
 <nav id="nav">
   <button data-view="live">Live</button>
@@ -515,6 +523,7 @@ header .app-version{
             <button class="btn ghost" id="livePrevLevelBtn">Niveau précédent</button>
             <button class="btn ghost" id="liveNextLevelBtn">Niveau suivant</button>
           </div>
+          <div id="liveSoundStatus" class="muted" style="margin-top:8px">🔊 Alertes sonores : 3 bips à 10 s, son au changement de niveau puis annonce vocale des nouvelles blinds.</div>
         </div>
 
         <div class="card">
@@ -2572,6 +2581,81 @@ function renderPoints(){
 /* ==================== LIVE BPT INTÉGRÉ ==================== */
 let liveSelected=new Set();
 let liveTicker=null;
+let liveAudioCtx=null;
+let liveTenSecondWarningKey="";
+
+function liveEnsureAudio(){
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)return null;
+    if(!liveAudioCtx)liveAudioCtx=new AC();
+    if(liveAudioCtx.state==="suspended")liveAudioCtx.resume();
+    return liveAudioCtx;
+  }catch(e){
+    return null;
+  }
+}
+
+function liveTone(freq=880,duration=0.12,volume=0.13,delay=0){
+  const ctx=liveEnsureAudio();
+  if(!ctx)return;
+  const start=ctx.currentTime+Math.max(0,delay);
+  const osc=ctx.createOscillator();
+  const gain=ctx.createGain();
+  osc.type="sine";
+  osc.frequency.setValueAtTime(freq,start);
+  gain.gain.setValueAtTime(0.0001,start);
+  gain.gain.exponentialRampToValueAtTime(Math.max(0.001,volume),start+0.015);
+  gain.gain.exponentialRampToValueAtTime(0.0001,start+duration);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(start);
+  osc.stop(start+duration+0.03);
+}
+
+function liveWarningSound(){
+  liveTone(880,0.11,0.12,0);
+  liveTone(880,0.11,0.12,0.22);
+  liveTone(880,0.11,0.12,0.44);
+}
+
+function liveLevelChangeSound(){
+  liveTone(660,0.18,0.15,0);
+  liveTone(990,0.28,0.18,0.20);
+}
+
+function liveSpeakBlinds(){
+  try{
+    if(!("speechSynthesis" in window))return;
+    const s=ensureLiveState();
+    const level=s.levels?.[s.levelIndex];
+    if(!level)return;
+
+    window.speechSynthesis.cancel();
+
+    let msg=`Nouveau niveau. Blinds ${liveFmt(level.sb)} et ${liveFmt(level.bb)}.`;
+    if(Number(level.ante)>0){
+      msg+=` Ante ${liveFmt(level.ante)}.`;
+    }
+
+    const u=new SpeechSynthesisUtterance(msg);
+    u.lang="fr-FR";
+    u.rate=0.95;
+    u.pitch=1;
+    u.volume=1;
+    window.speechSynthesis.speak(u);
+  }catch(e){
+    console.warn("Annonce vocale indisponible :",e);
+  }
+}
+
+function liveFlashLevel(){
+  const el=$("liveLevelLabel");
+  if(!el)return;
+  el.classList.remove("live-level-flash");
+  void el.offsetWidth;
+  el.classList.add("live-level-flash");
+}
 
 function ensureLiveState(){
   if(!db.liveState){
@@ -2728,6 +2812,7 @@ function liveLaunch(){
   const useAnte=$("liveUseAnte").value==="yes";
   const buyIn=Math.max(0,Number($("liveBuyIn").value)||0);
   const st=liveBuildStructure(names.length,stack,target,useAnte,minSB);
+  liveTenSecondWarningKey="";
   db.liveState={
     prepared:true,running:false,synced:false,gameNo:nextGameNo(),
     date:$("liveDate").value||new Date().toISOString().slice(0,10),
@@ -2741,6 +2826,7 @@ function liveLaunch(){
 }
 function liveStart(){
   const s=ensureLiveState();if(!s.prepared)return;
+  liveEnsureAudio();
   if(s.running)return;
   s.running=true;if(!s.startedAt)s.startedAt=Date.now();s.runStartedAt=Date.now();s.endAt=Date.now()+s.remainingSeconds*1000;
   saveDB();liveRunTicker();liveRenderAll();
@@ -2756,6 +2842,13 @@ function liveRunTicker(){
   liveTicker=setInterval(()=>{
     const s=ensureLiveState();if(!s.running)return;
     s.remainingSeconds=Math.max(0,Math.ceil((s.endAt-Date.now())/1000));
+
+    const warningKey=`${s.gameNo||0}:${s.levelIndex}`;
+    if(s.remainingSeconds<=10 && s.remainingSeconds>0 && liveTenSecondWarningKey!==warningKey){
+      liveTenSecondWarningKey=warningKey;
+      liveWarningSound();
+    }
+
     if(s.remainingSeconds<=0)liveChangeLevel(1,true);
     liveRenderTimerOnly();
   },250);
@@ -2783,14 +2876,26 @@ function liveAdjustTimer(deltaSeconds){
 
 function liveChangeLevel(delta,auto=false){
   const s=ensureLiveState();if(!s.prepared)return;
+  liveEnsureAudio();
+  const oldIndex=s.levelIndex;
+
   if(s.running){
     s.elapsedBeforeMs=(s.elapsedBeforeMs||0)+(Date.now()-(s.runStartedAt||Date.now()));
     s.runStartedAt=Date.now();
   }
+
   s.levelIndex=Math.max(0,Math.min(s.levels.length-1,s.levelIndex+delta));
   s.remainingSeconds=s.levelSeconds;
+  liveTenSecondWarningKey="";
+
   if(s.running)s.endAt=Date.now()+s.remainingSeconds*1000;
   saveDB();liveRenderAll();
+
+  if(s.levelIndex!==oldIndex){
+    liveLevelChangeSound();
+    liveFlashLevel();
+    setTimeout(liveSpeakBlinds,450);
+  }
 }
 function liveRenderTimerOnly(){
   const s=ensureLiveState();
