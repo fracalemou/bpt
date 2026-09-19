@@ -2990,6 +2990,186 @@ button.player-name-stack{
   font-weight:650;
 }
 
+
+/* ===== V117 — écran Parties + navigation historique + photo par partie ===== */
+.latestgame-photo-hero{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto auto;
+  align-items:center;
+  gap:18px;
+}
+.latestgame-hero-main{min-width:0}
+.latestgame-photo-area{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:7px;
+  min-width:132px;
+}
+.game-photo-thumb-btn{
+  width:118px;
+  height:78px;
+  padding:0;
+  border:1px solid rgba(200,161,92,.5);
+  border-radius:10px;
+  overflow:hidden;
+  cursor:zoom-in;
+  background:#0f151e;
+  box-shadow:0 7px 20px rgba(0,0,0,.25);
+}
+.game-photo-thumb{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+.game-photo-placeholder{
+  width:118px;
+  height:78px;
+  border:1px dashed #465267;
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  color:#8f9bab;
+  background:#111720;
+}
+.game-photo-placeholder span{
+  font-size:23px;
+  color:#c8a15c;
+}
+.game-photo-placeholder small{
+  font-size:9px;
+}
+.game-photo-actions{
+  display:flex;
+  gap:5px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+.game-photo-upload-label,
+.game-photo-actions .btn{
+  padding:5px 7px !important;
+  font-size:9px !important;
+}
+.winner-nickname{
+  color:#a8b0bd;
+  font-style:italic;
+  margin-top:1px;
+}
+.game-browser-toolbar{
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  gap:12px;
+  align-items:center;
+  margin:14px 0;
+  padding:10px 12px;
+  border:1px solid #2b3545;
+  border-radius:13px;
+  background:#141a24;
+}
+.game-browser-position{
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  gap:1px;
+}
+.game-browser-position strong{
+  color:#f1f3f6;
+  font-size:13px;
+}
+.game-browser-position small{
+  color:#8f9bab;
+  font-size:9px;
+}
+.game-browser-toolbar button:disabled{
+  opacity:.35;
+  cursor:not-allowed;
+}
+.game-photo-modal{
+  position:fixed;
+  inset:0;
+  z-index:15000;
+  background:rgba(4,7,11,.9);
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  gap:10px;
+  padding:24px;
+}
+.game-photo-modal img{
+  max-width:min(1100px,94vw);
+  max-height:82vh;
+  object-fit:contain;
+  border-radius:12px;
+  box-shadow:0 30px 90px rgba(0,0,0,.7);
+}
+.game-photo-modal-close{
+  position:fixed;
+  top:18px;
+  right:22px;
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  border:1px solid #4a5668;
+  background:#151d28;
+  color:#fff;
+  font-size:27px;
+  cursor:pointer;
+}
+.game-photo-modal-caption{
+  color:#c3cad4;
+  font-size:11px;
+  text-align:center;
+}
+@media(max-width:760px){
+  .latestgame-photo-hero{
+    grid-template-columns:1fr auto;
+  }
+  .latestgame-winner{
+    grid-column:1 / -1;
+  }
+  .game-browser-toolbar{
+    grid-template-columns:1fr 1fr;
+  }
+  .game-browser-position{
+    grid-column:1 / -1;
+    grid-row:1;
+  }
+  .game-photo-thumb-btn,.game-photo-placeholder{
+    width:96px;
+    height:66px;
+  }
+}
+@media screen and (orientation:landscape) and (max-height:520px) and (max-width:1000px){
+  .latestgame-photo-hero{
+    grid-template-columns:minmax(0,1fr) auto auto;
+    gap:10px;
+  }
+  .game-photo-thumb-btn,.game-photo-placeholder{
+    width:86px;
+    height:54px;
+  }
+  .game-browser-toolbar{
+    margin:7px 0;
+    padding:6px 8px;
+  }
+}
+
+
+/* ===== V118 — historique complet repliable dans Parties ===== */
+.latestgame-full-history{
+  margin-top:16px;
+}
+.latestgame-full-history:not([open]) > summary{
+  border-bottom-color:transparent;
+}
+.latestgame-full-history .history-cards{
+  margin-top:12px;
+}
+
 </style>
 </head>
 <body>
@@ -3007,13 +3187,13 @@ button.player-name-stack{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 11h53</div>
+  <div class="app-version">Version 19/09/26 11h58</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
   <button data-view="dashboard" class="active">▦ Tableau de bord</button>
-  <button data-view="latestgame">◷ Dernière partie</button>
-  <button data-view="ranking">♛ Classement & historique</button>
+  <button data-view="latestgame">◷ Parties</button>
+  <button data-view="ranking">♛ Classement</button>
   <button data-view="records">★ Records & accomplissements</button>
   <button data-view="profile">♤ Profil joueur</button>
   <button data-view="settings">⚙ Paramètres</button>
@@ -3326,24 +3506,52 @@ button.player-name-stack{
 
 
 <section id="latestgame" class="view">
-  <div class="hero latestgame-hero tab-premium-hero">
-    <div>
-      <div class="home-kicker">BPT · Dernière partie</div>
+  <div class="hero latestgame-hero tab-premium-hero latestgame-photo-hero">
+    <div class="latestgame-hero-main">
+      <div class="home-kicker">BPT · Parties</div>
       <h1 id="latestGameTitle">Dernière partie</h1>
       <p id="latestGameMeta">Aucune partie enregistrée.</p>
     </div>
+
+    <div id="latestGamePhotoArea" class="latestgame-photo-area">
+      <button id="latestGamePhotoThumbBtn" class="game-photo-thumb-btn" type="button" title="Agrandir la photo" style="display:none">
+        <img id="latestGamePhotoThumb" class="game-photo-thumb" alt="Photo de la partie">
+      </button>
+      <div id="latestGamePhotoPlaceholder" class="game-photo-placeholder">
+        <span>♠</span>
+        <small>Photo de la partie</small>
+      </div>
+      <div class="game-photo-actions">
+        <label class="btn ghost game-photo-upload-label">
+          <span id="latestGamePhotoUploadLabel">Ajouter une photo</span>
+          <input id="latestGamePhotoInput" type="file" accept="image/*" hidden>
+        </label>
+        <button class="btn ghost" id="latestGamePhotoDeleteBtn" type="button" style="display:none">Retirer</button>
+      </div>
+    </div>
+
     <div class="latestgame-winner">
       <span>Vainqueur</span>
       <strong id="latestGameWinner">—</strong>
+      <small id="latestGameWinnerNickname" class="winner-nickname"></small>
       <small id="latestGameWinnerMeta">—</small>
     </div>
   </div>
+
   <div class="tab-season-nav season-nav-toolbar">
     <button class="season-nav-btn" type="button" data-season-action="prev" onclick="changeSeasonFromToolbar('prev')">← Saison précédente</button>
     <button class="season-nav-btn" type="button" data-season-action="next" onclick="changeSeasonFromToolbar('next')">Saison suivante →</button>
     <button class="season-cumul-btn" type="button" data-season-action="all" onclick="changeSeasonFromToolbar('all')">Cumul toutes saisons</button>
   </div>
 
+  <div class="game-browser-toolbar">
+    <button class="btn secondary" id="latestPrevGameBtn" type="button">← Partie précédente</button>
+    <div class="game-browser-position">
+      <strong id="latestGamePosition">—</strong>
+      <small id="latestGameHistorySummary">Historique des parties</small>
+    </div>
+    <button class="btn secondary" id="latestNextGameBtn" type="button">Partie suivante →</button>
+  </div>
 
   <div id="latestGameEmpty" class="card muted" style="display:none;margin-top:12px">
     Aucune partie enregistrée.
@@ -3368,7 +3576,7 @@ button.player-name-stack{
         </div>
       </details>
 
-      <details class="latestgame-detail" open>
+      <details class="latestgame-detail">
         <summary>
           <span>Accomplissements débloqués</span>
           <small>Regroupés par joueur</small>
@@ -3378,13 +3586,42 @@ button.player-name-stack{
         </div>
       </details>
     </div>
+
+    <details class="combined-block latestgame-full-history">
+      <summary>
+        <span><strong>≡ Historique complet des parties</strong><small>Toutes les parties de la saison sélectionnée</small></span>
+      </summary>
+      <div class="combined-block-content">
+        <div class="row" style="justify-content:space-between;align-items:center;gap:10px">
+          <div id="historySummary" class="muted"></div>
+          <button class="btn ghost" id="exportCsvBtn">Exporter CSV</button>
+        </div>
+        <div id="historyEmpty" class="muted" style="display:none;padding:18px 0">Aucune partie enregistrée.</div>
+        <div id="historyCards" class="history-cards"></div>
+        <details class="history-raw">
+          <summary>Afficher le tableau détaillé complet</summary>
+          <div class="tablewrap" id="historyTableWrap">
+            <table>
+              <thead><tr><th>Partie</th><th>Date</th><th>Lieu</th><th>Joueur</th><th>Place</th><th>Éliminé par</th><th>Tablier</th><th>Joueurs</th><th>Points</th><th>Mise</th><th>Gain</th><th>Net</th><th>Kills</th></tr></thead>
+              <tbody id="historyBody"></tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+    </details>
   </div>
 </section>
 
+<div id="gamePhotoModal" class="game-photo-modal" style="display:none" role="dialog" aria-modal="true">
+  <button id="gamePhotoModalClose" class="game-photo-modal-close" type="button" aria-label="Fermer">×</button>
+  <img id="gamePhotoModalImage" alt="Photo agrandie de la partie">
+  <div id="gamePhotoModalCaption" class="game-photo-modal-caption"></div>
+</div>
+
 <section id="ranking" class="view">
   <div class="hero tab-premium-hero">
-    <h1 id="rankingSeasonTitle">Classement & historique BPT</h1>
-    <p>Classement général et historique complet des parties pour la saison sélectionnée.</p>
+    <h1 id="rankingSeasonTitle">Classement BPT</h1>
+    <p>Classement général et statistiques individuelles pour la saison sélectionnée.</p>
   </div>
   <div class="tab-season-nav season-nav-toolbar">
     <button class="season-nav-btn" type="button" data-season-action="prev" onclick="changeSeasonFromToolbar('prev')">← Saison précédente</button>
@@ -3407,28 +3644,7 @@ button.player-name-stack{
       </table></div>
     </div>
   </details>
-
-  <details class="combined-block combined-history-block">
-    <summary>
-      <span><strong>≡ Historique des parties</strong><small>Résultats et détail complet des parties</small></span>
-    </summary>
-    <div class="combined-block-content">
-      <div class="row" style="justify-content:space-between">
-        <div id="historySummary" class="muted"></div>
-        <button class="btn ghost" id="exportCsvBtn">Exporter CSV</button>
-      </div>
-      <div id="historyEmpty" class="muted" style="display:none;padding:18px 0">Aucune partie enregistrée.</div>
-      <div id="historyCards" class="history-cards"></div>
-      <details class="history-raw">
-        <summary>Afficher le tableau détaillé complet</summary>
-        <div class="tablewrap" id="historyTableWrap">
-          <table>
-            <thead><tr><th>Partie</th><th>Date</th><th>Lieu</th><th>Joueur</th><th>Place</th><th>Éliminé par</th><th>Tablier</th><th>Joueurs</th><th>Points</th><th>Mise</th><th>Gain</th><th>Net</th><th>Kills</th></tr></thead>
-            <tbody id="historyBody"></tbody>
-          </table>
-        </div>
-      </details>
-    </div>
+</div>
   </details>
 </section>
 
@@ -5746,6 +5962,125 @@ function playerPhoto(name){
   return String(ensurePlayerPhotos()[String(name||"").trim()]||"");
 }
 
+let latestGameSelectedKey=null;
+
+function ensureGamePhotos(){
+  if(!db.gamePhotos || typeof db.gamePhotos!=="object" || Array.isArray(db.gamePhotos)){
+    db.gamePhotos={};
+  }
+  return db.gamePhotos;
+}
+
+function currentGamePhotoSeasonKey(){
+  if(typeof selectedSeasonKey!=="undefined" && selectedSeasonKey && selectedSeasonKey!=="all"){
+    return selectedSeasonKey;
+  }
+  return CURRENT_SEASON_KEY;
+}
+
+function gamePhotoKey(gameNo,seasonKey=null){
+  return `${seasonKey||currentGamePhotoSeasonKey()}|${Number(gameNo)||0}`;
+}
+
+function getGamePhoto(gameNo,seasonKey=null){
+  return String(ensureGamePhotos()[gamePhotoKey(gameNo,seasonKey)]||"");
+}
+
+async function saveSharedMetadataOnly(){
+  saveLocalOnly();
+  if(!sbClient || !cloudReady || cloudApplying){
+    cloudLocalDirty=true;
+    return false;
+  }
+  setCloudStatus("busy","Synchronisation…");
+  try{
+    // Les métadonnées (photos, joueurs, surnoms...) sont dans bpt_state.
+    // On ne touche jamais aux lignes historiques canoniques ici.
+    const payload=JSON.parse(JSON.stringify(db));
+    payload.history=[];
+    const {data,error}=await sbClient
+      .from("bpt_state")
+      .upsert({id:CLOUD_ROW_ID,data:payload},{onConflict:"id"})
+      .select("revision,updated_at")
+      .single();
+    if(error)throw error;
+    cloudLastRevision=Number(data?.revision||cloudLastRevision||0);
+    cloudLocalDirty=false;
+    saveLocalOnly();
+    setCloudStatus("ok","Synchronisé","Photo de partie enregistrée");
+    return true;
+  }catch(e){
+    cloudLastError=e?.message||String(e);
+    console.error("BPT metadata save:",e);
+    cloudLocalDirty=true;
+    setCloudStatus("offline","Erreur synchro",cloudLastError);
+    return false;
+  }
+}
+
+async function saveGamePhoto(gameNo,file,seasonKey=null){
+  if(!file)return;
+  try{
+    const dataUrl=await fileToCompressedDataUrl(file);
+    ensureGamePhotos()[gamePhotoKey(gameNo,seasonKey)]=dataUrl;
+    await saveSharedMetadataOnly();
+    renderLatestGame();
+  }catch(e){
+    alert(e?.message||String(e));
+  }
+}
+
+async function deleteGamePhoto(gameNo,seasonKey=null){
+  const key=gamePhotoKey(gameNo,seasonKey);
+  if(!ensureGamePhotos()[key])return;
+  if(!confirm("Retirer la photo de cette partie ?"))return;
+  delete ensureGamePhotos()[key];
+  await saveSharedMetadataOnly();
+  renderLatestGame();
+}
+
+function latestGameEntries(){
+  return groupedGames().map(([gameNo,rows])=>({
+    gameNo:Number(gameNo),
+    rows,
+    seasonKey:(rows?.[0]?.seasonKey)||currentGamePhotoSeasonKey()
+  }));
+}
+
+function latestGameEntryKey(entry){
+  return `${entry.seasonKey||currentGamePhotoSeasonKey()}|${entry.gameNo}`;
+}
+
+function selectLatestGameOffset(delta){
+  const games=latestGameEntries();
+  if(!games.length)return;
+  let idx=games.findIndex(g=>latestGameEntryKey(g)===latestGameSelectedKey);
+  if(idx<0)idx=games.length-1;
+  idx=Math.max(0,Math.min(games.length-1,idx+delta));
+  latestGameSelectedKey=latestGameEntryKey(games[idx]);
+  renderLatestGame();
+}
+
+function resetLatestGameToNewest(){
+  latestGameSelectedKey=null;
+  renderLatestGame();
+}
+
+function openGamePhotoModal(src,caption=""){
+  if(!src)return;
+  const modal=$("gamePhotoModal");
+  if(!modal)return;
+  $("gamePhotoModalImage").src=src;
+  $("gamePhotoModalCaption").textContent=caption;
+  modal.style.display="flex";
+}
+
+function closeGamePhotoModal(){
+  const modal=$("gamePhotoModal");
+  if(modal)modal.style.display="none";
+}
+
+
 async function fileToCompressedDataUrl(file){
   return new Promise((resolve,reject)=>{
     if(!file){resolve("");return;}
@@ -5966,6 +6301,7 @@ function seasonNeighbor(delta){
 }
 
 function changeSeasonFromToolbar(action){
+  latestGameSelectedKey=null;
   if(action==="all"){
     return selectSeason("all");
   }
@@ -6002,7 +6338,7 @@ function updateSeasonContextTitles(){
     const el=document.getElementById(id);
     if(el)el.textContent=`${label} ${suffix}`;
   };
-  set("rankingSeasonTitle","Classement & historique BPT");
+  set("rankingSeasonTitle","Classement BPT");
   set("recordsSeasonTitle","Records & accomplissements BPT");
   set("profileSeasonTitle","Profil joueur BPT");
 }
@@ -6374,7 +6710,7 @@ function renderDashboard(){
 function mostAvgFix(v){ return Number.isFinite(Number(v)) ? Number(v) : 0; }
 
 function renderLatestGame(){
-  const games=groupedGames();
+  const games=latestGameEntries();
   const empty=$("latestGameEmpty");
   const content=$("latestGameContent");
   if(!empty || !content)return;
@@ -6382,26 +6718,69 @@ function renderLatestGame(){
   if(!games.length){
     empty.style.display="block";
     content.style.display="none";
-    $("latestGameTitle").textContent="Dernière partie";
+    $("latestGameTitle").textContent="Parties";
     $("latestGameMeta").textContent="Aucune partie enregistrée.";
     $("latestGameWinner").textContent="—";
+    if($("latestGameWinnerNickname"))$("latestGameWinnerNickname").textContent="";
     $("latestGameWinnerMeta").textContent="—";
+    if($("latestGamePosition"))$("latestGamePosition").textContent="—";
+    if($("latestPrevGameBtn"))$("latestPrevGameBtn").disabled=true;
+    if($("latestNextGameBtn"))$("latestNextGameBtn").disabled=true;
     return;
   }
+
+  let idx=games.findIndex(g=>latestGameEntryKey(g)===latestGameSelectedKey);
+  if(idx<0)idx=games.length-1;
+  const entry=games[idx];
+  latestGameSelectedKey=latestGameEntryKey(entry);
 
   empty.style.display="none";
   content.style.display="block";
 
-  const [gameNo,gameRows]=games[games.length-1];
-  const rows=gameRows.slice().sort((a,b)=>Number(a.place)-Number(b.place));
+  const gameNo=entry.gameNo;
+  const rows=entry.rows.slice().sort((a,b)=>Number(a.place)-Number(b.place));
   const first=rows[0]||{};
   const winner=rows.find(r=>Number(r.place)===1);
   const pot=rows.length*Number(first.stake||0);
+  const seasonKey=entry.seasonKey||currentGamePhotoSeasonKey();
 
   $("latestGameTitle").textContent=gameDisplayTitle(first,gameNo);
   $("latestGameMeta").textContent=`${shortDate(first.date||"")}${first.location?" · "+first.location:""} · ${rows.length} joueurs`;
   $("latestGameWinner").textContent=winner?.player||"—";
+  if($("latestGameWinnerNickname")){
+    const wn=winner?playerNicknameInfo(winner.player).primary:"";
+    $("latestGameWinnerNickname").textContent=wn?`(${wn})`:"";
+  }
   $("latestGameWinnerMeta").textContent=winner?`${num(winner.points||0,0)} pts · ${euro(winner.gross||0)} de gain`:"—";
+
+  if($("latestGamePosition"))$("latestGamePosition").textContent=`Partie ${idx+1} / ${games.length}`;
+  if($("latestGameHistorySummary")){
+    $("latestGameHistorySummary").textContent=idx===games.length-1?"Dernière partie":"Historique";
+  }
+  if($("latestPrevGameBtn"))$("latestPrevGameBtn").disabled=idx<=0;
+  if($("latestNextGameBtn"))$("latestNextGameBtn").disabled=idx>=games.length-1;
+
+  const photo=getGamePhoto(gameNo,seasonKey);
+  if($("latestGamePhotoThumbBtn"))$("latestGamePhotoThumbBtn").style.display=photo?"block":"none";
+  if($("latestGamePhotoThumb")){
+    $("latestGamePhotoThumb").src=photo||"";
+  }
+  if($("latestGamePhotoPlaceholder"))$("latestGamePhotoPlaceholder").style.display=photo?"none":"flex";
+  if($("latestGamePhotoDeleteBtn"))$("latestGamePhotoDeleteBtn").style.display=photo?"inline-flex":"none";
+  if($("latestGamePhotoUploadLabel"))$("latestGamePhotoUploadLabel").textContent=photo?"Changer la photo":"Ajouter une photo";
+  if($("latestGamePhotoThumbBtn")){
+    $("latestGamePhotoThumbBtn").onclick=()=>openGamePhotoModal(
+      photo,
+      `${gameDisplayTitle(first,gameNo)} · ${shortDate(first.date||"")}`
+    );
+  }
+  if($("latestGamePhotoInput")){
+    $("latestGamePhotoInput").dataset.game=String(gameNo);
+    $("latestGamePhotoInput").dataset.season=seasonKey;
+  }
+  if($("latestGamePhotoDeleteBtn")){
+    $("latestGamePhotoDeleteBtn").onclick=()=>deleteGamePhoto(gameNo,seasonKey);
+  }
 
   $("latestGameSummary").innerHTML=[
     ["Date",shortDate(first.date||"")],
@@ -6431,10 +6810,14 @@ function renderLatestGame(){
     </tr>`).join("")}</tbody>
   </table>`;
 
-  const unlocked=latestGameUnlockedAchievements();
+  // Accomplissements liés à la partie affichée et non obligatoirement la dernière.
+  // On utilise les définitions existantes et on retient les joueurs de cette partie.
+  const allAchievements=achievementPlayers();
+  const playerSet=new Set(rows.map(r=>r.player));
   const byPlayer=new Map();
-  for(const a of unlocked){
-    for(const player of a.players){
+  for(const a of allAchievements){
+    for(const player of (a.players||[])){
+      if(!playerSet.has(player))continue;
       if(!byPlayer.has(player))byPlayer.set(player,[]);
       byPlayer.get(player).push(a);
     }
@@ -6449,7 +6832,7 @@ function renderLatestGame(){
             ${items.map(a=>`<span class="latest-achievement-pill" title="${esc(a.desc)}">${a.icon} ${esc(a.name)}</span>`).join("")}
           </div>
         </div>`).join("")
-    : '<span class="muted">Aucun nouvel accomplissement débloqué lors de cette partie.</span>';
+    : '<span class="muted">Aucun accomplissement à afficher pour les joueurs de cette partie.</span>';
 }
 
 function renderRanking(){
@@ -6657,9 +7040,9 @@ function renderHistory(){
       <td><b>${Number(r.game)||""}</b></td>
       <td>${esc(shortDate(r.date||""))}</td>
       <td>${esc(r.location||"")}</td>
-      <td>${esc(r.player||"")}</td>
+      <td>${r.player?playerNameHtml(r.player):""}</td>
       <td>${Number(r.place)||""}</td>
-      <td>${esc(r.killer||"")}</td>
+      <td>${r.killer?playerNameHtml(r.killer):""}</td>
       <td>${r.tablier?"Oui":""}</td>
       <td>${Number(r.n)||""}</td>
       <td>${num(r.points,0)}</td>
@@ -8890,8 +9273,8 @@ async function showView(id){
     await refreshCanonicalHistoryUI(true);
   }else{
     if(id==="dashboard")renderDashboard();
-    if(id==="latestgame")renderLatestGame();
-    if(id==="ranking"){renderRanking();renderHistory();}
+    if(id==="latestgame"){renderLatestGame();renderHistory();}
+    if(id==="ranking")renderRanking();
     if(id==="records"){renderRecords();renderAchievements();}
     if(id==="profile"){renderProfile();renderVersus();}
   }
@@ -8934,6 +9317,25 @@ $("resetHistoryBtn").onclick=resetFullHistory;
 $("cStake").addEventListener("input",refreshCorrectionCalculatedValues);
 
 if($("versusPlayer2"))$("versusPlayer2").onchange=renderVersus;
+
+if($("latestPrevGameBtn"))$("latestPrevGameBtn").onclick=()=>selectLatestGameOffset(-1);
+if($("latestNextGameBtn"))$("latestNextGameBtn").onclick=()=>selectLatestGameOffset(1);
+if($("latestGamePhotoInput"))$("latestGamePhotoInput").addEventListener("change",async()=>{
+  const input=$("latestGamePhotoInput");
+  const file=input.files?.[0];
+  const gameNo=Number(input.dataset.game||0);
+  const seasonKey=input.dataset.season||currentGamePhotoSeasonKey();
+  if(file && gameNo)await saveGamePhoto(gameNo,file,seasonKey);
+  input.value="";
+});
+if($("gamePhotoModalClose"))$("gamePhotoModalClose").onclick=closeGamePhotoModal;
+if($("gamePhotoModal"))$("gamePhotoModal").onclick=e=>{
+  if(e.target===$("gamePhotoModal"))closeGamePhotoModal();
+};
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape" && $("gamePhotoModal")?.style.display==="flex")closeGamePhotoModal();
+});
+
 
 $("exportCsvBtn").onclick=()=>{const rows=[["Partie","Date","Lieu","Joueur","Place","Éliminé par","Tablier","Nb joueurs","Points","Mise","Gain","Solde","Kills"]];db.history.forEach(r=>rows.push([r.game,r.date,r.location,r.player,r.place,r.killer,r.tablier?"Oui":"",r.n,r.points,r.stake,r.gross,r.net,r.kills]));const csv="\ufeff"+rows.map(r=>r.map(x=>`"${String(x??"").replaceAll('"','""')}"`).join(";")).join("\r\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download="BPT_historique.csv";a.click();};
 
