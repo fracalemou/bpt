@@ -3969,9 +3969,39 @@ body.spectator-live-open #spectatorQuitLiveBtn{
   cursor:pointer;
 }
 
+
+/* ===== V137 — bouton de sortie global spectateur ===== */
+.spectator-global-exit{
+  position:fixed !important;
+  top:max(10px, env(safe-area-inset-top)) !important;
+  left:max(10px, env(safe-area-inset-left)) !important;
+  z-index:999999 !important;
+  align-items:center;
+  justify-content:center;
+  min-height:42px;
+  padding:10px 14px !important;
+  border:1px solid #6e879a !important;
+  border-radius:11px !important;
+  background:#0f1720 !important;
+  color:#ffffff !important;
+  font-size:12px !important;
+  font-weight:900 !important;
+  box-shadow:0 10px 28px rgba(0,0,0,.45) !important;
+  cursor:pointer;
+}
+
+body:not(.spectator-live-open) .spectator-global-exit{
+  display:none !important;
+}
+
+body.spectator-live-open .spectator-global-exit{
+  display:flex !important;
+}
+
 </style>
 </head>
 <body>
+<button id="spectatorGlobalExitBtn" class="spectator-global-exit" type="button" style="display:none">← Quitter le Live</button>
 <header class="bpt-header">
   <div class="bpt-brand-wrap">
     <div class="bpt-logo" aria-label="BPT">
@@ -3986,7 +4016,7 @@ body.spectator-live-open #spectatorQuitLiveBtn{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 14h25</div>
+  <div class="app-version">Version 19/09/26 14h31</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -4138,7 +4168,7 @@ body.spectator-live-open #spectatorQuitLiveBtn{
         <div class="spectator-fullscreen-shell">
           <div class="spectator-fullscreen-header">
             <div>
-              <div class="spectator-kicker">BPT · LIVE · V136</div>
+              <div class="spectator-kicker">BPT · LIVE · V138</div>
               <div id="spectatorGameMeta" class="spectator-game-meta">—</div>
               <div class="spectator-update-state">Dernière réception : <strong id="spectatorLastReceive">—</strong></div>
             </div>
@@ -5398,19 +5428,30 @@ function scheduleCloudSave(){
 function remoteLiveIsSpectatorForThisDevice(row){
   const remote=row?.data?.liveState||null;
   const creator=String(remote?.creatorDeviceId||"");
-  return !!(remote?.prepared && !remote?.synced && creator && creator!==liveDeviceId());
+  return !!(
+    remote?.prepared &&
+    !remote?.synced &&
+    creator &&
+    creator!==liveDeviceId()
+  );
 }
 
 async function renderSpectatorFromServer(row){
   if(!row || !isValidBptState(row.data) || !remoteLiveIsSpectatorForThisDevice(row))return false;
 
-  db.liveState=JSON.parse(JSON.stringify(row.data.liveState));
-  cloudLastRevision=Number(row.revision||cloudLastRevision||0);
+  spectatorServerLiveState=JSON.parse(JSON.stringify(row.data.liveState));
+  spectatorServerLiveRevision=Number(row.revision||0);
+
+  // db.liveState devient seulement une COPIE d'affichage de l'état serveur.
+  // Aucune décision de mode spectateur ne repose sur cette copie locale.
+  db.liveState=JSON.parse(JSON.stringify(spectatorServerLiveState));
+  cloudLastRevision=spectatorServerLiveRevision;
   cloudLocalDirty=false;
   saveLocalOnly();
 
   currentViewId="live";
   document.body.classList.add("spectator-live-open");
+  if($("spectatorGlobalExitBtn"))$("spectatorGlobalExitBtn").style.display="flex";
   document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id==="live"));
   document.querySelectorAll("nav button").forEach(n=>n.classList.toggle("active",n.dataset.view==="live"));
 
@@ -5433,7 +5474,7 @@ async function renderSpectatorFromServer(row){
   setCloudStatus(
     "ok",
     "Live spectateur connecté",
-    `Partie #${db.liveState?.gameNo||"—"} reçue directement depuis Supabase`
+    `Partie #${db.liveState?.gameNo||"—"} · révision serveur ${spectatorServerLiveRevision}`
   );
   return true;
 }
@@ -5903,6 +5944,17 @@ function loadDB(){
 }
 let db = loadDB();
 
+// Un Live distant conservé dans localStorage ne doit jamais être utilisé comme source.
+// Seul le navigateur créateur conserve son Live local ; les spectateurs relisent Supabase.
+if(
+  db?.liveState?.prepared &&
+  db.liveState.creatorDeviceId &&
+  db.liveState.creatorDeviceId!==liveDeviceId()
+){
+  db.liveState=null;
+  saveLocalOnly();
+}
+
 function saveDB(){
   saveLocalOnly();
   scheduleCloudSave();
@@ -5932,7 +5984,26 @@ async function fetchLiveStateDirect(){
     .eq("id",CLOUD_ROW_ID)
     .maybeSingle();
   if(error)throw error;
-  return data||null;
+
+  const row=data||null;
+  const remote=row?.data?.liveState||null;
+  const creator=String(remote?.creatorDeviceId||"");
+  const isRemoteActive=!!(
+    remote?.prepared &&
+    !remote?.synced &&
+    creator &&
+    creator!==liveDeviceId()
+  );
+
+  if(isRemoteActive){
+    spectatorServerLiveState=JSON.parse(JSON.stringify(remote));
+    spectatorServerLiveRevision=Number(row?.revision||0);
+  }else{
+    spectatorServerLiveState=null;
+    spectatorServerLiveRevision=0;
+  }
+
+  return row;
 }
 
 async function livePushStateNow(){
@@ -9061,20 +9132,27 @@ function startSpectatorLivePolling(){
   const pull=async()=>{
     try{
       const row=await fetchLiveStateDirect();
-      if(!row)return;
 
-      if(remoteLiveIsSpectatorForThisDevice(row)){
+      if(row && remoteLiveIsSpectatorForThisDevice(row)){
         if(currentViewId==="live"){
           await renderSpectatorFromServer(row);
         }else{
-          // En arrière-plan, mettre seulement à jour liveState + badge navigation.
-          db.liveState=JSON.parse(JSON.stringify(row.data.liveState));
-          cloudLastRevision=Number(row.revision||cloudLastRevision||0);
-          cloudLocalDirty=false;
-          saveLocalOnly();
-          applyLiveAccessMode();
+          // Mise à jour silencieuse : uniquement cache serveur + badge de navigation.
+          const liveNav=document.querySelector('nav button[data-view="live"]');
+          if(liveNav){
+            liveNav.textContent="● Live · Spectateur";
+            liveNav.classList.add("spectator-nav");
+          }
           document.body.classList.remove("spectator-live-open");
           $("live")?.classList.remove("active");
+        }
+      }else{
+        spectatorServerLiveState=null;
+        spectatorServerLiveRevision=0;
+        const liveNav=document.querySelector('nav button[data-view="live"]');
+        if(liveNav){
+          liveNav.textContent="● Live";
+          liveNav.classList.remove("spectator-nav");
         }
       }
     }catch(e){
@@ -9245,6 +9323,9 @@ function liveFlashLevel(){
 }
 
 const LIVE_DEVICE_KEY="bpt_live_device_id_v1";
+let spectatorServerLiveState=null;
+let spectatorServerLiveRevision=0;
+
 let liveSpectatorAutoOpened=false;
 
 function liveDeviceId(){
@@ -9270,8 +9351,12 @@ function liveIsCreator(){
 }
 
 function liveIsSpectator(){
-  const s=db?.liveState;
-  return !!(s?.prepared && !s?.synced && !liveIsCreator());
+  const remote=spectatorServerLiveState;
+  if(remote?.prepared && !remote?.synced){
+    const creator=String(remote.creatorDeviceId||"");
+    return !!(creator && creator!==liveDeviceId());
+  }
+  return false;
 }
 
 function liveSetLastSyncNow(){
@@ -9312,10 +9397,11 @@ function applyLiveAccessMode(){
 
   // Le mode spectateur n'immobilise jamais le site tant que l'onglet Live
   // n'est pas réellement ouvert.
-  document.body.classList.toggle(
-    "spectator-live-open",
-    spectator && currentViewId==="live"
-  );
+  const spectatorOpen=spectator && currentViewId==="live";
+  document.body.classList.toggle("spectator-live-open",spectatorOpen);
+  if($("spectatorGlobalExitBtn")){
+    $("spectatorGlobalExitBtn").style.display=spectatorOpen?"flex":"none";
+  }
 
   if($("liveTestSoundBtn"))$("liveTestSoundBtn").style.display=spectator?"none":"";
   if($("liveSyncBadge") && spectator)$("liveSyncBadge").textContent="LIVE · SPECTATEUR";
@@ -9733,7 +9819,15 @@ function liveRenderTimerOnly(){
   const s=ensureLiveState();
   $("liveTimer").textContent=liveTime(s.remainingSeconds);
   $("liveElapsed").textContent=liveTime(liveElapsedSeconds());
-  if($("spectatorTimer") && liveIsSpectator())$("spectatorTimer").textContent=liveTime(s.remainingSeconds);
+  if($("spectatorTimer") && liveIsSpectator()){
+    const ss=spectatorServerLiveState||s;
+    let remaining=Number(ss?.remainingSeconds||0);
+    if(ss?.running && ss?.endAt){
+      remaining=Math.max(0,Math.ceil((Number(ss.endAt)-Date.now())/1000));
+      if(spectatorServerLiveState)spectatorServerLiveState.remainingSeconds=remaining;
+    }
+    $("spectatorTimer").textContent=liveTime(remaining);
+  }
   updateLiveTimerUrgency();
   if(document.fullscreenElement===$("liveFullscreenDisplay"))liveRenderFullscreen();
 }
@@ -10030,8 +10124,8 @@ async function liveFinalizeGame(){
 }
 
 function renderSpectatorLive(){
-  const s=ensureLiveState();
-  if(!liveIsSpectator() || !s.prepared)return;
+  const s=spectatorServerLiveState;
+  if(!s?.prepared || s?.synced)return;
 
   const level=s.levels?.[s.levelIndex]||{};
   const next=s.levels?.[s.levelIndex+1]||null;
@@ -10788,6 +10882,10 @@ async function openSpectatorLive(){
       startSpectatorLivePolling();
       return true;
     }
+
+    spectatorServerLiveState=null;
+    spectatorServerLiveRevision=0;
+    alert("Aucun Live distant actif n'est disponible sur le serveur.");
   }catch(e){
     console.error("BPT open spectator live:",e);
     setCloudStatus("offline","Erreur Live spectateur",e?.message||String(e));
@@ -10827,14 +10925,18 @@ async function showView(id){
   }
 
   if(id==="live"){
-    if(liveIsSpectator()){
+    const localCreator=!!(db?.liveState?.prepared && db?.liveState?.creatorDeviceId===liveDeviceId());
+    if(localCreator){
+      liveRenderAll();
+    }else{
       const opened=await openSpectatorLive();
       if(!opened){
-        liveShowScreen("game");
-        liveRenderAll();
+        document.body.classList.remove("spectator-live-open");
+        currentViewId="dashboard";
+        document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id==="dashboard"));
+        document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view==="dashboard"));
+        renderDashboard();
       }
-    }else{
-      liveRenderAll();
     }
   }
 
@@ -10962,15 +11064,26 @@ if($("gameSummaryBackdrop"))$("gameSummaryBackdrop").onclick=e=>{if(e.target===$
 
 // Live : affichage, plein écran et test audio
 if($("liveFullscreenBtn"))$("liveFullscreenBtn").onclick=toggleLiveFullscreen;
+if($("spectatorGlobalExitBtn"))$("spectatorGlobalExitBtn").onclick=()=>{
+  stopSpectatorSyncCountdown();
+  document.body.classList.remove("spectator-live-open");
+  $("spectatorGlobalExitBtn").style.display="none";
+  $("live")?.classList.remove("active");
+  currentViewId="ranking";
+  showView("ranking");
+};
+
 if($("spectatorQuitLiveBtn"))$("spectatorQuitLiveBtn").onclick=()=>{
   stopSpectatorSyncCountdown();
   document.body.classList.remove("spectator-live-open");
+  if($("spectatorGlobalExitBtn"))$("spectatorGlobalExitBtn").style.display="none";
   $("live")?.classList.remove("active");
   currentViewId="ranking";
   showView("ranking");
 };
 if($("spectatorQuitLiveBottomBtn"))$("spectatorQuitLiveBottomBtn").onclick=()=>{
   document.body.classList.remove("spectator-live-open");
+  if($("spectatorGlobalExitBtn"))$("spectatorGlobalExitBtn").style.display="none";
   $("live")?.classList.remove("active");
   currentViewId="ranking";
   showView("ranking");
@@ -11009,9 +11122,14 @@ document.addEventListener("fullscreenchange",()=>{
 document.querySelectorAll("nav button[data-view]").forEach(b=>{
   b.addEventListener("click",async()=>{
     const target=b.dataset.view;
-    if(target==="live" && liveIsSpectator()){
-      const opened=await openSpectatorLive();
-      if(opened)return;
+    if(target==="live"){
+      // Toujours interroger le serveur avant d'ouvrir un Live spectateur.
+      // Si ce navigateur est le maître, liveIsCreator() reste vrai et on ouvre le Live normal.
+      const localCreator=!!(db?.liveState?.prepared && db?.liveState?.creatorDeviceId===liveDeviceId());
+      if(!localCreator){
+        const opened=await openSpectatorLive();
+        if(opened)return;
+      }
     }
     showView(target);
   });
@@ -11056,6 +11174,7 @@ renderAll();
 liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 initCloudSync();
+setTimeout(()=>startSpectatorLivePolling(),800);
 </script>
 
 
