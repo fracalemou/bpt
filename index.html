@@ -4016,7 +4016,7 @@ body.spectator-live-open .spectator-global-exit{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 14h49</div>
+  <div class="app-version">Version 19/09/26 14h54</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -4168,10 +4168,11 @@ body.spectator-live-open .spectator-global-exit{
         <div class="spectator-fullscreen-shell">
           <div class="spectator-fullscreen-header">
             <div>
-              <div class="spectator-kicker">BPT · LIVE · V143</div>
+              <div class="spectator-kicker">BPT · LIVE · V144</div>
               <div id="spectatorGameMeta" class="spectator-game-meta">—</div>
               <div class="spectator-update-state">Dernière réception : <strong id="spectatorLastReceive">—</strong></div>
               <div class="spectator-update-state">Serveur : <strong id="spectatorServerInfo">—</strong></div>
+              <div class="spectator-update-state">Source : <strong id="spectatorServerSource">—</strong></div>
             </div>
             <button id="spectatorQuitLiveBtn" class="spectator-quit-btn" type="button">← Quitter le Live</button>
           </div>
@@ -4995,6 +4996,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
+const LIVE_CLOUD_ROW_ID="live_current";
 
 let sbClient=null;
 let cloudReady=false;
@@ -5451,7 +5453,7 @@ function scheduleCloudSave(){
 }
 
 function remoteLiveIsSpectatorForThisDevice(row){
-  const remote=chooseRemoteLiveForSpectator(row?.data||{});
+  const remote=row?.data?.liveState || chooseRemoteLiveForSpectator(row?.data||{});
   const creator=String(remote?.creatorDeviceId||"");
   return !!(
     remote?.prepared &&
@@ -5464,9 +5466,9 @@ function remoteLiveIsSpectatorForThisDevice(row){
 async function renderSpectatorFromServer(row){
   if(!row || !isValidBptState(row.data) || !remoteLiveIsSpectatorForThisDevice(row))return false;
 
-  const serverLive=chooseRemoteLiveForSpectator(row.data||{});
+  const serverLive=row?.data?.liveState || chooseRemoteLiveForSpectator(row.data||{});
   if(!serverLive)return false;
-  spectatorServerLiveState=serverLive;
+  spectatorServerLiveState=JSON.parse(JSON.stringify(serverLive));
   spectatorServerLiveRevision=Number(row.revision||0);
 
   // db.liveState devient seulement une COPIE d'affichage de l'état serveur.
@@ -6023,8 +6025,46 @@ function chooseRemoteLiveForSpectator(data){
   return null;
 }
 
+async function fetchDedicatedLiveRow(){
+  if(!ensureLiveSupabaseClient())return null;
+  const {data,error}=await sbClient
+    .from("bpt_state")
+    .select("data,revision,updated_at")
+    .eq("id",LIVE_CLOUD_ROW_ID)
+    .maybeSingle();
+  if(error)throw error;
+  return data||null;
+}
+
+let spectatorLiveSource="—";
+
 async function fetchLiveStateDirect(){
   if(!ensureLiveSupabaseClient())return null;
+
+  // 1. Source prioritaire : ligne Live dédiée.
+  try{
+    const dedicated=await fetchDedicatedLiveRow();
+    const ds=dedicated?.data||null;
+    const remote=ds?.active ? ds?.liveState : null;
+
+    if(remote?.prepared && !remote?.synced){
+      spectatorLiveSource="live_current";
+      spectatorServerLiveState=JSON.parse(JSON.stringify(remote));
+      spectatorServerLiveRevision=Number(dedicated?.revision||0);
+
+      // Retourner une forme compatible avec les fonctions existantes.
+      return {
+        data:{liveState:JSON.parse(JSON.stringify(remote))},
+        revision:dedicated?.revision||0,
+        updated_at:dedicated?.updated_at||null,
+        __liveSource:"live_current"
+      };
+    }
+  }catch(e){
+    console.warn("BPT dedicated live row:",e);
+  }
+
+  // 2. Compatibilité : ancienne ligne main si live_current n'existe pas encore.
   const {data,error}=await sbClient
     .from("bpt_state")
     .select("data,revision,updated_at")
@@ -6043,9 +6083,11 @@ async function fetchLiveStateDirect(){
   );
 
   if(isRemoteActive){
+    spectatorLiveSource="main (compatibilité)";
     spectatorServerLiveState=remote;
     spectatorServerLiveRevision=Number(row?.revision||0);
   }else{
+    spectatorLiveSource="aucun";
     spectatorServerLiveState=null;
     spectatorServerLiveRevision=0;
   }
@@ -6082,6 +6124,29 @@ async function livePushStateNow(){
       .single();
 
     if(error)throw error;
+
+    // Publication dédiée du Live : une ligne indépendante de l'état général.
+    // C'est cette ligne qui fait foi pour les spectateurs.
+    const livePayload=db.liveState?.prepared && !db.liveState?.synced
+      ? {
+          active:true,
+          publishedAt:Date.now(),
+          liveState:JSON.parse(JSON.stringify(db.liveState))
+        }
+      : {
+          active:false,
+          publishedAt:Date.now(),
+          liveState:null
+        };
+
+    const {error:liveRowError}=await sbClient
+      .from("bpt_state")
+      .upsert(
+        {id:LIVE_CLOUD_ROW_ID,data:livePayload},
+        {onConflict:"id"}
+      );
+
+    if(liveRowError)throw liveRowError;
 
     cloudLastRevision=Number(data?.revision||cloudLastRevision||0);
     cloudLocalDirty=false;
@@ -10143,6 +10208,12 @@ function livePrepareNextGame(){
 
   // Le Live terminé reste dans l'historique officiel ; seul l'état temporaire
   // de la partie en direct est réinitialisé.
+  if(ensureLiveSupabaseClient()){
+    sbClient.from("bpt_state").upsert(
+      {id:LIVE_CLOUD_ROW_ID,data:{active:false,publishedAt:Date.now(),liveState:null}},
+      {onConflict:"id"}
+    ).then(()=>{}).catch(e=>console.warn("BPT clear live row:",e));
+  }
   db.liveState=null;
   liveSelected.clear();
   liveDraftLevels=[];
@@ -10216,6 +10287,9 @@ function renderSpectatorLive(){
   }
   if($("spectatorServerInfo")){
     $("spectatorServerInfo").textContent=`niveau ${Number(s.levelIndex||0)+1} · ${players.length} joueurs`;
+  }
+  if($("spectatorServerSource")){
+    $("spectatorServerSource").textContent=spectatorLiveSource;
   }
 
   if($("spectatorPlayerList")){
@@ -10929,7 +11003,7 @@ let currentViewId="dashboard";
 async function resolveLiveEntryMode(){
   try{
     const row=await fetchLiveStateDirect();
-    const remote=chooseRemoteLiveForSpectator(row?.data||{});
+    const remote=row?.data?.liveState || chooseRemoteLiveForSpectator(row?.data||{});
     const creator=String(remote?.creatorDeviceId||"");
     const remoteActive=!!(remote?.prepared && !remote?.synced);
 
