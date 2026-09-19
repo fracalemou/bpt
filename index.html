@@ -2810,197 +2810,184 @@ table{max-width:100%}
 }
 
 
-/* ===== V115 — photos des parties ===== */
-.history-game-photo-zone{
-  margin-bottom:12px;
-  padding:10px 11px;
-  border:1px solid rgba(255,255,255,.07);
-  border-radius:12px;
-  background:rgba(255,255,255,.018);
-}
-.history-photo-toolbar{
+/* ===== V115 — photos joueurs + surnom au-dessus des médailles ===== */
+.player-photo-admin{
+  width:92px;
+  flex:0 0 92px;
   display:flex;
-  justify-content:space-between;
+  flex-direction:column;
   align-items:center;
-  gap:10px;
-  margin-bottom:9px;
+  gap:5px;
 }
-.history-photo-toolbar strong{
-  font-size:12px;
-  color:#dce3eb;
-}
-.history-photo-thumbs{
-  display:flex;
-  gap:8px;
-  overflow-x:auto;
-  padding-bottom:2px;
-  -webkit-overflow-scrolling:touch;
-}
-.history-photo-thumb{
-  flex:0 0 112px;
-  width:112px;
-  height:76px;
-  padding:0;
-  border:1px solid #364255;
-  border-radius:9px;
-  overflow:hidden;
-  background:#0d121a;
-  cursor:zoom-in;
-}
-.history-photo-thumb img{
-  width:100%;
-  height:100%;
-  display:block;
+.player-photo-admin img,
+.player-photo-placeholder{
+  width:58px;
+  height:58px;
+  border-radius:50%;
   object-fit:cover;
+  border:1px solid #39465a;
+  background:#101620;
 }
-.history-photo-thumb:hover{
-  border-color:#c8a15c;
-  transform:translateY(-1px);
-}
-.history-no-photo{
-  font-size:11px;
-  padding:4px 0;
-}
-.game-photo-viewer{
-  position:fixed;
-  inset:0;
-  z-index:99999;
-  display:none;
+.player-photo-placeholder{
+  display:flex;
   align-items:center;
   justify-content:center;
-  padding:34px;
-  background:rgba(4,7,12,.94);
-  backdrop-filter:blur(5px);
-}
-.game-photo-viewer.open{display:flex}
-.game-photo-viewer img{
-  max-width:min(94vw,1500px);
-  max-height:88vh;
-  object-fit:contain;
-  border-radius:12px;
-  box-shadow:0 24px 80px rgba(0,0,0,.55);
-}
-.game-photo-viewer-close{
-  position:absolute;
-  top:16px;
-  right:20px;
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  border:1px solid rgba(255,255,255,.22);
-  background:rgba(20,25,35,.84);
-  color:white;
-  font-size:27px;
-  cursor:pointer;
-}
-.game-photo-viewer-caption{
-  position:absolute;
-  left:20px;
-  right:20px;
-  bottom:12px;
-  text-align:center;
-  color:#cbd4df;
-  font-size:12px;
-}
-body.photo-viewer-open{overflow:hidden}
-@media(max-width:700px){
-  .history-photo-toolbar{align-items:flex-start;flex-direction:column}
-  .history-photo-thumb{flex-basis:96px;width:96px;height:66px}
-  .game-photo-viewer{padding:16px}
-}
-@media screen and (orientation:landscape) and (max-height:520px) and (max-width:1000px){
-  .history-game-photo-zone{padding:7px 8px;margin-bottom:8px}
-  .history-photo-toolbar{margin-bottom:6px;flex-direction:row;align-items:center}
-  .history-photo-thumb{flex-basis:90px;width:90px;height:58px}
-  .game-photo-viewer{padding:10px 48px}
-  .game-photo-viewer img{max-height:90vh}
-}
-
-
-/* ===== V116 — navigation entre parties + historique dans Dernière partie ===== */
-.latestgame-navigation{
-  display:grid;
-  grid-template-columns:auto minmax(140px,1fr) auto;
-  align-items:center;
-  gap:10px;
-  margin:12px 0 2px;
-}
-.latestgame-navigation-status{
-  text-align:center;
-  color:#9da9b8;
-  font-size:11px;
-  font-weight:800;
-  text-transform:uppercase;
-  letter-spacing:.05em;
-}
-.latestgame-navigation button:disabled{
-  opacity:.32;
-  cursor:default;
-}
-.latestgame-photo-zone{
-  margin:12px 0 14px;
-  padding:12px;
-  border:1px solid rgba(200,161,92,.18);
-  border-radius:14px;
-  background:rgba(200,161,92,.035);
-}
-.latestgame-photo-thumb{
-  flex-basis:150px;
-  width:150px;
-  height:96px;
-}
-.latest-full-history-block{
-  margin-top:16px;
-}
-#ranking .combined-ranking-block{
-  margin-top:14px;
-}
-@media(max-width:700px){
-  .latestgame-navigation{
-    grid-template-columns:1fr 1fr;
-  }
-  .latestgame-navigation-status{
-    grid-column:1 / -1;
-    grid-row:1;
-  }
-}
-@media screen and (orientation:landscape) and (max-height:520px) and (max-width:1000px){
-  .latestgame-navigation{margin:7px 0 0;gap:6px}
-  .latestgame-navigation .btn{min-height:31px;padding:5px 9px;font-size:10px}
-  .latestgame-photo-zone{padding:7px 8px;margin:7px 0 9px}
-  .latestgame-photo-thumb{flex-basis:110px;width:110px;height:68px}
-}
-
-
-/* ===== V117 — correction rattachement et visibilité photos ===== */
-.latestgame-photo-zone:has(.latestgame-photo-thumb){
-  border-color:rgba(200,161,92,.42);
-}
-.latestgame-photo-thumb img,
-.history-photo-thumb img{
-  background:#0a0f16;
-}
-.latestgame-photo-thumb{
-  box-shadow:0 5px 18px rgba(0,0,0,.22);
-}
-
-
-/* ===== V121 — correction ajout photos + surnom sous les médailles ===== */
-.medal-player-name{
-  font-weight:900;
-}
-.medal-player-nickname{
-  margin-top:1px;
-  margin-bottom:4px;
   color:#c8a15c;
-  font-size:12px;
-  font-weight:850;
-  letter-spacing:.02em;
+  font-size:22px;
 }
-.summary-place .medal-player-nickname{
-  margin-top:3px;
-  margin-bottom:5px;
+.player-photo-upload-btn,
+.player-photo-delete-btn{
+  width:100%;
+  padding:5px 7px !important;
+  font-size:9px !important;
+}
+.profile-photo-wrap{
+  width:104px;
+  height:104px;
+  flex:0 0 104px;
+  border-radius:50%;
+  overflow:hidden;
+  border:2px solid rgba(200,161,92,.55);
+  background:#101620;
+  box-shadow:0 10px 30px rgba(0,0,0,.22);
+}
+.profile-photo,
+.profile-photo-placeholder{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+.profile-photo-placeholder{
+  align-items:center;
+  justify-content:center;
+  color:#c8a15c;
+  font-size:38px;
+}
+.premium-profile-identity{
+  display:flex;
+  align-items:center;
+  gap:18px;
+}
+.podium-nickname{
+  min-height:15px;
+  color:#e0c17d;
   font-size:11px;
+  font-style:italic;
+  font-weight:800;
+  margin-bottom:4px;
+  text-align:center;
+}
+.ranking-medal-stack{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  line-height:1.15;
+}
+.ranking-medal-stack .podium-nickname{
+  margin:0 0 3px 0;
+  text-align:left;
+  font-size:9px;
+}
+@media(max-width:760px){
+  .player-photo-admin{
+    width:72px;
+    flex-basis:72px;
+  }
+  .player-photo-admin img,
+  .player-photo-placeholder{
+    width:50px;
+    height:50px;
+  }
+  .premium-profile-identity{
+    align-items:flex-start;
+  }
+  .profile-photo-wrap{
+    width:76px;
+    height:76px;
+    flex-basis:76px;
+  }
+}
+
+
+/* ===== V116 — nom officiel principal, surnom secondaire partout ===== */
+.player-name-stack{
+  display:inline-flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:1px;
+  line-height:1.15;
+  vertical-align:middle;
+}
+button.player-name-stack{
+  text-align:left;
+}
+.player-primary-name{
+  font-weight:850;
+  color:inherit;
+}
+.player-secondary-nickname{
+  display:block;
+  font-size:9px;
+  line-height:1.15;
+  color:#a8b0bd;
+  font-weight:650;
+  font-style:italic;
+  opacity:.9;
+}
+.premium-podium-name,
+.podium-real-name{
+  display:block;
+  margin:0 auto;
+  font-weight:900;
+  text-align:center;
+}
+.podium-nickname{
+  order:initial;
+  min-height:14px;
+  margin:2px 0 5px;
+  font-size:10px;
+  color:#a8b0bd;
+  font-weight:650;
+  font-style:italic;
+}
+.record-player-holder{
+  display:block;
+}
+.record-player-holder .player-name-stack{
+  align-items:center;
+}
+.record-player-pair{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:3px;
+}
+.record-action{
+  font-size:9px;
+  color:#8f9bab;
+  font-weight:600;
+}
+.achievement-player .player-name-stack{
+  align-items:center;
+}
+.achievement-player .player-secondary-nickname{
+  font-size:8px;
+}
+.versus-player-name .player-name-stack,
+.versus-score .player-name-stack{
+  align-items:center;
+}
+.history-winner .player-name-stack{
+  align-items:flex-end;
+}
+.profile-nickname{
+  margin-top:2px;
+}
+.profile-nickname strong{
+  color:#a8b0bd;
+  font-size:13px;
+  font-style:italic;
+  font-weight:650;
 }
 
 </style>
@@ -3020,13 +3007,13 @@ body.photo-viewer-open{overflow:hidden}
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 11h06</div>
+  <div class="app-version">Version 19/09/26 11h53</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
   <button data-view="dashboard" class="active">▦ Tableau de bord</button>
   <button data-view="latestgame">◷ Dernière partie</button>
-  <button data-view="ranking">♛ Classement</button>
+  <button data-view="ranking">♛ Classement & historique</button>
   <button data-view="records">★ Records & accomplissements</button>
   <button data-view="profile">♤ Profil joueur</button>
   <button data-view="settings">⚙ Paramètres</button>
@@ -3357,11 +3344,6 @@ body.photo-viewer-open{overflow:hidden}
     <button class="season-cumul-btn" type="button" data-season-action="all" onclick="changeSeasonFromToolbar('all')">Cumul toutes saisons</button>
   </div>
 
-  <div class="latestgame-navigation">
-    <button id="latestPrevGameBtn" class="btn secondary" type="button">← Partie précédente</button>
-    <div class="latestgame-navigation-status" id="latestGameBrowseStatus">Dernière partie</div>
-    <button id="latestNextGameBtn" class="btn secondary" type="button">Partie suivante →</button>
-  </div>
 
   <div id="latestGameEmpty" class="card muted" style="display:none;margin-top:12px">
     Aucune partie enregistrée.
@@ -3369,14 +3351,6 @@ body.photo-viewer-open{overflow:hidden}
 
   <div id="latestGameContent" style="display:none">
     <div class="latestgame-summary-line" id="latestGameSummary"></div>
-
-    <div id="latestGamePhotoZone" class="latestgame-photo-zone">
-      <div class="history-photo-toolbar">
-        <strong>Photos de la partie</strong>
-        <button id="latestAddPhotoBtn" class="btn ghost" type="button">＋ Ajouter des photos</button>
-      </div>
-      <div id="latestGamePhotoThumbs" class="history-photo-thumbs"></div>
-    </div>
 
     <div class="latestgame-podium-wrap">
       <div class="dashboard-section-label">Podium de la partie</div>
@@ -3405,29 +3379,6 @@ body.photo-viewer-open{overflow:hidden}
       </details>
     </div>
   </div>
-
-  <details class="combined-block latest-full-history-block">
-    <summary>
-      <span><strong>≡ Historique complet</strong><small>Toutes les parties de la saison sélectionnée</small></span>
-    </summary>
-    <div class="combined-block-content">
-      <div class="row" style="justify-content:space-between">
-        <div id="historySummary" class="muted"></div>
-        <button class="btn ghost" id="exportCsvBtn">Exporter CSV</button>
-      </div>
-      <div id="historyEmpty" class="muted" style="display:none;padding:18px 0">Aucune partie enregistrée.</div>
-      <div id="historyCards" class="history-cards"></div>
-      <details class="history-raw">
-        <summary>Afficher le tableau détaillé complet</summary>
-        <div class="tablewrap" id="historyTableWrap">
-          <table>
-            <thead><tr><th>Partie</th><th>Date</th><th>Lieu</th><th>Joueur</th><th>Place</th><th>Éliminé par</th><th>Tablier</th><th>Joueurs</th><th>Points</th><th>Mise</th><th>Gain</th><th>Net</th><th>Kills</th></tr></thead>
-            <tbody id="historyBody"></tbody>
-          </table>
-        </div>
-      </details>
-    </div>
-  </details>
 </section>
 
 <section id="ranking" class="view">
@@ -3454,6 +3405,29 @@ body.photo-viewer-open{overflow:hidden}
         </tr></thead>
         <tbody id="rankingBody"></tbody>
       </table></div>
+    </div>
+  </details>
+
+  <details class="combined-block combined-history-block">
+    <summary>
+      <span><strong>≡ Historique des parties</strong><small>Résultats et détail complet des parties</small></span>
+    </summary>
+    <div class="combined-block-content">
+      <div class="row" style="justify-content:space-between">
+        <div id="historySummary" class="muted"></div>
+        <button class="btn ghost" id="exportCsvBtn">Exporter CSV</button>
+      </div>
+      <div id="historyEmpty" class="muted" style="display:none;padding:18px 0">Aucune partie enregistrée.</div>
+      <div id="historyCards" class="history-cards"></div>
+      <details class="history-raw">
+        <summary>Afficher le tableau détaillé complet</summary>
+        <div class="tablewrap" id="historyTableWrap">
+          <table>
+            <thead><tr><th>Partie</th><th>Date</th><th>Lieu</th><th>Joueur</th><th>Place</th><th>Éliminé par</th><th>Tablier</th><th>Joueurs</th><th>Points</th><th>Mise</th><th>Gain</th><th>Net</th><th>Kills</th></tr></thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+      </details>
     </div>
   </details>
 </section>
@@ -3520,6 +3494,10 @@ body.photo-viewer-open{overflow:hidden}
   </div>
 
   <div class="hero player-profile-hero profile-identity premium-profile-identity">
+    <div id="playerProfilePhotoWrap" class="profile-photo-wrap">
+      <div id="playerProfilePhotoPlaceholder" class="profile-photo-placeholder">♠</div>
+      <img id="playerProfilePhoto" class="profile-photo" alt="Photo du joueur" style="display:none">
+    </div>
     <div>
       <div class="muted">Fiche joueur BPT</div>
       <h1 id="playerProfileName">—</h1>
@@ -4014,9 +3992,6 @@ function mergeStateForPush(remote,local){
   }
 
   merged.players=mergePlayers(remote.players||[],local.players||[]);
-  merged.gamePhotos={...(remote.gamePhotos||{}),...(local.gamePhotos||{})};
-  merged.playerNicknames={...(remote.playerNicknames||{}),...(local.playerNicknames||{})};
-  merged.playerAliases={...(remote.playerAliases||{}),...(local.playerAliases||{})};
   return merged;
 }
 
@@ -4075,8 +4050,7 @@ async function refreshCanonicalHistoryUI(showBusy=true){
       return true;
     }
     db.history=applyPlayerAliasesToRows(recalcCurrentSeasonPoints(serverHistory));
-    ensureGamePhotos();
-applyHistoricalPointScale();
+    applyHistoricalPointScale();
     normalizeHistoryGameNumbers();
     saveLocalOnly();
 
@@ -4329,9 +4303,7 @@ async function applyCloudState(row){
     const serverHistory=await cloudFetchGames();
     currentSeasonHistoryCache=clone(serverHistory);
 
-    const localPhotos=clone(ensureGamePhotos());
     db=remoteState;
-    db.gamePhotos={...(db.gamePhotos||{}),...localPhotos};
 
     if(liveSeasonKey==="2023-2024"){
       db.history=applyPlayerAliasesToRows(ARCHIVE_2023_2024);
@@ -4438,9 +4410,7 @@ async function initCloudSync(){
       cloudApplying=true;
 
       const localHistory=Array.isArray(db.history)?db.history:[];
-      const localPhotos=clone(ensureGamePhotos());
       db=row.data;
-      db.gamePhotos={...(db.gamePhotos||{}),...localPhotos};
 
       // Migration automatique : si bpt_games est vide,
       // le premier navigateur alimente la base à partir de son historique local.
@@ -4952,7 +4922,21 @@ function renderRecords(){
     ["🐢","Loser",loser.name,loser.value?`${loser.value} dernière${loser.value>1?"s":""} place${loser.value>1?"s":""}`:"Aucune dernière place enregistrée"],
     ["🎯","Kill le plus fréquent",pairData?`${pairData.names[0]} a éliminé ${pairData.names[1]}`:"—",pairData?`${pairData.value} fois`:"—"]
   ];
-  holder.innerHTML=cards.map(c=>`<div class="record-card"><div class="record-icon">${c[0]}</div><span>${esc(c[1])}</span><strong>${esc(c[2])}</strong><small>${esc(c[3])}</small></div>`).join("");
+  holder.innerHTML=cards.map(c=>{
+    let holderHtml="";
+    if(c[1]==="Kill le plus fréquent" && pairData){
+      holderHtml=`<div class="record-player-pair">
+        ${playerNameHtml(pairData.names[0])}
+        <span class="record-action">a éliminé</span>
+        ${playerNameHtml(pairData.names[1])}
+      </div>`;
+    }else if(c[2] && c[2]!=="—"){
+      holderHtml=playerNameHtml(c[2]);
+    }else{
+      holderHtml='<span class="player-primary-name">—</span>';
+    }
+    return `<div class="record-card"><div class="record-icon">${c[0]}</div><span>${esc(c[1])}</span><strong class="record-player-holder">${holderHtml}</strong><small>${esc(c[3])}</small></div>`;
+  }).join("");
 }
 
 
@@ -5197,6 +5181,8 @@ function renderProfile(preferredName=null){
 
   if(!d){
     $("playerProfileName").textContent="—";
+    if($("playerProfilePhoto")){$("playerProfilePhoto").style.display="none";$("playerProfilePhoto").src="";}
+    if($("playerProfilePhotoPlaceholder"))$("playerProfilePhotoPlaceholder").style.display="flex";
     if($("playerProfileNickname"))$("playerProfileNickname").textContent="";
     if($("playerProfileOtherNicknames"))$("playerProfileOtherNicknames").textContent="";
     $("playerProfileRank").textContent="#—";
@@ -5213,11 +5199,22 @@ function renderProfile(preferredName=null){
   }
 
   const {s,rows}=d;
-  $("playerProfileName").textContent=displayPlayerName(name);
+  $("playerProfileName").textContent=name;
+
+  const profilePhoto=playerPhoto(name);
+  if($("playerProfilePhoto")){
+    $("playerProfilePhoto").style.display=profilePhoto?"block":"none";
+    $("playerProfilePhoto").src=profilePhoto||"";
+  }
+  if($("playerProfilePhotoPlaceholder")){
+    $("playerProfilePhotoPlaceholder").style.display=profilePhoto?"none":"flex";
+  }
 
   const nicknameInfo=playerNicknameInfo(name);
   if($("playerProfileNickname")){
-    $("playerProfileNickname").innerHTML="";
+    $("playerProfileNickname").innerHTML=nicknameInfo.primary
+      ? `<strong>(${esc(nicknameInfo.primary)})</strong>`
+      : "";
   }
   if($("playerProfileOtherNicknames")){
     $("playerProfileOtherNicknames").textContent=nicknameInfo.others.length
@@ -5257,8 +5254,8 @@ function renderProfile(preferredName=null){
     ["Série de podiums",`${d.podiumStreak} de suite`],
     ["4e places",String(d.fourthPlaces)],
     ["Dernières places",String(d.lastPlaces)],
-    ["Victime favorite",d.favoriteVictim?`${d.favoriteVictim[0]} · ${d.favoriteVictim[1]} fois`:"—"],
-    ["Bourreau principal",d.nemesis?`${d.nemesis[0]} · ${d.nemesis[1]} fois`:"—"]
+    ["Victime favorite",d.favoriteVictim?`${d.favoriteVictim[0]}${playerNicknameSecondary(d.favoriteVictim[0])?" "+playerNicknameSecondary(d.favoriteVictim[0]):""} · ${d.favoriteVictim[1]} fois`:"—"],
+    ["Bourreau principal",d.nemesis?`${d.nemesis[0]}${playerNicknameSecondary(d.nemesis[0])?" "+playerNicknameSecondary(d.nemesis[0]):""} · ${d.nemesis[1]} fois`:"—"]
   ];
   $("playerProfileFeats").innerHTML=feats
     .map(([l,v])=>`<div class="profile-feat"><span>${esc(l)}</span><strong>${esc(v)}</strong></div>`)
@@ -5282,12 +5279,12 @@ function renderProfile(preferredName=null){
   }
   const rv=Object.entries(rivals).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,6);
   $("playerProfileRivals").innerHTML=rv.length
-    ? rv.map(([n,v])=>`<div class="row" style="justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span>${esc(displayPlayerName(n))}</span><b>${v>0?"+":""}${v}</b></div>`).join("")
+    ? rv.map(([n,v])=>`<div class="row" style="justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span>${playerNameHtml(n)}</span><b>${v>0?"+":""}${v}</b></div>`).join("")
     : '<span class="muted">Pas encore de confrontation directe.</span>';
 
   $("playerProfileHistory").innerHTML=
     `<table><thead><tr><th>Partie</th><th>Date</th><th>Lieu</th><th>Place</th><th>Pts</th><th>Kills</th><th>Éliminé par</th><th>Net</th></tr></thead><tbody>`+
-    rows.slice().reverse().map(r=>`<tr><td>#${r.game}</td><td>${esc(shortDate(r.date))}</td><td>${esc(r.location||"")}</td><td>${r.place}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${r.killer?esc(displayPlayerName(r.killer)):"—"}</td><td>${euro(r.net)}</td></tr>`).join("")+
+    rows.slice().reverse().map(r=>`<tr><td>#${r.game}</td><td>${esc(shortDate(r.date))}</td><td>${esc(r.location||"")}</td><td>${r.place}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${r.killer?playerNameHtml(r.killer):"—"}</td><td>${euro(r.net)}</td></tr>`).join("")+
     `</tbody></table>`;
 
   renderVersus();
@@ -5306,260 +5303,12 @@ function showEndGameSummary(rows){
   content.innerHTML=`
     <div class="muted" style="margin-top:6px">Partie #${first.game} · ${esc(shortDate(first.date))}${first.location?" · "+esc(first.location):""} · ${sorted.length} joueurs</div>
     <div class="summary-podium">
-      ${sorted.slice(0,3).map((r,i)=>{
-        const pd=medalPlayerHtml(r.player);
-        return `<div class="summary-place"><div class="big">${medalForRank(i+1)}</div><b>${esc(pd.real)}</b>${pd.nick?`<div class="medal-player-nickname">${esc(pd.nick)}</div>`:""}<div>${num(r.points,0)} pts · ${euro(r.gross)}</div><div class="muted">${r.kills||0} kill${Number(r.kills||0)>1?"s":""}</div></div>`;
-      }).join("")}
+      ${sorted.slice(0,3).map((r,i)=>`<div class="summary-place"><b>${esc(r.player)}</b><div class="podium-nickname">${playerNicknameInfo(r.player).primary?`(${esc(playerNicknameInfo(r.player).primary)})`:""}</div><div class="big">${medalForRank(i+1)}</div><div>${num(r.points,0)} pts · ${euro(r.gross)}</div><div class="muted">${r.kills||0} kill${Number(r.kills||0)>1?"s":""}</div></div>`).join("")}
     </div>
     <div class="tablewrap"><table class="summary-table"><thead><tr><th>Place</th><th>Joueur</th><th>Points</th><th>Kills</th><th>Net</th></tr></thead><tbody>
-      ${sorted.map(r=>`<tr><td>${r.place}</td><td>${esc(displayPlayerName(r.player))}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${euro(r.net)}</td></tr>`).join("")}
+      ${sorted.map(r=>`<tr><td>${r.place}</td><td>${playerNameHtml(r.player)}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${euro(r.net)}</td></tr>`).join("")}
     </tbody></table></div>`;
   backdrop.style.display="flex";
-}
-
-
-function ensureGamePhotos(){
-  if(!db.gamePhotos || typeof db.gamePhotos!=="object" || Array.isArray(db.gamePhotos))db.gamePhotos={};
-  return db.gamePhotos;
-}
-
-function gamePhotoSeasonKey(firstRow){
-  return String(
-    firstRow?.seasonKey ||
-    (selectedSeasonKey==="all" ? CURRENT_SEASON_KEY : selectedSeasonKey) ||
-    CURRENT_SEASON_KEY
-  );
-}
-
-function gamePhotoSourceGame(firstRow,gameNo){
-  return Number(firstRow?.sourceGame || gameNo || firstRow?.game || 0);
-}
-
-function gamePhotoKey(firstRow,gameNo){
-  const seasonKey=gamePhotoSeasonKey(firstRow);
-  const sourceGame=gamePhotoSourceGame(firstRow,gameNo);
-  return `${seasonKey}|${sourceGame}`;
-}
-
-function gamePhotoStableKey(firstRow,gameNo){
-  const seasonKey=gamePhotoSeasonKey(firstRow);
-  const sourceGame=gamePhotoSourceGame(firstRow,gameNo);
-  const date=String(firstRow?.date||"").trim();
-  const location=String(firstRow?.location||"").trim().toLocaleLowerCase("fr");
-  return `${seasonKey}|${sourceGame}|${date}|${location}`;
-}
-
-function gamePhotoCandidateKeys(firstRow,gameNo){
-  const seasonKey=gamePhotoSeasonKey(firstRow);
-  const sourceGame=gamePhotoSourceGame(firstRow,gameNo);
-  const visibleGame=Number(gameNo||firstRow?.game||0);
-  const date=String(firstRow?.date||"").trim();
-  const location=String(firstRow?.location||"").trim().toLocaleLowerCase("fr");
-
-  return [...new Set([
-    gamePhotoStableKey(firstRow,gameNo),
-    `${seasonKey}|${sourceGame}`,
-    `${seasonKey}|${visibleGame}`,
-    `${CURRENT_SEASON_KEY}|${sourceGame}`,
-    `${CURRENT_SEASON_KEY}|${visibleGame}`,
-    `${seasonKey}|${sourceGame}|${date}|${location}`,
-    `${seasonKey}|${visibleGame}|${date}|${location}`
-  ].filter(Boolean))];
-}
-
-function photosForGame(firstRow,gameNo){
-  const all=ensureGamePhotos();
-  const keys=gamePhotoCandidateKeys(firstRow,gameNo);
-
-  // Normal lookup, including the old V115/V116 key format.
-  for(const key of keys){
-    const list=all[key];
-    if(Array.isArray(list) && list.length)return list;
-  }
-
-  // Recovery for previously stored photos whose visible/source game number
-  // changed after a canonical Supabase reload. Match by season/date/location.
-  const seasonKey=gamePhotoSeasonKey(firstRow);
-  const date=String(firstRow?.date||"").trim();
-  const location=String(firstRow?.location||"").trim().toLocaleLowerCase("fr");
-
-  for(const [key,list] of Object.entries(all)){
-    if(!Array.isArray(list) || !list.length)continue;
-    const parts=String(key).split("|");
-    if(parts[0]!==seasonKey)continue;
-
-    // New stable keys carry date/location.
-    if(parts.length>=4 && parts[2]===date && String(parts.slice(3).join("|")).toLocaleLowerCase("fr")===location){
-      return list;
-    }
-  }
-
-  return [];
-}
-
-function gamePhotoStorageKey(firstRow,gameNo){
-  // New uploads use a stable key while reads remain backward-compatible.
-  return gamePhotoStableKey(firstRow,gameNo);
-}
-
-function fileToCompressedPhoto(file,maxSide=1000,quality=.68){
-  return new Promise((resolve,reject)=>{
-    if(!file || !String(file.type||"").startsWith("image/")){
-      reject(new Error("Le fichier sélectionné n’est pas une image."));
-      return;
-    }
-    const reader=new FileReader();
-    reader.onerror=()=>reject(new Error("Lecture de l’image impossible."));
-    reader.onload=()=>{
-      const img=new Image();
-      img.onerror=()=>reject(new Error("Image illisible."));
-      img.onload=()=>{
-        let w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
-        const scale=Math.min(1,maxSide/Math.max(w,h));
-        w=Math.max(1,Math.round(w*scale));
-        h=Math.max(1,Math.round(h*scale));
-        const canvas=document.createElement("canvas");
-        canvas.width=w;canvas.height=h;
-        const ctx=canvas.getContext("2d");
-        ctx.drawImage(img,0,0,w,h);
-        resolve({
-          id:(crypto?.randomUUID?.() || `photo_${Date.now()}_${Math.random().toString(36).slice(2)}`),
-          dataUrl:canvas.toDataURL("image/jpeg",quality),
-          name:String(file.name||"Photo"),
-          addedAt:new Date().toISOString()
-        });
-      };
-      img.src=reader.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
-
-let pendingPhotoGameKey="";
-let pendingPhotoGameLabel="";
-
-async function cloudPushSharedStateOnly(){
-  if(!sbClient || !cloudReady){
-    saveLocalOnly();
-    cloudLocalDirty=true;
-    return false;
-  }
-  setCloudStatus("busy","Synchronisation des photos…");
-  try{
-    const remote=await cloudFetchState();
-    const remoteData=(remote && isValidBptState(remote.data)) ? clone(remote.data) : clone(db);
-
-    // Conserver l’état partagé le plus récent, puis y injecter les photos locales.
-    remoteData.gamePhotos={...(remoteData.gamePhotos||{}),...clone(ensureGamePhotos())};
-    remoteData.playerNicknames={...(remoteData.playerNicknames||{}),...clone(ensurePlayerNicknames())};
-    remoteData.playerAliases={...(remoteData.playerAliases||{}),...clone(ensurePlayerAliases())};
-    remoteData.history=[];
-
-    const {data,error}=await sbClient
-      .from("bpt_state")
-      .upsert({id:CLOUD_ROW_ID,data:remoteData},{onConflict:"id"})
-      .select("revision,updated_at")
-      .single();
-    if(error)throw error;
-
-    cloudLastRevision=Number(data?.revision||cloudLastRevision||0);
-    cloudLocalDirty=false;
-    saveLocalOnly();
-    setCloudStatus("ok","Photos synchronisées");
-    return true;
-  }catch(e){
-    console.error("BPT photo sync:",e);
-    cloudLocalDirty=true;
-    saveLocalOnly();
-    setCloudStatus("offline","Photos en attente de synchronisation",e?.message||String(e));
-    return false;
-  }
-}
-
-
-async function handleGamePhotoInputChange(input){
-  try{
-    if(!pendingPhotoGameKey){
-      alert("Impossible d’identifier la partie pour cette photo.");
-      return;
-    }
-    const files=input?.files;
-    if(!files || !files.length)return;
-    await addPhotosToGame(pendingPhotoGameKey,pendingPhotoGameLabel,files);
-  }catch(e){
-    console.error("Ajout photo :",e);
-    alert("Impossible d’ajouter la photo.\n\n"+(e?.message||String(e)));
-  }finally{
-    if(input)input.value="";
-  }
-}
-
-async function addPhotosToGame(key,label,files){
-  const selected=[...(files||[])].filter(f=>String(f.type||"").startsWith("image/"));
-  if(!selected.length)return;
-
-  const photos=ensureGamePhotos();
-  const existing=Array.isArray(photos[key])?photos[key]:[];
-  const remaining=Math.max(0,5-existing.length);
-  if(!remaining){
-    alert("Cette partie contient déjà 5 photos, qui est le maximum prévu.");
-    return;
-  }
-
-  const chosen=selected.slice(0,remaining);
-  setCloudStatus("busy","Préparation des photos…");
-  const added=[];
-  for(const f of chosen){
-    try{added.push(await fileToCompressedPhoto(f,720,.60));}
-    catch(e){console.warn(e);}
-  }
-  if(!added.length){
-    alert("La photo n’a pas pu être préparée.");
-    return;
-  }
-
-  photos[key]=[...existing,...added];
-  pendingPhotoGameKey="";
-  pendingPhotoGameLabel="";
-
-  // Keep an in-memory copy before any cloud operation so the photo is visible
-  // immediately even if the network synchronization fails.
-  db.gamePhotos=photos;
-  saveLocalOnly();
-  renderLatestGame();
-  renderHistory();
-
-  const synced=await cloudPushSharedStateOnly();
-
-  // Render again after the async save: this avoids a stale cloud/UI refresh
-  // hiding a successfully added image.
-  renderLatestGame();
-  renderHistory();
-
-  if(!synced){
-    alert("La photo est visible sur cet appareil, mais sa synchronisation avec les autres appareils n’a pas abouti pour le moment.");
-  }else if(selected.length>remaining){
-    alert(`Seules ${remaining} photo${remaining>1?"s":""} ont été ajoutées. Maximum : 5 photos par partie.`);
-  }
-}
-
-function openGamePhoto(src,caption=""){
-  const viewer=$("gamePhotoViewer");
-  if(!viewer)return;
-  $("gamePhotoViewerImage").src=src;
-  $("gamePhotoViewerCaption").textContent=caption;
-  viewer.classList.add("open");
-  viewer.setAttribute("aria-hidden","false");
-  document.body.classList.add("photo-viewer-open");
-}
-
-function closeGamePhoto(){
-  const viewer=$("gamePhotoViewer");
-  if(!viewer)return;
-  viewer.classList.remove("open");
-  viewer.setAttribute("aria-hidden","true");
-  $("gamePhotoViewerImage").src="";
-  document.body.classList.remove("photo-viewer-open");
 }
 
 function renderHistoryCards(){
@@ -5568,63 +5317,19 @@ function renderHistoryCards(){
   holder.innerHTML=games.map(([g,rows])=>{
     const sorted=rows.slice().sort((a,b)=>Number(a.place)-Number(b.place));
     const f=sorted[0]||{},win=sorted.find(r=>Number(r.place)===1);
-    const photoKey=gamePhotoStorageKey(f,g);
-    const photoLabel=gamePhotoLabel(f,g);
-    const photos=photosForGame(f,g);
-
     return `<details class="history-game">
       <summary>
         <div class="history-game-title">${esc(gameDisplayTitle(f,g))}</div>
-        <div><div>${esc(shortDate(f.date||""))}${f.location?" · "+esc(f.location):""} · ${rows.length} joueurs</div><div class="history-game-meta">Cagnotte ${euro(rows.length*Number(f.stake||0))}${photos.length?` · ${photos.length} photo${photos.length>1?"s":""}`:""}</div></div>
-        <div class="history-winner">🏆 ${esc(displayPlayerName(win?.player||"—"))} · ${num(win?.points||0,0)} pts</div>
+        <div><div>${esc(shortDate(f.date||""))}${f.location?" · "+esc(f.location):""} · ${rows.length} joueurs</div><div class="history-game-meta">Cagnotte ${euro(rows.length*Number(f.stake||0))}</div></div>
+        <div class="history-winner">🏆 ${win?playerNameHtml(win.player):"—"} <span>· ${num(win?.points||0,0)} pts</span></div>
       </summary>
-      <div class="history-game-body">
-        <div class="history-game-photo-zone">
-          <div class="history-photo-toolbar">
-            <strong>Photos de la partie</strong>
-            <button class="btn ghost history-add-photo-btn" type="button"
-                    data-photo-key="${encodeURIComponent(photoKey)}"
-                    data-photo-label="${encodeURIComponent(photoLabel)}">＋ Ajouter des photos</button>
-          </div>
-          <div class="history-photo-thumbs">
-            ${photos.length
-              ? photos.map((p,idx)=>`<button class="history-photo-thumb" type="button"
-                    data-photo-src="${encodeURIComponent(p.dataUrl)}"
-                    data-photo-caption="${encodeURIComponent(`${photoLabel} · Photo ${idx+1}`)}"
-                    title="Agrandir la photo">
-                  <img src="${p.dataUrl}" alt="${esc(`${photoLabel} · Photo ${idx+1}`)}">
-                </button>`).join("")
-              : `<span class="muted history-no-photo">Aucune photo pour cette partie.</span>`}
-          </div>
-        </div>
-
-        <div class="tablewrap"><table><thead><tr><th>Place</th><th>Joueur</th><th>Pts</th><th>Kills</th><th>Éliminé par</th><th>Gain</th><th>Net</th></tr></thead><tbody>
-          ${sorted.map(r=>`<tr><td>${r.place}</td><td><button class="player-link" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(displayPlayerDetailed(r.player))}</button></td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${r.killer?esc(displayPlayerDetailed(r.killer)):"—"}</td><td>${euro(r.gross)}</td><td>${euro(r.net)}</td></tr>`).join("")}
-        </tbody></table></div>
-      </div>
+      <div class="history-game-body"><div class="tablewrap"><table><thead><tr><th>Place</th><th>Joueur</th><th>Pts</th><th>Kills</th><th>Éliminé par</th><th>Gain</th><th>Net</th></tr></thead><tbody>
+        ${sorted.map(r=>`<tr><td>${r.place}</td><td>${playerNameHtml(r.player,{button:true,onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))`})}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${r.killer?playerNameHtml(r.killer):"—"}</td><td>${euro(r.gross)}</td><td>${euro(r.net)}</td></tr>`).join("")}
+      </tbody></table></div></div>
     </details>`;
   }).join("");
-
-  holder.querySelectorAll(".history-add-photo-btn").forEach(btn=>{
-    btn.onclick=e=>{
-      e.preventDefault();e.stopPropagation();
-      pendingPhotoGameKey=decodeURIComponent(btn.dataset.photoKey||"");
-      pendingPhotoGameLabel=decodeURIComponent(btn.dataset.photoLabel||"");
-      const input=$("gamePhotoInput");
-      if(input){input.value="";input.click();}
-    };
-  });
-
-  holder.querySelectorAll(".history-photo-thumb").forEach(btn=>{
-    btn.onclick=e=>{
-      e.preventDefault();e.stopPropagation();
-      openGamePhoto(
-        decodeURIComponent(btn.dataset.photoSrc||""),
-        decodeURIComponent(btn.dataset.photoCaption||"")
-      );
-    };
-  });
 }
+
 function updateLiveTimerUrgency(){
   const s=ensureLiveState(),el=$("liveTimer");if(!el)return;
   el.classList.toggle("live-warning-30",s.remainingSeconds<=30 && s.remainingSeconds>10);
@@ -5837,7 +5542,7 @@ function renderAchievements(){
       <div class="achievement-desc">${esc(a.desc)}</div>
       <div class="achievement-status">${a.dynamic?"Accomplissement dynamique":unlocked?"Débloqué":"À débloquer"}</div>
       ${unlocked
-        ? `<div class="achievement-players">${a.players.map(n=>`<span class="achievement-player">${esc(n)}</span>`).join("")}</div>`
+        ? `<div class="achievement-players">${a.players.map(n=>`<span class="achievement-player">${playerNameHtml(n)}</span>`).join("")}</div>`
         : `<div class="achievement-locked">🔒 Aucun joueur</div>`}
     </div>`;
   }).join("");
@@ -5980,7 +5685,7 @@ function mergeAllSeasonsOfficialStats(rawItems){
   });
 }
 
-const BPT_ANNALES_NICKNAMES={"Franck NAESSENS":["Francis Chatard","Chatard en Chef","Boucher en Chef","Boule à Facettes","Dogarty04","Dégolas","Raoul"],"Jérôme BINOT":["Tchobin","Panama","El Toucan","String Borat","Le Myticulteur","Livre La Moulasse","Chatard en Second"],"Jérôme BERA":["Superman","Slip Rouge","Cerf-Volant","Chip Leader","Ouvrier Plumeur"],"Olivier HENGUELLE":["Miguel","Migolivier","MigGeger","Désosseur","Jean-Michel j’aurais dû jouer !"],"Mehdi BRAHIMI":["El Español","M Le Maudit","Kabiloute","Dégraisseur","Bachybouzouk","Cobra"],"Michel SCHERPEREEL":["Scotty Nguyen","Michmuch59","Micheline59","Boyaudier","Club55"],"Alexis VOLANT":["Biogold","Petit Cœur","L’architecte","Le Neveu de Tonton","Le Jeune Loup de Wall Street"],"Jérôme RIFFE":["Le Chat","Pitch And Putt","Coupeur de Quartier","Djayrem"],"François CATTEAU":["Le Dealer","Chargé de Pesée","Jean Guile","Bpt59"],"Jérémy GRAS":["Shrek","Kersh"],"Thierry MONNIAUX":["L’antidote","Désosseur Pareur","TYMOON69"],"Stéphane LEFIN":["Phœnix","Boucher Gérant","George Luke Ass","Pevelef"],"David SAGALOWICZ":["The Shaker"],"Areski AIT GHERBI":["Kikipoker","Areskilimero","Kiki Le Magnifique"],"Anne BERA":["Maya","Nanou","PrinceLeia59"],"Gérard CANDELIER":["Le Professeur","Le Lion d’Arras","Le Templier","Eviscérateur","GG ARRAS"],"Jérémie CARPENTIER":["Le Trader","Sacrificateur","Lanseria44"],"Mélanie NAESSENS":["Francine Chatard"],"Grégoire DUFORET":["Robin Hood","Grofud"],"Florence SAGALOWICZ":["La Dame de Cœur"],"Dylan DECOTTE":["Rocky Balboa"],"Philippe DUBOIS":["Taz","Japlpel","Accrocheur en Abattoir","J’Adore Pulvériser Les Pokermen En Ligne"],"Solène BALLOIS":["SoBa","Poupée","La Chatte à la Voisine"],"Juliette PENIN":["Wild Horses"],"Jules NAESSENS":["Serial Senior Killer"],"Arnaud HEDIN":["Nono la Saumure"],"Clément MARAVAL":["Scotland Beret","Pointbreak8"],"Thomas DELVAL":["Kitemalaman"],"Hélène MORIZUR":["Psycho Girl","Tazette"],"Mélanie BINOT":["Micromachine","Bazouka"],"Jérémy COQUEL":["Shrek"],"Jeremy COQUEL":["Shrek"],"JEREMY COQUEL":["Shrek"]};
+const BPT_ANNALES_NICKNAMES={"Franck NAESSENS":["Francis Chatard","Chatard en Chef","Boucher en Chef","Boule à Facettes","Dogarty04","Dégolas","Raoul"],"Jérôme BINOT":["Tchobin","Panama","El Toucan","String Borat","Le Myticulteur","Livre La Moulasse","Chatard en Second"],"Jérôme BERA":["Superman","Slip Rouge","Cerf-Volant","Chip Leader","Ouvrier Plumeur"],"Olivier HENGUELLE":["Miguel","Migolivier","MigGeger","Désosseur","Jean-Michel j’aurais dû jouer !"],"Mehdi BRAHIMI":["El Español","M Le Maudit","Kabiloute","Dégraisseur","Bachybouzouk","Cobra"],"Michel SCHERPEREEL":["Scotty Nguyen","Michmuch59","Micheline59","Boyaudier","Club55"],"Alexis VOLANT":["Biogold","Petit Cœur","L’architecte","Le Neveu de Tonton","Le Jeune Loup de Wall Street"],"Jérôme RIFFE":["Le Chat","Pitch And Putt","Coupeur de Quartier","Djayrem"],"François CATTEAU":["Le Dealer","Chargé de Pesée","Jean Guile","Bpt59"],"Jérémy GRAS":["Shrek","Kersh"],"Thierry MONNIAUX":["L’antidote","Désosseur Pareur","TYMOON69"],"Stéphane LEFIN":["Phœnix","Boucher Gérant","George Luke Ass","Pevelef"],"David SAGALOWICZ":["The Shaker"],"Areski AIT GHERBI":["Kikipoker","Areskilimero","Kiki Le Magnifique"],"Anne BERA":["Maya","Nanou","PrinceLeia59"],"Gérard CANDELIER":["Le Professeur","Le Lion d’Arras","Le Templier","Eviscérateur","GG ARRAS"],"Jérémie CARPENTIER":["Le Trader","Sacrificateur","Lanseria44"],"Mélanie NAESSENS":["Francine Chatard"],"Grégoire DUFORET":["Robin Hood","Grofud"],"Florence SAGALOWICZ":["La Dame de Cœur"],"Dylan DECOTTE":["Rocky Balboa"],"Philippe DUBOIS":["Taz","Japlpel","Accrocheur en Abattoir","J’Adore Pulvériser Les Pokermen En Ligne"],"Solène BALLOIS":["SoBa","Poupée","La Chatte à la Voisine"],"Juliette PENIN":["Wild Horses"],"Jules NAESSENS":["Serial Senior Killer"],"Arnaud HEDIN":["Nono la Saumure"],"Clément MARAVAL":["Scotland Beret","Pointbreak8"],"Thomas DELVAL":["Kitemalaman"],"Hélène MORIZUR":["Psycho Girl","Tazette"],"Mélanie BINOT":["Micromachine","Bazouka"]};
 
 function normalizePlayerLookupName(name){
   return String(name||"")
@@ -6004,12 +5709,7 @@ function annalesNicknamesFor(name){
 }
 
 function playerNicknameInfo(name){
-  const nicknameStore=ensurePlayerNicknames();
-  const normalized=normalizePlayerLookupName(name);
-  if(normalized==="JEREMY COQUEL" && !String(nicknameStore[name]||"").trim()){
-    nicknameStore[name]="Shrek";
-  }
-  const custom=String(nicknameStore[name]||"").trim();
+  const custom=String(ensurePlayerNicknames()[name]||"").trim();
   const annales=annalesNicknamesFor(name);
   const primary=custom || annales[0] || "";
   const others=annales.filter(n=>n!==primary);
@@ -6017,28 +5717,97 @@ function playerNicknameInfo(name){
 }
 
 function displayPlayerName(name){
-  const real=String(name||"").trim();
-  const nick=playerNicknameInfo(real).primary;
-  return nick && normalizePlayerLookupName(nick)!==normalizePlayerLookupName(real)
-    ? `${real} (${nick})`
-    : real;
+  return String(name||"").trim();
 }
 
-function displayPlayerDetailed(name){
-  return displayPlayerName(name);
+function playerNicknameSecondary(name){
+  const nick=playerNicknameInfo(name).primary;
+  return nick?`(${nick})`:"";
 }
-function medalPlayerHtml(name){
+
+function playerNameHtml(name,{button=false,buttonClass="",onclick=""}={}){
   const real=String(name||"").trim();
   const nick=playerNicknameInfo(real).primary;
-  return {
-    real,
-    nick:(nick && normalizePlayerLookupName(nick)!==normalizePlayerLookupName(real)) ? nick : ""
-  };
+  const inner=`<span class="player-primary-name">${esc(real)}</span>${nick?`<span class="player-secondary-nickname">(${esc(nick)})</span>`:""}`;
+  if(button){
+    return `<button class="player-link player-name-stack ${buttonClass}" ${onclick?`onclick="${onclick}"`:""}>${inner}</button>`;
+  }
+  return `<span class="player-name-stack">${inner}</span>`;
+}
+
+function ensurePlayerPhotos(){
+  if(!db.playerPhotos || typeof db.playerPhotos!=="object" || Array.isArray(db.playerPhotos)){
+    db.playerPhotos={};
+  }
+  return db.playerPhotos;
+}
+
+function playerPhoto(name){
+  return String(ensurePlayerPhotos()[String(name||"").trim()]||"");
+}
+
+async function fileToCompressedDataUrl(file){
+  return new Promise((resolve,reject)=>{
+    if(!file){resolve("");return;}
+    if(!String(file.type||"").startsWith("image/")){
+      reject(new Error("Le fichier sélectionné n’est pas une image."));
+      return;
+    }
+    const reader=new FileReader();
+    reader.onerror=()=>reject(new Error("Impossible de lire l’image."));
+    reader.onload=()=>{
+      const img=new Image();
+      img.onerror=()=>reject(new Error("Format d’image non reconnu."));
+      img.onload=()=>{
+        const max=480;
+        const ratio=Math.min(1,max/Math.max(img.width,img.height));
+        const w=Math.max(1,Math.round(img.width*ratio));
+        const h=Math.max(1,Math.round(img.height*ratio));
+        const canvas=document.createElement("canvas");
+        canvas.width=w;canvas.height=h;
+        const ctx=canvas.getContext("2d");
+        ctx.drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL("image/jpeg",0.72));
+      };
+      img.src=reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function savePlayerPhoto(name,file){
+  const player=String(name||"").trim();
+  if(!player || !file)return;
+  try{
+    const dataUrl=await fileToCompressedDataUrl(file);
+    ensurePlayerPhotos()[player]=dataUrl;
+    saveDB();
+    renderPlayers();
+    if($("profilePlayerSelect")?.value===player)renderProfile(player);
+  }catch(e){
+    alert(e?.message||String(e));
+  }
+}
+
+function deletePlayerPhoto(name){
+  const player=String(name||"").trim();
+  if(!player)return;
+  const map=ensurePlayerPhotos();
+  if(!map[player])return;
+  if(!confirm(`Supprimer la photo de ${player} ?`))return;
+  delete map[player];
+  saveDB();
+  renderPlayers();
+  if($("profilePlayerSelect")?.value===player)renderProfile(player);
 }
 
 
 function playerDisplayWithRealName(name){
-  return displayPlayerName(name);
+  const real=String(name||"").trim();
+  const nick=playerNicknameInfo(real).primary;
+  return nick && normalizePlayerLookupName(nick)!==normalizePlayerLookupName(real)
+    ? `${real} · (${nick})`
+    : real;
 }
 
 async function savePlayerNickname(name,value){
@@ -6140,7 +5909,6 @@ async function selectSeason(key){
   if(leavingCurrent)currentSeasonHistoryCache=clone(db.history||[]);
 
   selectedSeasonKey=key;
-  latestGameBrowseIndex=null;
   dashboardRecordSelection=null;
 
   if(key==="all"){
@@ -6234,7 +6002,7 @@ function updateSeasonContextTitles(){
     const el=document.getElementById(id);
     if(el)el.textContent=`${label} ${suffix}`;
   };
-  set("rankingSeasonTitle","Classement BPT");
+  set("rankingSeasonTitle","Classement & historique BPT");
   set("recordsSeasonTitle","Records & accomplissements BPT");
   set("profileSeasonTitle","Profil joueur BPT");
 }
@@ -6547,8 +6315,9 @@ function renderDashboard(){
   const podium=rank.slice(0,3);
   $("dashPodium").innerHTML=podium.length ? podium.map((p,i)=>`
     <div class="premium-podium-card rank-${i+1}">
+      <button class="player-link premium-podium-name" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(p.name)}'))">${esc(p.name)}</button>
+      <div class="podium-nickname">${playerNicknameInfo(p.name).primary?`(${esc(playerNicknameInfo(p.name).primary)})`:""}</div>
       <div class="premium-podium-medal">${medalForRank(i+1)}</div>
-      <button class="player-link premium-podium-name" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(p.name)}'))">${esc(displayPlayerName(p.name))}</button>
       <div class="premium-podium-points">${num(p.points,0)} pts</div>
     </div>`).join("")
     : '<div class="muted" style="padding:18px 0">Le podium apparaîtra après la première partie classée.</div>';
@@ -6604,54 +6373,6 @@ function renderDashboard(){
 
 function mostAvgFix(v){ return Number.isFinite(Number(v)) ? Number(v) : 0; }
 
-
-let latestGameBrowseIndex=null;
-
-function selectedGameIndex(games){
-  if(!games.length)return -1;
-  if(latestGameBrowseIndex===null || !Number.isFinite(Number(latestGameBrowseIndex))){
-    return games.length-1;
-  }
-  return Math.max(0,Math.min(games.length-1,Number(latestGameBrowseIndex)));
-}
-
-function browseGame(delta){
-  const games=groupedGames();
-  if(!games.length)return;
-  const current=selectedGameIndex(games);
-  latestGameBrowseIndex=Math.max(0,Math.min(games.length-1,current+delta));
-  renderLatestGame();
-}
-
-function resetGameBrowserToLatest(){
-  latestGameBrowseIndex=null;
-}
-
-function bindLatestGamePhotoControls(photoKey,photoLabel){
-  const addBtn=$("latestAddPhotoBtn");
-  if(addBtn){
-    addBtn.onclick=()=>{
-      pendingPhotoGameKey=photoKey;
-      pendingPhotoGameLabel=photoLabel;
-      const input=$("gamePhotoInput");
-      if(input){input.value="";input.click();}
-    };
-  }
-
-  const thumbs=$("latestGamePhotoThumbs");
-  if(thumbs){
-    thumbs.querySelectorAll(".history-photo-thumb").forEach(btn=>{
-      btn.onclick=e=>{
-        e.preventDefault();e.stopPropagation();
-        openGamePhoto(
-          decodeURIComponent(btn.dataset.photoSrc||""),
-          decodeURIComponent(btn.dataset.photoCaption||"")
-        );
-      };
-    });
-  }
-}
-
 function renderLatestGame(){
   const games=groupedGames();
   const empty=$("latestGameEmpty");
@@ -6665,37 +6386,22 @@ function renderLatestGame(){
     $("latestGameMeta").textContent="Aucune partie enregistrée.";
     $("latestGameWinner").textContent="—";
     $("latestGameWinnerMeta").textContent="—";
-    if($("latestGameBrowseStatus"))$("latestGameBrowseStatus").textContent="Aucune partie";
-    if($("latestPrevGameBtn"))$("latestPrevGameBtn").disabled=true;
-    if($("latestNextGameBtn"))$("latestNextGameBtn").disabled=true;
-    if($("latestGamePhotoThumbs"))$("latestGamePhotoThumbs").innerHTML='<span class="muted">Aucune photo.</span>';
     return;
   }
 
   empty.style.display="none";
   content.style.display="block";
 
-  const index=selectedGameIndex(games);
-  latestGameBrowseIndex=index;
-  const [gameNo,gameRows]=games[index];
+  const [gameNo,gameRows]=games[games.length-1];
   const rows=gameRows.slice().sort((a,b)=>Number(a.place)-Number(b.place));
   const first=rows[0]||{};
   const winner=rows.find(r=>Number(r.place)===1);
   const pot=rows.length*Number(first.stake||0);
-  const isLatest=index===games.length-1;
 
   $("latestGameTitle").textContent=gameDisplayTitle(first,gameNo);
   $("latestGameMeta").textContent=`${shortDate(first.date||"")}${first.location?" · "+first.location:""} · ${rows.length} joueurs`;
-  $("latestGameWinner").textContent=displayPlayerName(winner?.player||"—");
+  $("latestGameWinner").textContent=winner?.player||"—";
   $("latestGameWinnerMeta").textContent=winner?`${num(winner.points||0,0)} pts · ${euro(winner.gross||0)} de gain`:"—";
-
-  if($("latestGameBrowseStatus")){
-    $("latestGameBrowseStatus").textContent=isLatest
-      ? `Dernière partie · ${index+1}/${games.length}`
-      : `Partie ${index+1} sur ${games.length}`;
-  }
-  if($("latestPrevGameBtn"))$("latestPrevGameBtn").disabled=index<=0;
-  if($("latestNextGameBtn"))$("latestNextGameBtn").disabled=index>=games.length-1;
 
   $("latestGameSummary").innerHTML=[
     ["Date",shortDate(first.date||"")],
@@ -6704,77 +6410,53 @@ function renderLatestGame(){
     ["Cagnotte",euro(pot)]
   ].map(([label,value])=>`<div class="latestgame-summary-item"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join("");
 
-  // Photos directly visible in the game view.
-  const photoKey=gamePhotoStorageKey(first,gameNo);
-  const photoLabel=gamePhotoLabel(first,gameNo);
-  const photos=photosForGame(first,gameNo);
-  const photoZone=$("latestGamePhotoZone");
-  if(photoZone)photoZone.dataset.photoCount=String(photos.length);
-  $("latestGamePhotoThumbs").innerHTML=photos.length
-    ? photos.map((p,idx)=>`<button class="history-photo-thumb latestgame-photo-thumb" type="button"
-          data-photo-src="${encodeURIComponent(p.dataUrl)}"
-          data-photo-caption="${encodeURIComponent(`${photoLabel} · Photo ${idx+1}`)}"
-          title="Agrandir la photo">
-        <img src="${p.dataUrl}" alt="${esc(`${photoLabel} · Photo ${idx+1}`)}">
-      </button>`).join("")
-    : `<span class="muted history-no-photo">Aucune photo pour cette partie.</span>`;
-  bindLatestGamePhotoControls(photoKey,photoLabel);
-
-  $("latestGamePodium").innerHTML=rows.slice(0,3).map((r,i)=>{
-    const pd=medalPlayerHtml(r.player);
-    return `<div class="podium-medal-item rank-${i+1}">
+  $("latestGamePodium").innerHTML=rows.slice(0,3).map((r,i)=>`
+    <div class="podium-medal-item rank-${i+1}">
+      <button class="player-link podium-real-name" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(r.player)}</button>
+      <div class="podium-nickname">${playerNicknameInfo(r.player).primary?`(${esc(playerNicknameInfo(r.player).primary)})`:""}</div>
       <div class="medal-badge">${medalForRank(i+1)}</div>
-      <button class="player-link medal-player-name" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(pd.real)}</button>
-      ${pd.nick?`<div class="medal-player-nickname">${esc(pd.nick)}</div>`:""}
       <small>${num(r.points||0,0)} pts · ${euro(r.gross||0)}</small>
-    </div>`;
-  }).join("");
+    </div>`).join("");
 
   $("latestGameResults").innerHTML=`<table>
     <thead><tr><th>Place</th><th>Joueur</th><th>Points</th><th>Kills</th><th>Éliminé par</th><th>Gain</th><th>Net</th></tr></thead>
     <tbody>${rows.map(r=>`<tr>
       <td>${r.place}</td>
-      <td><button class="player-link" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(displayPlayerDetailed(r.player))}</button></td>
+      <td>${playerNameHtml(r.player,{button:true,onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))`})}</td>
       <td>${num(r.points||0,0)}</td>
       <td>${num(r.kills||0,0)}</td>
-      <td>${r.killer?esc(displayPlayerDetailed(r.killer)):"—"}</td>
+      <td>${r.killer?playerNameHtml(r.killer):"—"}</td>
       <td>${euro(r.gross||0)}</td>
       <td>${euro(r.net||0)}</td>
     </tr>`).join("")}</tbody>
   </table>`;
 
-  // Existing achievement unlock logic is defined against the latest game.
-  // For older browsed games we avoid showing misleading "unlocked" data.
-  if(isLatest){
-    const unlocked=latestGameUnlockedAchievements();
-    const byPlayer=new Map();
-    for(const a of unlocked){
-      for(const player of a.players){
-        if(!byPlayer.has(player))byPlayer.set(player,[]);
-        byPlayer.get(player).push(a);
-      }
+  const unlocked=latestGameUnlockedAchievements();
+  const byPlayer=new Map();
+  for(const a of unlocked){
+    for(const player of a.players){
+      if(!byPlayer.has(player))byPlayer.set(player,[]);
+      byPlayer.get(player).push(a);
     }
-
-    $("latestGameAchievementsByPlayer").innerHTML=byPlayer.size
-      ? [...byPlayer.entries()]
-          .sort((a,b)=>a[0].localeCompare(b[0],"fr"))
-          .map(([player,items])=>`<div class="latest-achievement-player">
-            <button class="player-link latest-achievement-player-name" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(player)}'))">${esc(displayPlayerName(player))}</button>
-            <div class="latest-achievement-list">
-              ${items.map(a=>`<span class="latest-achievement-pill" title="${esc(a.desc)}">${a.icon} ${esc(a.name)}</span>`).join("")}
-            </div>
-          </div>`).join("")
-      : '<span class="muted">Aucun nouvel accomplissement débloqué lors de cette partie.</span>';
-  }else{
-    $("latestGameAchievementsByPlayer").innerHTML=
-      '<span class="muted">Les accomplissements débloqués sont affichés uniquement pour la dernière partie, afin de ne pas reconstruire rétroactivement des déblocages historiques incertains.</span>';
   }
+
+  $("latestGameAchievementsByPlayer").innerHTML=byPlayer.size
+    ? [...byPlayer.entries()]
+        .sort((a,b)=>a[0].localeCompare(b[0],"fr"))
+        .map(([player,items])=>`<div class="latest-achievement-player">
+          ${playerNameHtml(player,{button:true,buttonClass:"latest-achievement-player-name",onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(player)}'))`})}
+          <div class="latest-achievement-list">
+            ${items.map(a=>`<span class="latest-achievement-pill" title="${esc(a.desc)}">${a.icon} ${esc(a.name)}</span>`).join("")}
+          </div>
+        </div>`).join("")
+    : '<span class="muted">Aucun nouvel accomplissement débloqué lors de cette partie.</span>';
 }
+
 function renderRanking(){
   const ks=killerStats();
   $("rankingBody").innerHTML=ranking().map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}">
     <td>${medalForRank(s.rank)} ${s.rank}</td>
-    <td><button class="player-link ranking-player-link" title="Ouvrir le profil de ${esc(s.name)}" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(s.name)}'))">${esc(displayPlayerDetailed(s.name))}</button></td>
+    <td>${playerNameHtml(s.name,{button:true,buttonClass:"ranking-player-link",onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(s.name)}'))`})}</td>
     <td><b>${num(s.points,0)}</b></td>
     <td>${s.progress===null?(isArchiveSeason()?"—":"Nouvelle entrée"):s.progress>0?"+"+s.progress:s.progress===0?"=":String(s.progress)}</td>
     <td>${num(s.avgPoints,1)}</td>
@@ -6785,8 +6467,8 @@ function renderRanking(){
     <td>${s.kills}</td>
     <td>${num(s.kpg,2)}</td>
     <td>${euro(s.net)}</td>
-    <td>${esc(ks.mainKiller(s.name))}</td>
-    <td>${esc(ks.mainVictim(s.name))}</td>
+    <td>${ks.mainKiller(s.name)?playerNameHtml(ks.mainKiller(s.name)):"—"}</td>
+    <td>${ks.mainVictim(s.name)?playerNameHtml(ks.mainVictim(s.name)):"—"}</td>
   </tr>`).join("");
 }
 
@@ -6898,10 +6580,10 @@ function renderVersus(){
   $("versusContent").style.display=valid?"block":"none";
   if(!valid)return;
 
-  $("versusName1").textContent=displayPlayerName(name1);
-  $("versusName2").textContent=displayPlayerName(name2);
-  $("versusHeader1").textContent=displayPlayerName(name1);
-  $("versusHeader2").textContent=displayPlayerName(name2);
+  $("versusName1").innerHTML=playerNameHtml(name1);
+  $("versusName2").innerHTML=playerNameHtml(name2);
+  $("versusHeader1").textContent=name1;
+  $("versusHeader2").textContent=name2;
   $("versusRank1").textContent=m1.rank?`Classement général : #${m1.rank}`:"Non classé";
   $("versusRank2").textContent=m2.rank?`Classement général : #${m2.rank}`:"Non classé";
 
@@ -6909,9 +6591,9 @@ function renderVersus(){
 
   if($("versusScoreboard")){
     $("versusScoreboard").innerHTML=`
-      <div class="versus-score"><span class="muted">${esc(name1)}</span><b>${h2h.better1}</b><small>duels gagnés</small></div>
+      <div class="versus-score">${playerNameHtml(name1)}<b>${h2h.better1}</b><small>duels gagnés</small></div>
       <div class="versus-center">${h2h.commonGames} partie${h2h.commonGames>1?"s":""} commune${h2h.commonGames>1?"s":""}<br><span class="muted">${h2h.elim2By1}–${h2h.elim1By2} éliminations directes</span></div>
-      <div class="versus-score"><span class="muted">${esc(name2)}</span><b>${h2h.better2}</b><small>duels gagnés</small></div>`;
+      <div class="versus-score">${playerNameHtml(name2)}<b>${h2h.better2}</b><small>duels gagnés</small></div>`;
   }
 
   const criteria=[
@@ -6975,9 +6657,9 @@ function renderHistory(){
       <td><b>${Number(r.game)||""}</b></td>
       <td>${esc(shortDate(r.date||""))}</td>
       <td>${esc(r.location||"")}</td>
-      <td>${r.player?esc(displayPlayerDetailed(r.player)):""}</td>
+      <td>${esc(r.player||"")}</td>
       <td>${Number(r.place)||""}</td>
-      <td>${r.killer?esc(displayPlayerDetailed(r.killer)):""}</td>
+      <td>${esc(r.killer||"")}</td>
       <td>${r.tablier?"Oui":""}</td>
       <td>${Number(r.n)||""}</td>
       <td>${num(r.points,0)}</td>
@@ -7010,6 +6692,16 @@ function renderPlayers(){
       <div class="player-admin-list">
         ${list.map(p=>`
           <div class="player-admin-row ${p.active?"":"inactive"}" data-player="${encodeURIComponent(p.name)}">
+            <div class="player-photo-admin">
+              ${playerPhoto(p.name)
+                ? `<img src="${playerPhoto(p.name)}" alt="Photo de ${esc(p.name)}">`
+                : `<div class="player-photo-placeholder">♠</div>`}
+              <label class="btn ghost player-photo-upload-btn">
+                ${playerPhoto(p.name)?"Changer photo":"Ajouter photo"}
+                <input class="player-photo-input" type="file" accept="image/*" hidden>
+              </label>
+              ${playerPhoto(p.name)?`<button class="btn ghost player-photo-delete-btn" type="button">Retirer</button>`:""}
+            </div>
             <div class="player-admin-fields">
               <input class="player-rename-input" value="${esc(p.name)}"
                      aria-label="Nom du joueur ${esc(p.name)}"
@@ -7041,6 +6733,8 @@ function renderPlayers(){
     const oldName=decodeURIComponent(row.dataset.player||"");
     const input=row.querySelector(".player-rename-input");
     const nicknameInput=row.querySelector(".player-nickname-input");
+    const photoInput=row.querySelector(".player-photo-input");
+    const photoDeleteBtn=row.querySelector(".player-photo-delete-btn");
     const activeBtn=row.querySelector(".player-active-btn");
     const deleteBtn=row.querySelector(".player-delete-btn");
 
@@ -7075,6 +6769,14 @@ function renderPlayers(){
         if(e.key==="Enter"){e.preventDefault();nicknameInput.blur();}
       });
     }
+    if(photoInput){
+      photoInput.addEventListener("change",async()=>{
+        const file=photoInput.files?.[0];
+        if(file)await savePlayerPhoto(oldName,file);
+        photoInput.value="";
+      });
+    }
+    if(photoDeleteBtn)photoDeleteBtn.onclick=()=>deletePlayerPhoto(oldName);
 
     activeBtn.onclick=()=>togglePlayerByName(oldName);
     deleteBtn.onclick=()=>deletePlayerByName(oldName);
@@ -7268,6 +6970,10 @@ async function mergePlayersByName(){
     const nickMap=ensurePlayerNicknames();
     if(nickMap[source] && !nickMap[target])nickMap[target]=nickMap[source];
     delete nickMap[source];
+
+    const photoMap=ensurePlayerPhotos();
+    if(photoMap[source] && !photoMap[target])photoMap[target]=photoMap[source];
+    delete photoMap[source];
 
     // Current season / current cache
     const replaceRows=rows=>(rows||[]).map(r=>({
@@ -9184,8 +8890,8 @@ async function showView(id){
     await refreshCanonicalHistoryUI(true);
   }else{
     if(id==="dashboard")renderDashboard();
-    if(id==="latestgame"){renderLatestGame();renderHistory();}
-    if(id==="ranking")renderRanking();
+    if(id==="latestgame")renderLatestGame();
+    if(id==="ranking"){renderRanking();renderHistory();}
     if(id==="records"){renderRecords();renderAchievements();}
     if(id==="profile"){renderProfile();renderVersus();}
   }
@@ -9230,17 +8936,6 @@ $("cStake").addEventListener("input",refreshCorrectionCalculatedValues);
 if($("versusPlayer2"))$("versusPlayer2").onchange=renderVersus;
 
 $("exportCsvBtn").onclick=()=>{const rows=[["Partie","Date","Lieu","Joueur","Place","Éliminé par","Tablier","Nb joueurs","Points","Mise","Gain","Solde","Kills"]];db.history.forEach(r=>rows.push([r.game,r.date,r.location,r.player,r.place,r.killer,r.tablier?"Oui":"",r.n,r.points,r.stake,r.gross,r.net,r.kills]));const csv="\ufeff"+rows.map(r=>r.map(x=>`"${String(x??"").replaceAll('"','""')}"`).join(";")).join("\r\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download="BPT_historique.csv";a.click();};
-
-
-if($("latestPrevGameBtn"))$("latestPrevGameBtn").onclick=()=>browseGame(-1);
-if($("latestNextGameBtn"))$("latestNextGameBtn").onclick=()=>browseGame(1);
-if($("gamePhotoViewerClose"))$("gamePhotoViewerClose").onclick=closeGamePhoto;
-if($("gamePhotoViewer"))$("gamePhotoViewer").onclick=e=>{
-  if(e.target===$("gamePhotoViewer"))closeGamePhoto();
-};
-document.addEventListener("keydown",e=>{
-  if(e.key==="Escape" && $("gamePhotoViewer")?.classList.contains("open"))closeGamePhoto();
-});
 
 
 $("liveSelectAllBtn").onclick=()=>{liveSelected=new Set(liveActiveNames());liveRenderPlayerList();livePreviewStructure();};
@@ -9382,15 +9077,6 @@ if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus"
 initCloudSync();
 </script>
 
-
-
-<input id="gamePhotoInput" type="file" accept="image/*" multiple hidden onchange="handleGamePhotoInputChange(this)">
-
-<div id="gamePhotoViewer" class="game-photo-viewer" aria-hidden="true">
-  <button id="gamePhotoViewerClose" class="game-photo-viewer-close" type="button" aria-label="Fermer">×</button>
-  <img id="gamePhotoViewerImage" alt="Photo de la partie">
-  <div id="gamePhotoViewerCaption" class="game-photo-viewer-caption"></div>
-</div>
 
 </body>
 </html>
