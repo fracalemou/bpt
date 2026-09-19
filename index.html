@@ -5270,7 +5270,7 @@ body.spectator-live-open .spectator-global-exit{
   <div class="spectator-server-shell">
     <div class="spectator-server-top">
       <div>
-        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V154</div>
+        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V157</div>
         <div id="spectatorServerGameMeta" class="spectator-server-meta">—</div>
         <div class="spectator-server-receive">
           Reçu : <strong id="spectatorServerReceivedAt">—</strong>
@@ -5328,7 +5328,7 @@ body.spectator-live-open .spectator-global-exit{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 15h43</div>
+  <div class="app-version">Version 19/09/26 16h16</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -5400,7 +5400,7 @@ body.spectator-live-open .spectator-global-exit{
         </div>
 
         <div class="card mobile-hide-live-details">
-          <h2>Structure calculée</h2><div class="muted" style="margin-bottom:8px">La durée des niveaux et la progression des blindes sont calculées automatiquement à partir de la durée totale souhaitée, du nombre de joueurs et du stack.</div>
+          <h2>Structure calculée</h2><div class="muted" style="margin-bottom:8px">La structure des blindes est fixe. Seule la durée des niveaux est adaptée à la durée totale souhaitée.</div>
           <div id="liveStructureSummary" class="muted" style="margin-bottom:8px">Sélectionnez au moins 2 joueurs.</div>
           <div class="live-structure">
             <table>
@@ -11213,53 +11213,35 @@ function liveBuildStructure(n,stack,targetMin,useAnte,minSB){
   n=Math.max(2,Number(n)||2);
   stack=Math.max(100,Number(stack)||20000);
   targetMin=Math.max(60,Number(targetMin)||240);
-  minSB=Math.max(1,Number(minSB)||25);
 
-  const totalChips=n*stack;
-  const firstSB=minSB;
-  const firstBB=minSB*2;
-
-  // Cible de fin : environ 8 BB de tapis moyen en heads-up.
-  const targetFinalBB=Math.max(firstBB*4,totalChips/16);
-
-  // Progression classique.
-  const classicBase=[
-    [25,50],[50,100],[75,150],[100,200],[150,300],[200,400],
-    [300,600],[400,800],[500,1000],[750,1500],[1000,2000],
-    [1500,3000],[2000,4000],[3000,6000],[4000,8000],
-    [5000,10000],[7500,15000],[10000,20000],[15000,30000],
-    [20000,40000],[30000,60000],[40000,80000],[50000,100000]
+  // Structure BPT de référence : les blindes ne changent jamais.
+  // Seule la durée de chaque niveau est adaptée à la durée totale souhaitée.
+  const fixedBlinds=[
+    [25,50],
+    [50,100],
+    [75,150],
+    [100,200],
+    [150,300],
+    [200,400],
+    [300,600],
+    [400,800],
+    [500,1000],
+    [800,1600],
+    [1000,2000],
+    [1500,3000],
+    [2000,4000],
+    [3000,6000],
+    [4000,8000],
+    [5000,10000]
   ];
 
-  const scale=firstSB/25;
-  let levelsRaw=classicBase.map(([sb,bb])=>({
-    sb:liveNice(sb*scale),
-    bb:liveNice(bb*scale)
-  }));
+  const levelMin=Math.max(5,Math.round(targetMin/fixedBlinds.length));
 
-  levelsRaw[0]={sb:firstSB,bb:firstBB};
-
-  // Conserver les niveaux nécessaires pour atteindre la cible finale.
-  let endIndex=levelsRaw.findIndex(x=>x.bb>=targetFinalBB);
-  if(endIndex<0)endIndex=levelsRaw.length-1;
-  levelsRaw=levelsRaw.slice(0,endIndex+1);
-
-  // Minimum 6 niveaux pour éviter une structure trop brutale.
-  while(levelsRaw.length<6){
-    const prev=levelsRaw[levelsRaw.length-1];
-    const nextBB=liveNice(prev.bb*1.5);
-    levelsRaw.push({sb:liveNice(nextBB/2),bb:nextBB});
-  }
-
-  // La durée de chaque niveau est déterminée automatiquement
-  // pour coller au mieux à la durée totale souhaitée.
-  const levelMin=Math.max(5,Math.round(targetMin/levelsRaw.length));
-
-  const levels=levelsRaw.map((x,i)=>({
+  const levels=fixedBlinds.map(([sb,bb],i)=>({
     level:i+1,
-    sb:x.sb,
-    bb:x.bb,
-    ante:(!useAnte||i<3)?0:liveNice(x.bb/10),
+    sb,
+    bb,
+    ante:(!useAnte||i<3)?0:liveNice(bb/10),
     durationMin:levelMin
   }));
 
@@ -11267,7 +11249,7 @@ function liveBuildStructure(n,stack,targetMin,useAnte,minSB){
     levels,
     count:levels.length,
     levelMin,
-    targetFinalBB,
+    targetFinalBB:10000,
     actualMinutes:levels.length*levelMin
   };
 }
