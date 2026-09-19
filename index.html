@@ -4193,13 +4193,11 @@ body.spectator-live-open .spectator-global-exit{
 </style>
 </head>
 <body>
-<button id="spectatorGlobalExitBtn" class="spectator-global-exit" type="button" style="display:none">← Quitter le Live</button>
-
 <div id="spectatorServerOverlay" class="spectator-server-overlay" style="display:none">
   <div class="spectator-server-shell">
     <div class="spectator-server-top">
       <div>
-        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V147</div>
+        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V148</div>
         <div id="spectatorServerGameMeta" class="spectator-server-meta">—</div>
         <div class="spectator-server-receive">
           Reçu : <strong id="spectatorServerReceivedAt">—</strong>
@@ -4254,7 +4252,7 @@ body.spectator-live-open .spectator-global-exit{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 15h08</div>
+  <div class="app-version">Version 19/09/26 15h13</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -5734,8 +5732,7 @@ function spectatorOverlayIsOpen(){
 
 function closeSpectatorServerOverlay(target="ranking"){
   if($("spectatorServerOverlay"))$("spectatorServerOverlay").style.display="none";
-  if($("spectatorGlobalExitBtn"))$("spectatorGlobalExitBtn").style.display="none";
-  document.body.classList.remove("spectator-live-open");
+    document.body.classList.remove("spectator-live-open");
   document.body.style.overflow="";
   currentViewId=target;
   showView(target);
@@ -5800,8 +5797,7 @@ function renderSpectatorServerOverlay(wire){
   }).join("");
 
   $("spectatorServerOverlay").style.display="block";
-  if($("spectatorGlobalExitBtn"))$("spectatorGlobalExitBtn").style.display="none";
-  document.body.classList.add("spectator-live-open");
+    document.body.classList.add("spectator-live-open");
   document.body.style.overflow="hidden";
   return true;
 }
@@ -11423,8 +11419,7 @@ async function showView(id){
 
     if(resolved.mode==="creator"){
       document.body.classList.remove("spectator-live-open");
-      if($("spectatorGlobalExitBtn"))$("spectatorGlobalExitBtn").style.display="none";
-      applyLiveAccessMode();
+            applyLiveAccessMode();
       liveShowScreen("game");
       liveRenderAll();
       if(db.liveState?.running && db.liveState?.endAt)liveRunTicker();
@@ -11434,8 +11429,7 @@ async function showView(id){
 
     if(resolved.mode==="create"){
       document.body.classList.remove("spectator-live-open");
-      if($("spectatorGlobalExitBtn"))$("spectatorGlobalExitBtn").style.display="none";
-      spectatorServerLiveState=null;
+            spectatorServerLiveState=null;
       db.liveState=null;
       saveLocalOnly();
       liveSelected.clear();
@@ -11584,22 +11578,16 @@ if($("spectatorServerExitBtn"))$("spectatorServerExitBtn").onclick=()=>{
   closeSpectatorServerOverlay("ranking");
 };
 
-if($("spectatorGlobalExitBtn"))$("spectatorGlobalExitBtn").onclick=()=>{
-  closeSpectatorServerOverlay("ranking");
-};
-
 if($("spectatorQuitLiveBtn"))$("spectatorQuitLiveBtn").onclick=()=>{
   stopSpectatorSyncCountdown();
   document.body.classList.remove("spectator-live-open");
-  if($("spectatorGlobalExitBtn"))$("spectatorGlobalExitBtn").style.display="none";
-  $("live")?.classList.remove("active");
+    $("live")?.classList.remove("active");
   currentViewId="ranking";
   showView("ranking");
 };
 if($("spectatorQuitLiveBottomBtn"))$("spectatorQuitLiveBottomBtn").onclick=()=>{
   document.body.classList.remove("spectator-live-open");
-  if($("spectatorGlobalExitBtn"))$("spectatorGlobalExitBtn").style.display="none";
-  $("live")?.classList.remove("active");
+    $("live")?.classList.remove("active");
   currentViewId="ranking";
   showView("ranking");
 };
