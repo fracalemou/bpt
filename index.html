@@ -4190,6 +4190,584 @@ body.spectator-live-open .spectator-global-exit{
   }
 }
 
+
+/* ===== V149 — Live spectateur optimisé téléphone ===== */
+@media (max-width: 700px){
+  .spectator-server-overlay{
+    background:#070b10 !important;
+  }
+
+  .spectator-server-shell{
+    min-height:100dvh;
+    padding:
+      max(10px, env(safe-area-inset-top))
+      10px
+      max(16px, env(safe-area-inset-bottom));
+  }
+
+  .spectator-server-top{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:8px;
+    margin-bottom:8px;
+  }
+
+  .spectator-server-kicker{
+    font-size:10px;
+    letter-spacing:.06em;
+  }
+
+  .spectator-server-meta{
+    font-size:10px;
+    line-height:1.25;
+  }
+
+  .spectator-server-receive{
+    display:none;
+  }
+
+  .spectator-server-exit{
+    position:static !important;
+    min-height:36px;
+    padding:7px 10px;
+    font-size:10px;
+    border-radius:9px;
+    white-space:nowrap;
+  }
+
+  .spectator-server-summary{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+    margin-top:8px;
+  }
+
+  .spectator-server-card{
+    min-height:0;
+    padding:10px 8px;
+    border-radius:12px;
+  }
+
+  .spectator-server-card > span{
+    font-size:8px;
+    letter-spacing:.06em;
+  }
+
+  /* Timer en premier et sur toute la largeur */
+  .spectator-server-timer-card{
+    grid-column:1 / -1;
+    grid-row:1;
+    padding:12px 8px;
+  }
+
+  .spectator-server-timer-card > strong{
+    margin-top:2px;
+    font-size:54px;
+    line-height:.95;
+  }
+
+  .spectator-server-timer-card small{
+    margin-top:6px;
+    font-size:10px;
+  }
+
+  /* Niveau à gauche */
+  .spectator-server-summary .spectator-server-card:nth-child(1){
+    grid-column:1;
+    grid-row:2;
+  }
+
+  .spectator-server-summary .spectator-server-card:nth-child(1) > strong{
+    font-size:20px;
+  }
+
+  .spectator-server-summary .spectator-server-card:nth-child(1) > b{
+    margin-top:5px;
+    font-size:26px;
+    line-height:1;
+  }
+
+  .spectator-server-summary .spectator-server-card:nth-child(1) small{
+    margin-top:3px;
+    font-size:9px;
+  }
+
+  /* Restants à droite */
+  .spectator-server-summary .spectator-server-card:nth-child(3){
+    grid-column:2;
+    grid-row:2;
+    min-height:0;
+  }
+
+  .spectator-server-summary .spectator-server-card:nth-child(3) > strong{
+    font-size:34px;
+    line-height:1;
+  }
+
+  .spectator-server-summary .spectator-server-card:nth-child(3) small{
+    font-size:9px;
+  }
+
+  .spectator-server-players-card{
+    margin-top:8px;
+    padding:9px;
+    border-radius:12px;
+  }
+
+  .spectator-server-list-head{
+    align-items:flex-start;
+    margin-bottom:7px;
+  }
+
+  .spectator-server-list-head > div:first-child > strong{
+    font-size:14px;
+  }
+
+  .spectator-server-list-head small{
+    font-size:8px;
+  }
+
+  .spectator-server-list-head > div:last-child{
+    display:none;
+  }
+
+  .spectator-server-players{
+    gap:4px;
+  }
+
+  .spectator-server-player{
+    display:grid;
+    grid-template-columns:24px minmax(0,1fr) auto;
+    gap:6px;
+    min-height:36px;
+    padding:6px 8px;
+    border-radius:8px;
+  }
+
+  .spectator-server-place{
+    font-size:11px;
+  }
+
+  .spectator-server-name{
+    min-width:0;
+    overflow:hidden;
+  }
+
+  .spectator-server-name .player-primary-name{
+    display:block;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-size:12px;
+    font-weight:800;
+  }
+
+  .spectator-server-name .player-secondary-nickname{
+    display:block;
+    margin-top:1px;
+    font-size:9px;
+    color:#8193a4;
+  }
+
+  .spectator-server-status{
+    grid-column:auto;
+    margin-top:0;
+    text-align:right;
+    font-size:8px;
+    white-space:nowrap;
+  }
+
+  .spectator-server-player.is-out{
+    opacity:.58;
+  }
+
+  /* Réduire encore sur très petits écrans */
+  @media (max-width: 390px){
+    .spectator-server-timer-card > strong{
+      font-size:48px;
+    }
+
+    .spectator-server-summary .spectator-server-card:nth-child(1) > b{
+      font-size:23px;
+    }
+
+    .spectator-server-player{
+      grid-template-columns:20px minmax(0,1fr);
+    }
+
+    .spectator-server-status{
+      grid-column:2;
+      text-align:left;
+      margin-top:-3px;
+      white-space:normal;
+    }
+  }
+}
+
+
+/* ===== V150 — Responsive mobile sur l'ensemble du site ===== */
+@media (max-width: 700px){
+
+  html, body{
+    max-width:100%;
+    overflow-x:hidden;
+  }
+
+  body{
+    font-size:14px;
+  }
+
+  .bpt-header{
+    padding:10px 12px !important;
+    gap:8px;
+    align-items:center;
+  }
+
+  .bpt-brand-wrap{
+    min-width:0;
+    flex:1;
+  }
+
+  .bpt-logo{
+    transform:scale(.88);
+    transform-origin:left center;
+  }
+
+  .brand{
+    min-width:0;
+  }
+
+  .brand b{
+    font-size:14px !important;
+    line-height:1.15;
+  }
+
+  .brand span{
+    font-size:9px !important;
+    line-height:1.2;
+  }
+
+  .app-version{
+    font-size:8px !important;
+    white-space:nowrap;
+  }
+
+  /* Navigation mobile : barre horizontale défilante */
+  nav#nav{
+    display:flex !important;
+    gap:6px !important;
+    overflow-x:auto;
+    overflow-y:hidden;
+    white-space:nowrap;
+    padding:8px 10px !important;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+
+  nav#nav::-webkit-scrollbar{
+    display:none;
+  }
+
+  nav#nav button{
+    flex:0 0 auto;
+    min-height:38px;
+    padding:8px 11px !important;
+    border-radius:9px !important;
+    font-size:10px !important;
+  }
+
+  main{
+    width:100%;
+    padding:10px !important;
+    box-sizing:border-box;
+  }
+
+  .view{
+    width:100%;
+    min-width:0;
+  }
+
+  .hero,
+  .tab-premium-hero{
+    padding:14px !important;
+    border-radius:14px !important;
+    margin-bottom:10px !important;
+  }
+
+  .hero h1,
+  .tab-premium-hero h1{
+    font-size:22px !important;
+    line-height:1.1 !important;
+    margin-bottom:5px !important;
+  }
+
+  .hero p,
+  .tab-premium-hero p{
+    font-size:11px !important;
+    line-height:1.4 !important;
+  }
+
+  h1{font-size:22px !important;}
+  h2{font-size:17px !important;}
+  h3{font-size:14px !important;}
+
+  .card{
+    border-radius:13px !important;
+    padding:12px !important;
+  }
+
+  /* Toutes les grilles principales passent sur une colonne */
+  .grid,
+  .dashboard-grid,
+  .live-layout,
+  .settings-grid,
+  .profile-grid,
+  .records-grid,
+  .stats-grid,
+  .latest-game-grid{
+    grid-template-columns:1fr !important;
+  }
+
+  /* Flexbox : permettre le retour à la ligne */
+  .row{
+    flex-wrap:wrap;
+    gap:7px !important;
+  }
+
+  .row > input,
+  .row > select{
+    min-width:0;
+    flex:1 1 140px;
+  }
+
+  /* Boutons tactiles */
+  .btn,
+  button{
+    min-height:40px;
+  }
+
+  .btn{
+    padding:8px 12px !important;
+    font-size:12px !important;
+    border-radius:9px !important;
+  }
+
+  input,
+  select,
+  textarea{
+    width:100%;
+    max-width:100%;
+    box-sizing:border-box;
+    min-height:42px;
+    font-size:16px !important; /* évite le zoom automatique iOS */
+  }
+
+  .field{
+    width:100%;
+  }
+
+  .field label{
+    font-size:10px !important;
+  }
+
+  /* KPI : 2 colonnes sur mobile, 1 sur très petit écran */
+  .kpis,
+  .live-kpis,
+  .dashboard-kpis,
+  .stats-kpis{
+    display:grid !important;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:7px !important;
+  }
+
+  .kpi,
+  .live-kpi{
+    min-width:0 !important;
+    padding:10px 8px !important;
+  }
+
+  .kpi b,
+  .live-kpi b{
+    font-size:20px !important;
+  }
+
+  .kpi span,
+  .live-kpi span{
+    font-size:9px !important;
+  }
+
+  /* Tableaux : défilement horizontal sans casser la page */
+  .tablewrap,
+  .live-players,
+  .history-table-wrap,
+  .ranking-table-wrap,
+  .records-table-wrap{
+    width:100%;
+    overflow-x:auto !important;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  table{
+    min-width:620px;
+    font-size:10px !important;
+  }
+
+  th, td{
+    padding:7px 8px !important;
+  }
+
+  /* Classement */
+  #ranking .card,
+  #latestgame .card,
+  #records .card,
+  #profile .card,
+  #settings .card{
+    margin-bottom:10px;
+  }
+
+  /* Toolbar saison */
+  .season-toolbar,
+  .season-nav{
+    display:flex !important;
+    overflow-x:auto;
+    gap:6px;
+    white-space:nowrap;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+
+  .season-toolbar::-webkit-scrollbar,
+  .season-nav::-webkit-scrollbar{
+    display:none;
+  }
+
+  .season-toolbar button,
+  .season-nav button{
+    flex:0 0 auto;
+  }
+
+  /* Profil joueur */
+  .player-profile-header{
+    flex-direction:column !important;
+    align-items:flex-start !important;
+    gap:10px !important;
+  }
+
+  .player-profile-photo{
+    width:76px !important;
+    height:76px !important;
+  }
+
+  /* Parties */
+  .latest-game-head,
+  .latest-game-summary{
+    flex-direction:column !important;
+    align-items:flex-start !important;
+  }
+
+  .game-photo-thumb-btn,
+  .game-photo-thumb{
+    max-width:100% !important;
+    max-height:220px !important;
+  }
+
+  /* Paramètres */
+  #settings .row{
+    align-items:stretch !important;
+  }
+
+  #settings .row .btn{
+    flex:1 1 auto;
+  }
+
+  /* Live maître sur téléphone : empilé et commandes accessibles */
+  #live:not(.live-spectator-mode) .live-stage{
+    grid-template-columns:1fr !important;
+  }
+
+  #live:not(.live-spectator-mode) .live-head{
+    flex-direction:column !important;
+    align-items:flex-start !important;
+    gap:8px !important;
+  }
+
+  #live:not(.live-spectator-mode) .live-head > .row{
+    width:100%;
+  }
+
+  #live:not(.live-spectator-mode) .live-head > .row .btn{
+    flex:1 1 auto;
+  }
+
+  #live:not(.live-spectator-mode) .live-timer{
+    font-size:58px !important;
+  }
+
+  #live:not(.live-spectator-mode) .live-blinds{
+    font-size:34px !important;
+  }
+
+  #live:not(.live-spectator-mode) .live-controls{
+    display:grid !important;
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+  }
+
+  #live:not(.live-spectator-mode) .live-controls .live-blind-duration-control,
+  #live:not(.live-spectator-mode) .live-controls .live-level-nav,
+  #live:not(.live-spectator-mode) .live-controls #liveStartBtn,
+  #live:not(.live-spectator-mode) .live-controls #livePauseBtn{
+    grid-column:1 / -1;
+  }
+
+  /* Modales */
+  .modal,
+  .dialog,
+  .popup{
+    max-width:calc(100vw - 20px) !important;
+    max-height:calc(100dvh - 20px) !important;
+  }
+
+  /* Éviter les largeurs fixes résiduelles */
+  [style*="width: 50%"],
+  [style*="width:50%"],
+  [style*="min-width"]{
+    max-width:100%;
+  }
+}
+
+@media (max-width: 390px){
+  main{
+    padding:7px !important;
+  }
+
+  .hero h1,
+  .tab-premium-hero h1{
+    font-size:19px !important;
+  }
+
+  .kpis,
+  .live-kpis,
+  .dashboard-kpis,
+  .stats-kpis{
+    grid-template-columns:1fr !important;
+  }
+
+  nav#nav button{
+    padding:7px 9px !important;
+    font-size:9px !important;
+  }
+
+  #live:not(.live-spectator-mode) .live-controls{
+    grid-template-columns:1fr !important;
+  }
+
+  #live:not(.live-spectator-mode) .live-controls > *{
+    grid-column:1 !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -4197,7 +4775,7 @@ body.spectator-live-open .spectator-global-exit{
   <div class="spectator-server-shell">
     <div class="spectator-server-top">
       <div>
-        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V148</div>
+        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V150</div>
         <div id="spectatorServerGameMeta" class="spectator-server-meta">—</div>
         <div class="spectator-server-receive">
           Reçu : <strong id="spectatorServerReceivedAt">—</strong>
@@ -4252,7 +4830,7 @@ body.spectator-live-open .spectator-global-exit{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 15h13</div>
+  <div class="app-version">Version 19/09/26 15h23</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
