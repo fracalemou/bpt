@@ -2984,6 +2984,25 @@ body.photo-viewer-open{overflow:hidden}
   box-shadow:0 5px 18px rgba(0,0,0,.22);
 }
 
+
+/* ===== V121 — correction ajout photos + surnom sous les médailles ===== */
+.medal-player-name{
+  font-weight:900;
+}
+.medal-player-nickname{
+  margin-top:1px;
+  margin-bottom:4px;
+  color:#c8a15c;
+  font-size:12px;
+  font-weight:850;
+  letter-spacing:.02em;
+}
+.summary-place .medal-player-nickname{
+  margin-top:3px;
+  margin-bottom:5px;
+  font-size:11px;
+}
+
 </style>
 </head>
 <body>
@@ -3001,7 +3020,7 @@ body.photo-viewer-open{overflow:hidden}
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 11h01</div>
+  <div class="app-version">Version 19/09/26 11h06</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -5287,7 +5306,10 @@ function showEndGameSummary(rows){
   content.innerHTML=`
     <div class="muted" style="margin-top:6px">Partie #${first.game} · ${esc(shortDate(first.date))}${first.location?" · "+esc(first.location):""} · ${sorted.length} joueurs</div>
     <div class="summary-podium">
-      ${sorted.slice(0,3).map((r,i)=>`<div class="summary-place"><div class="big">${medalForRank(i+1)}</div><b>${esc(displayPlayerName(r.player))}</b><div>${num(r.points,0)} pts · ${euro(r.gross)}</div><div class="muted">${r.kills||0} kill${Number(r.kills||0)>1?"s":""}</div></div>`).join("")}
+      ${sorted.slice(0,3).map((r,i)=>{
+        const pd=medalPlayerHtml(r.player);
+        return `<div class="summary-place"><div class="big">${medalForRank(i+1)}</div><b>${esc(pd.real)}</b>${pd.nick?`<div class="medal-player-nickname">${esc(pd.nick)}</div>`:""}<div>${num(r.points,0)} pts · ${euro(r.gross)}</div><div class="muted">${r.kills||0} kill${Number(r.kills||0)>1?"s":""}</div></div>`;
+      }).join("")}
     </div>
     <div class="tablewrap"><table class="summary-table"><thead><tr><th>Place</th><th>Joueur</th><th>Points</th><th>Kills</th><th>Net</th></tr></thead><tbody>
       ${sorted.map(r=>`<tr><td>${r.place}</td><td>${esc(displayPlayerName(r.player))}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${euro(r.net)}</td></tr>`).join("")}
@@ -5454,6 +5476,24 @@ async function cloudPushSharedStateOnly(){
   }
 }
 
+
+async function handleGamePhotoInputChange(input){
+  try{
+    if(!pendingPhotoGameKey){
+      alert("Impossible d’identifier la partie pour cette photo.");
+      return;
+    }
+    const files=input?.files;
+    if(!files || !files.length)return;
+    await addPhotosToGame(pendingPhotoGameKey,pendingPhotoGameLabel,files);
+  }catch(e){
+    console.error("Ajout photo :",e);
+    alert("Impossible d’ajouter la photo.\n\n"+(e?.message||String(e)));
+  }finally{
+    if(input)input.value="";
+  }
+}
+
 async function addPhotosToGame(key,label,files){
   const selected=[...(files||[])].filter(f=>String(f.type||"").startsWith("image/"));
   if(!selected.length)return;
@@ -5479,6 +5519,8 @@ async function addPhotosToGame(key,label,files){
   }
 
   photos[key]=[...existing,...added];
+  pendingPhotoGameKey="";
+  pendingPhotoGameLabel="";
 
   // Keep an in-memory copy before any cloud operation so the photo is visible
   // immediately even if the network synchronization fails.
@@ -5985,6 +6027,15 @@ function displayPlayerName(name){
 function displayPlayerDetailed(name){
   return displayPlayerName(name);
 }
+function medalPlayerHtml(name){
+  const real=String(name||"").trim();
+  const nick=playerNicknameInfo(real).primary;
+  return {
+    real,
+    nick:(nick && normalizePlayerLookupName(nick)!==normalizePlayerLookupName(real)) ? nick : ""
+  };
+}
+
 
 function playerDisplayWithRealName(name){
   return displayPlayerName(name);
@@ -6669,12 +6720,15 @@ function renderLatestGame(){
     : `<span class="muted history-no-photo">Aucune photo pour cette partie.</span>`;
   bindLatestGamePhotoControls(photoKey,photoLabel);
 
-  $("latestGamePodium").innerHTML=rows.slice(0,3).map((r,i)=>`
-    <div class="podium-medal-item rank-${i+1}">
+  $("latestGamePodium").innerHTML=rows.slice(0,3).map((r,i)=>{
+    const pd=medalPlayerHtml(r.player);
+    return `<div class="podium-medal-item rank-${i+1}">
       <div class="medal-badge">${medalForRank(i+1)}</div>
-      <button class="player-link" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(displayPlayerName(r.player))}</button>
+      <button class="player-link medal-player-name" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(pd.real)}</button>
+      ${pd.nick?`<div class="medal-player-nickname">${esc(pd.nick)}</div>`:""}
       <small>${num(r.points||0,0)} pts · ${euro(r.gross||0)}</small>
-    </div>`).join("");
+    </div>`;
+  }).join("");
 
   $("latestGameResults").innerHTML=`<table>
     <thead><tr><th>Place</th><th>Joueur</th><th>Points</th><th>Kills</th><th>Éliminé par</th><th>Gain</th><th>Net</th></tr></thead>
@@ -9180,11 +9234,6 @@ $("exportCsvBtn").onclick=()=>{const rows=[["Partie","Date","Lieu","Joueur","Pla
 
 if($("latestPrevGameBtn"))$("latestPrevGameBtn").onclick=()=>browseGame(-1);
 if($("latestNextGameBtn"))$("latestNextGameBtn").onclick=()=>browseGame(1);
-if($("gamePhotoInput"))$("gamePhotoInput").addEventListener("change",async e=>{
-  if(!pendingPhotoGameKey)return;
-  await addPhotosToGame(pendingPhotoGameKey,pendingPhotoGameLabel,e.target.files);
-  e.target.value="";
-});
 if($("gamePhotoViewerClose"))$("gamePhotoViewerClose").onclick=closeGamePhoto;
 if($("gamePhotoViewer"))$("gamePhotoViewer").onclick=e=>{
   if(e.target===$("gamePhotoViewer"))closeGamePhoto();
@@ -9335,7 +9384,7 @@ initCloudSync();
 
 
 
-<input id="gamePhotoInput" type="file" accept="image/*" multiple hidden>
+<input id="gamePhotoInput" type="file" accept="image/*" multiple hidden onchange="handleGamePhotoInputChange(this)">
 
 <div id="gamePhotoViewer" class="game-photo-viewer" aria-hidden="true">
   <button id="gamePhotoViewerClose" class="game-photo-viewer-close" type="button" aria-label="Fermer">×</button>
