@@ -3831,6 +3831,69 @@ body:has(#live.live-spectator-mode) #cloudStatus{
   }
 }
 
+
+/* ===== V132 — Spectateur navigable, Live plein écran seulement à l'ouverture ===== */
+
+/* Neutralise le verrouillage permanent des versions précédentes. */
+body:not(.spectator-live-open) #live.live-spectator-mode{
+  position:static !important;
+  inset:auto !important;
+  z-index:auto !important;
+  overflow:visible !important;
+  background:transparent !important;
+  padding:inherit !important;
+  margin:inherit !important;
+}
+
+body:not(.spectator-live-open) header,
+body:not(.spectator-live-open) nav,
+body:not(.spectator-live-open) .season-nav,
+body:not(.spectator-live-open) #cloudStatus{
+  display:initial;
+}
+
+/* Le plein écran visuel n'existe que lorsque le spectateur ouvre l'onglet Live. */
+body.spectator-live-open{
+  overflow:hidden;
+}
+
+body.spectator-live-open header,
+body.spectator-live-open nav,
+body.spectator-live-open .season-nav,
+body.spectator-live-open #cloudStatus{
+  display:none !important;
+}
+
+body.spectator-live-open #live.live-spectator-mode{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:5000 !important;
+  display:block !important;
+  overflow:auto !important;
+  background:#070b10 !important;
+  padding:0 !important;
+  margin:0 !important;
+}
+
+body.spectator-live-open #live.live-spectator-mode > .hero,
+body.spectator-live-open #live.live-spectator-mode #liveSpectatorBanner,
+body.spectator-live-open #live.live-spectator-mode .live-head,
+body.spectator-live-open #live.live-spectator-mode #liveFullscreenDisplay,
+body.spectator-live-open #live.live-spectator-mode > .season-toolbar{
+  display:none !important;
+}
+
+body.spectator-live-open .live-spectator-mode #liveManager,
+body.spectator-live-open .live-spectator-mode #liveGameScreen{
+  display:block !important;
+  min-height:100vh;
+}
+
+/* Hors de l'onglet Live, le site reste intégralement navigable. */
+body:not(.spectator-live-open) #live:not(.active){
+  display:none !important;
+}
+
 </style>
 </head>
 <body>
@@ -3848,7 +3911,7 @@ body:has(#live.live-spectator-mode) #cloudStatus{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 13h52</div>
+  <div class="app-version">Version 19/09/26 14h01</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -4033,7 +4096,7 @@ body:has(#live.live-spectator-mode) #cloudStatus{
                 <span>Les joueurs encore en jeu sont en haut. Le premier éliminé reste tout en bas.</span>
               </div>
               <div class="spectator-sync-mini">
-                Synchro <strong id="spectatorSyncCountdown">30 s</strong>
+                Synchro serveur <strong id="spectatorSyncCountdown">15 s</strong>
               </div>
             </div>
             <div id="spectatorPlayerList" class="spectator-player-list"></div>
@@ -5188,6 +5251,10 @@ async function cloudSyncGamesAdditive(){
 }
 
 async function cloudPushNow(){
+  if(typeof liveIsSpectator==="function" && liveIsSpectator()){
+    cloudLocalDirty=false;
+    return false;
+  }
   if(typeof isArchiveSeason==="function" && isArchiveSeason())return false;
   if(!sbClient || !cloudReady || cloudApplying)return false;
   setCloudStatus("busy","Synchronisation…");
@@ -5240,13 +5307,18 @@ async function cloudPushNow(){
 }
 
 function scheduleCloudSave(){
+  // Un appareil spectateur est strictement en lecture seule pendant un Live distant.
+  if(typeof liveIsSpectator==="function" && liveIsSpectator()){
+    cloudLocalDirty=false;
+    return;
+  }
   cloudLocalDirty=true;
   if(!cloudReady || cloudApplying)return;
   clearTimeout(cloudSaveTimer);
   cloudSaveTimer=setTimeout(cloudPushNow,250);
 }
 
-async function applySpectatorLiveState(row){
+async function applySpectatorLiveState(row,{fromDirectPoll=false}={}){
   if(!row || !isValidBptState(row.data))return false;
 
   const remoteLive=row.data?.liveState||null;
@@ -5256,45 +5328,35 @@ async function applySpectatorLiveState(row){
 
   if(!remoteActive || !remoteCreator || remoteCreator===thisDevice)return false;
 
-  cloudApplying=true;
-  try{
-    // En mode spectateur, on ne recharge PAS l'historique.
-    // On ne prend que les données partagées utiles au Live.
-    const keepHistory=Array.isArray(db.history)?db.history:[];
-    const incoming=JSON.parse(JSON.stringify(row.data));
+  // Spectateur = lecture seule. On ne remplace PAS le reste de db :
+  // classement, historique, paramètres locaux restent disponibles normalement.
+  db.liveState=JSON.parse(JSON.stringify(remoteLive));
+  cloudLastRevision=Number(row.revision||cloudLastRevision||0);
+  cloudLocalDirty=false;
+  saveLocalOnly();
 
-    db.players=Array.isArray(incoming.players)?incoming.players:db.players;
-    db.points=incoming.points||db.points;
-    db.settings=incoming.settings||db.settings;
-    db.playerNicknames=incoming.playerNicknames||db.playerNicknames||{};
-    db.playerAliases=incoming.playerAliases||db.playerAliases||{};
-    db.playerPhotos=incoming.playerPhotos||db.playerPhotos||{};
-    db.gamePhotos=incoming.gamePhotos||db.gamePhotos||{};
-    db.liveState=incoming.liveState;
-    db.history=keepHistory;
+  liveSetLastSyncNow();
+  resetSpectatorSyncCountdown();
 
-    cloudLastRevision=Number(row.revision||cloudLastRevision||0);
-    cloudLocalDirty=false;
-    saveLocalOnly();
-
-    liveSetLastSyncNow();
-    resetSpectatorSyncCountdown();
+  if($("live")?.classList.contains("active")){
     liveShowScreen("game");
     liveRenderAll();
-
-    if(db.liveState?.running && db.liveState?.endAt)liveRunTicker();
-    stopLiveCloudHeartbeat();
-    startSpectatorLivePolling();
-    liveMaybeAutoOpenSpectator();
-
-    setCloudStatus(
-      "ok",
-      "Live spectateur connecté",
-      `Partie #${db.liveState?.gameNo||"—"} · état reçu à ${new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}`
-    );
-  }finally{
-    cloudApplying=false;
+  }else{
+    applyLiveAccessMode();
   }
+
+  if(db.liveState?.running && db.liveState?.endAt)liveRunTicker();
+  stopLiveCloudHeartbeat();
+
+  if(!fromDirectPoll && !spectatorLivePollTimer){
+    startSpectatorLivePolling();
+  }
+
+  setCloudStatus(
+    "ok",
+    "Live spectateur disponible",
+    `Partie #${db.liveState?.gameNo||"—"} · état reçu à ${new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}`
+  );
   return true;
 }
 
@@ -5366,7 +5428,6 @@ async function cloudPoll(){
 
   try{
     const remote=await cloudFetchState();
-    const remoteRevision=Number(remote?.revision||0);
 
     if(remote && isValidBptState(remote.data)){
       const remoteLive=remote.data?.liveState||null;
@@ -5380,49 +5441,29 @@ async function cloudPoll(){
       const remoteOwnedByThisDevice=
         remoteActive && remoteCreator && remoteCreator===thisDevice;
 
-      // SPECTATEUR :
-      // l'état serveur est la source de vérité.
       if(remoteOwnedByOtherDevice){
         cloudLocalDirty=false;
-        await applySpectatorLiveState(remote);
+        await applySpectatorLiveState(remote,{fromDirectPoll:true});
+        if(!spectatorLivePollTimer)startSpectatorLivePolling();
         return;
       }
 
-      // MAÎTRE :
-      // ne jamais réinjecter son propre snapshot serveur dans le timer local.
-      // C'était la cause des retours périodiques à ~16 minutes.
       if(remoteOwnedByThisDevice){
         if(cloudLocalDirty){
           await livePushStateNow();
-          return;
         }
-        // Le timer maître continue exclusivement à partir de endAt local.
         return;
       }
 
-      if(pendingGamesLoad().length){
-        await flushPendingGames();
-      }
-
-      // Hors Live actif : comportement de synchronisation classique.
-      if(!cloudLastRevision || remoteRevision>cloudLastRevision){
-        await applyCloudState(remote);
-        return;
+      // Plus de Live distant : revenir au fonctionnement normal.
+      if(!remoteActive){
+        stopSpectatorLivePolling();
+        document.body.classList.remove("spectator-live-open");
       }
     }
 
     if(cloudLocalDirty){
       await cloudPushNow();
-      return;
-    }
-
-    if(liveIsSpectator()){
-      // En mode spectateur, le polling du Live suffit.
-      setCloudStatus(
-        "ok",
-        "Live spectateur connecté",
-        `Partie #${db.liveState?.gameNo||"—"} · mise à jour automatique`
-      );
       return;
     }
 
@@ -5432,11 +5473,7 @@ async function cloudPoll(){
     cloudLastError=e?.message||String(e);
     console.error("BPT cloud poll:",e);
     if(liveIsSpectator()){
-      setCloudStatus(
-        "offline",
-        "Live spectateur · reconnexion…",
-        cloudLastError
-      );
+      setCloudStatus("offline","Live spectateur · reconnexion…",cloudLastError);
     }else{
       setCloudStatus("offline","Erreur synchro",cloudLastError);
     }
@@ -8856,7 +8893,7 @@ function renderPoints(){
 let liveSelected=new Set();
 let liveTicker=null;
 let liveCloudHeartbeat=null;
-const LIVE_CLOUD_HEARTBEAT_MS=30000;
+const LIVE_CLOUD_HEARTBEAT_MS=15000;
 let spectatorSyncDeadline=Date.now()+LIVE_CLOUD_HEARTBEAT_MS;
 let spectatorSyncCountdownTimer=null;
 let spectatorLivePollTimer=null;
@@ -8864,41 +8901,30 @@ let spectatorLastPublishedAt=0;
 
 function startSpectatorLivePolling(){
   if(spectatorLivePollTimer)clearInterval(spectatorLivePollTimer);
-  spectatorLivePollTimer=setInterval(async()=>{
+
+  const pull=async()=>{
     if(!sbClient || !cloudReady)return;
     try{
       const row=await cloudFetchState();
-      const remote=row?.data?.liveState;
-      if(!row || !isValidBptState(row.data) || !remote)return;
+      if(!row || !isValidBptState(row.data))return;
 
-      const remoteCreator=String(remote.creatorDeviceId||"");
-      const active=!!(remote.prepared && !remote.synced);
-      if(!active || !remoteCreator || remoteCreator===liveDeviceId())return;
+      const remote=row.data?.liveState||null;
+      const remoteCreator=String(remote?.creatorDeviceId||"");
+      const remoteActive=!!(remote?.prepared && !remote?.synced);
 
-      const publishedAt=Number(remote.publishedAt||0);
-      const localSignature=JSON.stringify({
-        levelIndex:db?.liveState?.levelIndex,
-        players:db?.liveState?.players,
-        running:db?.liveState?.running,
-        endAt:db?.liveState?.endAt,
-        publishedAt:db?.liveState?.publishedAt
-      });
-      const remoteSignature=JSON.stringify({
-        levelIndex:remote.levelIndex,
-        players:remote.players,
-        running:remote.running,
-        endAt:remote.endAt,
-        publishedAt:remote.publishedAt
-      });
-
-      if(publishedAt!==spectatorLastPublishedAt || localSignature!==remoteSignature){
-        spectatorLastPublishedAt=publishedAt;
-        await applySpectatorLiveState(row);
+      if(!remoteActive || !remoteCreator || remoteCreator===liveDeviceId()){
+        return;
       }
+
+      // Toujours appliquer l'état reçu : pas de dépendance à revision/publishedAt/Realtime.
+      await applySpectatorLiveState(row,{fromDirectPoll:true});
     }catch(e){
       console.warn("BPT spectator direct poll:",e);
     }
-  },2000);
+  };
+
+  pull();
+  spectatorLivePollTimer=setInterval(pull,3000);
 }
 
 function stopSpectatorLivePolling(){
@@ -9122,6 +9148,13 @@ function applyLiveAccessMode(){
     liveNav.classList.toggle("spectator-nav",spectator);
   }
 
+  // Le mode spectateur n'immobilise jamais le site tant que l'onglet Live
+  // n'est pas réellement ouvert.
+  document.body.classList.toggle(
+    "spectator-live-open",
+    spectator && currentViewId==="live"
+  );
+
   if($("liveTestSoundBtn"))$("liveTestSoundBtn").style.display=spectator?"none":"";
   if($("liveSyncBadge") && spectator)$("liveSyncBadge").textContent="LIVE · SPECTATEUR";
 
@@ -9129,21 +9162,13 @@ function applyLiveAccessMode(){
 }
 
 function liveMaybeAutoOpenSpectator(){
-  if(!liveIsSpectator() || liveSpectatorAutoOpened)return;
-  try{
-    if(sessionStorage.getItem("bpt_spectator_opened")==="1")return;
-  }catch(e){}
-  if(typeof selectedSeasonKey!=="undefined" && selectedSeasonKey!==CURRENT_SEASON_KEY){
-    selectedSeasonKey=CURRENT_SEASON_KEY;
-    try{sessionStorage.setItem(SEASON_VISIT_KEY,CURRENT_SEASON_KEY);}catch(e){}
+  // Ne force jamais la navigation.
+  // Le spectateur peut consulter classement, records, profils, etc.
+  // Le plein écran spectateur ne s'ouvre que lorsqu'il choisit l'onglet Live.
+  if(liveIsSpectator()){
+    applyLiveAccessMode();
+    if(!spectatorLivePollTimer)startSpectatorLivePolling();
   }
-  liveSpectatorAutoOpened=true;
-  try{sessionStorage.setItem("bpt_spectator_opened","1");}catch(e){}
-  setTimeout(()=>{
-    showView("live");
-    liveShowScreen("game");
-    liveRenderAll();
-  },0);
 }
 
 function liveCreatorGuard(){
@@ -10586,6 +10611,8 @@ function lockSettings(){
   $("settingsPasswordError").textContent="";
 }
 
+let currentViewId="dashboard";
+
 async function showView(id){
   if(id==="versus")id="profile";
   if(id==="achievements")id="records";
@@ -10593,6 +10620,11 @@ async function showView(id){
   if(typeof isArchiveSeason==="function" && isArchiveSeason() && (id==="live" || id==="settings"))id="dashboard";
   if(id==="newgame")id="settings";
   if(id==="dashboard")dashboardRecordSelection=null;
+  currentViewId=id;
+
+  const spectatorLiveOpen=(id==="live" && liveIsSpectator());
+  document.body.classList.toggle("spectator-live-open",spectatorLiveOpen);
+
   document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===id));
 
@@ -10604,6 +10636,16 @@ async function showView(id){
     if(id==="ranking")renderRanking();
     if(id==="records"){renderRecords();renderAchievements();}
     if(id==="profile"){renderProfile();renderVersus();}
+  }
+
+  if(id==="live"){
+    if(liveIsSpectator()){
+      liveShowScreen("game");
+      liveRenderAll();
+      if(!spectatorLivePollTimer)startSpectatorLivePolling();
+    }else{
+      liveRenderAll();
+    }
   }
 
   if(id==="settings"){
@@ -10731,10 +10773,7 @@ if($("gameSummaryBackdrop"))$("gameSummaryBackdrop").onclick=e=>{if(e.target===$
 // Live : affichage, plein écran et test audio
 if($("liveFullscreenBtn"))$("liveFullscreenBtn").onclick=toggleLiveFullscreen;
 if($("spectatorQuitLiveBtn"))$("spectatorQuitLiveBtn").onclick=()=>{
-  liveSpectatorAutoOpened=true;
-  stopSpectatorLivePolling();
   stopSpectatorSyncCountdown();
-  try{sessionStorage.setItem("bpt_spectator_opened","1");}catch(e){}
   showView("dashboard");
 };
 if($("liveFullscreenExitBtn"))$("liveFullscreenExitBtn").onclick=()=>document.exitFullscreen?.();
