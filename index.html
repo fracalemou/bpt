@@ -3998,6 +3998,17 @@ body.spectator-live-open .spectator-global-exit{
   display:flex !important;
 }
 
+
+/* ===== V140 — snapshot joueurs spectateur dédié ===== */
+.spectator-server-count{
+  margin-top:2px;
+  color:#6f8192;
+  font-size:9px;
+}
+.spectator-server-count strong{
+  color:#d0dbe4;
+}
+
 </style>
 </head>
 <body>
@@ -4016,7 +4027,7 @@ body.spectator-live-open .spectator-global-exit{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 14h34</div>
+  <div class="app-version">Version 19/09/26 14h41</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -4168,9 +4179,10 @@ body.spectator-live-open .spectator-global-exit{
         <div class="spectator-fullscreen-shell">
           <div class="spectator-fullscreen-header">
             <div>
-              <div class="spectator-kicker">BPT · LIVE · V139</div>
+              <div class="spectator-kicker">BPT · LIVE · V140</div>
               <div id="spectatorGameMeta" class="spectator-game-meta">—</div>
               <div class="spectator-update-state">Dernière réception : <strong id="spectatorLastReceive">—</strong></div>
+              <div class="spectator-server-count">Serveur : <strong id="spectatorServerCount">—</strong></div>
             </div>
             <button id="spectatorQuitLiveBtn" class="spectator-quit-btn" type="button">← Quitter le Live</button>
           </div>
@@ -5378,6 +5390,35 @@ async function cloudPushNow(){
     const payload=JSON.parse(JSON.stringify(db));
     payload.history=[];
 
+    // Snapshot spectateur dédié : source simple et explicite pour les téléphones.
+    // Il est reconstruit à chaque publication depuis l'état maître courant.
+    if(db.liveState?.prepared && !db.liveState?.synced){
+      payload.liveSpectatorSnapshot={
+        version:1,
+        publishedAt:Date.now(),
+        creatorDeviceId:String(db.liveState.creatorDeviceId||""),
+        prepared:true,
+        running:!!db.liveState.running,
+        synced:false,
+        gameNo:db.liveState.gameNo,
+        date:db.liveState.date,
+        location:db.liveState.location,
+        startStack:Number(db.liveState.startStack||0),
+        buyIn:Number(db.liveState.buyIn||0),
+        levels:JSON.parse(JSON.stringify(db.liveState.levels||[])),
+        levelIndex:Number(db.liveState.levelIndex||0),
+        levelSeconds:Number(db.liveState.levelSeconds||0),
+        remainingSeconds:Number(db.liveState.remainingSeconds||0),
+        endAt:db.liveState.endAt||null,
+        elapsedBeforeMs:Number(db.liveState.elapsedBeforeMs||0),
+        runStartedAt:db.liveState.runStartedAt||null,
+        startedAt:db.liveState.startedAt||null,
+        players:JSON.parse(JSON.stringify(db.liveState.players||[]))
+      };
+    }else{
+      payload.liveSpectatorSnapshot=null;
+    }
+
     const {data,error}=await sbClient
       .from("bpt_state")
       .upsert({id:CLOUD_ROW_ID,data:payload},{onConflict:"id"})
@@ -5426,7 +5467,7 @@ function scheduleCloudSave(){
 }
 
 function remoteLiveIsSpectatorForThisDevice(row){
-  const remote=row?.data?.liveState||null;
+  const remote=row?.data?.liveSpectatorSnapshot || row?.data?.liveState || null;
   const creator=String(remote?.creatorDeviceId||"");
   return !!(
     remote?.prepared &&
@@ -5439,7 +5480,8 @@ function remoteLiveIsSpectatorForThisDevice(row){
 async function renderSpectatorFromServer(row){
   if(!row || !isValidBptState(row.data) || !remoteLiveIsSpectatorForThisDevice(row))return false;
 
-  spectatorServerLiveState=JSON.parse(JSON.stringify(row.data.liveState));
+  const serverLive=row.data.liveSpectatorSnapshot || row.data.liveState;
+  spectatorServerLiveState=JSON.parse(JSON.stringify(serverLive));
   spectatorServerLiveRevision=Number(row.revision||0);
 
   // db.liveState devient seulement une COPIE d'affichage de l'état serveur.
@@ -5986,7 +6028,7 @@ async function fetchLiveStateDirect(){
   if(error)throw error;
 
   const row=data||null;
-  const remote=row?.data?.liveState||null;
+  const remote=row?.data?.liveSpectatorSnapshot || row?.data?.liveState || null;
   const creator=String(remote?.creatorDeviceId||"");
   const isRemoteActive=!!(
     remote?.prepared &&
@@ -10129,17 +10171,23 @@ function renderSpectatorLive(){
 
   const level=s.levels?.[s.levelIndex]||{};
   const next=s.levels?.[s.levelIndex+1]||null;
+  const players=Array.isArray(s.players)?s.players:[];
 
-  const active=s.players.filter(p=>p.status!=="Sorti" && Number(p.place)!==1);
-  const winner=s.players.filter(p=>p.status==="Vainqueur" || Number(p.place)===1);
-  const eliminated=s.players
-    .filter(p=>p.status==="Sorti" && Number(p.place)>1)
+  const active=players.filter(p=>p && p.status!=="Sorti" && Number(p.place)!==1);
+  const winner=players.filter(p=>p && (p.status==="Vainqueur" || Number(p.place)===1));
+  const eliminated=players
+    .filter(p=>p && p.status==="Sorti" && Number(p.place)>1)
     // place la plus petite = élimination la plus récente -> plus haut.
     // place la plus grande = premier éliminé -> tout en bas.
     .sort((a,b)=>Number(a.place)-Number(b.place));
 
   const ordered=[...winner,...active,...eliminated];
-  const remainingCount=winner.length || active.length;
+  const remainingCount=winner.length ? 1 : active.length;
+
+  if($("spectatorServerCount")){
+    $("spectatorServerCount").textContent=
+      `${players.length} joueur${players.length>1?"s":""} · ${eliminated.length} sorti${eliminated.length>1?"s":""}`;
+  }
 
   if($("spectatorGameMeta")){
     $("spectatorGameMeta").textContent=
@@ -10877,7 +10925,7 @@ let currentViewId="dashboard";
 async function resolveLiveEntryMode(){
   try{
     const row=await fetchLiveStateDirect();
-    const remote=row?.data?.liveState||null;
+    const remote=row?.data?.liveSpectatorSnapshot || row?.data?.liveState || null;
     const creator=String(remote?.creatorDeviceId||"");
     const remoteActive=!!(remote?.prepared && !remote?.synced);
 
