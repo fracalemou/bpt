@@ -4013,10 +4013,233 @@ body.spectator-live-open .spectator-global-exit{
   color:#ff9c9c;
 }
 
+
+/* ===== V147 — overlay spectateur 100 % main.liveWire ===== */
+.spectator-server-overlay{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:999900 !important;
+  overflow:auto !important;
+  background:#070b10 !important;
+  color:#eef4f8;
+}
+.spectator-server-shell{
+  min-height:100vh;
+  box-sizing:border-box;
+  padding:18px clamp(12px,3vw,42px) 26px;
+  background:
+    radial-gradient(circle at 20% 0%,rgba(30,66,92,.28),transparent 34%),
+    linear-gradient(180deg,#0b1118,#070b10);
+}
+.spectator-server-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:16px;
+}
+.spectator-server-kicker{
+  color:#8fd4ff;
+  font-size:12px;
+  font-weight:950;
+  letter-spacing:.09em;
+}
+.spectator-server-meta{
+  margin-top:4px;
+  color:#a3b0bd;
+  font-size:11px;
+}
+.spectator-server-receive{
+  margin-top:3px;
+  color:#718396;
+  font-size:9px;
+}
+.spectator-server-receive strong{color:#b7dff6;}
+.spectator-server-exit{
+  position:sticky;
+  top:10px;
+  flex:none;
+  padding:10px 14px;
+  border:1px solid #567086;
+  border-radius:11px;
+  background:#111a24;
+  color:white;
+  font-weight:900;
+  cursor:pointer;
+}
+.spectator-server-summary{
+  display:grid;
+  grid-template-columns:1fr 1.25fr .7fr;
+  gap:12px;
+  margin-top:18px;
+}
+.spectator-server-card{
+  min-height:145px;
+  border:1px solid #2b3e50;
+  border-radius:15px;
+  background:#111a24;
+  padding:16px;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.spectator-server-card > span{
+  color:#8293a4;
+  font-size:9px;
+  font-weight:900;
+  letter-spacing:.09em;
+}
+.spectator-server-card > strong{
+  margin-top:5px;
+  font-size:34px;
+  line-height:1;
+}
+.spectator-server-card > b{
+  margin-top:8px;
+  font-size:28px;
+}
+.spectator-server-card small{
+  margin-top:7px;
+  color:#8fa0b0;
+}
+.spectator-server-timer-card > strong{
+  font-size:58px;
+  font-variant-numeric:tabular-nums;
+}
+.spectator-server-players-card{
+  margin-top:14px;
+  border:1px solid #2b3e50;
+  border-radius:15px;
+  background:#0f171f;
+  padding:14px;
+}
+.spectator-server-list-head{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-end;
+  margin-bottom:10px;
+}
+.spectator-server-list-head > div:first-child{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.spectator-server-list-head small,
+.spectator-server-list-head > div:last-child{
+  color:#718396;
+  font-size:9px;
+}
+.spectator-server-players{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.spectator-server-player{
+  display:grid;
+  grid-template-columns:38px minmax(0,1fr) minmax(120px,.7fr);
+  gap:10px;
+  align-items:center;
+  min-height:42px;
+  padding:7px 10px;
+  border:1px solid #243544;
+  border-radius:10px;
+  background:#121c26;
+}
+.spectator-server-player.is-out{
+  opacity:.62;
+  background:#0d141b;
+}
+.spectator-server-player.is-winner{
+  border-color:#8b713a;
+  background:#201b11;
+}
+.spectator-server-place{
+  text-align:center;
+  color:#8798a8;
+  font-weight:900;
+}
+.spectator-server-status{
+  text-align:right;
+  color:#96a6b5;
+  font-size:10px;
+}
+@media(max-width:700px){
+  .spectator-server-shell{padding:10px 9px 18px;}
+  .spectator-server-summary{
+    grid-template-columns:1fr 1fr;
+    gap:7px;
+  }
+  .spectator-server-card{min-height:112px;padding:10px 6px;}
+  .spectator-server-card > strong{font-size:26px;}
+  .spectator-server-card > b{font-size:22px;}
+  .spectator-server-timer-card > strong{font-size:40px;}
+  .spectator-server-summary .spectator-server-card:last-child{
+    grid-column:1 / -1;
+    min-height:70px;
+  }
+  .spectator-server-player{
+    grid-template-columns:28px minmax(0,1fr);
+    min-height:38px;
+  }
+  .spectator-server-status{
+    grid-column:2;
+    text-align:left;
+    margin-top:-4px;
+    font-size:9px;
+  }
+}
+
 </style>
 </head>
 <body>
 <button id="spectatorGlobalExitBtn" class="spectator-global-exit" type="button" style="display:none">← Quitter le Live</button>
+
+<div id="spectatorServerOverlay" class="spectator-server-overlay" style="display:none">
+  <div class="spectator-server-shell">
+    <div class="spectator-server-top">
+      <div>
+        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V147</div>
+        <div id="spectatorServerGameMeta" class="spectator-server-meta">—</div>
+        <div class="spectator-server-receive">
+          Reçu : <strong id="spectatorServerReceivedAt">—</strong>
+          · Source : <strong>main.liveWire</strong>
+        </div>
+      </div>
+      <button id="spectatorServerExitBtn" class="spectator-server-exit" type="button">← Quitter le Live</button>
+    </div>
+
+    <div class="spectator-server-summary">
+      <div class="spectator-server-card">
+        <span>NIVEAU ACTUEL</span>
+        <strong id="spectatorServerLevel">—</strong>
+        <b id="spectatorServerBlinds">— / —</b>
+        <small id="spectatorServerAnte"></small>
+      </div>
+      <div class="spectator-server-card spectator-server-timer-card">
+        <span>TEMPS RESTANT</span>
+        <strong id="spectatorServerTimer">00:00</strong>
+        <small>Niveau suivant : <b id="spectatorServerNext">—</b></small>
+      </div>
+      <div class="spectator-server-card">
+        <span>JOUEURS RESTANTS</span>
+        <strong id="spectatorServerRemaining">0</strong>
+        <small id="spectatorServerCount">0 inscrits</small>
+      </div>
+    </div>
+
+    <div class="spectator-server-players-card">
+      <div class="spectator-server-list-head">
+        <div>
+          <strong>Joueurs</strong>
+          <small>Encore en jeu en haut · premier éliminé tout en bas</small>
+        </div>
+        <div>Actualisation serveur toutes les 3 s</div>
+      </div>
+      <div id="spectatorServerPlayers" class="spectator-server-players"></div>
+    </div>
+  </div>
+</div>
 <header class="bpt-header">
   <div class="bpt-brand-wrap">
     <div class="bpt-logo" aria-label="BPT">
@@ -4031,7 +4254,7 @@ body.spectator-live-open .spectator-global-exit{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 15h04</div>
+  <div class="app-version">Version 19/09/26 15h08</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -5500,48 +5723,123 @@ function remoteLiveIsSpectatorForThisDevice(row){
   );
 }
 
-async function renderSpectatorFromServer(row){
-  if(!row || !isValidBptState(row.data) || !remoteLiveIsSpectatorForThisDevice(row))return false;
-
+function spectatorWireFromRow(row){
   const wire=row?.data?.liveWire||null;
-  const serverLive=(wire?.prepared && !wire?.synced) ? wire : row?.data?.liveState;
-  if(!serverLive)return false;
-  spectatorServerLiveState=JSON.parse(JSON.stringify(serverLive));
-  spectatorServerLiveRevision=Number(row.revision||0);
+  return (wire?.prepared && !wire?.synced) ? wire : null;
+}
 
-  // db.liveState devient seulement une COPIE d'affichage de l'état serveur.
-  // Aucune décision de mode spectateur ne repose sur cette copie locale.
-  db.liveState=JSON.parse(JSON.stringify(spectatorServerLiveState));
+function spectatorOverlayIsOpen(){
+  return $("spectatorServerOverlay")?.style.display==="block";
+}
+
+function closeSpectatorServerOverlay(target="ranking"){
+  if($("spectatorServerOverlay"))$("spectatorServerOverlay").style.display="none";
+  if($("spectatorGlobalExitBtn"))$("spectatorGlobalExitBtn").style.display="none";
+  document.body.classList.remove("spectator-live-open");
+  document.body.style.overflow="";
+  currentViewId=target;
+  showView(target);
+}
+
+function renderSpectatorServerOverlay(wire){
+  if(!wire?.prepared || wire?.synced)return false;
+
+  spectatorServerLiveState=JSON.parse(JSON.stringify(wire));
+
+  const levels=Array.isArray(wire.levels)?wire.levels:[];
+  const levelIndex=Math.max(0,Number(wire.levelIndex||0));
+  const level=levels[levelIndex]||{};
+  const next=levels[levelIndex+1]||null;
+  const players=Array.isArray(wire.players)?wire.players:[];
+
+  const winner=players.filter(p=>p && (p.status==="Vainqueur" || Number(p.place)===1));
+  const alive=players.filter(p=>p && p.status!=="Sorti" && p.status!=="Vainqueur" && Number(p.place)!==1);
+  const eliminated=players
+    .filter(p=>p && p.status==="Sorti" && Number(p.place)>1)
+    .sort((a,b)=>Number(a.place)-Number(b.place));
+
+  const ordered=[...winner,...alive,...eliminated];
+  const remaining=winner.length?1:alive.length;
+
+  $("spectatorServerGameMeta").textContent=
+    `Partie #${wire.gameNo||"—"} · ${wire.date||""}${wire.location?" · "+wire.location:""}`;
+  $("spectatorServerReceivedAt").textContent=
+    new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  $("spectatorServerLevel").textContent=`Niveau ${Number(level.level||levelIndex+1)}`;
+  $("spectatorServerBlinds").textContent=
+    `${liveFmt(level.sb||0)} / ${liveFmt(level.bb||0)}`;
+  $("spectatorServerAnte").textContent=
+    Number(level.ante)>0?`Ante ${liveFmt(level.ante)}`:"";
+  $("spectatorServerNext").textContent=next
+    ? `${liveFmt(next.sb||0)} / ${liveFmt(next.bb||0)}${Number(next.ante)>0?" · ante "+liveFmt(next.ante):""}`
+    : "—";
+  $("spectatorServerRemaining").textContent=String(remaining);
+  $("spectatorServerCount").textContent=
+    `${players.length} inscrit${players.length>1?"s":""}`;
+
+  let remainingSeconds=Number(wire.remainingSeconds||0);
+  if(wire.running && wire.endAt){
+    remainingSeconds=Math.max(0,Math.ceil((Number(wire.endAt)-Date.now())/1000));
+  }
+  $("spectatorServerTimer").textContent=liveTime(remainingSeconds);
+
+  $("spectatorServerPlayers").innerHTML=ordered.map(p=>{
+    const out=p.status==="Sorti";
+    const won=p.status==="Vainqueur" || Number(p.place)===1;
+    const status=won
+      ? "Vainqueur"
+      : out
+        ? `Éliminé${p.killer?` par ${p.killer}`:""}`
+        : "En jeu";
+    return `
+      <div class="spectator-server-player ${out?"is-out":""} ${won?"is-winner":""}">
+        <div class="spectator-server-place">${out?(p.place||"—"):"•"}</div>
+        <div class="spectator-server-name">${playerNameHtml(p.name)}</div>
+        <div class="spectator-server-status">${esc(status)}</div>
+      </div>`;
+  }).join("");
+
+  $("spectatorServerOverlay").style.display="block";
+  if($("spectatorGlobalExitBtn"))$("spectatorGlobalExitBtn").style.display="none";
+  document.body.classList.add("spectator-live-open");
+  document.body.style.overflow="hidden";
+  return true;
+}
+
+let spectatorOverlayTicker=null;
+function startSpectatorOverlayTicker(){
+  if(spectatorOverlayTicker)clearInterval(spectatorOverlayTicker);
+  spectatorOverlayTicker=setInterval(()=>{
+    if(!spectatorOverlayIsOpen() || !spectatorServerLiveState)return;
+    const w=spectatorServerLiveState;
+    let remaining=Number(w.remainingSeconds||0);
+    if(w.running && w.endAt){
+      remaining=Math.max(0,Math.ceil((Number(w.endAt)-Date.now())/1000));
+    }
+    if($("spectatorServerTimer"))$("spectatorServerTimer").textContent=liveTime(remaining);
+  },250);
+}
+
+async function renderSpectatorFromServer(row){
+  const wire=spectatorWireFromRow(row);
+  if(!wire)return false;
+
+  const creator=String(wire.creatorDeviceId||"");
+  if(!creator || creator===liveDeviceId())return false;
+
+  spectatorServerLiveState=JSON.parse(JSON.stringify(wire));
+  spectatorServerLiveRevision=Number(row.revision||0);
   cloudLastRevision=spectatorServerLiveRevision;
   cloudLocalDirty=false;
-  saveLocalOnly();
 
   currentViewId="live";
-  document.body.classList.add("spectator-live-open");
-  if($("spectatorGlobalExitBtn"))$("spectatorGlobalExitBtn").style.display="flex";
-  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id==="live"));
-  document.querySelectorAll("nav button").forEach(n=>n.classList.toggle("active",n.dataset.view==="live"));
-
-  liveShowScreen("game");
-  applyLiveAccessMode();
-
-  if($("liveSpectatorPanel"))$("liveSpectatorPanel").style.display="block";
-  const stage=document.querySelector("#liveGameScreen > .live-stage");
-  if(stage)stage.style.display="none";
-
-  renderSpectatorLive();
-
-  if($("spectatorLastReceive")){
-    $("spectatorLastReceive").textContent=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
-  }
-  resetSpectatorSyncCountdown();
-
-  if(db.liveState?.running && db.liveState?.endAt)liveRunTicker();
+  renderSpectatorServerOverlay(wire);
+  startSpectatorOverlayTicker();
 
   setCloudStatus(
     "ok",
     "Live spectateur connecté",
-    `Partie #${db.liveState?.gameNo||"—"} · révision serveur ${spectatorServerLiveRevision}`
+    `main.liveWire · niveau ${Number(wire.levelIndex||0)+1} · ${Array.isArray(wire.players)?wire.players.length:0} joueurs`
   );
   return true;
 }
@@ -9287,34 +9585,25 @@ function startSpectatorLivePolling(){
   const pull=async()=>{
     try{
       const row=await fetchLiveStateDirect();
+      const wire=spectatorWireFromRow(row);
+      const creator=String(wire?.creatorDeviceId||"");
 
-      if(row && remoteLiveIsSpectatorForThisDevice(row)){
-        if(currentViewId==="live"){
-          await renderSpectatorFromServer(row);
+      if(wire && creator && creator!==liveDeviceId()){
+        spectatorServerLiveState=JSON.parse(JSON.stringify(wire));
+
+        if(spectatorOverlayIsOpen() || currentViewId==="live"){
+          renderSpectatorServerOverlay(wire);
+          startSpectatorOverlayTicker();
         }else{
-          // Mise à jour silencieuse : uniquement cache serveur + badge de navigation.
           const liveNav=document.querySelector('nav button[data-view="live"]');
           if(liveNav){
             liveNav.textContent="● Live · Spectateur";
             liveNav.classList.add("spectator-nav");
           }
-          document.body.classList.remove("spectator-live-open");
-          $("live")?.classList.remove("active");
-        }
-      }else{
-        spectatorServerLiveState=null;
-        spectatorServerLiveRevision=0;
-        const liveNav=document.querySelector('nav button[data-view="live"]');
-        if(liveNav){
-          liveNav.textContent="● Live";
-          liveNav.classList.remove("spectator-nav");
         }
       }
     }catch(e){
       console.warn("BPT spectator direct poll:",e);
-      if(currentViewId==="live"){
-        setCloudStatus("offline","Live spectateur · reconnexion…",e?.message||String(e));
-      }
     }
   };
 
@@ -11125,9 +11414,11 @@ async function showView(id){
     const resolved=await resolveLiveEntryMode();
 
     if(resolved.mode==="spectator"){
-      await renderSpectatorFromServer(resolved.row);
-      startSpectatorLivePolling();
-      return;
+      const opened=await renderSpectatorFromServer(resolved.row);
+      if(opened){
+        startSpectatorLivePolling();
+        return;
+      }
     }
 
     if(resolved.mode==="creator"){
@@ -11289,13 +11580,12 @@ if($("gameSummaryBackdrop"))$("gameSummaryBackdrop").onclick=e=>{if(e.target===$
 
 // Live : affichage, plein écran et test audio
 if($("liveFullscreenBtn"))$("liveFullscreenBtn").onclick=toggleLiveFullscreen;
+if($("spectatorServerExitBtn"))$("spectatorServerExitBtn").onclick=()=>{
+  closeSpectatorServerOverlay("ranking");
+};
+
 if($("spectatorGlobalExitBtn"))$("spectatorGlobalExitBtn").onclick=()=>{
-  stopSpectatorSyncCountdown();
-  document.body.classList.remove("spectator-live-open");
-  $("spectatorGlobalExitBtn").style.display="none";
-  $("live")?.classList.remove("active");
-  currentViewId="ranking";
-  showView("ranking");
+  closeSpectatorServerOverlay("ranking");
 };
 
 if($("spectatorQuitLiveBtn"))$("spectatorQuitLiveBtn").onclick=()=>{
