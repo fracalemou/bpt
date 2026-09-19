@@ -5903,6 +5903,107 @@ body.spectator-live-open .spectator-global-exit{
   }
 }
 
+
+/* ===== V171 — plein écran Live mobile réduit d'environ 10 % ===== */
+@media(max-width:700px){
+  #liveFullscreenDisplay .live-fullscreen-brand{
+    font-size:90% !important;
+  }
+
+  #liveFullscreenDisplay .live-fullscreen-level{
+    font-size:90% !important;
+  }
+
+  #liveFullscreenDisplay .live-fullscreen-next-compact{
+    font-size:9px !important;
+  }
+
+  #liveFullscreenDisplay .live-fullscreen-blinds{
+    font-size:90% !important;
+  }
+
+  #liveFullscreenDisplay .live-fullscreen-ante{
+    font-size:90% !important;
+  }
+
+  #liveFullscreenDisplay .live-fullscreen-timer-label{
+    font-size:10px !important;
+  }
+
+  #liveFullscreenDisplay .live-fullscreen-timer{
+    font-size:clamp(40px,10vw,65px) !important;
+  }
+
+  #liveFullscreenDisplay .live-fullscreen-kpi span{
+    font-size:90% !important;
+  }
+
+  #liveFullscreenDisplay .live-fullscreen-kpi strong{
+    font-size:90% !important;
+  }
+
+  #liveFullscreenDisplay .live-fs-dock-btn{
+    min-height:42px !important;
+    font-size:12.5px !important;
+    padding:6px 8px !important;
+  }
+
+  #liveFullscreenDisplay .live-fullscreen-settings,
+  #liveFullscreenDisplay .live-fullscreen-exit{
+    font-size:9px !important;
+    padding:5px 8px !important;
+  }
+
+  #liveFullscreenDisplay .live-fs-elim-card{
+    transform:scale(.92);
+    transform-origin:center;
+  }
+}
+
+
+/* ===== V173 — photo de profil joueur ===== */
+.profile-photo-column{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:8px;
+  flex:none;
+}
+.profile-photo-wrap{
+  cursor:pointer;
+  transition:transform .15s ease, border-color .15s ease;
+}
+.profile-photo-wrap:hover{
+  transform:translateY(-1px);
+}
+.profile-photo-btn{
+  border:1px solid #3d5264;
+  background:#14212c;
+  color:#eaf2f7;
+  border-radius:9px;
+  padding:7px 10px;
+  font-size:11px;
+  font-weight:800;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.profile-photo-btn:hover{
+  border-color:#7da8c8;
+}
+.profile-photo-btn:disabled{
+  opacity:.45;
+  cursor:default;
+}
+@media(max-width:700px){
+  .profile-photo-column{
+    gap:6px;
+  }
+  .profile-photo-btn{
+    padding:6px 8px;
+    font-size:10px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -5918,7 +6019,7 @@ body.spectator-live-open .spectator-global-exit{
   <div class="spectator-server-shell">
     <div class="spectator-server-top">
       <div>
-        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V170</div>
+        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V173</div>
         <div id="spectatorServerGameMeta" class="spectator-server-meta">—</div>
         <div class="spectator-server-receive">
           Reçu : <strong id="spectatorServerReceivedAt">—</strong>
@@ -5976,7 +6077,7 @@ body.spectator-live-open .spectator-global-exit{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 17h30</div>
+  <div class="app-version">Version 19/09/26 17h43</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -6594,9 +6695,13 @@ body.spectator-live-open .spectator-global-exit{
   </div>
 
   <div class="hero player-profile-hero profile-identity premium-profile-identity">
-    <div id="playerProfilePhotoWrap" class="profile-photo-wrap">
-      <div id="playerProfilePhotoPlaceholder" class="profile-photo-placeholder">♠</div>
-      <img id="playerProfilePhoto" class="profile-photo" alt="Photo du joueur" style="display:none">
+    <div class="profile-photo-column">
+      <div id="playerProfilePhotoWrap" class="profile-photo-wrap">
+        <div id="playerProfilePhotoPlaceholder" class="profile-photo-placeholder">♠</div>
+        <img id="playerProfilePhoto" class="profile-photo" alt="Photo du joueur" style="display:none">
+      </div>
+      <input id="playerProfilePhotoInput" type="file" accept="image/*" hidden>
+      <button id="playerProfilePhotoBtn" class="profile-photo-btn" type="button">Ajouter une photo</button>
     </div>
     <div>
       <div class="muted">Fiche joueur BPT</div>
@@ -7668,6 +7773,13 @@ async function applyCloudState(row){
   const rev=Number(row.revision||0);
   const remoteState=JSON.parse(JSON.stringify(row.data));
 
+  // La photothèque est additive : une photo déjà connue localement ne doit jamais
+  // disparaître parce qu'un autre appareil possède un état plus ancien.
+  const localGamePhotos=JSON.parse(JSON.stringify(ensureGamePhotos()));
+  const localPlayerPhotos=JSON.parse(JSON.stringify(ensurePlayerPhotos()));
+  remoteState.gamePhotos=mergePhotoMaps(remoteState.gamePhotos,localGamePhotos);
+  remoteState.playerPhotos=mergePhotoMaps(remoteState.playerPhotos,localPlayerPhotos);
+
   cloudApplying=true;
   try{
     // L'état partagé continue d'être actualisé, mais la saison choisie
@@ -7677,6 +7789,7 @@ async function applyCloudState(row){
     currentSeasonHistoryCache=clone(serverHistory);
 
     db=remoteState;
+    saveLocalOnly();
     if(remoteActive && !thisDeviceOwnsRemoteLive)cloudLocalDirty=false;
 
     if(liveSeasonKey==="2023-2024"){
@@ -8880,6 +8993,10 @@ function renderProfile(preferredName=null){
     $("playerProfileName").textContent="—";
     if($("playerProfilePhoto")){$("playerProfilePhoto").style.display="none";$("playerProfilePhoto").src="";}
     if($("playerProfilePhotoPlaceholder"))$("playerProfilePhotoPlaceholder").style.display="flex";
+    if($("playerProfilePhotoBtn")){
+      $("playerProfilePhotoBtn").textContent="Ajouter une photo";
+      $("playerProfilePhotoBtn").disabled=!name;
+    }
     if($("playerProfileNickname"))$("playerProfileNickname").textContent="";
     if($("playerProfileOtherNicknames"))$("playerProfileOtherNicknames").textContent="";
     $("playerProfileRank").textContent="#—";
@@ -8905,6 +9022,10 @@ function renderProfile(preferredName=null){
   }
   if($("playerProfilePhotoPlaceholder")){
     $("playerProfilePhotoPlaceholder").style.display=profilePhoto?"none":"flex";
+  }
+  if($("playerProfilePhotoBtn")){
+    $("playerProfilePhotoBtn").textContent=profilePhoto?"Modifier la photo":"Ajouter une photo";
+    $("playerProfilePhotoBtn").disabled=!name;
   }
 
   const nicknameInfo=playerNicknameInfo(name);
@@ -9616,36 +9737,119 @@ function getGamePhoto(gameNo,seasonKey=null){
   return String(ensureGamePhotos()[gamePhotoKey(gameNo,seasonKey)]||"");
 }
 
-async function saveSharedMetadataOnly(){
+
+function mergePhotoMaps(a,b){
+  const out={};
+  const left=(a && typeof a==="object" && !Array.isArray(a))?a:{};
+  const right=(b && typeof b==="object" && !Array.isArray(b))?b:{};
+
+  // Les photos déjà présentes sur le serveur sont conservées.
+  Object.entries(left).forEach(([k,v])=>{
+    if(typeof v==="string" && v)out[k]=v;
+  });
+
+  // Une photo locale manquante côté serveur est ajoutée.
+  // Si les deux existent, la version locale est conservée sur cet appareil,
+  // puis publiée lors de syncSharedPhotosOnly().
+  Object.entries(right).forEach(([k,v])=>{
+    if(typeof v==="string" && v)out[k]=v;
+  });
+
+  return out;
+}
+
+function mergeSharedPhotosIntoLocal(remoteState){
+  if(!remoteState || typeof remoteState!=="object")return false;
+
+  const localGame=ensureGamePhotos();
+  const localPlayers=ensurePlayerPhotos();
+  const mergedGame=mergePhotoMaps(remoteState.gamePhotos,localGame);
+  const mergedPlayers=mergePhotoMaps(remoteState.playerPhotos,localPlayers);
+
+  db.gamePhotos=mergedGame;
+  db.playerPhotos=mergedPlayers;
+  return true;
+}
+
+/*
+  Synchronisation dédiée aux photos.
+  Elle relit toujours bpt_state/main, fusionne uniquement gamePhotos/playerPhotos,
+  puis réécrit l'état serveur courant sans toucher au Live, à l'historique,
+  aux paramètres ni au propriétaire du Live.
+*/
+async function syncSharedPhotosOnly({silent=false}={}){
   saveLocalOnly();
+
   if(!sbClient || !cloudReady || cloudApplying){
     cloudLocalDirty=true;
     return false;
   }
-  setCloudStatus("busy","Synchronisation…");
+
   try{
-    // Les métadonnées (photos, joueurs, surnoms...) sont dans bpt_state.
-    // On ne touche jamais aux lignes historiques canoniques ici.
-    const payload=JSON.parse(JSON.stringify(db));
-    payload.history=[];
+    const {data:row,error:readError}=await sbClient
+      .from("bpt_state")
+      .select("id,data,revision,updated_at")
+      .eq("id",CLOUD_ROW_ID)
+      .single();
+
+    if(readError)throw readError;
+
+    const remoteState=(row?.data && typeof row.data==="object")
+      ? JSON.parse(JSON.stringify(row.data))
+      : {};
+
+    const mergedGame=mergePhotoMaps(remoteState.gamePhotos,ensureGamePhotos());
+    const mergedPlayers=mergePhotoMaps(remoteState.playerPhotos,ensurePlayerPhotos());
+
+    // Met à jour immédiatement la bibliothèque locale avec l'union serveur + appareil.
+    db.gamePhotos=mergedGame;
+    db.playerPhotos=mergedPlayers;
+    saveLocalOnly();
+
+    // On repart de l'état serveur pour ne jamais écraser un Live publié par un autre flux.
+    remoteState.gamePhotos=mergedGame;
+    remoteState.playerPhotos=mergedPlayers;
+
     const {data,error}=await sbClient
       .from("bpt_state")
-      .upsert({id:CLOUD_ROW_ID,data:payload},{onConflict:"id"})
+      .upsert({id:CLOUD_ROW_ID,data:remoteState},{onConflict:"id"})
       .select("revision,updated_at")
       .single();
+
     if(error)throw error;
-    cloudLastRevision=Number(data?.revision||cloudLastRevision||0);
+
+    cloudLastRevision=Math.max(
+      Number(cloudLastRevision||0),
+      Number(data?.revision||0)
+    );
     cloudLocalDirty=false;
     saveLocalOnly();
-    setCloudStatus("ok","Synchronisé","Photo de partie enregistrée");
+
+    if(!silent){
+      setCloudStatus("ok","Synchronisé","Photothèque partagée enregistrée");
+    }
     return true;
   }catch(e){
     cloudLastError=e?.message||String(e);
-    console.error("BPT metadata save:",e);
+    console.error("BPT photos sync:",e);
     cloudLocalDirty=true;
-    setCloudStatus("offline","Erreur synchro",cloudLastError);
+    if(!silent)setCloudStatus("offline","Erreur photos",cloudLastError);
     return false;
   }
+}
+
+async function syncSharedPhotosWithRetry(attempt=0){
+  if(sbClient && cloudReady){
+    await syncSharedPhotosOnly({silent:true});
+    return;
+  }
+  if(attempt<8){
+    setTimeout(()=>syncSharedPhotosWithRetry(attempt+1),1000);
+  }
+}
+
+async function saveSharedMetadataOnly(){
+  return await syncSharedPhotosOnly({silent:false});
 }
 
 async function saveGamePhoto(gameNo,file,seasonKey=null){
@@ -9653,8 +9857,15 @@ async function saveGamePhoto(gameNo,file,seasonKey=null){
   try{
     const dataUrl=await fileToCompressedDataUrl(file);
     ensureGamePhotos()[gamePhotoKey(gameNo,seasonKey)]=dataUrl;
-    await saveSharedMetadataOnly();
+    saveLocalOnly();
+
+    const ok=await syncSharedPhotosOnly({silent:false});
+    if(!ok){
+      alert("La photo est conservée sur cet appareil mais n’a pas encore pu être synchronisée. Elle sera renvoyée automatiquement lors d’une prochaine connexion.");
+    }
+
     renderLatestGame();
+    if(typeof renderHistory==="function")renderHistory();
   }catch(e){
     alert(e?.message||String(e));
   }
@@ -9746,7 +9957,13 @@ async function savePlayerPhoto(name,file){
   try{
     const dataUrl=await fileToCompressedDataUrl(file);
     ensurePlayerPhotos()[player]=dataUrl;
-    saveDB();
+    saveLocalOnly();
+
+    const ok=await syncSharedPhotosOnly({silent:false});
+    if(!ok){
+      alert("La photo est conservée sur cet appareil mais n’a pas encore pu être synchronisée. Elle sera renvoyée automatiquement lors d’une prochaine connexion.");
+    }
+
     renderPlayers();
     if($("profilePlayerSelect")?.value===player)renderProfile(player);
   }catch(e){
@@ -13841,6 +14058,30 @@ $("liveFinalizeBtn").onclick=liveFinalizeGame;
 // Fiche joueur
 if($("profilePlayerSelect"))$("profilePlayerSelect").onchange=()=>renderProfile($("profilePlayerSelect").value);
 
+if($("playerProfilePhotoBtn"))$("playerProfilePhotoBtn").onclick=()=>{
+  const player=String($("profilePlayerSelect")?.value||"").trim();
+  if(!player)return;
+  const input=$("playerProfilePhotoInput");
+  if(!input)return;
+  input.dataset.player=player;
+  input.click();
+};
+
+if($("playerProfilePhotoInput"))$("playerProfilePhotoInput").onchange=async e=>{
+  const input=e.currentTarget;
+  const file=input.files?.[0];
+  const player=String(input.dataset.player||$("profilePlayerSelect")?.value||"").trim();
+  if(file && player){
+    await savePlayerPhoto(player,file);
+  }
+  input.value="";
+};
+
+if($("playerProfilePhotoWrap"))$("playerProfilePhotoWrap").onclick=()=>{
+  $("playerProfilePhotoBtn")?.click();
+};
+
+
 
 // Résumé de fin de partie
 if($("gameSummaryCloseBtn"))$("gameSummaryCloseBtn").onclick=()=>$("gameSummaryBackdrop").style.display="none";
@@ -13970,6 +14211,7 @@ if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus"
 initCloudSync();
 setTimeout(()=>startSpectatorLivePolling(),800);
 setTimeout(()=>startGlobalHandoverPolling(),1000);
+setTimeout(()=>syncSharedPhotosWithRetry(),1400);
 
 // Fermeture robuste du détail de structure : fonctionne même si le panneau
 // a été inséré dans le DOM après l'initialisation des autres événements.
@@ -14014,6 +14256,16 @@ document.addEventListener("keydown",e=>{
   }
   if(e.key==="Escape" && $("liveStructureViewer")?.style.display!=="none"){
     closeLiveStructureViewer();
+  }
+});
+
+
+window.addEventListener("online",()=>{
+  syncSharedPhotosWithRetry();
+});
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible"){
+    syncSharedPhotosWithRetry();
   }
 });
 
