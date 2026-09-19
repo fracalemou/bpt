@@ -2803,6 +2803,119 @@ table{max-width:100%}
   .combined-block > summary small{font-size:9px}
 }
 
+
+/* ===== V114 — affichage surnom prioritaire ===== */
+.profile-nickname span{
+  min-width:30px;
+}
+
+
+/* ===== V115 — photos des parties ===== */
+.history-game-photo-zone{
+  margin-bottom:12px;
+  padding:10px 11px;
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:12px;
+  background:rgba(255,255,255,.018);
+}
+.history-photo-toolbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:9px;
+}
+.history-photo-toolbar strong{
+  font-size:12px;
+  color:#dce3eb;
+}
+.history-photo-thumbs{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding-bottom:2px;
+  -webkit-overflow-scrolling:touch;
+}
+.history-photo-thumb{
+  flex:0 0 112px;
+  width:112px;
+  height:76px;
+  padding:0;
+  border:1px solid #364255;
+  border-radius:9px;
+  overflow:hidden;
+  background:#0d121a;
+  cursor:zoom-in;
+}
+.history-photo-thumb img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+}
+.history-photo-thumb:hover{
+  border-color:#c8a15c;
+  transform:translateY(-1px);
+}
+.history-no-photo{
+  font-size:11px;
+  padding:4px 0;
+}
+.game-photo-viewer{
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:34px;
+  background:rgba(4,7,12,.94);
+  backdrop-filter:blur(5px);
+}
+.game-photo-viewer.open{display:flex}
+.game-photo-viewer img{
+  max-width:min(94vw,1500px);
+  max-height:88vh;
+  object-fit:contain;
+  border-radius:12px;
+  box-shadow:0 24px 80px rgba(0,0,0,.55);
+}
+.game-photo-viewer-close{
+  position:absolute;
+  top:16px;
+  right:20px;
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.22);
+  background:rgba(20,25,35,.84);
+  color:white;
+  font-size:27px;
+  cursor:pointer;
+}
+.game-photo-viewer-caption{
+  position:absolute;
+  left:20px;
+  right:20px;
+  bottom:12px;
+  text-align:center;
+  color:#cbd4df;
+  font-size:12px;
+}
+body.photo-viewer-open{overflow:hidden}
+@media(max-width:700px){
+  .history-photo-toolbar{align-items:flex-start;flex-direction:column}
+  .history-photo-thumb{flex-basis:96px;width:96px;height:66px}
+  .game-photo-viewer{padding:16px}
+}
+@media screen and (orientation:landscape) and (max-height:520px) and (max-width:1000px){
+  .history-game-photo-zone{padding:7px 8px;margin-bottom:8px}
+  .history-photo-toolbar{margin-bottom:6px;flex-direction:row;align-items:center}
+  .history-photo-thumb{flex-basis:90px;width:90px;height:58px}
+  .game-photo-viewer{padding:10px 48px}
+  .game-photo-viewer img{max-height:90vh}
+}
+
 </style>
 </head>
 <body>
@@ -2820,7 +2933,7 @@ table{max-width:100%}
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 10h18</div>
+  <div class="app-version">Version 19/09/26 10h36</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -3801,6 +3914,9 @@ function mergeStateForPush(remote,local){
   }
 
   merged.players=mergePlayers(remote.players||[],local.players||[]);
+  merged.gamePhotos={...(remote.gamePhotos||{}),...(local.gamePhotos||{})};
+  merged.playerNicknames={...(remote.playerNicknames||{}),...(local.playerNicknames||{})};
+  merged.playerAliases={...(remote.playerAliases||{}),...(local.playerAliases||{})};
   return merged;
 }
 
@@ -3859,7 +3975,8 @@ async function refreshCanonicalHistoryUI(showBusy=true){
       return true;
     }
     db.history=applyPlayerAliasesToRows(recalcCurrentSeasonPoints(serverHistory));
-    applyHistoricalPointScale();
+    ensureGamePhotos();
+applyHistoricalPointScale();
     normalizeHistoryGameNumbers();
     saveLocalOnly();
 
@@ -4965,7 +5082,7 @@ function renderProfile(preferredName=null){
     .sort((a,b)=>a.localeCompare(b,"fr",{sensitivity:"base"}));
 
   const previous=preferredName || sel.value;
-  sel.innerHTML=allNames.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+  sel.innerHTML=allNames.map(n=>`<option value="${esc(n)}">${esc(playerDisplayWithRealName(n))}</option>`).join("");
 
   if(previous && allNames.includes(previous))sel.value=previous;
   else if(ranked[0])sel.value=ranked[0].name;
@@ -4992,13 +5109,13 @@ function renderProfile(preferredName=null){
   }
 
   const {s,rows}=d;
-  $("playerProfileName").textContent=name;
+  $("playerProfileName").textContent=displayPlayerName(name);
 
   const nicknameInfo=playerNicknameInfo(name);
   if($("playerProfileNickname")){
     $("playerProfileNickname").innerHTML=nicknameInfo.primary
-      ? `<span>Surnom</span><strong>${esc(nicknameInfo.primary)}</strong>`
-      : `<span>Surnom</span><strong class="muted">—</strong>`;
+      ? `<span>Nom</span><strong>${esc(name)}</strong>`
+      : "";
   }
   if($("playerProfileOtherNicknames")){
     $("playerProfileOtherNicknames").textContent=nicknameInfo.others.length
@@ -5063,12 +5180,12 @@ function renderProfile(preferredName=null){
   }
   const rv=Object.entries(rivals).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,6);
   $("playerProfileRivals").innerHTML=rv.length
-    ? rv.map(([n,v])=>`<div class="row" style="justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span>${esc(n)}</span><b>${v>0?"+":""}${v}</b></div>`).join("")
+    ? rv.map(([n,v])=>`<div class="row" style="justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span>${esc(displayPlayerName(n))}</span><b>${v>0?"+":""}${v}</b></div>`).join("")
     : '<span class="muted">Pas encore de confrontation directe.</span>';
 
   $("playerProfileHistory").innerHTML=
     `<table><thead><tr><th>Partie</th><th>Date</th><th>Lieu</th><th>Place</th><th>Pts</th><th>Kills</th><th>Éliminé par</th><th>Net</th></tr></thead><tbody>`+
-    rows.slice().reverse().map(r=>`<tr><td>#${r.game}</td><td>${esc(shortDate(r.date))}</td><td>${esc(r.location||"")}</td><td>${r.place}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${esc(r.killer||"—")}</td><td>${euro(r.net)}</td></tr>`).join("")+
+    rows.slice().reverse().map(r=>`<tr><td>#${r.game}</td><td>${esc(shortDate(r.date))}</td><td>${esc(r.location||"")}</td><td>${r.place}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${r.killer?esc(displayPlayerName(r.killer)):"—"}</td><td>${euro(r.net)}</td></tr>`).join("")+
     `</tbody></table>`;
 
   renderVersus();
@@ -5087,12 +5204,160 @@ function showEndGameSummary(rows){
   content.innerHTML=`
     <div class="muted" style="margin-top:6px">Partie #${first.game} · ${esc(shortDate(first.date))}${first.location?" · "+esc(first.location):""} · ${sorted.length} joueurs</div>
     <div class="summary-podium">
-      ${sorted.slice(0,3).map((r,i)=>`<div class="summary-place"><div class="big">${medalForRank(i+1)}</div><b>${esc(r.player)}</b><div>${num(r.points,0)} pts · ${euro(r.gross)}</div><div class="muted">${r.kills||0} kill${Number(r.kills||0)>1?"s":""}</div></div>`).join("")}
+      ${sorted.slice(0,3).map((r,i)=>`<div class="summary-place"><div class="big">${medalForRank(i+1)}</div><b>${esc(displayPlayerName(r.player))}</b><div>${num(r.points,0)} pts · ${euro(r.gross)}</div><div class="muted">${r.kills||0} kill${Number(r.kills||0)>1?"s":""}</div></div>`).join("")}
     </div>
     <div class="tablewrap"><table class="summary-table"><thead><tr><th>Place</th><th>Joueur</th><th>Points</th><th>Kills</th><th>Net</th></tr></thead><tbody>
-      ${sorted.map(r=>`<tr><td>${r.place}</td><td>${esc(r.player)}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${euro(r.net)}</td></tr>`).join("")}
+      ${sorted.map(r=>`<tr><td>${r.place}</td><td>${esc(displayPlayerName(r.player))}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${euro(r.net)}</td></tr>`).join("")}
     </tbody></table></div>`;
   backdrop.style.display="flex";
+}
+
+
+function ensureGamePhotos(){
+  if(!db.gamePhotos || typeof db.gamePhotos!=="object" || Array.isArray(db.gamePhotos))db.gamePhotos={};
+  return db.gamePhotos;
+}
+
+function gamePhotoKey(firstRow,gameNo){
+  const seasonKey=String(firstRow?.seasonKey || (isAllSeasons()?CURRENT_SEASON_KEY:selectedSeasonKey) || CURRENT_SEASON_KEY);
+  const sourceGame=Number(firstRow?.sourceGame || gameNo || firstRow?.game || 0);
+  return `${seasonKey}|${sourceGame}`;
+}
+
+function gamePhotoLabel(firstRow,gameNo){
+  const season=String(firstRow?.seasonLabel || seasonDisplayName(firstRow?.seasonKey || selectedSeasonKey));
+  const sourceGame=Number(firstRow?.sourceGame || gameNo || firstRow?.game || 0);
+  return `${season} · Partie #${sourceGame}`;
+}
+
+function photosForGame(firstRow,gameNo){
+  const key=gamePhotoKey(firstRow,gameNo);
+  const list=ensureGamePhotos()[key];
+  return Array.isArray(list)?list:[];
+}
+
+function fileToCompressedPhoto(file,maxSide=1000,quality=.68){
+  return new Promise((resolve,reject)=>{
+    if(!file || !String(file.type||"").startsWith("image/")){
+      reject(new Error("Le fichier sélectionné n’est pas une image."));
+      return;
+    }
+    const reader=new FileReader();
+    reader.onerror=()=>reject(new Error("Lecture de l’image impossible."));
+    reader.onload=()=>{
+      const img=new Image();
+      img.onerror=()=>reject(new Error("Image illisible."));
+      img.onload=()=>{
+        let w=img.naturalWidth||img.width,h=img.naturalHeight||img.height;
+        const scale=Math.min(1,maxSide/Math.max(w,h));
+        w=Math.max(1,Math.round(w*scale));
+        h=Math.max(1,Math.round(h*scale));
+        const canvas=document.createElement("canvas");
+        canvas.width=w;canvas.height=h;
+        const ctx=canvas.getContext("2d");
+        ctx.drawImage(img,0,0,w,h);
+        resolve({
+          id:(crypto?.randomUUID?.() || `photo_${Date.now()}_${Math.random().toString(36).slice(2)}`),
+          dataUrl:canvas.toDataURL("image/jpeg",quality),
+          name:String(file.name||"Photo"),
+          addedAt:new Date().toISOString()
+        });
+      };
+      img.src=reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+let pendingPhotoGameKey="";
+let pendingPhotoGameLabel="";
+
+async function cloudPushSharedStateOnly(){
+  if(!sbClient || !cloudReady){
+    saveLocalOnly();
+    cloudLocalDirty=true;
+    return false;
+  }
+  setCloudStatus("busy","Synchronisation des photos…");
+  try{
+    const remote=await cloudFetchState();
+    const remoteData=(remote && isValidBptState(remote.data)) ? clone(remote.data) : clone(db);
+
+    // Conserver l’état partagé le plus récent, puis y injecter les photos locales.
+    remoteData.gamePhotos=clone(ensureGamePhotos());
+    remoteData.playerNicknames=clone(ensurePlayerNicknames());
+    remoteData.playerAliases=clone(ensurePlayerAliases());
+    remoteData.history=[];
+
+    const {data,error}=await sbClient
+      .from("bpt_state")
+      .upsert({id:CLOUD_ROW_ID,data:remoteData},{onConflict:"id"})
+      .select("revision,updated_at")
+      .single();
+    if(error)throw error;
+
+    cloudLastRevision=Number(data?.revision||cloudLastRevision||0);
+    cloudLocalDirty=false;
+    saveLocalOnly();
+    setCloudStatus("ok","Photos synchronisées");
+    return true;
+  }catch(e){
+    console.error("BPT photo sync:",e);
+    cloudLocalDirty=true;
+    saveLocalOnly();
+    setCloudStatus("offline","Photos en attente de synchronisation",e?.message||String(e));
+    return false;
+  }
+}
+
+async function addPhotosToGame(key,label,files){
+  const selected=[...(files||[])].filter(f=>String(f.type||"").startsWith("image/"));
+  if(!selected.length)return;
+
+  const photos=ensureGamePhotos();
+  const existing=Array.isArray(photos[key])?photos[key]:[];
+  const remaining=Math.max(0,5-existing.length);
+  if(!remaining){
+    alert("Cette partie contient déjà 5 photos, qui est le maximum prévu.");
+    return;
+  }
+
+  const chosen=selected.slice(0,remaining);
+  setCloudStatus("busy","Préparation des photos…");
+  const added=[];
+  for(const f of chosen){
+    try{added.push(await fileToCompressedPhoto(f));}
+    catch(e){console.warn(e);}
+  }
+  if(!added.length)return;
+
+  photos[key]=[...existing,...added];
+  saveLocalOnly();
+  renderHistory();
+  await cloudPushSharedStateOnly();
+
+  if(selected.length>remaining){
+    alert(`Seules ${remaining} photo${remaining>1?"s":""} ont été ajoutées. Maximum : 5 photos par partie.`);
+  }
+}
+
+function openGamePhoto(src,caption=""){
+  const viewer=$("gamePhotoViewer");
+  if(!viewer)return;
+  $("gamePhotoViewerImage").src=src;
+  $("gamePhotoViewerCaption").textContent=caption;
+  viewer.classList.add("open");
+  viewer.setAttribute("aria-hidden","false");
+  document.body.classList.add("photo-viewer-open");
+}
+
+function closeGamePhoto(){
+  const viewer=$("gamePhotoViewer");
+  if(!viewer)return;
+  viewer.classList.remove("open");
+  viewer.setAttribute("aria-hidden","true");
+  $("gamePhotoViewerImage").src="";
+  document.body.classList.remove("photo-viewer-open");
 }
 
 function renderHistoryCards(){
@@ -5101,19 +5366,63 @@ function renderHistoryCards(){
   holder.innerHTML=games.map(([g,rows])=>{
     const sorted=rows.slice().sort((a,b)=>Number(a.place)-Number(b.place));
     const f=sorted[0]||{},win=sorted.find(r=>Number(r.place)===1);
+    const photoKey=gamePhotoKey(f,g);
+    const photoLabel=gamePhotoLabel(f,g);
+    const photos=photosForGame(f,g);
+
     return `<details class="history-game">
       <summary>
         <div class="history-game-title">${esc(gameDisplayTitle(f,g))}</div>
-        <div><div>${esc(shortDate(f.date||""))}${f.location?" · "+esc(f.location):""} · ${rows.length} joueurs</div><div class="history-game-meta">Cagnotte ${euro(rows.length*Number(f.stake||0))}</div></div>
-        <div class="history-winner">🏆 ${esc(win?.player||"—")} · ${num(win?.points||0,0)} pts</div>
+        <div><div>${esc(shortDate(f.date||""))}${f.location?" · "+esc(f.location):""} · ${rows.length} joueurs</div><div class="history-game-meta">Cagnotte ${euro(rows.length*Number(f.stake||0))}${photos.length?` · ${photos.length} photo${photos.length>1?"s":""}`:""}</div></div>
+        <div class="history-winner">🏆 ${esc(displayPlayerName(win?.player||"—"))} · ${num(win?.points||0,0)} pts</div>
       </summary>
-      <div class="history-game-body"><div class="tablewrap"><table><thead><tr><th>Place</th><th>Joueur</th><th>Pts</th><th>Kills</th><th>Éliminé par</th><th>Gain</th><th>Net</th></tr></thead><tbody>
-        ${sorted.map(r=>`<tr><td>${r.place}</td><td><button class="player-link" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(r.player)}</button></td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${esc(r.killer||"—")}</td><td>${euro(r.gross)}</td><td>${euro(r.net)}</td></tr>`).join("")}
-      </tbody></table></div></div>
+      <div class="history-game-body">
+        <div class="history-game-photo-zone">
+          <div class="history-photo-toolbar">
+            <strong>Photos de la partie</strong>
+            <button class="btn ghost history-add-photo-btn" type="button"
+                    data-photo-key="${encodeURIComponent(photoKey)}"
+                    data-photo-label="${encodeURIComponent(photoLabel)}">＋ Ajouter des photos</button>
+          </div>
+          <div class="history-photo-thumbs">
+            ${photos.length
+              ? photos.map((p,idx)=>`<button class="history-photo-thumb" type="button"
+                    data-photo-src="${encodeURIComponent(p.dataUrl)}"
+                    data-photo-caption="${encodeURIComponent(`${photoLabel} · Photo ${idx+1}`)}"
+                    title="Agrandir la photo">
+                  <img src="${p.dataUrl}" alt="${esc(`${photoLabel} · Photo ${idx+1}`)}">
+                </button>`).join("")
+              : `<span class="muted history-no-photo">Aucune photo pour cette partie.</span>`}
+          </div>
+        </div>
+
+        <div class="tablewrap"><table><thead><tr><th>Place</th><th>Joueur</th><th>Pts</th><th>Kills</th><th>Éliminé par</th><th>Gain</th><th>Net</th></tr></thead><tbody>
+          ${sorted.map(r=>`<tr><td>${r.place}</td><td><button class="player-link" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(displayPlayerName(r.player))}</button></td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${r.killer?esc(displayPlayerName(r.killer)):"—"}</td><td>${euro(r.gross)}</td><td>${euro(r.net)}</td></tr>`).join("")}
+        </tbody></table></div>
+      </div>
     </details>`;
   }).join("");
-}
 
+  holder.querySelectorAll(".history-add-photo-btn").forEach(btn=>{
+    btn.onclick=e=>{
+      e.preventDefault();e.stopPropagation();
+      pendingPhotoGameKey=decodeURIComponent(btn.dataset.photoKey||"");
+      pendingPhotoGameLabel=decodeURIComponent(btn.dataset.photoLabel||"");
+      const input=$("gamePhotoInput");
+      if(input){input.value="";input.click();}
+    };
+  });
+
+  holder.querySelectorAll(".history-photo-thumb").forEach(btn=>{
+    btn.onclick=e=>{
+      e.preventDefault();e.stopPropagation();
+      openGamePhoto(
+        decodeURIComponent(btn.dataset.photoSrc||""),
+        decodeURIComponent(btn.dataset.photoCaption||"")
+      );
+    };
+  });
+}
 function updateLiveTimerUrgency(){
   const s=ensureLiveState(),el=$("liveTimer");if(!el)return;
   el.classList.toggle("live-warning-30",s.remainingSeconds<=30 && s.remainingSeconds>10);
@@ -5498,6 +5807,20 @@ function playerNicknameInfo(name){
   const primary=custom || annales[0] || "";
   const others=annales.filter(n=>n!==primary);
   return {primary,others,source:custom?"personnalisé":(annales.length?"annales":"")};
+}
+
+function displayPlayerName(name){
+  const real=String(name||"").trim();
+  const nick=playerNicknameInfo(real).primary;
+  return nick || real;
+}
+
+function playerDisplayWithRealName(name){
+  const real=String(name||"").trim();
+  const nick=playerNicknameInfo(real).primary;
+  return nick && normalizePlayerLookupName(nick)!==normalizePlayerLookupName(real)
+    ? `${nick} · ${real}`
+    : real;
 }
 
 async function savePlayerNickname(name,value){
@@ -6006,7 +6329,7 @@ function renderDashboard(){
   $("dashPodium").innerHTML=podium.length ? podium.map((p,i)=>`
     <div class="premium-podium-card rank-${i+1}">
       <div class="premium-podium-medal">${medalForRank(i+1)}</div>
-      <button class="player-link premium-podium-name" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(p.name)}'))">${esc(p.name)}</button>
+      <button class="player-link premium-podium-name" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(p.name)}'))">${esc(displayPlayerName(p.name))}</button>
       <div class="premium-podium-points">${num(p.points,0)} pts</div>
     </div>`).join("")
     : '<div class="muted" style="padding:18px 0">Le podium apparaîtra après la première partie classée.</div>';
@@ -6038,7 +6361,7 @@ function renderDashboard(){
       <div class="premium-record-icon">${r.icon}</div>
       <div class="premium-record-copy">
         <span>${esc(r.label)}</span>
-        <strong>${esc(r.player)}</strong>
+        <strong>${esc(displayPlayerName(r.player))}</strong>
       </div>
       <b>${esc(r.value)}</b>
     </div>`).join('');
@@ -6102,7 +6425,7 @@ function renderLatestGame(){
   $("latestGamePodium").innerHTML=rows.slice(0,3).map((r,i)=>`
     <div class="podium-medal-item rank-${i+1}">
       <div class="medal-badge">${medalForRank(i+1)}</div>
-      <button class="player-link" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(r.player)}</button>
+      <button class="player-link" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(displayPlayerName(r.player))}</button>
       <small>${num(r.points||0,0)} pts · ${euro(r.gross||0)}</small>
     </div>`).join("");
 
@@ -6110,10 +6433,10 @@ function renderLatestGame(){
     <thead><tr><th>Place</th><th>Joueur</th><th>Points</th><th>Kills</th><th>Éliminé par</th><th>Gain</th><th>Net</th></tr></thead>
     <tbody>${rows.map(r=>`<tr>
       <td>${r.place}</td>
-      <td><button class="player-link" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(r.player)}</button></td>
+      <td><button class="player-link" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(displayPlayerName(r.player))}</button></td>
       <td>${num(r.points||0,0)}</td>
       <td>${num(r.kills||0,0)}</td>
-      <td>${esc(r.killer||"—")}</td>
+      <td>${r.killer?esc(displayPlayerName(r.killer)):"—"}</td>
       <td>${euro(r.gross||0)}</td>
       <td>${euro(r.net||0)}</td>
     </tr>`).join("")}</tbody>
@@ -6144,7 +6467,7 @@ function renderRanking(){
   const ks=killerStats();
   $("rankingBody").innerHTML=ranking().map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}">
     <td>${medalForRank(s.rank)} ${s.rank}</td>
-    <td><button class="player-link ranking-player-link" title="Ouvrir le profil de ${esc(s.name)}" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(s.name)}'))">${esc(s.name)}</button></td>
+    <td><button class="player-link ranking-player-link" title="Ouvrir le profil de ${esc(s.name)}" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(s.name)}'))">${esc(displayPlayerName(s.name))}</button></td>
     <td><b>${num(s.points,0)}</b></td>
     <td>${s.progress===null?(isArchiveSeason()?"—":"Nouvelle entrée"):s.progress>0?"+"+s.progress:s.progress===0?"=":String(s.progress)}</td>
     <td>${num(s.avgPoints,1)}</td>
@@ -6247,17 +6570,17 @@ function renderVersus(){
     ...(db.history||[]).map(r=>String(r.player||"")).filter(Boolean)
   ])].sort((a,b)=>a.localeCompare(b,"fr",{sensitivity:"base"}));
 
-  s1.innerHTML=names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+  s1.innerHTML=names.map(n=>`<option value="${esc(n)}">${esc(playerDisplayWithRealName(n))}</option>`).join("");
   s1.value=names.includes(profileName)?profileName:(ranked[0]?.name||names[0]||"");
 
   const player2Names=names.filter(n=>n!==s1.value);
   s2.innerHTML='<option value="">— Choisir un adversaire —</option>'+
-    player2Names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+    player2Names.map(n=>`<option value="${esc(n)}">${esc(playerDisplayWithRealName(n))}</option>`).join("");
 
   if(previous2 && player2Names.includes(previous2))s2.value=previous2;
   else if(player2Names.length)s2.value=player2Names[0];
 
-  if($("versusPlayer1Display"))$("versusPlayer1Display").value=s1.value;
+  if($("versusPlayer1Display"))$("versusPlayer1Display").value=playerDisplayWithRealName(s1.value);
   const name1=s1.value;
   const name2=s2.value;
   const m1=versusPlayerMetrics(name1);
@@ -6268,10 +6591,10 @@ function renderVersus(){
   $("versusContent").style.display=valid?"block":"none";
   if(!valid)return;
 
-  $("versusName1").textContent=name1;
-  $("versusName2").textContent=name2;
-  $("versusHeader1").textContent=name1;
-  $("versusHeader2").textContent=name2;
+  $("versusName1").textContent=displayPlayerName(name1);
+  $("versusName2").textContent=displayPlayerName(name2);
+  $("versusHeader1").textContent=displayPlayerName(name1);
+  $("versusHeader2").textContent=displayPlayerName(name2);
   $("versusRank1").textContent=m1.rank?`Classement général : #${m1.rank}`:"Non classé";
   $("versusRank2").textContent=m2.rank?`Classement général : #${m2.rank}`:"Non classé";
 
@@ -6399,7 +6722,7 @@ function renderPlayers(){
 
   const mergeSource=$("mergePlayerSource"),mergeTarget=$("mergePlayerTarget");
   if(mergeSource&&mergeTarget){
-    const opts=players.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join("");
+    const opts=players.map(p=>`<option value="${esc(p.name)}">${esc(playerDisplayWithRealName(p.name))}</option>`).join("");
     const oldS=mergeSource.value,oldT=mergeTarget.value;
     mergeSource.innerHTML=opts;mergeTarget.innerHTML=opts;
     if(players.some(p=>p.name===oldS))mergeSource.value=oldS;
@@ -8601,6 +8924,19 @@ if($("versusPlayer2"))$("versusPlayer2").onchange=renderVersus;
 
 $("exportCsvBtn").onclick=()=>{const rows=[["Partie","Date","Lieu","Joueur","Place","Éliminé par","Tablier","Nb joueurs","Points","Mise","Gain","Solde","Kills"]];db.history.forEach(r=>rows.push([r.game,r.date,r.location,r.player,r.place,r.killer,r.tablier?"Oui":"",r.n,r.points,r.stake,r.gross,r.net,r.kills]));const csv="\ufeff"+rows.map(r=>r.map(x=>`"${String(x??"").replaceAll('"','""')}"`).join(";")).join("\r\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download="BPT_historique.csv";a.click();};
 
+if($("gamePhotoInput"))$("gamePhotoInput").addEventListener("change",async e=>{
+  if(!pendingPhotoGameKey)return;
+  await addPhotosToGame(pendingPhotoGameKey,pendingPhotoGameLabel,e.target.files);
+  e.target.value="";
+});
+if($("gamePhotoViewerClose"))$("gamePhotoViewerClose").onclick=closeGamePhoto;
+if($("gamePhotoViewer"))$("gamePhotoViewer").onclick=e=>{
+  if(e.target===$("gamePhotoViewer"))closeGamePhoto();
+};
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape" && $("gamePhotoViewer")?.classList.contains("open"))closeGamePhoto();
+});
+
 
 $("liveSelectAllBtn").onclick=()=>{liveSelected=new Set(liveActiveNames());liveRenderPlayerList();livePreviewStructure();};
 $("liveSelectNoneBtn").onclick=()=>{liveSelected.clear();liveRenderPlayerList();livePreviewStructure();};
@@ -8741,6 +9077,15 @@ if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus"
 initCloudSync();
 </script>
 
+
+
+<input id="gamePhotoInput" type="file" accept="image/*" multiple hidden>
+
+<div id="gamePhotoViewer" class="game-photo-viewer" aria-hidden="true">
+  <button id="gamePhotoViewerClose" class="game-photo-viewer-close" type="button" aria-label="Fermer">×</button>
+  <img id="gamePhotoViewerImage" alt="Photo de la partie">
+  <div id="gamePhotoViewerCaption" class="game-photo-viewer-caption"></div>
+</div>
 
 </body>
 </html>
