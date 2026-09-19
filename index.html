@@ -5406,6 +5406,25 @@ body.spectator-live-open .spectator-global-exit{
   }
 }
 
+
+/* ===== V159 — fermeture fiable du détail de structure ===== */
+.live-structure-viewer{
+  pointer-events:auto !important;
+}
+.live-structure-viewer-backdrop{
+  pointer-events:auto !important;
+  cursor:pointer;
+}
+.live-structure-viewer-card{
+  pointer-events:auto !important;
+}
+#liveStructureViewerClose{
+  position:relative;
+  z-index:3;
+  pointer-events:auto !important;
+  cursor:pointer;
+}
+
 </style>
 </head>
 <body>
@@ -5421,7 +5440,7 @@ body.spectator-live-open .spectator-global-exit{
   <div class="spectator-server-shell">
     <div class="spectator-server-top">
       <div>
-        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V158</div>
+        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V159</div>
         <div id="spectatorServerGameMeta" class="spectator-server-meta">—</div>
         <div class="spectator-server-receive">
           Reçu : <strong id="spectatorServerReceivedAt">—</strong>
@@ -5479,7 +5498,7 @@ body.spectator-live-open .spectator-global-exit{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 16h23</div>
+  <div class="app-version">Version 19/09/26 16h48</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -13059,10 +13078,6 @@ if($("gameSummaryBackdrop"))$("gameSummaryBackdrop").onclick=e=>{if(e.target===$
 if($("liveFullscreenBtn"))$("liveFullscreenBtn").onclick=toggleLiveFullscreen;
 if($("liveLevelLabel"))$("liveLevelLabel").onclick=openLiveStructureViewer;
 if($("spectatorServerLevel"))$("spectatorServerLevel").onclick=openLiveStructureViewer;
-if($("liveStructureViewerClose"))$("liveStructureViewerClose").onclick=closeLiveStructureViewer;
-if($("liveStructureViewer"))$("liveStructureViewer").addEventListener("click",e=>{
-  if(e.target?.classList?.contains("live-structure-viewer-backdrop"))closeLiveStructureViewer();
-});
 
 if($("spectatorTakeoverBtn"))$("spectatorTakeoverBtn").onclick=requestLiveTakeover;
 if($("liveHandoverApproveBtn"))$("liveHandoverApproveBtn").onclick=approveLiveTakeover;
@@ -13167,6 +13182,25 @@ liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 initCloudSync();
 setTimeout(()=>startSpectatorLivePolling(),800);
+
+// Fermeture robuste du détail de structure : fonctionne même si le panneau
+// a été inséré dans le DOM après l'initialisation des autres événements.
+document.addEventListener("click",e=>{
+  if(e.target?.id==="liveStructureViewerClose"){
+    closeLiveStructureViewer();
+    return;
+  }
+  if(e.target?.classList?.contains("live-structure-viewer-backdrop")){
+    closeLiveStructureViewer();
+  }
+});
+
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape" && $("liveStructureViewer")?.style.display!=="none"){
+    closeLiveStructureViewer();
+  }
+});
+
 </script>
 
 
