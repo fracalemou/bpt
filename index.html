@@ -3326,6 +3326,22 @@ nav button.spectator-nav{
   opacity:.78;
 }
 
+
+/* ===== V128 — Live spectateur indépendant de l'historique ===== */
+.spectator-connection-hint{
+  margin-left:auto;
+  font-size:9px;
+  color:#8fc7e9;
+  white-space:nowrap;
+  opacity:.85;
+}
+@media(max-width:700px){
+  .spectator-connection-hint{
+    margin-left:0;
+    white-space:normal;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -3343,7 +3359,7 @@ nav button.spectator-nav{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 12h41</div>
+  <div class="app-version">Version 19/09/26 13h10</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -3438,6 +3454,7 @@ nav button.spectator-nav{
       <div id="liveSpectatorBanner" class="live-spectator-banner" style="display:none">
         <strong>Mode spectateur</strong>
         <span id="liveSpectatorBannerText">Cette partie est pilotée depuis un autre appareil. L’affichage est en lecture seule et se met à jour automatiquement.</span>
+        <span class="spectator-connection-hint">État Live prioritaire · historique indépendant</span>
       </div>
       <div class="live-head">
         <div>
@@ -4794,12 +4811,30 @@ async function cloudPoll(){
       return;
     }
 
+    if(liveIsSpectator()){
+      // En mode spectateur, le polling du Live suffit.
+      setCloudStatus(
+        "ok",
+        "Live spectateur connecté",
+        `Partie #${db.liveState?.gameNo||"—"} · mise à jour automatique`
+      );
+      return;
+    }
+
     await refreshCanonicalHistoryUI(false);
 
   }catch(e){
     cloudLastError=e?.message||String(e);
     console.error("BPT cloud poll:",e);
-    setCloudStatus("offline","Erreur synchro",cloudLastError);
+    if(liveIsSpectator()){
+      setCloudStatus(
+        "offline",
+        "Live spectateur · reconnexion…",
+        cloudLastError
+      );
+    }else{
+      setCloudStatus("offline","Erreur synchro",cloudLastError);
+    }
   }
 }
 
@@ -4837,6 +4872,8 @@ async function initCloudSync(){
       {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}}
     );
 
+    // 1) PRIORITÉ ABSOLUE : état partagé / Live.
+    // Le Live spectateur ne dépend plus de bpt_games_v2.
     const row=await cloudFetchState();
 
     if(row && isValidBptState(row.data)){
@@ -4844,46 +4881,92 @@ async function initCloudSync(){
       cloudApplying=true;
 
       const localHistory=Array.isArray(db.history)?db.history:[];
-      db=row.data;
+      const remoteState=JSON.parse(JSON.stringify(row.data));
+      db=remoteState;
+      db.history=localHistory; // historique temporaire conservé jusqu'au fetch dédié
       cloudLocalDirty=false;
+      cloudApplying=false;
 
-      // Migration automatique : si bpt_games est vide,
-      // le premier navigateur alimente la base à partir de son historique local.
-      let serverHistory=await cloudFetchGames();
-      if(serverHistory.length===0){
-        // Migration V11 -> V12 : priorité à l'ancienne table centrale bpt_games.
-        let migrationHistory=[];
-        try{
-          const {data:oldGames,error:oldErr}=await sbClient
-            .from("bpt_games")
-            .select("game_data,created_at")
-            .order("created_at",{ascending:true});
-          if(!oldErr && Array.isArray(oldGames)){
-            oldGames.forEach((g,index)=>{
-              (Array.isArray(g.game_data)?g.game_data:[]).forEach(r=>{
-                migrationHistory.push({...r,game:index+1});
-              });
-            });
-          }
-        }catch(e){}
+      cloudReady=true;
+      cloudLastError="";
+      saveLocalOnly();
 
-        if(migrationHistory.length===0)migrationHistory=localHistory;
+      renderAll();
 
-        for(const [,rows] of historyGroups(migrationHistory)){
-          await cloudInsertGame(rows);
+      if(db.liveState?.prepared){
+        liveRenderAll();
+        if(db.liveState.running && db.liveState.endAt)liveRunTicker();
+        liveMaybeAutoOpenSpectator();
+
+        if(liveIsSpectator()){
+          setCloudStatus(
+            "ok",
+            "Live spectateur connecté",
+            `Partie #${db.liveState.gameNo||"—"} reçue depuis Supabase`
+          );
+        }else{
+          setCloudStatus(
+            "ok",
+            "Live connecté",
+            `Partie #${db.liveState.gameNo||"—"} synchronisée`
+          );
         }
-        serverHistory=await cloudFetchGames();
+      }else{
+        setCloudStatus(
+          "ok",
+          "Connecté",
+          `État partagé Supabase reçu • révision ${cloudLastRevision}`
+        );
       }
 
-      db.history=serverHistory;
-      normalizeHistoryGameNumbers();
-      saveLocalOnly();
-      cloudApplying=false;
-      renderAll();
-      renderHistory();
-      if(typeof liveRenderAll==="function")liveRenderAll();
+      // 2) HISTORIQUE : tentative séparée, jamais bloquante pour le Live.
+      try{
+        const serverHistory=await cloudFetchGames();
+        currentSeasonHistoryCache=clone(serverHistory);
+
+        if(selectedSeasonKey==="2023-2024"){
+          db.history=applyPlayerAliasesToRows(ARCHIVE_2023_2024);
+        }else if(selectedSeasonKey==="2025-2026"){
+          db.history=applyPlayerAliasesToRows(ARCHIVE_2025_2026);
+        }else if(selectedSeasonKey==="all"){
+          db.history=buildAllSeasonsHistory();
+        }else{
+          db.history=applyPlayerAliasesToRows(recalcCurrentSeasonPoints(serverHistory));
+          applyHistoricalPointScale();
+          normalizeHistoryGameNumbers();
+        }
+
+        saveLocalOnly();
+        renderAll();
+
+        // Ne pas remplacer l'indication Live spectateur par un statut d'historique.
+        if(!liveIsSpectator()){
+          const games=new Set(serverHistory.map(r=>Number(r.game))).size;
+          setCloudStatus(
+            "ok",
+            `Synchronisé • ${games} partie${games>1?"s":""}`,
+            `État partagé + historique opérationnels • révision ${cloudLastRevision}`
+          );
+        }
+      }catch(historyError){
+        console.warn("Historique indisponible, Live maintenu :",historyError);
+        if(liveIsSpectator()){
+          setCloudStatus(
+            "ok",
+            "Live spectateur connecté",
+            `Le Live fonctionne. Historique temporairement indisponible : ${historyError?.message||historyError}`
+          );
+        }else{
+          setCloudStatus(
+            "ok",
+            "Live connecté",
+            `État partagé opérationnel. Historique temporairement indisponible.`
+          );
+        }
+      }
+
     }else if(!row){
-      // Première initialisation globale : aucune ligne bpt_state n'existe encore.
+      // Première initialisation globale.
       const payload=JSON.parse(JSON.stringify(db));
       const initialHistory=Array.isArray(payload.history)?payload.history:[];
       payload.history=[];
@@ -4894,44 +4977,31 @@ async function initCloudSync(){
         .select("revision,updated_at")
         .single();
       if(error)throw error;
+
       cloudLastRevision=Number(data?.revision||0);
+      cloudReady=true;
+      cloudLocalDirty=false;
+      cloudLastError="";
+      setCloudStatus("ok","Connecté","État partagé Supabase initialisé.");
 
-      if((await cloudFetchGames()).length===0 && initialHistory.length>0){
-        for(const [,rows] of historyGroups(initialHistory)){
-          await cloudInsertGame(rows);
+      // Migration historique non bloquante.
+      try{
+        if((await cloudFetchGames()).length===0 && initialHistory.length>0){
+          for(const [,rows] of historyGroups(initialHistory)){
+            await cloudInsertGame(rows);
+          }
         }
+        db.history=await cloudFetchGames();
+        saveLocalOnly();
+        renderAll();
+      }catch(historyError){
+        console.warn("Migration historique différée :",historyError);
       }
-      db.history=await cloudFetchGames();
     }else{
-      // Une ligne serveur existe mais son format n'est pas reconnu :
-      // surtout ne pas l'écraser avec l'état local du navigateur.
-      throw new Error("État partagé Supabase présent mais format non reconnu. Aucune donnée distante n'a été écrasée.");
+      throw new Error("État partagé Supabase présent mais format non reconnu.");
     }
 
-    cloudReady=true;
-    cloudLocalDirty=false;
-    cloudLastError="";
-    await flushPendingGames();
-    {
-      const games=cloudGameCount(db);
-      setCloudStatus("ok",`Synchronisé • ${games} partie${games>1?"s":""}`,
-        `Connexion Supabase opérationnelle • révision ${cloudLastRevision}`);
-    }
-
-    if(db.liveState?.prepared){
-      liveRenderAll();
-      if(db.liveState.running && db.liveState.endAt)liveRunTicker();
-      liveMaybeAutoOpenSpectator();
-      if(liveIsSpectator()){
-        setCloudStatus(
-          "ok",
-          "Live spectateur connecté",
-          `Partie #${db.liveState.gameNo||"—"} reçue depuis Supabase`
-        );
-      }
-    }
-
-    // Realtime : confort immédiat lorsqu'il fonctionne.
+    // Realtime : le Live reste prioritaire.
     try{
       cloudChannel=sbClient
         .channel("bpt-shared-state")
@@ -4949,11 +5019,14 @@ async function initCloudSync(){
               const ownedByThisDevice=
                 remoteActive && remoteCreator && remoteCreator===liveDeviceId();
 
-              // Le maître ne recharge jamais son propre snapshot Live depuis Supabase.
               if(ownedByThisDevice)return;
-
               await applyCloudState(fresh);
-            }catch(e){console.error("BPT realtime:",e);}
+            }catch(e){
+              console.error("BPT realtime:",e);
+              if(liveIsSpectator()){
+                setCloudStatus("ok","Live spectateur connecté","Realtime indisponible, polling actif.");
+              }
+            }
           }
         )
         .subscribe();
@@ -4961,15 +5034,26 @@ async function initCloudSync(){
       console.warn("Realtime indisponible, polling utilisé :",e);
     }
 
-    // Polling de secours : garantit la synchronisation même si Realtime est mal configuré.
     clearInterval(cloudPollTimer);
     cloudPollTimer=setInterval(cloudPoll,2000);
 
   }catch(e){
+    cloudApplying=false;
     cloudLastError=e?.message||String(e);
     console.error("BPT cloud init:",e);
     cloudReady=false;
-    setCloudStatus("offline","Erreur synchro",cloudLastError);
+
+    // Si un Live spectateur est déjà présent localement, on ne masque pas son écran.
+    if(liveIsSpectator()){
+      setCloudStatus(
+        "offline",
+        "Live spectateur · connexion dégradée",
+        cloudLastError
+      );
+      liveRenderAll();
+    }else{
+      setCloudStatus("offline","Erreur synchro",cloudLastError);
+    }
   }
 }
 
