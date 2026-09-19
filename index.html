@@ -3238,6 +3238,86 @@ button.player-name-stack{
   border-color:rgba(255,255,255,.28);
 }
 
+
+/* ===== V121 — Live organisateur / spectateur automatique ===== */
+.live-spectator-banner{
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+  padding:10px 13px;
+  border:1px solid #345a77;
+  border-radius:12px;
+  background:linear-gradient(135deg,#142332,#172b3c);
+}
+.live-spectator-banner strong{
+  color:#9dd2f4;
+  white-space:nowrap;
+}
+.live-spectator-banner span{
+  color:#b7c5d2;
+  font-size:11px;
+}
+.live-spectator-mode .live-admin-only{
+  display:none !important;
+}
+.live-spectator-mode .live-admin-panel{
+  border-color:#30465a;
+}
+.live-spectator-mode .live-timer-card{
+  border-color:#345a77;
+}
+.live-spectator-mode #liveStateBadge::after{
+  content:" · SPECTATEUR";
+}
+@media(max-width:700px){
+  .live-spectator-banner{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:3px;
+  }
+}
+
+
+/* ===== V122 — indication explicite du mode spectateur ===== */
+.live-hero-title-row{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+}
+.live-hero-spectator-badge{
+  align-items:center;
+  justify-content:center;
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid #4c7898;
+  background:linear-gradient(135deg,#173149,#214562);
+  color:#bfe6ff;
+  font-size:11px;
+  font-weight:900;
+  letter-spacing:.08em;
+  white-space:nowrap;
+  box-shadow:0 8px 20px rgba(0,0,0,.2);
+}
+nav button.spectator-nav{
+  color:#bfe6ff;
+  border-color:#365b78;
+  background:#152638;
+}
+.live-spectator-mode .live-tab-hero{
+  border-color:#345a77;
+  box-shadow:inset 0 0 0 1px rgba(72,121,157,.08);
+}
+@media(max-width:700px){
+  .live-hero-title-row{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  .live-hero-spectator-badge{
+    margin-top:4px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -3255,7 +3335,7 @@ button.player-name-stack{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 12h09</div>
+  <div class="app-version">Version 19/09/26 12h16</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -3270,9 +3350,16 @@ button.player-name-stack{
 
 <section id="live" class="view">
   <div class="hero tab-premium-hero live-tab-hero">
-    <div class="home-kicker">BPT · Live</div>
-    <h1>Gestion de la partie en direct</h1>
-    <p>Préparez, lancez et suivez la partie jusqu’à son enregistrement dans le championnat.</p>
+    <div class="live-hero-title-row">
+      <div>
+        <div class="home-kicker">BPT · Live</div>
+        <h1 id="liveHeroTitle">Gestion de la partie en direct</h1>
+      </div>
+      <div id="liveHeroSpectatorBadge" class="live-hero-spectator-badge" style="display:none">
+        MODE SPECTATEUR
+      </div>
+    </div>
+    <p id="liveHeroSubtitle">Préparez, lancez et suivez la partie jusqu’à son enregistrement dans le championnat.</p>
   </div>
   <div id="liveManager">
     <div id="livePrepScreen" class="live-screen active">
@@ -3340,9 +3427,13 @@ button.player-name-stack{
     </div>
 
     <div id="liveGameScreen" class="live-screen">
+      <div id="liveSpectatorBanner" class="live-spectator-banner" style="display:none">
+        <strong>Mode spectateur</strong>
+        <span>Cette partie est pilotée depuis un autre appareil. L’affichage est en lecture seule et se met à jour automatiquement.</span>
+      </div>
       <div class="live-head">
         <div>
-          <div class="live-title">Championnat BPT — Partie en cours</div>
+          <div class="live-title" id="liveGameTitle">Championnat BPT — Partie en cours</div>
           <div id="liveGameMeta" class="muted"></div>
         </div>
         <div class="row">
@@ -3434,13 +3525,13 @@ button.player-name-stack{
           </div>
 
           <h2 style="margin-top:16px">Enregistrer un sortant</h2>
-          <div class="live-elim">
+          <div class="live-elim live-admin-only">
             <select id="liveOutPlayer"></select>
             <select id="liveKiller"></select>
             <button class="btn danger" id="liveEliminateBtn">Éliminer</button>
             <button class="btn" id="liveFinalizeBtn" style="display:none;margin-left:8px">Enregistrer la partie dans l’historique</button>
           </div>
-          <div id="liveUndoBox" style="margin-top:10px;padding:10px;border:1px solid #6f5d2b;border-radius:10px;background:#241f12">
+          <div id="liveUndoBox" class="live-admin-only" style="margin-top:10px;padding:10px;border:1px solid #6f5d2b;border-radius:10px;background:#241f12">
             <div style="font-weight:800;margin-bottom:7px">Correction d’une élimination</div>
             <button class="btn secondary" id="liveUndoEliminationBtn" style="width:100%">
               ↶ Annuler la dernière élimination
@@ -4604,7 +4695,11 @@ async function applyCloudState(row){
 
     cloudLastRevision=rev;
     renderAll();
-    if(typeof liveRenderAll==="function" && liveSeasonKey===CURRENT_SEASON_KEY)liveRenderAll();
+    if(typeof liveRenderAll==="function" && liveSeasonKey===CURRENT_SEASON_KEY){
+      liveRenderAll();
+      if(db.liveState?.running && db.liveState?.endAt)liveRunTicker();
+      liveMaybeAutoOpenSpectator();
+    }
 
     const hh=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
     const games=new Set(serverHistory.map(r=>Number(r.game))).size;
@@ -4761,6 +4856,12 @@ async function initCloudSync(){
       const games=cloudGameCount(db);
       setCloudStatus("ok",`Synchronisé • ${games} partie${games>1?"s":""}`,
         `Connexion Supabase opérationnelle • révision ${cloudLastRevision}`);
+    }
+
+    if(db.liveState?.prepared){
+      liveRenderAll();
+      if(db.liveState.running && db.liveState.endAt)liveRunTicker();
+      liveMaybeAutoOpenSpectator();
     }
 
     // Realtime : confort immédiat lorsqu'il fonctionne.
@@ -8015,10 +8116,95 @@ function liveFlashLevel(){
   el.classList.add("live-level-flash");
 }
 
+const LIVE_DEVICE_KEY="bpt_live_device_id_v1";
+let liveSpectatorAutoOpened=false;
+
+function liveDeviceId(){
+  let id="";
+  try{id=localStorage.getItem(LIVE_DEVICE_KEY)||"";}catch(e){}
+  if(!id){
+    try{
+      id=(crypto?.randomUUID?.()||("bpt-"+Date.now()+"-"+Math.random().toString(36).slice(2)));
+      localStorage.setItem(LIVE_DEVICE_KEY,id);
+    }catch(e){
+      id="bpt-"+Date.now()+"-"+Math.random().toString(36).slice(2);
+    }
+  }
+  return id;
+}
+
+function liveIsCreator(){
+  const s=db?.liveState;
+  if(!s?.prepared)return true;
+  // Compatibilité avec les Live créés avant V121 : pas de verrou automatique.
+  if(!s.creatorDeviceId)return true;
+  return s.creatorDeviceId===liveDeviceId();
+}
+
+function liveIsSpectator(){
+  const s=db?.liveState;
+  return !!(s?.prepared && !s?.synced && !liveIsCreator());
+}
+
+function applyLiveAccessMode(){
+  const spectator=liveIsSpectator();
+  const live=$("live");
+  if(live)live.classList.toggle("live-spectator-mode",spectator);
+
+  document.querySelectorAll("#live .live-admin-only").forEach(el=>{
+    el.style.display=spectator?"none":"";
+  });
+
+  if($("liveSpectatorBanner"))$("liveSpectatorBanner").style.display=spectator?"flex":"none";
+  if($("liveHeroSpectatorBadge"))$("liveHeroSpectatorBadge").style.display=spectator?"inline-flex":"none";
+  if($("liveHeroTitle"))$("liveHeroTitle").textContent=spectator
+    ?"Live BPT — Mode spectateur"
+    :"Gestion de la partie en direct";
+  if($("liveHeroSubtitle"))$("liveHeroSubtitle").textContent=spectator
+    ?"Vous suivez la partie en lecture seule. Les informations se mettent à jour automatiquement."
+    :"Préparez, lancez et suivez la partie jusqu’à son enregistrement dans le championnat.";
+
+  if($("liveGameTitle"))$("liveGameTitle").textContent=spectator
+    ?"Championnat BPT — Live spectateur"
+    :"Championnat BPT — Partie en cours";
+
+  const liveNav=document.querySelector('nav button[data-view="live"]');
+  if(liveNav){
+    liveNav.textContent=spectator?"● Live · Spectateur":"● Live";
+    liveNav.classList.toggle("spectator-nav",spectator);
+  }
+
+  if($("liveTestSoundBtn"))$("liveTestSoundBtn").style.display=spectator?"none":"";
+  if($("liveSyncBadge") && spectator)$("liveSyncBadge").textContent="LIVE · SPECTATEUR";
+
+  return spectator;
+}
+
+function liveMaybeAutoOpenSpectator(){
+  if(!liveIsSpectator() || liveSpectatorAutoOpened)return;
+  liveSpectatorAutoOpened=true;
+  try{
+    if(sessionStorage.getItem("bpt_spectator_opened")==="1")return;
+    sessionStorage.setItem("bpt_spectator_opened","1");
+  }catch(e){}
+  setTimeout(()=>{
+    showView("live");
+    liveShowScreen("game");
+    liveRenderAll();
+  },0);
+}
+
+function liveCreatorGuard(){
+  if(!liveIsSpectator())return true;
+  applyLiveAccessMode();
+  return false;
+}
+
 function ensureLiveState(){
   if(!db.liveState){
     db.liveState={
       prepared:false,running:false,synced:false,gameNo:null,date:"",location:"",
+      creatorDeviceId:"",
       startStack:20000,minSB:25,targetMinutes:240,useAnte:false,buyIn:5,
       levels:[],levelIndex:0,levelSeconds:0,remainingSeconds:0,endAt:null,
       elapsedBeforeMs:0,runStartedAt:null,startedAt:null,players:[]
@@ -8212,6 +8398,7 @@ function liveShowScreen(which){
   if(which==="game")liveRenderAll();
 }
 function liveLaunch(){
+  if(!liveCreatorGuard())return;
   if(liveSelected.size<2){alert("Sélectionnez au moins 2 joueurs.");return;}
   const old=ensureLiveState();
   if(old.prepared && !old.synced && old.players.length && !confirm("Une partie live non synchronisée existe déjà. La remplacer ?"))return;
@@ -8230,6 +8417,7 @@ function liveLaunch(){
   liveThirtySecondWarningKey="";
   db.liveState={
     prepared:true,running:false,synced:false,gameNo:nextGameNo(),
+    creatorDeviceId:liveDeviceId(),
     date:$("liveDate").value||new Date().toISOString().slice(0,10),
     location:$("liveLocation").value.trim(),
     startStack:stack,minSB,targetMinutes:target,useAnte,buyIn,
@@ -8240,6 +8428,7 @@ function liveLaunch(){
   saveDB();liveShowScreen("game");liveRenderAll();
 }
 function liveStart(){
+  if(!liveCreatorGuard())return;
   const s=ensureLiveState();if(!s.prepared)return;
   liveEnsureAudio();
   if(s.running)return;
@@ -8247,6 +8436,7 @@ function liveStart(){
   saveDB();liveRunTicker();liveRenderAll();
 }
 function livePause(){
+  if(!liveCreatorGuard())return;
   const s=ensureLiveState();if(!s.running)return;
   s.remainingSeconds=Math.max(0,Math.ceil((s.endAt-Date.now())/1000));
   s.elapsedBeforeMs=(s.elapsedBeforeMs||0)+(Date.now()-(s.runStartedAt||Date.now()));
@@ -8260,17 +8450,19 @@ function liveRunTicker(){
 
     const warningKey=`${s.gameNo||0}:${s.levelIndex}`;
 
-    if(s.remainingSeconds<=30 && s.remainingSeconds>10 && liveThirtySecondWarningKey!==warningKey){
-      liveThirtySecondWarningKey=warningKey;
-      liveSpeakThirtySeconds();
-    }
+    if(!liveIsSpectator()){
+      if(s.remainingSeconds<=30 && s.remainingSeconds>10 && liveThirtySecondWarningKey!==warningKey){
+        liveThirtySecondWarningKey=warningKey;
+        liveSpeakThirtySeconds();
+      }
 
-    if(s.remainingSeconds<=10 && s.remainingSeconds>0 && liveTenSecondWarningKey!==warningKey){
-      liveTenSecondWarningKey=warningKey;
-      liveWarningSound();
-    }
+      if(s.remainingSeconds<=10 && s.remainingSeconds>0 && liveTenSecondWarningKey!==warningKey){
+        liveTenSecondWarningKey=warningKey;
+        liveWarningSound();
+      }
 
-    if(s.remainingSeconds<=0)liveChangeLevel(1,true);
+      if(s.remainingSeconds<=0)liveChangeLevel(1,true);
+    }
     liveRenderTimerOnly();
   },250);
 }
@@ -8299,6 +8491,7 @@ function adjustLiveMinSB(direction){
 }
 
 function liveApplyBlindDuration(){
+  if(!liveCreatorGuard())return;
   const s=ensureLiveState();
   if(!s.prepared || !Array.isArray(s.levels) || !s.levels.length)return;
 
@@ -8359,6 +8552,7 @@ function liveAdjustTimer(deltaSeconds){
 }
 
 function liveChangeLevel(delta,auto=false){
+  if(!liveCreatorGuard())return;
   const s=ensureLiveState();if(!s.prepared)return;
   liveEnsureAudio();
   const oldIndex=s.levelIndex;
@@ -8426,6 +8620,7 @@ function livePrize(place){
 }
 
 function liveUndoLastElimination(){
+  if(!liveCreatorGuard())return;
   const s=ensureLiveState();
   if(!s.prepared)return;
 
@@ -8469,6 +8664,7 @@ function liveUndoLastElimination(){
 }
 
 async function liveEliminate(){
+  if(!liveCreatorGuard())return;
   const s=ensureLiveState();
   const out=$("liveOutPlayer").value;
   const killer=$("liveKiller").value;
@@ -8641,6 +8837,7 @@ async function liveSyncChampionship(force=false){
 }
 
 async function liveFinalizeGame(){
+  if(!liveCreatorGuard())return;
   const ok=await liveSyncChampionship(true);
   if(ok){
     alert(`Partie #${ensureLiveState().gameNo} enregistrée dans l'historique et synchronisée.`);
@@ -8649,7 +8846,9 @@ async function liveFinalizeGame(){
 
 function liveRenderAll(){
   const s=ensureLiveState();
+  const spectator=applyLiveAccessMode();
   if(!s.prepared){liveShowScreen("prep");return;}
+  if(spectator)liveShowScreen("game");
   const level=s.levels[s.levelIndex],next=s.levels[s.levelIndex+1];
   $("liveGameMeta").textContent=`Partie #${s.gameNo} • ${s.date}${s.location?" • "+s.location:""} • ${s.players.length} joueurs`;
   $("liveGameNo").textContent="#"+s.gameNo;
@@ -8665,8 +8864,8 @@ function liveRenderAll(){
   $("liveAvgStack").textContent=remainingCount?liveFmt(total/remainingCount):"0";
   $("livePrizePool").textContent=euro(s.players.length*s.buyIn);$("livePaid").textContent=Math.min(3,s.players.length);
   $("liveStateBadge").textContent=s.synced?"TERMINÉE":s.running?"EN COURS":(s.players.some(p=>p.place)?"PAUSE":"PRÊT");
-  $("liveSyncBadge").textContent=s.synced?"SYNCHRONISÉE":(pendingGamesLoad().length?"EN ATTENTE":"NON SYNCHRONISÉE");
-  $("liveSyncBadge").style.background=s.synced?"#79c594":"#c8952e";
+  $("liveSyncBadge").textContent=spectator?"LIVE · SPECTATEUR":(s.synced?"SYNCHRONISÉE":(pendingGamesLoad().length?"EN ATTENTE":"NON SYNCHRONISÉE"));
+  $("liveSyncBadge").style.background=spectator?"#315a78":(s.synced?"#79c594":"#c8952e");
   $("liveSyncStatus").innerHTML=s.synced
     ? `<strong>Partie #${s.gameNo} enregistrée dans l’historique et synchronisée.</strong> Le classement général a été recalculé.`
     : (winner
@@ -8698,13 +8897,15 @@ function liveRenderAll(){
   }
   $("livePlayersBody").innerHTML=[...s.players].sort((a,b)=>(a.place||999)-(b.place||999)).map(p=>`
     <tr class="${p.status==="Sorti"?"out":p.status==="Vainqueur"?"winner":""}">
-      <td>${esc(p.name)}</td><td>${p.status}</td><td>${p.place||"—"}</td><td>${p.place?euro(livePrize(p.place)):"—"}</td><td>${esc(p.killer||"")}</td>
+      <td>${playerNameHtml(p.name)}</td><td>${p.status}</td><td>${p.place||"—"}</td><td>${p.place?euro(livePrize(p.place)):"—"}</td><td>${esc(p.killer||"")}</td>
     </tr>`).join("");
   liveRenderTimerOnly();liveRefreshElimLists();
+  if(s.running && s.endAt && !liveTicker)liveRunTicker();
   if(document.fullscreenElement===$("liveFullscreenDisplay"))liveRenderFullscreen();
 }
 
 async function liveCancelCurrentGame({ask=true,showMessage=true}={}){
+  if(!liveCreatorGuard())return;
   const s=ensureLiveState();
   if(!s.prepared){
     db.liveState=null;
@@ -8800,24 +9001,15 @@ function liveInit(){
   $("liveBuyIn").value=db.settings.stake||5;
   liveRenderPlayerList();
 
-  const interrupted=liveInterruptedState();
-
   if(db.liveState&&db.liveState.prepared){
-    // Un live existant est restauré visuellement, mais jamais relancé automatiquement.
-    db.liveState.running=false;
-    db.liveState.runStartedAt=null;
-    db.liveState.endAt=null;
-    saveLocalOnly();
-
     liveShowScreen("game");
     liveRenderAll();
-
-    if(interrupted){
-      setTimeout(showLiveResumePrompt,80);
-    }
+    if(db.liveState.running && db.liveState.endAt)liveRunTicker();
+    liveMaybeAutoOpenSpectator();
   }else{
     liveShowScreen("prep");
     livePreviewStructure();
+    applyLiveAccessMode();
   }
 }
 let correctionUnlocked=true;
