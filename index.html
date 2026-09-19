@@ -3335,7 +3335,7 @@ nav button.spectator-nav{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 12h25</div>
+  <div class="app-version">Version 19/09/26 12h30</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -3429,7 +3429,7 @@ nav button.spectator-nav{
     <div id="liveGameScreen" class="live-screen">
       <div id="liveSpectatorBanner" class="live-spectator-banner" style="display:none">
         <strong>Mode spectateur</strong>
-        <span>Cette partie est pilotée depuis un autre appareil. L’affichage est en lecture seule et se met à jour automatiquement toutes les quelques secondes.</span>
+        <span id="liveSpectatorBannerText">Cette partie est pilotée depuis un autre appareil. L’affichage est en lecture seule et se met à jour automatiquement.</span>
       </div>
       <div class="live-head">
         <div>
@@ -4286,7 +4286,16 @@ function setCloudStatus(state,label,details=""){
 }
 
 function isValidBptState(x){
-  return !!(x && Array.isArray(x.players) && Array.isArray(x.history) && Array.isArray(x.points) && x.settings);
+  return !!(
+    x &&
+    Array.isArray(x.players) &&
+    Array.isArray(x.history) &&
+    x.points &&
+    typeof x.points==="object" &&
+    !Array.isArray(x.points) &&
+    x.settings &&
+    typeof x.settings==="object"
+  );
 }
 
 function cloudGameCount(state){
@@ -4726,18 +4735,22 @@ async function cloudPoll(){
       await flushPendingGames();
     }
 
-    if(cloudLocalDirty){
-      await cloudPushNow();
-      return;
-    }
-
-    // Le polling vérifie aussi bpt_state : joueurs, surnoms, paramètres et Live.
-    // Cela garantit la synchronisation entre PC et téléphone même si Realtime
-    // n'est pas disponible ou qu'un événement a été manqué.
+    // Toujours lire l'état serveur AVANT de pousser un éventuel état local.
+    // Cela évite qu'un téléphone spectateur écrase un Live lancé depuis le PC.
     const remote=await cloudFetchState();
     const remoteRevision=Number(remote?.revision||0);
 
     if(remote && isValidBptState(remote.data)){
+      const remoteCreator=String(remote.data?.liveState?.creatorDeviceId||"");
+      const remoteActive=!!(remote.data?.liveState?.prepared && !remote.data?.liveState?.synced);
+      const remoteOwnedByOtherDevice=remoteActive && remoteCreator && remoteCreator!==liveDeviceId();
+
+      if(remoteOwnedByOtherDevice){
+        cloudLocalDirty=false;
+        await applyCloudState(remote);
+        return;
+      }
+
       const localLiveSig=JSON.stringify(db?.liveState||null);
       const remoteLiveSig=JSON.stringify(remote.data?.liveState||null);
       const liveChanged=localLiveSig!==remoteLiveSig;
@@ -4746,6 +4759,11 @@ async function cloudPoll(){
         await applyCloudState(remote);
         return;
       }
+    }
+
+    if(cloudLocalDirty){
+      await cloudPushNow();
+      return;
     }
 
     // Même sans nouvelle révision d'état, l'historique officiel peut évoluer.
@@ -4837,8 +4855,8 @@ async function initCloudSync(){
       renderAll();
       renderHistory();
       if(typeof liveRenderAll==="function")liveRenderAll();
-    }else{
-      // Première initialisation globale.
+    }else if(!row){
+      // Première initialisation globale : aucune ligne bpt_state n'existe encore.
       const payload=JSON.parse(JSON.stringify(db));
       const initialHistory=Array.isArray(payload.history)?payload.history:[];
       payload.history=[];
@@ -4857,6 +4875,10 @@ async function initCloudSync(){
         }
       }
       db.history=await cloudFetchGames();
+    }else{
+      // Une ligne serveur existe mais son format n'est pas reconnu :
+      // surtout ne pas l'écraser avec l'état local du navigateur.
+      throw new Error("État partagé Supabase présent mais format non reconnu. Aucune donnée distante n'a été écrasée.");
     }
 
     cloudReady=true;
@@ -4873,6 +4895,13 @@ async function initCloudSync(){
       liveRenderAll();
       if(db.liveState.running && db.liveState.endAt)liveRunTicker();
       liveMaybeAutoOpenSpectator();
+      if(liveIsSpectator()){
+        setCloudStatus(
+          "ok",
+          "Live spectateur connecté",
+          `Partie #${db.liveState.gameNo||"—"} reçue depuis Supabase`
+        );
+      }
     }
 
     // Realtime : confort immédiat lorsqu'il fonctionne.
@@ -4884,10 +4913,16 @@ async function initCloudSync(){
           {event:"*",schema:"public",table:"bpt_state",filter:"id=eq."+CLOUD_ROW_ID},
           async payload=>{
             try{
-              const rev=Number(payload?.new?.revision||0);
-              if(rev && rev<=cloudLastRevision)return;
-              if(cloudLocalDirty)return;
               const fresh=await cloudFetchState();
+              if(!fresh || !isValidBptState(fresh.data))return;
+              const remoteCreator=String(fresh.data?.liveState?.creatorDeviceId||"");
+              const ownsRemoteLive=!!(
+                fresh.data?.liveState?.prepared &&
+                !fresh.data?.liveState?.synced &&
+                remoteCreator &&
+                remoteCreator===liveDeviceId()
+              );
+              if(cloudLocalDirty && ownsRemoteLive)return;
               await applyCloudState(fresh);
             }catch(e){console.error("BPT realtime:",e);}
           }
@@ -8175,6 +8210,9 @@ function applyLiveAccessMode(){
   });
 
   if($("liveSpectatorBanner"))$("liveSpectatorBanner").style.display=spectator?"flex":"none";
+  if($("liveSpectatorBannerText") && spectator){
+    $("liveSpectatorBannerText").textContent=`Partie #${db.liveState?.gameNo||"—"} pilotée depuis un autre appareil · lecture seule · synchronisation automatique.`;
+  }
   if($("liveHeroSpectatorBadge"))$("liveHeroSpectatorBadge").style.display=spectator?"inline-flex":"none";
   if($("liveHeroTitle"))$("liveHeroTitle").textContent=spectator
     ?"Live BPT — Mode spectateur"
