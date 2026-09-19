@@ -3359,7 +3359,7 @@ nav button.spectator-nav{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 13h10</div>
+  <div class="app-version">Version 19/09/26 13h27</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -4305,6 +4305,20 @@ function setCloudStatus(state,label,details=""){
   const el=document.getElementById("cloudStatus");
   const txt=document.getElementById("cloudStatusText");
   if(!el||!txt)return;
+
+  // Une fois un Live spectateur identifié, les opérations secondaires
+  // ne doivent plus remettre l'indicateur global sur "Connexion…".
+  if(
+    typeof liveIsSpectator==="function" &&
+    liveIsSpectator() &&
+    state==="busy" &&
+    (label==="Connexion…" || label==="Actualisation…" || label==="Synchronisation…")
+  ){
+    state="ok";
+    label="Live spectateur connecté";
+    details=`Partie #${db?.liveState?.gameNo||"—"} · lecture seule`;
+  }
+
   el.classList.remove("ok","busy","offline");
   if(state)el.classList.add(state);
   txt.textContent=label;
@@ -4698,12 +4712,67 @@ function scheduleCloudSave(){
   cloudSaveTimer=setTimeout(cloudPushNow,250);
 }
 
+async function applySpectatorLiveState(row){
+  if(!row || !isValidBptState(row.data))return false;
+
+  const remoteLive=row.data?.liveState||null;
+  const remoteCreator=String(remoteLive?.creatorDeviceId||"");
+  const thisDevice=liveDeviceId();
+  const remoteActive=!!(remoteLive?.prepared && !remoteLive?.synced);
+
+  if(!remoteActive || !remoteCreator || remoteCreator===thisDevice)return false;
+
+  cloudApplying=true;
+  try{
+    // En mode spectateur, on ne recharge PAS l'historique.
+    // On ne prend que les données partagées utiles au Live.
+    const keepHistory=Array.isArray(db.history)?db.history:[];
+    const incoming=JSON.parse(JSON.stringify(row.data));
+
+    db.players=Array.isArray(incoming.players)?incoming.players:db.players;
+    db.points=incoming.points||db.points;
+    db.settings=incoming.settings||db.settings;
+    db.playerNicknames=incoming.playerNicknames||db.playerNicknames||{};
+    db.playerAliases=incoming.playerAliases||db.playerAliases||{};
+    db.playerPhotos=incoming.playerPhotos||db.playerPhotos||{};
+    db.gamePhotos=incoming.gamePhotos||db.gamePhotos||{};
+    db.liveState=incoming.liveState;
+    db.history=keepHistory;
+
+    cloudLastRevision=Number(row.revision||cloudLastRevision||0);
+    cloudLocalDirty=false;
+    saveLocalOnly();
+
+    liveSetLastSyncNow();
+    liveShowScreen("game");
+    liveRenderAll();
+
+    if(db.liveState?.running && db.liveState?.endAt)liveRunTicker();
+    stopLiveCloudHeartbeat();
+    liveMaybeAutoOpenSpectator();
+
+    setCloudStatus(
+      "ok",
+      "Live spectateur connecté",
+      `Partie #${db.liveState?.gameNo||"—"} · état reçu à ${new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}`
+    );
+  }finally{
+    cloudApplying=false;
+  }
+  return true;
+}
+
 async function applyCloudState(row){
   if(!row || !isValidBptState(row.data))return false;
   const remoteCreator=String(row.data?.liveState?.creatorDeviceId||"");
   const thisDevice=liveDeviceId();
   const remoteActive=!!(row.data?.liveState?.prepared && !row.data?.liveState?.synced);
   const thisDeviceOwnsRemoteLive=remoteActive && remoteCreator && remoteCreator===thisDevice;
+
+  if(remoteActive && remoteCreator && remoteCreator!==thisDevice){
+    return await applySpectatorLiveState(row);
+  }
+
   if(cloudLocalDirty && thisDeviceOwnsRemoteLive)return false;
 
   const rev=Number(row.revision||0);
@@ -4760,10 +4829,6 @@ async function cloudPoll(){
   if(!sbClient || !cloudReady || cloudApplying)return;
 
   try{
-    if(pendingGamesLoad().length){
-      await flushPendingGames();
-    }
-
     const remote=await cloudFetchState();
     const remoteRevision=Number(remote?.revision||0);
 
@@ -4783,7 +4848,7 @@ async function cloudPoll(){
       // l'état serveur est la source de vérité.
       if(remoteOwnedByOtherDevice){
         cloudLocalDirty=false;
-        await applyCloudState(remote);
+        await applySpectatorLiveState(remote);
         return;
       }
 
@@ -4797,6 +4862,10 @@ async function cloudPoll(){
         }
         // Le timer maître continue exclusivement à partir de endAt local.
         return;
+      }
+
+      if(pendingGamesLoad().length){
+        await flushPendingGames();
       }
 
       // Hors Live actif : comportement de synchronisation classique.
@@ -4877,6 +4946,18 @@ async function initCloudSync(){
     const row=await cloudFetchState();
 
     if(row && isValidBptState(row.data)){
+      const initialRemoteLive=row.data?.liveState||null;
+      const initialRemoteCreator=String(initialRemoteLive?.creatorDeviceId||"");
+      const initialRemoteActive=!!(initialRemoteLive?.prepared && !initialRemoteLive?.synced);
+
+      if(initialRemoteActive && initialRemoteCreator && initialRemoteCreator!==liveDeviceId()){
+        cloudReady=true;
+        cloudLocalDirty=false;
+        cloudLastError="";
+        await applySpectatorLiveState(row);
+
+        // Realtime + polling sont installés plus bas ; pas de chargement d'historique ici.
+      }else{
       cloudLastRevision=Number(row.revision||0);
       cloudApplying=true;
 
@@ -4964,6 +5045,7 @@ async function initCloudSync(){
           );
         }
       }
+      }
 
     }else if(!row){
       // Première initialisation globale.
@@ -5020,6 +5102,15 @@ async function initCloudSync(){
                 remoteActive && remoteCreator && remoteCreator===liveDeviceId();
 
               if(ownedByThisDevice)return;
+
+              const ownedByOtherDevice=
+                remoteActive && remoteCreator && remoteCreator!==liveDeviceId();
+
+              if(ownedByOtherDevice){
+                await applySpectatorLiveState(fresh);
+                return;
+              }
+
               await applyCloudState(fresh);
             }catch(e){
               console.error("BPT realtime:",e);
