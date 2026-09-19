@@ -3894,6 +3894,15 @@ body:not(.spectator-live-open) #live:not(.active){
   display:none !important;
 }
 
+
+/* ===== V133 — correction navigation vers Live spectateur ===== */
+body.spectator-live-open #live:not(.active){
+  display:none !important;
+}
+body.spectator-live-open #live.active.live-spectator-mode{
+  display:block !important;
+}
+
 </style>
 </head>
 <body>
@@ -3911,7 +3920,7 @@ body:not(.spectator-live-open) #live:not(.active){
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 14h01</div>
+  <div class="app-version">Version 19/09/26 14h06</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -10617,7 +10626,13 @@ async function showView(id){
   if(id==="versus")id="profile";
   if(id==="achievements")id="records";
   if(id==="history")id="ranking";
-  if(typeof isArchiveSeason==="function" && isArchiveSeason() && (id==="live" || id==="settings"))id="dashboard";
+  if(typeof isArchiveSeason==="function" && isArchiveSeason()){
+    // Les paramètres restent réservés à la saison courante.
+    if(id==="settings")id="dashboard";
+    // Un Live spectateur distant reste accessible quelle que soit
+    // la saison actuellement consultée dans le reste du site.
+    if(id==="live" && !liveIsSpectator())id="dashboard";
+  }
   if(id==="newgame")id="settings";
   if(id==="dashboard")dashboardRecordSelection=null;
   currentViewId=id;
@@ -10774,6 +10789,8 @@ if($("gameSummaryBackdrop"))$("gameSummaryBackdrop").onclick=e=>{if(e.target===$
 if($("liveFullscreenBtn"))$("liveFullscreenBtn").onclick=toggleLiveFullscreen;
 if($("spectatorQuitLiveBtn"))$("spectatorQuitLiveBtn").onclick=()=>{
   stopSpectatorSyncCountdown();
+  document.body.classList.remove("spectator-live-open");
+  currentViewId="dashboard";
   showView("dashboard");
 };
 if($("liveFullscreenExitBtn"))$("liveFullscreenExitBtn").onclick=()=>document.exitFullscreen?.();
@@ -10808,7 +10825,20 @@ document.addEventListener("fullscreenchange",()=>{
 
 // Navigation principale
 document.querySelectorAll("nav button[data-view]").forEach(b=>{
-  b.addEventListener("click",()=>showView(b.dataset.view));
+  b.addEventListener("click",()=>{
+    const target=b.dataset.view;
+    if(target==="live" && liveIsSpectator()){
+      currentViewId="live";
+      document.body.classList.add("spectator-live-open");
+      document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id==="live"));
+      document.querySelectorAll("nav button").forEach(n=>n.classList.toggle("active",n.dataset.view==="live"));
+      liveShowScreen("game");
+      liveRenderAll();
+      if(!spectatorLivePollTimer)startSpectatorLivePolling();
+      return;
+    }
+    showView(target);
+  });
 });
 
 // Gestion des joueurs
