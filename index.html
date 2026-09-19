@@ -3007,25 +3007,31 @@ button.player-name-stack{
   min-width:132px;
 }
 .game-photo-thumb-btn{
-  width:118px;
-  height:78px;
-  padding:0;
+  width:132px;
+  height:88px;
+  padding:4px;
   border:1px solid rgba(200,161,92,.5);
   border-radius:10px;
   overflow:hidden;
   cursor:zoom-in;
   background:#0f151e;
   box-shadow:0 7px 20px rgba(0,0,0,.25);
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 .game-photo-thumb{
   width:100%;
   height:100%;
-  object-fit:cover;
+  object-fit:contain;
+  object-position:center;
   display:block;
+  background:#0b1017;
+  border-radius:6px;
 }
 .game-photo-placeholder{
-  width:118px;
-  height:78px;
+  width:132px;
+  height:88px;
   border:1px dashed #465267;
   border-radius:10px;
   display:flex;
@@ -3139,8 +3145,8 @@ button.player-name-stack{
     grid-row:1;
   }
   .game-photo-thumb-btn,.game-photo-placeholder{
-    width:96px;
-    height:66px;
+    width:108px;
+    height:76px;
   }
 }
 @media screen and (orientation:landscape) and (max-height:520px) and (max-width:1000px){
@@ -3149,8 +3155,8 @@ button.player-name-stack{
     gap:10px;
   }
   .game-photo-thumb-btn,.game-photo-placeholder{
-    width:86px;
-    height:54px;
+    width:98px;
+    height:64px;
   }
   .game-browser-toolbar{
     margin:7px 0;
@@ -3170,6 +3176,18 @@ button.player-name-stack{
   margin-top:12px;
 }
 
+
+/* ===== V119 — vignette photo complète, orientation respectée ===== */
+.game-photo-modal img{
+  width:auto;
+  height:auto;
+  max-width:94vw;
+  max-height:82vh;
+  object-fit:contain;
+  object-position:center;
+  background:#0b1017;
+}
+
 </style>
 </head>
 <body>
@@ -3187,7 +3205,7 @@ button.player-name-stack{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 11h58</div>
+  <div class="app-version">Version 19/09/26 12h04</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
