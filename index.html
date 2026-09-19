@@ -4768,6 +4768,172 @@ body.spectator-live-open .spectator-global-exit{
   }
 }
 
+
+/* ===== V151 — Mobile allégé + texte +20 % ===== */
+@media (max-width: 700px){
+
+  /* Base typographique +20 % environ */
+  body{
+    font-size:16.8px !important;
+  }
+
+  .brand b{
+    font-size:16.8px !important;
+  }
+
+  .brand span{
+    font-size:10.8px !important;
+  }
+
+  .app-version{
+    font-size:9.6px !important;
+  }
+
+  nav#nav button{
+    font-size:12px !important;
+  }
+
+  .hero h1,
+  .tab-premium-hero h1{
+    font-size:26px !important;
+  }
+
+  .hero p,
+  .tab-premium-hero p{
+    font-size:13.2px !important;
+  }
+
+  h1{font-size:26px !important;}
+  h2{font-size:20px !important;}
+  h3{font-size:17px !important;}
+
+  .btn{
+    font-size:14.4px !important;
+  }
+
+  .field label{
+    font-size:12px !important;
+  }
+
+  .kpi b,
+  .live-kpi b{
+    font-size:24px !important;
+  }
+
+  .kpi span,
+  .live-kpi span{
+    font-size:10.8px !important;
+  }
+
+  table{
+    font-size:12px !important;
+  }
+
+  /* Alléger les explications peu utiles sur petit écran */
+  .hero p,
+  .tab-premium-hero p,
+  .muted:not(.live-last-sync):not(.spectator-server-meta):not(.spectator-server-receive),
+  .stack-step-hint,
+  #liveSoundStatus,
+  .live-next + .muted,
+  .spectator-server-list-head small{
+    display:none !important;
+  }
+
+  /* Conserver certains textes utiles */
+  .live-last-sync,
+  .spectator-server-meta,
+  .spectator-server-receive{
+    display:block !important;
+  }
+
+  /* Live spectateur : encore plus lisible */
+  .spectator-server-kicker{
+    font-size:12px !important;
+  }
+
+  .spectator-server-meta{
+    font-size:12px !important;
+  }
+
+  .spectator-server-exit{
+    font-size:12px !important;
+  }
+
+  .spectator-server-card > span{
+    font-size:10px !important;
+  }
+
+  .spectator-server-card > strong{
+    font-size:40px !important;
+  }
+
+  .spectator-server-card > b{
+    font-size:31px !important;
+  }
+
+  .spectator-server-timer-card > strong{
+    font-size:65px !important;
+  }
+
+  .spectator-server-timer-card small{
+    font-size:12px !important;
+  }
+
+  .spectator-server-summary .spectator-server-card:nth-child(3) > strong{
+    font-size:41px !important;
+  }
+
+  .spectator-server-name .player-primary-name{
+    font-size:14.4px !important;
+  }
+
+  .spectator-server-name .player-secondary-nickname{
+    font-size:10.8px !important;
+  }
+
+  .spectator-server-status{
+    font-size:10px !important;
+  }
+
+  .spectator-server-place{
+    font-size:13px !important;
+  }
+
+  /* Live maître mobile */
+  #live:not(.live-spectator-mode) .live-timer{
+    font-size:70px !important;
+  }
+
+  #live:not(.live-spectator-mode) .live-blinds{
+    font-size:41px !important;
+  }
+
+  /* Parties / classement / profil */
+  .player-primary-name{
+    font-size:1.08em;
+  }
+
+  .player-secondary-nickname{
+    font-size:.9em;
+  }
+}
+
+@media (max-width: 390px){
+  .hero h1,
+  .tab-premium-hero h1{
+    font-size:23px !important;
+  }
+
+  nav#nav button{
+    font-size:10.8px !important;
+  }
+
+  .spectator-server-timer-card > strong{
+    font-size:58px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -4775,7 +4941,7 @@ body.spectator-live-open .spectator-global-exit{
   <div class="spectator-server-shell">
     <div class="spectator-server-top">
       <div>
-        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V150</div>
+        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V151</div>
         <div id="spectatorServerGameMeta" class="spectator-server-meta">—</div>
         <div class="spectator-server-receive">
           Reçu : <strong id="spectatorServerReceivedAt">—</strong>
@@ -4830,7 +4996,7 @@ body.spectator-live-open .spectator-global-exit{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 15h23</div>
+  <div class="app-version">Version 19/09/26 15h28</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
