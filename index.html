@@ -2971,6 +2971,19 @@ body.photo-viewer-open{overflow:hidden}
   .latestgame-photo-thumb{flex-basis:110px;width:110px;height:68px}
 }
 
+
+/* ===== V117 — correction rattachement et visibilité photos ===== */
+.latestgame-photo-zone:has(.latestgame-photo-thumb){
+  border-color:rgba(200,161,92,.42);
+}
+.latestgame-photo-thumb img,
+.history-photo-thumb img{
+  background:#0a0f16;
+}
+.latestgame-photo-thumb{
+  box-shadow:0 5px 18px rgba(0,0,0,.22);
+}
+
 </style>
 </head>
 <body>
@@ -2988,7 +3001,7 @@ body.photo-viewer-open{overflow:hidden}
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 10h49</div>
+  <div class="app-version">Version 19/09/26 11h01</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -4297,7 +4310,9 @@ async function applyCloudState(row){
     const serverHistory=await cloudFetchGames();
     currentSeasonHistoryCache=clone(serverHistory);
 
+    const localPhotos=clone(ensureGamePhotos());
     db=remoteState;
+    db.gamePhotos={...(db.gamePhotos||{}),...localPhotos};
 
     if(liveSeasonKey==="2023-2024"){
       db.history=applyPlayerAliasesToRows(ARCHIVE_2023_2024);
@@ -4404,7 +4419,9 @@ async function initCloudSync(){
       cloudApplying=true;
 
       const localHistory=Array.isArray(db.history)?db.history:[];
+      const localPhotos=clone(ensureGamePhotos());
       db=row.data;
+      db.gamePhotos={...(db.gamePhotos||{}),...localPhotos};
 
       // Migration automatique : si bpt_games est vide,
       // le premier navigateur alimente la base à partir de son historique local.
@@ -5181,9 +5198,7 @@ function renderProfile(preferredName=null){
 
   const nicknameInfo=playerNicknameInfo(name);
   if($("playerProfileNickname")){
-    $("playerProfileNickname").innerHTML=nicknameInfo.primary
-      ? `<span>Nom</span><strong>${esc(name)}</strong>`
-      : "";
+    $("playerProfileNickname").innerHTML="";
   }
   if($("playerProfileOtherNicknames")){
     $("playerProfileOtherNicknames").textContent=nicknameInfo.others.length
@@ -5286,22 +5301,83 @@ function ensureGamePhotos(){
   return db.gamePhotos;
 }
 
+function gamePhotoSeasonKey(firstRow){
+  return String(
+    firstRow?.seasonKey ||
+    (selectedSeasonKey==="all" ? CURRENT_SEASON_KEY : selectedSeasonKey) ||
+    CURRENT_SEASON_KEY
+  );
+}
+
+function gamePhotoSourceGame(firstRow,gameNo){
+  return Number(firstRow?.sourceGame || gameNo || firstRow?.game || 0);
+}
+
 function gamePhotoKey(firstRow,gameNo){
-  const seasonKey=String(firstRow?.seasonKey || (isAllSeasons()?CURRENT_SEASON_KEY:selectedSeasonKey) || CURRENT_SEASON_KEY);
-  const sourceGame=Number(firstRow?.sourceGame || gameNo || firstRow?.game || 0);
+  const seasonKey=gamePhotoSeasonKey(firstRow);
+  const sourceGame=gamePhotoSourceGame(firstRow,gameNo);
   return `${seasonKey}|${sourceGame}`;
 }
 
-function gamePhotoLabel(firstRow,gameNo){
-  const season=String(firstRow?.seasonLabel || seasonDisplayName(firstRow?.seasonKey || selectedSeasonKey));
-  const sourceGame=Number(firstRow?.sourceGame || gameNo || firstRow?.game || 0);
-  return `${season} · Partie #${sourceGame}`;
+function gamePhotoStableKey(firstRow,gameNo){
+  const seasonKey=gamePhotoSeasonKey(firstRow);
+  const sourceGame=gamePhotoSourceGame(firstRow,gameNo);
+  const date=String(firstRow?.date||"").trim();
+  const location=String(firstRow?.location||"").trim().toLocaleLowerCase("fr");
+  return `${seasonKey}|${sourceGame}|${date}|${location}`;
+}
+
+function gamePhotoCandidateKeys(firstRow,gameNo){
+  const seasonKey=gamePhotoSeasonKey(firstRow);
+  const sourceGame=gamePhotoSourceGame(firstRow,gameNo);
+  const visibleGame=Number(gameNo||firstRow?.game||0);
+  const date=String(firstRow?.date||"").trim();
+  const location=String(firstRow?.location||"").trim().toLocaleLowerCase("fr");
+
+  return [...new Set([
+    gamePhotoStableKey(firstRow,gameNo),
+    `${seasonKey}|${sourceGame}`,
+    `${seasonKey}|${visibleGame}`,
+    `${CURRENT_SEASON_KEY}|${sourceGame}`,
+    `${CURRENT_SEASON_KEY}|${visibleGame}`,
+    `${seasonKey}|${sourceGame}|${date}|${location}`,
+    `${seasonKey}|${visibleGame}|${date}|${location}`
+  ].filter(Boolean))];
 }
 
 function photosForGame(firstRow,gameNo){
-  const key=gamePhotoKey(firstRow,gameNo);
-  const list=ensureGamePhotos()[key];
-  return Array.isArray(list)?list:[];
+  const all=ensureGamePhotos();
+  const keys=gamePhotoCandidateKeys(firstRow,gameNo);
+
+  // Normal lookup, including the old V115/V116 key format.
+  for(const key of keys){
+    const list=all[key];
+    if(Array.isArray(list) && list.length)return list;
+  }
+
+  // Recovery for previously stored photos whose visible/source game number
+  // changed after a canonical Supabase reload. Match by season/date/location.
+  const seasonKey=gamePhotoSeasonKey(firstRow);
+  const date=String(firstRow?.date||"").trim();
+  const location=String(firstRow?.location||"").trim().toLocaleLowerCase("fr");
+
+  for(const [key,list] of Object.entries(all)){
+    if(!Array.isArray(list) || !list.length)continue;
+    const parts=String(key).split("|");
+    if(parts[0]!==seasonKey)continue;
+
+    // New stable keys carry date/location.
+    if(parts.length>=4 && parts[2]===date && String(parts.slice(3).join("|")).toLocaleLowerCase("fr")===location){
+      return list;
+    }
+  }
+
+  return [];
+}
+
+function gamePhotoStorageKey(firstRow,gameNo){
+  // New uploads use a stable key while reads remain backward-compatible.
+  return gamePhotoStableKey(firstRow,gameNo);
 }
 
 function fileToCompressedPhoto(file,maxSide=1000,quality=.68){
@@ -5352,9 +5428,9 @@ async function cloudPushSharedStateOnly(){
     const remoteData=(remote && isValidBptState(remote.data)) ? clone(remote.data) : clone(db);
 
     // Conserver l’état partagé le plus récent, puis y injecter les photos locales.
-    remoteData.gamePhotos=clone(ensureGamePhotos());
-    remoteData.playerNicknames=clone(ensurePlayerNicknames());
-    remoteData.playerAliases=clone(ensurePlayerAliases());
+    remoteData.gamePhotos={...(remoteData.gamePhotos||{}),...clone(ensureGamePhotos())};
+    remoteData.playerNicknames={...(remoteData.playerNicknames||{}),...clone(ensurePlayerNicknames())};
+    remoteData.playerAliases={...(remoteData.playerAliases||{}),...clone(ensurePlayerAliases())};
     remoteData.history=[];
 
     const {data,error}=await sbClient
@@ -5394,18 +5470,33 @@ async function addPhotosToGame(key,label,files){
   setCloudStatus("busy","Préparation des photos…");
   const added=[];
   for(const f of chosen){
-    try{added.push(await fileToCompressedPhoto(f));}
+    try{added.push(await fileToCompressedPhoto(f,720,.60));}
     catch(e){console.warn(e);}
   }
-  if(!added.length)return;
+  if(!added.length){
+    alert("La photo n’a pas pu être préparée.");
+    return;
+  }
 
   photos[key]=[...existing,...added];
-  saveLocalOnly();
-  renderHistory();
-  renderLatestGame();
-  await cloudPushSharedStateOnly();
 
-  if(selected.length>remaining){
+  // Keep an in-memory copy before any cloud operation so the photo is visible
+  // immediately even if the network synchronization fails.
+  db.gamePhotos=photos;
+  saveLocalOnly();
+  renderLatestGame();
+  renderHistory();
+
+  const synced=await cloudPushSharedStateOnly();
+
+  // Render again after the async save: this avoids a stale cloud/UI refresh
+  // hiding a successfully added image.
+  renderLatestGame();
+  renderHistory();
+
+  if(!synced){
+    alert("La photo est visible sur cet appareil, mais sa synchronisation avec les autres appareils n’a pas abouti pour le moment.");
+  }else if(selected.length>remaining){
     alert(`Seules ${remaining} photo${remaining>1?"s":""} ont été ajoutées. Maximum : 5 photos par partie.`);
   }
 }
@@ -5435,7 +5526,7 @@ function renderHistoryCards(){
   holder.innerHTML=games.map(([g,rows])=>{
     const sorted=rows.slice().sort((a,b)=>Number(a.place)-Number(b.place));
     const f=sorted[0]||{},win=sorted.find(r=>Number(r.place)===1);
-    const photoKey=gamePhotoKey(f,g);
+    const photoKey=gamePhotoStorageKey(f,g);
     const photoLabel=gamePhotoLabel(f,g);
     const photos=photosForGame(f,g);
 
@@ -5466,7 +5557,7 @@ function renderHistoryCards(){
         </div>
 
         <div class="tablewrap"><table><thead><tr><th>Place</th><th>Joueur</th><th>Pts</th><th>Kills</th><th>Éliminé par</th><th>Gain</th><th>Net</th></tr></thead><tbody>
-          ${sorted.map(r=>`<tr><td>${r.place}</td><td><button class="player-link" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(displayPlayerName(r.player))}</button></td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${r.killer?esc(displayPlayerName(r.killer)):"—"}</td><td>${euro(r.gross)}</td><td>${euro(r.net)}</td></tr>`).join("")}
+          ${sorted.map(r=>`<tr><td>${r.place}</td><td><button class="player-link" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(displayPlayerDetailed(r.player))}</button></td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${r.killer?esc(displayPlayerDetailed(r.killer)):"—"}</td><td>${euro(r.gross)}</td><td>${euro(r.net)}</td></tr>`).join("")}
         </tbody></table></div>
       </div>
     </details>`;
@@ -5847,7 +5938,7 @@ function mergeAllSeasonsOfficialStats(rawItems){
   });
 }
 
-const BPT_ANNALES_NICKNAMES={"Franck NAESSENS":["Francis Chatard","Chatard en Chef","Boucher en Chef","Boule à Facettes","Dogarty04","Dégolas","Raoul"],"Jérôme BINOT":["Tchobin","Panama","El Toucan","String Borat","Le Myticulteur","Livre La Moulasse","Chatard en Second"],"Jérôme BERA":["Superman","Slip Rouge","Cerf-Volant","Chip Leader","Ouvrier Plumeur"],"Olivier HENGUELLE":["Miguel","Migolivier","MigGeger","Désosseur","Jean-Michel j’aurais dû jouer !"],"Mehdi BRAHIMI":["El Español","M Le Maudit","Kabiloute","Dégraisseur","Bachybouzouk","Cobra"],"Michel SCHERPEREEL":["Scotty Nguyen","Michmuch59","Micheline59","Boyaudier","Club55"],"Alexis VOLANT":["Biogold","Petit Cœur","L’architecte","Le Neveu de Tonton","Le Jeune Loup de Wall Street"],"Jérôme RIFFE":["Le Chat","Pitch And Putt","Coupeur de Quartier","Djayrem"],"François CATTEAU":["Le Dealer","Chargé de Pesée","Jean Guile","Bpt59"],"Jérémy GRAS":["Shrek","Kersh"],"Thierry MONNIAUX":["L’antidote","Désosseur Pareur","TYMOON69"],"Stéphane LEFIN":["Phœnix","Boucher Gérant","George Luke Ass","Pevelef"],"David SAGALOWICZ":["The Shaker"],"Areski AIT GHERBI":["Kikipoker","Areskilimero","Kiki Le Magnifique"],"Anne BERA":["Maya","Nanou","PrinceLeia59"],"Gérard CANDELIER":["Le Professeur","Le Lion d’Arras","Le Templier","Eviscérateur","GG ARRAS"],"Jérémie CARPENTIER":["Le Trader","Sacrificateur","Lanseria44"],"Mélanie NAESSENS":["Francine Chatard"],"Grégoire DUFORET":["Robin Hood","Grofud"],"Florence SAGALOWICZ":["La Dame de Cœur"],"Dylan DECOTTE":["Rocky Balboa"],"Philippe DUBOIS":["Taz","Japlpel","Accrocheur en Abattoir","J’Adore Pulvériser Les Pokermen En Ligne"],"Solène BALLOIS":["SoBa","Poupée","La Chatte à la Voisine"],"Juliette PENIN":["Wild Horses"],"Jules NAESSENS":["Serial Senior Killer"],"Arnaud HEDIN":["Nono la Saumure"],"Clément MARAVAL":["Scotland Beret","Pointbreak8"],"Thomas DELVAL":["Kitemalaman"],"Hélène MORIZUR":["Psycho Girl","Tazette"],"Mélanie BINOT":["Micromachine","Bazouka"]};
+const BPT_ANNALES_NICKNAMES={"Franck NAESSENS":["Francis Chatard","Chatard en Chef","Boucher en Chef","Boule à Facettes","Dogarty04","Dégolas","Raoul"],"Jérôme BINOT":["Tchobin","Panama","El Toucan","String Borat","Le Myticulteur","Livre La Moulasse","Chatard en Second"],"Jérôme BERA":["Superman","Slip Rouge","Cerf-Volant","Chip Leader","Ouvrier Plumeur"],"Olivier HENGUELLE":["Miguel","Migolivier","MigGeger","Désosseur","Jean-Michel j’aurais dû jouer !"],"Mehdi BRAHIMI":["El Español","M Le Maudit","Kabiloute","Dégraisseur","Bachybouzouk","Cobra"],"Michel SCHERPEREEL":["Scotty Nguyen","Michmuch59","Micheline59","Boyaudier","Club55"],"Alexis VOLANT":["Biogold","Petit Cœur","L’architecte","Le Neveu de Tonton","Le Jeune Loup de Wall Street"],"Jérôme RIFFE":["Le Chat","Pitch And Putt","Coupeur de Quartier","Djayrem"],"François CATTEAU":["Le Dealer","Chargé de Pesée","Jean Guile","Bpt59"],"Jérémy GRAS":["Shrek","Kersh"],"Thierry MONNIAUX":["L’antidote","Désosseur Pareur","TYMOON69"],"Stéphane LEFIN":["Phœnix","Boucher Gérant","George Luke Ass","Pevelef"],"David SAGALOWICZ":["The Shaker"],"Areski AIT GHERBI":["Kikipoker","Areskilimero","Kiki Le Magnifique"],"Anne BERA":["Maya","Nanou","PrinceLeia59"],"Gérard CANDELIER":["Le Professeur","Le Lion d’Arras","Le Templier","Eviscérateur","GG ARRAS"],"Jérémie CARPENTIER":["Le Trader","Sacrificateur","Lanseria44"],"Mélanie NAESSENS":["Francine Chatard"],"Grégoire DUFORET":["Robin Hood","Grofud"],"Florence SAGALOWICZ":["La Dame de Cœur"],"Dylan DECOTTE":["Rocky Balboa"],"Philippe DUBOIS":["Taz","Japlpel","Accrocheur en Abattoir","J’Adore Pulvériser Les Pokermen En Ligne"],"Solène BALLOIS":["SoBa","Poupée","La Chatte à la Voisine"],"Juliette PENIN":["Wild Horses"],"Jules NAESSENS":["Serial Senior Killer"],"Arnaud HEDIN":["Nono la Saumure"],"Clément MARAVAL":["Scotland Beret","Pointbreak8"],"Thomas DELVAL":["Kitemalaman"],"Hélène MORIZUR":["Psycho Girl","Tazette"],"Mélanie BINOT":["Micromachine","Bazouka"],"Jérémy COQUEL":["Shrek"],"Jeremy COQUEL":["Shrek"],"JEREMY COQUEL":["Shrek"]};
 
 function normalizePlayerLookupName(name){
   return String(name||"")
@@ -5871,7 +5962,12 @@ function annalesNicknamesFor(name){
 }
 
 function playerNicknameInfo(name){
-  const custom=String(ensurePlayerNicknames()[name]||"").trim();
+  const nicknameStore=ensurePlayerNicknames();
+  const normalized=normalizePlayerLookupName(name);
+  if(normalized==="JEREMY COQUEL" && !String(nicknameStore[name]||"").trim()){
+    nicknameStore[name]="Shrek";
+  }
+  const custom=String(nicknameStore[name]||"").trim();
   const annales=annalesNicknamesFor(name);
   const primary=custom || annales[0] || "";
   const others=annales.filter(n=>n!==primary);
@@ -5881,15 +5977,17 @@ function playerNicknameInfo(name){
 function displayPlayerName(name){
   const real=String(name||"").trim();
   const nick=playerNicknameInfo(real).primary;
-  return nick || real;
+  return nick && normalizePlayerLookupName(nick)!==normalizePlayerLookupName(real)
+    ? `${real} (${nick})`
+    : real;
+}
+
+function displayPlayerDetailed(name){
+  return displayPlayerName(name);
 }
 
 function playerDisplayWithRealName(name){
-  const real=String(name||"").trim();
-  const nick=playerNicknameInfo(real).primary;
-  return nick && normalizePlayerLookupName(nick)!==normalizePlayerLookupName(real)
-    ? `${nick} · ${real}`
-    : real;
+  return displayPlayerName(name);
 }
 
 async function savePlayerNickname(name,value){
@@ -6556,9 +6654,11 @@ function renderLatestGame(){
   ].map(([label,value])=>`<div class="latestgame-summary-item"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join("");
 
   // Photos directly visible in the game view.
-  const photoKey=gamePhotoKey(first,gameNo);
+  const photoKey=gamePhotoStorageKey(first,gameNo);
   const photoLabel=gamePhotoLabel(first,gameNo);
   const photos=photosForGame(first,gameNo);
+  const photoZone=$("latestGamePhotoZone");
+  if(photoZone)photoZone.dataset.photoCount=String(photos.length);
   $("latestGamePhotoThumbs").innerHTML=photos.length
     ? photos.map((p,idx)=>`<button class="history-photo-thumb latestgame-photo-thumb" type="button"
           data-photo-src="${encodeURIComponent(p.dataUrl)}"
@@ -6580,10 +6680,10 @@ function renderLatestGame(){
     <thead><tr><th>Place</th><th>Joueur</th><th>Points</th><th>Kills</th><th>Éliminé par</th><th>Gain</th><th>Net</th></tr></thead>
     <tbody>${rows.map(r=>`<tr>
       <td>${r.place}</td>
-      <td><button class="player-link" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(displayPlayerName(r.player))}</button></td>
+      <td><button class="player-link" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(displayPlayerDetailed(r.player))}</button></td>
       <td>${num(r.points||0,0)}</td>
       <td>${num(r.kills||0,0)}</td>
-      <td>${r.killer?esc(displayPlayerName(r.killer)):"—"}</td>
+      <td>${r.killer?esc(displayPlayerDetailed(r.killer)):"—"}</td>
       <td>${euro(r.gross||0)}</td>
       <td>${euro(r.net||0)}</td>
     </tr>`).join("")}</tbody>
@@ -6620,7 +6720,7 @@ function renderRanking(){
   const ks=killerStats();
   $("rankingBody").innerHTML=ranking().map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}">
     <td>${medalForRank(s.rank)} ${s.rank}</td>
-    <td><button class="player-link ranking-player-link" title="Ouvrir le profil de ${esc(s.name)}" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(s.name)}'))">${esc(displayPlayerName(s.name))}</button></td>
+    <td><button class="player-link ranking-player-link" title="Ouvrir le profil de ${esc(s.name)}" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(s.name)}'))">${esc(displayPlayerDetailed(s.name))}</button></td>
     <td><b>${num(s.points,0)}</b></td>
     <td>${s.progress===null?(isArchiveSeason()?"—":"Nouvelle entrée"):s.progress>0?"+"+s.progress:s.progress===0?"=":String(s.progress)}</td>
     <td>${num(s.avgPoints,1)}</td>
@@ -6821,9 +6921,9 @@ function renderHistory(){
       <td><b>${Number(r.game)||""}</b></td>
       <td>${esc(shortDate(r.date||""))}</td>
       <td>${esc(r.location||"")}</td>
-      <td>${esc(r.player||"")}</td>
+      <td>${r.player?esc(displayPlayerDetailed(r.player)):""}</td>
       <td>${Number(r.place)||""}</td>
-      <td>${esc(r.killer||"")}</td>
+      <td>${r.killer?esc(displayPlayerDetailed(r.killer)):""}</td>
       <td>${r.tablier?"Oui":""}</td>
       <td>${Number(r.n)||""}</td>
       <td>${num(r.points,0)}</td>
