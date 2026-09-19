@@ -5425,6 +5425,305 @@ body.spectator-live-open .spectator-global-exit{
   cursor:pointer;
 }
 
+
+/* ===== V160 — nom / lieu obligatoire ===== */
+#liveLocation:invalid,
+#gLocation:invalid,
+#cLocation:invalid{
+  border-color:#8a5a5a;
+}
+
+
+/* ===== V163 — Live allégé ===== */
+#liveSoundStatus,
+#liveSyncStatus{
+  display:none !important;
+}
+
+
+/* ===== V164 — structure accessible depuis le plein écran ===== */
+.live-fs-level-clickable{
+  border:0 !important;
+  background:transparent !important;
+  color:inherit !important;
+  font:inherit !important;
+  font-weight:inherit !important;
+  padding:0 !important;
+  margin:0 !important;
+  cursor:pointer !important;
+  text-decoration:underline;
+  text-decoration-style:dotted;
+  text-underline-offset:5px;
+}
+.live-fs-level-clickable:hover{
+  color:#8fd4ff !important;
+}
+
+
+/* ===== V165 — commandes rapides en plein écran ===== */
+.live-fullscreen-kpi-stack{
+  position:relative;
+}
+.live-fs-quick-actions{
+  display:flex;
+  gap:8px;
+  justify-content:center;
+  margin-top:10px;
+  flex-wrap:wrap;
+}
+.live-fs-action-btn{
+  border:1px solid rgba(143,212,255,.35);
+  background:rgba(15,29,41,.92);
+  color:#edf6fb;
+  border-radius:10px;
+  padding:8px 13px;
+  font-size:13px;
+  font-weight:900;
+  cursor:pointer;
+}
+.live-fs-action-btn:hover{
+  border-color:#8fd4ff;
+}
+.live-fs-action-btn.danger{
+  border-color:rgba(214,112,112,.55);
+  color:#ffd6d6;
+}
+.live-fs-action-btn:disabled{
+  opacity:.45;
+  cursor:default;
+}
+
+.live-fs-elim-popup{
+  position:absolute;
+  inset:0;
+  z-index:40;
+  align-items:center;
+  justify-content:center;
+  background:rgba(2,6,10,.72);
+  backdrop-filter:blur(4px);
+}
+.live-fs-elim-card{
+  width:min(420px,88vw);
+  padding:18px;
+  border:1px solid #44596c;
+  border-radius:16px;
+  background:#0d151e;
+  box-shadow:0 24px 70px rgba(0,0,0,.55);
+}
+.live-fs-elim-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+  font-size:20px;
+}
+.live-fs-elim-close{
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  border:1px solid #42586b;
+  background:#14212c;
+  color:#fff;
+  font-size:23px;
+  cursor:pointer;
+}
+.live-fs-elim-card label{
+  display:block;
+  margin:10px 0 5px;
+  color:#aebdca;
+  font-size:12px;
+  font-weight:800;
+}
+.live-fs-elim-card select{
+  width:100%;
+  min-height:44px;
+  border:1px solid #344a5d;
+  border-radius:10px;
+  background:#111c26;
+  color:#f0f5f8;
+  padding:8px 10px;
+  font-size:15px;
+}
+.live-fs-elim-confirm{
+  width:100%;
+  margin-top:14px;
+  min-height:46px;
+  border:1px solid #a95050;
+  border-radius:10px;
+  background:#4a1f23;
+  color:#fff1f1;
+  font-weight:900;
+  cursor:pointer;
+}
+
+
+/* ===== V166 — démarrage depuis plein écran + paramètres avant départ ===== */
+.live-fullscreen-top-actions{
+  position:absolute;
+  top:18px;
+  right:18px;
+  z-index:12;
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.live-fullscreen-top-actions .live-fullscreen-exit{
+  position:static !important;
+}
+.live-fullscreen-settings{
+  border:1px solid rgba(143,212,255,.35);
+  background:rgba(15,29,41,.9);
+  color:#edf6fb;
+  border-radius:10px;
+  padding:8px 13px;
+  font-size:12px;
+  font-weight:900;
+  cursor:pointer;
+}
+.live-fullscreen-settings:disabled{
+  opacity:.35;
+  cursor:default;
+}
+.live-fs-elim-popup{
+  display:none !important;
+}
+.live-fs-elim-inline{
+  width:min(860px,94vw);
+  margin:14px auto 4px;
+  grid-template-columns:minmax(180px,1fr) minmax(180px,1fr) auto auto;
+  gap:8px;
+  align-items:center;
+}
+.live-fs-elim-inline select{
+  min-height:44px;
+  border:1px solid #344a5d;
+  border-radius:10px;
+  background:#111c26;
+  color:#f0f5f8;
+  padding:8px 10px;
+  font-size:15px;
+}
+.live-fs-elim-confirm,
+.live-fs-elim-cancel{
+  min-height:44px;
+  border-radius:10px;
+  padding:8px 14px;
+  font-weight:900;
+  cursor:pointer;
+}
+.live-fs-elim-confirm{
+  border:1px solid #a95050;
+  background:#4a1f23;
+  color:#fff1f1;
+}
+.live-fs-elim-cancel{
+  border:1px solid #3d5264;
+  background:#15222d;
+  color:#e9f2f7;
+}
+.summary-eliminations{
+  margin:16px 0;
+}
+.summary-eliminations h3{
+  margin:0 0 8px;
+}
+@media(max-width:700px){
+  .live-fullscreen-top-actions{
+    top:8px;
+    right:8px;
+  }
+  .live-fullscreen-settings,
+  .live-fullscreen-top-actions .live-fullscreen-exit{
+    padding:6px 9px !important;
+    font-size:10px !important;
+  }
+  .live-fs-elim-inline{
+    width:96vw;
+    grid-template-columns:1fr 1fr auto auto;
+    gap:6px;
+    margin-top:8px;
+  }
+  .live-fs-elim-inline select{
+    min-height:38px;
+    padding:6px 7px;
+    font-size:12px;
+  }
+  .live-fs-elim-confirm,
+  .live-fs-elim-cancel{
+    min-height:38px;
+    padding:6px 9px;
+    font-size:11px;
+  }
+}
+
+
+/* ===== V167 — sortie joueur en pop-up auto-fermant ===== */
+.live-fs-elim-inline{display:none !important;}
+.live-fs-elim-popup{
+  position:absolute;
+  inset:0;
+  z-index:45;
+  align-items:center;
+  justify-content:center;
+  background:rgba(2,6,10,.80);
+  backdrop-filter:blur(5px);
+}
+.live-fs-elim-card{
+  width:min(420px,88vw);
+  padding:18px;
+  border:1px solid #44596c;
+  border-radius:16px;
+  background:#0d151e;
+  box-shadow:0 24px 70px rgba(0,0,0,.55);
+}
+.live-fs-elim-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:14px;
+  font-size:20px;
+}
+.live-fs-elim-close{
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  border:1px solid #42586b;
+  background:#14212c;
+  color:#fff;
+  font-size:23px;
+  cursor:pointer;
+}
+.live-fs-elim-card label{
+  display:block;
+  margin:10px 0 5px;
+  color:#aebdca;
+  font-size:12px;
+  font-weight:800;
+}
+.live-fs-elim-card select{
+  width:100%;
+  min-height:44px;
+  border:1px solid #344a5d;
+  border-radius:10px;
+  background:#111c26;
+  color:#f0f5f8;
+  padding:8px 10px;
+  font-size:15px;
+}
+.live-fs-elim-confirm{
+  width:100%;
+  margin-top:14px;
+  min-height:46px;
+}
+@media(max-width:700px){
+  .live-fs-elim-card{
+    width:min(390px,92vw);
+    padding:14px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -5440,7 +5739,7 @@ body.spectator-live-open .spectator-global-exit{
   <div class="spectator-server-shell">
     <div class="spectator-server-top">
       <div>
-        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V159</div>
+        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V167</div>
         <div id="spectatorServerGameMeta" class="spectator-server-meta">—</div>
         <div class="spectator-server-receive">
           Reçu : <strong id="spectatorServerReceivedAt">—</strong>
@@ -5498,7 +5797,7 @@ body.spectator-live-open .spectator-global-exit{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 16h48</div>
+  <div class="app-version">Version 19/09/26 17h13</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -5529,7 +5828,7 @@ body.spectator-live-open .spectator-global-exit{
       <div class="live-head">
         <div>
           <div class="live-title">BPT — Préparation d’une nouvelle partie</div>
-          <div class="muted">Configurez la prochaine partie. À la fin du Live, la partie terminée est enregistrée dans le championnat puis cet écran est réaffiché automatiquement.</div>
+          
         </div>
       </div>
 
@@ -5537,7 +5836,7 @@ body.spectator-live-open .spectator-global-exit{
         <div class="card">
           <h2>Partie</h2>
           <div class="field"><label>Date</label><input id="liveDate" type="date"></div>
-          <div class="field"><label>Lieu</label><input id="liveLocation" placeholder="Lieu de la partie"></div>
+          <div class="field"><label>Nom / lieu de la partie *</label><input id="liveLocation" placeholder="Obligatoire" required></div>
           <div class="field mobile-hide-live-structure"><label>Stack de départ</label><input id="liveStartStack" type="number" min="1000" step="1000" value="20000"><span class="stack-step-hint">Par pas de 1 000</span></div>
           <div class="field mobile-hide-live-structure"><label>SB minimale</label><input id="liveMinSB" type="number" min="25" step="25" value="25"><span class="stack-step-hint">25 → 50 → 100</span></div>
           <div class="field mobile-hide-live-structure"><label>Durée cible</label>
@@ -5623,10 +5922,13 @@ body.spectator-live-open .spectator-global-exit{
 
 
       <div id="liveFullscreenDisplay" class="live-fullscreen-display" aria-label="Affichage plein écran du Live">
-        <button id="liveFullscreenExitBtn" class="live-fullscreen-exit" type="button">Quitter plein écran</button>
+        <div class="live-fullscreen-top-actions live-admin-only">
+          <button id="liveFsSettingsBtn" class="live-fullscreen-settings" type="button">Paramètres</button>
+          <button id="liveFullscreenExitBtn" class="live-fullscreen-exit" type="button">Quitter plein écran</button>
+        </div>
         <div class="live-fullscreen-brand">BPT · LIVE</div>
 
-        <div class="live-fullscreen-level" id="liveFsLevel">NIVEAU 1</div>
+        <button class="live-fullscreen-level" id="liveFsLevel" type="button" title="Voir la structure">NIVEAU 1</button>
         <div class="live-fullscreen-blinds" id="liveFsBlinds">— / —</div>
         <div class="live-fullscreen-ante" id="liveFsAnte">Ante —</div>
 
@@ -5638,9 +5940,13 @@ body.spectator-live-open .spectator-global-exit{
             <span>Durée du niveau</span>
             <strong id="liveFsLevelDuration">—</strong>
           </div>
-          <div class="live-fullscreen-kpi">
+          <div class="live-fullscreen-kpi live-fullscreen-kpi-stack">
             <span>Stack moyen</span>
             <strong id="liveFsAvgStack">—</strong>
+            <div class="live-fs-quick-actions live-admin-only">
+              <button id="liveFsPauseResumeBtn" class="live-fs-action-btn" type="button">Pause</button>
+              <button id="liveFsEliminateOpenBtn" class="live-fs-action-btn danger" type="button">Sortir un joueur</button>
+            </div>
           </div>
           <div class="live-fullscreen-kpi">
             <span>Joueurs restants</span>
@@ -5649,6 +5955,20 @@ body.spectator-live-open .spectator-global-exit{
           <div class="live-fullscreen-kpi">
             <span>Durée écoulée</span>
             <strong id="liveFsElapsed">00:00:00</strong>
+          </div>
+        </div>
+
+        <div id="liveFsElimPopup" class="live-fs-elim-popup live-admin-only" style="display:none">
+          <div class="live-fs-elim-card">
+            <div class="live-fs-elim-head">
+              <strong>Sortie d’un joueur</strong>
+              <button id="liveFsElimCancelBtn" class="live-fs-elim-close" type="button" aria-label="Fermer">×</button>
+            </div>
+            <label>Joueur sortant</label>
+            <select id="liveFsOutPlayer" aria-label="Joueur sortant"></select>
+            <label>Éliminé par</label>
+            <select id="liveFsKiller" aria-label="Éliminé par"></select>
+            <button id="liveFsEliminateBtn" class="live-fs-elim-confirm" type="button">Valider la sortie</button>
           </div>
         </div>
 
@@ -5735,7 +6055,7 @@ body.spectator-live-open .spectator-global-exit{
               <button class="btn ghost" id="liveNextLevelBtn">Niveau suivant</button>
             </div>
           </div>
-          <div id="liveSoundStatus" class="muted live-admin-only" style="margin-top:8px">🔊 Alertes sonores : annonce « 30 secondes » à 30 s, 3 bips à 10 s, puis annonce vocale distincte des deux blinds.</div>
+          <div id="liveSoundStatus" class="muted live-admin-only" style="display:none"></div>
         </div>
 
         <div class="card live-admin-panel">
@@ -5765,9 +6085,9 @@ body.spectator-live-open .spectator-global-exit{
               Disponible dès qu’un joueur a été éliminé.
             </div>
           </div>
-          <div class="muted" style="margin-top:5px">L'éliminateur est limité aux joueurs encore en jeu et ne peut pas être le sortant.</div>
+          
 
-          <div id="liveSyncStatus" class="live-status">La synchronisation se fera automatiquement lorsque le vainqueur sera déterminé.</div>
+          <div id="liveSyncStatus" class="live-status" style="display:none"></div>
 
           <h2 style="margin-top:16px">Joueurs</h2>
           <div class="live-players">
@@ -6232,7 +6552,7 @@ body.spectator-live-open .spectator-global-exit{
     <div class="card span4">
       <h2>Nouvelle partie manuelle</h2>
       <div class="field"><label>Date</label><input id="gDate" type="date"></div>
-      <div class="field"><label>Lieu</label><input id="gLocation" placeholder="Lieu"></div>
+      <div class="field"><label>Nom / lieu de la partie *</label><input id="gLocation" placeholder="Obligatoire" required></div>
       <div class="field"><label>Mise / joueur</label><input id="gStake" type="number" min="0" step="1"></div><div class="muted">Gains BPT : 1er 60 % • 2e 30 % • 3e 10 % — ajustés aux 5 € les plus proches</div>
       <div class="muted">Sélectionnez les joueurs actifs participant à la partie.</div>
       <div id="gamePlayerChecks" style="margin-top:8px;max-height:340px;overflow:auto"></div>
@@ -6305,7 +6625,7 @@ body.spectator-live-open .spectator-global-exit{
         <div id="correctionEditor" style="display:none">
           <div class="grid">
             <div class="span6"><div class="field"><label>Date</label><input id="cDate" type="date"></div></div>
-            <div class="span6"><div class="field"><label>Lieu</label><input id="cLocation" type="text" autocomplete="off" placeholder="Lieu de la partie"></div></div>
+            <div class="span6"><div class="field"><label>Nom / lieu de la partie *</label><input id="cLocation" type="text" autocomplete="off" placeholder="Obligatoire" required></div></div>
             <div class="span6"><div class="field"><label>Mise / joueur</label><input id="cStake" type="number" min="0" step="1"></div></div>
             <div class="span6"><div class="field"><label>Participants</label><input id="cParticipants" disabled></div></div>
           </div>
@@ -8502,6 +8822,21 @@ function showEndGameSummary(rows){
     <div class="summary-podium">
       ${sorted.slice(0,3).map((r,i)=>`<div class="summary-place"><b>${esc(r.player)}</b><div class="podium-nickname">${playerNicknameInfo(r.player).primary?`(${esc(playerNicknameInfo(r.player).primary)})`:""}</div><div class="big">${medalForRank(i+1)}</div><div>${num(r.points,0)} pts · ${euro(r.gross)}</div><div class="muted">${r.kills||0} kill${Number(r.kills||0)>1?"s":""}</div></div>`).join("")}
     </div>
+    <div class="summary-eliminations">
+      <h3>Résumé des éliminations</h3>
+      <div class="tablewrap"><table class="summary-table">
+        <thead><tr><th>Place</th><th>Joueur</th><th>Éliminé par</th><th>Niveau</th><th>Heure</th></tr></thead>
+        <tbody>
+          ${sorted.map(r=>`<tr>
+            <td>${r.place}</td>
+            <td>${playerNameHtml(r.player)}</td>
+            <td>${Number(r.place)===1?"Vainqueur":(r.killer?playerNameHtml(r.killer):"—")}</td>
+            <td>${r.outLevel?`N${Number(r.outLevel)}`:"—"}</td>
+            <td>${esc(r.outTime||"—")}</td>
+          </tr>`).join("")}
+        </tbody>
+      </table></div>
+    </div>
     <div class="tablewrap"><table class="summary-table"><thead><tr><th>Place</th><th>Joueur</th><th>Points</th><th>Kills</th><th>Net</th></tr></thead><tbody>
       ${sorted.map(r=>`<tr><td>${r.place}</td><td>${playerNameHtml(r.player)}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${euro(r.net)}</td></tr>`).join("")}
     </tbody></table></div>`;
@@ -8550,6 +8885,121 @@ async function toggleLiveFullscreen(){
   }
 }
 
+
+function liveFsRefreshElimLists(resetKiller=false){
+  const s=ensureLiveState();
+  if(!s?.prepared || !$("liveFsOutPlayer") || !$("liveFsKiller"))return;
+
+  const alive=liveAlive();
+  const prevOut=$("liveFsOutPlayer").value;
+  const outStillAlive=alive.some(p=>p.name===prevOut);
+
+  $("liveFsOutPlayer").innerHTML=
+    '<option value="">— Joueur sortant —</option>'+
+    alive.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join("");
+
+  if(outStillAlive)$("liveFsOutPlayer").value=prevOut;
+
+  const out=$("liveFsOutPlayer").value;
+  const previousKiller=(!resetKiller && outStillAlive)?$("liveFsKiller").value:"";
+  const eligible=alive.filter(p=>p.name!==out);
+
+  $("liveFsKiller").innerHTML=
+    '<option value="">— Éliminé par… —</option>'+
+    eligible.map(p=>`<option value="${esc(p.name)}">${esc(p.name)}</option>`).join("");
+
+  if(previousKiller && eligible.some(p=>p.name===previousKiller)){
+    $("liveFsKiller").value=previousKiller;
+  }else{
+    $("liveFsKiller").value="";
+  }
+}
+
+function openLiveFsElimPopup(){
+  if(!liveCreatorGuard())return;
+  const s=ensureLiveState();
+  if(!s?.prepared || s.synced || !s.startedAt)return;
+  liveFsRefreshElimLists(true);
+  $("liveFsElimPopup").style.display="flex";
+  setTimeout(()=>$("liveFsOutPlayer")?.focus(),0);
+}
+
+function closeLiveFsElimPopup(){
+  if(!$("liveFsElimPopup"))return;
+  $("liveFsElimPopup").style.display="none";
+  if($("liveFsOutPlayer"))$("liveFsOutPlayer").value="";
+  if($("liveFsKiller"))$("liveFsKiller").value="";
+}
+
+async function liveFsTogglePauseResume(){
+  if(!liveCreatorGuard())return;
+  const s=ensureLiveState();
+  if(!s?.prepared || s.synced)return;
+  if(s.running)await livePause();
+  else await liveStart();
+  liveRenderFullscreen();
+}
+
+async function liveFsEliminate(){
+  if(!liveCreatorGuard())return;
+  const s=ensureLiveState();
+  const out=$("liveFsOutPlayer")?.value||"";
+  const killer=$("liveFsKiller")?.value||"";
+
+  if(!out){
+    alert("Choisissez le joueur sortant.");
+    return;
+  }
+  if(!killer){
+    alert("Renseignez obligatoirement le joueur qui a éliminé ce joueur.");
+    return;
+  }
+  if(killer===out){
+    alert("Un joueur ne peut pas s'éliminer lui-même.");
+    return;
+  }
+
+  const alive=liveAlive();
+  if(alive.length<=1)return;
+  if(!alive.some(p=>p.name===killer)){
+    alert("L'éliminateur doit être encore en jeu.");
+    return;
+  }
+
+  const p=s.players.find(x=>x.name===out && x.status==="En jeu");
+  if(!p)return;
+
+  p.status="Sorti";
+  p.place=alive.length;
+  p.killer=killer;
+  p.outLevel=s.levelIndex+1;
+  p.outTime=new Date().toLocaleTimeString("fr-FR");
+
+  // La saisie est terminée : fermeture immédiate de la popup.
+  closeLiveFsElimPopup();
+
+  const left=liveAlive();
+  if(left.length===1){
+    left[0].status="Vainqueur";
+    left[0].place=1;
+    left[0].killer="";
+    await livePause();
+    const synced=await liveSyncChampionship(true);
+    if(synced){
+      livePrepareNextGame();
+      return;
+    }else{
+      liveRenderAll();
+    }
+  }else{
+    saveLocalOnly();
+    await livePushStateNow();
+  }
+
+  liveRenderAll();
+  liveRenderFullscreen();
+}
+
 function liveRenderFullscreen(){
   const s=ensureLiveState();
   if(!s.prepared)return;
@@ -8574,6 +9024,23 @@ function liveRenderFullscreen(){
   $("liveFsNext").textContent=next
     ? `${liveFmt(next.sb)} / ${liveFmt(next.bb)}${next.ante?" · ante "+liveFmt(next.ante):""}`
     : "Dernier niveau";
+
+  if($("liveFsPauseResumeBtn")){
+    $("liveFsPauseResumeBtn").textContent=s.running
+      ? "Pause"
+      : (s.startedAt ? "Reprendre" : "Démarrer");
+    $("liveFsPauseResumeBtn").disabled=!!s.synced;
+  }
+  if($("liveFsEliminateOpenBtn")){
+    $("liveFsEliminateOpenBtn").disabled=!!s.synced || !s.startedAt || liveAlive().length<=1;
+  }
+  if($("liveFsSettingsBtn")){
+    const canEditPlayers=!s.startedAt && !s.synced;
+    $("liveFsSettingsBtn").disabled=!canEditPlayers;
+    $("liveFsSettingsBtn").title=canEditPlayers
+      ? "Revenir à la préparation pour modifier les participants"
+      : "Les participants sont figés après le démarrage";
+  }
 
   $("liveFsTimer").classList.toggle("warning30",s.remainingSeconds<=30 && s.remainingSeconds>10);
   $("liveFsTimer").classList.toggle("warning10",s.remainingSeconds<=10);
@@ -10765,6 +11232,11 @@ async function saveGameFromEntry(){
   const game=nextGameNo();
   const date=$("gDate").value;
   const location=$("gLocation").value.trim();
+  if(!location){
+    alert("Le nom / lieu de la partie est obligatoire.");
+    $("gLocation").focus();
+    return;
+  }
   const stake=Number($("gStake").value)||0;
 
   // Tous les joueurs classés 2e et suivants doivent avoir un éliminateur.
@@ -11519,10 +11991,23 @@ function liveShowScreen(which){
   if(which==="game")liveRenderAll();
 }
 async function liveLaunch(){
+  const requiredLocation=String($("liveLocation")?.value||"").trim();
+  if(!requiredLocation){
+    alert("Le nom / lieu de la partie est obligatoire.");
+    $("liveLocation")?.focus();
+    return;
+  }
+
   if(!liveCreatorGuard())return;
   if(liveSelected.size<2){alert("Sélectionnez au moins 2 joueurs.");return;}
   const old=ensureLiveState();
-  if(old.prepared && !old.synced && old.players.length && !confirm("Une partie live non synchronisée existe déjà. La remplacer ?"))return;
+  if(
+    old.prepared &&
+    !old.synced &&
+    old.players.length &&
+    old.startedAt &&
+    !confirm("Une partie live non synchronisée existe déjà. La remplacer ?")
+  )return;
   if(liveTicker){clearInterval(liveTicker);liveTicker=null;}
   const names=[...liveSelected];
   const stack=Math.max(100,Number($("liveStartStack").value)||20000);
@@ -11540,7 +12025,7 @@ async function liveLaunch(){
     prepared:true,running:false,synced:false,gameNo:nextGameNo(),
     creatorDeviceId:liveDeviceId(),
     date:$("liveDate").value||new Date().toISOString().slice(0,10),
-    location:$("liveLocation").value.trim(),
+    location:requiredLocation,
     startStack:stack,minSB,targetMinutes:target,useAnte,buyIn,
     levels:st.levels,levelIndex:0,levelSeconds:Number(st.levels[0]?.durationMin||st.levelMin)*60,remainingSeconds:Number(st.levels[0]?.durationMin||st.levelMin)*60,
     endAt:null,elapsedBeforeMs:0,runStartedAt:null,startedAt:null,
@@ -11549,9 +12034,55 @@ async function liveLaunch(){
   saveLocalOnly();
   liveShowScreen("game");
   liveRenderAll();
+  liveRenderFullscreen();
+
+  // Le clic sur « Lancer la partie » ouvre immédiatement le plein écran.
+  // Le chrono reste arrêté jusqu'au bouton « Démarrer » du plein écran.
+  const fsTarget=$("liveFullscreenDisplay");
+  if(fsTarget && !document.fullscreenElement){
+    try{
+      await fsTarget.requestFullscreen?.();
+    }catch(e){
+      console.warn("Plein écran automatique indisponible :",e);
+    }
+  }
+
   await livePushStateNow();
   startLiveCloudHeartbeat();
 }
+
+async function liveFsReturnToSettings(){
+  if(!liveCreatorGuard())return;
+  const s=ensureLiveState();
+  if(!s?.prepared || s.synced)return;
+  if(s.startedAt){
+    alert("Les participants ne peuvent plus être modifiés après le démarrage de la partie.");
+    return;
+  }
+
+  // Recharger la sélection depuis le Live préparé.
+  liveSelected=new Set((s.players||[]).map(p=>p.name));
+  if($("liveDate"))$("liveDate").value=s.date||new Date().toISOString().slice(0,10);
+  if($("liveLocation"))$("liveLocation").value=s.location||"";
+  if($("liveStartStack"))$("liveStartStack").value=s.startStack||20000;
+  if($("liveBuyIn"))$("liveBuyIn").value=s.buyIn??db.settings.stake??5;
+  if($("liveDuration"))$("liveDuration").value=s.targetMinutes||240;
+  if($("liveUseAnte"))$("liveUseAnte").value=s.useAnte?"yes":"no";
+
+  liveDraftLevels=clone(s.levels||[]);
+  liveDraftCustom=true;
+  liveRenderPlayerList();
+  liveRenderStructureEditor();
+  liveUpdateStructureSummary();
+
+  if(document.fullscreenElement){
+    try{await document.exitFullscreen?.();}catch(e){}
+  }
+
+  liveShowScreen("prep");
+  liveRenderAll();
+}
+
 async function liveStart(){
   if(!liveCreatorGuard())return;
   const s=ensureLiveState();if(!s.prepared)return;
@@ -11920,6 +12451,8 @@ async function liveSyncChampionship(force=false){
         player:p.name,
         place,
         killer:p.killer||"",
+        outLevel:p.outLevel||null,
+        outTime:p.outTime||"",
         tablier:n>=db.settings.tablierMinPlayers&&place===1,
         n,
         points:pointsFor(place,n),
@@ -12598,6 +13131,11 @@ async function saveCorrection(){
 
   const date=$("cDate").value;
   const location=String($("cLocation").value||"").trim();
+  if(!location){
+    alert("Le nom / lieu de la partie est obligatoire.");
+    $("cLocation").focus();
+    return;
+  }
   const stake=Number($("cStake").value)||0;
   const killCounts={};
   for(const k of killers)if(k)killCounts[k]=(killCounts[k]||0)+1;
@@ -13005,6 +13543,13 @@ if($("gamePhotoModalClose"))$("gamePhotoModalClose").onclick=closeGamePhotoModal
 if($("gamePhotoModal"))$("gamePhotoModal").onclick=e=>{
   if(e.target===$("gamePhotoModal"))closeGamePhotoModal();
 };
+
+document.addEventListener("change",e=>{
+  if(e.target?.id==="liveFsOutPlayer"){
+    liveFsRefreshElimLists(true);
+  }
+});
+
 document.addEventListener("keydown",e=>{
   if(e.key==="Escape" && $("gamePhotoModal")?.style.display==="flex")closeGamePhotoModal();
 });
@@ -13186,6 +13731,30 @@ setTimeout(()=>startSpectatorLivePolling(),800);
 // Fermeture robuste du détail de structure : fonctionne même si le panneau
 // a été inséré dans le DOM après l'initialisation des autres événements.
 document.addEventListener("click",e=>{
+  if(e.target?.id==="liveFsSettingsBtn"){
+    liveFsReturnToSettings();
+    return;
+  }
+  if(e.target?.id==="liveFsPauseResumeBtn"){
+    liveFsTogglePauseResume();
+    return;
+  }
+  if(e.target?.id==="liveFsEliminateOpenBtn"){
+    openLiveFsElimPopup();
+    return;
+  }
+  if(e.target?.id==="liveFsElimCancelBtn" || e.target?.id==="liveFsElimPopup"){
+    closeLiveFsElimPopup();
+    return;
+  }
+  if(e.target?.id==="liveFsEliminateBtn"){
+    liveFsEliminate();
+    return;
+  }
+  if(e.target?.id==="liveFsLevel"){
+    openLiveStructureViewer();
+    return;
+  }
   if(e.target?.id==="liveStructureViewerClose"){
     closeLiveStructureViewer();
     return;
@@ -13196,6 +13765,10 @@ document.addEventListener("click",e=>{
 });
 
 document.addEventListener("keydown",e=>{
+  if(e.key==="Escape" && $("liveFsElimPopup")?.style.display==="flex"){
+    closeLiveFsElimPopup();
+    return;
+  }
   if(e.key==="Escape" && $("liveStructureViewer")?.style.display!=="none"){
     closeLiveStructureViewer();
   }
