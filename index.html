@@ -3516,32 +3516,6 @@ nav button.spectator-nav{
 
 
 /* ===== V131 — Spectateur plein écran uniquement ===== */
-body:has(#live.live-spectator-mode) header,
-body:has(#live.live-spectator-mode) nav,
-body:has(#live.live-spectator-mode) .season-nav,
-body:has(#live.live-spectator-mode) #cloudStatus{
-  display:none !important;
-}
-
-#live.live-spectator-mode{
-  position:fixed;
-  inset:0;
-  z-index:5000;
-  display:block !important;
-  overflow:auto;
-  background:#070b10;
-  padding:0 !important;
-  margin:0 !important;
-}
-
-#live.live-spectator-mode > .hero,
-#live.live-spectator-mode #liveSpectatorBanner,
-#live.live-spectator-mode .live-head,
-#live.live-spectator-mode #liveFullscreenDisplay,
-#live.live-spectator-mode > .season-toolbar{
-  display:none !important;
-}
-
 .live-spectator-mode #liveManager,
 .live-spectator-mode #liveGameScreen{
   display:block !important;
@@ -3903,6 +3877,45 @@ body.spectator-live-open #live.active.live-spectator-mode{
   display:block !important;
 }
 
+
+/* ===== V134 — correction définitive : un Live existant ne masque jamais le site ===== */
+
+/* Par défaut, toutes les vues obéissent exclusivement à la classe .active. */
+#live.live-spectator-mode:not(.active){
+  display:none !important;
+  position:static !important;
+}
+
+/* Le reste du site reste visible tant que l'utilisateur n'a pas ouvert Live. */
+body:not(.spectator-live-open) header.bpt-header{
+  display:flex !important;
+}
+body:not(.spectator-live-open) nav#nav{
+  display:flex !important;
+}
+body:not(.spectator-live-open) main{
+  display:block !important;
+}
+
+/* Plein écran spectateur uniquement si Live EST la vue active. */
+body.spectator-live-open #live.active.live-spectator-mode{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:5000 !important;
+  display:block !important;
+  overflow:auto !important;
+  background:#070b10 !important;
+  margin:0 !important;
+  padding:0 !important;
+}
+
+body.spectator-live-open #live.active.live-spectator-mode > .hero,
+body.spectator-live-open #live.active.live-spectator-mode #liveSpectatorBanner,
+body.spectator-live-open #live.active.live-spectator-mode .live-head,
+body.spectator-live-open #live.active.live-spectator-mode #liveFullscreenDisplay{
+  display:none !important;
+}
+
 </style>
 </head>
 <body>
@@ -3920,7 +3933,7 @@ body.spectator-live-open #live.active.live-spectator-mode{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 14h06</div>
+  <div class="app-version">Version 19/09/26 14h13</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -5347,11 +5360,15 @@ async function applySpectatorLiveState(row,{fromDirectPoll=false}={}){
   liveSetLastSyncNow();
   resetSpectatorSyncCountdown();
 
-  if($("live")?.classList.contains("active")){
+  if($("live")?.classList.contains("active") && currentViewId==="live"){
     liveShowScreen("game");
     liveRenderAll();
   }else{
+    // Mise à jour silencieuse : badge/navigation seulement.
+    // Ne jamais rendre la vue Live active à la réception d'une synchro.
     applyLiveAccessMode();
+    $("live")?.classList.remove("active");
+    document.body.classList.remove("spectator-live-open");
   }
 
   if(db.liveState?.running && db.liveState?.endAt)liveRunTicker();
@@ -9171,11 +9188,16 @@ function applyLiveAccessMode(){
 }
 
 function liveMaybeAutoOpenSpectator(){
-  // Ne force jamais la navigation.
-  // Le spectateur peut consulter classement, records, profils, etc.
-  // Le plein écran spectateur ne s'ouvre que lorsqu'il choisit l'onglet Live.
+  // Détection silencieuse uniquement : jamais de changement de vue.
   if(liveIsSpectator()){
     applyLiveAccessMode();
+    if(currentViewId!=="live"){
+      $("live")?.classList.remove("active");
+      document.body.classList.remove("spectator-live-open");
+      document.querySelectorAll("nav button").forEach(b=>{
+        b.classList.toggle("active",b.dataset.view===currentViewId);
+      });
+    }
     if(!spectatorLivePollTimer)startSpectatorLivePolling();
   }
 }
