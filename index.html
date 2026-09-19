@@ -3004,34 +3004,36 @@ button.player-name-stack{
   flex-direction:column;
   align-items:center;
   gap:7px;
-  min-width:132px;
+  min-width:0;
 }
 .game-photo-thumb-btn{
-  width:132px;
-  height:88px;
-  padding:4px;
-  border:1px solid rgba(200,161,92,.5);
-  border-radius:10px;
-  overflow:hidden;
+  padding:0;
+  border:0;
+  border-radius:0;
+  overflow:visible;
   cursor:zoom-in;
-  background:#0f151e;
-  box-shadow:0 7px 20px rgba(0,0,0,.25);
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  background:transparent;
+  box-shadow:none;
+  display:block;
+  width:auto;
+  height:auto;
+  max-width:190px;
+  max-height:150px;
 }
 .game-photo-thumb{
-  width:100%;
-  height:100%;
+  width:auto;
+  height:auto;
+  max-width:190px;
+  max-height:150px;
   object-fit:contain;
   object-position:center;
   display:block;
-  background:#0b1017;
-  border-radius:6px;
+  background:transparent;
+  border-radius:8px;
 }
 .game-photo-placeholder{
-  width:132px;
-  height:88px;
+  width:150px;
+  height:100px;
   border:1px dashed #465267;
   border-radius:10px;
   display:flex;
@@ -3144,9 +3146,17 @@ button.player-name-stack{
     grid-column:1 / -1;
     grid-row:1;
   }
-  .game-photo-thumb-btn,.game-photo-placeholder{
-    width:108px;
-    height:76px;
+  .game-photo-thumb-btn{
+    max-width:145px;
+    max-height:115px;
+  }
+  .game-photo-thumb{
+    max-width:145px;
+    max-height:115px;
+  }
+  .game-photo-placeholder{
+    width:120px;
+    height:82px;
   }
 }
 @media screen and (orientation:landscape) and (max-height:520px) and (max-width:1000px){
@@ -3154,9 +3164,17 @@ button.player-name-stack{
     grid-template-columns:minmax(0,1fr) auto auto;
     gap:10px;
   }
-  .game-photo-thumb-btn,.game-photo-placeholder{
-    width:98px;
-    height:64px;
+  .game-photo-thumb-btn{
+    max-width:135px;
+    max-height:98px;
+  }
+  .game-photo-thumb{
+    max-width:135px;
+    max-height:98px;
+  }
+  .game-photo-placeholder{
+    width:105px;
+    height:68px;
   }
   .game-browser-toolbar{
     margin:7px 0;
@@ -3188,6 +3206,38 @@ button.player-name-stack{
   background:#0b1017;
 }
 
+
+/* ===== V120 — vignette naturelle sans cadre + agrandissement plein écran ===== */
+.game-photo-modal{
+  padding:0;
+  background:#000;
+}
+.game-photo-modal img{
+  width:auto;
+  height:auto;
+  max-width:100vw;
+  max-height:100vh;
+  object-fit:contain;
+  object-position:center;
+  border-radius:0;
+  background:#000;
+  box-shadow:none;
+}
+.game-photo-modal-caption{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:12px;
+  padding:0 16px;
+  color:rgba(255,255,255,.82);
+  text-shadow:0 1px 4px rgba(0,0,0,.7);
+}
+.game-photo-modal-close{
+  z-index:2;
+  background:rgba(15,20,28,.62);
+  border-color:rgba(255,255,255,.28);
+}
+
 </style>
 </head>
 <body>
@@ -3205,7 +3255,7 @@ button.player-name-stack{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 12h04</div>
+  <div class="app-version">Version 19/09/26 12h09</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
