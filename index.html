@@ -4031,7 +4031,7 @@ body.spectator-live-open .spectator-global-exit{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 14h59</div>
+  <div class="app-version">Version 19/09/26 15h04</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -4184,7 +4184,7 @@ body.spectator-live-open .spectator-global-exit{
         <div class="spectator-fullscreen-shell">
           <div class="spectator-fullscreen-header">
             <div>
-              <div class="spectator-kicker">BPT · LIVE · V145</div>
+              <div class="spectator-kicker">BPT · LIVE · V146</div>
               <div id="spectatorGameMeta" class="spectator-game-meta">—</div>
               <div class="spectator-update-state">Dernière réception : <strong id="spectatorLastReceive">—</strong></div>
               <div class="spectator-update-state">Serveur : <strong id="spectatorServerInfo">—</strong></div>
@@ -5012,7 +5012,6 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const LIVE_CLOUD_ROW_ID="live_current";
 
 let sbClient=null;
 let cloudReady=false;
@@ -5377,6 +5376,15 @@ async function cloudSyncGamesAdditive(){
 }
 
 async function cloudPushNow(){
+  if(
+    db?.liveState?.prepared &&
+    !db.liveState.synced &&
+    db.liveState.creatorDeviceId===liveDeviceId()
+  ){
+    cloudLocalDirty=false;
+    return true;
+  }
+
   if(typeof liveIsSpectator==="function" && liveIsSpectator()){
     cloudLocalDirty=false;
     return false;
@@ -5481,7 +5489,8 @@ function scheduleCloudSave(){
 }
 
 function remoteLiveIsSpectatorForThisDevice(row){
-  const remote=row?.data?.liveState || chooseRemoteLiveForSpectator(row?.data||{});
+  const wire=row?.data?.liveWire||null;
+  const remote=(wire?.prepared && !wire?.synced) ? wire : row?.data?.liveState;
   const creator=String(remote?.creatorDeviceId||"");
   return !!(
     remote?.prepared &&
@@ -5494,7 +5503,8 @@ function remoteLiveIsSpectatorForThisDevice(row){
 async function renderSpectatorFromServer(row){
   if(!row || !isValidBptState(row.data) || !remoteLiveIsSpectatorForThisDevice(row))return false;
 
-  const serverLive=row?.data?.liveState || chooseRemoteLiveForSpectator(row.data||{});
+  const wire=row?.data?.liveWire||null;
+  const serverLive=(wire?.prepared && !wire?.synced) ? wire : row?.data?.liveState;
   if(!serverLive)return false;
   spectatorServerLiveState=JSON.parse(JSON.stringify(serverLive));
   spectatorServerLiveRevision=Number(row.revision||0);
@@ -6063,63 +6073,32 @@ function chooseRemoteLiveForSpectator(data){
   return null;
 }
 
-async function fetchDedicatedLiveRow(){
-  if(!ensureLiveSupabaseClient())return null;
-  const {data,error}=await sbClient
-    .from("bpt_state")
-    .select("data,revision,updated_at")
-    .eq("id",LIVE_CLOUD_ROW_ID)
-    .maybeSingle();
-  if(error)throw error;
-  return data||null;
-}
-
 let spectatorLiveSource="—";
 
 async function fetchLiveStateDirect(){
   if(!ensureLiveSupabaseClient())return null;
 
-  // 1. Source prioritaire : ligne Live dédiée.
-  try{
-    const dedicated=await fetchDedicatedLiveRow();
-    const ds=dedicated?.data||null;
-    const remote=ds?.active ? ds?.liveState : null;
-
-    if($("spectatorServerSource")){
-      const rawPlayers=Array.isArray(remote?.players)?remote.players.length:0;
-      const rawLevel=Number(remote?.levelIndex||0)+1;
-      $("spectatorServerSource").textContent=
-        `live_current brut · niveau ${rawLevel} · ${rawPlayers} joueur${rawPlayers>1?"s":""}`;
-    }
-
-    if(remote?.prepared && !remote?.synced){
-      spectatorLiveSource="live_current";
-      spectatorServerLiveState=JSON.parse(JSON.stringify(remote));
-      spectatorServerLiveRevision=Number(dedicated?.revision||0);
-
-      // Retourner une forme compatible avec les fonctions existantes.
-      return {
-        data:{liveState:JSON.parse(JSON.stringify(remote))},
-        revision:dedicated?.revision||0,
-        updated_at:dedicated?.updated_at||null,
-        __liveSource:"live_current"
-      };
-    }
-  }catch(e){
-    console.warn("BPT dedicated live row:",e);
-  }
-
-  // 2. Compatibilité : ancienne ligne main si live_current n'existe pas encore.
   const {data,error}=await sbClient
     .from("bpt_state")
     .select("data,revision,updated_at")
     .eq("id",CLOUD_ROW_ID)
     .maybeSingle();
+
   if(error)throw error;
 
   const row=data||null;
-  const remote=chooseRemoteLiveForSpectator(row?.data||{});
+  const wire=row?.data?.liveWire||null;
+  const legacy=row?.data?.liveState||null;
+  const remote=(wire?.prepared && !wire?.synced) ? wire : legacy;
   const creator=String(remote?.creatorDeviceId||"");
+
+  if($("spectatorServerSource")){
+    const rawPlayers=Array.isArray(remote?.players)?remote.players.length:0;
+    const rawLevel=Number(remote?.levelIndex||0)+1;
+    $("spectatorServerSource").textContent=
+      `${wire?"main.liveWire":"main.liveState"} · niveau ${rawLevel} · ${rawPlayers} joueur${rawPlayers>1?"s":""}`;
+  }
+
   const isRemoteActive=!!(
     remote?.prepared &&
     !remote?.synced &&
@@ -6128,8 +6107,8 @@ async function fetchLiveStateDirect(){
   );
 
   if(isRemoteActive){
-    spectatorLiveSource="main (compatibilité)";
-    spectatorServerLiveState=remote;
+    spectatorLiveSource=wire?"main.liveWire":"main.liveState";
+    spectatorServerLiveState=JSON.parse(JSON.stringify(remote));
     spectatorServerLiveRevision=Number(row?.revision||0);
   }else{
     spectatorLiveSource="aucun";
@@ -6144,10 +6123,6 @@ async function livePushStateNow(){
   saveLocalOnly();
   if(!ensureLiveSupabaseClient())return false;
 
-  // Publication Live indépendante du cycle de synchronisation général.
-  // Elle ne dépend volontairement ni de cloudReady ni de cloudApplying.
-  // Chaque publication Live est horodatée pour garantir une vraie mise à jour
-  // côté Supabase, même si aucun événement métier n'a changé.
   if(db.liveState){
     db.liveState.publishedAt=Date.now();
     if(db.liveState.running && db.liveState.endAt){
@@ -6162,59 +6137,56 @@ async function livePushStateNow(){
     const payload=JSON.parse(JSON.stringify(db));
     payload.history=[];
 
+    if(db.liveState?.prepared && !db.liveState?.synced){
+      const s=db.liveState;
+      payload.liveWire={
+        wireVersion:1,
+        publishedAt:Date.now(),
+        creatorDeviceId:String(s.creatorDeviceId||""),
+        prepared:true,
+        synced:false,
+        running:!!s.running,
+        gameNo:s.gameNo,
+        date:s.date||"",
+        location:s.location||"",
+        levelIndex:Number(s.levelIndex||0),
+        levelSeconds:Number(s.levelSeconds||0),
+        remainingSeconds:Number(s.remainingSeconds||0),
+        endAt:s.endAt||null,
+        levels:JSON.parse(JSON.stringify(s.levels||[])),
+        players:JSON.parse(JSON.stringify(s.players||[]))
+      };
+    }else{
+      payload.liveWire=null;
+    }
+
     const {data,error}=await sbClient
       .from("bpt_state")
       .upsert({id:CLOUD_ROW_ID,data:payload},{onConflict:"id"})
-      .select("revision,updated_at")
+      .select("data,revision,updated_at")
       .single();
 
     if(error)throw error;
 
-    // Publication dédiée du Live : une ligne indépendante de l'état général.
-    // C'est cette ligne qui fait foi pour les spectateurs.
-    const livePayload=db.liveState?.prepared && !db.liveState?.synced
-      ? {
-          active:true,
-          publishedAt:Date.now(),
-          liveState:JSON.parse(JSON.stringify(db.liveState))
-        }
-      : {
-          active:false,
-          publishedAt:Date.now(),
-          liveState:null
-        };
-
-    const {data:liveRowWritten,error:liveRowError}=await sbClient
-      .from("bpt_state")
-      .upsert(
-        {id:LIVE_CLOUD_ROW_ID,data:livePayload},
-        {onConflict:"id"}
-      )
-      .select("data,revision,updated_at")
-      .single();
-
-    if(liveRowError)throw liveRowError;
-
-    // Vérification immédiate de ce que Supabase a réellement conservé.
-    const writtenState=liveRowWritten?.data?.liveState||null;
+    const writtenWire=data?.data?.liveWire||null;
     const sentPlayers=Array.isArray(db.liveState?.players)?db.liveState.players.length:0;
-    const readPlayers=Array.isArray(writtenState?.players)?writtenState.players.length:0;
+    const readPlayers=Array.isArray(writtenWire?.players)?writtenWire.players.length:0;
     const sentLevel=Number(db.liveState?.levelIndex||0);
-    const readLevel=Number(writtenState?.levelIndex||0);
+    const readLevel=Number(writtenWire?.levelIndex||0);
 
     const diag=$("liveMasterSyncDiag");
     if(diag){
-      const ok=sentPlayers===readPlayers && sentLevel===readLevel;
+      const ok=!!writtenWire && sentPlayers===readPlayers && sentLevel===readLevel;
       diag.textContent=ok
         ? `Serveur Live : OK · niveau ${readLevel+1} · ${readPlayers} joueur${readPlayers>1?"s":""}`
-        : `ERREUR SERVEUR LIVE · envoyé : niveau ${sentLevel+1}, ${sentPlayers} joueurs · relu : niveau ${readLevel+1}, ${readPlayers} joueurs`;
+        : `ERREUR FLUX LIVE · envoyé : niveau ${sentLevel+1}, ${sentPlayers} joueurs · serveur : niveau ${readLevel+1}, ${readPlayers} joueurs`;
       diag.classList.toggle("error",!ok);
       diag.classList.toggle("ok",ok);
     }
 
-    if(sentPlayers!==readPlayers || sentLevel!==readLevel){
+    if(!writtenWire || sentPlayers!==readPlayers || sentLevel!==readLevel){
       throw new Error(
-        `Vérification Live impossible : envoyé niveau ${sentLevel+1}/${sentPlayers} joueurs, `+
+        `Flux Live main incohérent : envoyé niveau ${sentLevel+1}/${sentPlayers} joueurs, `+
         `serveur niveau ${readLevel+1}/${readPlayers} joueurs`
       );
     }
@@ -6228,8 +6200,8 @@ async function livePushStateNow(){
     const hh=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
     setCloudStatus(
       "ok",
-      liveIsCreator()?"Live publié":"Live reçu",
-      `État Live partagé • révision ${cloudLastRevision} • ${hh}`
+      "Live publié",
+      `main.liveWire · niveau ${readLevel+1} · ${readPlayers} joueurs · ${hh}`
     );
     return true;
   }catch(e){
@@ -10279,12 +10251,6 @@ function livePrepareNextGame(){
 
   // Le Live terminé reste dans l'historique officiel ; seul l'état temporaire
   // de la partie en direct est réinitialisé.
-  if(ensureLiveSupabaseClient()){
-    sbClient.from("bpt_state").upsert(
-      {id:LIVE_CLOUD_ROW_ID,data:{active:false,publishedAt:Date.now(),liveState:null}},
-      {onConflict:"id"}
-    ).then(()=>{}).catch(e=>console.warn("BPT clear live row:",e));
-  }
   db.liveState=null;
   liveSelected.clear();
   liveDraftLevels=[];
@@ -11074,7 +11040,8 @@ let currentViewId="dashboard";
 async function resolveLiveEntryMode(){
   try{
     const row=await fetchLiveStateDirect();
-    const remote=row?.data?.liveState || chooseRemoteLiveForSpectator(row?.data||{});
+    const wire=row?.data?.liveWire||null;
+    const remote=(wire?.prepared && !wire?.synced) ? wire : row?.data?.liveState;
     const creator=String(remote?.creatorDeviceId||"");
     const remoteActive=!!(remote?.prepared && !remote?.synced);
 
