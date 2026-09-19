@@ -3343,7 +3343,7 @@ nav button.spectator-nav{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 12h36</div>
+  <div class="app-version">Version 19/09/26 12h41</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -3443,7 +3443,7 @@ nav button.spectator-nav{
         <div>
           <div class="live-title" id="liveGameTitle">Championnat BPT — Partie en cours</div>
           <div id="liveGameMeta" class="muted"></div>
-          <div class="live-last-sync muted">Dernière synchro Live : <span id="liveLastSync">—</span></div>
+          <div class="live-last-sync muted">Dernière synchro Live : <span id="liveLastSync">—</span> · événements immédiats · rappel 30 s</div>
         </div>
         <div class="row">
           <span class="live-badge" id="liveSyncBadge">NON SYNCHRONISÉE</span>
@@ -4747,27 +4747,43 @@ async function cloudPoll(){
       await flushPendingGames();
     }
 
-    // Toujours lire l'état serveur AVANT de pousser un éventuel état local.
-    // Cela évite qu'un téléphone spectateur écrase un Live lancé depuis le PC.
     const remote=await cloudFetchState();
     const remoteRevision=Number(remote?.revision||0);
 
     if(remote && isValidBptState(remote.data)){
-      const remoteCreator=String(remote.data?.liveState?.creatorDeviceId||"");
-      const remoteActive=!!(remote.data?.liveState?.prepared && !remote.data?.liveState?.synced);
-      const remoteOwnedByOtherDevice=remoteActive && remoteCreator && remoteCreator!==liveDeviceId();
+      const remoteLive=remote.data?.liveState||null;
+      const remoteCreator=String(remoteLive?.creatorDeviceId||"");
+      const remoteActive=!!(remoteLive?.prepared && !remoteLive?.synced);
+      const thisDevice=liveDeviceId();
 
+      const remoteOwnedByOtherDevice=
+        remoteActive && remoteCreator && remoteCreator!==thisDevice;
+
+      const remoteOwnedByThisDevice=
+        remoteActive && remoteCreator && remoteCreator===thisDevice;
+
+      // SPECTATEUR :
+      // l'état serveur est la source de vérité.
       if(remoteOwnedByOtherDevice){
         cloudLocalDirty=false;
         await applyCloudState(remote);
         return;
       }
 
-      const localLiveSig=JSON.stringify(db?.liveState||null);
-      const remoteLiveSig=JSON.stringify(remote.data?.liveState||null);
-      const liveChanged=localLiveSig!==remoteLiveSig;
+      // MAÎTRE :
+      // ne jamais réinjecter son propre snapshot serveur dans le timer local.
+      // C'était la cause des retours périodiques à ~16 minutes.
+      if(remoteOwnedByThisDevice){
+        if(cloudLocalDirty){
+          await livePushStateNow();
+          return;
+        }
+        // Le timer maître continue exclusivement à partir de endAt local.
+        return;
+      }
 
-      if(!cloudLastRevision || remoteRevision>cloudLastRevision || liveChanged){
+      // Hors Live actif : comportement de synchronisation classique.
+      if(!cloudLastRevision || remoteRevision>cloudLastRevision){
         await applyCloudState(remote);
         return;
       }
@@ -4778,7 +4794,6 @@ async function cloudPoll(){
       return;
     }
 
-    // Même sans nouvelle révision d'état, l'historique officiel peut évoluer.
     await refreshCanonicalHistoryUI(false);
 
   }catch(e){
@@ -4927,14 +4942,16 @@ async function initCloudSync(){
             try{
               const fresh=await cloudFetchState();
               if(!fresh || !isValidBptState(fresh.data))return;
-              const remoteCreator=String(fresh.data?.liveState?.creatorDeviceId||"");
-              const ownsRemoteLive=!!(
-                fresh.data?.liveState?.prepared &&
-                !fresh.data?.liveState?.synced &&
-                remoteCreator &&
-                remoteCreator===liveDeviceId()
-              );
-              if(cloudLocalDirty && ownsRemoteLive)return;
+
+              const remoteLive=fresh.data?.liveState||null;
+              const remoteCreator=String(remoteLive?.creatorDeviceId||"");
+              const remoteActive=!!(remoteLive?.prepared && !remoteLive?.synced);
+              const ownedByThisDevice=
+                remoteActive && remoteCreator && remoteCreator===liveDeviceId();
+
+              // Le maître ne recharge jamais son propre snapshot Live depuis Supabase.
+              if(ownedByThisDevice)return;
+
               await applyCloudState(fresh);
             }catch(e){console.error("BPT realtime:",e);}
           }
@@ -5018,12 +5035,46 @@ function saveDB(){
 
 async function livePushStateNow(){
   saveLocalOnly();
-  cloudLocalDirty=true;
   if(!sbClient || !cloudReady || cloudApplying)return false;
+
+  // Le Live ne doit pas attendre la synchronisation de l'historique.
+  // On publie directement bpt_state (joueurs / paramètres / liveState),
+  // avec history vide puisque l'historique officiel reste dans bpt_games_v2.
   clearTimeout(cloudSaveTimer);
-  const ok=await cloudPushNow();
-  if(ok)liveSetLastSyncNow();
-  return ok;
+  setCloudStatus("busy","Synchronisation Live…");
+
+  try{
+    const payload=JSON.parse(JSON.stringify(db));
+    payload.history=[];
+
+    const {data,error}=await sbClient
+      .from("bpt_state")
+      .upsert({id:CLOUD_ROW_ID,data:payload},{onConflict:"id"})
+      .select("revision,updated_at")
+      .single();
+
+    if(error)throw error;
+
+    cloudLastRevision=Number(data?.revision||cloudLastRevision||0);
+    cloudLocalDirty=false;
+    cloudLastError="";
+    saveLocalOnly();
+    liveSetLastSyncNow();
+
+    const hh=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+    setCloudStatus(
+      "ok",
+      liveIsCreator()?"Live publié":"Live reçu",
+      `État Live partagé • révision ${cloudLastRevision} • ${hh}`
+    );
+    return true;
+  }catch(e){
+    cloudLastError=e?.message||String(e);
+    cloudLocalDirty=true;
+    console.error("BPT live state push:",e);
+    setCloudStatus("offline","Erreur synchro Live",cloudLastError);
+    return false;
+  }
 }
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
 function euro(n){return Number(n||0).toLocaleString("fr-FR",{minimumFractionDigits:0,maximumFractionDigits:2})+" €";}
@@ -8088,7 +8139,7 @@ function renderPoints(){
 let liveSelected=new Set();
 let liveTicker=null;
 let liveCloudHeartbeat=null;
-const LIVE_CLOUD_HEARTBEAT_MS=60000;
+const LIVE_CLOUD_HEARTBEAT_MS=30000;
 
 function startLiveCloudHeartbeat(){
   if(liveCloudHeartbeat)clearInterval(liveCloudHeartbeat);
