@@ -2678,6 +2678,131 @@ table{max-width:100%}
   .records-scope-row{font-size:9px;gap:4px}
 }
 
+
+/* ===== V112 — synchro joueurs multi-appareils + surnoms profils ===== */
+.ranking-player-link{
+  text-decoration:underline;
+  text-decoration-color:rgba(200,161,92,.38);
+  text-underline-offset:3px;
+}
+.ranking-player-link:hover{
+  color:#e2c27d;
+  text-decoration-color:#e2c27d;
+}
+.profile-nickname{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  margin-top:5px;
+}
+.profile-nickname span{
+  color:#94a0b1;
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  font-weight:800;
+}
+.profile-nickname strong{
+  color:#e0c17d;
+  font-size:17px;
+  font-weight:900;
+}
+.profile-other-nicknames{
+  margin-top:4px;
+  color:#8f9bab;
+  font-size:10px;
+  line-height:1.35;
+  max-width:700px;
+}
+.player-admin-fields{
+  display:grid;
+  grid-template-columns:minmax(180px,1.4fr) minmax(150px,1fr);
+  gap:8px;
+  flex:1;
+  min-width:0;
+}
+.player-nickname-input{
+  min-width:0;
+  color:#e0c17d;
+}
+@media(max-width:760px){
+  .player-admin-fields{grid-template-columns:1fr}
+}
+@media screen and (orientation:landscape) and (max-height:520px) and (max-width:1000px){
+  .profile-nickname strong{font-size:14px}
+  .profile-other-nicknames{font-size:9px}
+}
+
+
+/* ===== V113 — onglets regroupés ===== */
+.combined-block{
+  margin-top:14px;
+  border:1px solid #2b3545;
+  border-radius:16px;
+  background:#141923;
+  overflow:hidden;
+}
+.combined-block > summary{
+  list-style:none;
+  cursor:pointer;
+  padding:15px 17px;
+  background:#171e29;
+  border-bottom:1px solid transparent;
+  user-select:none;
+}
+.combined-block[open] > summary{
+  border-bottom-color:#2b3545;
+}
+.combined-block > summary::-webkit-details-marker{display:none}
+.combined-block > summary span{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.combined-block > summary strong{
+  font-size:16px;
+  color:#f2f4f7;
+}
+.combined-block > summary small{
+  color:#909daf;
+  font-size:11px;
+}
+.combined-block > summary::after{
+  content:"▾";
+  float:right;
+  margin-top:-20px;
+  color:#c8a15c;
+  font-size:16px;
+}
+.combined-block:not([open]) > summary::after{content:"▸"}
+.combined-block-content{padding:15px 16px 17px}
+.profile-versus-block{margin-top:16px}
+.profile-versus-selector-card{
+  padding:12px 14px;
+  background:#171e29;
+}
+.profile-versus-selectors{
+  grid-template-columns:minmax(180px,1fr) auto minmax(180px,1fr);
+}
+#versusPlayer1Display{
+  font-weight:850;
+  color:#e0c17d;
+  background:#101620;
+  border-color:#354154;
+}
+@media(max-width:760px){
+  .profile-versus-selectors{grid-template-columns:1fr}
+  .profile-versus-selectors .versus-vs{text-align:center}
+}
+@media screen and (orientation:landscape) and (max-height:520px) and (max-width:1000px){
+  .combined-block{margin-top:8px}
+  .combined-block > summary{padding:9px 11px}
+  .combined-block-content{padding:9px 10px 11px}
+  .combined-block > summary strong{font-size:13px}
+  .combined-block > summary small{font-size:9px}
+}
+
 </style>
 </head>
 <body>
@@ -2695,18 +2820,15 @@ table{max-width:100%}
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 14/09/26 13h38</div>
+  <div class="app-version">Version 19/09/26 10h18</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
   <button data-view="dashboard" class="active">▦ Tableau de bord</button>
   <button data-view="latestgame">◷ Dernière partie</button>
-  <button data-view="ranking">♛ Classement</button>
-  <button data-view="versus">⚔ Versus</button>
-  <button data-view="records">★ Records</button>
-  <button data-view="achievements">◆ Accomplissements</button>
+  <button data-view="ranking">♛ Classement & historique</button>
+  <button data-view="records">★ Records & accomplissements</button>
   <button data-view="profile">♤ Profil joueur</button>
-  <button data-view="history">≡ Historique</button>
   <button data-view="settings">⚙ Paramètres</button>
 </nav>
 <main>
@@ -3073,30 +3195,9 @@ table{max-width:100%}
 </section>
 
 <section id="ranking" class="view">
-  <div class="hero tab-premium-hero"><h1 id="rankingSeasonTitle">Classement BPT</h1><p>Classement général et statistiques individuelles.</p></div>
-  <div class="tab-season-nav season-nav-toolbar">
-    <button class="season-nav-btn" type="button" data-season-action="prev" onclick="changeSeasonFromToolbar('prev')">← Saison précédente</button>
-    <button class="season-nav-btn" type="button" data-season-action="next" onclick="changeSeasonFromToolbar('next')">Saison suivante →</button>
-    <button class="season-cumul-btn" type="button" data-season-action="all" onclick="changeSeasonFromToolbar('all')">Cumul toutes saisons</button>
-  </div>
-
-  <div class="card tab-primary-panel" style="margin-top:16px">
-    <h2>Classement général détaillé</h2>
-    <div class="tablewrap"><table>
-      <thead><tr>
-        <th>Clt</th><th>Joueur</th><th>Points</th><th>Progression</th><th>Moy. pts</th>
-        <th>Participations</th><th>Victoires</th><th>Podiums</th><th>Tabliers</th>
-        <th>Kills</th><th>Kills/partie</th><th>Solde net</th><th>Bourreau</th><th>Victime</th>
-      </tr></thead>
-      <tbody id="rankingBody"></tbody>
-    </table></div>
-  </div>
-</section>
-
-<section id="versus" class="view">
   <div class="hero tab-premium-hero">
-    <h1 id="versusSeasonTitle">Versus</h1>
-    <p>Comparez les performances individuelles de deux joueurs du BPT sur les principaux indicateurs du championnat.</p>
+    <h1 id="rankingSeasonTitle">Classement & historique BPT</h1>
+    <p>Classement général et historique complet des parties pour la saison sélectionnée.</p>
   </div>
   <div class="tab-season-nav season-nav-toolbar">
     <button class="season-nav-btn" type="button" data-season-action="prev" onclick="changeSeasonFromToolbar('prev')">← Saison précédente</button>
@@ -3104,126 +3205,86 @@ table{max-width:100%}
     <button class="season-cumul-btn" type="button" data-season-action="all" onclick="changeSeasonFromToolbar('all')">Cumul toutes saisons</button>
   </div>
 
-
-  <div class="card tab-primary-panel" style="margin-top:16px">
-    <div class="versus-selectors">
-      <div class="field">
-        <label>Joueur 1</label>
-        <select id="versusPlayer1"></select>
-      </div>
-      <div class="versus-vs">VS</div>
-      <div class="field">
-        <label>Joueur 2</label>
-        <select id="versusPlayer2"></select>
-      </div>
+  <details class="combined-block combined-ranking-block" open>
+    <summary>
+      <span><strong>♛ Classement général</strong><small>Classement et statistiques individuelles</small></span>
+    </summary>
+    <div class="combined-block-content">
+      <div class="tablewrap"><table>
+        <thead><tr>
+          <th>Clt</th><th>Joueur</th><th>Points</th><th>Progression</th><th>Moy. pts</th>
+          <th>Participations</th><th>Victoires</th><th>Podiums</th><th>Tabliers</th>
+          <th>Kills</th><th>Kills/partie</th><th>Solde net</th><th>Bourreau</th><th>Victime</th>
+        </tr></thead>
+        <tbody id="rankingBody"></tbody>
+      </table></div>
     </div>
-  </div>
+  </details>
 
-  <div id="versusEmpty" class="card muted" style="display:none;margin-top:12px">
-    Sélectionnez deux joueurs différents disposant d’un historique.
-  </div>
-
-  <div id="versusContent" style="display:none">
-    <div id="versusScoreboard" class="versus-scoreboard"></div>
-    <div class="versus-headcards">
-      <div class="card versus-player-card">
-        <div class="muted">Joueur 1</div>
-        <div class="versus-player-name" id="versusName1">—</div>
-        <div class="versus-player-rank" id="versusRank1">—</div>
-      </div>
-      <div class="card versus-player-card">
-        <div class="muted">Joueur 2</div>
-        <div class="versus-player-name" id="versusName2">—</div>
-        <div class="versus-player-rank" id="versusRank2">—</div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:12px">
-      <h2>Comparaison des performances</h2>
-      <div class="tablewrap">
-        <table class="versus-table">
-          <thead>
-            <tr>
-              <th id="versusHeader1">Joueur 1</th>
-              <th>Critère</th>
-              <th id="versusHeader2">Joueur 2</th>
-            </tr>
-          </thead>
-          <tbody id="versusBody"></tbody>
-        </table>
-      </div>
-      <div class="muted" style="margin-top:10px">La meilleure valeur de chaque critère est mise en évidence. Les parties communes correspondent aux parties auxquelles les deux joueurs ont participé. Les éliminations directes comptent uniquement lorsqu’un joueur a éliminé l’autre.</div>
-    </div>
-  </div>
-</section>
-
-
-<section id="achievements" class="view">
-  <div class="hero tab-premium-hero">
-    <h1 id="achievementsSeasonTitle">Accomplissements BPT</h1>
-    <p>Les performances spéciales débloquées au fil du championnat.</p>
-  </div>
-  <div class="tab-season-nav season-nav-toolbar">
-    <button class="season-nav-btn" type="button" data-season-action="prev" onclick="changeSeasonFromToolbar('prev')">← Saison précédente</button>
-    <button class="season-nav-btn" type="button" data-season-action="next" onclick="changeSeasonFromToolbar('next')">Saison suivante →</button>
-    <button class="season-cumul-btn" type="button" data-season-action="all" onclick="changeSeasonFromToolbar('all')">Cumul toutes saisons</button>
-  </div>
-
-
-  <div class="achievements-toolbar">
-    <div><strong id="achievementUnlockedCount">0</strong> accomplissement(s) débloqué(s)</div>
-    <div class="muted">Un accomplissement peut être obtenu par plusieurs joueurs.</div>
-  </div>
-
-  <div id="achievementsGrid" class="achievements-grid"></div>
-</section>
-
-<section id="history" class="view">
-  <div class="hero tab-premium-hero">
-    <div class="home-kicker">BPT · Historique</div>
-    <h1 id="historySeasonTitle">Historique BPT</h1>
-    <p>Retrouvez les parties jouées, leurs résultats et le détail complet du championnat.</p>
-  </div>
-  <div class="tab-season-nav season-nav-toolbar">
-    <button class="season-nav-btn" type="button" data-season-action="prev" onclick="changeSeasonFromToolbar('prev')">← Saison précédente</button>
-    <button class="season-nav-btn" type="button" data-season-action="next" onclick="changeSeasonFromToolbar('next')">Saison suivante →</button>
-    <button class="season-cumul-btn" type="button" data-season-action="all" onclick="changeSeasonFromToolbar('all')">Cumul toutes saisons</button>
-  </div>
-
-  <div class="card tab-primary-panel">
-    <div class="row" style="justify-content:space-between">
-      <div>
-        <h2>Historique des parties</h2>
+  <details class="combined-block combined-history-block">
+    <summary>
+      <span><strong>≡ Historique des parties</strong><small>Résultats et détail complet des parties</small></span>
+    </summary>
+    <div class="combined-block-content">
+      <div class="row" style="justify-content:space-between">
         <div id="historySummary" class="muted"></div>
+        <button class="btn ghost" id="exportCsvBtn">Exporter CSV</button>
       </div>
-      <button class="btn ghost" id="exportCsvBtn">Exporter CSV</button>
+      <div id="historyEmpty" class="muted" style="display:none;padding:18px 0">Aucune partie enregistrée.</div>
+      <div id="historyCards" class="history-cards"></div>
+      <details class="history-raw">
+        <summary>Afficher le tableau détaillé complet</summary>
+        <div class="tablewrap" id="historyTableWrap">
+          <table>
+            <thead><tr><th>Partie</th><th>Date</th><th>Lieu</th><th>Joueur</th><th>Place</th><th>Éliminé par</th><th>Tablier</th><th>Joueurs</th><th>Points</th><th>Mise</th><th>Gain</th><th>Net</th><th>Kills</th></tr></thead>
+            <tbody id="historyBody"></tbody>
+          </table>
+        </div>
+      </details>
     </div>
-    <div id="historyEmpty" class="muted" style="display:none;padding:18px 0">Aucune partie enregistrée.</div>
-    <div id="historyCards" class="history-cards"></div>
-    <details class="history-raw">
-      <summary>Afficher le tableau détaillé complet</summary>
-      <div class="tablewrap" id="historyTableWrap">
-        <table>
-          <thead><tr><th>Partie</th><th>Date</th><th>Lieu</th><th>Joueur</th><th>Place</th><th>Éliminé par</th><th>Tablier</th><th>Joueurs</th><th>Points</th><th>Mise</th><th>Gain</th><th>Net</th><th>Kills</th></tr></thead>
-          <tbody id="historyBody"></tbody>
-        </table>
-      </div>
-    </details>
-  </div>
+  </details>
 </section>
+
+
+
+
+
 
 
 <section id="records" class="view">
-  <div class="hero tab-premium-hero"><h1 id="recordsSeasonTitle">Records BPT</h1><p>Les performances marquantes du championnat.</p></div>
+  <div class="hero tab-premium-hero">
+    <h1 id="recordsSeasonTitle">Records & accomplissements BPT</h1>
+    <p>Records du championnat et accomplissements débloqués pour le contexte sélectionné.</p>
+  </div>
   <div class="tab-season-nav season-nav-toolbar">
     <button class="season-nav-btn" type="button" data-season-action="prev" onclick="changeSeasonFromToolbar('prev')">← Saison précédente</button>
     <button class="season-nav-btn" type="button" data-season-action="next" onclick="changeSeasonFromToolbar('next')">Saison suivante →</button>
     <button class="season-cumul-btn" type="button" data-season-action="all" onclick="changeSeasonFromToolbar('all')">Cumul toutes saisons</button>
   </div>
 
-  <div id="recordsScopeSummary" class="records-scope-summary"></div>
-  <h2 style="margin-top:18px">Records du contexte sélectionné</h2>
-  <div id="recordsGrid" class="records-grid" style="margin-top:12px"></div>
+  <details class="combined-block" open>
+    <summary>
+      <span><strong>★ Records</strong><small>Carrière, saison et performances sur une partie</small></span>
+    </summary>
+    <div class="combined-block-content">
+      <div id="recordsScopeSummary" class="records-scope-summary"></div>
+      <h2 style="margin-top:18px">Records du contexte sélectionné</h2>
+      <div id="recordsGrid" class="records-grid" style="margin-top:12px"></div>
+    </div>
+  </details>
+
+  <details class="combined-block" open>
+    <summary>
+      <span><strong>◆ Accomplissements</strong><small>Performances spéciales débloquées par les joueurs</small></span>
+    </summary>
+    <div class="combined-block-content">
+      <div class="achievements-toolbar">
+        <div><strong id="achievementUnlockedCount">0</strong> accomplissement(s) débloqué(s)</div>
+        <div class="muted">Un accomplissement peut être obtenu par plusieurs joueurs.</div>
+      </div>
+      <div id="achievementsGrid" class="achievements-grid"></div>
+    </div>
+  </details>
 </section>
 
 <section id="profile" class="view">
@@ -3245,15 +3306,12 @@ table{max-width:100%}
     <button class="season-cumul-btn" type="button" data-season-action="all" onclick="changeSeasonFromToolbar('all')">Cumul toutes saisons</button>
   </div>
 
-
-  <div class="row" style="justify-content:flex-end;margin:12px 0">
-    <button class="btn secondary" id="playerProfileVersusBtn">Comparer dans Versus</button>
-  </div>
-
   <div class="hero player-profile-hero profile-identity premium-profile-identity">
     <div>
       <div class="muted">Fiche joueur BPT</div>
       <h1 id="playerProfileName">—</h1>
+      <div id="playerProfileNickname" class="profile-nickname"></div>
+      <div id="playerProfileOtherNicknames" class="profile-other-nicknames"></div>
       <p id="playerProfileMeta"></p>
     </div>
     <div class="profile-rank" id="playerProfileRank">#—</div>
@@ -3300,6 +3358,65 @@ table{max-width:100%}
       <div id="playerProfileHistory" class="tablewrap"></div>
     </div>
   </div>
+
+  <details class="combined-block profile-versus-block" open>
+    <summary>
+      <span><strong>⚔ Versus</strong><small>Comparer ce joueur à un autre joueur du BPT</small></span>
+    </summary>
+    <div class="combined-block-content">
+      <div class="card profile-versus-selector-card">
+        <div class="versus-selectors profile-versus-selectors">
+          <div class="field">
+            <label>Joueur 1 · profil consulté</label>
+            <input id="versusPlayer1Display" type="text" readonly value="">
+            <select id="versusPlayer1" style="display:none"></select>
+          </div>
+          <div class="versus-vs">VS</div>
+          <div class="field">
+            <label>Joueur 2 · à comparer</label>
+            <select id="versusPlayer2"></select>
+          </div>
+        </div>
+      </div>
+
+      <div id="versusEmpty" class="card muted" style="display:none;margin-top:12px">
+        Sélectionnez un second joueur disposant d’un historique.
+      </div>
+
+      <div id="versusContent" style="display:none">
+        <div id="versusScoreboard" class="versus-scoreboard"></div>
+        <div class="versus-headcards">
+          <div class="card versus-player-card">
+            <div class="muted">Joueur 1</div>
+            <div class="versus-player-name" id="versusName1">—</div>
+            <div class="versus-player-rank" id="versusRank1">—</div>
+          </div>
+          <div class="card versus-player-card">
+            <div class="muted">Joueur 2</div>
+            <div class="versus-player-name" id="versusName2">—</div>
+            <div class="versus-player-rank" id="versusRank2">—</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h2>Comparaison des performances</h2>
+          <div class="tablewrap">
+            <table class="versus-table">
+              <thead>
+                <tr>
+                  <th id="versusHeader1">Joueur 1</th>
+                  <th>Critère</th>
+                  <th id="versusHeader2">Joueur 2</th>
+                </tr>
+              </thead>
+              <tbody id="versusBody"></tbody>
+            </table>
+          </div>
+          <div class="muted" style="margin-top:10px">La meilleure valeur de chaque critère est mise en évidence. Les parties communes correspondent aux parties auxquelles les deux joueurs ont participé. Les éliminations directes comptent uniquement lorsqu’un joueur a éliminé l’autre.</div>
+        </div>
+      </div>
+    </div>
+  </details>
 </section>
 
 <section id="settings" class="view">
@@ -3998,9 +4115,9 @@ async function applyCloudState(row){
     db=remoteState;
 
     if(liveSeasonKey==="2023-2024"){
-      db.history=clone(ARCHIVE_2023_2024);
+      db.history=applyPlayerAliasesToRows(ARCHIVE_2023_2024);
     }else if(liveSeasonKey==="2025-2026"){
-      db.history=clone(ARCHIVE_2025_2026);
+      db.history=applyPlayerAliasesToRows(ARCHIVE_2025_2026);
     }else if(liveSeasonKey==="all"){
       db.history=buildAllSeasonsHistory();
     }else{
@@ -4039,8 +4156,19 @@ async function cloudPoll(){
       return;
     }
 
-    // L'historique canonique est lu directement depuis bpt_games_v2.
-    // Le Dashboard et l'Historique sont donc toujours recalculés ensemble.
+    // Le polling vérifie aussi bpt_state : joueurs, surnoms, paramètres et Live.
+    // Cela garantit la synchronisation entre PC et téléphone même si Realtime
+    // n'est pas disponible ou qu'un événement a été manqué.
+    const remote=await cloudFetchState();
+    const remoteRevision=Number(remote?.revision||0);
+
+    if(remote && isValidBptState(remote.data) &&
+       (!cloudLastRevision || remoteRevision>cloudLastRevision)){
+      await applyCloudState(remote);
+      return;
+    }
+
+    // Même sans nouvelle révision d'état, l'historique officiel peut évoluer.
     await refreshCanonicalHistoryUI(false);
 
   }catch(e){
@@ -4058,9 +4186,15 @@ async function forceCloudSync(){
 
   if(cloudLocalDirty){
     await cloudPushNow();
+    return;
   }
 
-  await refreshCanonicalHistoryUI(true);
+  const remote=await cloudFetchState();
+  if(remote && isValidBptState(remote.data)){
+    await applyCloudState(remote);
+  }else{
+    await refreshCanonicalHistoryUI(true);
+  }
 }
 
 async function initCloudSync(){
@@ -4842,6 +4976,8 @@ function renderProfile(preferredName=null){
 
   if(!d){
     $("playerProfileName").textContent="—";
+    if($("playerProfileNickname"))$("playerProfileNickname").textContent="";
+    if($("playerProfileOtherNicknames"))$("playerProfileOtherNicknames").textContent="";
     $("playerProfileRank").textContent="#—";
     $("playerProfileMeta").textContent="Aucune donnée disponible.";
     $("playerProfileKpis").innerHTML="";
@@ -4857,6 +4993,19 @@ function renderProfile(preferredName=null){
 
   const {s,rows}=d;
   $("playerProfileName").textContent=name;
+
+  const nicknameInfo=playerNicknameInfo(name);
+  if($("playerProfileNickname")){
+    $("playerProfileNickname").innerHTML=nicknameInfo.primary
+      ? `<span>Surnom</span><strong>${esc(nicknameInfo.primary)}</strong>`
+      : `<span>Surnom</span><strong class="muted">—</strong>`;
+  }
+  if($("playerProfileOtherNicknames")){
+    $("playerProfileOtherNicknames").textContent=nicknameInfo.others.length
+      ? `Autres surnoms historiques : ${nicknameInfo.others.join(" · ")}`
+      : "";
+  }
+
   $("playerProfileRank").textContent=s.rank?`#${s.rank}`:"#—";
   $("playerProfileMeta").textContent=
     `${s.gamesCount||rows.length} participation${(s.gamesCount||rows.length)>1?"s":""} · `+
@@ -4922,7 +5071,7 @@ function renderProfile(preferredName=null){
     rows.slice().reverse().map(r=>`<tr><td>#${r.game}</td><td>${esc(shortDate(r.date))}</td><td>${esc(r.location||"")}</td><td>${r.place}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${esc(r.killer||"—")}</td><td>${euro(r.net)}</td></tr>`).join("")+
     `</tbody></table>`;
 
-  $("playerProfileVersusBtn").dataset.player=name;
+  renderVersus();
 }
 
 function openPlayerProfile(name){
@@ -5320,6 +5469,49 @@ function mergeAllSeasonsOfficialStats(rawItems){
   });
 }
 
+const BPT_ANNALES_NICKNAMES={"Franck NAESSENS":["Francis Chatard","Chatard en Chef","Boucher en Chef","Boule à Facettes","Dogarty04","Dégolas","Raoul"],"Jérôme BINOT":["Tchobin","Panama","El Toucan","String Borat","Le Myticulteur","Livre La Moulasse","Chatard en Second"],"Jérôme BERA":["Superman","Slip Rouge","Cerf-Volant","Chip Leader","Ouvrier Plumeur"],"Olivier HENGUELLE":["Miguel","Migolivier","MigGeger","Désosseur","Jean-Michel j’aurais dû jouer !"],"Mehdi BRAHIMI":["El Español","M Le Maudit","Kabiloute","Dégraisseur","Bachybouzouk","Cobra"],"Michel SCHERPEREEL":["Scotty Nguyen","Michmuch59","Micheline59","Boyaudier","Club55"],"Alexis VOLANT":["Biogold","Petit Cœur","L’architecte","Le Neveu de Tonton","Le Jeune Loup de Wall Street"],"Jérôme RIFFE":["Le Chat","Pitch And Putt","Coupeur de Quartier","Djayrem"],"François CATTEAU":["Le Dealer","Chargé de Pesée","Jean Guile","Bpt59"],"Jérémy GRAS":["Shrek","Kersh"],"Thierry MONNIAUX":["L’antidote","Désosseur Pareur","TYMOON69"],"Stéphane LEFIN":["Phœnix","Boucher Gérant","George Luke Ass","Pevelef"],"David SAGALOWICZ":["The Shaker"],"Areski AIT GHERBI":["Kikipoker","Areskilimero","Kiki Le Magnifique"],"Anne BERA":["Maya","Nanou","PrinceLeia59"],"Gérard CANDELIER":["Le Professeur","Le Lion d’Arras","Le Templier","Eviscérateur","GG ARRAS"],"Jérémie CARPENTIER":["Le Trader","Sacrificateur","Lanseria44"],"Mélanie NAESSENS":["Francine Chatard"],"Grégoire DUFORET":["Robin Hood","Grofud"],"Florence SAGALOWICZ":["La Dame de Cœur"],"Dylan DECOTTE":["Rocky Balboa"],"Philippe DUBOIS":["Taz","Japlpel","Accrocheur en Abattoir","J’Adore Pulvériser Les Pokermen En Ligne"],"Solène BALLOIS":["SoBa","Poupée","La Chatte à la Voisine"],"Juliette PENIN":["Wild Horses"],"Jules NAESSENS":["Serial Senior Killer"],"Arnaud HEDIN":["Nono la Saumure"],"Clément MARAVAL":["Scotland Beret","Pointbreak8"],"Thomas DELVAL":["Kitemalaman"],"Hélène MORIZUR":["Psycho Girl","Tazette"],"Mélanie BINOT":["Micromachine","Bazouka"]};
+
+function normalizePlayerLookupName(name){
+  return String(name||"")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .trim().replace(/\s+/g," ").toLocaleUpperCase("fr");
+}
+
+function ensurePlayerNicknames(){
+  if(!db.playerNicknames || typeof db.playerNicknames!=="object" || Array.isArray(db.playerNicknames)){
+    db.playerNicknames={};
+  }
+  return db.playerNicknames;
+}
+
+function annalesNicknamesFor(name){
+  const key=normalizePlayerLookupName(name);
+  for(const [fullName,nicks] of Object.entries(BPT_ANNALES_NICKNAMES)){
+    if(normalizePlayerLookupName(fullName)===key)return [...nicks];
+  }
+  return [];
+}
+
+function playerNicknameInfo(name){
+  const custom=String(ensurePlayerNicknames()[name]||"").trim();
+  const annales=annalesNicknamesFor(name);
+  const primary=custom || annales[0] || "";
+  const others=annales.filter(n=>n!==primary);
+  return {primary,others,source:custom?"personnalisé":(annales.length?"annales":"")};
+}
+
+async function savePlayerNickname(name,value){
+  const player=String(name||"").trim();
+  if(!player)return;
+  const nick=String(value||"").trim().replace(/\s+/g," ");
+  const map=ensurePlayerNicknames();
+  if(nick)map[player]=nick;
+  else delete map[player];
+  saveDB();
+  renderPlayers();
+  if($("profilePlayerSelect")?.value===player)renderProfile(player);
+}
+
 function ensurePlayerAliases(){
   if(!db.playerAliases || typeof db.playerAliases!=="object" || Array.isArray(db.playerAliases))db.playerAliases={};
   return db.playerAliases;
@@ -5500,12 +5692,9 @@ function updateSeasonContextTitles(){
     const el=document.getElementById(id);
     if(el)el.textContent=`${label} ${suffix}`;
   };
-  set("rankingSeasonTitle","Classement BPT");
-  set("versusSeasonTitle","Versus BPT");
-  set("recordsSeasonTitle","Records BPT");
-  set("achievementsSeasonTitle","Accomplissements BPT");
+  set("rankingSeasonTitle","Classement & historique BPT");
+  set("recordsSeasonTitle","Records & accomplissements BPT");
   set("profileSeasonTitle","Profil joueur BPT");
-  set("historySeasonTitle","Historique BPT");
 }
 
 
@@ -5955,7 +6144,7 @@ function renderRanking(){
   const ks=killerStats();
   $("rankingBody").innerHTML=ranking().map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}">
     <td>${medalForRank(s.rank)} ${s.rank}</td>
-    <td><button class="player-link" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(s.name)}'))">${esc(s.name)}</button></td>
+    <td><button class="player-link ranking-player-link" title="Ouvrir le profil de ${esc(s.name)}" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(s.name)}'))">${esc(s.name)}</button></td>
     <td><b>${num(s.points,0)}</b></td>
     <td>${s.progress===null?(isArchiveSeason()?"—":"Nouvelle entrée"):s.progress>0?"+"+s.progress:s.progress===0?"=":String(s.progress)}</td>
     <td>${num(s.avgPoints,1)}</td>
@@ -6049,7 +6238,7 @@ function renderVersus(){
   const s2=$("versusPlayer2");
   if(!s1 || !s2)return;
 
-  const previous1=s1.value;
+  const profileName=$("profilePlayerSelect")?.value || "";
   const previous2=s2.value;
 
   const ranked=ranking();
@@ -6058,17 +6247,17 @@ function renderVersus(){
     ...(db.history||[]).map(r=>String(r.player||"")).filter(Boolean)
   ])].sort((a,b)=>a.localeCompare(b,"fr",{sensitivity:"base"}));
 
-  const options=names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
-  s1.innerHTML='<option value="">— Choisir —</option>'+options;
-  s2.innerHTML='<option value="">— Choisir —</option>'+options;
+  s1.innerHTML=names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
+  s1.value=names.includes(profileName)?profileName:(ranked[0]?.name||names[0]||"");
 
-  if(previous1 && names.includes(previous1))s1.value=previous1;
-  else if(ranked[0])s1.value=ranked[0].name;
+  const player2Names=names.filter(n=>n!==s1.value);
+  s2.innerHTML='<option value="">— Choisir un adversaire —</option>'+
+    player2Names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join("");
 
-  if(previous2 && names.includes(previous2) && previous2!==s1.value)s2.value=previous2;
-  else if(ranked[1])s2.value=ranked[1].name;
-  else if(ranked[0] && names.length>1)s2.value=names.find(n=>n!==s1.value)||"";
+  if(previous2 && player2Names.includes(previous2))s2.value=previous2;
+  else if(player2Names.length)s2.value=player2Names[0];
 
+  if($("versusPlayer1Display"))$("versusPlayer1Display").value=s1.value;
   const name1=s1.value;
   const name2=s2.value;
   const m1=versusPlayerMetrics(name1);
@@ -6191,9 +6380,15 @@ function renderPlayers(){
       <div class="player-admin-list">
         ${list.map(p=>`
           <div class="player-admin-row ${p.active?"":"inactive"}" data-player="${encodeURIComponent(p.name)}">
-            <input class="player-rename-input" value="${esc(p.name)}"
-                   aria-label="Nom du joueur ${esc(p.name)}"
-                   title="Modifiez le nom puis validez avec Entrée ou en quittant le champ">
+            <div class="player-admin-fields">
+              <input class="player-rename-input" value="${esc(p.name)}"
+                     aria-label="Nom du joueur ${esc(p.name)}"
+                     title="Modifiez le nom puis validez avec Entrée ou en quittant le champ">
+              <input class="player-nickname-input" value="${esc(playerNicknameInfo(p.name).primary)}"
+                     placeholder="Surnom"
+                     aria-label="Surnom de ${esc(p.name)}"
+                     title="Surnom affiché dans le profil. Les surnoms des Annales sont proposés par défaut.">
+            </div>
             <div class="player-admin-actions">
               <button class="btn ghost player-active-btn" type="button">${p.active?"Actif":"Inactif"}</button>
               <button class="btn danger player-delete-btn" type="button">Supprimer</button>
@@ -6215,6 +6410,7 @@ function renderPlayers(){
   wrap.querySelectorAll(".player-admin-row").forEach(row=>{
     const oldName=decodeURIComponent(row.dataset.player||"");
     const input=row.querySelector(".player-rename-input");
+    const nicknameInput=row.querySelector(".player-nickname-input");
     const activeBtn=row.querySelector(".player-active-btn");
     const deleteBtn=row.querySelector(".player-delete-btn");
 
@@ -6242,6 +6438,13 @@ function renderPlayers(){
         input.blur();
       }
     });
+
+    if(nicknameInput){
+      nicknameInput.addEventListener("change",()=>savePlayerNickname(oldName,nicknameInput.value));
+      nicknameInput.addEventListener("keydown",e=>{
+        if(e.key==="Enter"){e.preventDefault();nicknameInput.blur();}
+      });
+    }
 
     activeBtn.onclick=()=>togglePlayerByName(oldName);
     deleteBtn.onclick=()=>deletePlayerByName(oldName);
@@ -6431,6 +6634,10 @@ async function mergePlayersByName(){
   try{
     setCloudStatus("busy","Fusion des joueurs…");
     ensurePlayerAliases()[source]=target;
+
+    const nickMap=ensurePlayerNicknames();
+    if(nickMap[source] && !nickMap[target])nickMap[target]=nickMap[source];
+    delete nickMap[source];
 
     // Current season / current cache
     const replaceRows=rows=>(rows||[]).map(r=>({
@@ -8334,6 +8541,9 @@ function lockSettings(){
 }
 
 async function showView(id){
+  if(id==="versus")id="profile";
+  if(id==="achievements")id="records";
+  if(id==="history")id="ranking";
   if(typeof isArchiveSeason==="function" && isArchiveSeason() && (id==="live" || id==="settings"))id="dashboard";
   if(id==="newgame")id="settings";
   if(id==="dashboard")dashboardRecordSelection=null;
@@ -8345,12 +8555,9 @@ async function showView(id){
   }else{
     if(id==="dashboard")renderDashboard();
     if(id==="latestgame")renderLatestGame();
-    if(id==="ranking")renderRanking();
-    if(id==="versus")renderVersus();
-    if(id==="records")renderRecords();
-    if(id==="achievements")renderAchievements();
-    if(id==="profile")renderProfile();
-    if(id==="history")renderHistory();
+    if(id==="ranking"){renderRanking();renderHistory();}
+    if(id==="records"){renderRecords();renderAchievements();}
+    if(id==="profile"){renderProfile();renderVersus();}
   }
 
   if(id==="settings"){
@@ -8390,7 +8597,6 @@ $("deleteCorrectionGameBtn").onclick=deleteCorrectionGame;
 $("resetHistoryBtn").onclick=resetFullHistory;
 $("cStake").addEventListener("input",refreshCorrectionCalculatedValues);
 
-if($("versusPlayer1"))$("versusPlayer1").onchange=renderVersus;
 if($("versusPlayer2"))$("versusPlayer2").onchange=renderVersus;
 
 $("exportCsvBtn").onclick=()=>{const rows=[["Partie","Date","Lieu","Joueur","Place","Éliminé par","Tablier","Nb joueurs","Points","Mise","Gain","Solde","Kills"]];db.history.forEach(r=>rows.push([r.game,r.date,r.location,r.player,r.place,r.killer,r.tablier?"Oui":"",r.n,r.points,r.stake,r.gross,r.net,r.kills]));const csv="\ufeff"+rows.map(r=>r.map(x=>`"${String(x??"").replaceAll('"','""')}"`).join(";")).join("\r\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));a.download="BPT_historique.csv";a.click();};
@@ -8451,13 +8657,7 @@ $("liveFinalizeBtn").onclick=liveFinalizeGame;
 
 // Fiche joueur
 if($("profilePlayerSelect"))$("profilePlayerSelect").onchange=()=>renderProfile($("profilePlayerSelect").value);
-if($("playerProfileVersusBtn"))$("playerProfileVersusBtn").onclick=()=>{
-  const name=$("playerProfileVersusBtn").dataset.player||"";
-  showView("versus").then?.(()=>{});
-  setTimeout(()=>{
-    if($("versusPlayer1")){$("versusPlayer1").value=name;renderVersus();}
-  },0);
-};
+
 
 // Résumé de fin de partie
 if($("gameSummaryCloseBtn"))$("gameSummaryCloseBtn").onclick=()=>$("gameSummaryBackdrop").style.display="none";
