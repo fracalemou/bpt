@@ -3998,6 +3998,21 @@ body.spectator-live-open .spectator-global-exit{
   display:flex !important;
 }
 
+
+/* ===== V145 — vérification écriture Live maître ===== */
+.live-master-sync-diag{
+  margin-top:4px;
+  font-size:10px;
+  font-weight:800;
+  color:#8ea1b2;
+}
+.live-master-sync-diag.ok{
+  color:#8fd8a8;
+}
+.live-master-sync-diag.error{
+  color:#ff9c9c;
+}
+
 </style>
 </head>
 <body>
@@ -4016,7 +4031,7 @@ body.spectator-live-open .spectator-global-exit{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 14h54</div>
+  <div class="app-version">Version 19/09/26 14h59</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -4117,7 +4132,8 @@ body.spectator-live-open .spectator-global-exit{
         <div>
           <div class="live-title" id="liveGameTitle">Championnat BPT — Partie en cours</div>
           <div id="liveGameMeta" class="muted"></div>
-          <div class="live-last-sync muted">Dernière synchro Live : <span id="liveLastSync">—</span> · événements immédiats · rappel 30 s</div>
+          <div class="live-last-sync muted">Dernière synchro Live : <span id="liveLastSync">—</span> · événements immédiats · rappel serveur</div>
+          <div id="liveMasterSyncDiag" class="live-master-sync-diag">Serveur Live : en attente de vérification…</div>
         </div>
         <div class="row">
           <span class="live-badge" id="liveSyncBadge">NON SYNCHRONISÉE</span>
@@ -4168,7 +4184,7 @@ body.spectator-live-open .spectator-global-exit{
         <div class="spectator-fullscreen-shell">
           <div class="spectator-fullscreen-header">
             <div>
-              <div class="spectator-kicker">BPT · LIVE · V144</div>
+              <div class="spectator-kicker">BPT · LIVE · V145</div>
               <div id="spectatorGameMeta" class="spectator-game-meta">—</div>
               <div class="spectator-update-state">Dernière réception : <strong id="spectatorLastReceive">—</strong></div>
               <div class="spectator-update-state">Serveur : <strong id="spectatorServerInfo">—</strong></div>
@@ -5365,6 +5381,18 @@ async function cloudPushNow(){
     cloudLocalDirty=false;
     return false;
   }
+
+  // Pendant un Live maître, seul livePushStateNow() publie l'état Live.
+  // Cela évite qu'une synchro générale réécrive bpt_state avec un snapshot plus ancien.
+  if(
+    db?.liveState?.prepared &&
+    !db.liveState.synced &&
+    db.liveState.creatorDeviceId===liveDeviceId()
+  ){
+    cloudLocalDirty=false;
+    return true;
+  }
+
   if(typeof isArchiveSeason==="function" && isArchiveSeason())return false;
   if(!sbClient || !cloudReady || cloudApplying)return false;
   setCloudStatus("busy","Synchronisation…");
@@ -5986,6 +6014,16 @@ if(
 
 function saveDB(){
   saveLocalOnly();
+
+  if(
+    db?.liveState?.prepared &&
+    !db.liveState.synced &&
+    db.liveState.creatorDeviceId===liveDeviceId()
+  ){
+    // Le Live a son propre canal de publication.
+    return;
+  }
+
   scheduleCloudSave();
 }
 
@@ -6046,6 +6084,13 @@ async function fetchLiveStateDirect(){
     const dedicated=await fetchDedicatedLiveRow();
     const ds=dedicated?.data||null;
     const remote=ds?.active ? ds?.liveState : null;
+
+    if($("spectatorServerSource")){
+      const rawPlayers=Array.isArray(remote?.players)?remote.players.length:0;
+      const rawLevel=Number(remote?.levelIndex||0)+1;
+      $("spectatorServerSource").textContent=
+        `live_current brut · niveau ${rawLevel} · ${rawPlayers} joueur${rawPlayers>1?"s":""}`;
+    }
 
     if(remote?.prepared && !remote?.synced){
       spectatorLiveSource="live_current";
@@ -6139,14 +6184,40 @@ async function livePushStateNow(){
           liveState:null
         };
 
-    const {error:liveRowError}=await sbClient
+    const {data:liveRowWritten,error:liveRowError}=await sbClient
       .from("bpt_state")
       .upsert(
         {id:LIVE_CLOUD_ROW_ID,data:livePayload},
         {onConflict:"id"}
-      );
+      )
+      .select("data,revision,updated_at")
+      .single();
 
     if(liveRowError)throw liveRowError;
+
+    // Vérification immédiate de ce que Supabase a réellement conservé.
+    const writtenState=liveRowWritten?.data?.liveState||null;
+    const sentPlayers=Array.isArray(db.liveState?.players)?db.liveState.players.length:0;
+    const readPlayers=Array.isArray(writtenState?.players)?writtenState.players.length:0;
+    const sentLevel=Number(db.liveState?.levelIndex||0);
+    const readLevel=Number(writtenState?.levelIndex||0);
+
+    const diag=$("liveMasterSyncDiag");
+    if(diag){
+      const ok=sentPlayers===readPlayers && sentLevel===readLevel;
+      diag.textContent=ok
+        ? `Serveur Live : OK · niveau ${readLevel+1} · ${readPlayers} joueur${readPlayers>1?"s":""}`
+        : `ERREUR SERVEUR LIVE · envoyé : niveau ${sentLevel+1}, ${sentPlayers} joueurs · relu : niveau ${readLevel+1}, ${readPlayers} joueurs`;
+      diag.classList.toggle("error",!ok);
+      diag.classList.toggle("ok",ok);
+    }
+
+    if(sentPlayers!==readPlayers || sentLevel!==readLevel){
+      throw new Error(
+        `Vérification Live impossible : envoyé niveau ${sentLevel+1}/${sentPlayers} joueurs, `+
+        `serveur niveau ${readLevel+1}/${readPlayers} joueurs`
+      );
+    }
 
     cloudLastRevision=Number(data?.revision||cloudLastRevision||0);
     cloudLocalDirty=false;
