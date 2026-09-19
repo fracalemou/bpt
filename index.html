@@ -4016,7 +4016,7 @@ body.spectator-live-open .spectator-global-exit{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 14h31</div>
+  <div class="app-version">Version 19/09/26 14h34</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -4168,7 +4168,7 @@ body.spectator-live-open .spectator-global-exit{
         <div class="spectator-fullscreen-shell">
           <div class="spectator-fullscreen-header">
             <div>
-              <div class="spectator-kicker">BPT · LIVE · V138</div>
+              <div class="spectator-kicker">BPT · LIVE · V139</div>
               <div id="spectatorGameMeta" class="spectator-game-meta">—</div>
               <div class="spectator-update-state">Dernière réception : <strong id="spectatorLastReceive">—</strong></div>
             </div>
@@ -10874,6 +10874,39 @@ function lockSettings(){
 
 let currentViewId="dashboard";
 
+async function resolveLiveEntryMode(){
+  try{
+    const row=await fetchLiveStateDirect();
+    const remote=row?.data?.liveState||null;
+    const creator=String(remote?.creatorDeviceId||"");
+    const remoteActive=!!(remote?.prepared && !remote?.synced);
+
+    if(remoteActive){
+      if(creator && creator!==liveDeviceId()){
+        return {mode:"spectator",row};
+      }
+      if(creator && creator===liveDeviceId()){
+        // Ce navigateur est le créateur du Live existant.
+        db.liveState=JSON.parse(JSON.stringify(remote));
+        saveLocalOnly();
+        return {mode:"creator",row};
+      }
+
+      // Compatibilité ancien Live sans creatorDeviceId :
+      // s'il existe côté serveur, on ne crée pas une seconde partie concurrente.
+      return {mode:"spectator",row};
+    }
+
+    // Aucun Live actif côté serveur : ce navigateur peut en créer un.
+    spectatorServerLiveState=null;
+    spectatorServerLiveRevision=0;
+    return {mode:"create",row};
+  }catch(e){
+    console.error("BPT resolve Live mode:",e);
+    return {mode:"error",error:e};
+  }
+}
+
 async function openSpectatorLive(){
   try{
     const row=await fetchLiveStateDirect();
@@ -10900,9 +10933,9 @@ async function showView(id){
   if(typeof isArchiveSeason==="function" && isArchiveSeason()){
     // Les paramètres restent réservés à la saison courante.
     if(id==="settings")id="dashboard";
-    // Un Live spectateur distant reste accessible quelle que soit
-    // la saison actuellement consultée dans le reste du site.
-    if(id==="live" && !liveIsSpectator())id="dashboard";
+    // Le Live est toujours accessible : showView("live") décide ensuite
+    // s'il faut ouvrir le mode spectateur ou l'écran de création.
+
   }
   if(id==="newgame")id="settings";
   if(id==="dashboard")dashboardRecordSelection=null;
@@ -10925,19 +10958,47 @@ async function showView(id){
   }
 
   if(id==="live"){
-    const localCreator=!!(db?.liveState?.prepared && db?.liveState?.creatorDeviceId===liveDeviceId());
-    if(localCreator){
-      liveRenderAll();
-    }else{
-      const opened=await openSpectatorLive();
-      if(!opened){
-        document.body.classList.remove("spectator-live-open");
-        currentViewId="dashboard";
-        document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id==="dashboard"));
-        document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view==="dashboard"));
-        renderDashboard();
-      }
+    const resolved=await resolveLiveEntryMode();
+
+    if(resolved.mode==="spectator"){
+      await renderSpectatorFromServer(resolved.row);
+      startSpectatorLivePolling();
+      return;
     }
+
+    if(resolved.mode==="creator"){
+      document.body.classList.remove("spectator-live-open");
+      if($("spectatorGlobalExitBtn"))$("spectatorGlobalExitBtn").style.display="none";
+      applyLiveAccessMode();
+      liveShowScreen("game");
+      liveRenderAll();
+      if(db.liveState?.running && db.liveState?.endAt)liveRunTicker();
+      startLiveCloudHeartbeat();
+      return;
+    }
+
+    if(resolved.mode==="create"){
+      document.body.classList.remove("spectator-live-open");
+      if($("spectatorGlobalExitBtn"))$("spectatorGlobalExitBtn").style.display="none";
+      spectatorServerLiveState=null;
+      db.liveState=null;
+      saveLocalOnly();
+      liveSelected.clear();
+      liveRenderPlayerList();
+      livePreviewStructure();
+      liveShowScreen("prep");
+      applyLiveAccessMode();
+      if($("liveHeroTitle"))$("liveHeroTitle").textContent="Gestion de la partie en direct";
+      if($("liveHeroSubtitle"))$("liveHeroSubtitle").textContent="Préparez, lancez et suivez la partie jusqu’à son enregistrement dans le championnat.";
+      return;
+    }
+
+    alert("Impossible de vérifier l'état du Live sur le serveur.");
+    currentViewId="dashboard";
+    document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id==="dashboard"));
+    document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view==="dashboard"));
+    renderDashboard();
+    return;
   }
 
   if(id==="settings"){
@@ -11123,13 +11184,8 @@ document.querySelectorAll("nav button[data-view]").forEach(b=>{
   b.addEventListener("click",async()=>{
     const target=b.dataset.view;
     if(target==="live"){
-      // Toujours interroger le serveur avant d'ouvrir un Live spectateur.
-      // Si ce navigateur est le maître, liveIsCreator() reste vrai et on ouvre le Live normal.
-      const localCreator=!!(db?.liveState?.prepared && db?.liveState?.creatorDeviceId===liveDeviceId());
-      if(!localCreator){
-        const opened=await openSpectatorLive();
-        if(opened)return;
-      }
+      await showView("live");
+      return;
     }
     showView(target);
   });
