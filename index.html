@@ -4009,6 +4009,28 @@ body.spectator-live-open .spectator-global-exit{
   color:#d0dbe4;
 }
 
+
+/* ===== V141 — sélection de la bonne source joueurs ===== */
+.spectator-source-count{
+  margin-top:2px;
+  color:#657789;
+  font-size:9px;
+}
+.spectator-source-count strong{
+  color:#f0c879;
+}
+
+
+/* ===== V142 — flux Live spectateur dédié ===== */
+.spectator-wire-state{
+  margin-top:2px;
+  color:#657789;
+  font-size:9px;
+}
+.spectator-wire-state strong{
+  color:#8fd4ff;
+}
+
 </style>
 </head>
 <body>
@@ -4027,7 +4049,7 @@ body.spectator-live-open .spectator-global-exit{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 14h41</div>
+  <div class="app-version">Version 19/09/26 14h46</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -4179,10 +4201,12 @@ body.spectator-live-open .spectator-global-exit{
         <div class="spectator-fullscreen-shell">
           <div class="spectator-fullscreen-header">
             <div>
-              <div class="spectator-kicker">BPT · LIVE · V140</div>
+              <div class="spectator-kicker">BPT · LIVE · V142</div>
               <div id="spectatorGameMeta" class="spectator-game-meta">—</div>
               <div class="spectator-update-state">Dernière réception : <strong id="spectatorLastReceive">—</strong></div>
               <div class="spectator-server-count">Serveur : <strong id="spectatorServerCount">—</strong></div>
+              <div class="spectator-wire-state">Flux Live : <strong id="spectatorWireState">—</strong></div>
+              <div class="spectator-source-count">Sources : <strong id="spectatorSourceCount">—</strong></div>
             </div>
             <button id="spectatorQuitLiveBtn" class="spectator-quit-btn" type="button">← Quitter le Live</button>
           </div>
@@ -5390,9 +5414,38 @@ async function cloudPushNow(){
     const payload=JSON.parse(JSON.stringify(db));
     payload.history=[];
 
+    // Flux Live spectateur minimal et autoritaire.
+    // Le téléphone ne dépend plus du reste de db/liveState.
+    if(db.liveState?.prepared && !db.liveState?.synced){
+      const s=db.liveState;
+      payload.liveWire={
+        wireVersion:1,
+        publishedAt:Date.now(),
+        creatorDeviceId:String(s.creatorDeviceId||""),
+        prepared:true,
+        synced:false,
+        running:!!s.running,
+        gameNo:s.gameNo,
+        date:s.date||"",
+        location:s.location||"",
+        levelIndex:Number(s.levelIndex||0),
+        levelSeconds:Number(s.levelSeconds||0),
+        remainingSeconds:Number(s.remainingSeconds||0),
+        endAt:s.endAt||null,
+        levels:JSON.parse(JSON.stringify(s.levels||[])),
+        players:JSON.parse(JSON.stringify(s.players||[]))
+      };
+    }else{
+      payload.liveWire=null;
+    }
+
     // Snapshot spectateur dédié : source simple et explicite pour les téléphones.
     // Il est reconstruit à chaque publication depuis l'état maître courant.
     if(db.liveState?.prepared && !db.liveState?.synced){
+      // S'assurer que liveState publié contient bien les joueurs du maître.
+      payload.liveState.players=JSON.parse(JSON.stringify(db.liveState.players||[]));
+      payload.liveState.playerCount=payload.liveState.players.length;
+
       payload.liveSpectatorSnapshot={
         version:1,
         publishedAt:Date.now(),
@@ -5413,7 +5466,8 @@ async function cloudPushNow(){
         elapsedBeforeMs:Number(db.liveState.elapsedBeforeMs||0),
         runStartedAt:db.liveState.runStartedAt||null,
         startedAt:db.liveState.startedAt||null,
-        players:JSON.parse(JSON.stringify(db.liveState.players||[]))
+        players:JSON.parse(JSON.stringify(db.liveState.players||[])),
+        playerCount:Array.isArray(db.liveState.players)?db.liveState.players.length:0
       };
     }else{
       payload.liveSpectatorSnapshot=null;
@@ -5467,7 +5521,7 @@ function scheduleCloudSave(){
 }
 
 function remoteLiveIsSpectatorForThisDevice(row){
-  const remote=row?.data?.liveSpectatorSnapshot || row?.data?.liveState || null;
+  const remote=chooseRemoteLiveState(row?.data||{}).chosen;
   const creator=String(remote?.creatorDeviceId||"");
   return !!(
     remote?.prepared &&
@@ -5480,7 +5534,8 @@ function remoteLiveIsSpectatorForThisDevice(row){
 async function renderSpectatorFromServer(row){
   if(!row || !isValidBptState(row.data) || !remoteLiveIsSpectatorForThisDevice(row))return false;
 
-  const serverLive=row.data.liveSpectatorSnapshot || row.data.liveState;
+  const picked=chooseRemoteLiveState(row.data||{});
+  const serverLive=picked.chosen;
   spectatorServerLiveState=JSON.parse(JSON.stringify(serverLive));
   spectatorServerLiveRevision=Number(row.revision||0);
 
@@ -6018,6 +6073,41 @@ function ensureLiveSupabaseClient(){
   }
 }
 
+function chooseRemoteLiveState(data){
+  const wire=data?.liveWire||null;
+  const live=data?.liveState||null;
+  const snap=data?.liveSpectatorSnapshot||null;
+
+  if(wire?.prepared && !wire?.synced){
+    return {
+      chosen:JSON.parse(JSON.stringify(wire)),
+      source:"liveWire",
+      livePlayersCount:Array.isArray(live?.players)?live.players.length:0,
+      snapPlayersCount:Array.isArray(snap?.players)?snap.players.length:0,
+      wirePlayersCount:Array.isArray(wire?.players)?wire.players.length:0
+    };
+  }
+
+  const livePlayers=Array.isArray(live?.players)?live.players:[];
+  const snapPlayers=Array.isArray(snap?.players)?snap.players:[];
+  const chosen=livePlayers.length?live:(snapPlayers.length?snap:(live||snap));
+
+  return {
+    chosen:chosen?JSON.parse(JSON.stringify(chosen)):null,
+    source:livePlayers.length?"liveState":(snapPlayers.length?"snapshot":"fallback"),
+    livePlayersCount:livePlayers.length,
+    snapPlayersCount:snapPlayers.length,
+    wirePlayersCount:0
+  };
+}
+
+let spectatorServerDiag={
+    livePlayersCount:Number(picked.livePlayersCount||0),
+    snapPlayersCount:Number(picked.snapPlayersCount||0),
+    wirePlayersCount:Number(picked.wirePlayersCount||0),
+    source:picked.source||"—"
+  };
+
 async function fetchLiveStateDirect(){
   if(!ensureLiveSupabaseClient())return null;
   const {data,error}=await sbClient
@@ -6028,8 +6118,20 @@ async function fetchLiveStateDirect(){
   if(error)throw error;
 
   const row=data||null;
-  const remote=row?.data?.liveSpectatorSnapshot || row?.data?.liveState || null;
+  const picked=chooseRemoteLiveState(row?.data||{});
+  const remote=picked.chosen;
   const creator=String(remote?.creatorDeviceId||"");
+
+  spectatorServerDiag={
+    livePlayersCount:picked.livePlayersCount,
+    snapPlayersCount:picked.snapPlayersCount,
+    source:
+      remote===null?"—":
+      (row?.data?.liveState && Number(remote?.publishedAt||0)===Number(row.data.liveState?.publishedAt||0) && picked.livePlayersCount
+        ? "liveState"
+        : (picked.snapPlayersCount?"snapshot":"liveState"))
+  };
+
   const isRemoteActive=!!(
     remote?.prepared &&
     !remote?.synced &&
@@ -9805,8 +9907,9 @@ async function liveApplyBlindDuration(){
 
   liveTenSecondWarningKey="";
   liveThirtySecondWarningKey="";
-  saveDB();
+  saveLocalOnly();
   liveRenderAll();
+  await livePushStateNow();
 }
 
 function liveAdjustTimer(deltaSeconds){
@@ -10187,6 +10290,14 @@ function renderSpectatorLive(){
   if($("spectatorServerCount")){
     $("spectatorServerCount").textContent=
       `${players.length} joueur${players.length>1?"s":""} · ${eliminated.length} sorti${eliminated.length>1?"s":""}`;
+  }
+  if($("spectatorSourceCount")){
+    $("spectatorSourceCount").textContent=
+      `wire ${spectatorServerDiag.wirePlayersCount} · liveState ${spectatorServerDiag.livePlayersCount} · snapshot ${spectatorServerDiag.snapPlayersCount} · source ${spectatorServerDiag.source}`;
+  }
+  if($("spectatorWireState")){
+    $("spectatorWireState").textContent=
+      `${spectatorServerDiag.source} · niveau ${Number(s.levelIndex||0)+1} · ${players.length} joueurs`;
   }
 
   if($("spectatorGameMeta")){
@@ -10925,7 +11036,7 @@ let currentViewId="dashboard";
 async function resolveLiveEntryMode(){
   try{
     const row=await fetchLiveStateDirect();
-    const remote=row?.data?.liveSpectatorSnapshot || row?.data?.liveState || null;
+    const remote=chooseRemoteLiveState(row?.data||{}).chosen;
     const creator=String(remote?.creatorDeviceId||"");
     const remoteActive=!!(remote?.prepared && !remote?.synced);
 
