@@ -4934,21 +4934,353 @@ body.spectator-live-open .spectator-global-exit{
   }
 }
 
+
+/* ===== V152 — Mobile paysage forcé + interface compacte ===== */
+
+/* Écran de rotation : uniquement téléphone en portrait */
+.mobile-landscape-gate{
+  display:none;
+}
+
+@media (max-width: 700px) and (orientation: portrait){
+  .mobile-landscape-gate{
+    position:fixed;
+    inset:0;
+    z-index:1000000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:#070b10;
+    color:#eef4f8;
+  }
+
+  .mobile-landscape-gate-card{
+    width:min(320px,90vw);
+    text-align:center;
+    border:1px solid #2c4052;
+    border-radius:16px;
+    padding:22px 18px;
+    background:#111a24;
+    box-shadow:0 20px 60px rgba(0,0,0,.35);
+  }
+
+  .mobile-landscape-phone{
+    width:62px;
+    height:42px;
+    margin:0 auto 12px;
+    border:3px solid #8fd4ff;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:28px;
+    color:#8fd4ff;
+    transform:rotate(-8deg);
+  }
+
+  .mobile-landscape-gate-card strong{
+    display:block;
+    font-size:20px;
+    margin-bottom:6px;
+  }
+
+  .mobile-landscape-gate-card span{
+    display:block;
+    color:#91a1b1;
+    font-size:13px;
+    line-height:1.35;
+    margin-bottom:14px;
+  }
+
+  #mobileLandscapeTryBtn{
+    min-height:44px;
+    padding:9px 15px;
+    border:1px solid #54778f;
+    border-radius:10px;
+    background:#173047;
+    color:white;
+    font-weight:900;
+    font-size:13px;
+  }
+}
+
+@media (max-width: 700px) and (orientation: landscape){
+
+  /* Bandeau : boutons +15 % */
+  nav#nav button{
+    font-size:13.8px !important;
+    padding:9px 13px !important;
+    min-height:44px !important;
+    border-radius:10px !important;
+  }
+
+  /* Barre supérieure plus compacte */
+  .bpt-header{
+    padding:6px 10px !important;
+  }
+
+  .brand span,
+  .app-version{
+    display:none !important;
+  }
+
+  /* Réduction des informations secondaires */
+  .hero p,
+  .tab-premium-hero p,
+  .muted,
+  .hint,
+  .help,
+  .helper,
+  .description,
+  .subtitle,
+  .subtext,
+  .small-note,
+  .footnote,
+  .live-last-sync,
+  #liveSoundStatus,
+  .stack-step-hint,
+  .spectator-server-receive,
+  .spectator-server-list-head small,
+  .spectator-server-list-head > div:last-child{
+    display:none !important;
+  }
+
+  /* Exceptions : conserver les données secondaires réellement utiles */
+  .spectator-server-meta,
+  .player-secondary-nickname,
+  .live-master-sync-diag{
+    display:block !important;
+  }
+
+  /* Hero compact */
+  .hero,
+  .tab-premium-hero{
+    padding:10px 12px !important;
+    margin-bottom:7px !important;
+  }
+
+  .hero h1,
+  .tab-premium-hero h1{
+    margin:0 !important;
+    font-size:22px !important;
+  }
+
+  /* Cartes plus compactes */
+  .card{
+    padding:9px !important;
+    margin-bottom:7px !important;
+  }
+
+  .kpis,
+  .live-kpis,
+  .dashboard-kpis,
+  .stats-kpis{
+    gap:6px !important;
+  }
+
+  .kpi,
+  .live-kpi{
+    padding:8px 7px !important;
+  }
+
+  /* Formulaires */
+  input,
+  select,
+  textarea{
+    min-height:38px !important;
+    padding-top:6px !important;
+    padding-bottom:6px !important;
+  }
+
+  .btn{
+    min-height:38px !important;
+  }
+
+  /* Live spectateur en paysage : exploiter toute la largeur */
+  .spectator-server-shell{
+    padding:8px 10px 10px !important;
+  }
+
+  .spectator-server-top{
+    margin-bottom:5px !important;
+  }
+
+  .spectator-server-summary{
+    grid-template-columns:1fr 1.35fr .65fr !important;
+    gap:7px !important;
+    margin-top:5px !important;
+  }
+
+  .spectator-server-timer-card{
+    grid-column:2 !important;
+    grid-row:1 !important;
+  }
+
+  .spectator-server-summary .spectator-server-card:nth-child(1){
+    grid-column:1 !important;
+    grid-row:1 !important;
+  }
+
+  .spectator-server-summary .spectator-server-card:nth-child(3){
+    grid-column:3 !important;
+    grid-row:1 !important;
+  }
+
+  .spectator-server-card{
+    min-height:92px !important;
+    padding:7px 8px !important;
+  }
+
+  .spectator-server-timer-card > strong{
+    font-size:52px !important;
+  }
+
+  .spectator-server-summary .spectator-server-card:nth-child(1) > b{
+    font-size:27px !important;
+  }
+
+  .spectator-server-summary .spectator-server-card:nth-child(3) > strong{
+    font-size:36px !important;
+  }
+
+  .spectator-server-players-card{
+    margin-top:6px !important;
+    padding:7px !important;
+  }
+
+  .spectator-server-player{
+    min-height:32px !important;
+    padding:4px 7px !important;
+  }
+
+  .spectator-server-name .player-primary-name{
+    font-size:13.5px !important;
+  }
+
+  .spectator-server-status{
+    font-size:9.5px !important;
+  }
+}
+
+
+/* ===== V153 — Live téléphone simplifié ===== */
+@media (max-width:700px){
+  /* Sur téléphone, la structure reste calculée avec les valeurs par défaut,
+     mais ses paramètres et détails ne prennent plus de place à l'écran. */
+  #live .mobile-hide-live-structure,
+  #live .mobile-hide-live-details,
+  #live .mobile-hide-live-gains{
+    display:none !important;
+  }
+
+  /* La préparation devient centrée sur date, lieu, mise et joueurs. */
+  #livePrepScreen .live-layout{
+    grid-template-columns:1fr !important;
+  }
+
+  #livePrepScreen .live-layout > .card:first-child{
+    width:100%;
+    max-width:none;
+  }
+
+  /* Tableau Live plus compact après retrait de la colonne Gain. */
+  #liveGameScreen .live-players table{
+    min-width:520px !important;
+  }
+}
+
+
+/* ===== V154 — reprise autorisée du Live ===== */
+.spectator-server-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex:none;
+}
+.spectator-takeover-btn{
+  min-height:40px;
+  padding:8px 13px;
+  border:1px solid #b28b3d;
+  border-radius:10px;
+  background:#2a2110;
+  color:#f6d58b;
+  font-weight:900;
+  cursor:pointer;
+}
+.spectator-takeover-btn:disabled{
+  opacity:.55;
+  cursor:default;
+}
+.live-handover-request{
+  margin-top:8px;
+  padding:10px 12px;
+  border:1px solid #b28b3d;
+  border-radius:11px;
+  background:#241d10;
+  color:#f2eadb;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.live-handover-request > div:first-child{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.live-handover-request span{
+  color:#c7bda8;
+  font-size:10px;
+}
+.live-handover-request-actions{
+  display:flex;
+  gap:7px;
+  flex:none;
+}
+@media(max-width:700px){
+  .spectator-server-actions{
+    gap:5px;
+  }
+  .spectator-takeover-btn,
+  .spectator-server-exit{
+    min-height:38px !important;
+    padding:7px 9px !important;
+    font-size:11px !important;
+  }
+  .live-handover-request{
+    padding:8px;
+  }
+  .live-handover-request span{
+    font-size:11px;
+  }
+}
+
 </style>
 </head>
 <body>
+<div id="mobileLandscapeGate" class="mobile-landscape-gate" aria-hidden="true">
+  <div class="mobile-landscape-gate-card">
+    <div class="mobile-landscape-phone">↻</div>
+    <strong>Tournez votre téléphone</strong>
+    <span>Le BPT est optimisé en mode horizontal.</span>
+    <button id="mobileLandscapeTryBtn" type="button">Passer en horizontal</button>
+  </div>
+</div>
 <div id="spectatorServerOverlay" class="spectator-server-overlay" style="display:none">
   <div class="spectator-server-shell">
     <div class="spectator-server-top">
       <div>
-        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V151</div>
+        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V154</div>
         <div id="spectatorServerGameMeta" class="spectator-server-meta">—</div>
         <div class="spectator-server-receive">
           Reçu : <strong id="spectatorServerReceivedAt">—</strong>
           · Source : <strong>main.liveWire</strong>
         </div>
       </div>
-      <button id="spectatorServerExitBtn" class="spectator-server-exit" type="button">← Quitter le Live</button>
+      <div class="spectator-server-actions">
+        <button id="spectatorTakeoverBtn" class="spectator-takeover-btn" type="button">Reprendre la gestion</button>
+        <button id="spectatorServerExitBtn" class="spectator-server-exit" type="button">← Quitter le Live</button>
+      </div>
     </div>
 
     <div class="spectator-server-summary">
@@ -4996,7 +5328,7 @@ body.spectator-live-open .spectator-global-exit{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 15h28</div>
+  <div class="app-version">Version 19/09/26 15h43</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -5036,16 +5368,16 @@ body.spectator-live-open .spectator-global-exit{
           <h2>Partie</h2>
           <div class="field"><label>Date</label><input id="liveDate" type="date"></div>
           <div class="field"><label>Lieu</label><input id="liveLocation" placeholder="Lieu de la partie"></div>
-          <div class="field"><label>Stack de départ</label><input id="liveStartStack" type="number" min="1000" step="1000" value="20000"><span class="stack-step-hint">Par pas de 1 000</span></div>
-          <div class="field"><label>SB minimale</label><input id="liveMinSB" type="number" min="25" step="25" value="25"><span class="stack-step-hint">25 → 50 → 100</span></div>
-          <div class="field"><label>Durée cible</label>
+          <div class="field mobile-hide-live-structure"><label>Stack de départ</label><input id="liveStartStack" type="number" min="1000" step="1000" value="20000"><span class="stack-step-hint">Par pas de 1 000</span></div>
+          <div class="field mobile-hide-live-structure"><label>SB minimale</label><input id="liveMinSB" type="number" min="25" step="25" value="25"><span class="stack-step-hint">25 → 50 → 100</span></div>
+          <div class="field mobile-hide-live-structure"><label>Durée cible</label>
             <select id="liveDuration">
               <option value="120">2h00</option><option value="150">2h30</option><option value="180">3h00</option>
               <option value="210">3h30</option><option value="240" selected>4h00</option><option value="270">4h30</option>
               <option value="300">5h00</option><option value="330">5h30</option><option value="360">6h00</option>
             </select>
           </div>
-<div class="field"><label>Antes</label><select id="liveUseAnte"><option value="no" selected>Non</option><option value="yes">Oui</option></select></div>
+<div class="field mobile-hide-live-structure"><label>Antes</label><select id="liveUseAnte"><option value="no" selected>Non</option><option value="yes">Oui</option></select></div>
           <div class="field"><label>Mise / joueur</label><input id="liveBuyIn" type="number" min="0" step="1" value="5"></div>
 
           <h2 style="margin-top:18px">Joueurs actifs du championnat</h2>
@@ -5067,7 +5399,7 @@ body.spectator-live-open .spectator-global-exit{
           </div>
         </div>
 
-        <div class="card">
+        <div class="card mobile-hide-live-details">
           <h2>Structure calculée</h2><div class="muted" style="margin-bottom:8px">La durée des niveaux et la progression des blindes sont calculées automatiquement à partir de la durée totale souhaitée, du nombre de joueurs et du stack.</div>
           <div id="liveStructureSummary" class="muted" style="margin-bottom:8px">Sélectionnez au moins 2 joueurs.</div>
           <div class="live-structure">
@@ -5099,6 +5431,16 @@ body.spectator-live-open .spectator-global-exit{
           <div id="liveGameMeta" class="muted"></div>
           <div class="live-last-sync muted">Dernière synchro Live : <span id="liveLastSync">—</span> · événements immédiats · rappel serveur</div>
           <div id="liveMasterSyncDiag" class="live-master-sync-diag">Serveur Live : en attente de vérification…</div>
+          <div id="liveHandoverRequestBox" class="live-handover-request" style="display:none">
+            <div>
+              <strong>Demande de reprise du Live</strong>
+              <span id="liveHandoverRequestText">Un autre appareil demande à reprendre la gestion.</span>
+            </div>
+            <div class="live-handover-request-actions">
+              <button id="liveHandoverApproveBtn" class="btn" type="button">Autoriser</button>
+              <button id="liveHandoverRejectBtn" class="btn ghost" type="button">Refuser</button>
+            </div>
+          </div>
         </div>
         <div class="row">
           <span class="live-badge" id="liveSyncBadge">NON SYNCHRONISÉE</span>
@@ -5232,9 +5574,9 @@ body.spectator-live-open .spectator-global-exit{
             <div class="live-kpi"><b id="liveRemaining">0</b><span>joueurs restants</span></div>
             <div class="live-kpi"><b id="liveAvgStack">0</b><span>stack moyen</span></div>
             <div class="live-kpi"><b id="liveElapsed">00:00:00</b><span>durée écoulée</span></div>
-            <div class="live-kpi"><b id="livePrizePool">0 €</b><span>cagnotte</span></div>
+            <div class="live-kpi mobile-hide-live-gains"><b id="livePrizePool">0 €</b><span>cagnotte</span></div>
             <div class="live-kpi"><b id="liveGameNo">—</b><span>partie championnat</span></div>
-            <div class="live-kpi"><b id="livePaid">3</b><span>places payées</span></div>
+            <div class="live-kpi mobile-hide-live-gains"><b id="livePaid">3</b><span>places payées</span></div>
           </div>
 
           <h2 style="margin-top:16px">Enregistrer un sortant</h2>
@@ -5260,7 +5602,7 @@ body.spectator-live-open .spectator-global-exit{
           <h2 style="margin-top:16px">Joueurs</h2>
           <div class="live-players">
             <table>
-              <thead><tr><th>Joueur</th><th>Statut</th><th>Place</th><th>Gain</th><th>Éliminé par</th></tr></thead>
+              <thead><tr><th>Joueur</th><th>Statut</th><th>Place</th><th class="mobile-hide-live-gains">Gain</th><th>Éliminé par</th></tr></thead>
               <tbody id="livePlayersBody"></tbody>
             </table>
           </div>
@@ -6400,7 +6742,8 @@ async function cloudPushNow(){
         remainingSeconds:Number(s.remainingSeconds||0),
         endAt:s.endAt||null,
         levels:JSON.parse(JSON.stringify(s.levels||[])),
-        players:JSON.parse(JSON.stringify(s.players||[]))
+        players:JSON.parse(JSON.stringify(s.players||[])),
+        handoverRequest:s.handoverRequest ? JSON.parse(JSON.stringify(s.handoverRequest)) : null
       };
     }else{
       payload.liveWire=null;
@@ -6539,6 +6882,12 @@ function renderSpectatorServerOverlay(wire){
         <div class="spectator-server-status">${esc(status)}</div>
       </div>`;
   }).join("");
+
+  if($("spectatorTakeoverBtn")){
+    const mine=wire?.handoverRequest?.requesterDeviceId===liveDeviceId();
+    $("spectatorTakeoverBtn").disabled=!!mine;
+    $("spectatorTakeoverBtn").textContent=mine?"Demande envoyée…":"Reprendre la gestion";
+  }
 
   $("spectatorServerOverlay").style.display="block";
     document.body.classList.add("spectator-live-open");
@@ -10328,6 +10677,11 @@ function startSpectatorLivePolling(){
       const wire=spectatorWireFromRow(row);
       const creator=String(wire?.creatorDeviceId||"");
 
+      if(wire && creator===liveDeviceId()){
+        activateTransferredLive(wire);
+        return;
+      }
+
       if(wire && creator && creator!==liveDeviceId()){
         spectatorServerLiveState=JSON.parse(JSON.stringify(wire));
 
@@ -10388,13 +10742,214 @@ function stopSpectatorSyncCountdown(){
   }
 }
 
+
+function handoverDeviceLabel(id){
+  const s=String(id||"");
+  return s ? `Appareil ${s.slice(-6).toUpperCase()}` : "Autre appareil";
+}
+
+function showLiveHandoverRequest(req){
+  const box=$("liveHandoverRequestBox");
+  if(!box)return;
+  if(!req?.requesterDeviceId){
+    box.style.display="none";
+    return;
+  }
+  box.style.display="flex";
+  if($("liveHandoverRequestText")){
+    $("liveHandoverRequestText").textContent=
+      `${handoverDeviceLabel(req.requesterDeviceId)} demande à reprendre la gestion de cette partie.`;
+  }
+}
+
+async function fetchMainStateRow(){
+  if(!ensureLiveSupabaseClient())return null;
+  const {data,error}=await sbClient
+    .from("bpt_state")
+    .select("data,revision,updated_at")
+    .eq("id",CLOUD_ROW_ID)
+    .maybeSingle();
+  if(error)throw error;
+  return data||null;
+}
+
+async function masterCheckHandoverRequest(){
+  const s=db?.liveState;
+  if(!s?.prepared || s.synced || !liveIsCreator())return null;
+
+  try{
+    const row=await fetchMainStateRow();
+    const wire=row?.data?.liveWire||null;
+
+    // Si le serveur indique qu'un autre appareil est désormais maître,
+    // cet appareil doit immédiatement devenir spectateur.
+    if(
+      wire?.prepared &&
+      !wire?.synced &&
+      wire.creatorDeviceId &&
+      wire.creatorDeviceId!==liveDeviceId()
+    ){
+      stopLiveCloudHeartbeat();
+      spectatorServerLiveState=JSON.parse(JSON.stringify(wire));
+      db.liveState=JSON.parse(JSON.stringify(wire));
+      saveLocalOnly();
+
+      if(currentViewId==="live"){
+        await renderSpectatorFromServer(row);
+        startSpectatorLivePolling();
+      }else{
+        applyLiveAccessMode();
+      }
+      return null;
+    }
+
+    const req=wire?.handoverRequest||row?.data?.liveState?.handoverRequest||null;
+    if(req?.requesterDeviceId && req.requesterDeviceId!==liveDeviceId()){
+      db.liveState.handoverRequest=JSON.parse(JSON.stringify(req));
+      showLiveHandoverRequest(req);
+      return req;
+    }
+
+    if(db.liveState?.handoverRequest){
+      db.liveState.handoverRequest=null;
+    }
+    showLiveHandoverRequest(null);
+    return null;
+  }catch(e){
+    console.warn("BPT handover check:",e);
+    return null;
+  }
+}
+
+async function requestLiveTakeover(){
+  try{
+    const row=await fetchMainStateRow();
+    const data=row?.data;
+    const wire=data?.liveWire;
+
+    if(!data || !wire?.prepared || wire?.synced){
+      alert("Le Live n'est plus disponible.");
+      return false;
+    }
+
+    if(wire.creatorDeviceId===liveDeviceId()){
+      activateTransferredLive(wire);
+      return true;
+    }
+
+    const request={
+      requesterDeviceId:liveDeviceId(),
+      requestedAt:Date.now()
+    };
+
+    const payload=JSON.parse(JSON.stringify(data));
+    payload.liveWire={...payload.liveWire,handoverRequest:request};
+    if(payload.liveState?.prepared && !payload.liveState?.synced){
+      payload.liveState={...payload.liveState,handoverRequest:request};
+    }
+
+    const {error}=await sbClient
+      .from("bpt_state")
+      .upsert({id:CLOUD_ROW_ID,data:payload},{onConflict:"id"});
+
+    if(error)throw error;
+
+    if($("spectatorTakeoverBtn")){
+      $("spectatorTakeoverBtn").disabled=true;
+      $("spectatorTakeoverBtn").textContent="Demande envoyée…";
+    }
+    return true;
+  }catch(e){
+    console.error("BPT takeover request:",e);
+    alert("Impossible d'envoyer la demande de reprise du Live.");
+    return false;
+  }
+}
+
+async function rejectLiveTakeover(){
+  const req=db?.liveState?.handoverRequest;
+  if(!req?.requesterDeviceId)return;
+
+  db.liveState.handoverRequest=null;
+  showLiveHandoverRequest(null);
+  await livePushStateNow();
+}
+
+async function approveLiveTakeover(){
+  const s=db?.liveState;
+  const req=s?.handoverRequest;
+  if(!s?.prepared || !req?.requesterDeviceId || !liveIsCreator())return;
+
+  const newCreator=String(req.requesterDeviceId);
+  s.creatorDeviceId=newCreator;
+  s.handoverRequest=null;
+
+  // Publier une dernière fois avec le nouvel appareil comme propriétaire.
+  await livePushStateNow();
+
+  stopLiveCloudHeartbeat();
+
+  try{
+    const row=await fetchMainStateRow();
+    const wire=row?.data?.liveWire||null;
+    if(wire?.prepared){
+      spectatorServerLiveState=JSON.parse(JSON.stringify(wire));
+      db.liveState=JSON.parse(JSON.stringify(wire));
+      saveLocalOnly();
+      if(currentViewId==="live"){
+        await renderSpectatorFromServer(row);
+        startSpectatorLivePolling();
+      }else{
+        applyLiveAccessMode();
+      }
+    }
+  }catch(e){
+    console.warn("BPT handover post approval:",e);
+  }
+
+  showLiveHandoverRequest(null);
+}
+
+function activateTransferredLive(wire){
+  if(!wire?.prepared || wire.creatorDeviceId!==liveDeviceId())return false;
+
+  spectatorServerLiveState=null;
+  spectatorServerLiveRevision=0;
+  db.liveState=JSON.parse(JSON.stringify(wire));
+  db.liveState.handoverRequest=null;
+  saveLocalOnly();
+
+  if($("spectatorServerOverlay"))$("spectatorServerOverlay").style.display="none";
+  document.body.classList.remove("spectator-live-open");
+  document.body.style.overflow="";
+
+  currentViewId="live";
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id==="live"));
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view==="live"));
+
+  liveShowScreen("game");
+  applyLiveAccessMode();
+  liveRenderAll();
+  if(db.liveState.running && db.liveState.endAt)liveRunTicker();
+
+  stopSpectatorLivePolling();
+  startLiveCloudHeartbeat();
+  return true;
+}
+
 function startLiveCloudHeartbeat(){
   stopSpectatorLivePolling();
   if(liveCloudHeartbeat)clearInterval(liveCloudHeartbeat);
+
+  // Contrôle immédiat, puis à chaque heartbeat.
+  masterCheckHandoverRequest();
+
   liveCloudHeartbeat=setInterval(async()=>{
     const s=db?.liveState;
     if(!s?.prepared || s?.synced || !liveIsCreator())return;
     try{
+      await masterCheckHandoverRequest();
+      if(!liveIsCreator())return;
       await livePushStateNow();
     }catch(e){
       console.warn("BPT Live heartbeat:",e);
@@ -11438,7 +11993,7 @@ function liveRenderAll(){
   }
   $("livePlayersBody").innerHTML=[...s.players].sort((a,b)=>(a.place||999)-(b.place||999)).map(p=>`
     <tr class="${p.status==="Sorti"?"out":p.status==="Vainqueur"?"winner":""}">
-      <td>${playerNameHtml(p.name)}</td><td>${p.status}</td><td>${p.place||"—"}</td><td>${p.place?euro(livePrize(p.place)):"—"}</td><td>${esc(p.killer||"")}</td>
+      <td>${playerNameHtml(p.name)}</td><td>${p.status}</td><td>${p.place||"—"}</td><td class="mobile-hide-live-gains">${p.place?euro(livePrize(p.place)):"—"}</td><td>${esc(p.killer||"")}</td>
     </tr>`).join("");
   liveRenderTimerOnly();liveRefreshElimLists();
   if(spectator)renderSpectatorLive();
@@ -12318,6 +12873,10 @@ if($("gameSummaryBackdrop"))$("gameSummaryBackdrop").onclick=e=>{if(e.target===$
 
 // Live : affichage, plein écran et test audio
 if($("liveFullscreenBtn"))$("liveFullscreenBtn").onclick=toggleLiveFullscreen;
+if($("spectatorTakeoverBtn"))$("spectatorTakeoverBtn").onclick=requestLiveTakeover;
+if($("liveHandoverApproveBtn"))$("liveHandoverApproveBtn").onclick=approveLiveTakeover;
+if($("liveHandoverRejectBtn"))$("liveHandoverRejectBtn").onclick=rejectLiveTakeover;
+
 if($("spectatorServerExitBtn"))$("spectatorServerExitBtn").onclick=()=>{
   closeSpectatorServerOverlay("ranking");
 };
@@ -12419,6 +12978,29 @@ initCloudSync();
 setTimeout(()=>startSpectatorLivePolling(),800);
 </script>
 
+
+
+<script>
+(function(){
+  const btn=document.getElementById("mobileLandscapeTryBtn");
+  if(!btn)return;
+
+  btn.addEventListener("click",async()=>{
+    try{
+      if(document.documentElement.requestFullscreen && !document.fullscreenElement){
+        await document.documentElement.requestFullscreen();
+      }
+      if(screen.orientation && screen.orientation.lock){
+        await screen.orientation.lock("landscape");
+      }
+    }catch(e){
+      // Certains navigateurs refusent le verrouillage hors application installée/fullscreen.
+      // L'overlay portrait reste alors affiché jusqu'à rotation manuelle.
+      console.warn("Orientation paysage non verrouillable :",e);
+    }
+  });
+})();
+</script>
 
 </body>
 </html>
