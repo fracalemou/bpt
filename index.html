@@ -3514,6 +3514,323 @@ nav button.spectator-nav{
   }
 }
 
+
+/* ===== V131 — Spectateur plein écran uniquement ===== */
+body:has(#live.live-spectator-mode) header,
+body:has(#live.live-spectator-mode) nav,
+body:has(#live.live-spectator-mode) .season-nav,
+body:has(#live.live-spectator-mode) #cloudStatus{
+  display:none !important;
+}
+
+#live.live-spectator-mode{
+  position:fixed;
+  inset:0;
+  z-index:5000;
+  display:block !important;
+  overflow:auto;
+  background:#070b10;
+  padding:0 !important;
+  margin:0 !important;
+}
+
+#live.live-spectator-mode > .hero,
+#live.live-spectator-mode #liveSpectatorBanner,
+#live.live-spectator-mode .live-head,
+#live.live-spectator-mode #liveFullscreenDisplay,
+#live.live-spectator-mode > .season-toolbar{
+  display:none !important;
+}
+
+.live-spectator-mode #liveManager,
+.live-spectator-mode #liveGameScreen{
+  display:block !important;
+  min-height:100vh;
+}
+
+.live-spectator-panel{
+  min-height:100vh;
+  margin:0 !important;
+  background:
+    radial-gradient(circle at 20% 0%,rgba(26,64,91,.26),transparent 35%),
+    linear-gradient(180deg,#0b1017,#070a0f);
+}
+
+.spectator-fullscreen-shell{
+  min-height:100vh;
+  box-sizing:border-box;
+  padding:22px clamp(16px,4vw,52px) 28px;
+  display:flex;
+  flex-direction:column;
+}
+
+.spectator-fullscreen-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+}
+
+.spectator-kicker{
+  color:#8ecff5;
+  font-size:12px;
+  font-weight:950;
+  letter-spacing:.12em;
+}
+
+.spectator-game-meta{
+  margin-top:4px;
+  color:#8494a5;
+  font-size:11px;
+}
+
+.spectator-quit-btn{
+  border:1px solid #354657;
+  border-radius:10px;
+  padding:9px 12px;
+  background:#111923;
+  color:#d7dee5;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.spectator-live-summary{
+  display:grid;
+  grid-template-columns:1fr 1.25fr .7fr;
+  gap:14px;
+  margin-top:22px;
+}
+
+.spectator-level-block,
+.spectator-timer-block,
+.spectator-remaining-block{
+  border:1px solid #26394b;
+  border-radius:16px;
+  background:rgba(17,26,36,.88);
+  padding:18px;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
+.spectator-level-block > span,
+.spectator-timer-block > span,
+.spectator-remaining-block > span{
+  color:#7f91a4;
+  font-size:9px;
+  font-weight:850;
+  letter-spacing:.1em;
+}
+
+.spectator-level-block > strong{
+  margin-top:5px;
+  color:#eef4f8;
+  font-size:20px;
+}
+
+.spectator-blinds{
+  margin-top:5px;
+  color:#fff;
+  font-size:32px;
+  font-weight:950;
+}
+
+.spectator-ante{
+  margin-top:4px;
+  min-height:15px;
+  color:#8fa0b0;
+  font-size:10px;
+}
+
+.spectator-timer{
+  display:block;
+  margin-top:2px;
+  color:#fff;
+  font-size:56px;
+  line-height:1;
+  font-weight:950;
+  font-variant-numeric:tabular-nums;
+}
+
+.spectator-next{
+  margin-top:7px;
+  color:#8fa0b0;
+  font-size:10px;
+}
+
+.spectator-remaining-block > strong{
+  margin-top:4px;
+  color:#fff;
+  font-size:52px;
+  line-height:1;
+}
+
+.spectator-player-list-wrap{
+  flex:1;
+  min-height:0;
+  margin-top:16px;
+  border:1px solid #26394b;
+  border-radius:16px;
+  background:rgba(14,21,29,.92);
+  padding:16px;
+}
+
+.spectator-list-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:12px;
+  margin-bottom:10px;
+}
+
+.spectator-list-head > div:first-child{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+
+.spectator-list-head strong{
+  color:#eef3f7;
+  font-size:16px;
+}
+
+.spectator-list-head span{
+  color:#7f8e9d;
+  font-size:9px;
+}
+
+.spectator-sync-mini{
+  color:#77899b;
+  font-size:9px;
+  white-space:nowrap;
+}
+
+.spectator-sync-mini strong{
+  margin-left:4px;
+  color:#9cd8fb;
+  font-size:14px;
+  font-variant-numeric:tabular-nums;
+}
+
+.spectator-player-list{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.spectator-player-row{
+  display:grid;
+  grid-template-columns:42px minmax(0,1fr) minmax(120px,.7fr);
+  align-items:center;
+  gap:10px;
+  min-height:42px;
+  padding:7px 10px;
+  border:1px solid #243442;
+  border-radius:10px;
+  background:#121b24;
+}
+
+.spectator-player-row.is-out{
+  opacity:.62;
+  background:#0d1319;
+}
+
+.spectator-player-row.is-winner{
+  border-color:#8d743c;
+  background:#201b11;
+}
+
+.spectator-player-rank{
+  color:#8393a3;
+  font-weight:900;
+  text-align:center;
+}
+
+.spectator-player-name{
+  min-width:0;
+  color:#edf2f6;
+}
+
+.spectator-player-status{
+  color:#8fa0b0;
+  font-size:10px;
+  text-align:right;
+}
+
+.spectator-player-row.is-out .spectator-player-status{
+  color:#8d9298;
+}
+
+@media(max-width:700px){
+  .spectator-fullscreen-shell{
+    padding:12px 10px 18px;
+  }
+
+  .spectator-fullscreen-header{
+    align-items:flex-start;
+  }
+
+  .spectator-live-summary{
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-top:12px;
+  }
+
+  .spectator-remaining-block{
+    grid-column:1 / -1;
+    flex-direction:row;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    padding:10px;
+  }
+
+  .spectator-remaining-block > strong{
+    font-size:34px;
+  }
+
+  .spectator-level-block,
+  .spectator-timer-block{
+    padding:12px 8px;
+  }
+
+  .spectator-blinds{
+    font-size:24px;
+  }
+
+  .spectator-timer{
+    font-size:40px;
+  }
+
+  .spectator-player-list-wrap{
+    margin-top:9px;
+    padding:10px;
+  }
+
+  .spectator-list-head span{
+    display:none;
+  }
+
+  .spectator-player-row{
+    grid-template-columns:28px minmax(0,1fr);
+    gap:7px;
+    min-height:38px;
+  }
+
+  .spectator-player-status{
+    grid-column:2;
+    text-align:left;
+    margin-top:-5px;
+    font-size:9px;
+  }
+
+  .spectator-quit-btn{
+    padding:7px 9px;
+    font-size:10px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -3531,7 +3848,7 @@ nav button.spectator-nav{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 13h38</div>
+  <div class="app-version">Version 19/09/26 13h52</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -3680,58 +3997,46 @@ nav button.spectator-nav{
       </div>
 
       <div id="liveSpectatorPanel" class="live-spectator-panel" style="display:none">
-        <div class="spectator-topline">
-          <div>
-            <div class="spectator-kicker">BPT · LIVE SPECTATEUR</div>
-            <div id="spectatorGameMeta" class="spectator-game-meta">—</div>
+        <div class="spectator-fullscreen-shell">
+          <div class="spectator-fullscreen-header">
+            <div>
+              <div class="spectator-kicker">BPT · LIVE</div>
+              <div id="spectatorGameMeta" class="spectator-game-meta">—</div>
+            </div>
+            <button id="spectatorQuitLiveBtn" class="spectator-quit-btn" type="button">Quitter le Live</button>
           </div>
-          <button id="spectatorQuitLiveBtn" class="btn ghost spectator-quit-btn" type="button">Quitter le Live</button>
-        </div>
 
-        <div class="spectator-main-grid">
-          <div class="spectator-timer-card">
-            <div id="spectatorStateBadge" class="spectator-state-badge">EN COURS</div>
-            <div id="spectatorLevel" class="spectator-level">Niveau —</div>
-            <div id="spectatorBlinds" class="spectator-blinds">— / —</div>
-            <div id="spectatorAnte" class="spectator-ante">Ante —</div>
-            <div class="spectator-timer-label">Temps restant</div>
-            <div id="spectatorTimer" class="spectator-timer">00:00</div>
-            <div class="spectator-next">Niveau suivant : <strong id="spectatorNextBlinds">—</strong></div>
-
-            <div class="spectator-sync-box">
-              <span>Prochaine synchro serveur</span>
-              <strong id="spectatorSyncCountdown">30 s</strong>
+          <div class="spectator-live-summary">
+            <div class="spectator-level-block">
+              <span>NIVEAU ACTUEL</span>
+              <strong id="spectatorLevel">Niveau —</strong>
+              <div id="spectatorBlinds" class="spectator-blinds">— / —</div>
+              <div id="spectatorAnte" class="spectator-ante">Ante —</div>
             </div>
 
-            <button class="btn secondary spectator-fullscreen-btn" id="spectatorFullscreenBtn" type="button">
-              Plein écran
-            </button>
+            <div class="spectator-timer-block">
+              <span>TEMPS RESTANT</span>
+              <strong id="spectatorTimer" class="spectator-timer">00:00</strong>
+              <div class="spectator-next">Suivant : <b id="spectatorNextBlinds">—</b></div>
+            </div>
+
+            <div class="spectator-remaining-block">
+              <span>JOUEURS RESTANTS</span>
+              <strong id="spectatorRemaining">—</strong>
+            </div>
           </div>
 
-          <div class="spectator-eliminated-card">
-            <div class="spectator-section-head">
+          <div class="spectator-player-list-wrap">
+            <div class="spectator-list-head">
               <div>
-                <h2>Joueurs éliminés</h2>
-                <div class="muted">Ordre de sortie et éliminateur</div>
+                <strong>Joueurs inscrits</strong>
+                <span>Les joueurs encore en jeu sont en haut. Le premier éliminé reste tout en bas.</span>
               </div>
-              <div class="spectator-remaining">
-                <span>Restants</span>
-                <strong id="spectatorRemaining">—</strong>
+              <div class="spectator-sync-mini">
+                Synchro <strong id="spectatorSyncCountdown">30 s</strong>
               </div>
             </div>
-
-            <div id="spectatorEliminatedEmpty" class="spectator-empty">
-              Aucun joueur éliminé pour le moment.
-            </div>
-
-            <div class="tablewrap">
-              <table class="spectator-eliminated-table">
-                <thead>
-                  <tr><th>Place</th><th>Joueur</th><th>Éliminé par</th></tr>
-                </thead>
-                <tbody id="spectatorEliminatedBody"></tbody>
-              </table>
-            </div>
+            <div id="spectatorPlayerList" class="spectator-player-list"></div>
           </div>
         </div>
       </div>
@@ -4979,6 +5284,7 @@ async function applySpectatorLiveState(row){
 
     if(db.liveState?.running && db.liveState?.endAt)liveRunTicker();
     stopLiveCloudHeartbeat();
+    startSpectatorLivePolling();
     liveMaybeAutoOpenSpectator();
 
     setCloudStatus(
@@ -5442,9 +5748,15 @@ async function livePushStateNow(){
   saveLocalOnly();
   if(!sbClient || !cloudReady || cloudApplying)return false;
 
-  // Le Live ne doit pas attendre la synchronisation de l'historique.
-  // On publie directement bpt_state (joueurs / paramètres / liveState),
-  // avec history vide puisque l'historique officiel reste dans bpt_games_v2.
+  // Chaque publication Live est horodatée pour garantir une vraie mise à jour
+  // côté Supabase, même si aucun événement métier n'a changé.
+  if(db.liveState){
+    db.liveState.publishedAt=Date.now();
+    if(db.liveState.running && db.liveState.endAt){
+      db.liveState.remainingSeconds=Math.max(0,Math.ceil((db.liveState.endAt-Date.now())/1000));
+    }
+  }
+
   clearTimeout(cloudSaveTimer);
   setCloudStatus("busy","Synchronisation Live…");
 
@@ -8547,6 +8859,54 @@ let liveCloudHeartbeat=null;
 const LIVE_CLOUD_HEARTBEAT_MS=30000;
 let spectatorSyncDeadline=Date.now()+LIVE_CLOUD_HEARTBEAT_MS;
 let spectatorSyncCountdownTimer=null;
+let spectatorLivePollTimer=null;
+let spectatorLastPublishedAt=0;
+
+function startSpectatorLivePolling(){
+  if(spectatorLivePollTimer)clearInterval(spectatorLivePollTimer);
+  spectatorLivePollTimer=setInterval(async()=>{
+    if(!sbClient || !cloudReady)return;
+    try{
+      const row=await cloudFetchState();
+      const remote=row?.data?.liveState;
+      if(!row || !isValidBptState(row.data) || !remote)return;
+
+      const remoteCreator=String(remote.creatorDeviceId||"");
+      const active=!!(remote.prepared && !remote.synced);
+      if(!active || !remoteCreator || remoteCreator===liveDeviceId())return;
+
+      const publishedAt=Number(remote.publishedAt||0);
+      const localSignature=JSON.stringify({
+        levelIndex:db?.liveState?.levelIndex,
+        players:db?.liveState?.players,
+        running:db?.liveState?.running,
+        endAt:db?.liveState?.endAt,
+        publishedAt:db?.liveState?.publishedAt
+      });
+      const remoteSignature=JSON.stringify({
+        levelIndex:remote.levelIndex,
+        players:remote.players,
+        running:remote.running,
+        endAt:remote.endAt,
+        publishedAt:remote.publishedAt
+      });
+
+      if(publishedAt!==spectatorLastPublishedAt || localSignature!==remoteSignature){
+        spectatorLastPublishedAt=publishedAt;
+        await applySpectatorLiveState(row);
+      }
+    }catch(e){
+      console.warn("BPT spectator direct poll:",e);
+    }
+  },2000);
+}
+
+function stopSpectatorLivePolling(){
+  if(spectatorLivePollTimer){
+    clearInterval(spectatorLivePollTimer);
+    spectatorLivePollTimer=null;
+  }
+}
 
 function resetSpectatorSyncCountdown(){
   spectatorSyncDeadline=Date.now()+LIVE_CLOUD_HEARTBEAT_MS;
@@ -8579,6 +8939,7 @@ function stopSpectatorSyncCountdown(){
 }
 
 function startLiveCloudHeartbeat(){
+  stopSpectatorLivePolling();
   if(liveCloudHeartbeat)clearInterval(liveCloudHeartbeat);
   liveCloudHeartbeat=setInterval(async()=>{
     const s=db?.liveState;
@@ -9482,17 +9843,21 @@ function renderSpectatorLive(){
 
   const level=s.levels?.[s.levelIndex]||{};
   const next=s.levels?.[s.levelIndex+1]||null;
-  const alive=s.players.filter(p=>p.status==="En jeu" || p.status==="Vainqueur" || Number(p.place)===1);
+
+  const active=s.players.filter(p=>p.status!=="Sorti" && Number(p.place)!==1);
+  const winner=s.players.filter(p=>p.status==="Vainqueur" || Number(p.place)===1);
   const eliminated=s.players
     .filter(p=>p.status==="Sorti" && Number(p.place)>1)
-    .sort((a,b)=>Number(b.place)-Number(a.place));
+    // place la plus petite = élimination la plus récente -> plus haut.
+    // place la plus grande = premier éliminé -> tout en bas.
+    .sort((a,b)=>Number(a.place)-Number(b.place));
+
+  const ordered=[...winner,...active,...eliminated];
+  const remainingCount=winner.length || active.length;
 
   if($("spectatorGameMeta")){
     $("spectatorGameMeta").textContent=
-      `Partie #${s.gameNo||"—"} · ${s.date||""}${s.location?" · "+s.location:""} · ${s.players.length} joueurs`;
-  }
-  if($("spectatorStateBadge")){
-    $("spectatorStateBadge").textContent=s.running?"EN COURS":"PAUSE";
+      `Partie #${s.gameNo||"—"} · ${s.date||""}${s.location?" · "+s.location:""}`;
   }
   if($("spectatorLevel")){
     $("spectatorLevel").textContent=`Niveau ${Number(level.level||s.levelIndex+1)}`;
@@ -9501,7 +9866,7 @@ function renderSpectatorLive(){
     $("spectatorBlinds").textContent=`${liveFmt(level.sb||0)} / ${liveFmt(level.bb||0)}`;
   }
   if($("spectatorAnte")){
-    $("spectatorAnte").textContent=`Ante ${level.ante?liveFmt(level.ante):"—"}`;
+    $("spectatorAnte").textContent=Number(level.ante)>0?`Ante ${liveFmt(level.ante)}`:"";
   }
   if($("spectatorTimer")){
     $("spectatorTimer").textContent=liveTime(s.remainingSeconds);
@@ -9509,22 +9874,29 @@ function renderSpectatorLive(){
   if($("spectatorNextBlinds")){
     $("spectatorNextBlinds").textContent=next
       ? `${liveFmt(next.sb)} / ${liveFmt(next.bb)}${next.ante?" · ante "+liveFmt(next.ante):""}`
-      : "—";
+      : "Dernier niveau";
   }
   if($("spectatorRemaining")){
-    $("spectatorRemaining").textContent=String(alive.length||1);
+    $("spectatorRemaining").textContent=String(remainingCount);
   }
 
-  if($("spectatorEliminatedBody")){
-    $("spectatorEliminatedBody").innerHTML=eliminated.map(p=>`
-      <tr>
-        <td>${p.place||"—"}</td>
-        <td>${playerNameHtml(p.name)}</td>
-        <td>${p.killer?playerNameHtml(p.killer):"—"}</td>
-      </tr>`).join("");
-  }
-  if($("spectatorEliminatedEmpty")){
-    $("spectatorEliminatedEmpty").style.display=eliminated.length?"none":"block";
+  if($("spectatorPlayerList")){
+    $("spectatorPlayerList").innerHTML=ordered.map((p,index)=>{
+      const out=p.status==="Sorti";
+      const won=p.status==="Vainqueur" || Number(p.place)===1;
+      const status=won
+        ? "Vainqueur"
+        : out
+          ? `Éliminé${p.killer?` par ${p.killer}`:""}`
+          : "En jeu";
+
+      return `
+        <div class="spectator-player-row ${out?"is-out":""} ${won?"is-winner":""}">
+          <div class="spectator-player-rank">${out?(p.place||"—"):"•"}</div>
+          <div class="spectator-player-name">${playerNameHtml(p.name)}</div>
+          <div class="spectator-player-status">${esc(status)}</div>
+        </div>`;
+    }).join("");
   }
 
   if(!spectatorSyncCountdownTimer)startSpectatorSyncCountdown();
@@ -10358,9 +10730,10 @@ if($("gameSummaryBackdrop"))$("gameSummaryBackdrop").onclick=e=>{if(e.target===$
 
 // Live : affichage, plein écran et test audio
 if($("liveFullscreenBtn"))$("liveFullscreenBtn").onclick=toggleLiveFullscreen;
-if($("spectatorFullscreenBtn"))$("spectatorFullscreenBtn").onclick=toggleLiveFullscreen;
 if($("spectatorQuitLiveBtn"))$("spectatorQuitLiveBtn").onclick=()=>{
   liveSpectatorAutoOpened=true;
+  stopSpectatorLivePolling();
+  stopSpectatorSyncCountdown();
   try{sessionStorage.setItem("bpt_spectator_opened","1");}catch(e){}
   showView("dashboard");
 };
