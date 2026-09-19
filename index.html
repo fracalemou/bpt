@@ -3342,6 +3342,178 @@ nav button.spectator-nav{
   }
 }
 
+
+/* ===== V130 — écran spectateur dédié ===== */
+.live-spectator-panel{
+  margin-top:12px;
+}
+.spectator-topline{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px;
+}
+.spectator-kicker{
+  color:#80c6ef;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+.spectator-game-meta{
+  margin-top:3px;
+  color:#b9c5d2;
+  font-size:11px;
+}
+.spectator-main-grid{
+  display:grid;
+  grid-template-columns:minmax(280px,.85fr) minmax(360px,1.15fr);
+  gap:14px;
+}
+.spectator-timer-card,
+.spectator-eliminated-card{
+  border:1px solid #345a77;
+  border-radius:16px;
+  background:linear-gradient(180deg,#131d28,#101720);
+  padding:18px;
+}
+.spectator-timer-card{
+  text-align:center;
+}
+.spectator-state-badge{
+  display:inline-flex;
+  padding:5px 9px;
+  border-radius:999px;
+  background:#244963;
+  color:#bfe6ff;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.06em;
+}
+.spectator-level{
+  margin-top:12px;
+  color:#d5dce5;
+  font-size:16px;
+  font-weight:800;
+}
+.spectator-blinds{
+  margin-top:3px;
+  color:#fff;
+  font-size:34px;
+  line-height:1;
+  font-weight:950;
+}
+.spectator-ante{
+  margin-top:5px;
+  color:#a9b5c2;
+  font-size:11px;
+}
+.spectator-timer-label{
+  margin-top:20px;
+  color:#8d9aaa;
+  font-size:9px;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.spectator-timer{
+  margin-top:2px;
+  font-size:58px;
+  line-height:1;
+  font-weight:950;
+  font-variant-numeric:tabular-nums;
+  color:#f4f7fa;
+}
+.spectator-next{
+  margin-top:12px;
+  color:#a9b5c2;
+  font-size:11px;
+}
+.spectator-sync-box{
+  margin:18px auto 10px;
+  max-width:240px;
+  padding:9px 12px;
+  border:1px solid #2f4f67;
+  border-radius:10px;
+  background:#101b25;
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+}
+.spectator-sync-box span{
+  color:#8294a6;
+  font-size:9px;
+}
+.spectator-sync-box strong{
+  color:#9fd8fa;
+  font-size:15px;
+  font-variant-numeric:tabular-nums;
+}
+.spectator-fullscreen-btn{
+  margin-top:4px;
+}
+.spectator-section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:12px;
+}
+.spectator-section-head h2{
+  margin:0;
+}
+.spectator-remaining{
+  text-align:right;
+}
+.spectator-remaining span{
+  display:block;
+  color:#8d9aaa;
+  font-size:9px;
+  text-transform:uppercase;
+}
+.spectator-remaining strong{
+  font-size:26px;
+  color:#f2f5f8;
+}
+.spectator-empty{
+  padding:18px 0;
+  color:#8997a7;
+  text-align:center;
+}
+.spectator-eliminated-table td,
+.spectator-eliminated-table th{
+  vertical-align:middle;
+}
+.spectator-quit-btn{
+  white-space:nowrap;
+}
+.live-spectator-mode .live-head{
+  display:none;
+}
+@media(max-width:800px){
+  .spectator-main-grid{
+    grid-template-columns:1fr;
+  }
+  .spectator-topline{
+    align-items:flex-start;
+  }
+  .spectator-timer{
+    font-size:48px;
+  }
+}
+@media(max-width:520px){
+  .spectator-topline{
+    flex-direction:column;
+  }
+  .spectator-quit-btn{
+    width:100%;
+  }
+  .spectator-timer-card,
+  .spectator-eliminated-card{
+    padding:14px;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -3359,7 +3531,7 @@ nav button.spectator-nav{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 13h27</div>
+  <div class="app-version">Version 19/09/26 13h38</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -3504,6 +3676,63 @@ nav button.spectator-nav{
 
         <div class="live-fullscreen-next">
           Niveau suivant : <strong id="liveFsNext">—</strong>
+        </div>
+      </div>
+
+      <div id="liveSpectatorPanel" class="live-spectator-panel" style="display:none">
+        <div class="spectator-topline">
+          <div>
+            <div class="spectator-kicker">BPT · LIVE SPECTATEUR</div>
+            <div id="spectatorGameMeta" class="spectator-game-meta">—</div>
+          </div>
+          <button id="spectatorQuitLiveBtn" class="btn ghost spectator-quit-btn" type="button">Quitter le Live</button>
+        </div>
+
+        <div class="spectator-main-grid">
+          <div class="spectator-timer-card">
+            <div id="spectatorStateBadge" class="spectator-state-badge">EN COURS</div>
+            <div id="spectatorLevel" class="spectator-level">Niveau —</div>
+            <div id="spectatorBlinds" class="spectator-blinds">— / —</div>
+            <div id="spectatorAnte" class="spectator-ante">Ante —</div>
+            <div class="spectator-timer-label">Temps restant</div>
+            <div id="spectatorTimer" class="spectator-timer">00:00</div>
+            <div class="spectator-next">Niveau suivant : <strong id="spectatorNextBlinds">—</strong></div>
+
+            <div class="spectator-sync-box">
+              <span>Prochaine synchro serveur</span>
+              <strong id="spectatorSyncCountdown">30 s</strong>
+            </div>
+
+            <button class="btn secondary spectator-fullscreen-btn" id="spectatorFullscreenBtn" type="button">
+              Plein écran
+            </button>
+          </div>
+
+          <div class="spectator-eliminated-card">
+            <div class="spectator-section-head">
+              <div>
+                <h2>Joueurs éliminés</h2>
+                <div class="muted">Ordre de sortie et éliminateur</div>
+              </div>
+              <div class="spectator-remaining">
+                <span>Restants</span>
+                <strong id="spectatorRemaining">—</strong>
+              </div>
+            </div>
+
+            <div id="spectatorEliminatedEmpty" class="spectator-empty">
+              Aucun joueur éliminé pour le moment.
+            </div>
+
+            <div class="tablewrap">
+              <table class="spectator-eliminated-table">
+                <thead>
+                  <tr><th>Place</th><th>Joueur</th><th>Éliminé par</th></tr>
+                </thead>
+                <tbody id="spectatorEliminatedBody"></tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -4744,6 +4973,7 @@ async function applySpectatorLiveState(row){
     saveLocalOnly();
 
     liveSetLastSyncNow();
+    resetSpectatorSyncCountdown();
     liveShowScreen("game");
     liveRenderAll();
 
@@ -8315,6 +8545,38 @@ let liveSelected=new Set();
 let liveTicker=null;
 let liveCloudHeartbeat=null;
 const LIVE_CLOUD_HEARTBEAT_MS=30000;
+let spectatorSyncDeadline=Date.now()+LIVE_CLOUD_HEARTBEAT_MS;
+let spectatorSyncCountdownTimer=null;
+
+function resetSpectatorSyncCountdown(){
+  spectatorSyncDeadline=Date.now()+LIVE_CLOUD_HEARTBEAT_MS;
+}
+
+function spectatorSyncSecondsLeft(){
+  return Math.max(0,Math.ceil((spectatorSyncDeadline-Date.now())/1000));
+}
+
+function startSpectatorSyncCountdown(){
+  if(spectatorSyncCountdownTimer)clearInterval(spectatorSyncCountdownTimer);
+  resetSpectatorSyncCountdown();
+  spectatorSyncCountdownTimer=setInterval(()=>{
+    const el=$("spectatorSyncCountdown");
+    if(!el)return;
+    let left=spectatorSyncSecondsLeft();
+    if(left<=0){
+      resetSpectatorSyncCountdown();
+      left=spectatorSyncSecondsLeft();
+    }
+    el.textContent=`${left} s`;
+  },250);
+}
+
+function stopSpectatorSyncCountdown(){
+  if(spectatorSyncCountdownTimer){
+    clearInterval(spectatorSyncCountdownTimer);
+    spectatorSyncCountdownTimer=null;
+  }
+}
 
 function startLiveCloudHeartbeat(){
   if(liveCloudHeartbeat)clearInterval(liveCloudHeartbeat);
@@ -8507,15 +8769,15 @@ function applyLiveAccessMode(){
 
 function liveMaybeAutoOpenSpectator(){
   if(!liveIsSpectator() || liveSpectatorAutoOpened)return;
+  try{
+    if(sessionStorage.getItem("bpt_spectator_opened")==="1")return;
+  }catch(e){}
   if(typeof selectedSeasonKey!=="undefined" && selectedSeasonKey!==CURRENT_SEASON_KEY){
     selectedSeasonKey=CURRENT_SEASON_KEY;
     try{sessionStorage.setItem(SEASON_VISIT_KEY,CURRENT_SEASON_KEY);}catch(e){}
   }
   liveSpectatorAutoOpened=true;
-  try{
-    if(sessionStorage.getItem("bpt_spectator_opened")==="1")return;
-    sessionStorage.setItem("bpt_spectator_opened","1");
-  }catch(e){}
+  try{sessionStorage.setItem("bpt_spectator_opened","1");}catch(e){}
   setTimeout(()=>{
     showView("live");
     liveShowScreen("game");
@@ -8918,6 +9180,7 @@ function liveRenderTimerOnly(){
   const s=ensureLiveState();
   $("liveTimer").textContent=liveTime(s.remainingSeconds);
   $("liveElapsed").textContent=liveTime(liveElapsedSeconds());
+  if($("spectatorTimer") && liveIsSpectator())$("spectatorTimer").textContent=liveTime(s.remainingSeconds);
   updateLiveTimerUrgency();
   if(document.fullscreenElement===$("liveFullscreenDisplay"))liveRenderFullscreen();
 }
@@ -9213,11 +9476,70 @@ async function liveFinalizeGame(){
   }
 }
 
+function renderSpectatorLive(){
+  const s=ensureLiveState();
+  if(!liveIsSpectator() || !s.prepared)return;
+
+  const level=s.levels?.[s.levelIndex]||{};
+  const next=s.levels?.[s.levelIndex+1]||null;
+  const alive=s.players.filter(p=>p.status==="En jeu" || p.status==="Vainqueur" || Number(p.place)===1);
+  const eliminated=s.players
+    .filter(p=>p.status==="Sorti" && Number(p.place)>1)
+    .sort((a,b)=>Number(b.place)-Number(a.place));
+
+  if($("spectatorGameMeta")){
+    $("spectatorGameMeta").textContent=
+      `Partie #${s.gameNo||"—"} · ${s.date||""}${s.location?" · "+s.location:""} · ${s.players.length} joueurs`;
+  }
+  if($("spectatorStateBadge")){
+    $("spectatorStateBadge").textContent=s.running?"EN COURS":"PAUSE";
+  }
+  if($("spectatorLevel")){
+    $("spectatorLevel").textContent=`Niveau ${Number(level.level||s.levelIndex+1)}`;
+  }
+  if($("spectatorBlinds")){
+    $("spectatorBlinds").textContent=`${liveFmt(level.sb||0)} / ${liveFmt(level.bb||0)}`;
+  }
+  if($("spectatorAnte")){
+    $("spectatorAnte").textContent=`Ante ${level.ante?liveFmt(level.ante):"—"}`;
+  }
+  if($("spectatorTimer")){
+    $("spectatorTimer").textContent=liveTime(s.remainingSeconds);
+  }
+  if($("spectatorNextBlinds")){
+    $("spectatorNextBlinds").textContent=next
+      ? `${liveFmt(next.sb)} / ${liveFmt(next.bb)}${next.ante?" · ante "+liveFmt(next.ante):""}`
+      : "—";
+  }
+  if($("spectatorRemaining")){
+    $("spectatorRemaining").textContent=String(alive.length||1);
+  }
+
+  if($("spectatorEliminatedBody")){
+    $("spectatorEliminatedBody").innerHTML=eliminated.map(p=>`
+      <tr>
+        <td>${p.place||"—"}</td>
+        <td>${playerNameHtml(p.name)}</td>
+        <td>${p.killer?playerNameHtml(p.killer):"—"}</td>
+      </tr>`).join("");
+  }
+  if($("spectatorEliminatedEmpty")){
+    $("spectatorEliminatedEmpty").style.display=eliminated.length?"none":"block";
+  }
+
+  if(!spectatorSyncCountdownTimer)startSpectatorSyncCountdown();
+}
+
 function liveRenderAll(){
   const s=ensureLiveState();
   const spectator=applyLiveAccessMode();
   if(!s.prepared){liveShowScreen("prep");return;}
   if(spectator)liveShowScreen("game");
+
+  if($("liveSpectatorPanel"))$("liveSpectatorPanel").style.display=spectator?"block":"none";
+  const stage=document.querySelector("#liveGameScreen > .live-stage");
+  if(stage)stage.style.display=spectator?"none":"grid";
+
   const level=s.levels[s.levelIndex],next=s.levels[s.levelIndex+1];
   $("liveGameMeta").textContent=`Partie #${s.gameNo} • ${s.date}${s.location?" • "+s.location:""} • ${s.players.length} joueurs`;
   $("liveGameNo").textContent="#"+s.gameNo;
@@ -9269,6 +9591,7 @@ function liveRenderAll(){
       <td>${playerNameHtml(p.name)}</td><td>${p.status}</td><td>${p.place||"—"}</td><td>${p.place?euro(livePrize(p.place)):"—"}</td><td>${esc(p.killer||"")}</td>
     </tr>`).join("");
   liveRenderTimerOnly();liveRefreshElimLists();
+  if(spectator)renderSpectatorLive();
   if(s.running && s.endAt && !liveTicker)liveRunTicker();
   if(document.fullscreenElement===$("liveFullscreenDisplay"))liveRenderFullscreen();
 }
@@ -10035,6 +10358,12 @@ if($("gameSummaryBackdrop"))$("gameSummaryBackdrop").onclick=e=>{if(e.target===$
 
 // Live : affichage, plein écran et test audio
 if($("liveFullscreenBtn"))$("liveFullscreenBtn").onclick=toggleLiveFullscreen;
+if($("spectatorFullscreenBtn"))$("spectatorFullscreenBtn").onclick=toggleLiveFullscreen;
+if($("spectatorQuitLiveBtn"))$("spectatorQuitLiveBtn").onclick=()=>{
+  liveSpectatorAutoOpened=true;
+  try{sessionStorage.setItem("bpt_spectator_opened","1");}catch(e){}
+  showView("dashboard");
+};
 if($("liveFullscreenExitBtn"))$("liveFullscreenExitBtn").onclick=()=>document.exitFullscreen?.();
 if($("liveCancelGameBtn"))$("liveCancelGameBtn").onclick=()=>liveCancelCurrentGame({ask:true,showMessage:true});
 if($("liveResumeContinueBtn"))$("liveResumeContinueBtn").onclick=()=>{
