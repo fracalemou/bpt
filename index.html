@@ -3335,7 +3335,7 @@ nav button.spectator-nav{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 12h16</div>
+  <div class="app-version">Version 19/09/26 12h25</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -3365,8 +3365,8 @@ nav button.spectator-nav{
     <div id="livePrepScreen" class="live-screen active">
       <div class="live-head">
         <div>
-          <div class="live-title">BPT — Préparation de la partie live</div>
-          <div class="muted">La partie terminée sera automatiquement enregistrée dans le championnat et le classement sera recalculé.</div>
+          <div class="live-title">BPT — Préparation d’une nouvelle partie</div>
+          <div class="muted">Configurez la prochaine partie. À la fin du Live, la partie terminée est enregistrée dans le championnat puis cet écran est réaffiché automatiquement.</div>
         </div>
       </div>
 
@@ -3429,7 +3429,7 @@ nav button.spectator-nav{
     <div id="liveGameScreen" class="live-screen">
       <div id="liveSpectatorBanner" class="live-spectator-banner" style="display:none">
         <strong>Mode spectateur</strong>
-        <span>Cette partie est pilotée depuis un autre appareil. L’affichage est en lecture seule et se met à jour automatiquement.</span>
+        <span>Cette partie est pilotée depuis un autre appareil. L’affichage est en lecture seule et se met à jour automatiquement toutes les quelques secondes.</span>
       </div>
       <div class="live-head">
         <div>
@@ -4665,7 +4665,11 @@ function scheduleCloudSave(){
 
 async function applyCloudState(row){
   if(!row || !isValidBptState(row.data))return false;
-  if(cloudLocalDirty)return false;
+  const remoteCreator=String(row.data?.liveState?.creatorDeviceId||"");
+  const thisDevice=liveDeviceId();
+  const remoteActive=!!(row.data?.liveState?.prepared && !row.data?.liveState?.synced);
+  const thisDeviceOwnsRemoteLive=remoteActive && remoteCreator && remoteCreator===thisDevice;
+  if(cloudLocalDirty && thisDeviceOwnsRemoteLive)return false;
 
   const rev=Number(row.revision||0);
   const remoteState=JSON.parse(JSON.stringify(row.data));
@@ -4679,6 +4683,7 @@ async function applyCloudState(row){
     currentSeasonHistoryCache=clone(serverHistory);
 
     db=remoteState;
+    if(remoteActive && !thisDeviceOwnsRemoteLive)cloudLocalDirty=false;
 
     if(liveSeasonKey==="2023-2024"){
       db.history=applyPlayerAliasesToRows(ARCHIVE_2023_2024);
@@ -4732,10 +4737,15 @@ async function cloudPoll(){
     const remote=await cloudFetchState();
     const remoteRevision=Number(remote?.revision||0);
 
-    if(remote && isValidBptState(remote.data) &&
-       (!cloudLastRevision || remoteRevision>cloudLastRevision)){
-      await applyCloudState(remote);
-      return;
+    if(remote && isValidBptState(remote.data)){
+      const localLiveSig=JSON.stringify(db?.liveState||null);
+      const remoteLiveSig=JSON.stringify(remote.data?.liveState||null);
+      const liveChanged=localLiveSig!==remoteLiveSig;
+
+      if(!cloudLastRevision || remoteRevision>cloudLastRevision || liveChanged){
+        await applyCloudState(remote);
+        return;
+      }
     }
 
     // Même sans nouvelle révision d'état, l'historique officiel peut évoluer.
@@ -4790,6 +4800,7 @@ async function initCloudSync(){
 
       const localHistory=Array.isArray(db.history)?db.history:[];
       db=row.data;
+      cloudLocalDirty=false;
 
       // Migration automatique : si bpt_games est vide,
       // le premier navigateur alimente la base à partir de son historique local.
@@ -4956,6 +4967,14 @@ let db = loadDB();
 function saveDB(){
   saveLocalOnly();
   scheduleCloudSave();
+}
+
+async function livePushStateNow(){
+  saveLocalOnly();
+  cloudLocalDirty=true;
+  if(!sbClient || !cloudReady || cloudApplying)return false;
+  clearTimeout(cloudSaveTimer);
+  return await cloudPushNow();
 }
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
 function euro(n){return Number(n||0).toLocaleString("fr-FR",{minimumFractionDigits:0,maximumFractionDigits:2})+" €";}
@@ -8182,6 +8201,10 @@ function applyLiveAccessMode(){
 
 function liveMaybeAutoOpenSpectator(){
   if(!liveIsSpectator() || liveSpectatorAutoOpened)return;
+  if(typeof selectedSeasonKey!=="undefined" && selectedSeasonKey!==CURRENT_SEASON_KEY){
+    selectedSeasonKey=CURRENT_SEASON_KEY;
+    try{sessionStorage.setItem(SEASON_VISIT_KEY,CURRENT_SEASON_KEY);}catch(e){}
+  }
   liveSpectatorAutoOpened=true;
   try{
     if(sessionStorage.getItem("bpt_spectator_opened")==="1")return;
@@ -8397,7 +8420,7 @@ function liveShowScreen(which){
   $("liveGameScreen").classList.toggle("active",which==="game");
   if(which==="game")liveRenderAll();
 }
-function liveLaunch(){
+async function liveLaunch(){
   if(!liveCreatorGuard())return;
   if(liveSelected.size<2){alert("Sélectionnez au moins 2 joueurs.");return;}
   const old=ensureLiveState();
@@ -8425,22 +8448,27 @@ function liveLaunch(){
     endAt:null,elapsedBeforeMs:0,runStartedAt:null,startedAt:null,
     players:names.map(name=>({name,status:"En jeu",place:null,killer:"",outLevel:null,outTime:""}))
   };
-  saveDB();liveShowScreen("game");liveRenderAll();
+  saveLocalOnly();
+  liveShowScreen("game");
+  liveRenderAll();
+  await livePushStateNow();
 }
-function liveStart(){
+async function liveStart(){
   if(!liveCreatorGuard())return;
   const s=ensureLiveState();if(!s.prepared)return;
   liveEnsureAudio();
   if(s.running)return;
   s.running=true;if(!s.startedAt)s.startedAt=Date.now();s.runStartedAt=Date.now();s.endAt=Date.now()+s.remainingSeconds*1000;
-  saveDB();liveRunTicker();liveRenderAll();
+  saveLocalOnly();liveRunTicker();liveRenderAll();
+  await livePushStateNow();
 }
-function livePause(){
+async function livePause(){
   if(!liveCreatorGuard())return;
   const s=ensureLiveState();if(!s.running)return;
   s.remainingSeconds=Math.max(0,Math.ceil((s.endAt-Date.now())/1000));
   s.elapsedBeforeMs=(s.elapsedBeforeMs||0)+(Date.now()-(s.runStartedAt||Date.now()));
-  s.running=false;s.runStartedAt=null;s.endAt=null;saveDB();liveRenderAll();
+  s.running=false;s.runStartedAt=null;s.endAt=null;saveLocalOnly();liveRenderAll();
+  await livePushStateNow();
 }
 function liveRunTicker(){
   if(liveTicker)clearInterval(liveTicker);
@@ -8490,7 +8518,7 @@ function adjustLiveMinSB(direction){
   input.dispatchEvent(new Event("change",{bubbles:true}));
 }
 
-function liveApplyBlindDuration(){
+async function liveApplyBlindDuration(){
   if(!liveCreatorGuard())return;
   const s=ensureLiveState();
   if(!s.prepared || !Array.isArray(s.levels) || !s.levels.length)return;
@@ -8551,7 +8579,7 @@ function liveAdjustTimer(deltaSeconds){
   liveRenderTimerOnly();
 }
 
-function liveChangeLevel(delta,auto=false){
+async function liveChangeLevel(delta,auto=false){
   if(!liveCreatorGuard())return;
   const s=ensureLiveState();if(!s.prepared)return;
   liveEnsureAudio();
@@ -8570,7 +8598,7 @@ function liveChangeLevel(delta,auto=false){
   liveThirtySecondWarningKey="";
 
   if(s.running)s.endAt=Date.now()+s.remainingSeconds*1000;
-  saveDB();liveRenderAll();
+  saveLocalOnly();liveRenderAll();await livePushStateNow();
 
   if(s.levelIndex!==oldIndex){
     liveLevelChangeSound();
@@ -8704,14 +8732,18 @@ async function liveEliminate(){
     left[0].status="Vainqueur";
     left[0].place=1;
     left[0].killer="";
-    livePause();
+    await livePause();
     const synced=await liveSyncChampionship(true);
-    if(!synced){
+    if(synced){
+      livePrepareNextGame();
+      return;
+    }else{
       // Le bouton manuel reste affiché pour permettre une nouvelle tentative.
       liveRenderAll();
     }
   }else{
-    saveDB();
+    saveLocalOnly();
+    await livePushStateNow();
   }
 
   liveRenderAll();
@@ -8836,11 +8868,39 @@ async function liveSyncChampionship(force=false){
   }
 }
 
+function livePrepareNextGame(){
+  if(liveTicker){
+    clearInterval(liveTicker);
+    liveTicker=null;
+  }
+
+  // Le Live terminé reste dans l'historique officiel ; seul l'état temporaire
+  // de la partie en direct est réinitialisé.
+  db.liveState=null;
+  liveSelected.clear();
+  liveDraftLevels=[];
+  liveDraftCustom=false;
+
+  saveDB();
+
+  if($("liveDate"))$("liveDate").value=new Date().toISOString().slice(0,10);
+  if($("liveBuyIn"))$("liveBuyIn").value=db.settings.stake||5;
+  if($("liveLocation"))$("liveLocation").value="";
+  if($("liveNewPlayer"))$("liveNewPlayer").value="";
+
+  liveRenderPlayerList();
+  livePreviewStructure();
+  liveShowScreen("prep");
+  applyLiveAccessMode();
+}
+
 async function liveFinalizeGame(){
   if(!liveCreatorGuard())return;
+  const gameNo=ensureLiveState().gameNo;
   const ok=await liveSyncChampionship(true);
   if(ok){
-    alert(`Partie #${ensureLiveState().gameNo} enregistrée dans l'historique et synchronisée.`);
+    alert(`Partie #${gameNo} enregistrée dans l'historique et synchronisée.`);
+    livePrepareNextGame();
   }
 }
 
