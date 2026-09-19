@@ -3916,6 +3916,39 @@ body.spectator-live-open #live.active.live-spectator-mode #liveFullscreenDisplay
   display:none !important;
 }
 
+
+/* ===== V135 — synchro spectateur autonome + sortie toujours accessible ===== */
+body.spectator-live-open .spectator-quit-btn{
+  position:fixed !important;
+  top:max(10px, env(safe-area-inset-top)) !important;
+  right:max(10px, env(safe-area-inset-right)) !important;
+  z-index:7000 !important;
+  display:inline-flex !important;
+  align-items:center;
+  justify-content:center;
+  min-height:38px;
+  padding:9px 12px !important;
+  border:1px solid #496175 !important;
+  border-radius:10px !important;
+  background:#101820 !important;
+  color:#eef4f8 !important;
+  box-shadow:0 8px 24px rgba(0,0,0,.35);
+}
+
+.spectator-update-state{
+  margin-top:3px;
+  color:#718395;
+  font-size:9px;
+}
+.spectator-update-state strong{
+  color:#9ed7f8;
+  font-variant-numeric:tabular-nums;
+}
+
+body.spectator-live-open .spectator-fullscreen-header{
+  padding-right:125px;
+}
+
 </style>
 </head>
 <body>
@@ -3933,7 +3966,7 @@ body.spectator-live-open #live.active.live-spectator-mode #liveFullscreenDisplay
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 14h13</div>
+  <div class="app-version">Version 19/09/26 14h18</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -4087,8 +4120,9 @@ body.spectator-live-open #live.active.live-spectator-mode #liveFullscreenDisplay
             <div>
               <div class="spectator-kicker">BPT · LIVE</div>
               <div id="spectatorGameMeta" class="spectator-game-meta">—</div>
+              <div class="spectator-update-state">Dernière réception : <strong id="spectatorLastReceive">—</strong></div>
             </div>
-            <button id="spectatorQuitLiveBtn" class="spectator-quit-btn" type="button">Quitter le Live</button>
+            <button id="spectatorQuitLiveBtn" class="spectator-quit-btn" type="button">← Quitter le Live</button>
           </div>
 
           <div class="spectator-live-summary">
@@ -5358,6 +5392,9 @@ async function applySpectatorLiveState(row,{fromDirectPoll=false}={}){
   saveLocalOnly();
 
   liveSetLastSyncNow();
+  if($("spectatorLastReceive")){
+    $("spectatorLastReceive").textContent=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  }
   resetSpectatorSyncCountdown();
 
   if($("live")?.classList.contains("active") && currentViewId==="live"){
@@ -8929,7 +8966,7 @@ function startSpectatorLivePolling(){
   if(spectatorLivePollTimer)clearInterval(spectatorLivePollTimer);
 
   const pull=async()=>{
-    if(!sbClient || !cloudReady)return;
+    if(!sbClient)return;
     try{
       const row=await cloudFetchState();
       if(!row || !isValidBptState(row.data))return;
@@ -10679,6 +10716,9 @@ async function showView(id){
     if(liveIsSpectator()){
       liveShowScreen("game");
       liveRenderAll();
+      if(!sbClient){
+        try{await initCloudSync();}catch(e){console.warn("BPT spectator init:",e);}
+      }
       if(!spectatorLivePollTimer)startSpectatorLivePolling();
     }else{
       liveRenderAll();
@@ -10812,8 +10852,8 @@ if($("liveFullscreenBtn"))$("liveFullscreenBtn").onclick=toggleLiveFullscreen;
 if($("spectatorQuitLiveBtn"))$("spectatorQuitLiveBtn").onclick=()=>{
   stopSpectatorSyncCountdown();
   document.body.classList.remove("spectator-live-open");
-  currentViewId="dashboard";
-  showView("dashboard");
+  currentViewId="ranking";
+  showView("ranking");
 };
 if($("liveFullscreenExitBtn"))$("liveFullscreenExitBtn").onclick=()=>document.exitFullscreen?.();
 if($("liveCancelGameBtn"))$("liveCancelGameBtn").onclick=()=>liveCancelCurrentGame({ask:true,showMessage:true});
@@ -10847,7 +10887,7 @@ document.addEventListener("fullscreenchange",()=>{
 
 // Navigation principale
 document.querySelectorAll("nav button[data-view]").forEach(b=>{
-  b.addEventListener("click",()=>{
+  b.addEventListener("click",async()=>{
     const target=b.dataset.view;
     if(target==="live" && liveIsSpectator()){
       currentViewId="live";
@@ -10856,7 +10896,10 @@ document.querySelectorAll("nav button[data-view]").forEach(b=>{
       document.querySelectorAll("nav button").forEach(n=>n.classList.toggle("active",n.dataset.view==="live"));
       liveShowScreen("game");
       liveRenderAll();
-      if(!spectatorLivePollTimer)startSpectatorLivePolling();
+      if(!sbClient){
+        try{await initCloudSync();}catch(e){console.warn("BPT spectator init:",e);}
+      }
+      startSpectatorLivePolling();
       return;
     }
     showView(target);
