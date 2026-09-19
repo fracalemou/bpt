@@ -3318,6 +3318,14 @@ nav button.spectator-nav{
   }
 }
 
+
+/* ===== V126 — synchronisation Live continue ===== */
+.live-last-sync{
+  margin-top:3px;
+  font-size:9px;
+  opacity:.78;
+}
+
 </style>
 </head>
 <body>
@@ -3335,7 +3343,7 @@ nav button.spectator-nav{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 12h30</div>
+  <div class="app-version">Version 19/09/26 12h36</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -3435,6 +3443,7 @@ nav button.spectator-nav{
         <div>
           <div class="live-title" id="liveGameTitle">Championnat BPT — Partie en cours</div>
           <div id="liveGameMeta" class="muted"></div>
+          <div class="live-last-sync muted">Dernière synchro Live : <span id="liveLastSync">—</span></div>
         </div>
         <div class="row">
           <span class="live-badge" id="liveSyncBadge">NON SYNCHRONISÉE</span>
@@ -4708,10 +4717,13 @@ async function applyCloudState(row){
     }
 
     cloudLastRevision=rev;
+    liveSetLastSyncNow();
     renderAll();
     if(typeof liveRenderAll==="function" && liveSeasonKey===CURRENT_SEASON_KEY){
       liveRenderAll();
       if(db.liveState?.running && db.liveState?.endAt)liveRunTicker();
+      if(liveIsCreator() && !db.liveState?.synced)startLiveCloudHeartbeat();
+      else stopLiveCloudHeartbeat();
       liveMaybeAutoOpenSpectator();
     }
 
@@ -5009,7 +5021,9 @@ async function livePushStateNow(){
   cloudLocalDirty=true;
   if(!sbClient || !cloudReady || cloudApplying)return false;
   clearTimeout(cloudSaveTimer);
-  return await cloudPushNow();
+  const ok=await cloudPushNow();
+  if(ok)liveSetLastSyncNow();
+  return ok;
 }
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
 function euro(n){return Number(n||0).toLocaleString("fr-FR",{minimumFractionDigits:0,maximumFractionDigits:2})+" €";}
@@ -8073,6 +8087,29 @@ function renderPoints(){
 /* ==================== LIVE BPT INTÉGRÉ ==================== */
 let liveSelected=new Set();
 let liveTicker=null;
+let liveCloudHeartbeat=null;
+const LIVE_CLOUD_HEARTBEAT_MS=60000;
+
+function startLiveCloudHeartbeat(){
+  if(liveCloudHeartbeat)clearInterval(liveCloudHeartbeat);
+  liveCloudHeartbeat=setInterval(async()=>{
+    const s=db?.liveState;
+    if(!s?.prepared || s?.synced || !liveIsCreator())return;
+    try{
+      await livePushStateNow();
+    }catch(e){
+      console.warn("BPT Live heartbeat:",e);
+    }
+  },LIVE_CLOUD_HEARTBEAT_MS);
+}
+
+function stopLiveCloudHeartbeat(){
+  if(liveCloudHeartbeat){
+    clearInterval(liveCloudHeartbeat);
+    liveCloudHeartbeat=null;
+  }
+}
+
 let liveAudioCtx=null;
 let liveTenSecondWarningKey="";
 let liveThirtySecondWarningKey="";
@@ -8198,6 +8235,11 @@ function liveIsCreator(){
 function liveIsSpectator(){
   const s=db?.liveState;
   return !!(s?.prepared && !s?.synced && !liveIsCreator());
+}
+
+function liveSetLastSyncNow(){
+  const el=$("liveLastSync");
+  if(el)el.textContent=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
 }
 
 function applyLiveAccessMode(){
@@ -8490,6 +8532,7 @@ async function liveLaunch(){
   liveShowScreen("game");
   liveRenderAll();
   await livePushStateNow();
+  startLiveCloudHeartbeat();
 }
 async function liveStart(){
   if(!liveCreatorGuard())return;
@@ -8499,6 +8542,7 @@ async function liveStart(){
   s.running=true;if(!s.startedAt)s.startedAt=Date.now();s.runStartedAt=Date.now();s.endAt=Date.now()+s.remainingSeconds*1000;
   saveLocalOnly();liveRunTicker();liveRenderAll();
   await livePushStateNow();
+  startLiveCloudHeartbeat();
 }
 async function livePause(){
   if(!liveCreatorGuard())return;
@@ -8907,6 +8951,7 @@ async function liveSyncChampionship(force=false){
 }
 
 function livePrepareNextGame(){
+  stopLiveCloudHeartbeat();
   if(liveTicker){
     clearInterval(liveTicker);
     liveTicker=null;
@@ -9006,7 +9051,9 @@ async function liveCancelCurrentGame({ask=true,showMessage=true}={}){
   if(!liveCreatorGuard())return;
   const s=ensureLiveState();
   if(!s.prepared){
-    db.liveState=null;
+    stopLiveCloudHeartbeat();
+    stopLiveCloudHeartbeat();
+  db.liveState=null;
     saveDB();
     liveSelected.clear();
     liveRenderPlayerList();
@@ -9103,6 +9150,7 @@ function liveInit(){
     liveShowScreen("game");
     liveRenderAll();
     if(db.liveState.running && db.liveState.endAt)liveRunTicker();
+    if(liveIsCreator() && !db.liveState.synced)startLiveCloudHeartbeat();
     liveMaybeAutoOpenSpectator();
   }else{
     liveShowScreen("prep");
