@@ -5571,20 +5571,8 @@ body.spectator-live-open .spectator-global-exit{
 .live-fullscreen-top-actions .live-fullscreen-exit{
   position:static !important;
 }
-.live-fullscreen-settings{
-  border:1px solid rgba(143,212,255,.35);
-  background:rgba(15,29,41,.9);
-  color:#edf6fb;
-  border-radius:10px;
-  padding:8px 13px;
-  font-size:12px;
-  font-weight:900;
-  cursor:pointer;
-}
-.live-fullscreen-settings:disabled{
-  opacity:.35;
-  cursor:default;
-}
+
+
 
 .live-fs-elim-inline{
   width:min(860px,94vw);
@@ -5631,7 +5619,6 @@ body.spectator-live-open .spectator-global-exit{
     top:8px;
     right:8px;
   }
-  .live-fullscreen-settings,
   .live-fullscreen-top-actions .live-fullscreen-exit{
     padding:6px 9px !important;
     font-size:10px !important;
@@ -5948,7 +5935,6 @@ body.spectator-live-open .spectator-global-exit{
     padding:6px 8px !important;
   }
 
-  #liveFullscreenDisplay .live-fullscreen-settings,
   #liveFullscreenDisplay .live-fullscreen-exit{
     font-size:9px !important;
     padding:5px 8px !important;
@@ -6004,6 +5990,27 @@ body.spectator-live-open .spectator-global-exit{
   }
 }
 
+
+/* ===== V174 — reprise Live : bandeau global unique et fonctionnel ===== */
+#liveHandoverRequestBox{
+  display:none !important;
+}
+.global-handover-request{
+  pointer-events:none;
+}
+.global-handover-card,
+.global-handover-actions,
+#globalHandoverApproveBtn,
+#globalHandoverRejectBtn{
+  pointer-events:auto !important;
+}
+#globalHandoverApproveBtn,
+#globalHandoverRejectBtn{
+  position:relative;
+  z-index:2;
+  cursor:pointer !important;
+}
+
 </style>
 </head>
 <body>
@@ -6019,7 +6026,7 @@ body.spectator-live-open .spectator-global-exit{
   <div class="spectator-server-shell">
     <div class="spectator-server-top">
       <div>
-        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V173</div>
+        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V175</div>
         <div id="spectatorServerGameMeta" class="spectator-server-meta">—</div>
         <div class="spectator-server-receive">
           Reçu : <strong id="spectatorServerReceivedAt">—</strong>
@@ -6077,7 +6084,7 @@ body.spectator-live-open .spectator-global-exit{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 17h43</div>
+  <div class="app-version">Version 19/09/26 17h49</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -6180,16 +6187,7 @@ body.spectator-live-open .spectator-global-exit{
           <div id="liveGameMeta" class="muted"></div>
           <div class="live-last-sync muted">Dernière synchro Live : <span id="liveLastSync">—</span> · événements immédiats · rappel serveur</div>
           <div id="liveMasterSyncDiag" class="live-master-sync-diag">Serveur Live : en attente de vérification…</div>
-          <div id="liveHandoverRequestBox" class="live-handover-request" style="display:none">
-            <div>
-              <strong>Demande de reprise du Live</strong>
-              <span id="liveHandoverRequestText">Un autre appareil demande à reprendre la gestion.</span>
-            </div>
-            <div class="live-handover-request-actions">
-              <button id="liveHandoverApproveBtn" class="btn" type="button">Autoriser</button>
-              <button id="liveHandoverRejectBtn" class="btn ghost" type="button">Refuser</button>
-            </div>
-          </div>
+          
         </div>
         <div class="row">
           <span class="live-badge" id="liveSyncBadge">NON SYNCHRONISÉE</span>
@@ -6203,7 +6201,6 @@ body.spectator-live-open .spectator-global-exit{
 
       <div id="liveFullscreenDisplay" class="live-fullscreen-display" aria-label="Affichage plein écran du Live">
         <div class="live-fullscreen-top-actions live-admin-only">
-          <button id="liveFsSettingsBtn" class="live-fullscreen-settings" type="button">Paramètres</button>
           <button id="liveFullscreenExitBtn" class="live-fullscreen-exit" type="button">Quitter plein écran</button>
         </div>
         <div class="live-fullscreen-brand">BPT · LIVE</div>
@@ -8324,7 +8321,8 @@ async function livePushStateNow(){
         remainingSeconds:Number(s.remainingSeconds||0),
         endAt:s.endAt||null,
         levels:JSON.parse(JSON.stringify(s.levels||[])),
-        players:JSON.parse(JSON.stringify(s.players||[]))
+        players:JSON.parse(JSON.stringify(s.players||[])),
+        handoverRequest:s.handoverRequest ? JSON.parse(JSON.stringify(s.handoverRequest)) : null
       };
     }else{
       payload.liveWire=null;
@@ -9336,13 +9334,6 @@ function liveRenderFullscreen(){
   }
   if($("liveFsEliminateOpenBtn")){
     $("liveFsEliminateOpenBtn").disabled=!!s.synced || liveAlive().length<=1;
-  }
-  if($("liveFsSettingsBtn")){
-    const canEditPlayers=!s.startedAt && !s.synced;
-    $("liveFsSettingsBtn").disabled=!canEditPlayers;
-    $("liveFsSettingsBtn").title=canEditPlayers
-      ? "Revenir à la préparation pour modifier les participants"
-      : "Les participants sont figés après le démarrage";
   }
 
   $("liveFsTimer").classList.toggle("warning30",s.remainingSeconds<=30 && s.remainingSeconds>10);
@@ -11791,17 +11782,8 @@ function handoverDeviceLabel(id){
 }
 
 function showLiveHandoverRequest(req){
-  const box=$("liveHandoverRequestBox");
-  if(!box)return;
-  if(!req?.requesterDeviceId){
-    box.style.display="none";
-    return;
-  }
-  box.style.display="flex";
-  if($("liveHandoverRequestText")){
-    $("liveHandoverRequestText").textContent=
-      `${handoverDeviceLabel(req.requesterDeviceId)} demande à reprendre la gestion de cette partie.`;
-  }
+  // V174 : la demande de reprise est affichée uniquement par le bandeau global.
+  return;
 }
 
 async function fetchMainStateRow(){
@@ -11835,16 +11817,15 @@ async function masterCheckHandoverRequest(){
   const s=ensureLiveState();
   if(!s?.prepared || s.synced || !liveIsCreator()){
     hideGlobalHandoverRequest();
-    if($("liveHandoverRequestBox"))$("liveHandoverRequestBox").style.display="none";
     return;
   }
 
   try{
     const row=await fetchMainStateRow();
     const wire=row?.data?.liveWire||null;
+
     if(!wire?.prepared || wire?.synced){
       hideGlobalHandoverRequest();
-      if($("liveHandoverRequestBox"))$("liveHandoverRequestBox").style.display="none";
       return;
     }
 
@@ -11854,24 +11835,18 @@ async function masterCheckHandoverRequest(){
       db.liveState={...clone(wire),synced:false,prepared:true};
       saveLocalOnly();
       hideGlobalHandoverRequest();
-      if($("liveHandoverRequestBox"))$("liveHandoverRequestBox").style.display="none";
       startSpectatorLivePolling();
       return;
     }
 
     const req=wire.handoverRequest||null;
-    if(req && req.requesterDeviceId && req.requesterDeviceId!==liveDeviceId()){
-      const label=handoverDeviceLabel(req.requesterDeviceId);
-      const msg=`${label} demande à reprendre la gestion du Live.`;
-
+    if(req?.requesterDeviceId && req.requesterDeviceId!==liveDeviceId()){
       s.handoverRequest=clone(req);
-      if($("liveHandoverRequestText"))$("liveHandoverRequestText").textContent=msg;
-      if($("liveHandoverRequestBox"))$("liveHandoverRequestBox").style.display="flex";
-
-      showGlobalHandoverRequest(msg);
+      showGlobalHandoverRequest(
+        `${handoverDeviceLabel(req.requesterDeviceId)} demande à reprendre la gestion du Live.`
+      );
     }else{
       s.handoverRequest=null;
-      if($("liveHandoverRequestBox"))$("liveHandoverRequestBox").style.display="none";
       hideGlobalHandoverRequest();
     }
   }catch(e){
@@ -11926,48 +11901,110 @@ async function requestLiveTakeover(){
 
 async function rejectLiveTakeover(){
   hideGlobalHandoverRequest();
-  const req=db?.liveState?.handoverRequest;
-  if(!req?.requesterDeviceId)return;
 
-  db.liveState.handoverRequest=null;
-  showLiveHandoverRequest(null);
-  await livePushStateNow();
+  try{
+    const row=await fetchMainStateRow();
+    const data=row?.data;
+    const wire=data?.liveWire;
+
+    if(!data || !wire?.prepared || wire?.synced)return false;
+    if(String(wire.creatorDeviceId||"")!==liveDeviceId())return false;
+
+    const req=wire.handoverRequest||null;
+    if(!req?.requesterDeviceId)return false;
+
+    const payload=JSON.parse(JSON.stringify(data));
+    payload.liveWire={...payload.liveWire,handoverRequest:null};
+
+    if(payload.liveState?.prepared && !payload.liveState?.synced){
+      payload.liveState={...payload.liveState,handoverRequest:null};
+    }
+
+    const {error}=await sbClient
+      .from("bpt_state")
+      .upsert({id:CLOUD_ROW_ID,data:payload},{onConflict:"id"});
+
+    if(error)throw error;
+
+    if(db.liveState)db.liveState.handoverRequest=null;
+    saveLocalOnly();
+    return true;
+  }catch(e){
+    console.error("BPT reject takeover:",e);
+    alert("Impossible de refuser la demande de reprise du Live.");
+    return false;
+  }
 }
 
 async function approveLiveTakeover(){
   hideGlobalHandoverRequest();
-  const s=db?.liveState;
-  const req=s?.handoverRequest;
-  if(!s?.prepared || !req?.requesterDeviceId || !liveIsCreator())return;
-
-  const newCreator=String(req.requesterDeviceId);
-  s.creatorDeviceId=newCreator;
-  s.handoverRequest=null;
-
-  // Publier une dernière fois avec le nouvel appareil comme propriétaire.
-  await livePushStateNow();
-
-  stopLiveCloudHeartbeat();
 
   try{
     const row=await fetchMainStateRow();
-    const wire=row?.data?.liveWire||null;
-    if(wire?.prepared){
-      spectatorServerLiveState=JSON.parse(JSON.stringify(wire));
-      db.liveState=JSON.parse(JSON.stringify(wire));
-      saveLocalOnly();
-      if(currentViewId==="live"){
-        await renderSpectatorFromServer(row);
-        startSpectatorLivePolling();
-      }else{
-        applyLiveAccessMode();
-      }
-    }
-  }catch(e){
-    console.warn("BPT handover post approval:",e);
-  }
+    const data=row?.data;
+    const wire=data?.liveWire;
 
-  showLiveHandoverRequest(null);
+    if(!data || !wire?.prepared || wire?.synced){
+      alert("Le Live n’est plus disponible.");
+      return false;
+    }
+
+    if(String(wire.creatorDeviceId||"")!==liveDeviceId()){
+      alert("Cet appareil n’est plus le gestionnaire du Live.");
+      return false;
+    }
+
+    const req=wire.handoverRequest||null;
+    if(!req?.requesterDeviceId){
+      return false;
+    }
+
+    const newCreator=String(req.requesterDeviceId);
+    const payload=JSON.parse(JSON.stringify(data));
+
+    payload.liveWire={
+      ...payload.liveWire,
+      creatorDeviceId:newCreator,
+      handoverRequest:null,
+      publishedAt:Date.now()
+    };
+
+    if(payload.liveState?.prepared && !payload.liveState?.synced){
+      payload.liveState={
+        ...payload.liveState,
+        creatorDeviceId:newCreator,
+        handoverRequest:null
+      };
+    }
+
+    const {data:written,error}=await sbClient
+      .from("bpt_state")
+      .upsert({id:CLOUD_ROW_ID,data:payload},{onConflict:"id"})
+      .select("data,revision,updated_at")
+      .single();
+
+    if(error)throw error;
+
+    stopLiveCloudHeartbeat();
+
+    const writtenWire=written?.data?.liveWire||payload.liveWire;
+    spectatorServerLiveState=JSON.parse(JSON.stringify(writtenWire));
+    db.liveState=JSON.parse(JSON.stringify(writtenWire));
+    saveLocalOnly();
+
+    applyLiveAccessMode();
+    startSpectatorLivePolling();
+
+    if(currentViewId==="live"){
+      renderSpectatorServerOverlay(writtenWire);
+    }
+
+    return true;
+  }catch(e){
+    console.error("BPT approve takeover:",e);
+    alert("Impossible d’autoriser la reprise du Live.");
+    return false;
+  }
 }
 
 function activateTransferredLive(wire){
@@ -12486,37 +12523,7 @@ async function liveLaunch(){
   startLiveCloudHeartbeat();
 }
 
-async function liveFsReturnToSettings(){
-  if(!liveCreatorGuard())return;
-  const s=ensureLiveState();
-  if(!s?.prepared || s.synced)return;
-  if(s.startedAt){
-    alert("Les participants ne peuvent plus être modifiés après le démarrage de la partie.");
-    return;
-  }
 
-  // Recharger la sélection depuis le Live préparé.
-  liveSelected=new Set((s.players||[]).map(p=>p.name));
-  if($("liveDate"))$("liveDate").value=s.date||new Date().toISOString().slice(0,10);
-  if($("liveLocation"))$("liveLocation").value=s.location||"";
-  if($("liveStartStack"))$("liveStartStack").value=s.startStack||20000;
-  if($("liveBuyIn"))$("liveBuyIn").value=s.buyIn??db.settings.stake??5;
-  if($("liveDuration"))$("liveDuration").value=s.targetMinutes||240;
-  if($("liveUseAnte"))$("liveUseAnte").value=s.useAnte?"yes":"no";
-
-  liveDraftLevels=clone(s.levels||[]);
-  liveDraftCustom=true;
-  liveRenderPlayerList();
-  liveRenderStructureEditor();
-  liveUpdateStructureSummary();
-
-  if(document.fullscreenElement){
-    try{await document.exitFullscreen?.();}catch(e){}
-  }
-
-  liveShowScreen("prep");
-  liveRenderAll();
-}
 
 async function liveStart(){
   if(!liveCreatorGuard())return;
@@ -14095,8 +14102,6 @@ if($("spectatorServerLevel"))$("spectatorServerLevel").onclick=openLiveStructure
 
 if($("spectatorTakeoverBtn"))$("spectatorTakeoverBtn").onclick=requestLiveTakeover;
 if($("liveHandoverApproveBtn"))$("liveHandoverApproveBtn").onclick=approveLiveTakeover;
-if($("globalHandoverApproveBtn"))$("globalHandoverApproveBtn").onclick=approveLiveTakeover;
-if($("globalHandoverRejectBtn"))$("globalHandoverRejectBtn").onclick=rejectLiveTakeover;
 
 if($("liveHandoverRejectBtn"))$("liveHandoverRejectBtn").onclick=rejectLiveTakeover;
 
@@ -14216,8 +14221,16 @@ setTimeout(()=>syncSharedPhotosWithRetry(),1400);
 // Fermeture robuste du détail de structure : fonctionne même si le panneau
 // a été inséré dans le DOM après l'initialisation des autres événements.
 document.addEventListener("click",e=>{
-  if(e.target?.id==="liveFsSettingsBtn"){
-    liveFsReturnToSettings();
+  if(e.target?.id==="globalHandoverApproveBtn"){
+    e.preventDefault();
+    e.stopPropagation();
+    approveLiveTakeover();
+    return;
+  }
+  if(e.target?.id==="globalHandoverRejectBtn"){
+    e.preventDefault();
+    e.stopPropagation();
+    rejectLiveTakeover();
     return;
   }
   if(e.target?.id==="liveFsPauseResumeBtn"){
