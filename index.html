@@ -4,6 +4,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>BPT — Gestion du championnat</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23173a2b'/%3E%3Cpath d='M32 10c-6 10-18 15-18 26 0 7 5 12 11 12 3 0 5-1 7-4-1 5-3 8-7 10h14c-4-2-6-5-7-10 2 3 4 4 7 4 6 0 11-5 11-12 0-11-12-16-18-26z' fill='%23c8952e'/%3E%3C/svg%3E">
 <style>
@@ -9073,7 +9076,7 @@ function updateBptDeviceBadge(){
   const badge=document.getElementById("bptDeviceBadge");
   if(!badge)return;
   const mobile=!!isBptMobileDevice();
-  badge.textContent=mobile?"Version téléphone 2.1.2":"Version PC 2.1.2";
+  badge.textContent=mobile?"Version téléphone 2.1.4":"Version PC 2.1.4";
   badge.classList.toggle("mobile",mobile);
   badge.classList.toggle("desktop",!mobile);
 }
@@ -11887,15 +11890,15 @@ function renderRecords(){
     let holderHtml="";
     if(c[1]==="Kill le plus fréquent" && pairData){
       holderHtml=`<span class="record-mobile-player-pair">
-        <span class="record-mobile-player-name">${esc(pairData.names[0])}</span>
+        <span class="record-mobile-player-name" style="color:#42D5E8 !important">${esc(pairData.names[0])}</span>
         <span class="record-action">a éliminé</span>
-        <span class="record-mobile-player-name">${esc(pairData.names[1])}</span>
+        <span class="record-mobile-player-name" style="color:#42D5E8 !important">${esc(pairData.names[1])}</span>
       </span>`;
     }else if(c[2] && c[2]!=="—"){
       const nick=playerNicknameInfo(c[2]).primary;
-      holderHtml=`<span class="record-mobile-player-name">${esc(c[2])}${nick?` <span class="record-mobile-nickname">(${esc(nick)})</span>`:""}</span>`;
+      holderHtml=`<span class="record-mobile-player-name" style="color:#42D5E8 !important">${esc(c[2])}${nick?` <span class="record-mobile-nickname" style="color:#9FE8F1 !important">(${esc(nick)})</span>`:""}</span>`;
     }else{
-      holderHtml='<span class="record-mobile-player-name">—</span>';
+      holderHtml='<span class="record-mobile-player-name" style="color:#42D5E8 !important">—</span>';
     }
 
     if(mobileRecords){
