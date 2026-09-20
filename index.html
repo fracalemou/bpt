@@ -14036,7 +14036,7 @@ function startSpectatorLivePolling(){
         }else{
           const liveNav=document.querySelector('nav button[data-view="live"]');
           if(liveNav){
-            liveNav.textContent="● Live · Spectateur";
+            liveNav.textContent="● Live";
             liveNav.classList.add("spectator-nav");
           }
         }
@@ -14563,7 +14563,7 @@ function applyLiveAccessMode(){
 
   const liveNav=document.querySelector('nav button[data-view="live"]');
   if(liveNav){
-    liveNav.textContent=spectator?"● Live · Spectateur":"● Live";
+    liveNav.textContent="● Live";
     liveNav.classList.toggle("spectator-nav",spectator);
   }
 
@@ -16828,7 +16828,7 @@ document.addEventListener("visibilitychange",()=>{
       const key = btn.getAttribute('data-view') || '';
       let label=(isMobile ? mobileLabels[key] : desktopLabels[key]) || btn.textContent;
       if(key==='live' && typeof liveIsSpectator==='function' && liveIsSpectator()){
-        label='● Live · Spectateur';
+        label='● Live';
       }
       btn.textContent = label;
     });
@@ -16894,7 +16894,7 @@ document.addEventListener("visibilitychange",()=>{
     const nav=document.querySelector('nav button[data-view="live"]');
     if(!nav)return;
     const spectator=window.liveIsSpectator();
-    nav.textContent=spectator?'● Live · Spectateur':'● Live';
+    nav.textContent='● Live';
     nav.classList.toggle('spectator-nav',spectator);
   };
 
