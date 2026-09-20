@@ -8190,6 +8190,221 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 </style>
+
+<style id="bpt-v195-nav-records-final">
+/* ===== V195 — navigation plus lisible ===== */
+#nav{
+  gap:8px !important;
+  padding:10px 14px !important;
+  background:#101a15 !important;
+  border-bottom:1px solid #34483c !important;
+}
+#nav button{
+  min-height:42px !important;
+  padding:9px 14px !important;
+  border:1px solid #52665a !important;
+  border-radius:10px !important;
+  background:#17231d !important;
+  color:#f0f4f1 !important;
+  font-size:14px !important;
+  line-height:1.15 !important;
+  font-weight:800 !important;
+  letter-spacing:.01em !important;
+}
+#nav button:hover{
+  background:#223329 !important;
+  border-color:#708478 !important;
+  color:#fff !important;
+}
+#nav button.active{
+  background:#c8952e !important;
+  border-color:#e0b34e !important;
+  color:#17120b !important;
+  box-shadow:0 0 0 1px rgba(255,255,255,.05) inset !important;
+}
+
+/* ===== V195 — Records : même logique visuelle PC / téléphone ===== */
+#records .records-grid{
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:10px !important;
+}
+#records .record-card{
+  display:grid !important;
+  grid-template-columns:34px auto minmax(0,1fr) !important;
+  grid-template-areas:
+    "ico label player"
+    "ico value value" !important;
+  column-gap:8px !important;
+  row-gap:5px !important;
+  align-items:baseline !important;
+  min-height:0 !important;
+  padding:13px 14px !important;
+  border-radius:12px !important;
+}
+#records .record-icon{
+  grid-area:ico !important;
+  align-self:center !important;
+  font-size:22px !important;
+  line-height:1 !important;
+  margin:0 !important;
+}
+#records .record-card > span{
+  grid-area:label !important;
+  display:inline !important;
+  margin:0 !important;
+  color:#d2b06c !important;
+  font-size:15px !important;
+  line-height:1.2 !important;
+  font-weight:800 !important;
+  white-space:normal !important;
+}
+#records .record-card > span::after{content:" :" !important;}
+#records .record-player-holder{
+  grid-area:player !important;
+  display:inline !important;
+  min-width:0 !important;
+  margin:0 !important;
+  color:#42d4e8 !important;
+  font-size:15px !important;
+  line-height:1.2 !important;
+  font-weight:900 !important;
+  letter-spacing:0 !important;
+}
+#records .record-player-holder .player-primary-name,
+#records .record-player-pair{
+  display:inline !important;
+  font-size:inherit !important;
+  line-height:inherit !important;
+  color:#42d4e8 !important;
+  font-weight:900 !important;
+}
+#records .record-player-holder .player-secondary-nickname{
+  display:inline !important;
+  margin-left:4px !important;
+  font-size:12px !important;
+}
+#records .record-action{
+  font-size:12px !important;
+  color:#95a6a0 !important;
+}
+#records .record-card > small{
+  grid-area:value !important;
+  display:block !important;
+  margin:0 !important;
+  color:#aeb9b2 !important;
+  font-size:13px !important;
+  line-height:1.25 !important;
+  font-weight:650 !important;
+  text-align:left !important;
+}
+@media(max-width:1100px){
+  #records .records-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}
+}
+@media(max-width:700px){
+  html.bpt-mobile-device #nav, body.bpt-mobile-device #nav{
+    gap:6px !important;
+    padding:8px 9px !important;
+    background:#171d3d !important;
+    border-bottom-color:#4653a3 !important;
+  }
+  html.bpt-mobile-device #nav button, body.bpt-mobile-device #nav button{
+    min-height:40px !important;
+    padding:8px 10px !important;
+    border-color:#5968b0 !important;
+    background:#242c58 !important;
+    color:#f4f6ff !important;
+    font-size:12.5px !important;
+    font-weight:850 !important;
+  }
+  html.bpt-mobile-device #nav button.active, body.bpt-mobile-device #nav button.active{
+    background:#c8952e !important;
+    border-color:#e1b454 !important;
+    color:#17120b !important;
+  }
+  html.bpt-mobile-device #records .records-grid, body.bpt-mobile-device #records .records-grid{
+    grid-template-columns:1fr !important;
+    gap:8px !important;
+  }
+  html.bpt-mobile-device #records .record-card, body.bpt-mobile-device #records .record-card{
+    grid-template-columns:30px auto minmax(0,1fr) !important;
+    grid-template-areas:
+      "ico label player"
+      "ico value value" !important;
+    padding:11px 12px !important;
+    column-gap:7px !important;
+    row-gap:4px !important;
+  }
+  html.bpt-mobile-device #records .record-icon, body.bpt-mobile-device #records .record-icon{
+    font-size:20px !important;
+  }
+  html.bpt-mobile-device #records .record-card > span,
+  body.bpt-mobile-device #records .record-card > span,
+  html.bpt-mobile-device #records .record-player-holder,
+  body.bpt-mobile-device #records .record-player-holder,
+  html.bpt-mobile-device #records .record-player-holder .player-primary-name,
+  body.bpt-mobile-device #records .record-player-holder .player-primary-name,
+  html.bpt-mobile-device #records .record-player-pair,
+  body.bpt-mobile-device #records .record-player-pair{
+    font-size:15px !important;
+    line-height:1.22 !important;
+  }
+  html.bpt-mobile-device #records .record-card > small, body.bpt-mobile-device #records .record-card > small{
+    font-size:13px !important;
+    line-height:1.22 !important;
+  }
+}
+</style>
+
+
+<style id="bpt-v196-records-readability-final">
+/* ===== V196 — Records : libellé plus lisible + Nom (Surnom) sur une seule ligne ===== */
+#records .record-card > span{
+  color:#ffffff !important;
+  font-size:17px !important;
+  line-height:1.2 !important;
+  font-weight:850 !important;
+}
+#records .record-player-holder{
+  display:inline-flex !important;
+  align-items:baseline !important;
+  gap:4px !important;
+  flex-wrap:nowrap !important;
+  white-space:nowrap !important;
+  min-width:0 !important;
+}
+#records .record-player-holder .player-primary-name,
+#records .record-player-holder .player-secondary-nickname{
+  display:inline !important;
+  vertical-align:baseline !important;
+  white-space:nowrap !important;
+}
+#records .record-player-holder .player-secondary-nickname{
+  margin-left:0 !important;
+}
+#records .record-player-pair{
+  display:inline-flex !important;
+  align-items:baseline !important;
+  gap:4px !important;
+  flex-wrap:wrap !important;
+}
+@media(max-width:700px){
+  html.bpt-mobile-device #records .record-card > span,
+  body.bpt-mobile-device #records .record-card > span{
+    color:#ffffff !important;
+    font-size:17px !important;
+    line-height:1.2 !important;
+  }
+  html.bpt-mobile-device #records .record-player-holder,
+  body.bpt-mobile-device #records .record-player-holder{
+    display:inline-flex !important;
+    align-items:baseline !important;
+    gap:4px !important;
+    flex-wrap:nowrap !important;
+    white-space:nowrap !important;
+  }
+}
+</style>
 </head>
 <body>
 
@@ -8299,7 +8514,7 @@ function simplifyRecordTextForMobile(text){
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 1.9.4</div>
+  <div class="app-version">Version 1.9.6</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -16696,7 +16911,19 @@ $("settingsPassword").addEventListener("keydown",e=>{
 renderAll();
 liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
-initCloudSync();
+(async()=>{
+  await initCloudSync();
+  const s=db?.liveState;
+  const active=!!(s?.prepared && !s?.synced);
+  if(active){
+    await autoOpenActiveLiveOnStartup();
+  }else{
+    // Sans Live actif, l'application démarre toujours sur Accueil.
+    spectatorAutoOpenSuppressed=false;
+    document.body.classList.remove("spectator-live-open");
+    await showView("dashboard");
+  }
+})();
 setTimeout(()=>startSpectatorLivePolling(),800);
 setTimeout(()=>startGlobalHandoverPolling(),1000);
 setTimeout(()=>syncSharedPhotosWithRetry(),1400);
