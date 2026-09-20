@@ -8951,6 +8951,81 @@ nav button.active{background:#c8952e!important;border-color:#c8952e!important;co
   }
 }
 </style>
+
+<style id="bpt-v210-mobile-records-layout">
+@media (max-width:700px){
+  html.bpt-mobile-device #records .record-mobile-card,
+  body.bpt-mobile-device #records .record-mobile-card{
+    padding:12px 13px !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-title,
+  body.bpt-mobile-device #records .record-mobile-title{
+    display:flex !important;
+    align-items:center !important;
+    gap:7px !important;
+    margin:0 0 6px 0 !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-title .record-mobile-icon,
+  body.bpt-mobile-device #records .record-mobile-title .record-mobile-icon{
+    font-size:15px !important;
+    line-height:1 !important;
+    margin:0 !important;
+    flex:0 0 auto !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-title .record-mobile-label,
+  body.bpt-mobile-device #records .record-mobile-title .record-mobile-label{
+    display:block !important;
+    color:#ffffff !important;
+    font-size:15px !important;
+    line-height:1.3 !important;
+    font-weight:800 !important;
+    margin:0 !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-meta,
+  body.bpt-mobile-device #records .record-mobile-meta{
+    display:flex !important;
+    align-items:baseline !important;
+    justify-content:space-between !important;
+    gap:10px !important;
+    margin-left:22px !important;
+    flex-wrap:nowrap !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-player,
+  body.bpt-mobile-device #records .record-mobile-player{
+    display:block !important;
+    flex:1 1 auto !important;
+    min-width:0 !important;
+    color:#42d5e8 !important;
+    font-size:15px !important;
+    line-height:1.35 !important;
+    font-weight:800 !important;
+    white-space:normal !important;
+    overflow-wrap:anywhere !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-player-name,
+  body.bpt-mobile-device #records .record-mobile-player-name,
+  html.bpt-mobile-device #records .record-mobile-nickname,
+  body.bpt-mobile-device #records .record-mobile-nickname,
+  html.bpt-mobile-device #records .record-mobile-player-pair,
+  body.bpt-mobile-device #records .record-mobile-player-pair,
+  html.bpt-mobile-device #records .record-mobile-player-pair .record-action,
+  body.bpt-mobile-device #records .record-mobile-player-pair .record-action{
+    font-size:15px !important;
+    line-height:1.35 !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-value-inline,
+  body.bpt-mobile-device #records .record-mobile-value-inline{
+    display:block !important;
+    flex:0 0 auto !important;
+    color:#ffffff !important;
+    font-size:15px !important;
+    line-height:1.35 !important;
+    font-weight:800 !important;
+    white-space:nowrap !important;
+    text-align:right !important;
+  }
+}
+</style>
 </head>
 <body>
 <div id="bptDeviceBadge" class="desktop">Version PC</div>
@@ -9074,7 +9149,7 @@ function simplifyRecordTextForMobile(text){
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 2.0.9</div>
+  <div class="app-version">Version 2.1.0</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -11811,10 +11886,8 @@ function renderRecords(){
 
     if(mobileRecords){
       return `<div class="record-mobile-card">
-        <div class="record-mobile-line">
-          <span class="record-mobile-icon">${c[0]}</span><span class="record-mobile-label">${esc(c[1])}</span><span class="record-mobile-sep"> :</span><span class="record-mobile-player">${holderHtml}</span>
-        </div>
-        <div class="record-mobile-value">${esc(simplifyRecordTextForMobile(c[3]))}</div>
+        <div class="record-mobile-title"><span class="record-mobile-icon">${c[0]}</span><span class="record-mobile-label">${esc(c[1])}</span></div>
+        <div class="record-mobile-meta"><span class="record-mobile-player">${holderHtml}</span><span class="record-mobile-value-inline">${esc(simplifyRecordTextForMobile(c[3]))}</span></div>
       </div>`;
     }
 
