@@ -8025,6 +8025,83 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 </style>
+
+<style id="bpt-records-final-hierarchy">
+/* Records : hiérarchie finale — joueur prioritaire */
+#records .record-card > span{
+  display:block !important;
+  font-size:12px !important;
+  line-height:1.2 !important;
+  font-weight:750 !important;
+  color:#d2b06c !important;
+  margin:0 0 4px !important;
+}
+#records .record-player-holder{
+  display:block !important;
+  margin:4px 0 5px !important;
+  font-size:32px !important;
+  line-height:1.02 !important;
+  font-weight:950 !important;
+  color:#42d4e8 !important;
+  letter-spacing:-.025em !important;
+}
+#records .record-player-holder .player-primary-name{
+  font-size:inherit !important;
+  line-height:inherit !important;
+  font-weight:950 !important;
+  color:#42d4e8 !important;
+}
+#records .record-player-holder .player-secondary-nickname{
+  display:block !important;
+  margin-top:3px !important;
+  font-size:12px !important;
+  line-height:1.15 !important;
+  color:#9ecbd1 !important;
+  font-weight:700 !important;
+}
+#records .record-card > small{
+  display:block !important;
+  margin:2px 0 0 !important;
+  font-size:12px !important;
+  line-height:1.25 !important;
+  font-weight:650 !important;
+  color:#9eaaa3 !important;
+}
+#records .record-player-pair{font-size:inherit !important;line-height:inherit !important}
+#records .record-action{font-size:11px !important;color:#82938a !important;font-weight:700 !important}
+@media(max-width:700px){
+  html.bpt-mobile-device #records .record-card,
+  body.bpt-mobile-device #records .record-card{
+    grid-template-areas:"ico label" "ico player" "ico value" !important;
+  }
+  html.bpt-mobile-device #records .record-card > span,
+  body.bpt-mobile-device #records .record-card > span{
+    font-size:10px !important;
+    margin:0 0 1px !important;
+  }
+  html.bpt-mobile-device #records .record-player-holder,
+  body.bpt-mobile-device #records .record-player-holder{
+    font-size:24px !important;
+    line-height:1 !important;
+    margin:2px 0 4px !important;
+    color:#42d4e8 !important;
+  }
+  html.bpt-mobile-device #records .record-player-holder .player-primary-name,
+  body.bpt-mobile-device #records .record-player-holder .player-primary-name{
+    font-size:24px !important;
+    color:#42d4e8 !important;
+  }
+  html.bpt-mobile-device #records .record-card > small,
+  body.bpt-mobile-device #records .record-card > small{
+    display:block !important;
+    font-size:10.5px !important;
+    line-height:1.2 !important;
+    font-weight:600 !important;
+    color:#93a097 !important;
+    margin:0 !important;
+  }
+}
+</style>
 </head>
 <body>
 
@@ -16695,7 +16772,7 @@ document.addEventListener("visibilitychange",()=>{
   };
   const mobileLabels = {
     live:'● Live',
-    dashboard:'▦ Bord',
+    dashboard:'⌂ Accueil',
     latestgame:'◷ Parties',
     ranking:'♛ Classement',
     records:'★ Records',
@@ -16713,7 +16790,11 @@ document.addEventListener("visibilitychange",()=>{
 
     document.querySelectorAll('nav#nav button[data-view]').forEach(btn=>{
       const key = btn.getAttribute('data-view') || '';
-      btn.textContent = (isMobile ? mobileLabels[key] : desktopLabels[key]) || btn.textContent;
+      let label=(isMobile ? mobileLabels[key] : desktopLabels[key]) || btn.textContent;
+      if(key==='live' && typeof liveIsSpectator==='function' && liveIsSpectator()){
+        label='● Live · Spectateur';
+      }
+      btn.textContent = label;
     });
 
     const title = document.getElementById('liveHeroTitle');
@@ -16732,5 +16813,61 @@ document.addEventListener("visibilitychange",()=>{
 })();
 </script>
 
+
+<script id="bpt-live-role-lock-final">
+(function(){
+  let lockedLiveKey='';
+  let lockedLiveRole='';
+
+  function activeLiveForRole(){
+    const direct=(window.spectatorServerLiveState && spectatorServerLiveState.prepared && !spectatorServerLiveState.synced)
+      ? spectatorServerLiveState : null;
+    const local=(window.db && db.liveState && db.liveState.prepared && !db.liveState.synced)
+      ? db.liveState : null;
+    return direct || local || null;
+  }
+
+  function liveKeyOf(state){
+    if(!state || !state.prepared || state.synced)return '';
+    return [String(state.creatorDeviceId||''),String(state.gameNo||''),String(state.startedAt||state.date||'')].join('|');
+  }
+
+  function resolveLockedRole(){
+    const state=activeLiveForRole();
+    const key=liveKeyOf(state);
+    if(!key){
+      lockedLiveKey='';
+      lockedLiveRole='';
+      return '';
+    }
+    if(key!==lockedLiveKey){
+      lockedLiveKey=key;
+      const creator=String(state.creatorDeviceId||'');
+      lockedLiveRole=(creator && creator!==liveDeviceId()) ? 'spectator' : 'creator';
+    }
+    return lockedLiveRole;
+  }
+
+  window.liveIsSpectator=function(){ return resolveLockedRole()==='spectator'; };
+  window.liveIsCreator=function(){
+    const role=resolveLockedRole();
+    return role ? role==='creator' : true;
+  };
+
+  window.bptRefreshLiveNavRole=function(){
+    const nav=document.querySelector('nav button[data-view="live"]');
+    if(!nav)return;
+    const spectator=window.liveIsSpectator();
+    nav.textContent=spectator?'● Live · Spectateur':'● Live';
+    nav.classList.toggle('spectator-nav',spectator);
+  };
+
+  // Toute synchro, resize ou changement d'orientation réapplique le rôle verrouillé.
+  ['resize','orientationchange'].forEach(ev=>window.addEventListener(ev,()=>setTimeout(window.bptRefreshLiveNavRole,0),{passive:true}));
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden)setTimeout(window.bptRefreshLiveNavRole,0); });
+  setInterval(window.bptRefreshLiveNavRole,1000);
+  setTimeout(window.bptRefreshLiveNavRole,0);
+})();
+</script>
 </body>
 </html>
