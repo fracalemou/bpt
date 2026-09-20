@@ -7080,7 +7080,7 @@ body.bpt-mobile-device.bpt-mobile-landscape .tablewrap{
 }
 
 
-/* ===== V185 — vraie version mobile allégée ===== */
+/* ===== V189 — vraie version mobile allégée ===== */
 
 /* La version téléphone n'est plus la version PC simplement réduite. */
 html.bpt-mobile-device #dashboard .premium-hero-copy p,
@@ -7328,6 +7328,435 @@ body.bpt-mobile-device.bpt-mobile-landscape #profile .premium-profile-identity{
   margin-bottom:6px !important;
 }
 
+
+
+/* ===== V189 — mobile épuré : sans saisons, records sûrs, classement enrichi ===== */
+
+/* Aucun changement de saison n'est présenté sur téléphone. */
+html.bpt-mobile-device .season-nav-toolbar,
+body.bpt-mobile-device .season-nav-toolbar,
+html.bpt-mobile-device .tab-season-nav,
+body.bpt-mobile-device .tab-season-nav,
+html.bpt-mobile-device .dashboard-season-nav,
+body.bpt-mobile-device .dashboard-season-nav,
+html.bpt-mobile-device .dashboard-season-nav-label,
+body.bpt-mobile-device .dashboard-season-nav-label{
+  display:none !important;
+}
+
+/* Sécurité générale : aucun texte ne doit déborder sur une autre zone mobile. */
+html.bpt-mobile-device .card,
+html.bpt-mobile-device .record-card,
+html.bpt-mobile-device .profile-kpi,
+html.bpt-mobile-device .premium-panel,
+html.bpt-mobile-device td,
+html.bpt-mobile-device th,
+body.bpt-mobile-device .card,
+body.bpt-mobile-device .record-card,
+body.bpt-mobile-device .profile-kpi,
+body.bpt-mobile-device .premium-panel,
+body.bpt-mobile-device td,
+body.bpt-mobile-device th{
+  min-width:0 !important;
+  overflow-wrap:anywhere !important;
+  word-break:normal !important;
+}
+
+html.bpt-mobile-device .player-primary-name,
+html.bpt-mobile-device .player-secondary-nickname,
+html.bpt-mobile-device .record-player-holder,
+body.bpt-mobile-device .player-primary-name,
+body.bpt-mobile-device .player-secondary-nickname,
+body.bpt-mobile-device .record-player-holder{
+  max-width:100% !important;
+  white-space:normal !important;
+  overflow-wrap:anywhere !important;
+}
+
+/* Records mobile : icône fixe + contenu vertical. Aucune superposition possible. */
+html.bpt-mobile-device #records .record-card,
+body.bpt-mobile-device #records .record-card{
+  display:grid !important;
+  grid-template-columns:30px minmax(0,1fr) !important;
+  grid-template-areas:
+    "ico label"
+    "ico player"
+    "ico value" !important;
+  column-gap:9px !important;
+  row-gap:3px !important;
+  align-items:start !important;
+  padding:9px 10px !important;
+  width:100% !important;
+}
+
+html.bpt-mobile-device #records .record-icon,
+body.bpt-mobile-device #records .record-icon{
+  grid-area:ico !important;
+  width:30px !important;
+  min-width:30px !important;
+  font-size:20px !important;
+  line-height:1.15 !important;
+  text-align:center !important;
+}
+
+html.bpt-mobile-device #records .record-card > span,
+body.bpt-mobile-device #records .record-card > span{
+  grid-area:label !important;
+  display:block !important;
+  min-width:0 !important;
+  font-size:10px !important;
+  line-height:1.2 !important;
+  white-space:normal !important;
+}
+
+html.bpt-mobile-device #records .record-player-holder,
+body.bpt-mobile-device #records .record-player-holder{
+  grid-area:player !important;
+  display:block !important;
+  min-width:0 !important;
+  margin:0 !important;
+  font-size:13px !important;
+  line-height:1.2 !important;
+}
+
+html.bpt-mobile-device #records .record-card > small,
+body.bpt-mobile-device #records .record-card > small{
+  grid-area:value !important;
+  display:block !important;
+  min-width:0 !important;
+  margin:1px 0 0 !important;
+  text-align:left !important;
+  font-size:12px !important;
+  line-height:1.2 !important;
+  color:#fff !important;
+  font-weight:900 !important;
+  white-space:normal !important;
+  overflow-wrap:anywhere !important;
+}
+
+/* Classement mobile : rang, joueur, points, moyenne, parties, victoires, kills. */
+html.bpt-mobile-device #ranking th:nth-child(5),
+html.bpt-mobile-device #ranking td:nth-child(5),
+html.bpt-mobile-device #ranking th:nth-child(6),
+html.bpt-mobile-device #ranking td:nth-child(6),
+body.bpt-mobile-device #ranking th:nth-child(5),
+body.bpt-mobile-device #ranking td:nth-child(5),
+body.bpt-mobile-device #ranking th:nth-child(6),
+body.bpt-mobile-device #ranking td:nth-child(6){
+  display:table-cell !important;
+}
+
+html.bpt-mobile-device #ranking table,
+body.bpt-mobile-device #ranking table{
+  min-width:570px !important;
+  width:100% !important;
+  table-layout:auto !important;
+}
+
+html.bpt-mobile-device #ranking th,
+html.bpt-mobile-device #ranking td,
+body.bpt-mobile-device #ranking th,
+body.bpt-mobile-device #ranking td{
+  padding:7px 5px !important;
+  font-size:10px !important;
+  line-height:1.2 !important;
+  vertical-align:middle !important;
+}
+
+html.bpt-mobile-device #ranking th:nth-child(1),
+html.bpt-mobile-device #ranking td:nth-child(1),
+body.bpt-mobile-device #ranking th:nth-child(1),
+body.bpt-mobile-device #ranking td:nth-child(1){width:34px !important;text-align:center !important}
+
+html.bpt-mobile-device #ranking th:nth-child(3),
+html.bpt-mobile-device #ranking td:nth-child(3),
+html.bpt-mobile-device #ranking th:nth-child(5),
+html.bpt-mobile-device #ranking td:nth-child(5),
+html.bpt-mobile-device #ranking th:nth-child(6),
+html.bpt-mobile-device #ranking td:nth-child(6),
+html.bpt-mobile-device #ranking th:nth-child(7),
+html.bpt-mobile-device #ranking td:nth-child(7),
+html.bpt-mobile-device #ranking th:nth-child(10),
+html.bpt-mobile-device #ranking td:nth-child(10),
+body.bpt-mobile-device #ranking th:nth-child(3),
+body.bpt-mobile-device #ranking td:nth-child(3),
+body.bpt-mobile-device #ranking th:nth-child(5),
+body.bpt-mobile-device #ranking td:nth-child(5),
+body.bpt-mobile-device #ranking th:nth-child(6),
+body.bpt-mobile-device #ranking td:nth-child(6),
+body.bpt-mobile-device #ranking th:nth-child(7),
+body.bpt-mobile-device #ranking td:nth-child(7),
+body.bpt-mobile-device #ranking th:nth-child(10),
+body.bpt-mobile-device #ranking td:nth-child(10){
+  text-align:center !important;
+  white-space:nowrap !important;
+}
+
+/* Le tableau peut glisser horizontalement si un téléphone est très étroit. */
+html.bpt-mobile-device #ranking .tablewrap,
+body.bpt-mobile-device #ranking .tablewrap{
+  overflow-x:auto !important;
+  overflow-y:visible !important;
+  -webkit-overflow-scrolling:touch !important;
+}
+
+
+
+/* ===== V189 — préparation Live mobile minimale ===== */
+html.bpt-mobile-device #livePrepScreen .mobile-hide-live-structure,
+body.bpt-mobile-device #livePrepScreen .mobile-hide-live-structure,
+html.bpt-mobile-device #livePrepScreen .mobile-hide-live-details,
+body.bpt-mobile-device #livePrepScreen .mobile-hide-live-details,
+html.bpt-mobile-device #livePrepScreen #liveRecalcBtn,
+body.bpt-mobile-device #livePrepScreen #liveRecalcBtn,
+html.bpt-mobile-device #livePrepScreen .live-layout > .card:nth-child(2),
+body.bpt-mobile-device #livePrepScreen .live-layout > .card:nth-child(2){
+  display:none !important;
+}
+
+html.bpt-mobile-device #livePrepScreen .live-layout,
+body.bpt-mobile-device #livePrepScreen .live-layout{
+  grid-template-columns:1fr !important;
+  gap:0 !important;
+}
+
+html.bpt-mobile-device #livePrepScreen .live-layout > .card:first-child,
+body.bpt-mobile-device #livePrepScreen .live-layout > .card:first-child{
+  width:100% !important;
+  max-width:none !important;
+}
+
+html.bpt-mobile-device #livePrepScreen .live-title,
+body.bpt-mobile-device #livePrepScreen .live-title{
+  font-size:15px !important;
+}
+
+html.bpt-mobile-device #livePrepScreen .live-title,
+body.bpt-mobile-device #livePrepScreen .live-title{
+  font-size:0 !important;
+}
+html.bpt-mobile-device #livePrepScreen .live-title::after,
+body.bpt-mobile-device #livePrepScreen .live-title::after{
+  content:"Préparation du Live";
+  font-size:15px !important;
+}
+
+html.bpt-mobile-device #livePrepScreen .card > h2:first-child,
+body.bpt-mobile-device #livePrepScreen .card > h2:first-child{
+  display:none !important;
+}
+
+html.bpt-mobile-device #livePrepScreen .field,
+body.bpt-mobile-device #livePrepScreen .field{
+  margin:6px 0 !important;
+}
+
+html.bpt-mobile-device #livePrepScreen h2,
+body.bpt-mobile-device #livePrepScreen h2{
+  margin-top:10px !important;
+  margin-bottom:6px !important;
+  font-size:12px !important;
+}
+
+html.bpt-mobile-device #livePrepScreen #liveLaunchBtn,
+body.bpt-mobile-device #livePrepScreen #liveLaunchBtn{
+  width:100% !important;
+  min-height:46px !important;
+  font-size:15px !important;
+}
+
+
+/* ===== V189 — préparation Live minimale sur PC et mobile ===== */
+#liveHeroSubtitle{display:none !important;}
+#livePrepScreen .live-head{margin-bottom:8px !important;}
+#livePrepScreen .live-title{
+  font-size:16px !important;
+  color:#e8c39e;
+}
+#livePrepScreen .live-title::after{content:none !important;}
+
+#livePrepScreen .live-prep-compact-layout{
+  display:block !important;
+}
+#livePrepScreen .live-prep-card{
+  width:min(860px,100%);
+  margin:0 auto;
+  padding:16px !important;
+  border-radius:16px !important;
+}
+#livePrepScreen .live-structure-hidden-card,
+#livePrepScreen .live-internal-config{
+  display:none !important;
+}
+#livePrepScreen .live-prep-topline{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:12px;
+  align-items:end;
+}
+#livePrepScreen .live-prep-location-wrap label{
+  display:block;
+  font-size:11px;
+  color:var(--muted);
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  margin-bottom:5px;
+}
+#livePrepScreen .live-prep-location-wrap input{
+  min-height:44px;
+  font-size:16px;
+}
+#livePrepScreen .live-prep-count{
+  min-width:86px;
+  min-height:62px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--line);
+  border-radius:12px;
+}
+#livePrepScreen .live-prep-count strong{
+  font-size:24px;
+  line-height:1;
+  color:#e8c39e;
+}
+#livePrepScreen .live-prep-count span{
+  margin-top:4px;
+  font-size:10px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+#livePrepScreen .live-prep-section-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin:16px 0 9px;
+}
+#livePrepScreen .live-prep-section-head > strong{
+  font-size:14px;
+  color:#fff;
+}
+#livePrepScreen .live-prep-select-actions{
+  display:flex;
+  gap:6px;
+}
+#livePrepScreen .live-prep-select-actions .btn{
+  min-height:34px !important;
+  padding:6px 10px !important;
+  font-size:11px !important;
+}
+#livePrepScreen .live-player-list-compact{
+  display:grid !important;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:7px !important;
+  max-height:260px;
+  overflow:auto;
+  padding:2px;
+}
+#livePrepScreen .live-player-list-compact label,
+#livePrepScreen .live-player-list-compact .playerchip{
+  margin:0 !important;
+  min-width:0;
+}
+#livePrepScreen .live-prep-add-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:8px;
+  margin-top:12px;
+}
+#livePrepScreen .live-prep-add-row input{
+  min-width:0;
+  min-height:42px;
+}
+#livePrepScreen .live-prep-launch{
+  width:100%;
+  min-height:48px !important;
+  margin-top:12px;
+  font-size:15px !important;
+}
+
+html.bpt-mobile-device #livePrepScreen .live-prep-card,
+body.bpt-mobile-device #livePrepScreen .live-prep-card{
+  padding:10px !important;
+  border-radius:12px !important;
+}
+html.bpt-mobile-device #livePrepScreen .live-prep-topline,
+body.bpt-mobile-device #livePrepScreen .live-prep-topline{
+  gap:8px;
+}
+html.bpt-mobile-device #livePrepScreen .live-prep-count,
+body.bpt-mobile-device #livePrepScreen .live-prep-count{
+  min-width:68px;
+  min-height:52px;
+}
+html.bpt-mobile-device #livePrepScreen .live-prep-count strong,
+body.bpt-mobile-device #livePrepScreen .live-prep-count strong{
+  font-size:20px;
+}
+html.bpt-mobile-device #livePrepScreen .live-player-list-compact,
+body.bpt-mobile-device #livePrepScreen .live-player-list-compact{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  max-height:38vh;
+  gap:5px !important;
+}
+html.bpt-mobile-device #livePrepScreen .live-prep-add-row,
+body.bpt-mobile-device #livePrepScreen .live-prep-add-row{
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:6px;
+}
+html.bpt-mobile-device #livePrepScreen .live-prep-launch,
+body.bpt-mobile-device #livePrepScreen .live-prep-launch{
+  min-height:44px !important;
+  margin-top:9px;
+}
+
+
+/* ===== V189 — paramètres essentiels Live : stack + durée ===== */
+.live-prep-essential-config{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin:10px 0 12px;
+}
+.live-prep-essential-field{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:5px;
+  margin:0;
+}
+.live-prep-essential-field label{
+  font-size:11px;
+  color:var(--muted);
+  font-weight:800;
+}
+.live-prep-essential-field input,
+.live-prep-essential-field select{
+  min-height:40px;
+}
+html.bpt-mobile-device .live-prep-essential-config,
+body.bpt-mobile-device .live-prep-essential-config{
+  grid-template-columns:1fr 1fr !important;
+  gap:7px !important;
+  margin:7px 0 9px !important;
+}
+html.bpt-mobile-device .live-prep-essential-field label,
+body.bpt-mobile-device .live-prep-essential-field label{
+  font-size:10px !important;
+}
+html.bpt-mobile-device .live-prep-essential-field input,
+html.bpt-mobile-device .live-prep-essential-field select,
+body.bpt-mobile-device .live-prep-essential-field input,
+body.bpt-mobile-device .live-prep-essential-field select{
+  min-height:36px !important;
+  font-size:13px !important;
+  padding:6px 8px !important;
+}
+
 </style>
 </head>
 <body>
@@ -7437,7 +7866,7 @@ function simplifyRecordTextForMobile(text){
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 1.8.5</div>
+  <div class="app-version">Version 1.8.9</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -7472,43 +7901,62 @@ function simplifyRecordTextForMobile(text){
         </div>
       </div>
 
-      <div class="live-layout">
-        <div class="card">
-          <h2>Partie</h2>
-          <div class="field"><label>Date</label><input id="liveDate" type="date"></div>
-          <div class="field"><label>Nom / lieu de la partie *</label><input id="liveLocation" placeholder="Obligatoire" required></div>
-          <div class="field mobile-hide-live-structure"><label>Stack de départ</label><input id="liveStartStack" type="number" min="1000" step="1000" value="20000"><span class="stack-step-hint">Par pas de 1 000</span></div>
-          <div class="field mobile-hide-live-structure"><label>SB minimale</label><input id="liveMinSB" type="number" min="25" step="25" value="25"><span class="stack-step-hint">25 → 50 → 100</span></div>
-          <div class="field mobile-hide-live-structure"><label>Durée cible</label>
-            <select id="liveDuration">
-              <option value="120">2h00</option><option value="150">2h30</option><option value="180">3h00</option>
-              <option value="210">3h30</option><option value="240" selected>4h00</option><option value="270">4h30</option>
-              <option value="300">5h00</option><option value="330">5h30</option><option value="360">6h00</option>
-            </select>
+      <div class="live-layout live-prep-compact-layout">
+        <div class="card live-prep-card">
+          <div class="live-prep-topline">
+            <div class="live-prep-location-wrap">
+              <label for="liveLocation">Nom / lieu</label>
+              <input id="liveLocation" placeholder="Ex. Soirée chez Martin" required>
+            </div>
+            <div class="live-prep-count"><strong id="liveSelectedCount">0</strong><span>joueurs</span></div>
           </div>
-<div class="field mobile-hide-live-structure"><label>Antes</label><select id="liveUseAnte"><option value="no" selected>Non</option><option value="yes">Oui</option></select></div>
-          <div class="field"><label>Mise / joueur</label><input id="liveBuyIn" type="number" min="0" step="1" value="5"></div>
 
-          <h2 style="margin-top:18px">Joueurs actifs du championnat</h2>
-          <div class="row" style="margin-bottom:8px">
-            <button class="btn secondary" id="liveSelectAllBtn">Tous</button>
-            <button class="btn ghost" id="liveSelectNoneBtn">Aucun</button>
-            <span class="muted"><b id="liveSelectedCount">0</b> sélectionné(s)</span>
+          <div class="live-prep-essential-config">
+            <div class="field live-prep-essential-field">
+              <label for="liveStartStack">Stack de départ</label>
+              <input id="liveStartStack" type="number" min="1000" step="1000" value="20000">
+            </div>
+            <div class="field live-prep-essential-field">
+              <label for="liveDuration">Durée cible</label>
+              <select id="liveDuration">
+                <option value="180">3h00</option>
+                <option value="210">3h30</option>
+                <option value="240">4h00</option>
+                <option value="270" selected>4h30</option>
+                <option value="300">5h00</option>
+                <option value="330">5h30</option>
+                <option value="360">6h00</option>
+              </select>
+            </div>
           </div>
-          <div id="livePlayerList" class="live-player-list"></div>
-          <div class="row" style="margin-top:10px">
-            <input id="liveNewPlayer" placeholder="Nouveau joueur" style="flex:1">
-            <button class="btn secondary" id="liveAddPlayerBtn">Ajouter et sélectionner</button>
-          </div>
-          <div class="muted" style="margin-top:5px">Le joueur ajouté devient automatiquement actif dans le championnat.</div>
 
-          <div class="row" style="margin-top:12px">
-            <button class="btn ghost" id="liveRecalcBtn">Recalculer la structure</button>
-            <button class="btn" id="liveLaunchBtn">Lancer la partie</button>
+          <div class="live-internal-config" aria-hidden="true">
+            <input id="liveDate" type="hidden">
+            <input id="liveMinSB" type="hidden" value="25">
+            <select id="liveUseAnte" tabindex="-1"><option value="no" selected>Non</option></select>
+            <input id="liveBuyIn" type="hidden" value="5">
           </div>
+
+          <div class="live-prep-section-head">
+            <strong>Joueurs</strong>
+            <div class="live-prep-select-actions">
+              <button class="btn secondary" id="liveSelectAllBtn">Tous</button>
+              <button class="btn ghost" id="liveSelectNoneBtn">Aucun</button>
+            </div>
+          </div>
+
+          <div id="livePlayerList" class="live-player-list live-player-list-compact"></div>
+
+          <div class="live-prep-add-row">
+            <input id="liveNewPlayer" placeholder="Ajouter un joueur">
+            <button class="btn secondary" id="liveAddPlayerBtn">Ajouter</button>
+          </div>
+
+          <button class="btn live-prep-launch" id="liveLaunchBtn">Lancer la partie</button>
+          <button class="btn ghost" id="liveRecalcBtn" style="display:none">Recalculer la structure</button>
         </div>
 
-        <div class="card mobile-hide-live-details">
+        <div class="card mobile-hide-live-details live-structure-hidden-card">
           <h2>Structure calculée</h2><div class="muted" style="margin-bottom:8px">La structure des blindes est fixe. Seule la durée des niveaux est adaptée à la durée totale souhaitée.</div>
           <div id="liveStructureSummary" class="muted" style="margin-bottom:8px">Sélectionnez au moins 2 joueurs.</div>
           <div class="live-structure">
@@ -13800,7 +14248,7 @@ function livePreviewStructure(forceReset=false){
   }
   const stack=Math.max(100,Number($("liveStartStack").value)||20000);
   const minSB=Math.max(25,Number($("liveMinSB").value)||25);
-  const target=Number($("liveDuration").value)||240;
+  const target=Number($("liveDuration").value)||270;
   const ante=$("liveUseAnte").value==="yes";
   if(forceReset || !liveDraftCustom || !liveDraftLevels.length){
     const st=liveBuildStructure(n,stack,target,ante,minSB);
@@ -13837,7 +14285,7 @@ async function liveLaunch(){
   const names=[...liveSelected];
   const stack=Math.max(100,Number($("liveStartStack").value)||20000);
   const minSB=Math.max(1,Number($("liveMinSB").value)||25);
-  const target=Number($("liveDuration").value)||240;
+  const target=Number($("liveDuration").value)||270;
   const useAnte=$("liveUseAnte").value==="yes";
   const buyIn=Math.max(0,Number($("liveBuyIn").value)||0);
   const auto=liveBuildStructure(names.length,stack,target,useAnte,minSB);
