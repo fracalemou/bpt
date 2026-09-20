@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- BPT: auto-ouverture Live spectateur en plein écran applicatif -->
 <html lang="fr">
 <head>
 <meta charset="utf-8">
@@ -7080,7 +7081,7 @@ body.bpt-mobile-device.bpt-mobile-landscape .tablewrap{
 }
 
 
-/* ===== V192 — vraie version mobile allégée ===== */
+/* ===== V193 — vraie version mobile allégée ===== */
 
 /* La version téléphone n'est plus la version PC simplement réduite. */
 html.bpt-mobile-device #dashboard .premium-hero-copy p,
@@ -7330,7 +7331,7 @@ body.bpt-mobile-device.bpt-mobile-landscape #profile .premium-profile-identity{
 
 
 
-/* ===== V192 — mobile épuré : sans saisons, records sûrs, classement enrichi ===== */
+/* ===== V193 — mobile épuré : sans saisons, records sûrs, classement enrichi ===== */
 
 /* Aucun changement de saison n'est présenté sur téléphone. */
 html.bpt-mobile-device .season-nav-toolbar,
@@ -7502,7 +7503,7 @@ body.bpt-mobile-device #ranking .tablewrap{
 
 
 
-/* ===== V192 — préparation Live mobile minimale ===== */
+/* ===== V193 — préparation Live mobile minimale ===== */
 html.bpt-mobile-device #livePrepScreen .mobile-hide-live-structure,
 body.bpt-mobile-device #livePrepScreen .mobile-hide-live-structure,
 html.bpt-mobile-device #livePrepScreen .mobile-hide-live-details,
@@ -7566,7 +7567,7 @@ body.bpt-mobile-device #livePrepScreen #liveLaunchBtn{
 }
 
 
-/* ===== V192 — préparation Live minimale sur PC et mobile ===== */
+/* ===== V193 — préparation Live minimale sur PC et mobile ===== */
 #liveHeroSubtitle{display:none !important;}
 #livePrepScreen .live-head{margin-bottom:8px !important;}
 #livePrepScreen .live-title{
@@ -7716,7 +7717,7 @@ body.bpt-mobile-device #livePrepScreen .live-prep-launch{
 }
 
 
-/* ===== V192 — paramètres essentiels Live : stack + durée ===== */
+/* ===== V193 — paramètres essentiels Live : stack + durée ===== */
 .live-prep-essential-config{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -7758,7 +7759,7 @@ body.bpt-mobile-device .live-prep-essential-field select{
 }
 
 
-/* ===== V192 — Live plein écran + classement enrichi ===== */
+/* ===== V193 — Live plein écran + classement enrichi ===== */
 .live-fs-timer-row{
   display:grid;
   grid-template-columns:auto minmax(180px,1fr) auto;
@@ -7897,7 +7898,7 @@ body.bpt-mobile-device.bpt-mobile-landscape #liveFullscreenDisplay .live-fs-minu
 }
 
 
-/* ===== V192 — plein écran Live : timer centré + durée sur demande ===== */
+/* ===== V193 — plein écran Live : timer centré + durée sur demande ===== */
 .live-fs-timer-row{
   grid-template-columns:86px minmax(220px,1fr) 86px !important;
   justify-items:center !important;
@@ -7955,6 +7956,35 @@ body.bpt-mobile-device.bpt-mobile-landscape #liveFullscreenDisplay .live-fs-minu
   width:58px !important;
 }
 
+
+/* ===== V193 — plein écran mobile portrait : boutons chrono rapprochés ===== */
+html.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fs-timer-row,
+body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fs-timer-row{
+  grid-template-columns:52px minmax(0,1fr) 52px !important;
+  width:min(330px,92vw) !important;
+  max-width:92vw !important;
+  gap:4px !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+}
+html.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fs-minute-btn,
+body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fs-minute-btn{
+  width:50px !important;
+  min-width:50px !important;
+  min-height:34px !important;
+  padding:4px 3px !important;
+  font-size:9.5px !important;
+  border-radius:8px !important;
+}
+html.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscreen-timer,
+body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscreen-timer{
+  min-width:0 !important;
+  width:100% !important;
+  text-align:center !important;
+  font-size:clamp(42px,17vw,66px) !important;
+  line-height:.92 !important;
+}
+
 </style>
 </head>
 <body>
@@ -8006,7 +8036,7 @@ function simplifyRecordTextForMobile(text){
   <div class="spectator-server-shell">
     <div class="spectator-server-top">
       <div>
-        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V183</div>
+        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V184</div>
         <div id="spectatorServerGameMeta" class="spectator-server-meta">—</div>
         <div class="spectator-server-receive">
           Reçu : <strong id="spectatorServerReceivedAt">—</strong>
@@ -8064,7 +8094,7 @@ function simplifyRecordTextForMobile(text){
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 1.9.2</div>
+  <div class="app-version">Version 1.9.3</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -9609,9 +9639,13 @@ function spectatorOverlayIsOpen(){
 }
 
 function closeSpectatorServerOverlay(target="ranking"){
+  spectatorAutoOpenSuppressed=true;
   if($("spectatorServerOverlay"))$("spectatorServerOverlay").style.display="none";
-    document.body.classList.remove("spectator-live-open");
+  document.body.classList.remove("spectator-live-open");
   document.body.style.overflow="";
+  if(document.fullscreenElement && document.exitFullscreen){
+    document.exitFullscreen().catch(()=>{});
+  }
   currentViewId=target;
   showView(target);
 }
@@ -9715,6 +9749,8 @@ async function renderSpectatorFromServer(row){
   currentViewId="live";
   renderSpectatorServerOverlay(wire);
   startSpectatorOverlayTicker();
+  // Le plein écran spectateur est celui de l'application : overlay 100 % du viewport.
+  // Aucun appel au plein écran natif du navigateur n'est nécessaire.
 
   setCloudStatus(
     "ok",
@@ -9763,6 +9799,13 @@ async function applySpectatorLiveState(row,{fromDirectPoll=false}={}){
 
   if(!fromDirectPoll && !spectatorLivePollTimer){
     startSpectatorLivePolling();
+  }
+
+  // À la première détection d'un Live piloté depuis un autre appareil,
+  // ouvrir automatiquement la vue spectateur plein écran de l'application.
+  // Si l'utilisateur l'a quittée volontairement, respecter ce choix jusqu'au prochain Live.
+  if(!spectatorAutoOpenSuppressed && (currentViewId!=="live" || !spectatorOverlayIsOpen())){
+    setTimeout(()=>{ liveMaybeAutoOpenSpectator(); },0);
   }
 
   setCloudStatus(
@@ -9879,6 +9922,8 @@ async function cloudPoll(){
       // Plus de Live distant : revenir au fonctionnement normal.
       if(!remoteActive){
         stopSpectatorLivePolling();
+        spectatorAutoOpenSuppressed=false;
+        liveAutoOpenDone=false;
         document.body.classList.remove("spectator-live-open");
       }
     }
@@ -9899,6 +9944,48 @@ async function cloudPoll(){
       setCloudStatus("offline","Erreur synchro",cloudLastError);
     }
   }
+}
+
+
+let liveAutoOpenDone=false;
+async function autoOpenActiveLiveOnStartup(){
+  if(liveAutoOpenDone)return false;
+  const s=db?.liveState;
+  if(!s?.prepared || s?.synced)return false;
+
+  liveAutoOpenDone=true;
+
+  try{
+    await showView("live");
+  }catch(e){
+    try{ showView("live"); }catch(_){}
+  }
+
+  if(typeof liveIsSpectator==="function" && liveIsSpectator()){
+    // Le mode spectateur est déjà affiché en plein écran dans l'application.
+    return true;
+  }
+
+  // Pour le maître, afficher immédiatement l'écran Live.
+  if(typeof liveIsCreator==="function" && liveIsCreator()){
+    try{
+      liveShowScreen("game");
+      liveRenderAll();
+      liveRenderFullscreen();
+    }catch(e){}
+
+    const target=$("liveFullscreenDisplay");
+    if(target && !document.fullscreenElement){
+      try{
+        await target.requestFullscreen?.();
+      }catch(e){
+        // Les navigateurs mobiles peuvent exiger un geste utilisateur.
+        // La vue Live reste néanmoins ouverte automatiquement.
+      }
+    }
+  }
+
+  return true;
 }
 
 async function forceCloudSync(){
@@ -9949,6 +10036,7 @@ async function initCloudSync(){
         cloudLocalDirty=false;
         cloudLastError="";
         await applySpectatorLiveState(row);
+        setTimeout(()=>autoOpenActiveLiveOnStartup(),0);
 
         // Realtime + polling sont installés plus bas ; pas de chargement d'historique ici.
       }else{
@@ -9969,6 +10057,7 @@ async function initCloudSync(){
       renderAll();
 
       if(db.liveState?.prepared){
+        setTimeout(()=>autoOpenActiveLiveOnStartup(),0);
         liveRenderAll();
         if(db.liveState.running && db.liveState.endAt)liveRunTicker();
         liveMaybeAutoOpenSpectator();
@@ -14324,18 +14413,69 @@ function applyLiveAccessMode(){
   return spectator;
 }
 
-function liveMaybeAutoOpenSpectator(){
-  // Détection silencieuse uniquement : jamais de changement de vue.
-  if(liveIsSpectator()){
-    applyLiveAccessMode();
-    if(currentViewId!=="live"){
-      $("live")?.classList.remove("active");
-      document.body.classList.remove("spectator-live-open");
-      document.querySelectorAll("nav button").forEach(b=>{
-        b.classList.toggle("active",b.dataset.view===currentViewId);
-      });
+let spectatorAutoOpenInProgress=false;
+let spectatorAutoOpenSuppressed=false;
+let spectatorFullscreenGestureArmed=false;
+
+async function spectatorTryFullscreen(){
+  const target=$("spectatorServerOverlay") || document.documentElement;
+  if(!target || document.fullscreenElement)return true;
+
+  try{
+    if(target.requestFullscreen){
+      await target.requestFullscreen();
+    }else if(target.webkitRequestFullscreen){
+      target.webkitRequestFullscreen();
     }
-    if(!spectatorLivePollTimer)startSpectatorLivePolling();
+    try{
+      if(screen.orientation?.lock)await screen.orientation.lock("landscape");
+    }catch(_){ }
+    return !!(document.fullscreenElement || document.webkitFullscreenElement);
+  }catch(e){
+    // Les navigateurs imposent souvent un geste utilisateur pour le vrai plein écran.
+    // L'overlay spectateur reste malgré tout en plein écran visuel (100 % du viewport).
+    return false;
+  }
+}
+
+function armSpectatorFullscreenOnFirstGesture(){
+  if(spectatorFullscreenGestureArmed)return;
+  spectatorFullscreenGestureArmed=true;
+  const enter=async()=>{
+    if(!spectatorOverlayIsOpen())return;
+    await spectatorTryFullscreen();
+    spectatorFullscreenGestureArmed=false;
+  };
+  document.addEventListener("pointerdown",enter,{once:true,capture:true});
+  document.addEventListener("touchstart",enter,{once:true,capture:true,passive:true});
+  document.addEventListener("keydown",enter,{once:true,capture:true});
+}
+
+async function liveMaybeAutoOpenSpectator(){
+  if(!liveIsSpectator())return false;
+
+  applyLiveAccessMode();
+  if(!spectatorLivePollTimer)startSpectatorLivePolling();
+
+  // Un utilisateur qui a volontairement quitté le Live reste libre de naviguer.
+  if(spectatorAutoOpenSuppressed)return false;
+  if(spectatorAutoOpenInProgress)return true;
+
+  spectatorAutoOpenInProgress=true;
+  try{
+    if(currentViewId!=="live" || !spectatorOverlayIsOpen()){
+      try{
+        await showView("live");
+      }catch(e){
+        console.warn("Ouverture automatique du Live spectateur impossible :",e);
+      }
+    }
+
+    // La vue spectateur est un plein écran applicatif (overlay 100 % du viewport).
+    // On n'active pas le plein écran natif du navigateur.
+    return true;
+  }finally{
+    spectatorAutoOpenInProgress=false;
   }
 }
 
