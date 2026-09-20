@@ -8771,153 +8771,123 @@ body.bpt-mobile-device nav#nav button.active{
 }
 </style>
 
-<style id="bpt-device-themes-v200">
-/* ===== BPT 2.0.1 — thèmes locaux par appareil ===== */
-.theme-device-card{
-  margin:18px 0 20px;
-  padding:18px;
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:16px;
-  background:rgba(255,255,255,.025);
-}
-.theme-device-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:14px}
-.theme-device-head h2{margin:0 0 4px;font-size:17px;color:#fff}
-.theme-device-head p{margin:0;color:var(--muted);font-size:12px;line-height:1.4}
-.theme-device-badge{flex:0 0 auto;padding:5px 9px;border-radius:999px;background:rgba(200,149,46,.14);border:1px solid rgba(200,149,46,.30);color:#e8c39e;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}
-.theme-choice-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.theme-choice{
-  width:100%;display:grid;grid-template-columns:54px 1fr auto;gap:12px;align-items:center;
-  padding:13px;border-radius:13px;border:1px solid rgba(255,255,255,.10);
-  background:rgba(255,255,255,.025);color:#fff;text-align:left;cursor:pointer;
-}
-.theme-choice:hover{border-color:rgba(200,149,46,.45);background:rgba(255,255,255,.045)}
-.theme-choice.active{border-color:#c8952e;box-shadow:0 0 0 2px rgba(200,149,46,.16) inset;background:rgba(200,149,46,.055)}
-.theme-preview{display:grid;grid-template-columns:1fr 1fr;width:54px;height:38px;border-radius:9px;overflow:hidden;border:1px solid rgba(255,255,255,.12)}
-.theme-preview i{display:block}
-.theme-preview .p1{grid-row:1/3}.theme-preview .p2{grid-row:1}.theme-preview .p3{grid-row:2}
-.theme-choice-copy b{display:block;font-size:14px}.theme-choice-copy small{display:block;margin-top:3px;color:var(--muted);font-size:11px;line-height:1.3}
-.theme-choice-check{font-size:18px;color:#c8952e;opacity:0}.theme-choice.active .theme-choice-check{opacity:1}
-.theme-local-note{margin-top:10px;color:var(--muted);font-size:11px}
-
-/* PC — thème 1 : Club (style actuel) */
-html[data-bpt-theme="pc-club"]{--bg:#0e1712;--panel:#18231d;--panel2:#213128;--line:#32473a;--green:#173a2b;--green2:#2f6d50;--gold:#c8952e;--cream:#fff8ea;--text:#f7f4ec;--muted:#b7c3bb}
-
-/* PC — thème 2 : Nuit bleue */
-html[data-bpt-theme="pc-blue"]{
-  --bg:#07111d;--panel:#0f1e2e;--panel2:#142a40;--line:#294764;
-  --green:#0d2940;--green2:#235f89;--gold:#d2aa59;--cream:#f6f9ff;--text:#f3f7fb;--muted:#9fb1c3;
-}
-html[data-bpt-theme="pc-blue"] body{background:linear-gradient(180deg,#07111d,#0a1725 58%,#07111d)}
-html[data-bpt-theme="pc-blue"] header{background:#0b2b46;border-bottom-color:#294f6e}
-html[data-bpt-theme="pc-blue"] nav{background:#091827;border-bottom-color:#24425b}
-html[data-bpt-theme="pc-blue"] .card,
-html[data-bpt-theme="pc-blue"] .record-card,
-html[data-bpt-theme="pc-blue"] .achievement-card,
-html[data-bpt-theme="pc-blue"] .history-game,
-html[data-bpt-theme="pc-blue"] .settings-block{background:#0f1e2e;border-color:#294764}
-html[data-bpt-theme="pc-blue"] .hero,
-html[data-bpt-theme="pc-blue"] .tab-premium-hero{background:linear-gradient(135deg,#123757,#0a1727 72%);border-color:#315a78}
-html[data-bpt-theme="pc-blue"] nav button.active{background:#c8952e !important;border-color:#e0b95f !important;color:#17120b !important}
-
-/* Mobile — thème 1 : Club mobile (style actuel) */
-html[data-bpt-theme="mobile-club"]{--bg:#0e1712;--panel:#18231d;--panel2:#213128;--line:#32473a;--green:#173a2b;--green2:#2f6d50;--gold:#c8952e;--cream:#fff8ea;--text:#f7f4ec;--muted:#b7c3bb}
-
-/* Mobile — thème 2 : Contraste */
-html[data-bpt-theme="mobile-contrast"]{
-  --bg:#080a0d;--panel:#12171d;--panel2:#19212a;--line:#3f4b57;
-  --green:#111922;--green2:#295a7c;--gold:#e0ad46;--cream:#ffffff;--text:#ffffff;--muted:#c0c8d0;
-}
-html[data-bpt-theme="mobile-contrast"] body{background:#080a0d}
-html[data-bpt-theme="mobile-contrast"] header{background:#10171f;border-bottom-color:#394653}
-html[data-bpt-theme="mobile-contrast"] nav{background:#0b1016;border-bottom-color:#394653}
-html[data-bpt-theme="mobile-contrast"] .card,
-html[data-bpt-theme="mobile-contrast"] .record-card,
-html[data-bpt-theme="mobile-contrast"] .achievement-card,
-html[data-bpt-theme="mobile-contrast"] .history-game,
-html[data-bpt-theme="mobile-contrast"] .settings-block{background:#12171d;border-color:#3f4b57}
-html[data-bpt-theme="mobile-contrast"] .hero,
-html[data-bpt-theme="mobile-contrast"] .tab-premium-hero{background:linear-gradient(145deg,#17202a,#0b0f14);border-color:#45515e}
-html[data-bpt-theme="mobile-contrast"] nav button{color:#f2f5f8;border-color:#43505d}
-html[data-bpt-theme="mobile-contrast"] nav button.active{background:#c8952e !important;border-color:#e3b85e !important;color:#17120b !important}
-html[data-bpt-theme="mobile-contrast"] .muted{color:#c0c8d0}
-
-/* L'onglet actif reste doré quel que soit le thème. */
-html[data-bpt-theme] nav#nav button.active,
-body nav#nav button.active{
-  background:#c8952e !important;
-  border-color:#dcb158 !important;
-  color:#17120b !important;
-  box-shadow:0 0 0 1px rgba(255,255,255,.07) inset !important;
-}
-
-@media(max-width:760px){
-  .theme-device-card{padding:14px;margin:14px 0 16px}
-  .theme-choice-grid{grid-template-columns:1fr}
-  .theme-device-head{align-items:center}
-  .theme-choice{grid-template-columns:48px 1fr auto;padding:11px}
-  .theme-preview{width:48px;height:34px}
+<style id="bpt-v202-mobile-records-dedicated">
+/* ===== BPT 2.0.2 — Records téléphone : structure dédiée, sans impact PC ===== */
+@media (max-width:700px){
+  html.bpt-mobile-device #records .records-grid,
+  body.bpt-mobile-device #records .records-grid{
+    display:flex !important;
+    flex-direction:column !important;
+    gap:8px !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-card,
+  body.bpt-mobile-device #records .record-mobile-card{
+    display:block !important;
+    width:100% !important;
+    padding:10px 11px !important;
+    background:var(--panel) !important;
+    border:1px solid var(--line) !important;
+    border-radius:10px !important;
+    min-height:0 !important;
+    text-align:left !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-topline,
+  body.bpt-mobile-device #records .record-mobile-topline{
+    display:flex !important;
+    align-items:baseline !important;
+    flex-wrap:wrap !important;
+    column-gap:4px !important;
+    row-gap:2px !important;
+    width:100% !important;
+    font-size:15px !important;
+    line-height:1.25 !important;
+    font-weight:800 !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-icon,
+  body.bpt-mobile-device #records .record-mobile-icon{
+    flex:0 0 auto !important;
+    font-size:15px !important;
+    line-height:1 !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-label,
+  body.bpt-mobile-device #records .record-mobile-label{
+    flex:0 0 auto !important;
+    color:#fff !important;
+    font:inherit !important;
+    font-weight:850 !important;
+    white-space:normal !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-player,
+  body.bpt-mobile-device #records .record-mobile-player{
+    display:inline-flex !important;
+    align-items:baseline !important;
+    flex-wrap:nowrap !important;
+    gap:4px !important;
+    color:#42d5e8 !important;
+    font:inherit !important;
+    font-weight:900 !important;
+    white-space:nowrap !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-player .player-name-stack,
+  body.bpt-mobile-device #records .record-mobile-player .player-name-stack{
+    display:inline-flex !important;
+    flex-direction:row !important;
+    align-items:baseline !important;
+    gap:4px !important;
+    white-space:nowrap !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-player .player-primary-name,
+  body.bpt-mobile-device #records .record-mobile-player .player-primary-name,
+  html.bpt-mobile-device #records .record-mobile-player .player-secondary-nickname,
+  body.bpt-mobile-device #records .record-mobile-player .player-secondary-nickname{
+    display:inline !important;
+    margin:0 !important;
+    padding:0 !important;
+    font:inherit !important;
+    line-height:inherit !important;
+    white-space:nowrap !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-player .player-secondary-nickname,
+  body.bpt-mobile-device #records .record-mobile-player .player-secondary-nickname{
+    color:#9fe8f1 !important;
+    font-weight:700 !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-player-pair,
+  body.bpt-mobile-device #records .record-mobile-player-pair{
+    display:inline-flex !important;
+    align-items:baseline !important;
+    flex-wrap:wrap !important;
+    gap:4px !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-player-pair .record-action,
+  body.bpt-mobile-device #records .record-mobile-player-pair .record-action{
+    color:var(--muted) !important;
+    font-size:inherit !important;
+    font-weight:700 !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-value,
+  body.bpt-mobile-device #records .record-mobile-value{
+    margin:5px 0 0 19px !important;
+    color:#fff !important;
+    font-size:17px !important;
+    line-height:1.2 !important;
+    font-weight:800 !important;
+  }
 }
 </style>
 
 
-<style id="bpt-device-themes-v201-strong">
-/* Thèmes renforcés : le changement doit être immédiatement perceptible */
-html[data-bpt-theme="pc-club"] body,
-html[data-bpt-theme="mobile-club"] body{background:#0e1712 !important;color:#f7f4ec !important}
-html[data-bpt-theme="pc-club"] header,
-html[data-bpt-theme="mobile-club"] header{background:#173a2b !important;border-bottom-color:#315441 !important}
-html[data-bpt-theme="pc-club"] nav,
-html[data-bpt-theme="mobile-club"] nav{background:#121e17 !important;border-bottom-color:#283c31 !important}
-html[data-bpt-theme="pc-club"] .card,
-html[data-bpt-theme="pc-club"] .record-card,
-html[data-bpt-theme="pc-club"] .settings-block,
-html[data-bpt-theme="pc-club"] .history-game,
-html[data-bpt-theme="mobile-club"] .card,
-html[data-bpt-theme="mobile-club"] .record-card,
-html[data-bpt-theme="mobile-club"] .settings-block,
-html[data-bpt-theme="mobile-club"] .history-game{background:#18231d !important;border-color:#32473a !important}
 
-html[data-bpt-theme="pc-blue"] body{background:linear-gradient(180deg,#07111d 0%,#0b1c2d 55%,#07111d 100%) !important;color:#f5f8fc !important}
-html[data-bpt-theme="pc-blue"] header{background:linear-gradient(90deg,#0a2238,#113a5c) !important;border-bottom-color:#35698f !important}
-html[data-bpt-theme="pc-blue"] nav{background:#081624 !important;border-bottom-color:#28506d !important}
-html[data-bpt-theme="pc-blue"] .card,
-html[data-bpt-theme="pc-blue"] .record-card,
-html[data-bpt-theme="pc-blue"] .settings-block,
-html[data-bpt-theme="pc-blue"] .history-game,
-html[data-bpt-theme="pc-blue"] .achievement-card{background:#0f2031 !important;border-color:#2e5878 !important;box-shadow:0 8px 24px rgba(0,0,0,.16)}
-html[data-bpt-theme="pc-blue"] .hero,
-html[data-bpt-theme="pc-blue"] .tab-premium-hero,
-html[data-bpt-theme="pc-blue"] .dashboard-hero,
-html[data-bpt-theme="pc-blue"] .home-hero{background:linear-gradient(135deg,#123f65,#0b1b2b 72%) !important;border-color:#3f7297 !important}
-html[data-bpt-theme="pc-blue"] th{background:#173f5f !important}
-html[data-bpt-theme="pc-blue"] input,
-html[data-bpt-theme="pc-blue"] select{background:#091725 !important;border-color:#3b6280 !important}
-
-html[data-bpt-theme="mobile-contrast"] body{background:#050608 !important;color:#fff !important}
-html[data-bpt-theme="mobile-contrast"] header{background:#111820 !important;border-bottom-color:#59636e !important}
-html[data-bpt-theme="mobile-contrast"] nav{background:#070b0f !important;border-bottom-color:#4b555f !important}
-html[data-bpt-theme="mobile-contrast"] .card,
-html[data-bpt-theme="mobile-contrast"] .record-card,
-html[data-bpt-theme="mobile-contrast"] .settings-block,
-html[data-bpt-theme="mobile-contrast"] .history-game,
-html[data-bpt-theme="mobile-contrast"] .achievement-card{background:#151a20 !important;border-color:#505a65 !important;box-shadow:none !important}
-html[data-bpt-theme="mobile-contrast"] .hero,
-html[data-bpt-theme="mobile-contrast"] .tab-premium-hero,
-html[data-bpt-theme="mobile-contrast"] .dashboard-hero,
-html[data-bpt-theme="mobile-contrast"] .home-hero{background:linear-gradient(145deg,#1b222b,#0b0e12) !important;border-color:#606b76 !important}
-html[data-bpt-theme="mobile-contrast"] th{background:#222a33 !important}
-html[data-bpt-theme="mobile-contrast"] input,
-html[data-bpt-theme="mobile-contrast"] select{background:#090d11 !important;border-color:#58636e !important}
-html[data-bpt-theme="mobile-contrast"] .muted{color:#d0d5da !important}
-
-/* Onglet actif doré quel que soit le thème */
-html[data-bpt-theme] nav#nav button.active{background:#c8952e !important;border-color:#e0b95f !important;color:#17120b !important}
-
-.bpt-theme-toast{position:fixed;right:16px;bottom:64px;z-index:12000;background:#111a14;color:#fff;border:1px solid #c8952e;border-radius:10px;padding:10px 13px;font-weight:800;box-shadow:0 10px 28px rgba(0,0,0,.35);opacity:0;transform:translateY(8px);pointer-events:none;transition:.18s ease}
-.bpt-theme-toast.show{opacity:1;transform:translateY(0)}
-@media(max-width:700px){.bpt-theme-toast{left:12px;right:12px;bottom:78px;text-align:center}}
+<style id="bpt-look-180-rollback">
+:root{--bg:#0e1712;--panel:#18231d;--panel2:#213128;--line:#32473a;--green:#173a2b;--green2:#2f6d50;--gold:#c8952e;--cream:#fff8ea;--text:#f7f4ec;--muted:#b7c3bb;--danger:#a94343;--ok:#79c594}
+html,body{background:#0e1712;color:#f7f4ec}
+header{background:#173a2b;border-bottom-color:#315441}
+nav{background:#121e17;border-bottom-color:#283c31}
+.card{background:#18231d;border-color:#32473a}
+th{background:#274334;color:#fff}
+input,select{background:#0d1711;color:#fff;border-color:#42594b}
+nav button.active{background:#c8952e!important;border-color:#c8952e!important;color:#17120b!important}
 </style>
-
 </head>
 <body>
 
@@ -9027,7 +8997,7 @@ function simplifyRecordTextForMobile(text){
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 2.0.1</div>
+  <div class="app-version">Version 2.0.5</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -9800,53 +9770,7 @@ function simplifyRecordTextForMobile(text){
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
   </div>
-
-  <div id="deviceThemeSettings" class="theme-device-card" aria-label="Apparence de cet appareil">
-    <div class="theme-device-head">
-      <div>
-        <h2>Apparence de cet appareil</h2>
-        <p>Le thème est mémorisé uniquement dans ce navigateur et n'affecte aucun autre appareil.</p>
-      </div>
-      <span id="themeDeviceBadge" class="theme-device-badge">—</span>
-    </div>
-    <div id="themeChoices" class="theme-choice-grid"></div>
-    <div class="theme-local-note">Le choix reste local : chaque PC ou téléphone peut conserver son propre thème.</div>
-  </div>
-
-  <div id="settingsLock" class="card tab-primary-panel" style="max-width:520px;margin:20px auto">
-    <h2>Paramètres protégés</h2>
-    <p class="muted">Saisissez le mot de passe pour accéder aux paramètres du championnat.</p>
-    <div class="field"><label>Mot de passe</label><input id="settingsPassword" type="password" inputmode="numeric" placeholder="••••"></div>
-    <button class="btn secondary" id="unlockSettingsBtn" style="width:100%">Déverrouiller</button>
-    <div id="settingsPasswordError" class="bad" style="margin-top:8px"></div>
-  </div>
-  <div id="settingsProtectedContent" style="display:none">
-  <details class="settings-block" open>
-    <summary>Nouvelle partie</summary>
-    <div class="settings-block-content">
-      <div class="muted" style="margin:0 0 12px 2px">Utilisez ce module pour saisir manuellement une partie terminée. Pour une partie en cours, utilisez l’onglet Live.</div>
-<div class="grid" style="margin:12px 0">
-    <div class="card span4">
-      <h2>Nouvelle partie manuelle</h2>
-      <div class="field"><label>Date</label><input id="gDate" type="date"></div>
-      <div class="field"><label>Nom / lieu de la partie *</label><input id="gLocation" placeholder="Obligatoire" required></div>
-      <div class="field"><label>Mise / joueur</label><input id="gStake" type="number" min="0" step="1"></div><div class="muted">Gains BPT : 1er 60 % • 2e 30 % • 3e 10 % — ajustés aux 5 € les plus proches</div>
-      <div class="muted">Sélectionnez les joueurs actifs participant à la partie.</div>
-      <div id="gamePlayerChecks" style="margin-top:8px;max-height:340px;overflow:auto"></div>
-      <div class="row" style="margin-top:10px">
-        <input id="gameNewPlayer" placeholder="Nouveau joueur" style="flex:1">
-        <button class="btn secondary" id="gameAddPlayerBtn">Ajouter et sélectionner</button>
-      </div>
-      <div class="muted" style="margin-top:5px">Le joueur ajouté devient automatiquement actif dans le championnat.</div>
-      <button class="btn secondary" id="buildGameBtn" style="width:100%;margin-top:10px">Préparer le classement</button>
-    </div>
-    <div class="card span8">
-      <h2>Saisie du classement</h2>
-      <div id="gameEntryEmpty" class="muted">Sélectionnez au moins 2 joueurs puis cliquez sur « Préparer le classement ».</div>
-      <div id="gameEntry"></div>
-    </div>
-  </div>
-    </div>
+</div>
   </details>
 
   <details class="settings-block">
@@ -11792,19 +11716,32 @@ function renderRecords(){
     ["🐢","Loser",loser.name,loser.value?`${loser.value} dernière${loser.value>1?"s":""} place${loser.value>1?"s":""}`:"Aucune dernière place enregistrée"],
     ["🎯","Kill le plus fréquent",pairData?`${pairData.names[0]} a éliminé ${pairData.names[1]}`:"—",pairData?`${pairData.value} fois`:"—"]
   ];
+  const mobileRecords=isBptMobileDevice();
   holder.innerHTML=cards.map(c=>{
     let holderHtml="";
     if(c[1]==="Kill le plus fréquent" && pairData){
-      holderHtml=`<div class="record-player-pair">
+      holderHtml=`<span class="record-mobile-player-pair">
         ${playerNameHtml(pairData.names[0])}
         <span class="record-action">a éliminé</span>
         ${playerNameHtml(pairData.names[1])}
-      </div>`;
+      </span>`;
     }else if(c[2] && c[2]!=="—"){
       holderHtml=playerNameHtml(c[2]);
     }else{
-      holderHtml='<span class="player-primary-name">—</span>';
+      holderHtml='<span class="player-name-stack"><span class="player-primary-name">—</span></span>';
     }
+
+    if(mobileRecords){
+      return `<div class="record-mobile-card">
+        <div class="record-mobile-topline">
+          <span class="record-mobile-icon">${c[0]}</span>
+          <span class="record-mobile-label">${esc(c[1])} :</span>
+          <strong class="record-mobile-player">${holderHtml}</strong>
+        </div>
+        <div class="record-mobile-value">${esc(simplifyRecordTextForMobile(c[3]))}</div>
+      </div>`;
+    }
+
     return `<div class="record-card"><div class="record-icon">${c[0]}</div><div class="record-headline"><span class="record-label">${esc(c[1])}</span><span class="record-separator"> :</span><strong class="record-player-holder">${holderHtml}</strong></div><small>${esc(simplifyRecordTextForMobile(c[3]))}</small></div>`;
   }).join("");
 }
@@ -17708,84 +17645,6 @@ document.addEventListener("visibilitychange",()=>{
   document.addEventListener('visibilitychange',()=>{ if(!document.hidden)setTimeout(window.bptRefreshLiveNavRole,0); });
   setInterval(window.bptRefreshLiveNavRole,1000);
   setTimeout(window.bptRefreshLiveNavRole,0);
-})();
-</script>
-
-<script id="bpt-device-theme-v200">
-(function(){
-  const THEME_KEYS={desktop:'bpt.theme.desktop.v1',mobile:'bpt.theme.mobile.v1'};
-  const THEMES={
-    desktop:[
-      {id:'pc-club',name:'Club',desc:'Vert poker · ambiance BPT classique',colors:['#173a2b','#18231d','#c8952e']},
-      {id:'pc-blue',name:'Nuit bleue',desc:'Bleu nuit · lecture plus éditoriale',colors:['#0d2940','#0f1e2e','#d2aa59']}
-    ],
-    mobile:[
-      {id:'mobile-club',name:'Club mobile',desc:'Vert poker · continuité avec le PC',colors:['#173a2b','#18231d','#c8952e']},
-      {id:'mobile-contrast',name:'Contraste',desc:'Noir profond · textes renforcés',colors:['#080a0d','#19212a','#e0ad46']}
-    ]
-  };
-
-  function deviceKind(){
-    const mobile=document.documentElement.classList.contains('bpt-mobile-device')
-      || document.body?.classList.contains('bpt-mobile-device')
-      || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent||'');
-    return mobile?'mobile':'desktop';
-  }
-
-  function validTheme(kind,id){return THEMES[kind].some(t=>t.id===id)}
-  function savedTheme(kind){
-    try{
-      const v=localStorage.getItem(THEME_KEYS[kind]);
-      if(validTheme(kind,v))return v;
-    }catch(e){}
-    return THEMES[kind][0].id;
-  }
-  function themeName(kind,id){const t=THEMES[kind].find(x=>x.id===id);return t?t.name:id}
-  function showThemeToast(kind,id){
-    let el=document.getElementById('bptThemeToast');
-    if(!el){el=document.createElement('div');el.id='bptThemeToast';el.className='bpt-theme-toast';document.body.appendChild(el)}
-    el.textContent='Thème appliqué : '+themeName(kind,id);
-    el.classList.remove('show');void el.offsetWidth;el.classList.add('show');
-    clearTimeout(showThemeToast._t);showThemeToast._t=setTimeout(()=>el.classList.remove('show'),1400);
-  }
-  function applyTheme(id,kind=deviceKind(),save=false){
-    if(!validTheme(kind,id))id=THEMES[kind][0].id;
-    document.documentElement.setAttribute('data-bpt-theme',id);
-    if(document.body)document.body.setAttribute('data-bpt-theme',id);
-    if(save){try{localStorage.setItem(THEME_KEYS[kind],id)}catch(e){};showThemeToast(kind,id)}
-    renderThemeChooser();
-  }
-  function previewMarkup(t){
-    return `<span class="theme-preview" aria-hidden="true"><i class="p1" style="background:${t.colors[0]}"></i><i class="p2" style="background:${t.colors[1]}"></i><i class="p3" style="background:${t.colors[2]}"></i></span>`;
-  }
-  function renderThemeChooser(){
-    const host=document.getElementById('themeChoices');
-    const badge=document.getElementById('themeDeviceBadge');
-    if(!host||!badge)return;
-    const kind=deviceKind();
-    const current=document.documentElement.getAttribute('data-bpt-theme')||savedTheme(kind);
-    badge.textContent=kind==='mobile'?'Téléphone / tablette':'PC';
-    host.innerHTML=THEMES[kind].map(t=>`
-      <button type="button" class="theme-choice ${t.id===current?'active':''}" data-theme-id="${t.id}">
-        ${previewMarkup(t)}
-        <span class="theme-choice-copy"><b>${t.name}</b><small>${t.desc}</small></span>
-        <span class="theme-choice-check">✓</span>
-      </button>`).join('');
-    host.querySelectorAll('.theme-choice').forEach(btn=>btn.addEventListener('click',()=>applyTheme(btn.dataset.themeId,kind,true)));
-  }
-  function syncThemeToDevice(){
-    const kind=deviceKind();
-    const current=document.documentElement.getAttribute('data-bpt-theme')||'';
-    if(!validTheme(kind,current))applyTheme(savedTheme(kind),kind,false);
-    else renderThemeChooser();
-  }
-
-  window.BPTDeviceTheme={apply:applyTheme,render:renderThemeChooser,deviceKind};
-
-  function init(){applyTheme(savedTheme(deviceKind()),deviceKind(),false)}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
-  window.addEventListener('resize',()=>setTimeout(syncThemeToDevice,0),{passive:true});
-  window.addEventListener('orientationchange',()=>setTimeout(syncThemeToDevice,0),{passive:true});
 })();
 </script>
 
