@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- BPT: auto-ouverture Live spectateur en plein écran applicatif -->
+<!-- BPT: Live spectateur auto + durée écoulée + rôle maître/spectateur stabilisé -->
 <html lang="fr">
 <head>
 <meta charset="utf-8">
@@ -7985,6 +7985,45 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   line-height:.92 !important;
 }
 
+
+/* ===== BPT — Records : joueur mis en évidence ===== */
+#records .record-player-holder{
+  display:block;
+  margin:7px 0 4px;
+  font-size:27px;
+  line-height:1.05;
+  font-weight:950;
+  color:#38c9dc;
+  letter-spacing:-.02em;
+}
+#records .record-player-holder .player-primary-name{
+  color:#38c9dc;
+  font-weight:950;
+}
+#records .record-player-holder .player-secondary-nickname{
+  margin-top:3px;
+  color:#a7dfe6;
+  font-size:11px;
+}
+#records .record-player-pair{
+  color:#38c9dc;
+}
+#records .record-action{
+  color:#95a6a0;
+  font-size:11px;
+}
+@media(max-width:700px){
+  html.bpt-mobile-device #records .record-player-holder,
+  body.bpt-mobile-device #records .record-player-holder{
+    font-size:17px !important;
+    line-height:1.08 !important;
+    color:#38c9dc !important;
+  }
+  html.bpt-mobile-device #records .record-player-holder .player-primary-name,
+  body.bpt-mobile-device #records .record-player-holder .player-primary-name{
+    color:#38c9dc !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -8059,6 +8098,7 @@ function simplifyRecordTextForMobile(text){
       <div class="spectator-server-card spectator-server-timer-card">
         <span>TEMPS RESTANT</span>
         <strong id="spectatorServerTimer">00:00</strong>
+        <small>Durée écoulée : <b id="spectatorServerElapsed">00:00:00</b></small>
         <small>Niveau suivant : <b id="spectatorServerNext">—</b></small>
       </div>
       <div class="spectator-server-card">
@@ -8098,7 +8138,7 @@ function simplifyRecordTextForMobile(text){
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
-  <button data-view="dashboard" class="active">▦ Tableau de bord</button>
+  <button data-view="dashboard" class="active">⌂ Accueil</button>
   <button data-view="latestgame">◷ Parties</button>
   <button data-view="ranking">♛ Classement</button>
   <button data-view="records">★ Records & accomplissements</button>
@@ -8432,7 +8472,7 @@ function simplifyRecordTextForMobile(text){
 <section id="dashboard" class="view active">
   <div class="premium-hero">
     <div class="premium-hero-copy">
-      <div class="home-kicker">BPT · Tableau de bord</div>
+      <div class="home-kicker">BPT · Accueil</div>
       <h1 id="dashboardSeasonTitle">Championnat BPT saison 2026–2027</h1>
       <p id="heroText"></p>
     </div>
@@ -9562,6 +9602,9 @@ async function cloudPushNow(){
         levelSeconds:Number(s.levelSeconds||0),
         remainingSeconds:Number(s.remainingSeconds||0),
         endAt:s.endAt||null,
+        elapsedBeforeMs:Number(s.elapsedBeforeMs||0),
+        runStartedAt:s.runStartedAt||null,
+        startedAt:s.startedAt||null,
         levels:JSON.parse(JSON.stringify(s.levels||[])),
         players:JSON.parse(JSON.stringify(s.players||[])),
         handoverRequest:s.handoverRequest ? JSON.parse(JSON.stringify(s.handoverRequest)) : null
@@ -9691,6 +9734,7 @@ function renderSpectatorServerOverlay(wire){
     remainingSeconds=Math.max(0,Math.ceil((Number(wire.endAt)-Date.now())/1000));
   }
   $("spectatorServerTimer").textContent=liveTime(remainingSeconds);
+  if($("spectatorServerElapsed"))$("spectatorServerElapsed").textContent=liveTime(liveElapsedSeconds(wire));
 
   $("spectatorServerPlayers").innerHTML=ordered.map(p=>{
     const out=p.status==="Sorti";
@@ -9731,6 +9775,7 @@ function startSpectatorOverlayTicker(){
       remaining=Math.max(0,Math.ceil((Number(w.endAt)-Date.now())/1000));
     }
     if($("spectatorServerTimer"))$("spectatorServerTimer").textContent=liveTime(remaining);
+    if($("spectatorServerElapsed"))$("spectatorServerElapsed").textContent=liveTime(liveElapsedSeconds(w));
   },250);
 }
 
@@ -10428,6 +10473,9 @@ async function livePushStateNow(){
         levelSeconds:Number(s.levelSeconds||0),
         remainingSeconds:Number(s.remainingSeconds||0),
         endAt:s.endAt||null,
+        elapsedBeforeMs:Number(s.elapsedBeforeMs||0),
+        runStartedAt:s.runStartedAt||null,
+        startedAt:s.startedAt||null,
         levels:JSON.parse(JSON.stringify(s.levels||[])),
         players:JSON.parse(JSON.stringify(s.players||[])),
         handoverRequest:s.handoverRequest ? JSON.parse(JSON.stringify(s.handoverRequest)) : null
@@ -11469,7 +11517,7 @@ function liveRenderFullscreen(){
   $("liveFsLevelDuration").textContent=`${level.durationMin} min`;
   $("liveFsAvgStack").textContent=remainingCount?liveFmt(total/remainingCount):"0";
   $("liveFsRemaining").textContent=String(remainingCount);
-  $("liveFsElapsed").textContent=liveTime(liveElapsedSeconds());
+  $("liveFsElapsed").textContent=liveTime(liveElapsedSeconds(s));
   $("liveFsNext").textContent=next
     ? `${liveFmt(next.sb)} / ${liveFmt(next.bb)}${next.ante?" · ante "+liveFmt(next.ante):""}`
     : "Dernier niveau";
@@ -14355,10 +14403,17 @@ function liveIsCreator(){
 }
 
 function liveIsSpectator(){
-  const remote=spectatorServerLiveState;
+  // Le rôle doit rester stable pendant toute la durée d’un Live.
+  // Priorité à l’état spectateur directement reçu du serveur ; si celui-ci
+  // n’est pas momentanément disponible entre deux polls, on s’appuie sur
+  // db.liveState, qui contient la dernière copie synchronisée du même Live.
+  const remote=(spectatorServerLiveState?.prepared && !spectatorServerLiveState?.synced)
+    ? spectatorServerLiveState
+    : db?.liveState;
+
   if(remote?.prepared && !remote?.synced){
     const creator=String(remote.creatorDeviceId||"");
-    return !!(creator && creator!==liveDeviceId());
+    if(creator)return creator!==liveDeviceId();
   }
   return false;
 }
@@ -14511,10 +14566,12 @@ function liveTime(sec){
   const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;
   return h?`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`:`${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
 }
-function liveElapsedSeconds(){
-  const s=ensureLiveState();
-  let ms=s.elapsedBeforeMs||0;
-  if(s.running && s.runStartedAt)ms+=Date.now()-s.runStartedAt;
+function liveElapsedSeconds(state=null){
+  const s=state||ensureLiveState();
+  let ms=Number(s?.elapsedBeforeMs||0);
+  if(s?.running && s?.runStartedAt)ms+=Math.max(0,Date.now()-Number(s.runStartedAt));
+  // Compatibilité avec un ancien liveWire ne publiant pas encore les champs ci-dessus.
+  if(ms<=0 && s?.running && s?.startedAt)ms=Math.max(0,Date.now()-Number(s.startedAt));
   return Math.floor(ms/1000);
 }
 function liveNice(v){
@@ -14885,7 +14942,8 @@ function liveRenderTimerOnly(){
     $("spectatorTimer").textContent=liveTime(remaining);
   }
   updateLiveTimerUrgency();
-  if(document.fullscreenElement===$("liveFullscreenDisplay"))liveRenderFullscreen();
+  const liveFs=$("liveFullscreenDisplay");
+  if(document.fullscreenElement===liveFs || (liveFs && getComputedStyle(liveFs).display!=="none"))liveRenderFullscreen();
 }
 function liveRefreshElimLists(resetKiller=false){
   const s=ensureLiveState();
@@ -16628,7 +16686,7 @@ document.addEventListener("visibilitychange",()=>{
 (function(){
   const desktopLabels = {
     live:'● Live',
-    dashboard:'▦ Tableau de bord',
+    dashboard:'⌂ Accueil',
     latestgame:'◷ Parties',
     ranking:'♛ Classement',
     records:'★ Records & accomplissements',
