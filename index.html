@@ -9044,6 +9044,57 @@ nav button.active{background:#c8952e!important;border-color:#c8952e!important;co
   }
 }
 </style>
+
+<style id="bpt-v215-mobile-live-app-fullscreen">
+@media (max-width:700px){
+  body.bpt-mobile-live-fullscreen{overflow:hidden !important;}
+  html.bpt-mobile-device body.bpt-mobile-live-fullscreen #liveFullscreenDisplay,
+  body.bpt-mobile-device.bpt-mobile-live-fullscreen #liveFullscreenDisplay{
+    display:flex !important;
+    position:fixed !important;
+    inset:0 !important;
+    width:100vw !important;
+    height:100dvh !important;
+    min-height:100vh !important;
+    z-index:20000 !important;
+    overflow:auto !important;
+    flex-direction:column !important;
+    align-items:center !important;
+    justify-content:flex-start !important;
+    padding-top:max(12px,env(safe-area-inset-top)) !important;
+    padding-bottom:max(72px,calc(56px + env(safe-area-inset-bottom))) !important;
+    box-sizing:border-box !important;
+    pointer-events:auto !important;
+    touch-action:manipulation !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay button,
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay select,
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay input{
+    pointer-events:auto !important;
+    touch-action:manipulation !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-bottom-dock{
+    position:fixed !important;
+    left:8px !important;
+    right:8px !important;
+    bottom:max(8px,env(safe-area-inset-bottom)) !important;
+    z-index:20020 !important;
+    pointer-events:auto !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-minute-btn,
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-dock-btn,
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-exit{
+    position:relative !important;
+    z-index:20030 !important;
+    pointer-events:auto !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-elim-popup,
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-duration-popup{
+    z-index:20050 !important;
+    pointer-events:auto !important;
+  }
+}
+</style>
 </head>
 <body>
 <div id="bptDeviceBadge" class="desktop">Version PC</div>
@@ -9076,7 +9127,7 @@ function updateBptDeviceBadge(){
   const badge=document.getElementById("bptDeviceBadge");
   if(!badge)return;
   const mobile=!!isBptMobileDevice();
-  badge.textContent=mobile?"Version téléphone 2.1.4":"Version PC 2.1.4";
+  badge.textContent=mobile?"Version téléphone 2.1.5":"Version PC 2.1.5";
   badge.classList.toggle("mobile",mobile);
   badge.classList.toggle("desktop",!mobile);
 }
@@ -12336,12 +12387,24 @@ async function toggleLiveFullscreen(){
   const target=$("liveFullscreenDisplay");
   if(!target)return;
 
+  // Téléphone : plein écran applicatif, sans API plein écran du navigateur.
+  if(isBptMobileDevice()){
+    const opening=!document.body.classList.contains("bpt-mobile-live-fullscreen");
+    document.body.classList.toggle("bpt-mobile-live-fullscreen",opening);
+    target.setAttribute("aria-hidden",opening?"false":"true");
+    if(opening){
+      liveRenderFullscreen();
+      window.scrollTo({top:0,left:0,behavior:"auto"});
+    }
+    return;
+  }
+
+  // PC : comportement plein écran navigateur conservé.
   try{
     if(document.fullscreenElement){
       await document.exitFullscreen?.();
       return;
     }
-
     liveRenderFullscreen();
     await target.requestFullscreen?.();
   }catch(e){
@@ -17380,7 +17443,17 @@ if($("spectatorQuitLiveBottomBtn"))$("spectatorQuitLiveBottomBtn").onclick=()=>{
   currentViewId="ranking";
   showView("ranking");
 };
-if($("liveFullscreenExitBtn"))$("liveFullscreenExitBtn").onclick=()=>document.exitFullscreen?.();
+if($("liveFullscreenExitBtn"))$("liveFullscreenExitBtn").onclick=async()=>{
+  if(isBptMobileDevice()){
+    document.body.classList.remove("bpt-mobile-live-fullscreen");
+    $("liveFullscreenDisplay")?.setAttribute("aria-hidden","true");
+    showView("live");
+    liveShowScreen("game");
+    liveRenderAll();
+    return;
+  }
+  await document.exitFullscreen?.();
+};
 if($("liveCancelGameBtn"))$("liveCancelGameBtn").onclick=()=>liveCancelCurrentGame({ask:true,showMessage:true});
 if($("liveResumeContinueBtn"))$("liveResumeContinueBtn").onclick=()=>{
   $("liveResumeBackdrop").style.display="none";
@@ -17536,6 +17609,30 @@ $("unlockSettingsBtn").onclick=unlockSettings;
 $("settingsPassword").addEventListener("keydown",e=>{
   if(e.key==="Enter")unlockSettings();
 });
+
+function bindMobileLiveFullscreenControls(){
+  const bind=(id,handler)=>{
+    const el=$(id);
+    if(!el)return;
+    el.addEventListener("click",async e=>{
+      if(!isBptMobileDevice())return;
+      e.preventDefault();
+      e.stopPropagation();
+      await handler();
+    },true);
+  };
+  bind("liveFsPauseResumeBtn",liveFsTogglePauseResume);
+  bind("liveFsMinusMinuteBtn",()=>liveFsAdjustTimer(-60));
+  bind("liveFsPlusMinuteBtn",()=>liveFsAdjustTimer(60));
+  bind("liveFsDurationBtn",liveFsOpenDurationPopup);
+  bind("liveFsEliminateOpenBtn",openLiveFsElimPopup);
+  bind("liveFsDurationApplyBtn",liveFsApplyDuration);
+  bind("liveFsDurationCancelBtn",liveFsCloseDurationPopup);
+  bind("liveFsEliminateBtn",liveFsEliminate);
+  bind("liveFsElimCancelBtn",closeLiveFsElimPopup);
+}
+
+bindMobileLiveFullscreenControls();
 
 renderAll();
 liveInit();
