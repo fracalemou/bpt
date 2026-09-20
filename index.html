@@ -9095,6 +9095,199 @@ nav button.active{background:#c8952e!important;border-color:#c8952e!important;co
   }
 }
 </style>
+
+<style id="bpt-v216-live-mobile-mode">
+/* ===== BPT 2.1.6 — vrai mode Live mobile dédié ===== */
+@media (max-width:700px){
+  body.bpt-mobile-live-fullscreen{overflow:hidden !important;touch-action:manipulation !important;}
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay{
+    display:flex !important;
+    position:fixed !important;
+    inset:0 !important;
+    z-index:20000 !important;
+    width:100vw !important;
+    height:100dvh !important;
+    min-height:100dvh !important;
+    overflow-y:auto !important;
+    overflow-x:hidden !important;
+    flex-direction:column !important;
+    align-items:stretch !important;
+    justify-content:flex-start !important;
+    padding:12px 12px calc(18px + env(safe-area-inset-bottom)) !important;
+    background:linear-gradient(180deg,#0b120e,#101b15) !important;
+    box-sizing:border-box !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-brand{
+    position:static !important;
+    order:1 !important;
+    font-size:12px !important;
+    letter-spacing:.13em !important;
+    margin:0 0 5px !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-top-actions{
+    position:absolute !important;
+    top:8px !important;
+    right:8px !important;
+    z-index:20 !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-exit{
+    position:static !important;
+    min-height:38px !important;
+    padding:7px 10px !important;
+    opacity:1 !important;
+    font-size:12px !important;
+    pointer-events:auto !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-level{
+    order:2 !important;
+    margin:8px 0 2px !important;
+    font-size:21px !important;
+    text-align:center !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-next-compact{
+    order:3 !important;
+    margin:0 0 5px !important;
+    font-size:12px !important;
+    text-align:center !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-blinds{
+    order:4 !important;
+    font-size:clamp(42px,13vw,68px) !important;
+    line-height:1 !important;
+    text-align:center !important;
+    margin:4px 0 !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-ante{
+    order:5 !important;
+    min-height:18px !important;
+    margin:0 0 5px !important;
+    font-size:15px !important;
+    text-align:center !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-timer-label{
+    order:6 !important;
+    margin:5px 0 0 !important;
+    font-size:10px !important;
+    text-align:center !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-row{
+    order:7 !important;
+    display:grid !important;
+    grid-template-columns:72px minmax(0,1fr) 72px !important;
+    gap:8px !important;
+    width:100% !important;
+    margin:0 !important;
+    align-items:center !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-timer{
+    font-size:clamp(50px,16vw,82px) !important;
+    line-height:1 !important;
+    margin:5px 0 !important;
+    text-align:center !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-minute-btn{
+    min-width:0 !important;
+    width:100% !important;
+    min-height:50px !important;
+    padding:8px 4px !important;
+    font-size:14px !important;
+    pointer-events:auto !important;
+    touch-action:manipulation !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-kpis{
+    order:8 !important;
+    width:100% !important;
+    display:grid !important;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:7px !important;
+    margin:8px 0 !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-kpi{
+    padding:8px 5px !important;
+    border-radius:10px !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-kpi span{
+    font-size:9px !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-kpi strong{
+    margin-top:3px !important;
+    font-size:20px !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay #liveFsDurationBtn{
+    min-height:30px !important;
+    margin-top:4px !important;
+    pointer-events:auto !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-bottom-dock{
+    order:9 !important;
+    position:static !important;
+    width:100% !important;
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:8px !important;
+    margin:4px 0 0 !important;
+    padding:0 !important;
+    background:transparent !important;
+    pointer-events:auto !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-mobile-level-controls,
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-mobile-main-controls{
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    gap:8px !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-dock-btn{
+    width:100% !important;
+    min-height:52px !important;
+    font-size:14px !important;
+    padding:9px 7px !important;
+    pointer-events:auto !important;
+    touch-action:manipulation !important;
+    position:relative !important;
+    z-index:5 !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-elim-popup,
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-duration-popup{
+    position:fixed !important;
+    inset:0 !important;
+    z-index:21000 !important;
+    pointer-events:auto !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-elim-card,
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-duration-card{
+    width:min(390px,94vw) !important;
+    max-height:88dvh !important;
+    overflow:auto !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-elim-card button,
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-elim-card select,
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-duration-card button,
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-duration-card input{
+    min-height:48px !important;
+    pointer-events:auto !important;
+    touch-action:manipulation !important;
+  }
+}
+</style>
+
+<style id="bpt-v217-mobile-handover-fix">
+@media (max-width:700px){
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay #globalHandoverRequest{
+    z-index:3000000 !important;
+    pointer-events:auto !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay #globalHandoverRequest .global-handover-card{
+    pointer-events:auto !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay #globalHandoverApproveBtn,
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay #globalHandoverRejectBtn{
+    min-height:44px !important;
+    min-width:88px !important;
+    pointer-events:auto !important;
+    touch-action:manipulation !important;
+  }
+}
+</style>
 </head>
 <body>
 <div id="bptDeviceBadge" class="desktop">Version PC</div>
@@ -9127,7 +9320,7 @@ function updateBptDeviceBadge(){
   const badge=document.getElementById("bptDeviceBadge");
   if(!badge)return;
   const mobile=!!isBptMobileDevice();
-  badge.textContent=mobile?"Version téléphone 2.1.5":"Version PC 2.1.5";
+  badge.textContent=mobile?"Version téléphone 2.1.7":"Version PC 2.1.7";
   badge.classList.toggle("mobile",mobile);
   badge.classList.toggle("desktop",!mobile);
 }
@@ -9391,8 +9584,14 @@ function simplifyRecordTextForMobile(text){
         </div>
 
         <div class="live-fs-bottom-dock live-admin-only">
-          <button id="liveFsPauseResumeBtn" class="live-fs-dock-btn primary" type="button">Démarrer</button>
-          <button id="liveFsEliminateOpenBtn" class="live-fs-dock-btn danger" type="button">Sortir un joueur</button>
+          <div class="live-mobile-level-controls">
+            <button id="liveFsPrevLevelBtn" class="live-fs-dock-btn" type="button">← Niveau</button>
+            <button id="liveFsNextLevelBtn" class="live-fs-dock-btn" type="button">Niveau →</button>
+          </div>
+          <div class="live-mobile-main-controls">
+            <button id="liveFsPauseResumeBtn" class="live-fs-dock-btn primary" type="button">Démarrer</button>
+            <button id="liveFsEliminateOpenBtn" class="live-fs-dock-btn danger" type="button">Sortir un joueur</button>
+          </div>
         </div>
 
         <div id="liveFsDurationPopup" class="live-fs-duration-popup live-admin-only" style="display:none">
@@ -12392,9 +12591,14 @@ async function toggleLiveFullscreen(){
     const opening=!document.body.classList.contains("bpt-mobile-live-fullscreen");
     document.body.classList.toggle("bpt-mobile-live-fullscreen",opening);
     target.setAttribute("aria-hidden",opening?"false":"true");
+    const handover=$('globalHandoverRequest');
     if(opening){
+      if(handover && handover.parentElement!==target)target.appendChild(handover);
+      bindMobileHandoverControls();
       liveRenderFullscreen();
       window.scrollTo({top:0,left:0,behavior:"auto"});
+    }else if(handover && handover.parentElement!==document.body){
+      document.body.appendChild(handover);
     }
     return;
   }
@@ -17447,6 +17651,8 @@ if($("liveFullscreenExitBtn"))$("liveFullscreenExitBtn").onclick=async()=>{
   if(isBptMobileDevice()){
     document.body.classList.remove("bpt-mobile-live-fullscreen");
     $("liveFullscreenDisplay")?.setAttribute("aria-hidden","true");
+    const handover=$('globalHandoverRequest');
+    if(handover && handover.parentElement!==document.body)document.body.appendChild(handover);
     showView("live");
     liveShowScreen("game");
     liveRenderAll();
@@ -17610,6 +17816,30 @@ $("settingsPassword").addEventListener("keydown",e=>{
   if(e.key==="Enter")unlockSettings();
 });
 
+function bindMobileHandoverControls(){
+  if(!isBptMobileDevice())return;
+  const bind=(id,action)=>{
+    const btn=$(id);
+    if(!btn || btn.dataset.mobileHandoverBound==='1')return;
+    btn.dataset.mobileHandoverBound='1';
+    btn.addEventListener('click',async e=>{
+      if(!isBptMobileDevice() || !document.body.classList.contains('bpt-mobile-live-fullscreen'))return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if(btn.dataset.busy==='1')return;
+      btn.dataset.busy='1';
+      btn.disabled=true;
+      try{ await action(); }
+      finally{
+        btn.dataset.busy='0';
+        if($('globalHandoverRequest')?.style.display!=='none')btn.disabled=false;
+      }
+    },true);
+  };
+  bind('globalHandoverApproveBtn',approveLiveTakeover);
+  bind('globalHandoverRejectBtn',rejectLiveTakeover);
+}
+
 function bindMobileLiveFullscreenControls(){
   const bind=(id,handler)=>{
     const el=$(id);
@@ -17624,6 +17854,8 @@ function bindMobileLiveFullscreenControls(){
   bind("liveFsPauseResumeBtn",liveFsTogglePauseResume);
   bind("liveFsMinusMinuteBtn",()=>liveFsAdjustTimer(-60));
   bind("liveFsPlusMinuteBtn",()=>liveFsAdjustTimer(60));
+  bind("liveFsPrevLevelBtn",()=>liveChangeLevel(-1,false));
+  bind("liveFsNextLevelBtn",()=>liveChangeLevel(1,false));
   bind("liveFsDurationBtn",liveFsOpenDurationPopup);
   bind("liveFsEliminateOpenBtn",openLiveFsElimPopup);
   bind("liveFsDurationApplyBtn",liveFsApplyDuration);
@@ -17679,6 +17911,14 @@ document.addEventListener("click",e=>{
   }
   if(e.target?.id==="liveFsPlusMinuteBtn"){
     liveFsAdjustTimer(60);
+    return;
+  }
+  if(e.target?.id==="liveFsPrevLevelBtn"){
+    liveChangeLevel(-1,false);
+    return;
+  }
+  if(e.target?.id==="liveFsNextLevelBtn"){
+    liveChangeLevel(1,false);
     return;
   }
   if(e.target?.id==="liveFsDurationBtn"){
