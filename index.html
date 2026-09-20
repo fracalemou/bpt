@@ -9373,6 +9373,60 @@ nav button.active{background:#c8952e!important;border-color:#c8952e!important;co
   body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-mobile-level-controls{display:none !important;}
 }
 </style>
+
+<style id="bpt-v220-mobile-live-layout">
+@media (max-width:700px){
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-row{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) !important;
+    align-items:center !important;
+    gap:8px !important;
+    width:100% !important;
+    margin:5px 0 8px !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-side{
+    display:flex !important;
+    align-items:center !important;
+    gap:6px !important;
+    min-width:0 !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-side-left{
+    justify-content:flex-end !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-side-right{
+    justify-content:flex-start !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-timer{
+    width:auto !important;
+    min-width:126px !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    margin:0 !important;
+    padding:0 2px !important;
+    font-size:clamp(48px,15vw,74px) !important;
+    line-height:1 !important;
+    text-align:center !important;
+    white-space:nowrap !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-side-btn{
+    flex:0 1 64px !important;
+    width:64px !important;
+    min-width:0 !important;
+    min-height:48px !important;
+    padding:5px 3px !important;
+    font-size:11px !important;
+    line-height:1.1 !important;
+  }
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-mobile-main-controls{
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    gap:8px !important;
+    width:100% !important;
+    margin-top:5px !important;
+  }
+}
+</style>
 </head>
 <body>
 <div id="bptDeviceBadge" class="desktop">Version PC</div>
@@ -9405,7 +9459,7 @@ function updateBptDeviceBadge(){
   const badge=document.getElementById("bptDeviceBadge");
   if(!badge)return;
   const mobile=!!isBptMobileDevice();
-  badge.textContent=mobile?"Version téléphone 2.1.9":"Version PC 2.1.9";
+  badge.textContent=mobile?"Version téléphone 2.2.0":"Version PC 2.2.0";
   badge.classList.toggle("mobile",mobile);
   badge.classList.toggle("desktop",!mobile);
 }
@@ -9642,11 +9696,15 @@ function simplifyRecordTextForMobile(text){
 
         <div class="live-fullscreen-timer-label">TEMPS RESTANT</div>
         <div class="live-fs-timer-row live-admin-only">
-          <button id="liveFsPrevLevelBtn" class="live-fs-timer-side-btn" type="button" onclick="event.stopPropagation(); mobileLiveChangeLevelDirect(-1); return false;">← Niveau</button>
-          <button id="liveFsMinusMinuteBtn" class="live-fs-timer-side-btn" type="button" onclick="event.stopPropagation(); mobileLiveAdjustTimerDirect(-60); return false;">−1 min</button>
+          <div class="live-fs-timer-side live-fs-timer-side-left">
+            <button id="liveFsPrevLevelBtn" class="live-fs-timer-side-btn" type="button" onclick="event.stopPropagation(); mobileLiveChangeLevelDirect(-1); return false;">← Niveau</button>
+            <button id="liveFsMinusMinuteBtn" class="live-fs-timer-side-btn" type="button" onclick="event.stopPropagation(); mobileLiveAdjustTimerDirect(-60); return false;">−1 min</button>
+          </div>
           <div class="live-fullscreen-timer" id="liveFsTimer">00:00</div>
-          <button id="liveFsPlusMinuteBtn" class="live-fs-timer-side-btn" type="button" onclick="event.stopPropagation(); mobileLiveAdjustTimerDirect(60); return false;">+1 min</button>
-          <button id="liveFsNextLevelBtn" class="live-fs-timer-side-btn" type="button" onclick="event.stopPropagation(); mobileLiveChangeLevelDirect(1); return false;">Niveau →</button>
+          <div class="live-fs-timer-side live-fs-timer-side-right">
+            <button id="liveFsPlusMinuteBtn" class="live-fs-timer-side-btn" type="button" onclick="event.stopPropagation(); mobileLiveAdjustTimerDirect(60); return false;">+1 min</button>
+            <button id="liveFsNextLevelBtn" class="live-fs-timer-side-btn" type="button" onclick="event.stopPropagation(); mobileLiveChangeLevelDirect(1); return false;">Niveau →</button>
+          </div>
         </div>
 
         <div class="live-fullscreen-kpis">
@@ -12674,6 +12732,7 @@ async function toggleLiveFullscreen(){
     const opening=!document.body.classList.contains("bpt-mobile-live-fullscreen");
     document.body.classList.toggle("bpt-mobile-live-fullscreen",opening);
     target.setAttribute("aria-hidden",opening?"false":"true");
+    if($("liveFullscreenBtn"))$("liveFullscreenBtn").textContent=opening?"Quitter plein écran":"Plein écran";
     const handover=$('globalHandoverRequest');
     if(opening){
       if(handover && handover.parentElement!==target)target.appendChild(handover);
@@ -17740,6 +17799,7 @@ if($("liveFullscreenExitBtn"))$("liveFullscreenExitBtn").onclick=async()=>{
   if(isBptMobileDevice()){
     document.body.classList.remove("bpt-mobile-live-fullscreen");
     $("liveFullscreenDisplay")?.setAttribute("aria-hidden","true");
+    if($("liveFullscreenBtn"))$("liveFullscreenBtn").textContent="Plein écran";
     const handover=$('globalHandoverRequest');
     if(handover && handover.parentElement!==document.body)document.body.appendChild(handover);
     showView("live");
