@@ -9026,6 +9026,21 @@ nav button.active{background:#c8952e!important;border-color:#c8952e!important;co
   }
 }
 </style>
+
+<style id="bpt-v211-mobile-record-player-turquoise">
+@media (max-width:700px){
+  html.bpt-mobile-device #records .record-mobile-player,
+  body.bpt-mobile-device #records .record-mobile-player,
+  html.bpt-mobile-device #records .record-mobile-player-name,
+  body.bpt-mobile-device #records .record-mobile-player-name{
+    color:#42d5e8 !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-nickname,
+  body.bpt-mobile-device #records .record-mobile-nickname{
+    color:#9fe8f1 !important;
+  }
+}
+</style>
 </head>
 <body>
 <div id="bptDeviceBadge" class="desktop">Version PC</div>
@@ -9058,7 +9073,7 @@ function updateBptDeviceBadge(){
   const badge=document.getElementById("bptDeviceBadge");
   if(!badge)return;
   const mobile=!!isBptMobileDevice();
-  badge.textContent=mobile?"Version téléphone":"Version PC";
+  badge.textContent=mobile?"Version téléphone 2.1.2":"Version PC 2.1.2";
   badge.classList.toggle("mobile",mobile);
   badge.classList.toggle("desktop",!mobile);
 }
@@ -9149,7 +9164,6 @@ function simplifyRecordTextForMobile(text){
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 2.1.0</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
