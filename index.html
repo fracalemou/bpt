@@ -8138,6 +8138,58 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 </style>
+
+<style id="bpt-records-mobile-inline-label-player">
+/* Records téléphone uniquement : libellé + joueur sur la même ligne, même taille. PC inchangé. */
+@media(max-width:700px){
+  html.bpt-mobile-device #records .record-card,
+  body.bpt-mobile-device #records .record-card{
+    grid-template-columns:30px auto minmax(0,1fr) !important;
+    grid-template-areas:
+      "ico label player"
+      "ico value value" !important;
+    column-gap:7px !important;
+    row-gap:4px !important;
+    align-items:baseline !important;
+  }
+  html.bpt-mobile-device #records .record-card > span,
+  body.bpt-mobile-device #records .record-card > span,
+  html.bpt-mobile-device #records .record-player-holder,
+  body.bpt-mobile-device #records .record-player-holder,
+  html.bpt-mobile-device #records .record-player-holder .player-primary-name,
+  body.bpt-mobile-device #records .record-player-holder .player-primary-name,
+  html.bpt-mobile-device #records .record-player-pair,
+  body.bpt-mobile-device #records .record-player-pair{
+    font-size:16px !important;
+    line-height:1.18 !important;
+  }
+  html.bpt-mobile-device #records .record-card > span,
+  body.bpt-mobile-device #records .record-card > span{
+    grid-area:label !important;
+    display:inline !important;
+    white-space:nowrap !important;
+    margin:0 !important;
+  }
+  html.bpt-mobile-device #records .record-card > span::after,
+  body.bpt-mobile-device #records .record-card > span::after{
+    content:" :";
+  }
+  html.bpt-mobile-device #records .record-player-holder,
+  body.bpt-mobile-device #records .record-player-holder{
+    grid-area:player !important;
+    display:inline !important;
+    margin:0 !important;
+    min-width:0 !important;
+  }
+  html.bpt-mobile-device #records .record-card > small,
+  body.bpt-mobile-device #records .record-card > small{
+    grid-area:value !important;
+    display:block !important;
+    margin:0 !important;
+    text-align:left !important;
+  }
+}
+</style>
 </head>
 <body>
 
@@ -8247,7 +8299,7 @@ function simplifyRecordTextForMobile(text){
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 1.9.3</div>
+  <div class="app-version">Version 1.9.4</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
