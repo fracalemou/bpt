@@ -7080,7 +7080,7 @@ body.bpt-mobile-device.bpt-mobile-landscape .tablewrap{
 }
 
 
-/* ===== V189 — vraie version mobile allégée ===== */
+/* ===== V190 — vraie version mobile allégée ===== */
 
 /* La version téléphone n'est plus la version PC simplement réduite. */
 html.bpt-mobile-device #dashboard .premium-hero-copy p,
@@ -7330,7 +7330,7 @@ body.bpt-mobile-device.bpt-mobile-landscape #profile .premium-profile-identity{
 
 
 
-/* ===== V189 — mobile épuré : sans saisons, records sûrs, classement enrichi ===== */
+/* ===== V190 — mobile épuré : sans saisons, records sûrs, classement enrichi ===== */
 
 /* Aucun changement de saison n'est présenté sur téléphone. */
 html.bpt-mobile-device .season-nav-toolbar,
@@ -7502,7 +7502,7 @@ body.bpt-mobile-device #ranking .tablewrap{
 
 
 
-/* ===== V189 — préparation Live mobile minimale ===== */
+/* ===== V190 — préparation Live mobile minimale ===== */
 html.bpt-mobile-device #livePrepScreen .mobile-hide-live-structure,
 body.bpt-mobile-device #livePrepScreen .mobile-hide-live-structure,
 html.bpt-mobile-device #livePrepScreen .mobile-hide-live-details,
@@ -7566,7 +7566,7 @@ body.bpt-mobile-device #livePrepScreen #liveLaunchBtn{
 }
 
 
-/* ===== V189 — préparation Live minimale sur PC et mobile ===== */
+/* ===== V190 — préparation Live minimale sur PC et mobile ===== */
 #liveHeroSubtitle{display:none !important;}
 #livePrepScreen .live-head{margin-bottom:8px !important;}
 #livePrepScreen .live-title{
@@ -7716,7 +7716,7 @@ body.bpt-mobile-device #livePrepScreen .live-prep-launch{
 }
 
 
-/* ===== V189 — paramètres essentiels Live : stack + durée ===== */
+/* ===== V190 — paramètres essentiels Live : stack + durée ===== */
 .live-prep-essential-config{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -7755,6 +7755,145 @@ body.bpt-mobile-device .live-prep-essential-field select{
   min-height:36px !important;
   font-size:13px !important;
   padding:6px 8px !important;
+}
+
+
+/* ===== V190 — Live plein écran + classement enrichi ===== */
+.live-fs-timer-row{
+  display:grid;
+  grid-template-columns:auto minmax(180px,1fr) auto;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  width:min(760px,92vw);
+  margin:0 auto;
+}
+.live-fs-minute-btn{
+  min-width:78px;
+  min-height:42px;
+  padding:7px 10px;
+  border:1px solid #50677a;
+  border-radius:11px;
+  background:#14212c;
+  color:#eaf2f7;
+  font-size:14px;
+  font-weight:900;
+  cursor:pointer;
+}
+.live-fs-minute-btn:disabled,
+.live-fs-duration-kpi:disabled{opacity:.42;cursor:default}
+.live-fs-timer-row .live-fullscreen-timer{
+  margin:6px 0 8px !important;
+}
+.live-fs-duration-kpi{
+  appearance:none;
+  color:inherit;
+  font:inherit;
+  cursor:pointer;
+}
+.live-fs-duration-kpi small{
+  display:block;
+  margin-top:4px;
+  color:#8fd4ff;
+  font-size:9px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+.live-fs-duration-popup{
+  position:absolute;
+  inset:0;
+  z-index:95;
+  align-items:center;
+  justify-content:center;
+  background:rgba(4,8,12,.72);
+  padding:18px;
+}
+#liveFsDurationPopup[style*="display: flex"]{display:flex !important}
+.live-fs-duration-card{
+  width:min(360px,92vw);
+  padding:16px;
+  border:1px solid #42586b;
+  border-radius:14px;
+  background:#111c26;
+  color:#f0f5f8;
+  box-shadow:0 20px 55px rgba(0,0,0,.48);
+}
+.live-fs-duration-card label{
+  display:block;
+  margin:12px 0 6px;
+  color:#aebdca;
+  font-size:12px;
+  font-weight:800;
+}
+.live-fs-duration-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+  align-items:center;
+}
+.live-fs-duration-row input{
+  width:100%;
+  min-height:44px;
+  border:1px solid #344a5d;
+  border-radius:10px;
+  background:#0d171f;
+  color:#fff;
+  padding:8px 10px;
+  font-size:18px;
+  font-weight:900;
+  text-align:center;
+}
+
+/* Mobile : classement plus riche : + podiums, kills/partie et solde. */
+html.bpt-mobile-device #ranking th:nth-child(8),
+html.bpt-mobile-device #ranking td:nth-child(8),
+html.bpt-mobile-device #ranking th:nth-child(11),
+html.bpt-mobile-device #ranking td:nth-child(11),
+html.bpt-mobile-device #ranking th:nth-child(12),
+html.bpt-mobile-device #ranking td:nth-child(12),
+body.bpt-mobile-device #ranking th:nth-child(8),
+body.bpt-mobile-device #ranking td:nth-child(8),
+body.bpt-mobile-device #ranking th:nth-child(11),
+body.bpt-mobile-device #ranking td:nth-child(11),
+body.bpt-mobile-device #ranking th:nth-child(12),
+body.bpt-mobile-device #ranking td:nth-child(12){
+  display:table-cell !important;
+}
+html.bpt-mobile-device #ranking table,
+body.bpt-mobile-device #ranking table{
+  min-width:760px !important;
+}
+
+/* Téléphone horizontal : commandes plein écran plus petites. Portrait inchangé. */
+html.bpt-mobile-device.bpt-mobile-landscape #liveFullscreenDisplay .live-fs-bottom-dock,
+body.bpt-mobile-device.bpt-mobile-landscape #liveFullscreenDisplay .live-fs-bottom-dock{
+  width:min(500px,70vw) !important;
+  bottom:5px !important;
+  gap:7px !important;
+}
+html.bpt-mobile-device.bpt-mobile-landscape #liveFullscreenDisplay .live-fs-dock-btn,
+body.bpt-mobile-device.bpt-mobile-landscape #liveFullscreenDisplay .live-fs-dock-btn{
+  min-height:34px !important;
+  padding:4px 7px !important;
+  border-radius:8px !important;
+  font-size:10.5px !important;
+}
+html.bpt-mobile-device.bpt-mobile-landscape #liveFullscreenDisplay{
+  padding-bottom:50px !important;
+}
+html.bpt-mobile-device.bpt-mobile-landscape #liveFullscreenDisplay .live-fs-timer-row,
+body.bpt-mobile-device.bpt-mobile-landscape #liveFullscreenDisplay .live-fs-timer-row{
+  width:min(560px,82vw) !important;
+  gap:8px !important;
+}
+html.bpt-mobile-device.bpt-mobile-landscape #liveFullscreenDisplay .live-fs-minute-btn,
+body.bpt-mobile-device.bpt-mobile-landscape #liveFullscreenDisplay .live-fs-minute-btn{
+  min-width:58px !important;
+  min-height:32px !important;
+  padding:4px 6px !important;
+  font-size:10px !important;
+  border-radius:8px !important;
 }
 
 </style>
@@ -7866,7 +8005,7 @@ function simplifyRecordTextForMobile(text){
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 1.8.9</div>
+  <div class="app-version">Version 1.9.0</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -8012,13 +8151,18 @@ function simplifyRecordTextForMobile(text){
         <div class="live-fullscreen-ante" id="liveFsAnte">Ante —</div>
 
         <div class="live-fullscreen-timer-label">TEMPS RESTANT</div>
-        <div class="live-fullscreen-timer" id="liveFsTimer">00:00</div>
+        <div class="live-fs-timer-row live-admin-only">
+          <button id="liveFsMinusMinuteBtn" class="live-fs-minute-btn" type="button" title="Retirer 1 minute">−1 min</button>
+          <div class="live-fullscreen-timer" id="liveFsTimer">00:00</div>
+          <button id="liveFsPlusMinuteBtn" class="live-fs-minute-btn" type="button" title="Ajouter 1 minute">+1 min</button>
+        </div>
 
         <div class="live-fullscreen-kpis">
-          <div class="live-fullscreen-kpi">
+          <button id="liveFsDurationBtn" class="live-fullscreen-kpi live-fs-duration-kpi live-admin-only" type="button" title="Modifier la durée des blinds">
             <span>Durée du niveau</span>
             <strong id="liveFsLevelDuration">—</strong>
-          </div>
+            <small>Modifier</small>
+          </button>
           <div class="live-fullscreen-kpi live-fullscreen-kpi-stack">
             <span>Stack moyen</span>
             <strong id="liveFsAvgStack">—</strong>
@@ -8037,6 +8181,21 @@ function simplifyRecordTextForMobile(text){
         <div class="live-fs-bottom-dock live-admin-only">
           <button id="liveFsPauseResumeBtn" class="live-fs-dock-btn primary" type="button">Démarrer</button>
           <button id="liveFsEliminateOpenBtn" class="live-fs-dock-btn danger" type="button">Sortir un joueur</button>
+        </div>
+
+        <div id="liveFsDurationPopup" class="live-fs-duration-popup live-admin-only" style="display:none">
+          <div class="live-fs-duration-card">
+            <div class="live-fs-elim-head">
+              <strong>Durée des blinds</strong>
+              <button id="liveFsDurationCancelBtn" class="live-fs-elim-close" type="button" aria-label="Fermer">×</button>
+            </div>
+            <label for="liveFsBlindDurationInput">Durée du niveau courant et des suivants</label>
+            <div class="live-fs-duration-row">
+              <input id="liveFsBlindDurationInput" type="number" min="5" max="60" step="1" value="15">
+              <span>min</span>
+            </div>
+            <button id="liveFsDurationApplyBtn" class="live-fs-elim-confirm" type="button">Appliquer</button>
+          </div>
         </div>
 
         <div id="liveFsElimPopup" class="live-fs-elim-popup live-admin-only" style="display:none">
@@ -11032,6 +11191,46 @@ function closeLiveFsElimPopup(){
   if($("liveFsKiller"))$("liveFsKiller").value="";
 }
 
+
+async function liveFsAdjustTimer(deltaSeconds){
+  if(!liveCreatorGuard())return;
+  const s=ensureLiveState();
+  if(!s?.prepared || s.synced)return;
+  liveAdjustTimer(deltaSeconds);
+  liveRenderFullscreen();
+  await livePushStateNow();
+}
+
+function liveFsOpenDurationPopup(){
+  if(!liveCreatorGuard())return;
+  const s=ensureLiveState();
+  if(!s?.prepared || s.synced)return;
+  const level=s.levels?.[s.levelIndex];
+  const input=$("liveFsBlindDurationInput");
+  if(input)input.value=String(Math.max(5,Number(level?.durationMin||15)));
+  if($("liveFsDurationPopup"))$("liveFsDurationPopup").style.display="flex";
+  setTimeout(()=>input?.focus(),0);
+}
+
+function liveFsCloseDurationPopup(){
+  if($("liveFsDurationPopup"))$("liveFsDurationPopup").style.display="none";
+}
+
+async function liveFsApplyDuration(){
+  if(!liveCreatorGuard())return;
+  const input=$("liveFsBlindDurationInput");
+  const minutes=Math.max(5,Math.min(60,Math.round(Number(input?.value)||0)));
+  if(!minutes){
+    alert("Indiquez une durée comprise entre 5 et 60 minutes.");
+    return;
+  }
+  const source=$("liveBlindDuration");
+  if(source)source.value=String(minutes);
+  await liveApplyBlindDuration();
+  liveFsCloseDurationPopup();
+  liveRenderFullscreen();
+}
+
 async function liveFsTogglePauseResume(){
   if(!liveCreatorGuard())return;
   const s=ensureLiveState();
@@ -11136,6 +11335,9 @@ function liveRenderFullscreen(){
   if($("liveFsEliminateOpenBtn")){
     $("liveFsEliminateOpenBtn").disabled=!!s.synced || liveAlive().length<=1;
   }
+  if($("liveFsMinusMinuteBtn"))$("liveFsMinusMinuteBtn").disabled=!!s.synced;
+  if($("liveFsPlusMinuteBtn"))$("liveFsPlusMinuteBtn").disabled=!!s.synced;
+  if($("liveFsDurationBtn"))$("liveFsDurationBtn").disabled=!!s.synced;
 
   $("liveFsTimer").classList.toggle("warning30",s.remainingSeconds<=30 && s.remainingSeconds>10);
   $("liveFsTimer").classList.toggle("warning10",s.remainingSeconds<=10);
@@ -14437,7 +14639,7 @@ function liveAdjustTimer(deltaSeconds){
   const s=ensureLiveState();
   if(!s.prepared)return;
 
-  const maxSeconds=Math.max(Number(s.levelSeconds)||0,1);
+  const maxSeconds=3*60*60;
   let current=Number(s.remainingSeconds)||0;
 
   if(s.running && s.endAt){
@@ -16107,6 +16309,26 @@ document.addEventListener("click",e=>{
     liveFsTogglePauseResume();
     return;
   }
+  if(e.target?.id==="liveFsMinusMinuteBtn"){
+    liveFsAdjustTimer(-60);
+    return;
+  }
+  if(e.target?.id==="liveFsPlusMinuteBtn"){
+    liveFsAdjustTimer(60);
+    return;
+  }
+  if(e.target?.id==="liveFsDurationBtn"){
+    liveFsOpenDurationPopup();
+    return;
+  }
+  if(e.target?.id==="liveFsDurationCancelBtn" || e.target?.id==="liveFsDurationPopup"){
+    liveFsCloseDurationPopup();
+    return;
+  }
+  if(e.target?.id==="liveFsDurationApplyBtn"){
+    liveFsApplyDuration();
+    return;
+  }
   if(e.target?.id==="liveFsEliminateOpenBtn"){
     openLiveFsElimPopup();
     return;
@@ -16133,6 +16355,10 @@ document.addEventListener("click",e=>{
 });
 
 document.addEventListener("keydown",e=>{
+  if(e.key==="Escape" && $("liveFsDurationPopup")?.style.display==="flex"){
+    liveFsCloseDurationPopup();
+    return;
+  }
   if(e.key==="Escape" && $("liveFsElimPopup")?.style.display==="flex"){
     closeLiveFsElimPopup();
     return;
