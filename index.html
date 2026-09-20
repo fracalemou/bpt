@@ -8102,6 +8102,42 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 </style>
+
+<style id="bpt-records-typography-balanced">
+/* Records — nom du joueur et explication à taille égale */
+#records .record-player-holder{
+  font-size:18px !important;
+  line-height:1.18 !important;
+  margin:4px 0 3px !important;
+}
+#records .record-player-holder .player-primary-name,
+#records .record-player-pair{
+  font-size:inherit !important;
+  line-height:inherit !important;
+}
+#records .record-card > small{
+  font-size:18px !important;
+  line-height:1.18 !important;
+  font-weight:650 !important;
+}
+@media(max-width:700px){
+  html.bpt-mobile-device #records .record-player-holder,
+  body.bpt-mobile-device #records .record-player-holder,
+  html.bpt-mobile-device #records .record-player-holder .player-primary-name,
+  body.bpt-mobile-device #records .record-player-holder .player-primary-name,
+  html.bpt-mobile-device #records .record-player-pair,
+  body.bpt-mobile-device #records .record-player-pair{
+    font-size:20px !important;
+    line-height:1.15 !important;
+  }
+  html.bpt-mobile-device #records .record-card > small,
+  body.bpt-mobile-device #records .record-card > small{
+    font-size:20px !important;
+    line-height:1.15 !important;
+    font-weight:650 !important;
+  }
+}
+</style>
 </head>
 <body>
 
