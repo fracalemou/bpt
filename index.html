@@ -7080,7 +7080,7 @@ body.bpt-mobile-device.bpt-mobile-landscape .tablewrap{
 }
 
 
-/* ===== V190 — vraie version mobile allégée ===== */
+/* ===== V192 — vraie version mobile allégée ===== */
 
 /* La version téléphone n'est plus la version PC simplement réduite. */
 html.bpt-mobile-device #dashboard .premium-hero-copy p,
@@ -7330,7 +7330,7 @@ body.bpt-mobile-device.bpt-mobile-landscape #profile .premium-profile-identity{
 
 
 
-/* ===== V190 — mobile épuré : sans saisons, records sûrs, classement enrichi ===== */
+/* ===== V192 — mobile épuré : sans saisons, records sûrs, classement enrichi ===== */
 
 /* Aucun changement de saison n'est présenté sur téléphone. */
 html.bpt-mobile-device .season-nav-toolbar,
@@ -7502,7 +7502,7 @@ body.bpt-mobile-device #ranking .tablewrap{
 
 
 
-/* ===== V190 — préparation Live mobile minimale ===== */
+/* ===== V192 — préparation Live mobile minimale ===== */
 html.bpt-mobile-device #livePrepScreen .mobile-hide-live-structure,
 body.bpt-mobile-device #livePrepScreen .mobile-hide-live-structure,
 html.bpt-mobile-device #livePrepScreen .mobile-hide-live-details,
@@ -7566,7 +7566,7 @@ body.bpt-mobile-device #livePrepScreen #liveLaunchBtn{
 }
 
 
-/* ===== V190 — préparation Live minimale sur PC et mobile ===== */
+/* ===== V192 — préparation Live minimale sur PC et mobile ===== */
 #liveHeroSubtitle{display:none !important;}
 #livePrepScreen .live-head{margin-bottom:8px !important;}
 #livePrepScreen .live-title{
@@ -7716,7 +7716,7 @@ body.bpt-mobile-device #livePrepScreen .live-prep-launch{
 }
 
 
-/* ===== V190 — paramètres essentiels Live : stack + durée ===== */
+/* ===== V192 — paramètres essentiels Live : stack + durée ===== */
 .live-prep-essential-config{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -7758,7 +7758,7 @@ body.bpt-mobile-device .live-prep-essential-field select{
 }
 
 
-/* ===== V190 — Live plein écran + classement enrichi ===== */
+/* ===== V192 — Live plein écran + classement enrichi ===== */
 .live-fs-timer-row{
   display:grid;
   grid-template-columns:auto minmax(180px,1fr) auto;
@@ -7896,6 +7896,65 @@ body.bpt-mobile-device.bpt-mobile-landscape #liveFullscreenDisplay .live-fs-minu
   border-radius:8px !important;
 }
 
+
+/* ===== V192 — plein écran Live : timer centré + durée sur demande ===== */
+.live-fs-timer-row{
+  grid-template-columns:86px minmax(220px,1fr) 86px !important;
+  justify-items:center !important;
+  align-items:center !important;
+  width:min(760px,92vw) !important;
+}
+.live-fs-timer-row .live-fullscreen-timer{
+  width:100% !important;
+  text-align:center !important;
+  justify-self:stretch !important;
+}
+.live-fs-minute-btn{
+  width:78px !important;
+  justify-self:center !important;
+}
+.live-fs-duration-kpi{
+  position:relative;
+  cursor:default !important;
+}
+.live-fs-duration-kpi .live-fs-duration-edit-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  margin-top:5px;
+  min-height:24px;
+  padding:3px 9px;
+  border:1px solid #50677a;
+  border-radius:999px;
+  background:#14212c;
+  color:#8fd4ff;
+  font-size:9px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  cursor:pointer;
+}
+.live-fs-duration-kpi .live-fs-duration-edit-btn:disabled{
+  opacity:.42;
+  cursor:default;
+}
+
+/* Aucun contrôle de durée n'est visible hors popup. */
+#liveFsDurationPopup{
+  display:none;
+}
+
+/* Téléphone horizontal : chrono parfaitement centré malgré les boutons. */
+html.bpt-mobile-device.bpt-mobile-landscape #liveFullscreenDisplay .live-fs-timer-row,
+body.bpt-mobile-device.bpt-mobile-landscape #liveFullscreenDisplay .live-fs-timer-row{
+  grid-template-columns:62px minmax(180px,1fr) 62px !important;
+  width:min(520px,84vw) !important;
+}
+html.bpt-mobile-device.bpt-mobile-landscape #liveFullscreenDisplay .live-fs-minute-btn,
+body.bpt-mobile-device.bpt-mobile-landscape #liveFullscreenDisplay .live-fs-minute-btn{
+  width:58px !important;
+}
+
 </style>
 </head>
 <body>
@@ -8005,7 +8064,7 @@ function simplifyRecordTextForMobile(text){
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 1.9.0</div>
+  <div class="app-version">Version 1.9.2</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -8158,11 +8217,11 @@ function simplifyRecordTextForMobile(text){
         </div>
 
         <div class="live-fullscreen-kpis">
-          <button id="liveFsDurationBtn" class="live-fullscreen-kpi live-fs-duration-kpi live-admin-only" type="button" title="Modifier la durée des blinds">
+          <div class="live-fullscreen-kpi live-fs-duration-kpi">
             <span>Durée du niveau</span>
             <strong id="liveFsLevelDuration">—</strong>
-            <small>Modifier</small>
-          </button>
+            <button id="liveFsDurationBtn" class="live-fs-duration-edit-btn live-admin-only" type="button">Modifier</button>
+          </div>
           <div class="live-fullscreen-kpi live-fullscreen-kpi-stack">
             <span>Stack moyen</span>
             <strong id="liveFsAvgStack">—</strong>
@@ -14334,22 +14393,11 @@ function liveBuildStructure(n,stack,targetMin,useAnte,minSB){
   // Structure BPT de référence : les blindes ne changent jamais.
   // Seule la durée de chaque niveau est adaptée à la durée totale souhaitée.
   const fixedBlinds=[
-    [25,50],
-    [50,100],
-    [75,150],
-    [100,200],
-    [150,300],
-    [200,400],
-    [300,600],
-    [400,800],
-    [500,1000],
-    [800,1600],
-    [1000,2000],
-    [1500,3000],
-    [2000,4000],
-    [3000,6000],
-    [4000,8000],
-    [5000,10000]
+    [25,50],[50,100],[75,150],[100,200],
+    [150,300],[200,400],[300,600],[400,800],
+    [500,1000],[600,1200],[800,1600],[1000,2000],
+    [1200,2400],[1500,3000],[2000,4000],[3000,6000],
+    [4000,8000],[5000,10000],[7000,14000],[9000,18000]
   ];
 
   const levelMin=Math.max(5,Math.round(targetMin/fixedBlinds.length));
