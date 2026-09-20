@@ -8916,6 +8916,41 @@ nav button.active{background:#c8952e!important;border-color:#c8952e!important;co
 #bptDeviceBadge.mobile{color:#9fe8f1;border-color:rgba(66,213,232,.45)}
 #bptDeviceBadge.desktop{color:#e8c39e;border-color:rgba(200,149,46,.45)}
 </style>
+
+<style id="bpt-v209-mobile-records-font-lock">
+@media (max-width:700px){
+  html.bpt-mobile-device #records .record-mobile-label,
+  body.bpt-mobile-device #records .record-mobile-label,
+  html.bpt-mobile-device #records .record-mobile-player,
+  body.bpt-mobile-device #records .record-mobile-player,
+  html.bpt-mobile-device #records .record-mobile-player-name,
+  body.bpt-mobile-device #records .record-mobile-player-name,
+  html.bpt-mobile-device #records .record-mobile-nickname,
+  body.bpt-mobile-device #records .record-mobile-nickname,
+  html.bpt-mobile-device #records .record-mobile-value,
+  body.bpt-mobile-device #records .record-mobile-value{
+    font-size:15px !important;
+    line-height:1.35 !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-player-name,
+  body.bpt-mobile-device #records .record-mobile-player-name{
+    color:#42d5e8 !important;
+    font-weight:800 !important;
+    display:inline !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-nickname,
+  body.bpt-mobile-device #records .record-mobile-nickname{
+    color:#9fe8f1 !important;
+    font-weight:700 !important;
+    display:inline !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-value,
+  body.bpt-mobile-device #records .record-mobile-value{
+    font-weight:800 !important;
+    margin-top:6px !important;
+  }
+}
+</style>
 </head>
 <body>
 <div id="bptDeviceBadge" class="desktop">Version PC</div>
@@ -9039,7 +9074,7 @@ function simplifyRecordTextForMobile(text){
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 2.0.8</div>
+  <div class="app-version">Version 2.0.9</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -11763,14 +11798,15 @@ function renderRecords(){
     let holderHtml="";
     if(c[1]==="Kill le plus fréquent" && pairData){
       holderHtml=`<span class="record-mobile-player-pair">
-        ${playerNameHtml(pairData.names[0])}
+        <span class="record-mobile-player-name">${esc(pairData.names[0])}</span>
         <span class="record-action">a éliminé</span>
-        ${playerNameHtml(pairData.names[1])}
+        <span class="record-mobile-player-name">${esc(pairData.names[1])}</span>
       </span>`;
     }else if(c[2] && c[2]!=="—"){
-      holderHtml=playerNameHtml(c[2]);
+      const nick=playerNicknameInfo(c[2]).primary;
+      holderHtml=`<span class="record-mobile-player-name">${esc(c[2])}${nick?` <span class="record-mobile-nickname">(${esc(nick)})</span>`:""}</span>`;
     }else{
-      holderHtml='<span class="player-name-stack"><span class="player-primary-name">—</span></span>';
+      holderHtml='<span class="record-mobile-player-name">—</span>';
     }
 
     if(mobileRecords){
