@@ -8894,8 +8894,31 @@ th{background:#274334;color:#fff}
 input,select{background:#0d1711;color:#fff;border-color:#42594b}
 nav button.active{background:#c8952e!important;border-color:#c8952e!important;color:#17120b!important}
 </style>
+
+<style id="bpt-device-diagnostic-badge-style">
+#bptDeviceBadge{
+  position:fixed;
+  top:8px;
+  right:10px;
+  z-index:20000;
+  padding:5px 9px;
+  border-radius:999px;
+  background:rgba(10,18,14,.88);
+  border:1px solid rgba(255,255,255,.16);
+  color:#f7f4ec;
+  font-size:11px;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:.03em;
+  box-shadow:0 4px 14px rgba(0,0,0,.28);
+  pointer-events:none;
+}
+#bptDeviceBadge.mobile{color:#9fe8f1;border-color:rgba(66,213,232,.45)}
+#bptDeviceBadge.desktop{color:#e8c39e;border-color:rgba(200,149,46,.45)}
+</style>
 </head>
 <body>
+<div id="bptDeviceBadge" class="desktop">Version PC</div>
 
 <script>
 (function(){
@@ -8920,6 +8943,19 @@ function isBptMobileDevice(){
     || document.body.classList.contains("bpt-mobile-device")
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
+
+function updateBptDeviceBadge(){
+  const badge=document.getElementById("bptDeviceBadge");
+  if(!badge)return;
+  const mobile=!!isBptMobileDevice();
+  badge.textContent=mobile?"Version téléphone":"Version PC";
+  badge.classList.toggle("mobile",mobile);
+  badge.classList.toggle("desktop",!mobile);
+}
+window.addEventListener("resize",updateBptDeviceBadge,{passive:true});
+window.addEventListener("orientationchange",updateBptDeviceBadge,{passive:true});
+document.addEventListener("DOMContentLoaded",updateBptDeviceBadge);
+setTimeout(updateBptDeviceBadge,0);
 
 function simplifyRecordTextForMobile(text){
   if(!isBptMobileDevice())return String(text||"");
@@ -9003,7 +9039,7 @@ function simplifyRecordTextForMobile(text){
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 2.0.7</div>
+  <div class="app-version">Version 2.0.8</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
