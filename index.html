@@ -8771,106 +8771,112 @@ body.bpt-mobile-device nav#nav button.active{
 }
 </style>
 
-<style id="bpt-v202-mobile-records-dedicated">
-/* ===== BPT 2.0.2 — Records téléphone : structure dédiée, sans impact PC ===== */
+<style id="bpt-v206-mobile-records-dedicated">
+/* ===== BPT 2.0.6 — Records téléphone refaits de zéro, sans impact PC ===== */
 @media (max-width:700px){
   html.bpt-mobile-device #records .records-grid,
   body.bpt-mobile-device #records .records-grid{
     display:flex !important;
     flex-direction:column !important;
-    gap:8px !important;
+    gap:10px !important;
   }
   html.bpt-mobile-device #records .record-mobile-card,
   body.bpt-mobile-device #records .record-mobile-card{
     display:block !important;
     width:100% !important;
-    padding:10px 11px !important;
+    padding:12px 13px !important;
     background:var(--panel) !important;
     border:1px solid var(--line) !important;
-    border-radius:10px !important;
+    border-radius:12px !important;
     min-height:0 !important;
     text-align:left !important;
+    box-sizing:border-box !important;
   }
-  html.bpt-mobile-device #records .record-mobile-topline,
-  body.bpt-mobile-device #records .record-mobile-topline{
-    display:flex !important;
-    align-items:baseline !important;
-    flex-wrap:wrap !important;
-    column-gap:4px !important;
-    row-gap:2px !important;
+  html.bpt-mobile-device #records .record-mobile-line,
+  body.bpt-mobile-device #records .record-mobile-line{
+    display:block !important;
     width:100% !important;
+    color:var(--text) !important;
     font-size:15px !important;
-    line-height:1.25 !important;
-    font-weight:800 !important;
+    line-height:1.35 !important;
+    font-weight:700 !important;
+    overflow-wrap:anywhere !important;
+    word-break:break-word !important;
   }
   html.bpt-mobile-device #records .record-mobile-icon,
   body.bpt-mobile-device #records .record-mobile-icon{
-    flex:0 0 auto !important;
-    font-size:15px !important;
+    display:inline !important;
+    margin-right:6px !important;
+    font-size:16px !important;
     line-height:1 !important;
+    vertical-align:baseline !important;
   }
   html.bpt-mobile-device #records .record-mobile-label,
   body.bpt-mobile-device #records .record-mobile-label{
-    flex:0 0 auto !important;
-    color:#fff !important;
-    font:inherit !important;
-    font-weight:850 !important;
-    white-space:normal !important;
+    display:inline !important;
+    color:#ffffff !important;
+    font-size:15px !important;
+    line-height:1.35 !important;
+    font-weight:800 !important;
+  }
+  html.bpt-mobile-device #records .record-mobile-sep,
+  body.bpt-mobile-device #records .record-mobile-sep{
+    display:inline !important;
+    color:#ffffff !important;
+    font-size:15px !important;
+    line-height:1.35 !important;
+    font-weight:800 !important;
+    margin:0 3px 0 0 !important;
   }
   html.bpt-mobile-device #records .record-mobile-player,
-  body.bpt-mobile-device #records .record-mobile-player{
-    display:inline-flex !important;
-    align-items:baseline !important;
-    flex-wrap:nowrap !important;
-    gap:4px !important;
-    color:#42d5e8 !important;
-    font:inherit !important;
-    font-weight:900 !important;
-    white-space:nowrap !important;
-  }
+  body.bpt-mobile-device #records .record-mobile-player,
   html.bpt-mobile-device #records .record-mobile-player .player-name-stack,
-  body.bpt-mobile-device #records .record-mobile-player .player-name-stack{
-    display:inline-flex !important;
-    flex-direction:row !important;
-    align-items:baseline !important;
-    gap:4px !important;
-    white-space:nowrap !important;
+  body.bpt-mobile-device #records .record-mobile-player .player-name-stack,
+  html.bpt-mobile-device #records .record-mobile-player-pair,
+  body.bpt-mobile-device #records .record-mobile-player-pair{
+    display:inline !important;
+    color:#42d5e8 !important;
+    font-size:15px !important;
+    line-height:1.35 !important;
+    font-weight:800 !important;
+    white-space:normal !important;
   }
   html.bpt-mobile-device #records .record-mobile-player .player-primary-name,
   body.bpt-mobile-device #records .record-mobile-player .player-primary-name,
   html.bpt-mobile-device #records .record-mobile-player .player-secondary-nickname,
-  body.bpt-mobile-device #records .record-mobile-player .player-secondary-nickname{
+  body.bpt-mobile-device #records .record-mobile-player .player-secondary-nickname,
+  html.bpt-mobile-device #records .record-mobile-player-pair .player-primary-name,
+  body.bpt-mobile-device #records .record-mobile-player-pair .player-primary-name,
+  html.bpt-mobile-device #records .record-mobile-player-pair .player-secondary-nickname,
+  body.bpt-mobile-device #records .record-mobile-player-pair .player-secondary-nickname,
+  html.bpt-mobile-device #records .record-mobile-player-pair .record-action,
+  body.bpt-mobile-device #records .record-mobile-player-pair .record-action{
     display:inline !important;
     margin:0 !important;
     padding:0 !important;
     font:inherit !important;
     line-height:inherit !important;
-    white-space:nowrap !important;
+    white-space:normal !important;
   }
   html.bpt-mobile-device #records .record-mobile-player .player-secondary-nickname,
-  body.bpt-mobile-device #records .record-mobile-player .player-secondary-nickname{
+  body.bpt-mobile-device #records .record-mobile-player .player-secondary-nickname,
+  html.bpt-mobile-device #records .record-mobile-player-pair .player-secondary-nickname,
+  body.bpt-mobile-device #records .record-mobile-player-pair .player-secondary-nickname{
     color:#9fe8f1 !important;
     font-weight:700 !important;
-  }
-  html.bpt-mobile-device #records .record-mobile-player-pair,
-  body.bpt-mobile-device #records .record-mobile-player-pair{
-    display:inline-flex !important;
-    align-items:baseline !important;
-    flex-wrap:wrap !important;
-    gap:4px !important;
   }
   html.bpt-mobile-device #records .record-mobile-player-pair .record-action,
   body.bpt-mobile-device #records .record-mobile-player-pair .record-action{
     color:var(--muted) !important;
-    font-size:inherit !important;
     font-weight:700 !important;
   }
   html.bpt-mobile-device #records .record-mobile-value,
   body.bpt-mobile-device #records .record-mobile-value{
-    margin:5px 0 0 19px !important;
-    color:#fff !important;
-    font-size:17px !important;
-    line-height:1.2 !important;
+    display:block !important;
+    margin:6px 0 0 22px !important;
+    color:#ffffff !important;
+    font-size:15px !important;
+    line-height:1.35 !important;
     font-weight:800 !important;
   }
 }
@@ -8997,7 +9003,7 @@ function simplifyRecordTextForMobile(text){
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 2.0.5</div>
+  <div class="app-version">Version 2.0.7</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -11733,10 +11739,8 @@ function renderRecords(){
 
     if(mobileRecords){
       return `<div class="record-mobile-card">
-        <div class="record-mobile-topline">
-          <span class="record-mobile-icon">${c[0]}</span>
-          <span class="record-mobile-label">${esc(c[1])} :</span>
-          <strong class="record-mobile-player">${holderHtml}</strong>
+        <div class="record-mobile-line">
+          <span class="record-mobile-icon">${c[0]}</span><span class="record-mobile-label">${esc(c[1])}</span><span class="record-mobile-sep"> :</span><span class="record-mobile-player">${holderHtml}</span>
         </div>
         <div class="record-mobile-value">${esc(simplifyRecordTextForMobile(c[3]))}</div>
       </div>`;
