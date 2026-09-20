@@ -9096,334 +9096,43 @@ nav button.active{background:#c8952e!important;border-color:#c8952e!important;co
 }
 </style>
 
-<style id="bpt-v216-live-mobile-mode">
-/* ===== BPT 2.1.6 — vrai mode Live mobile dédié ===== */
+<style id="bpt-v221-live-mobile-minimal">
+/* Base 2.1.5 restaurée — ajout minimal téléphone uniquement */
+.live-fs-level-side-btn{display:none;}
 @media (max-width:700px){
-  body.bpt-mobile-live-fullscreen{overflow:hidden !important;touch-action:manipulation !important;}
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay{
-    display:flex !important;
-    position:fixed !important;
-    inset:0 !important;
-    z-index:20000 !important;
-    width:100vw !important;
-    height:100dvh !important;
-    min-height:100dvh !important;
-    overflow-y:auto !important;
-    overflow-x:hidden !important;
-    flex-direction:column !important;
-    align-items:stretch !important;
-    justify-content:flex-start !important;
-    padding:12px 12px calc(18px + env(safe-area-inset-bottom)) !important;
-    background:linear-gradient(180deg,#0b120e,#101b15) !important;
-    box-sizing:border-box !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-brand{
-    position:static !important;
-    order:1 !important;
-    font-size:12px !important;
-    letter-spacing:.13em !important;
-    margin:0 0 5px !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-top-actions{
-    position:absolute !important;
-    top:8px !important;
-    right:8px !important;
-    z-index:20 !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-exit{
-    position:static !important;
-    min-height:38px !important;
-    padding:7px 10px !important;
-    opacity:1 !important;
-    font-size:12px !important;
-    pointer-events:auto !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-level{
-    order:2 !important;
-    margin:8px 0 2px !important;
-    font-size:21px !important;
-    text-align:center !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-next-compact{
-    order:3 !important;
-    margin:0 0 5px !important;
-    font-size:12px !important;
-    text-align:center !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-blinds{
-    order:4 !important;
-    font-size:clamp(42px,13vw,68px) !important;
-    line-height:1 !important;
-    text-align:center !important;
-    margin:4px 0 !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-ante{
-    order:5 !important;
-    min-height:18px !important;
-    margin:0 0 5px !important;
-    font-size:15px !important;
-    text-align:center !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-timer-label{
-    order:6 !important;
-    margin:5px 0 0 !important;
-    font-size:10px !important;
-    text-align:center !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-row{
-    order:7 !important;
+  html.bpt-mobile-device #liveFullscreenDisplay .live-fs-timer-row,
+  body.bpt-mobile-device #liveFullscreenDisplay .live-fs-timer-row{
     display:grid !important;
-    grid-template-columns:72px minmax(0,1fr) 72px !important;
-    gap:8px !important;
-    width:100% !important;
-    margin:0 !important;
-    align-items:center !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-timer{
-    font-size:clamp(50px,16vw,82px) !important;
-    line-height:1 !important;
-    margin:5px 0 !important;
-    text-align:center !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-minute-btn{
-    min-width:0 !important;
-    width:100% !important;
-    min-height:50px !important;
-    padding:8px 4px !important;
-    font-size:14px !important;
-    pointer-events:auto !important;
-    touch-action:manipulation !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-kpis{
-    order:8 !important;
-    width:100% !important;
-    display:grid !important;
-    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-    gap:7px !important;
-    margin:8px 0 !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-kpi{
-    padding:8px 5px !important;
-    border-radius:10px !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-kpi span{
-    font-size:9px !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-kpi strong{
-    margin-top:3px !important;
-    font-size:20px !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay #liveFsDurationBtn{
-    min-height:30px !important;
-    margin-top:4px !important;
-    pointer-events:auto !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-bottom-dock{
-    order:9 !important;
-    position:static !important;
-    width:100% !important;
-    display:grid !important;
-    grid-template-columns:1fr !important;
-    gap:8px !important;
-    margin:4px 0 0 !important;
-    padding:0 !important;
-    background:transparent !important;
-    pointer-events:auto !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-mobile-level-controls,
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-mobile-main-controls{
-    display:grid !important;
-    grid-template-columns:1fr 1fr !important;
-    gap:8px !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-dock-btn{
-    width:100% !important;
-    min-height:52px !important;
-    font-size:14px !important;
-    padding:9px 7px !important;
-    pointer-events:auto !important;
-    touch-action:manipulation !important;
-    position:relative !important;
-    z-index:5 !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-elim-popup,
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-duration-popup{
-    position:fixed !important;
-    inset:0 !important;
-    z-index:21000 !important;
-    pointer-events:auto !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-elim-card,
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-duration-card{
-    width:min(390px,94vw) !important;
-    max-height:88dvh !important;
-    overflow:auto !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-elim-card button,
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-elim-card select,
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-duration-card button,
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-duration-card input{
-    min-height:48px !important;
-    pointer-events:auto !important;
-    touch-action:manipulation !important;
-  }
-}
-</style>
-
-<style id="bpt-v217-mobile-handover-fix">
-@media (max-width:700px){
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay #globalHandoverRequest{
-    z-index:3000000 !important;
-    pointer-events:auto !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay #globalHandoverRequest .global-handover-card{
-    pointer-events:auto !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay #globalHandoverApproveBtn,
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay #globalHandoverRejectBtn{
-    min-height:44px !important;
-    min-width:88px !important;
-    pointer-events:auto !important;
-    touch-action:manipulation !important;
-  }
-}
-</style>
-
-<style id="bpt-v218-live-mobile-controls-fix">
-@media (max-width:700px){
-  body.bpt-mobile-device.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-row{
-    display:flex !important;
-    justify-content:center !important;
-    align-items:center !important;
-    width:100% !important;
-  }
-  body.bpt-mobile-device.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-mobile-level-controls{
-    display:grid !important;
-    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
-    gap:7px !important;
-    width:100% !important;
-  }
-  body.bpt-mobile-device.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-mobile-level-controls .live-fs-dock-btn{
-    min-height:46px !important;
-    padding:8px 5px !important;
-    font-size:12px !important;
-    line-height:1.1 !important;
-    pointer-events:auto !important;
-    touch-action:manipulation !important;
-    position:relative !important;
-    z-index:10002 !important;
-  }
-  body.bpt-mobile-device.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-mobile-main-controls .live-fs-dock-btn,
-  body.bpt-mobile-device.bpt-mobile-live-fullscreen #liveFullscreenDisplay #liveFsDurationBtn,
-  body.bpt-mobile-device.bpt-mobile-live-fullscreen #liveFullscreenDisplay #liveFullscreenExitBtn{
-    pointer-events:auto !important;
-    touch-action:manipulation !important;
-    position:relative !important;
-    z-index:10002 !important;
-  }
-  body.bpt-mobile-device.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-bottom-dock{
-    pointer-events:auto !important;
-    z-index:10001 !important;
-  }
-}
-</style>
-
-<style id="bpt-v219-mobile-live-timer-layout">
-@media (max-width:700px){
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-row{
-    display:grid !important;
-    grid-template-columns:minmax(58px,.72fr) minmax(54px,.62fr) minmax(120px,1.55fr) minmax(54px,.62fr) minmax(58px,.72fr) !important;
-    gap:5px !important;
-    align-items:center !important;
-    width:100% !important;
-    margin:4px 0 6px !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-timer{
-    display:flex !important;
+    grid-template-columns:minmax(58px,.8fr) minmax(52px,.65fr) minmax(118px,1.55fr) minmax(52px,.65fr) minmax(58px,.8fr) !important;
     align-items:center !important;
     justify-content:center !important;
-    min-width:0 !important;
-    margin:0 !important;
-    font-size:clamp(46px,14vw,72px) !important;
-    line-height:1 !important;
-    text-align:center !important;
-    white-space:nowrap !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-side-btn{
-    display:flex !important;
-    align-items:center !important;
-    justify-content:center !important;
-    min-width:0 !important;
-    width:100% !important;
-    min-height:52px !important;
-    padding:6px 3px !important;
-    border:1px solid rgba(255,255,255,.18) !important;
-    border-radius:10px !important;
-    background:#24392e !important;
-    color:#fff !important;
-    font-size:12px !important;
-    font-weight:850 !important;
-    line-height:1.1 !important;
-    text-align:center !important;
-    pointer-events:auto !important;
-    touch-action:manipulation !important;
-    position:relative !important;
-    z-index:25000 !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-mobile-level-controls{display:none !important;}
-}
-</style>
-
-<style id="bpt-v220-mobile-live-layout">
-@media (max-width:700px){
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-row{
-    display:grid !important;
-    grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) !important;
-    align-items:center !important;
-    gap:8px !important;
-    width:100% !important;
-    margin:5px 0 8px !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-side{
-    display:flex !important;
-    align-items:center !important;
+    justify-items:stretch !important;
     gap:6px !important;
-    min-width:0 !important;
+    width:min(96vw,760px) !important;
+    margin:0 auto !important;
   }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-side-left{
-    justify-content:flex-end !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-side-right{
-    justify-content:flex-start !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-timer{
-    width:auto !important;
-    min-width:126px !important;
+  html.bpt-mobile-device #liveFullscreenDisplay .live-fs-level-side-btn,
+  body.bpt-mobile-device #liveFullscreenDisplay .live-fs-level-side-btn{
     display:flex !important;
     align-items:center !important;
     justify-content:center !important;
-    margin:0 !important;
-    padding:0 2px !important;
-    font-size:clamp(48px,15vw,74px) !important;
-    line-height:1 !important;
-    text-align:center !important;
+  }
+  html.bpt-mobile-device #liveFullscreenDisplay .live-fs-minute-btn,
+  body.bpt-mobile-device #liveFullscreenDisplay .live-fs-minute-btn{
+    width:100% !important;
+    min-width:0 !important;
+    min-height:40px !important;
+    padding:6px 5px !important;
+    font-size:11px !important;
+    border-radius:9px !important;
     white-space:nowrap !important;
   }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-side-btn{
-    flex:0 1 64px !important;
-    width:64px !important;
-    min-width:0 !important;
-    min-height:48px !important;
-    padding:5px 3px !important;
-    font-size:11px !important;
-    line-height:1.1 !important;
-  }
-  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-mobile-main-controls{
-    display:grid !important;
-    grid-template-columns:1fr 1fr !important;
-    gap:8px !important;
+  html.bpt-mobile-device #liveFullscreenDisplay .live-fs-timer-row .live-fullscreen-timer,
+  body.bpt-mobile-device #liveFullscreenDisplay .live-fs-timer-row .live-fullscreen-timer{
     width:100% !important;
-    margin-top:5px !important;
+    margin:0 !important;
+    text-align:center !important;
+    justify-self:stretch !important;
   }
 }
 </style>
@@ -9459,7 +9168,7 @@ function updateBptDeviceBadge(){
   const badge=document.getElementById("bptDeviceBadge");
   if(!badge)return;
   const mobile=!!isBptMobileDevice();
-  badge.textContent=mobile?"Version téléphone 2.2.0":"Version PC 2.2.0";
+  badge.textContent=mobile?"Version téléphone 2.2.1":"Version PC 2.2.1";
   badge.classList.toggle("mobile",mobile);
   badge.classList.toggle("desktop",!mobile);
 }
@@ -9696,22 +9405,18 @@ function simplifyRecordTextForMobile(text){
 
         <div class="live-fullscreen-timer-label">TEMPS RESTANT</div>
         <div class="live-fs-timer-row live-admin-only">
-          <div class="live-fs-timer-side live-fs-timer-side-left">
-            <button id="liveFsPrevLevelBtn" class="live-fs-timer-side-btn" type="button" onclick="event.stopPropagation(); mobileLiveChangeLevelDirect(-1); return false;">← Niveau</button>
-            <button id="liveFsMinusMinuteBtn" class="live-fs-timer-side-btn" type="button" onclick="event.stopPropagation(); mobileLiveAdjustTimerDirect(-60); return false;">−1 min</button>
-          </div>
+          <button id="liveFsPrevLevelBtn" class="live-fs-minute-btn live-fs-level-side-btn" type="button" title="Niveau précédent">Niveau préc.</button>
+          <button id="liveFsMinusMinuteBtn" class="live-fs-minute-btn" type="button" title="Retirer 1 minute">−1 min</button>
           <div class="live-fullscreen-timer" id="liveFsTimer">00:00</div>
-          <div class="live-fs-timer-side live-fs-timer-side-right">
-            <button id="liveFsPlusMinuteBtn" class="live-fs-timer-side-btn" type="button" onclick="event.stopPropagation(); mobileLiveAdjustTimerDirect(60); return false;">+1 min</button>
-            <button id="liveFsNextLevelBtn" class="live-fs-timer-side-btn" type="button" onclick="event.stopPropagation(); mobileLiveChangeLevelDirect(1); return false;">Niveau →</button>
-          </div>
+          <button id="liveFsPlusMinuteBtn" class="live-fs-minute-btn" type="button" title="Ajouter 1 minute">+1 min</button>
+          <button id="liveFsNextLevelBtn" class="live-fs-minute-btn live-fs-level-side-btn" type="button" title="Niveau suivant">Niveau suiv.</button>
         </div>
 
         <div class="live-fullscreen-kpis">
           <div class="live-fullscreen-kpi live-fs-duration-kpi">
             <span>Durée du niveau</span>
             <strong id="liveFsLevelDuration">—</strong>
-            <button id="liveFsDurationBtn" class="live-fs-duration-edit-btn live-admin-only" type="button" onclick="event.stopPropagation(); mobileLiveOpenDurationDirect(); return false;">Modifier</button>
+            <button id="liveFsDurationBtn" class="live-fs-duration-edit-btn live-admin-only" type="button">Modifier</button>
           </div>
           <div class="live-fullscreen-kpi live-fullscreen-kpi-stack">
             <span>Stack moyen</span>
@@ -9729,10 +9434,8 @@ function simplifyRecordTextForMobile(text){
         </div>
 
         <div class="live-fs-bottom-dock live-admin-only">
-          <div class="live-mobile-main-controls">
-            <button id="liveFsPauseResumeBtn" class="live-fs-dock-btn primary" type="button" onclick="event.stopPropagation(); mobileLiveToggleDirect(); return false;">Démarrer</button>
-            <button id="liveFsEliminateOpenBtn" class="live-fs-dock-btn danger" type="button" onclick="event.stopPropagation(); mobileLiveOpenElimDirect(); return false;">Sortir un joueur</button>
-          </div>
+          <button id="liveFsPauseResumeBtn" class="live-fs-dock-btn primary" type="button">Démarrer</button>
+          <button id="liveFsEliminateOpenBtn" class="live-fs-dock-btn danger" type="button">Sortir un joueur</button>
         </div>
 
         <div id="liveFsDurationPopup" class="live-fs-duration-popup live-admin-only" style="display:none">
@@ -9746,7 +9449,7 @@ function simplifyRecordTextForMobile(text){
               <input id="liveFsBlindDurationInput" type="number" min="5" max="60" step="1" value="15">
               <span>min</span>
             </div>
-            <button id="liveFsDurationApplyBtn" class="live-fs-elim-confirm" type="button" onclick="event.stopPropagation(); mobileLiveApplyDurationDirect(); return false;">Appliquer</button>
+            <button id="liveFsDurationApplyBtn" class="live-fs-elim-confirm" type="button">Appliquer</button>
           </div>
         </div>
 
@@ -9760,7 +9463,7 @@ function simplifyRecordTextForMobile(text){
             <select id="liveFsOutPlayer" aria-label="Joueur sortant"></select>
             <label>Éliminé par</label>
             <select id="liveFsKiller" aria-label="Éliminé par"></select>
-            <button id="liveFsEliminateBtn" class="live-fs-elim-confirm" type="button" onclick="event.stopPropagation(); mobileLiveEliminateDirect(); return false;">Valider la sortie</button>
+            <button id="liveFsEliminateBtn" class="live-fs-elim-confirm" type="button">Valider la sortie</button>
           </div>
         </div>
 
@@ -12732,15 +12435,9 @@ async function toggleLiveFullscreen(){
     const opening=!document.body.classList.contains("bpt-mobile-live-fullscreen");
     document.body.classList.toggle("bpt-mobile-live-fullscreen",opening);
     target.setAttribute("aria-hidden",opening?"false":"true");
-    if($("liveFullscreenBtn"))$("liveFullscreenBtn").textContent=opening?"Quitter plein écran":"Plein écran";
-    const handover=$('globalHandoverRequest');
     if(opening){
-      if(handover && handover.parentElement!==target)target.appendChild(handover);
-      bindMobileHandoverControls();
       liveRenderFullscreen();
       window.scrollTo({top:0,left:0,behavior:"auto"});
-    }else if(handover && handover.parentElement!==document.body){
-      document.body.appendChild(handover);
     }
     return;
   }
@@ -15821,12 +15518,6 @@ function liveIsCreator(){
 }
 
 function liveIsSpectator(){
-  // Sur téléphone, le poste créateur reste maître même si un poll distant
-  // conserve brièvement une copie spectateur plus ancienne du même Live.
-  if(isBptMobileDevice()){
-    const local=db?.liveState;
-    if(local?.prepared && !local?.synced && (!local.creatorDeviceId || local.creatorDeviceId===liveDeviceId()))return false;
-  }
   // Le rôle doit rester stable pendant toute la durée d’un Live.
   // Priorité à l’état spectateur directement reçu du serveur ; si celui-ci
   // n’est pas momentanément disponible entre deux polls, on s’appuie sur
@@ -17799,9 +17490,6 @@ if($("liveFullscreenExitBtn"))$("liveFullscreenExitBtn").onclick=async()=>{
   if(isBptMobileDevice()){
     document.body.classList.remove("bpt-mobile-live-fullscreen");
     $("liveFullscreenDisplay")?.setAttribute("aria-hidden","true");
-    if($("liveFullscreenBtn"))$("liveFullscreenBtn").textContent="Plein écran";
-    const handover=$('globalHandoverRequest');
-    if(handover && handover.parentElement!==document.body)document.body.appendChild(handover);
     showView("live");
     liveShowScreen("game");
     liveRenderAll();
@@ -17965,186 +17653,6 @@ $("settingsPassword").addEventListener("keydown",e=>{
   if(e.key==="Enter")unlockSettings();
 });
 
-function bindMobileHandoverControls(){
-  if(!isBptMobileDevice())return;
-  const bind=(id,action)=>{
-    const btn=$(id);
-    if(!btn || btn.dataset.mobileHandoverBound==='1')return;
-    btn.dataset.mobileHandoverBound='1';
-    btn.addEventListener('click',async e=>{
-      if(!isBptMobileDevice() || !document.body.classList.contains('bpt-mobile-live-fullscreen'))return;
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      if(btn.dataset.busy==='1')return;
-      btn.dataset.busy='1';
-      btn.disabled=true;
-      try{ await action(); }
-      finally{
-        btn.dataset.busy='0';
-        if($('globalHandoverRequest')?.style.display!=='none')btn.disabled=false;
-      }
-    },true);
-  };
-  bind('globalHandoverApproveBtn',approveLiveTakeover);
-  bind('globalHandoverRejectBtn',rejectLiveTakeover);
-}
-
-
-// ===== BPT 2.1.9 — commandes Live mobile directes =====
-function mobileLiveCanControlDirect(){
-  if(!isBptMobileDevice())return false;
-  const s=ensureLiveState();
-  if(!s?.prepared || s.synced)return false;
-  const creator=String(s.creatorDeviceId||"");
-  if(creator && creator!==liveDeviceId()){
-    alert("Ce téléphone n'est pas le maître du Live.");
-    return false;
-  }
-  return true;
-}
-
-async function mobileLiveToggleDirect(){
-  if(!mobileLiveCanControlDirect())return;
-  const s=ensureLiveState();
-  liveEnsureAudio();
-  if(s.running){
-    s.remainingSeconds=Math.max(0,Math.ceil(((s.endAt||Date.now())-Date.now())/1000));
-    s.elapsedBeforeMs=(s.elapsedBeforeMs||0)+(Date.now()-(s.runStartedAt||Date.now()));
-    s.running=false;
-    s.runStartedAt=null;
-    s.endAt=null;
-  }else{
-    s.running=true;
-    if(!s.startedAt)s.startedAt=Date.now();
-    s.runStartedAt=Date.now();
-    s.endAt=Date.now()+Math.max(0,Number(s.remainingSeconds)||0)*1000;
-  }
-  saveLocalOnly();
-  liveRunTicker();
-  liveRenderAll();
-  liveRenderFullscreen();
-  await livePushStateNow();
-  startLiveCloudHeartbeat();
-}
-
-async function mobileLiveAdjustTimerDirect(deltaSeconds){
-  if(!mobileLiveCanControlDirect())return;
-  const s=ensureLiveState();
-  let current=Number(s.remainingSeconds)||0;
-  if(s.running && s.endAt)current=Math.max(0,Math.ceil((s.endAt-Date.now())/1000));
-  s.remainingSeconds=Math.max(0,Math.min(3*60*60,current+Number(deltaSeconds||0)));
-  if(s.running)s.endAt=Date.now()+s.remainingSeconds*1000;
-  saveLocalOnly();
-  liveRenderTimerOnly();
-  liveRenderFullscreen();
-  await livePushStateNow();
-}
-
-async function mobileLiveChangeLevelDirect(delta){
-  if(!mobileLiveCanControlDirect())return;
-  const s=ensureLiveState();
-  if(!Array.isArray(s.levels)||!s.levels.length)return;
-  liveEnsureAudio();
-  const oldIndex=Number(s.levelIndex)||0;
-  if(s.running){
-    s.elapsedBeforeMs=(s.elapsedBeforeMs||0)+(Date.now()-(s.runStartedAt||Date.now()));
-    s.runStartedAt=Date.now();
-  }
-  s.levelIndex=Math.max(0,Math.min(s.levels.length-1,oldIndex+Number(delta||0)));
-  const currentLevel=s.levels[s.levelIndex]||{};
-  s.levelSeconds=Math.max(60,Number(currentLevel.durationMin||0)*60||Number(s.levelSeconds)||60);
-  s.remainingSeconds=s.levelSeconds;
-  liveTenSecondWarningKey="";
-  liveThirtySecondWarningKey="";
-  if(s.running)s.endAt=Date.now()+s.remainingSeconds*1000;
-  saveLocalOnly();
-  liveRenderAll();
-  liveRenderFullscreen();
-  await livePushStateNow();
-  if(s.levelIndex!==oldIndex){
-    liveLevelChangeSound();
-    liveFlashLevel();
-    setTimeout(liveSpeakBlinds,450);
-  }
-}
-
-function mobileLiveOpenElimDirect(){
-  if(!mobileLiveCanControlDirect())return;
-  if(liveAlive().length<=1)return;
-  liveFsRefreshElimLists(true);
-  const pop=$("liveFsElimPopup");
-  if(pop)pop.style.display="flex";
-}
-
-async function mobileLiveEliminateDirect(){
-  if(!mobileLiveCanControlDirect())return;
-  const s=ensureLiveState();
-  const out=$("liveFsOutPlayer")?.value||"";
-  const killer=$("liveFsKiller")?.value||"";
-  if(!out){alert("Choisissez le joueur sortant.");return;}
-  if(!killer){alert("Renseignez obligatoirement le joueur qui a éliminé ce joueur.");return;}
-  const alive=liveAlive();
-  if(alive.length<=1)return;
-  if(killer===out){alert("Un joueur ne peut pas s'éliminer lui-même.");return;}
-  if(!alive.some(p=>p.name===killer)){alert("L'éliminateur doit être encore en jeu.");return;}
-  const player=s.players.find(x=>x.name===out&&x.status==="En jeu");
-  if(!player)return;
-  player.status="Sorti";
-  player.place=alive.length;
-  player.killer=killer;
-  player.outLevel=s.levelIndex+1;
-  player.outTime=new Date().toLocaleTimeString("fr-FR");
-  const left=liveAlive();
-  if(left.length===1){
-    left[0].status="Vainqueur";
-    left[0].place=1;
-    left[0].killer="";
-    if(s.running){
-      s.remainingSeconds=Math.max(0,Math.ceil(((s.endAt||Date.now())-Date.now())/1000));
-      s.elapsedBeforeMs=(s.elapsedBeforeMs||0)+(Date.now()-(s.runStartedAt||Date.now()));
-      s.running=false;s.runStartedAt=null;s.endAt=null;
-    }
-    saveLocalOnly();
-    await livePushStateNow();
-  }else{
-    saveLocalOnly();
-    await livePushStateNow();
-  }
-  closeLiveFsElimPopup();
-  liveRenderAll();
-  liveRenderFullscreen();
-}
-
-function mobileLiveOpenDurationDirect(){
-  if(!mobileLiveCanControlDirect())return;
-  const s=ensureLiveState();
-  const level=s.levels?.[s.levelIndex];
-  const input=$("liveFsBlindDurationInput");
-  if(input)input.value=String(Math.max(5,Number(level?.durationMin||15)));
-  const pop=$("liveFsDurationPopup");
-  if(pop)pop.style.display="flex";
-}
-
-async function mobileLiveApplyDurationDirect(){
-  if(!mobileLiveCanControlDirect())return;
-  const s=ensureLiveState();
-  const input=$("liveFsBlindDurationInput");
-  const minutes=Math.max(5,Math.min(60,Math.round(Number(input?.value)||0)));
-  const old=s.levels?.[s.levelIndex]||{};
-  const oldSec=Math.max(1,Number(old.durationMin||0)*60||Number(s.levelSeconds)||1);
-  let remaining=Math.max(0,Number(s.remainingSeconds)||0);
-  if(s.running&&s.endAt)remaining=Math.max(0,Math.ceil((s.endAt-Date.now())/1000));
-  const elapsed=Math.max(0,oldSec-remaining);
-  for(let i=s.levelIndex;i<s.levels.length;i++)s.levels[i].durationMin=minutes;
-  s.levelSeconds=minutes*60;
-  s.remainingSeconds=Math.max(0,minutes*60-elapsed);
-  if(s.running)s.endAt=Date.now()+s.remainingSeconds*1000;
-  saveLocalOnly();
-  liveFsCloseDurationPopup();
-  liveRenderAll();liveRenderFullscreen();
-  await livePushStateNow();
-}
-
 function bindMobileLiveFullscreenControls(){
   const bind=(id,handler)=>{
     const el=$(id);
@@ -18157,9 +17665,9 @@ function bindMobileLiveFullscreenControls(){
     },true);
   };
   bind("liveFsPauseResumeBtn",liveFsTogglePauseResume);
+  bind("liveFsPrevLevelBtn",()=>liveChangeLevel(-1,false));
   bind("liveFsMinusMinuteBtn",()=>liveFsAdjustTimer(-60));
   bind("liveFsPlusMinuteBtn",()=>liveFsAdjustTimer(60));
-  bind("liveFsPrevLevelBtn",()=>liveChangeLevel(-1,false));
   bind("liveFsNextLevelBtn",()=>liveChangeLevel(1,false));
   bind("liveFsDurationBtn",liveFsOpenDurationPopup);
   bind("liveFsEliminateOpenBtn",openLiveFsElimPopup);
@@ -18169,7 +17677,8 @@ function bindMobileLiveFullscreenControls(){
   bind("liveFsElimCancelBtn",closeLiveFsElimPopup);
 }
 
-// BPT 2.1.8 : un seul système de clic pour le Live mobile (délégation ci-dessous).
+bindMobileLiveFullscreenControls();
+
 renderAll();
 liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
@@ -18215,14 +17724,6 @@ document.addEventListener("click",e=>{
   }
   if(e.target?.id==="liveFsPlusMinuteBtn"){
     liveFsAdjustTimer(60);
-    return;
-  }
-  if(e.target?.id==="liveFsPrevLevelBtn"){
-    liveChangeLevel(-1,false);
-    return;
-  }
-  if(e.target?.id==="liveFsNextLevelBtn"){
-    liveChangeLevel(1,false);
     return;
   }
   if(e.target?.id==="liveFsDurationBtn"){
