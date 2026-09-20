@@ -6051,7 +6051,7 @@ body.spectator-live-open .spectator-global-exit{
 }
 
 
-/* ===== V179 — priorité téléphone 16/9 paysage ===== */
+/* ===== V181 — priorité téléphone 16/9 paysage ===== */
 @media (max-width:700px) and (orientation:landscape){
 
   html,body{
@@ -6372,7 +6372,7 @@ body.spectator-live-open .spectator-global-exit{
 }
 
 
-/* ===== V179 — Records mobile : uniquement le record et sa valeur ===== */
+/* ===== V181 — Records mobile : uniquement le record et sa valeur ===== */
 @media (max-width:700px){
   #records .record-card small,
   #records .records-scope-summary{
@@ -6400,7 +6400,7 @@ body.spectator-live-open .spectator-global-exit{
 }
 
 
-/* ===== V179 — mobile portrait + scroll vertical naturel ===== */
+/* ===== V181 — mobile portrait + scroll vertical naturel ===== */
 @media (max-width:700px){
 
   /* Désactive définitivement l'écran qui imposait le paysage. */
@@ -6756,6 +6756,78 @@ body.spectator-live-open .spectator-global-exit{
   }
 }
 
+
+/* ===== V181 — swipe onglets mobile ===== */
+@media(max-width:700px){
+  body{
+    overscroll-behavior-x:contain;
+  }
+  .view.active{
+    touch-action:pan-y;
+  }
+}
+
+
+/* ===== V181 — test visuel mobile : palette distincte ===== */
+@media(max-width:700px){
+  body{
+    background:#101427 !important;
+  }
+
+  .bpt-header{
+    background:#20285a !important;
+    border-bottom-color:#4653a3 !important;
+  }
+
+  nav#nav{
+    background:#171d3d !important;
+    border-bottom-color:#3b467d !important;
+  }
+
+  nav#nav button{
+    border-color:#4b5a9f !important;
+    color:#e7eaff !important;
+  }
+
+  nav#nav button.active{
+    background:#5967d8 !important;
+    border-color:#7180ee !important;
+    color:#ffffff !important;
+  }
+
+  .card,
+  .record-card,
+  .achievement-card,
+  .profile-kpi,
+  .profile-feat,
+  .history-game,
+  .combined-block,
+  .settings-block{
+    background:#171c34 !important;
+    border-color:#3d477e !important;
+  }
+
+  .hero,
+  .tab-premium-hero{
+    background:linear-gradient(135deg,#252d68,#161a33 70%) !important;
+    border-color:#4653a3 !important;
+  }
+
+  .btn.secondary{
+    background:#4d59bd !important;
+  }
+
+  .btn.ghost{
+    background:#303964 !important;
+  }
+
+  .profile-rank,
+  .record-card span,
+  .card h2{
+    color:#b9c2ff !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -6771,7 +6843,7 @@ body.spectator-live-open .spectator-global-exit{
   <div class="spectator-server-shell">
     <div class="spectator-server-top">
       <div>
-        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V179</div>
+        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V181</div>
         <div id="spectatorServerGameMeta" class="spectator-server-meta">—</div>
         <div class="spectator-server-receive">
           Reçu : <strong id="spectatorServerReceivedAt">—</strong>
@@ -6829,7 +6901,7 @@ body.spectator-live-open .spectator-global-exit{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 1.7.9</div>
+  <div class="app-version">Version 1.8.1</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -14919,6 +14991,73 @@ document.querySelectorAll("nav button[data-view]").forEach(b=>{
     showView(target);
   });
 });
+
+
+/* V181 — navigation mobile par balayage horizontal */
+(function initMobileSwipeTabs(){
+  const order=["live","dashboard","latestgame","ranking","records","profile","settings"];
+  let startX=0,startY=0,startTime=0,tracking=false;
+
+  function isMobile(){
+    return window.matchMedia("(max-width:700px)").matches;
+  }
+
+  function ignoreSwipeTarget(target){
+    return !!target.closest(
+      "input,select,textarea,button,a,label,.tablewrap,table,"+
+      ".history-cards,.player-admin-row,.modal,.bpt-modal,.bpt-summary-modal,"+
+      ".live-fs-elim-popup,.live-structure-viewer"
+    );
+  }
+
+  document.addEventListener("touchstart",e=>{
+    if(!isMobile() || e.touches.length!==1)return;
+    const t=e.target;
+    if(ignoreSwipeTarget(t))return;
+
+    const touch=e.touches[0];
+    startX=touch.clientX;
+    startY=touch.clientY;
+    startTime=Date.now();
+    tracking=true;
+  },{passive:true});
+
+  document.addEventListener("touchend",async e=>{
+    if(!tracking || !isMobile())return;
+    tracking=false;
+
+    const touch=e.changedTouches?.[0];
+    if(!touch)return;
+
+    const dx=touch.clientX-startX;
+    const dy=touch.clientY-startY;
+    const dt=Date.now()-startTime;
+
+    // Swipe horizontal volontaire : au moins 70 px, rapide et plus horizontal que vertical.
+    if(Math.abs(dx)<70 || Math.abs(dx)<Math.abs(dy)*1.35 || dt>800)return;
+
+    const current=document.querySelector(".view.active")?.id || currentViewId || "dashboard";
+    const index=order.indexOf(current);
+    if(index<0)return;
+
+    const nextIndex=dx<0 ? index+1 : index-1;
+    if(nextIndex<0 || nextIndex>=order.length)return;
+
+    const target=order[nextIndex];
+
+    if(target==="live"){
+      await showView("live");
+    }else{
+      showView(target);
+    }
+
+    // Ramène le nouvel onglet en haut et centre son bouton de navigation.
+    window.scrollTo({top:0,behavior:"smooth"});
+    const navBtn=document.querySelector(`nav button[data-view="${target}"]`);
+    navBtn?.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"});
+  },{passive:true});
+})();
+
 
 // Gestion des joueurs
 if($("addPlayerBtn")){
