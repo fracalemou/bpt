@@ -6011,6 +6011,366 @@ body.spectator-live-open .spectator-global-exit{
   cursor:pointer !important;
 }
 
+
+/* ===== V176 — gestion joueurs : actions sur une seule ligne ===== */
+#playersAdmin .player-admin-row{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;
+  gap:12px;
+}
+#playersAdmin .player-admin-fields{
+  min-width:0;
+}
+#playersAdmin .player-admin-actions{
+  display:flex !important;
+  flex-direction:row !important;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+  flex-wrap:nowrap !important;
+  white-space:nowrap;
+}
+#playersAdmin .player-admin-actions .btn{
+  width:auto !important;
+  margin:0 !important;
+  flex:0 0 auto;
+}
+@media(max-width:700px){
+  #playersAdmin .player-admin-row{
+    grid-template-columns:auto minmax(0,1fr) auto;
+    gap:8px;
+  }
+  #playersAdmin .player-admin-actions{
+    gap:5px;
+  }
+  #playersAdmin .player-admin-actions .btn{
+    padding:6px 8px !important;
+    font-size:10px !important;
+  }
+}
+
+
+/* ===== V177 — priorité téléphone 16/9 paysage ===== */
+@media (max-width:700px) and (orientation:landscape){
+
+  html,body{
+    max-width:100%;
+    overflow-x:hidden;
+  }
+
+  body{
+    font-size:14px !important;
+  }
+
+  /* En-tête ultra compact pour préserver la hauteur utile */
+  .bpt-header{
+    min-height:38px !important;
+    padding:3px 8px !important;
+  }
+  .bpt-logo{
+    font-size:18px !important;
+  }
+  .bpt-logo svg{
+    width:28px !important;
+    height:28px !important;
+  }
+  .brand span,
+  header .app-version{
+    display:none !important;
+  }
+
+  /* Navigation horizontale compacte et toujours accessible */
+  nav#nav{
+    display:flex !important;
+    position:sticky !important;
+    top:0 !important;
+    z-index:50 !important;
+    gap:4px !important;
+    padding:4px 6px !important;
+    overflow-x:auto !important;
+    flex-wrap:nowrap !important;
+    scrollbar-width:none;
+    background:#0d151e !important;
+  }
+  nav#nav::-webkit-scrollbar{display:none}
+  nav#nav button{
+    flex:0 0 auto !important;
+    min-height:36px !important;
+    padding:6px 9px !important;
+    font-size:11.5px !important;
+    border-radius:8px !important;
+    white-space:nowrap !important;
+  }
+
+  main{
+    padding:6px 8px 12px !important;
+  }
+
+  /* Héros et titres plus compacts */
+  .hero,
+  .tab-premium-hero{
+    padding:9px 11px !important;
+    margin-bottom:6px !important;
+    border-radius:12px !important;
+  }
+  .hero h1,
+  .tab-premium-hero h1{
+    font-size:20px !important;
+    margin:0 !important;
+    line-height:1.05 !important;
+  }
+  .hero p,
+  .tab-premium-hero p{
+    display:none !important;
+  }
+
+  /* Navigation saison sur une ligne */
+  .season-nav-toolbar{
+    display:flex !important;
+    gap:5px !important;
+    margin-bottom:6px !important;
+    flex-wrap:nowrap !important;
+  }
+  .season-nav-toolbar button{
+    flex:1 1 0 !important;
+    min-height:34px !important;
+    padding:5px 7px !important;
+    font-size:10px !important;
+    white-space:nowrap !important;
+  }
+
+  /* Cartes générales plus denses */
+  .card{
+    padding:10px !important;
+    border-radius:11px !important;
+  }
+  .card h2{
+    font-size:15px !important;
+    margin-bottom:7px !important;
+  }
+
+  /* Classement : ne conserver que les colonnes utiles */
+  #ranking .tablewrap{
+    overflow:visible !important;
+  }
+  #ranking table{
+    width:100% !important;
+    min-width:0 !important;
+    table-layout:auto !important;
+  }
+  #ranking th,
+  #ranking td{
+    padding:6px 5px !important;
+    font-size:10px !important;
+  }
+  #ranking th:nth-child(4), #ranking td:nth-child(4),
+  #ranking th:nth-child(5), #ranking td:nth-child(5),
+  #ranking th:nth-child(6), #ranking td:nth-child(6),
+  #ranking th:nth-child(8), #ranking td:nth-child(8),
+  #ranking th:nth-child(9), #ranking td:nth-child(9),
+  #ranking th:nth-child(11),#ranking td:nth-child(11),
+  #ranking th:nth-child(12),#ranking td:nth-child(12),
+  #ranking th:nth-child(13),#ranking td:nth-child(13),
+  #ranking th:nth-child(14),#ranking td:nth-child(14){
+    display:none !important;
+  }
+  #ranking th:nth-child(1), #ranking td:nth-child(1){
+    width:32px;
+    text-align:center;
+  }
+  #ranking th:nth-child(3), #ranking td:nth-child(3),
+  #ranking th:nth-child(7), #ranking td:nth-child(7),
+  #ranking th:nth-child(10),#ranking td:nth-child(10){
+    text-align:center;
+    white-space:nowrap;
+  }
+
+  /* Profil joueur : véritable carte 16/9 compacte */
+  #profile .profile-topbar{
+    display:flex !important;
+    align-items:center !important;
+    gap:10px !important;
+  }
+  #profile .profile-selector-field{
+    min-width:220px !important;
+    margin:0 !important;
+  }
+  #profile .profile-selector-field select{
+    min-width:220px !important;
+    height:34px !important;
+    font-size:12px !important;
+  }
+  #profile .premium-profile-identity{
+    display:grid !important;
+    grid-template-columns:auto 1fr auto !important;
+    align-items:center !important;
+    gap:10px !important;
+    padding:9px 11px !important;
+  }
+  #profile .profile-photo-wrap,
+  #profile .profile-photo,
+  #profile .profile-photo-placeholder{
+    width:66px !important;
+    height:66px !important;
+  }
+  #profile .profile-photo{
+    object-fit:cover;
+  }
+  #profile .profile-photo-btn{
+    max-width:74px;
+    padding:4px 5px !important;
+    font-size:8.5px !important;
+    line-height:1.05;
+    white-space:normal;
+  }
+  #profile #playerProfileName{
+    font-size:20px !important;
+    margin:2px 0 !important;
+  }
+  #profile .profile-rank{
+    font-size:32px !important;
+  }
+  #profile #playerProfileMeta{
+    font-size:10px !important;
+    margin:3px 0 0 !important;
+  }
+  #profile .profile-kpis{
+    grid-template-columns:repeat(6,minmax(0,1fr)) !important;
+    gap:5px !important;
+    margin-top:6px !important;
+  }
+  #profile .profile-kpi{
+    padding:6px 4px !important;
+  }
+  #profile .profile-kpi b{
+    font-size:14px !important;
+  }
+  #profile .profile-kpi span{
+    font-size:8.5px !important;
+  }
+  #profile .profile-feats{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:6px !important;
+  }
+  #profile .profile-feat{
+    padding:7px !important;
+  }
+  #profile .profile-feat strong{
+    font-size:13px !important;
+  }
+  #profile .profile-achievement{
+    padding:6px 8px !important;
+    font-size:11px !important;
+  }
+
+  /* Parties : navigation compacte, podium et résultat visibles sans trop scroller */
+  #latestgame .game-browser-toolbar{
+    display:grid !important;
+    grid-template-columns:auto 1fr auto !important;
+    align-items:center !important;
+    gap:6px !important;
+    margin-bottom:6px !important;
+  }
+  #latestgame .game-browser-position{
+    min-width:0;
+    text-align:center;
+  }
+  #latestgame .game-browser-toolbar .btn{
+    min-height:34px !important;
+    padding:5px 8px !important;
+    font-size:10px !important;
+  }
+  #latestgame .latestgame-summary-line{
+    font-size:10px !important;
+  }
+  #latestgame .latestgame-podium-wrap{
+    margin-top:6px !important;
+  }
+  #latestgame .podium-medals{
+    gap:6px !important;
+  }
+  #latestgame .latestgame-detail > summary,
+  #latestgame .combined-block > summary{
+    min-height:38px !important;
+    padding:8px 10px !important;
+  }
+  #latestgame .history-raw{
+    display:none !important;
+  }
+
+  /* Dashboard : exploiter la largeur 16/9 */
+  #dashboard .grid{
+    gap:7px !important;
+  }
+  #dashboard .home-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    gap:7px !important;
+  }
+  #dashboard .home-highlight{
+    padding:9px !important;
+  }
+  #dashboard .home-highlight strong{
+    font-size:17px !important;
+  }
+
+  /* Records : 2 colonnes sur téléphone paysage */
+  #records .records-grid,
+  .achievements-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:7px !important;
+  }
+  .record-card,
+  .achievement-card{
+    min-height:0 !important;
+    padding:10px !important;
+  }
+
+  /* Gestion joueurs : ligne dense, actions toujours alignées */
+  #playersAdmin .player-admin-row{
+    grid-template-columns:auto minmax(0,1fr) auto !important;
+    gap:7px !important;
+    padding:6px !important;
+  }
+  #playersAdmin .player-photo-admin img,
+  #playersAdmin .player-photo-placeholder{
+    width:42px !important;
+    height:42px !important;
+  }
+  #playersAdmin .player-admin-fields{
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    gap:5px !important;
+  }
+  #playersAdmin .player-admin-fields input{
+    min-height:34px !important;
+    font-size:11px !important;
+  }
+  #playersAdmin .player-admin-actions{
+    flex-wrap:nowrap !important;
+    gap:5px !important;
+  }
+  #playersAdmin .player-admin-actions .btn{
+    min-height:34px !important;
+    padding:5px 7px !important;
+    font-size:9.5px !important;
+  }
+
+  /* Champs/boutons tactiles mais compacts */
+  input,select,button{
+    touch-action:manipulation;
+  }
+  input,select{
+    min-height:34px;
+  }
+
+  /* Le plein écran Live conserve sa propre mise en page 16/9 déjà optimisée */
+  #liveFullscreenDisplay:fullscreen{
+    width:100vw !important;
+    height:100vh !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -6026,7 +6386,7 @@ body.spectator-live-open .spectator-global-exit{
   <div class="spectator-server-shell">
     <div class="spectator-server-top">
       <div>
-        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V175</div>
+        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V177</div>
         <div id="spectatorServerGameMeta" class="spectator-server-meta">—</div>
         <div class="spectator-server-receive">
           Reçu : <strong id="spectatorServerReceivedAt">—</strong>
@@ -6084,7 +6444,7 @@ body.spectator-live-open .spectator-global-exit{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 19/09/26 17h49</div>
+  <div class="app-version">Version 1.7.7</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
