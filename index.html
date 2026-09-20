@@ -6051,7 +6051,7 @@ body.spectator-live-open .spectator-global-exit{
 }
 
 
-/* ===== V182 — priorité téléphone 16/9 paysage ===== */
+/* ===== V183 — priorité téléphone 16/9 paysage ===== */
 @media (max-width:700px) and (orientation:landscape){
 
   html,body{
@@ -6372,7 +6372,7 @@ body.spectator-live-open .spectator-global-exit{
 }
 
 
-/* ===== V182 — Records mobile : uniquement le record et sa valeur ===== */
+/* ===== V183 — Records mobile : uniquement le record et sa valeur ===== */
 @media (max-width:700px){
   #records .record-card small,
   #records .records-scope-summary{
@@ -6400,7 +6400,7 @@ body.spectator-live-open .spectator-global-exit{
 }
 
 
-/* ===== V182 — mobile portrait + scroll vertical naturel ===== */
+/* ===== V183 — mobile portrait + scroll vertical naturel ===== */
 @media (max-width:700px){
 
   /* Désactive définitivement l'écran qui imposait le paysage. */
@@ -6757,7 +6757,7 @@ body.spectator-live-open .spectator-global-exit{
 }
 
 
-/* ===== V182 — swipe onglets mobile ===== */
+/* ===== V183 — swipe onglets mobile ===== */
 @media(max-width:700px){
   body{
     overscroll-behavior-x:contain;
@@ -6768,7 +6768,7 @@ body.spectator-live-open .spectator-global-exit{
 }
 
 
-/* ===== V182 — test visuel mobile : palette distincte ===== */
+/* ===== V183 — test visuel mobile : palette distincte ===== */
 @media(max-width:700px){
   body{
     background:#101427 !important;
@@ -6829,7 +6829,7 @@ body.spectator-live-open .spectator-global-exit{
 }
 
 
-/* ===== V182 — détection mobile robuste indépendante de la largeur CSS ===== */
+/* ===== V183 — détection mobile robuste indépendante de la largeur CSS ===== */
 html.bpt-mobile-device body,
 body.bpt-mobile-device{
   background:#101427 !important;
@@ -6905,6 +6905,429 @@ body.bpt-mobile-device .card h2{
   color:#b9c2ff !important;
 }
 
+
+
+/* ===== V183 — mobile simplifié + portrait/paysage ===== */
+html.bpt-mobile-device .brand span,
+body.bpt-mobile-device .brand span,
+html.bpt-mobile-device footer,
+body.bpt-mobile-device footer,
+html.bpt-mobile-device #liveHeroSubtitle,
+body.bpt-mobile-device #liveHeroSubtitle,
+html.bpt-mobile-device .hero p,
+body.bpt-mobile-device .hero p{
+  display:none !important;
+}
+
+html.bpt-mobile-device main,
+body.bpt-mobile-device main{
+  padding:8px !important;
+  max-width:100% !important;
+}
+
+html.bpt-mobile-device .grid,
+body.bpt-mobile-device .grid{
+  gap:8px !important;
+}
+
+html.bpt-mobile-device .card,
+html.bpt-mobile-device .kpi,
+html.bpt-mobile-device .hero,
+body.bpt-mobile-device .card,
+body.bpt-mobile-device .kpi,
+body.bpt-mobile-device .hero{
+  padding:10px !important;
+  border-radius:10px !important;
+}
+
+html.bpt-mobile-device .hero h1,
+body.bpt-mobile-device .hero h1{
+  font-size:20px !important;
+  line-height:1.08 !important;
+  margin-bottom:0 !important;
+}
+
+html.bpt-mobile-device .home-kicker,
+body.bpt-mobile-device .home-kicker{
+  font-size:11px !important;
+  margin-bottom:4px !important;
+}
+
+html.bpt-mobile-device .kpi b,
+body.bpt-mobile-device .kpi b{
+  font-size:21px !important;
+}
+
+html.bpt-mobile-device .pill,
+body.bpt-mobile-device .pill{
+  font-size:10px !important;
+  padding:3px 6px !important;
+}
+
+html.bpt-mobile-device nav#nav,
+body.bpt-mobile-device nav#nav{
+  padding:8px !important;
+  gap:6px !important;
+}
+
+html.bpt-mobile-device nav#nav button,
+body.bpt-mobile-device nav#nav button{
+  min-height:44px !important;
+  padding:10px 12px !important;
+  font-size:13px !important;
+  white-space:nowrap !important;
+}
+
+html.bpt-mobile-device .btn,
+body.bpt-mobile-device .btn{
+  min-height:42px !important;
+}
+
+html.bpt-mobile-device .tablewrap,
+body.bpt-mobile-device .tablewrap{
+  max-height:52vh !important;
+}
+
+html.bpt-mobile-device .muted,
+body.bpt-mobile-device .muted{
+  font-size:11px !important;
+}
+
+/* En mobile, le live ne garde que l'essentiel visuel */
+html.bpt-mobile-device #livePrepScreen .live-head,
+body.bpt-mobile-device #livePrepScreen .live-head{
+  margin-bottom:6px !important;
+}
+
+html.bpt-mobile-device #livePrepScreen .live-title,
+body.bpt-mobile-device #livePrepScreen .live-title{
+  font-size:16px !important;
+}
+
+/* Portrait : interface plus verticale et lisible */
+html.bpt-mobile-device.bpt-mobile-portrait .span3,
+html.bpt-mobile-device.bpt-mobile-portrait .span4,
+html.bpt-mobile-device.bpt-mobile-portrait .span5,
+html.bpt-mobile-device.bpt-mobile-portrait .span6,
+html.bpt-mobile-device.bpt-mobile-portrait .span7,
+html.bpt-mobile-device.bpt-mobile-portrait .span8,
+body.bpt-mobile-device.bpt-mobile-portrait .span3,
+body.bpt-mobile-device.bpt-mobile-portrait .span4,
+body.bpt-mobile-device.bpt-mobile-portrait .span5,
+body.bpt-mobile-device.bpt-mobile-portrait .span6,
+body.bpt-mobile-device.bpt-mobile-portrait .span7,
+body.bpt-mobile-device.bpt-mobile-portrait .span8{
+  grid-column:span 12 !important;
+}
+
+html.bpt-mobile-device.bpt-mobile-portrait .hero h1,
+body.bpt-mobile-device.bpt-mobile-portrait .hero h1{
+  font-size:18px !important;
+}
+
+html.bpt-mobile-device.bpt-mobile-portrait nav#nav button,
+body.bpt-mobile-device.bpt-mobile-portrait nav#nav button{
+  font-size:12.5px !important;
+  padding:10px 11px !important;
+}
+
+/* Paysage : tout tient mieux sur une ligne, version compacte */
+html.bpt-mobile-device.bpt-mobile-landscape header,
+body.bpt-mobile-device.bpt-mobile-landscape header{
+  min-height:54px !important;
+  height:auto !important;
+  padding:8px 10px !important;
+}
+
+html.bpt-mobile-device.bpt-mobile-landscape .brand b,
+body.bpt-mobile-device.bpt-mobile-landscape .brand b{
+  font-size:14px !important;
+}
+
+html.bpt-mobile-device.bpt-mobile-landscape .app-version,
+body.bpt-mobile-device.bpt-mobile-landscape .app-version{
+  font-size:10px !important;
+}
+
+html.bpt-mobile-device.bpt-mobile-landscape .hero,
+body.bpt-mobile-device.bpt-mobile-landscape .hero{
+  padding:8px 10px !important;
+}
+
+html.bpt-mobile-device.bpt-mobile-landscape .hero h1,
+body.bpt-mobile-device.bpt-mobile-landscape .hero h1{
+  font-size:17px !important;
+}
+
+html.bpt-mobile-device.bpt-mobile-landscape .kpi b,
+body.bpt-mobile-device.bpt-mobile-landscape .kpi b{
+  font-size:19px !important;
+}
+
+html.bpt-mobile-device.bpt-mobile-landscape #liveGameScreen .live-blinds,
+body.bpt-mobile-device.bpt-mobile-landscape #liveGameScreen .live-blinds{
+  font-size:40px !important;
+}
+
+html.bpt-mobile-device.bpt-mobile-landscape #liveGameScreen .live-timer,
+body.bpt-mobile-device.bpt-mobile-landscape #liveGameScreen .live-timer{
+  font-size:58px !important;
+}
+
+html.bpt-mobile-device.bpt-mobile-landscape .tablewrap,
+body.bpt-mobile-device.bpt-mobile-landscape .tablewrap{
+  max-height:45vh !important;
+}
+
+
+/* ===== V185 — vraie version mobile allégée ===== */
+
+/* La version téléphone n'est plus la version PC simplement réduite. */
+html.bpt-mobile-device #dashboard .premium-hero-copy p,
+body.bpt-mobile-device #dashboard .premium-hero-copy p,
+html.bpt-mobile-device #dashboard .premium-hero-metrics .premium-hero-metric:nth-child(3),
+body.bpt-mobile-device #dashboard .premium-hero-metrics .premium-hero-metric:nth-child(3),
+html.bpt-mobile-device #dashboard .premium-bottom-grid,
+body.bpt-mobile-device #dashboard .premium-bottom-grid,
+html.bpt-mobile-device #dashboard .premium-story-item:nth-child(2),
+body.bpt-mobile-device #dashboard .premium-story-item:nth-child(2){
+  display:none !important;
+}
+
+html.bpt-mobile-device #dashboard .premium-main-grid,
+body.bpt-mobile-device #dashboard .premium-main-grid{
+  grid-template-columns:1fr !important;
+  gap:8px !important;
+}
+
+html.bpt-mobile-device #dashboard .premium-hero-metrics,
+body.bpt-mobile-device #dashboard .premium-hero-metrics{
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:6px !important;
+}
+
+html.bpt-mobile-device #dashboard .premium-panel,
+body.bpt-mobile-device #dashboard .premium-panel{
+  padding:9px !important;
+}
+
+html.bpt-mobile-device #dashboard .premium-panel-note,
+body.bpt-mobile-device #dashboard .premium-panel-note,
+html.bpt-mobile-device #dashboard .premium-eyebrow,
+body.bpt-mobile-device #dashboard .premium-eyebrow{
+  display:none !important;
+}
+
+html.bpt-mobile-device #dashboard .premium-panel h2,
+body.bpt-mobile-device #dashboard .premium-panel h2{
+  font-size:14px !important;
+  margin:0 0 6px !important;
+}
+
+/* Parties : uniquement navigation, vainqueur, podium et résultat. */
+html.bpt-mobile-device #latestgame .latestgame-photo-placeholder,
+body.bpt-mobile-device #latestgame .latestgame-photo-placeholder,
+html.bpt-mobile-device #latestgame .game-photo-actions,
+body.bpt-mobile-device #latestgame .game-photo-actions,
+html.bpt-mobile-device #latestgame .latestgame-detail:nth-child(2),
+body.bpt-mobile-device #latestgame .latestgame-detail:nth-child(2),
+html.bpt-mobile-device #latestgame .latestgame-full-history,
+body.bpt-mobile-device #latestgame .latestgame-full-history,
+html.bpt-mobile-device #latestgame .latestgame-summary-line,
+body.bpt-mobile-device #latestgame .latestgame-summary-line{
+  display:none !important;
+}
+
+html.bpt-mobile-device #latestgame .latestgame-photo-area:not(:has(.game-photo-thumb-btn[style*="display: none"])),
+body.bpt-mobile-device #latestgame .latestgame-photo-area:not(:has(.game-photo-thumb-btn[style*="display: none"])){
+  max-width:110px !important;
+}
+
+html.bpt-mobile-device #latestgame .latestgame-detail > summary small,
+body.bpt-mobile-device #latestgame .latestgame-detail > summary small,
+html.bpt-mobile-device #latestgame .dashboard-section-label,
+body.bpt-mobile-device #latestgame .dashboard-section-label,
+html.bpt-mobile-device #latestgame #latestGameHistorySummary,
+body.bpt-mobile-device #latestgame #latestGameHistorySummary{
+  display:none !important;
+}
+
+html.bpt-mobile-device #latestgame .latestgame-detail,
+body.bpt-mobile-device #latestgame .latestgame-detail{
+  margin-top:6px !important;
+}
+
+html.bpt-mobile-device #latestgame .latestgame-detail > summary,
+body.bpt-mobile-device #latestgame .latestgame-detail > summary{
+  padding:7px 9px !important;
+}
+
+/* Classement : seulement les colonnes réellement utiles sur téléphone. */
+html.bpt-mobile-device #ranking th:nth-child(4),
+html.bpt-mobile-device #ranking td:nth-child(4),
+html.bpt-mobile-device #ranking th:nth-child(5),
+html.bpt-mobile-device #ranking td:nth-child(5),
+html.bpt-mobile-device #ranking th:nth-child(6),
+html.bpt-mobile-device #ranking td:nth-child(6),
+html.bpt-mobile-device #ranking th:nth-child(8),
+html.bpt-mobile-device #ranking td:nth-child(8),
+html.bpt-mobile-device #ranking th:nth-child(9),
+html.bpt-mobile-device #ranking td:nth-child(9),
+html.bpt-mobile-device #ranking th:nth-child(11),
+html.bpt-mobile-device #ranking td:nth-child(11),
+html.bpt-mobile-device #ranking th:nth-child(12),
+html.bpt-mobile-device #ranking td:nth-child(12),
+html.bpt-mobile-device #ranking th:nth-child(13),
+html.bpt-mobile-device #ranking td:nth-child(13),
+html.bpt-mobile-device #ranking th:nth-child(14),
+html.bpt-mobile-device #ranking td:nth-child(14),
+body.bpt-mobile-device #ranking th:nth-child(4),
+body.bpt-mobile-device #ranking td:nth-child(4),
+body.bpt-mobile-device #ranking th:nth-child(5),
+body.bpt-mobile-device #ranking td:nth-child(5),
+body.bpt-mobile-device #ranking th:nth-child(6),
+body.bpt-mobile-device #ranking td:nth-child(6),
+body.bpt-mobile-device #ranking th:nth-child(8),
+body.bpt-mobile-device #ranking td:nth-child(8),
+body.bpt-mobile-device #ranking th:nth-child(9),
+body.bpt-mobile-device #ranking td:nth-child(9),
+body.bpt-mobile-device #ranking th:nth-child(11),
+body.bpt-mobile-device #ranking td:nth-child(11),
+body.bpt-mobile-device #ranking th:nth-child(12),
+body.bpt-mobile-device #ranking td:nth-child(12),
+body.bpt-mobile-device #ranking th:nth-child(13),
+body.bpt-mobile-device #ranking td:nth-child(13),
+body.bpt-mobile-device #ranking th:nth-child(14),
+body.bpt-mobile-device #ranking td:nth-child(14){
+  display:none !important;
+}
+
+html.bpt-mobile-device #ranking .combined-block > summary,
+body.bpt-mobile-device #ranking .combined-block > summary{
+  display:none !important;
+}
+
+html.bpt-mobile-device #ranking .combined-block-content,
+body.bpt-mobile-device #ranking .combined-block-content{
+  padding:0 !important;
+}
+
+html.bpt-mobile-device #ranking .tablewrap,
+body.bpt-mobile-device #ranking .tablewrap{
+  border-radius:10px !important;
+  max-height:none !important;
+}
+
+/* Records : pas de portée, pas d'accomplissements sur mobile. */
+html.bpt-mobile-device #records .records-scope-summary,
+body.bpt-mobile-device #records .records-scope-summary,
+html.bpt-mobile-device #records > details:nth-of-type(2),
+body.bpt-mobile-device #records > details:nth-of-type(2),
+html.bpt-mobile-device #records > details:first-of-type > summary,
+body.bpt-mobile-device #records > details:first-of-type > summary,
+html.bpt-mobile-device #records .combined-block-content > h2,
+body.bpt-mobile-device #records .combined-block-content > h2{
+  display:none !important;
+}
+
+html.bpt-mobile-device #records .combined-block-content,
+body.bpt-mobile-device #records .combined-block-content{
+  padding:0 !important;
+}
+
+html.bpt-mobile-device #records .records-grid,
+body.bpt-mobile-device #records .records-grid{
+  margin-top:0 !important;
+  grid-template-columns:1fr !important;
+  gap:6px !important;
+}
+
+html.bpt-mobile-device #records .record-card,
+body.bpt-mobile-device #records .record-card{
+  display:grid !important;
+  grid-template-columns:28px minmax(0,1fr) auto !important;
+  grid-template-areas:
+    "ico label value"
+    "ico player value" !important;
+  gap:2px 8px !important;
+  align-items:center !important;
+  padding:8px 9px !important;
+  min-height:0 !important;
+}
+html.bpt-mobile-device #records .record-icon,
+body.bpt-mobile-device #records .record-icon{grid-area:ico !important;font-size:20px !important;margin:0 !important}
+html.bpt-mobile-device #records .record-card > span,
+body.bpt-mobile-device #records .record-card > span{grid-area:label !important;font-size:10px !important}
+html.bpt-mobile-device #records .record-player-holder,
+body.bpt-mobile-device #records .record-player-holder{grid-area:player !important;font-size:13px !important;margin:0 !important}
+html.bpt-mobile-device #records .record-card > small,
+body.bpt-mobile-device #records .record-card > small{grid-area:value !important;display:block !important;font-size:13px !important;color:#fff !important;font-weight:900 !important;margin:0 !important;text-align:right !important}
+
+/* Profil : identité + KPI essentiels uniquement. */
+html.bpt-mobile-device #profile > .grid,
+body.bpt-mobile-device #profile > .grid,
+html.bpt-mobile-device #profile .profile-versus-block,
+body.bpt-mobile-device #profile .profile-versus-block,
+html.bpt-mobile-device #profile #playerProfileOtherNicknames,
+body.bpt-mobile-device #profile #playerProfileOtherNicknames,
+html.bpt-mobile-device #profile #playerProfileMeta,
+body.bpt-mobile-device #profile #playerProfileMeta{
+  display:none !important;
+}
+
+html.bpt-mobile-device #profile .profile-kpis,
+body.bpt-mobile-device #profile .profile-kpis{
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:6px !important;
+}
+html.bpt-mobile-device #profile .profile-kpi:nth-child(n+7),
+body.bpt-mobile-device #profile .profile-kpi:nth-child(n+7){
+  display:none !important;
+}
+
+/* Live mobile : masquer tout texte explicatif/diagnostic non indispensable. */
+html.bpt-mobile-device #live .live-head .muted,
+body.bpt-mobile-device #live .live-head .muted,
+html.bpt-mobile-device #live .live-master-sync-diag,
+body.bpt-mobile-device #live .live-master-sync-diag,
+html.bpt-mobile-device #live #liveTestSoundBtn,
+body.bpt-mobile-device #live #liveTestSoundBtn,
+html.bpt-mobile-device #live .stack-step-hint,
+body.bpt-mobile-device #live .stack-step-hint,
+html.bpt-mobile-device #live #liveUndoHint,
+body.bpt-mobile-device #live #liveUndoHint,
+html.bpt-mobile-device #live .live-blind-duration-control .muted,
+body.bpt-mobile-device #live .live-blind-duration-control .muted{
+  display:none !important;
+}
+
+/* Portrait : cartes plus hautes mais contenu minimum. */
+html.bpt-mobile-device.bpt-mobile-portrait #dashboard .premium-podium,
+body.bpt-mobile-device.bpt-mobile-portrait #dashboard .premium-podium{
+  gap:6px !important;
+}
+
+/* Paysage : tableau de bord et profil tiennent quasi intégralement dans la hauteur. */
+html.bpt-mobile-device.bpt-mobile-landscape #dashboard .premium-hero,
+body.bpt-mobile-device.bpt-mobile-landscape #dashboard .premium-hero{
+  display:grid !important;
+  grid-template-columns:1.5fr 1fr !important;
+  gap:8px !important;
+  align-items:center !important;
+}
+html.bpt-mobile-device.bpt-mobile-landscape #dashboard .dashboard-season-nav,
+body.bpt-mobile-device.bpt-mobile-landscape #dashboard .dashboard-season-nav{
+  grid-column:1 / -1 !important;
+}
+html.bpt-mobile-device.bpt-mobile-landscape #dashboard .premium-main-grid,
+body.bpt-mobile-device.bpt-mobile-landscape #dashboard .premium-main-grid{
+  grid-template-columns:1.15fr .85fr !important;
+}
+html.bpt-mobile-device.bpt-mobile-landscape #profile .premium-profile-identity,
+body.bpt-mobile-device.bpt-mobile-landscape #profile .premium-profile-identity{
+  margin-bottom:6px !important;
+}
+
 </style>
 </head>
 <body>
@@ -6926,6 +7349,24 @@ body.bpt-mobile-device .card h2{
 })();
 </script>
 
+<script>
+function isBptMobileDevice(){
+  return document.documentElement.classList.contains("bpt-mobile-device")
+    || document.body.classList.contains("bpt-mobile-device")
+    || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
+}
+
+function simplifyRecordTextForMobile(text){
+  if(!isBptMobileDevice())return String(text||"");
+  let s=String(text||"").trim();
+  s=s.replace(/\s*[·•]\s*saison\s*\d{4}\s*[–-]\s*\d{4}/gi, "");
+  s=s.replace(/\s*[·•]\s*partie\s*#?\d+/gi, "");
+  s=s.replace(/\s*[·•]\s*joueur le plus performant sur les 3 dernières parties/gi, "");
+  s=s.replace(/\s{2,}/g, " ").trim();
+  return s;
+}
+</script>
+
 <div id="mobileLandscapeGate" class="mobile-landscape-gate" aria-hidden="true">
   <div class="mobile-landscape-gate-card">
     <div class="mobile-landscape-phone">↻</div>
@@ -6938,7 +7379,7 @@ body.bpt-mobile-device .card h2{
   <div class="spectator-server-shell">
     <div class="spectator-server-top">
       <div>
-        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V182</div>
+        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V183</div>
         <div id="spectatorServerGameMeta" class="spectator-server-meta">—</div>
         <div class="spectator-server-receive">
           Reçu : <strong id="spectatorServerReceivedAt">—</strong>
@@ -6996,7 +7437,7 @@ body.bpt-mobile-device .card h2{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 1.8.2</div>
+  <div class="app-version">Version 1.8.5</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -9655,7 +10096,7 @@ function renderRecords(){
     }else{
       holderHtml='<span class="player-primary-name">—</span>';
     }
-    return `<div class="record-card"><div class="record-icon">${c[0]}</div><span>${esc(c[1])}</span><strong class="record-player-holder">${holderHtml}</strong><small>${esc(c[3])}</small></div>`;
+    return `<div class="record-card"><div class="record-icon">${c[0]}</div><span>${esc(c[1])}</span><strong class="record-player-holder">${holderHtml}</strong><small>${esc(simplifyRecordTextForMobile(c[3]))}</small></div>`;
   }).join("");
 }
 
@@ -11437,7 +11878,7 @@ function renderDashboard(){
         <span>${esc(r.label)}</span>
         <strong>${esc(displayPlayerName(r.player))}</strong>
       </div>
-      <b>${esc(r.value)}</b>
+      <b>${esc(simplifyRecordTextForMobile(r.value))}</b>
     </div>`).join('');
 
   const unlocked=latestGameUnlockedAchievements();
@@ -15088,13 +15529,15 @@ document.querySelectorAll("nav button[data-view]").forEach(b=>{
 });
 
 
-/* V182 — navigation mobile par balayage horizontal */
+/* V183 — navigation mobile par balayage horizontal */
 (function initMobileSwipeTabs(){
   const order=["live","dashboard","latestgame","ranking","records","profile","settings"];
   let startX=0,startY=0,startTime=0,tracking=false;
 
   function isMobile(){
-    return window.matchMedia("(max-width:700px)").matches;
+    return document.documentElement.classList.contains("bpt-mobile-device")
+      || document.body.classList.contains("bpt-mobile-device")
+      || window.matchMedia("(max-width:700px)").matches;
   }
 
   function ignoreSwipeTarget(target){
@@ -15317,6 +15760,57 @@ document.addEventListener("visibilitychange",()=>{
     </div>
   </div>
 </div>
+
+
+<script>
+(function(){
+  const desktopLabels = {
+    live:'● Live',
+    dashboard:'▦ Tableau de bord',
+    latestgame:'◷ Parties',
+    ranking:'♛ Classement',
+    records:'★ Records & accomplissements',
+    profile:'♤ Profil joueur',
+    settings:'⚙ Paramètres'
+  };
+  const mobileLabels = {
+    live:'● Live',
+    dashboard:'▦ Bord',
+    latestgame:'◷ Parties',
+    ranking:'♛ Classement',
+    records:'★ Records',
+    profile:'♤ Profil',
+    settings:'⚙ Réglages'
+  };
+
+  function applyBptMobileOrientation(){
+    const isMobile = document.documentElement.classList.contains('bpt-mobile-device') || document.body.classList.contains('bpt-mobile-device');
+    const portrait = window.matchMedia && window.matchMedia('(orientation: portrait)').matches;
+    document.documentElement.classList.toggle('bpt-mobile-portrait', !!(isMobile && portrait));
+    document.documentElement.classList.toggle('bpt-mobile-landscape', !!(isMobile && !portrait));
+    document.body.classList.toggle('bpt-mobile-portrait', !!(isMobile && portrait));
+    document.body.classList.toggle('bpt-mobile-landscape', !!(isMobile && !portrait));
+
+    document.querySelectorAll('nav#nav button[data-view]').forEach(btn=>{
+      const key = btn.getAttribute('data-view') || '';
+      btn.textContent = (isMobile ? mobileLabels[key] : desktopLabels[key]) || btn.textContent;
+    });
+
+    const title = document.getElementById('liveHeroTitle');
+    if(title){ title.textContent = isMobile ? 'Live BPT' : 'Gestion de la partie en direct'; }
+    const subtitle = document.getElementById('liveHeroSubtitle');
+    if(subtitle){ subtitle.style.display = isMobile ? 'none' : ''; }
+  }
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', applyBptMobileOrientation);
+  } else {
+    applyBptMobileOrientation();
+  }
+  window.addEventListener('resize', applyBptMobileOrientation, {passive:true});
+  window.addEventListener('orientationchange', applyBptMobileOrientation, {passive:true});
+})();
+</script>
 
 </body>
 </html>
