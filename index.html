@@ -6051,7 +6051,7 @@ body.spectator-live-open .spectator-global-exit{
 }
 
 
-/* ===== V181 — priorité téléphone 16/9 paysage ===== */
+/* ===== V182 — priorité téléphone 16/9 paysage ===== */
 @media (max-width:700px) and (orientation:landscape){
 
   html,body{
@@ -6372,7 +6372,7 @@ body.spectator-live-open .spectator-global-exit{
 }
 
 
-/* ===== V181 — Records mobile : uniquement le record et sa valeur ===== */
+/* ===== V182 — Records mobile : uniquement le record et sa valeur ===== */
 @media (max-width:700px){
   #records .record-card small,
   #records .records-scope-summary{
@@ -6400,7 +6400,7 @@ body.spectator-live-open .spectator-global-exit{
 }
 
 
-/* ===== V181 — mobile portrait + scroll vertical naturel ===== */
+/* ===== V182 — mobile portrait + scroll vertical naturel ===== */
 @media (max-width:700px){
 
   /* Désactive définitivement l'écran qui imposait le paysage. */
@@ -6757,7 +6757,7 @@ body.spectator-live-open .spectator-global-exit{
 }
 
 
-/* ===== V181 — swipe onglets mobile ===== */
+/* ===== V182 — swipe onglets mobile ===== */
 @media(max-width:700px){
   body{
     overscroll-behavior-x:contain;
@@ -6768,7 +6768,7 @@ body.spectator-live-open .spectator-global-exit{
 }
 
 
-/* ===== V181 — test visuel mobile : palette distincte ===== */
+/* ===== V182 — test visuel mobile : palette distincte ===== */
 @media(max-width:700px){
   body{
     background:#101427 !important;
@@ -6828,9 +6828,104 @@ body.spectator-live-open .spectator-global-exit{
   }
 }
 
+
+/* ===== V182 — détection mobile robuste indépendante de la largeur CSS ===== */
+html.bpt-mobile-device body,
+body.bpt-mobile-device{
+  background:#101427 !important;
+}
+
+html.bpt-mobile-device .bpt-header,
+body.bpt-mobile-device .bpt-header{
+  background:#20285a !important;
+  border-bottom-color:#4653a3 !important;
+}
+
+html.bpt-mobile-device nav#nav,
+body.bpt-mobile-device nav#nav{
+  background:#171d3d !important;
+  border-bottom-color:#3b467d !important;
+}
+
+html.bpt-mobile-device nav#nav button,
+body.bpt-mobile-device nav#nav button{
+  border-color:#4b5a9f !important;
+  color:#e7eaff !important;
+}
+
+html.bpt-mobile-device nav#nav button.active,
+body.bpt-mobile-device nav#nav button.active{
+  background:#5967d8 !important;
+  border-color:#7180ee !important;
+  color:#fff !important;
+}
+
+html.bpt-mobile-device .card,
+html.bpt-mobile-device .record-card,
+html.bpt-mobile-device .achievement-card,
+html.bpt-mobile-device .profile-kpi,
+html.bpt-mobile-device .profile-feat,
+html.bpt-mobile-device .history-game,
+html.bpt-mobile-device .combined-block,
+html.bpt-mobile-device .settings-block,
+body.bpt-mobile-device .card,
+body.bpt-mobile-device .record-card,
+body.bpt-mobile-device .achievement-card,
+body.bpt-mobile-device .profile-kpi,
+body.bpt-mobile-device .profile-feat,
+body.bpt-mobile-device .history-game,
+body.bpt-mobile-device .combined-block,
+body.bpt-mobile-device .settings-block{
+  background:#171c34 !important;
+  border-color:#3d477e !important;
+}
+
+html.bpt-mobile-device .hero,
+html.bpt-mobile-device .tab-premium-hero,
+body.bpt-mobile-device .hero,
+body.bpt-mobile-device .tab-premium-hero{
+  background:linear-gradient(135deg,#252d68,#161a33 70%) !important;
+  border-color:#4653a3 !important;
+}
+
+html.bpt-mobile-device .btn.secondary,
+body.bpt-mobile-device .btn.secondary{
+  background:#4d59bd !important;
+}
+html.bpt-mobile-device .btn.ghost,
+body.bpt-mobile-device .btn.ghost{
+  background:#303964 !important;
+}
+html.bpt-mobile-device .profile-rank,
+html.bpt-mobile-device .record-card span,
+html.bpt-mobile-device .card h2,
+body.bpt-mobile-device .profile-rank,
+body.bpt-mobile-device .record-card span,
+body.bpt-mobile-device .card h2{
+  color:#b9c2ff !important;
+}
+
 </style>
 </head>
 <body>
+
+<script>
+(function(){
+  function applyBptMobileClass(){
+    const coarse = window.matchMedia && window.matchMedia("(pointer:coarse)").matches;
+    const touch = navigator.maxTouchPoints > 0 || "ontouchstart" in window;
+    const smallSide = Math.min(window.innerWidth, window.innerHeight) <= 600;
+    const mobileUA = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
+    const isMobile = mobileUA || (touch && coarse) || (touch && smallSide);
+    document.documentElement.classList.toggle("bpt-mobile-device", !!isMobile);
+    document.body?.classList.toggle("bpt-mobile-device", !!isMobile);
+  }
+  applyBptMobileClass();
+  window.addEventListener("resize", applyBptMobileClass, {passive:true});
+  window.addEventListener("orientationchange", applyBptMobileClass, {passive:true});
+})();
+</script>
+
 <div id="mobileLandscapeGate" class="mobile-landscape-gate" aria-hidden="true">
   <div class="mobile-landscape-gate-card">
     <div class="mobile-landscape-phone">↻</div>
@@ -6843,7 +6938,7 @@ body.spectator-live-open .spectator-global-exit{
   <div class="spectator-server-shell">
     <div class="spectator-server-top">
       <div>
-        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V181</div>
+        <div class="spectator-server-kicker">BPT · LIVE SPECTATEUR · V182</div>
         <div id="spectatorServerGameMeta" class="spectator-server-meta">—</div>
         <div class="spectator-server-receive">
           Reçu : <strong id="spectatorServerReceivedAt">—</strong>
@@ -6901,7 +6996,7 @@ body.spectator-live-open .spectator-global-exit{
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
-  <div class="app-version">Version 1.8.1</div>
+  <div class="app-version">Version 1.8.2</div>
 </header>
 <nav id="nav">
   <button data-view="live">● Live</button>
@@ -14993,7 +15088,7 @@ document.querySelectorAll("nav button[data-view]").forEach(b=>{
 });
 
 
-/* V181 — navigation mobile par balayage horizontal */
+/* V182 — navigation mobile par balayage horizontal */
 (function initMobileSwipeTabs(){
   const order=["live","dashboard","latestgame","ranking","records","profile","settings"];
   let startX=0,startY=0,startTime=0,tracking=false;
