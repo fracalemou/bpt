@@ -9991,6 +9991,94 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs
 }
 </style>
 
+
+<style id="bpt-v242-mobile-chat-modal-final">
+/* 2.4.2 — Chat téléphone : vraie popup modale, identique dans tous les modes Live. */
+body.bpt-mobile-device #liveChatBackdrop,
+html.bpt-mobile-device #liveChatBackdrop{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:3000000 !important;
+  display:none !important;
+  align-items:center !important;
+  justify-content:center !important;
+  width:100vw !important;
+  height:100dvh !important;
+  padding:max(12px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left)) !important;
+  box-sizing:border-box !important;
+  background:rgba(2,7,4,.82) !important;
+  backdrop-filter:blur(6px) !important;
+}
+body.bpt-mobile-device #liveChatBackdrop.open,
+html.bpt-mobile-device #liveChatBackdrop.open{display:flex !important;}
+body.bpt-mobile-device #liveChatBackdrop .live-chat-card,
+html.bpt-mobile-device #liveChatBackdrop .live-chat-card{
+  position:relative !important;
+  width:min(94vw,420px) !important;
+  max-width:420px !important;
+  max-height:min(78dvh,570px) !important;
+  margin:0 !important;
+  padding:15px !important;
+  overflow:auto !important;
+  border:1px solid #496052 !important;
+  border-radius:18px !important;
+  background:#152119 !important;
+  box-shadow:0 24px 80px rgba(0,0,0,.66) !important;
+  transform:none !important;
+}
+body.bpt-mobile-device #liveChatBackdrop .live-chat-head h2,
+html.bpt-mobile-device #liveChatBackdrop .live-chat-head h2{font-size:19px !important;}
+body.bpt-mobile-device #liveChatBackdrop #liveChatHistory,
+html.bpt-mobile-device #liveChatBackdrop #liveChatHistory{
+  max-height:260px !important;
+  overflow:auto !important;
+  margin:10px 0 13px !important;
+}
+body.bpt-mobile-device #liveChatBackdrop .live-chat-item,
+html.bpt-mobile-device #liveChatBackdrop .live-chat-item{padding:10px 11px !important;border-radius:11px !important;}
+body.bpt-mobile-device #liveChatBackdrop .live-chat-compose,
+html.bpt-mobile-device #liveChatBackdrop .live-chat-compose{
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  gap:8px !important;
+}
+body.bpt-mobile-device #liveChatBackdrop #liveChatInput,
+html.bpt-mobile-device #liveChatBackdrop #liveChatInput{
+  min-height:46px !important;
+  font-size:16px !important; /* évite le zoom automatique iOS */
+}
+body.bpt-mobile-device #liveChatBackdrop #liveChatSendBtn,
+html.bpt-mobile-device #liveChatBackdrop #liveChatSendBtn{
+  width:100% !important;
+  min-height:46px !important;
+  font-size:14px !important;
+}
+body.bpt-mobile-device #liveChatBackdrop #liveChatCloseBtn,
+html.bpt-mobile-device #liveChatBackdrop #liveChatCloseBtn{
+  min-width:40px !important;
+  min-height:40px !important;
+  border:1px solid #405548 !important;
+  border-radius:10px !important;
+  background:#0f1813 !important;
+}
+/* En paysage, la popup reste compacte et centrée au lieu de devenir un panneau plein écran. */
+body.bpt-mobile-device.bpt-mobile-landscape #liveChatBackdrop .live-chat-card,
+html.bpt-mobile-device.bpt-mobile-landscape #liveChatBackdrop .live-chat-card{
+  width:min(72vw,560px) !important;
+  max-width:560px !important;
+  max-height:88dvh !important;
+  padding:12px 14px !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape #liveChatBackdrop #liveChatHistory,
+html.bpt-mobile-device.bpt-mobile-landscape #liveChatBackdrop #liveChatHistory{max-height:180px !important;}
+body.bpt-mobile-device.bpt-mobile-landscape #liveChatBackdrop .live-chat-compose,
+html.bpt-mobile-device.bpt-mobile-landscape #liveChatBackdrop .live-chat-compose{
+  grid-template-columns:minmax(0,1fr) auto !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape #liveChatBackdrop #liveChatSendBtn,
+html.bpt-mobile-device.bpt-mobile-landscape #liveChatBackdrop #liveChatSendBtn{width:auto !important;min-width:105px !important;}
+</style>
+
 </head>
 <body>
 <script>
@@ -10021,7 +10109,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.4.1":"Version PC 2.4.1";
+  el.textContent=mobile?"Version téléphone 2.4.2":"Version PC 2.4.2";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -10236,7 +10324,6 @@ function simplifyRecordTextForMobile(text){
         </div>
         <div class="row">
           <span class="live-badge" id="liveSyncBadge">NON SYNCHRONISÉE</span>
-          <button class="btn ghost" id="liveTestSoundBtn" type="button">Tester le son</button>
           <button class="btn ghost live-chat-open-btn" id="liveChatOpenBtn" type="button">💬 Chat</button>
           <button class="btn ghost" id="liveFullscreenBtn" type="button">Plein écran</button>
           <button class="btn danger live-admin-only" id="liveCancelGameBtn" type="button">Annuler la partie</button>
@@ -10891,7 +10978,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.4.1</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.4.2</div>
   </div>
   <div id="settingsLock" class="card" style="max-width:520px;margin:16px auto 0">
     <h2>Accès protégé</h2>
@@ -13747,12 +13834,7 @@ function liveRenderFullscreen(){
   $("liveFsTimer").classList.toggle("warning10",s.remainingSeconds<=10);
 }
 
-function testLiveSound(){
-  liveEnsureAudio();
-  liveWarningSound();
-  setTimeout(()=>liveSpeakThirtySeconds(),800);
-  setTimeout(()=>liveSpeakBlinds(),1900);
-}
+function testLiveSound(){ /* ancien test audio Live supprimé en 2.4.2 */ }
 
 function achievementPlayers(rowsOverride=null){
   const rows=Array.isArray(rowsOverride)?rowsOverride:(Array.isArray(db.history)?db.history:[]);
@@ -16489,55 +16571,18 @@ function stopLiveCloudHeartbeat(){
   }
 }
 
-let liveAudioCtx=null;
+/* BPT 2.4.2 — ancien système audio/vocal du Live désactivé.
+   Seule l’alerte sonore discrète du chat reste active. */
 let liveTenSecondWarningKey="";
 let liveThirtySecondWarningKey="";
 let liveDraftLevels=[];
 let liveDraftCustom=false;
-
-function liveEnsureAudio(){
-  try{
-    const AC=window.AudioContext||window.webkitAudioContext;
-    if(!AC)return null;
-    if(!liveAudioCtx)liveAudioCtx=new AC();
-    if(liveAudioCtx.state==="suspended")liveAudioCtx.resume();
-    return liveAudioCtx;
-  }catch(e){
-    return null;
-  }
-}
-
-function liveTone(freq=880,duration=0.12,volume=0.13,delay=0){
-  const ctx=liveEnsureAudio();
-  if(!ctx)return;
-  const start=ctx.currentTime+Math.max(0,delay);
-  const osc=ctx.createOscillator();
-  const gain=ctx.createGain();
-  osc.type="sine";
-  osc.frequency.setValueAtTime(freq,start);
-  gain.gain.setValueAtTime(0.0001,start);
-  gain.gain.exponentialRampToValueAtTime(Math.max(0.001,volume),start+0.015);
-  gain.gain.exponentialRampToValueAtTime(0.0001,start+duration);
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.start(start);
-  osc.stop(start+duration+0.03);
-}
-
-function liveWarningSound(){
-  liveTone(880,0.11,0.12,0);
-  liveTone(880,0.11,0.12,0.22);
-  liveTone(880,0.11,0.12,0.44);
-}
-
-function liveLevelChangeSound(){
-  liveTone(660,0.18,0.15,0);
-  liveTone(990,0.28,0.18,0.20);
-}
-
-function liveSpeakBlinds(){ /* synthèse vocale désactivée en 2.4.1 */ }
-
-function liveSpeakThirtySeconds(){ /* synthèse vocale désactivée en 2.4.1 */ }
+function liveEnsureAudio(){ return null; }
+function liveTone(){ /* désactivé */ }
+function liveWarningSound(){ /* désactivé */ }
+function liveLevelChangeSound(){ /* désactivé */ }
+function liveSpeakBlinds(){ /* désactivé */ }
+function liveSpeakThirtySeconds(){ /* désactivé */ }
 
 function liveFlashLevel(){
   const el=$("liveLevelLabel");
