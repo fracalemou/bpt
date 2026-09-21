@@ -9820,7 +9820,7 @@ body.bpt-mobile-device .settings-version-info{
 </style>
 
 <style id="bpt-v240-live-chat-clean">
-/* BPT 2.4.0 — chat Live isolé, sans modifier la mise en page validée du Live */
+/* BPT 2.4.1 — chat Live isolé, sans modifier la mise en page validée du Live */
 .live-chat-open-btn{white-space:nowrap}
 .live-fullscreen-top-actions{display:flex !important;gap:6px !important;align-items:center !important;}
 .spectator-server-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end;}
@@ -9839,9 +9839,6 @@ body.bpt-mobile-device .settings-version-info{
 .live-chat-head h2{margin:0;font-size:20px;line-height:1.1;}
 .live-chat-head small{display:block;color:#aebbb3;margin-top:4px;}
 #liveChatCloseBtn{border:0;background:transparent;color:#fff8ea;font-size:26px;line-height:1;cursor:pointer;padding:2px 6px;}
-.live-chat-voice-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0 12px;padding:8px 10px;border-radius:10px;background:#101a15;border:1px solid #2d4035;}
-#liveChatVoiceState{font-size:12px;color:#b7c3bb;}
-#liveChatVoiceTestBtn{min-height:34px;padding:6px 10px;border-radius:8px;border:1px solid #50677a;background:#14212c;color:#8fd4ff;font-weight:800;cursor:pointer;}
 #liveChatHistory{display:grid;gap:7px;margin:8px 0 12px;min-height:58px;}
 .live-chat-empty{padding:13px;border:1px dashed #3b4f43;border-radius:10px;color:#94a39a;text-align:center;font-size:13px;}
 .live-chat-item{padding:9px 11px;border-radius:10px;background:#101a15;border:1px solid #2d4035;}
@@ -9896,6 +9893,104 @@ body.bpt-mobile-device.bpt-mobile-portrait #spectatorServerOverlay #spectatorSer
 }
 </style>
 
+
+<style id="bpt-v241-pc-fullscreen-layout">
+/* 2.4.1 — Plein écran PC : disposition finale, indépendante des règles mobiles. */
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen{
+  display:grid !important;
+  grid-template-rows:auto auto auto auto auto auto 1fr auto auto !important;
+  grid-template-columns:1fr !important;
+  align-content:center !important;
+  justify-items:center !important;
+  gap:0 !important;
+  width:100vw !important;
+  height:100vh !important;
+  padding:24px 42px 26px !important;
+  box-sizing:border-box !important;
+  overflow:hidden !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fullscreen-brand,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fullscreen-brand{
+  position:absolute !important;top:22px !important;left:28px !important;
+  font-size:15px !important;line-height:1 !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fullscreen-top-actions,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fullscreen-top-actions{
+  position:absolute !important;top:16px !important;right:22px !important;
+  display:flex !important;gap:8px !important;z-index:50 !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fullscreen-top-actions .live-fullscreen-exit,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fullscreen-top-actions .live-fullscreen-exit{
+  position:static !important;min-height:38px !important;padding:7px 12px !important;
+  font-size:12px !important;opacity:1 !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fullscreen-level,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fullscreen-level{
+  grid-row:1 !important;margin:14px 0 3px !important;font-size:clamp(24px,2vw,38px) !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fullscreen-next-compact,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fullscreen-next-compact{
+  grid-row:2 !important;margin:0 !important;font-size:14px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fullscreen-blinds,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fullscreen-blinds{
+  grid-row:3 !important;margin:10px 0 0 !important;font-size:clamp(72px,8.4vw,150px) !important;line-height:.9 !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fullscreen-ante,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fullscreen-ante{
+  grid-row:4 !important;margin:5px 0 8px !important;font-size:clamp(16px,1.4vw,26px) !important;min-height:1em !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fullscreen-timer-label,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fullscreen-timer-label{
+  grid-row:5 !important;margin:6px 0 4px !important;font-size:12px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-timer-row,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-timer-row{
+  grid-row:6 !important;
+  display:grid !important;
+  grid-template-columns:118px 88px minmax(250px,360px) 88px 118px !important;
+  gap:10px !important;align-items:center !important;justify-content:center !important;
+  width:min(900px,88vw) !important;margin:0 auto 12px !important;padding:0 !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-timer-side-btn,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-timer-side-btn{
+  width:100% !important;min-width:0 !important;min-height:48px !important;
+  padding:8px 9px !important;border-radius:11px !important;font-size:13px !important;line-height:1.05 !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-timer-row .live-fullscreen-timer,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-timer-row .live-fullscreen-timer{
+  width:100% !important;margin:0 !important;padding:0 !important;
+  font-size:clamp(76px,8vw,132px) !important;line-height:.9 !important;text-align:center !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fullscreen-kpis,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fullscreen-kpis{
+  grid-row:8 !important;width:min(1050px,88vw) !important;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;gap:12px !important;margin:8px auto 0 !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fullscreen-kpi,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fullscreen-kpi{
+  padding:10px 9px !important;border-radius:12px !important;min-height:72px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fullscreen-kpi span,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fullscreen-kpi span{font-size:11px !important;}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fullscreen-kpi strong,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fullscreen-kpi strong{font-size:clamp(24px,2vw,34px) !important;margin-top:5px !important;}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-bottom-dock,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-bottom-dock{
+  grid-row:9 !important;position:static !important;transform:none !important;
+  width:min(520px,54vw) !important;margin:14px auto 0 !important;padding:0 !important;background:transparent !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-mobile-main-controls,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-mobile-main-controls{
+  display:grid !important;grid-template-columns:1fr 1fr !important;gap:10px !important;width:100% !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-dock-btn,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-dock-btn{
+  min-height:48px !important;padding:9px 14px !important;font-size:15px !important;border-radius:11px !important;
+}
+</style>
+
 </head>
 <body>
 <script>
@@ -9926,7 +10021,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.4.0":"Version PC 2.4.0";
+  el.textContent=mobile?"Version téléphone 2.4.1":"Version PC 2.4.1";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -10796,7 +10891,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.4.0</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.4.1</div>
   </div>
   <div id="settingsLock" class="card" style="max-width:520px;margin:16px auto 0">
     <h2>Accès protégé</h2>
@@ -10987,10 +11082,6 @@ function simplifyRecordTextForMobile(text){
       </div>
       <button id="liveChatCloseBtn" type="button" aria-label="Fermer">×</button>
     </div>
-    <div class="live-chat-voice-row">
-      <span id="liveChatVoiceState">Voix : en attente d’activation</span>
-      <button id="liveChatVoiceTestBtn" type="button">Tester la voix</button>
-    </div>
     <div id="liveChatHistory" aria-live="polite"></div>
     <div class="live-chat-compose">
       <input id="liveChatInput" type="text" maxlength="120" autocomplete="off" placeholder="Votre message…" aria-label="Message du Live">
@@ -11082,15 +11173,12 @@ let cloudPollTimer=null;
 let cloudLastRevision=0;
 let cloudChannel=null;
 
-/* ===== BPT 2.4.0 — Chat Live propre, commun à tous les participants ===== */
+/* ===== BPT 2.4.1 — Chat Live propre, commun à tous les participants ===== */
 const BPT_LIVE_CHAT_EVENT="live_chat_v2";
 let bptChatMessages=[];
 let bptChatLoadedKey="";
 let bptChatUnread=0;
 let bptChatLastSendAt=0;
-let bptChatSpeechUtterance=null;
-let bptChatVoicePrimed=false;
-let bptChatVoiceStartedOnce=false;
 let bptChatStatusTimer=null;
 
 function bptChatClean(value){
@@ -11169,7 +11257,6 @@ function bptChatSetUnread(value){
 function bptChatOpen(){
   const key=bptChatLiveKey();
   if(!key){bptChatSetStatus("Aucun Live actif.");return;}
-  bptChatPrimeVoice();
   bptChatLoadHistory();
   bptChatRender();
   bptChatSetUnread(0);
@@ -11190,57 +11277,36 @@ function bptChatClose(){
     if(bd.parentElement!==document.body)document.body.appendChild(bd);
   }
 }
-function bptChatPickFrenchVoice(){
+let bptChatAudioCtx=null;
+function bptChatEnsureAudio(){
   try{
-    const voices=window.speechSynthesis?.getVoices?.()||[];
-    return voices.find(v=>/^fr-FR$/i.test(v.lang)) || voices.find(v=>/^fr/i.test(v.lang)) || null;
+    const AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)return null;
+    if(!bptChatAudioCtx)bptChatAudioCtx=new AC();
+    if(bptChatAudioCtx.state==="suspended")bptChatAudioCtx.resume();
+    return bptChatAudioCtx;
   }catch(_e){return null;}
 }
-function bptChatVoiceState(text){
-  const el=document.getElementById("liveChatVoiceState");if(el)el.textContent=text;
-}
-function bptChatSpeak(text,{test=false}={}){
-  const clean=bptChatClean(text);
-  if(!clean || !("speechSynthesis" in window) || typeof SpeechSynthesisUtterance!=="function"){
-    bptChatVoiceState("Voix : non disponible sur ce navigateur");
-    return false;
-  }
+function bptChatAlertSound(){
+  const ctx=bptChatEnsureAudio();
+  if(!ctx)return;
   try{
-    const synth=window.speechSynthesis;
-    synth.resume();
-    const u=new SpeechSynthesisUtterance(clean);
-    u.lang="fr-FR";u.rate=1;u.pitch=1;u.volume=1;
-    const v=bptChatPickFrenchVoice();if(v)u.voice=v;
-    bptChatSpeechUtterance=u;
-    let started=false;
-    u.onstart=()=>{started=true;bptChatVoiceStartedOnce=true;bptChatVoiceState("Voix : active");};
-    u.onend=()=>{if(bptChatSpeechUtterance===u)bptChatSpeechUtterance=null;bptChatVoiceState("Voix : active");};
-    u.onerror=()=>{if(bptChatSpeechUtterance===u)bptChatSpeechUtterance=null;bptChatVoiceState("Voix : bloquée — cliquez sur Tester la voix");};
-    synth.speak(u);
-    setTimeout(()=>{
-      if(!started && !synth.speaking && !synth.pending && !test){
-        // Une seconde tentative après reprise résout certains retours d'onglet Chrome/Android.
-        try{synth.resume();synth.speak(u);}catch(_e){}
-      }
-    },450);
-    return true;
-  }catch(_e){
-    bptChatVoiceState("Voix : bloquée — cliquez sur Tester la voix");
-    return false;
-  }
-}
-function bptChatPrimeVoice(){
-  if(bptChatVoicePrimed || !("speechSynthesis" in window) || typeof SpeechSynthesisUtterance!=="function")return;
-  try{
-    const u=new SpeechSynthesisUtterance(".");u.lang="fr-FR";u.volume=0;u.rate=2;
-    window.speechSynthesis.resume();window.speechSynthesis.speak(u);
-    bptChatVoicePrimed=true;bptChatVoiceState("Voix : prête");
+    const now=ctx.currentTime;
+    [[660,0],[880,0.09]].forEach(([freq,delay])=>{
+      const osc=ctx.createOscillator();
+      const gain=ctx.createGain();
+      const t=now+delay;
+      osc.type="sine";
+      osc.frequency.setValueAtTime(freq,t);
+      gain.gain.setValueAtTime(0.0001,t);
+      gain.gain.exponentialRampToValueAtTime(0.045,t+0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001,t+0.09);
+      osc.connect(gain);gain.connect(ctx.destination);
+      osc.start(t);osc.stop(t+0.11);
+    });
   }catch(_e){}
 }
-function bptChatTestVoice(){
-  bptChatVoicePrimed=true;
-  bptChatSpeak("Synthèse vocale activée.",{test:true});
-}
+
 async function bptChatSend(){
   const input=document.getElementById("liveChatInput");
   const button=document.getElementById("liveChatSendBtn");
@@ -11278,18 +11344,18 @@ function bptChatHandleBroadcast(eventPayload){
   bptChatAppend(cleanMsg);
   const open=document.getElementById("liveChatBackdrop")?.classList.contains("open");
   if(!open)bptChatSetUnread(bptChatUnread+1);
-  // Règle fonctionnelle : tout message reçu est lu par synthèse vocale.
-  bptChatSpeak(`${msg.senderLabel||"Participant"}. ${text}`);
+  bptChatAlertSound();
+  // À la réception, le chat s'affiche immédiatement en popup.
+  bptChatOpen();
 }
 
-// Déverrouillage silencieux de la voix à la première interaction utilisateur.
-document.addEventListener("pointerdown",()=>{if(!bptChatVoicePrimed)bptChatPrimeVoice();},{capture:true,passive:true});
-document.addEventListener("keydown",()=>{if(!bptChatVoicePrimed)bptChatPrimeVoice();},{capture:true});
+// Amorçage audio discret à la première interaction utilisateur.
+document.addEventListener("pointerdown",()=>{bptChatEnsureAudio();},{capture:true,passive:true,once:true});
+document.addEventListener("keydown",()=>{bptChatEnsureAudio();},{capture:true,once:true});
 document.addEventListener("click",e=>{
   if(e.target?.closest?.(".live-chat-open-btn")){e.preventDefault();e.stopPropagation();bptChatOpen();return;}
   if(e.target?.id==="liveChatCloseBtn"){bptChatClose();return;}
   if(e.target?.id==="liveChatSendBtn"){bptChatSend();return;}
-  if(e.target?.id==="liveChatVoiceTestBtn"){bptChatTestVoice();return;}
   if(e.target?.id==="liveChatBackdrop"){bptChatClose();return;}
 });
 document.addEventListener("keydown",e=>{
@@ -16469,48 +16535,9 @@ function liveLevelChangeSound(){
   liveTone(990,0.28,0.18,0.20);
 }
 
-function liveSpeakBlinds(){
-  try{
-    if(!("speechSynthesis" in window))return;
-    const s=ensureLiveState();
-    const level=s.levels?.[s.levelIndex];
-    if(!level)return;
+function liveSpeakBlinds(){ /* synthèse vocale désactivée en 2.4.1 */ }
 
-    window.speechSynthesis.cancel();
-
-    const sb=Math.round(Number(level.sb)||0);
-    const bb=Math.round(Number(level.bb)||0);
-    let msg=`Nouveau niveau. ${sb}. ${bb}.`;
-    if(Number(level.ante)>0){
-      const ante=Math.round(Number(level.ante)||0);
-      msg+=` Ante ${ante}.`;
-    }
-
-    const u=new SpeechSynthesisUtterance(msg);
-    u.lang="fr-FR";
-    u.rate=0.95;
-    u.pitch=1;
-    u.volume=1;
-    window.speechSynthesis.speak(u);
-  }catch(e){
-    console.warn("Annonce vocale indisponible :",e);
-  }
-}
-
-function liveSpeakThirtySeconds(){
-  try{
-    if(!("speechSynthesis" in window))return;
-    window.speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance("30 secondes");
-    u.lang="fr-FR";
-    u.rate=0.95;
-    u.pitch=1;
-    u.volume=1;
-    window.speechSynthesis.speak(u);
-  }catch(e){
-    console.warn("Annonce vocale indisponible :",e);
-  }
-}
+function liveSpeakThirtySeconds(){ /* synthèse vocale désactivée en 2.4.1 */ }
 
 function liveFlashLevel(){
   const el=$("liveLevelLabel");
