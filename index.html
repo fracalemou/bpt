@@ -9930,6 +9930,128 @@ body.bpt-mobile-device.bpt-mobile-landscape #spectatorLiveChatHistory,
 body.bpt-mobile-device.bpt-mobile-landscape #liveChatMasterHistory{max-height:86px;margin:6px 0;}
 </style>
 
+
+<style id="bpt-v235-live-final-layout-fix">
+/* 2.3.5 — priorité finale au plein écran Live validé, PC + téléphone */
+body.bpt-mobile-live-fullscreen #liveFullscreenDisplay{
+  display:flex !important;
+  position:fixed !important;
+  inset:0 !important;
+  z-index:20000 !important;
+  width:100vw !important;
+  height:100dvh !important;
+  min-height:100dvh !important;
+  overflow:hidden !important;
+  flex-direction:column !important;
+  align-items:stretch !important;
+  justify-content:flex-start !important;
+  box-sizing:border-box !important;
+  padding:12px 16px 14px !important;
+  background:linear-gradient(180deg,#0b120e,#101b15) !important;
+}
+body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-brand{order:1 !important;position:static !important;margin:0 !important;text-align:left !important;}
+body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-top-actions{position:absolute !important;top:10px !important;right:12px !important;z-index:40 !important;}
+body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-level{order:2 !important;margin:8px 0 0 !important;text-align:center !important;}
+body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-next-compact{order:3 !important;margin:2px 0 0 !important;text-align:center !important;}
+body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-blinds{order:4 !important;margin:10px 0 2px !important;text-align:center !important;}
+body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-ante{order:5 !important;margin:0 !important;text-align:center !important;}
+body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-timer-label{order:6 !important;margin:14px 0 4px !important;text-align:center !important;}
+body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-row{
+  order:7 !important;
+  display:grid !important;
+  grid-template-columns:130px 90px minmax(260px,1fr) 90px 130px !important;
+  gap:10px !important;
+  align-items:center !important;
+  justify-content:center !important;
+  width:min(920px,96vw) !important;
+  margin:0 auto 12px !important;
+  padding:0 !important;
+  box-sizing:border-box !important;
+}
+body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-side-btn{
+  display:flex !important;align-items:center !important;justify-content:center !important;
+  width:100% !important;min-width:0 !important;min-height:48px !important;
+  padding:8px 6px !important;margin:0 !important;border-radius:10px !important;
+  font-size:13px !important;line-height:1.05 !important;font-weight:850 !important;
+  white-space:nowrap !important;position:relative !important;z-index:30 !important;
+}
+body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-row .live-fullscreen-timer{
+  display:flex !important;align-items:center !important;justify-content:center !important;
+  width:100% !important;min-width:0 !important;margin:0 !important;padding:0 4px !important;
+  font-size:clamp(64px,8vw,112px) !important;line-height:.95 !important;text-align:center !important;
+  white-space:nowrap !important;font-variant-numeric:tabular-nums !important;
+}
+body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-kpis{
+  order:8 !important;align-self:center !important;width:min(900px,94vw) !important;
+  display:grid !important;grid-template-columns:repeat(4,minmax(0,1fr)) !important;gap:10px !important;margin:4px auto 8px !important;
+}
+body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-bottom-dock{
+  order:9 !important;position:static !important;left:auto !important;right:auto !important;bottom:auto !important;transform:none !important;
+  width:min(620px,80vw) !important;align-self:center !important;margin:8px auto 0 !important;padding:0 !important;background:transparent !important;
+}
+body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-mobile-main-controls{
+  display:grid !important;grid-template-columns:1fr 1fr !important;gap:10px !important;width:100% !important;
+}
+body.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-mobile-main-controls .live-fs-dock-btn{min-height:48px !important;font-size:13px !important;}
+
+/* téléphone portrait */
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay{padding:8px 8px 10px !important;}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-level{font-size:16px !important;margin-top:4px !important;}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-next-compact{font-size:9px !important;}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-blinds{font-size:36px !important;margin-top:5px !important;}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-timer-label{font-size:8px !important;margin-top:5px !important;}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-row{
+  grid-template-columns:58px 46px minmax(132px,1fr) 46px 58px !important;
+  gap:3px !important;width:min(calc(100vw - 16px),356px) !important;margin:2px auto 7px !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-side-btn{min-height:42px !important;padding:5px 2px !important;font-size:9px !important;}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-row .live-fullscreen-timer{font-size:clamp(36px,12vw,52px) !important;}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-kpis{width:min(calc(100vw - 16px),356px) !important;grid-template-columns:1fr 1fr !important;gap:5px !important;margin:2px auto 4px !important;}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-kpi{padding:5px !important;min-height:0 !important;}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-kpi span{font-size:8px !important;}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-kpi strong{font-size:16px !important;margin-top:2px !important;}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-bottom-dock{width:min(calc(100vw - 16px),356px) !important;margin:4px auto 0 !important;}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-mobile-main-controls .live-fs-dock-btn{min-height:44px !important;font-size:11px !important;}
+
+/* téléphone paysage */
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay{padding:5px 8px 7px !important;}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-level{font-size:14px !important;margin-top:1px !important;}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-next-compact{font-size:8px !important;margin:0 !important;}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-blinds{font-size:32px !important;margin:1px 0 !important;}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-timer-label{font-size:7px !important;margin:1px 0 !important;}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-row{
+  grid-template-columns:82px 64px minmax(150px,240px) 64px 82px !important;
+  gap:5px !important;width:min(650px,94vw) !important;margin:1px auto 3px !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-side-btn{min-height:34px !important;padding:4px 3px !important;font-size:10px !important;}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-row .live-fullscreen-timer{font-size:44px !important;}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-kpis{width:min(760px,96vw) !important;grid-template-columns:repeat(4,minmax(0,1fr)) !important;gap:5px !important;margin:2px auto !important;}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-kpi{padding:4px !important;}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-kpi span{font-size:7px !important;}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-kpi strong{font-size:14px !important;margin-top:2px !important;}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-bottom-dock{width:min(520px,78vw) !important;margin:2px auto 0 !important;}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-mobile-main-controls .live-fs-dock-btn{min-height:32px !important;font-size:10px !important;padding:4px 7px !important;}
+
+/* Chat spectateur toujours visible à côté de Reprendre la gestion */
+#spectatorServerOverlay .spectator-server-actions{display:flex !important;visibility:visible !important;opacity:1 !important;align-items:center !important;gap:7px !important;flex-wrap:wrap !important;position:relative !important;z-index:100 !important;}
+#spectatorServerOverlay #spectatorLiveChatToggle{display:inline-flex !important;visibility:visible !important;opacity:1 !important;align-items:center !important;justify-content:center !important;}
+#spectatorServerOverlay #spectatorTakeoverBtn{display:inline-flex !important;}
+
+/* Noms complets dans les listes Live : aucune transformation de la donnée */
+#livePrepScreen .live-player-row span,#liveManager .live-player-row span{white-space:normal !important;overflow:visible !important;text-overflow:clip !important;word-break:normal !important;}
+#spectatorServerOverlay .spectator-server-name .player-primary-name{white-space:normal !important;overflow:visible !important;text-overflow:clip !important;word-break:normal !important;line-height:1.08 !important;}
+
+/* Spectateur téléphone portrait : Chat reste à côté de Reprendre la gestion, sans bouton coupé */
+body.bpt-mobile-device.bpt-mobile-portrait #spectatorServerOverlay .spectator-server-top{display:block !important;}
+body.bpt-mobile-device.bpt-mobile-portrait #spectatorServerOverlay .spectator-server-actions{
+  display:grid !important;grid-template-columns:minmax(0,1fr) auto !important;gap:6px !important;
+  width:100% !important;margin-top:8px !important;justify-content:stretch !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait #spectatorServerOverlay #spectatorTakeoverBtn{width:100% !important;min-width:0 !important;}
+body.bpt-mobile-device.bpt-mobile-portrait #spectatorServerOverlay #spectatorLiveChatToggle{min-width:72px !important;}
+body.bpt-mobile-device.bpt-mobile-portrait #spectatorServerOverlay #spectatorServerExitBtn{grid-column:1 / -1 !important;width:100% !important;}
+</style>
+
 </head>
 <body>
 <script>
@@ -9960,7 +10082,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.3.4":"Version PC 2.3.4";
+  el.textContent=mobile?"Version téléphone 2.3.5":"Version PC 2.3.5";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -10857,7 +10979,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.3.4</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.3.5</div>
   </div>
   <div id="settingsLock" class="card" style="max-width:520px;margin:16px auto 0">
     <h2>Accès protégé</h2>
