@@ -9852,6 +9852,26 @@ body.bpt-mobile-device.bpt-mobile-landscape .spectator-chat-title{margin-bottom:
 body.bpt-mobile-device.bpt-mobile-landscape .spectator-chat-row{grid-template-columns:minmax(0,1fr) 124px;gap:6px;}
 body.bpt-mobile-device.bpt-mobile-landscape #spectatorLiveChatInput{min-height:36px;padding:7px 9px;font-size:12px;}
 body.bpt-mobile-device.bpt-mobile-landscape #spectatorLiveChatSend{min-height:36px;padding:6px 9px;font-size:12px;}
+
+/* 2.3.2 — chat accessible directement à côté de Reprendre la gestion */
+.spectator-server-actions{position:relative;flex-wrap:wrap;justify-content:flex-end;}
+.spectator-chat-toggle-btn{
+  min-height:40px;padding:8px 12px;border:1px solid #3d8390;border-radius:10px;
+  background:#10262b;color:#9fe8f1;font-weight:900;cursor:pointer;white-space:nowrap;
+}
+.spectator-chat-toggle-btn[aria-expanded="true"]{background:#16353c;border-color:#42d5e8;color:#e8fdff;}
+.spectator-chat-popover{
+  position:absolute;top:calc(100% + 8px);right:0;z-index:80;width:min(360px,calc(100vw - 20px));
+  padding:11px;border:1px solid rgba(66,213,232,.4);border-radius:13px;
+  background:rgba(10,18,14,.98);box-shadow:0 14px 38px rgba(0,0,0,.42);box-sizing:border-box;
+}
+.spectator-chat-popover[hidden]{display:none !important;}
+@media(max-width:700px){
+  .spectator-server-actions{gap:5px !important;}
+  .spectator-chat-toggle-btn{min-height:38px;padding:7px 9px;font-size:11px;}
+  .spectator-chat-popover{top:calc(100% + 6px);right:0;width:min(330px,calc(100vw - 20px));padding:9px;}
+}
+body.bpt-mobile-device.bpt-mobile-landscape .spectator-chat-popover{width:min(390px,60vw);}
 </style>
 </head>
 <body>
@@ -9883,7 +9903,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.3.1":"Version PC 2.3.1";
+  el.textContent=mobile?"Version téléphone 2.3.2":"Version PC 2.3.2";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -9922,7 +9942,19 @@ function simplifyRecordTextForMobile(text){
       </div>
       <div class="spectator-server-actions">
         <button id="spectatorTakeoverBtn" class="spectator-takeover-btn" type="button">Reprendre la gestion</button>
+        <button id="spectatorLiveChatToggle" class="spectator-chat-toggle-btn" type="button" aria-expanded="false">💬 Chat</button>
         <button id="spectatorServerExitBtn" class="spectator-server-exit" type="button">← Quitter le Live</button>
+        <div class="spectator-chat-popover" id="spectatorLiveChatCard" hidden>
+          <div class="spectator-chat-title">
+            <strong>Message au maître</strong>
+            <span>lu à voix haute</span>
+          </div>
+          <div class="spectator-chat-row">
+            <input id="spectatorLiveChatInput" type="text" maxlength="120" autocomplete="off" placeholder="Votre message…" aria-label="Message au maître">
+            <button id="spectatorLiveChatSend" type="button">Envoyer</button>
+          </div>
+          <div id="spectatorLiveChatStatus" aria-live="polite"></div>
+        </div>
       </div>
     </div>
 
@@ -9946,18 +9978,6 @@ function simplifyRecordTextForMobile(text){
       </div>
     </div>
 
-
-    <div class="spectator-chat-card" id="spectatorLiveChatCard">
-      <div class="spectator-chat-title">
-        <strong>💬 Message au maître</strong>
-        <span>lu à voix haute sur le PC maître</span>
-      </div>
-      <div class="spectator-chat-row">
-        <input id="spectatorLiveChatInput" type="text" maxlength="120" autocomplete="off" placeholder="Votre message…" aria-label="Message au maître">
-        <button id="spectatorLiveChatSend" type="button">Envoyer</button>
-      </div>
-      <div id="spectatorLiveChatStatus" aria-live="polite"></div>
-    </div>
 
     <div class="spectator-server-players-card">
       <div class="spectator-server-list-head">
@@ -10761,7 +10781,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.3.1</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.3.2</div>
   </div>
   <div id="settingsLock" class="card" style="max-width:520px;margin:16px auto 0">
     <h2>Accès protégé</h2>
@@ -11934,6 +11954,18 @@ function handleLiveChatBroadcast(eventPayload){
     liveChatShowMasterToast(message);
     liveChatSpeakOnMaster(message);
   }catch(e){console.warn("Réception chat Live :",e);}
+}
+
+function setSpectatorLiveChatOpen(force){
+  const panel=$("spectatorLiveChatCard");
+  const toggle=$("spectatorLiveChatToggle");
+  if(!panel || !toggle)return;
+  const open=typeof force==="boolean"?force:panel.hidden;
+  panel.hidden=!open;
+  toggle.setAttribute("aria-expanded",open?"true":"false");
+  if(open){
+    setTimeout(()=>$("spectatorLiveChatInput")?.focus(),0);
+  }
 }
 
 async function sendSpectatorLiveChat(){
@@ -18314,6 +18346,7 @@ if($("liveFullscreenBtn"))$("liveFullscreenBtn").onclick=toggleLiveFullscreen;
 if($("liveFsLevel"))$("liveFsLevel").onclick=openLiveStructureViewer;
 if($("liveLevelLabel"))$("liveLevelLabel").onclick=openLiveStructureViewer;
 
+if($("spectatorLiveChatToggle"))$("spectatorLiveChatToggle").onclick=()=>setSpectatorLiveChatOpen();
 if($("spectatorLiveChatSend"))$("spectatorLiveChatSend").onclick=sendSpectatorLiveChat;
 if($("spectatorLiveChatInput"))$("spectatorLiveChatInput").addEventListener("keydown",e=>{
   if(e.key==="Enter" && !e.shiftKey){e.preventDefault();sendSpectatorLiveChat();}
