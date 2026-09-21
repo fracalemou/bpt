@@ -9873,6 +9873,31 @@ body.bpt-mobile-device.bpt-mobile-landscape #spectatorLiveChatSend{min-height:36
 }
 body.bpt-mobile-device.bpt-mobile-landscape .spectator-chat-popover{width:min(390px,60vw);}
 </style>
+
+<style id="bpt-v233-bidirectional-live-chat">
+#spectatorLiveChatHistory,#liveChatMasterHistory{
+  display:flex;flex-direction:column;gap:6px;max-height:150px;overflow:auto;margin:8px 0;padding:2px;
+}
+.live-chat-msg{padding:7px 9px;border-radius:9px;background:#16231c;border:1px solid #32473a;color:#f7f4ec;font-size:12px;line-height:1.25;}
+.live-chat-msg.me{background:#2a2416;border-color:#7a5e27;}
+.live-chat-msg small{display:block;color:#9fb0a5;font-size:9px;margin-bottom:2px;text-transform:uppercase;letter-spacing:.04em;}
+#liveChatMasterPanel{
+  position:fixed;right:16px;bottom:16px;z-index:28000;width:min(390px,calc(100vw - 24px));
+  padding:12px;border:1px solid #c8952e;border-radius:14px;background:rgba(14,23,18,.97);
+  box-shadow:0 16px 45px rgba(0,0,0,.45);color:#fff8ea;
+}
+#liveChatMasterPanel[hidden]{display:none !important;}
+.live-chat-master-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:5px;}
+.live-chat-master-head strong{font-size:14px;}
+#liveChatMasterClose{border:0;background:transparent;color:#fff8ea;font-size:20px;cursor:pointer;padding:0 4px;}
+.live-chat-master-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;}
+#liveChatMasterInput{min-width:0;border:1px solid #405548;border-radius:10px;background:#101a15;color:#fff8ea;padding:10px 11px;font:inherit;outline:none;}
+#liveChatMasterInput:focus{border-color:#c8952e;box-shadow:0 0 0 2px rgba(200,149,46,.15);}
+#liveChatMasterSend{min-height:40px;padding:8px 13px;border-radius:10px;border:1px solid #c8952e;background:#c8952e;color:#10150f;font-weight:900;cursor:pointer;}
+#liveChatMasterSend:disabled{opacity:.45;cursor:default;}
+#liveChatMasterStatus{margin-top:6px;min-height:14px;color:#b7c3bb;font-size:10px;}
+@media(max-width:700px){#liveChatMasterPanel{left:8px;right:8px;bottom:8px;width:auto}.live-chat-master-row{grid-template-columns:1fr}#liveChatMasterSend{width:100%}}
+</style>
 </head>
 <body>
 <script>
@@ -9903,7 +9928,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.3.2":"Version PC 2.3.2";
+  el.textContent=mobile?"Version téléphone 2.3.3":"Version PC 2.3.3";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -9949,6 +9974,7 @@ function simplifyRecordTextForMobile(text){
             <strong>Message au maître</strong>
             <span>lu à voix haute</span>
           </div>
+          <div id="spectatorLiveChatHistory" aria-live="polite"></div>
           <div class="spectator-chat-row">
             <input id="spectatorLiveChatInput" type="text" maxlength="120" autocomplete="off" placeholder="Votre message…" aria-label="Message au maître">
             <button id="spectatorLiveChatSend" type="button">Envoyer</button>
@@ -9992,6 +10018,18 @@ function simplifyRecordTextForMobile(text){
   </div>
 </div>
 <div id="liveChatMasterToast" class="live-chat-master-toast" aria-live="polite"></div>
+<div id="liveChatMasterPanel" hidden aria-live="polite">
+  <div class="live-chat-master-head">
+    <strong>💬 Chat Live spectateur</strong>
+    <button id="liveChatMasterClose" type="button" aria-label="Fermer">×</button>
+  </div>
+  <div id="liveChatMasterHistory"></div>
+  <div class="live-chat-master-row">
+    <input id="liveChatMasterInput" type="text" maxlength="120" autocomplete="off" placeholder="Répondre au spectateur…" aria-label="Réponse au spectateur">
+    <button id="liveChatMasterSend" type="button">Envoyer</button>
+  </div>
+  <div id="liveChatMasterStatus"></div>
+</div>
 <header class="bpt-header">
   <div class="bpt-brand-wrap">
     <div class="bpt-logo" aria-label="BPT">
@@ -10781,7 +10819,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.3.2</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.3.3</div>
   </div>
   <div id="settingsLock" class="card" style="max-width:520px;margin:16px auto 0">
     <h2>Accès protégé</h2>
@@ -11910,6 +11948,9 @@ async function forceCloudSync(){
 
 let liveChatLastSentAt=0;
 let liveChatToastTimer=null;
+let liveChatStatusTimer=null;
+let liveChatMasterStatusTimer=null;
+let liveChatLastSpectatorDeviceId="";
 
 function liveChatCleanMessage(value){
   return String(value||"").replace(/\s+/g," ").trim().slice(0,120);
@@ -11921,6 +11962,36 @@ function liveChatCurrentTargetCreator(){
   return String(s?.creatorDeviceId||"");
 }
 
+function liveChatSetTemporaryStatus(el,text,ms=1600){
+  if(!el)return;
+  el.textContent=text||"";
+  const isMaster=el.id==="liveChatMasterStatus";
+  if(isMaster){clearTimeout(liveChatMasterStatusTimer);liveChatMasterStatusTimer=setTimeout(()=>{if(el)el.textContent="";},ms);}
+  else{clearTimeout(liveChatStatusTimer);liveChatStatusTimer=setTimeout(()=>{if(el)el.textContent="";},ms);}
+}
+
+function liveChatAppend(historyId,who,message,isMine=false){
+  const box=$(historyId);
+  if(!box)return;
+  const item=document.createElement("div");
+  item.className="live-chat-msg"+(isMine?" me":"");
+  const meta=document.createElement("small");
+  meta.textContent=who;
+  const body=document.createElement("div");
+  body.textContent=message;
+  item.append(meta,body);
+  box.appendChild(item);
+  while(box.children.length>8)box.removeChild(box.firstElementChild);
+  box.scrollTop=box.scrollHeight;
+}
+
+function liveChatShowMasterPanel(message,senderDeviceId){
+  liveChatLastSpectatorDeviceId=String(senderDeviceId||"");
+  const panel=$("liveChatMasterPanel");
+  if(panel)panel.hidden=false;
+  liveChatAppend("liveChatMasterHistory","Spectateur",message,false);
+}
+
 function liveChatShowMasterToast(message){
   const el=$("liveChatMasterToast");
   if(!el)return;
@@ -11930,15 +12001,26 @@ function liveChatShowMasterToast(message){
   liveChatToastTimer=setTimeout(()=>el.classList.remove("show"),6500);
 }
 
-function liveChatSpeakOnMaster(message){
+function liveChatSpeak(text,prefix=""){
   try{
-    if(!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance!=="function")return;
-    const utter=new SpeechSynthesisUtterance("Message spectateur. "+message);
+    if(!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance!=="function")return false;
+    const spoken=(prefix?prefix+" ":"")+text;
+    const utter=new SpeechSynthesisUtterance(spoken);
     utter.lang="fr-FR";
     utter.rate=1;
     utter.pitch=1;
+    try{window.speechSynthesis.resume();}catch(_e){}
     window.speechSynthesis.speak(utter);
-  }catch(e){console.warn("Synthèse vocale Live :",e);}
+    return true;
+  }catch(e){console.warn("Synthèse vocale Live :",e);return false;}
+}
+
+function liveChatSpeakOnMaster(message){
+  return liveChatSpeak(message,"Message spectateur.");
+}
+
+function liveChatSpeakOnSpectator(message){
+  return liveChatSpeak(message,"Réponse du maître.");
 }
 
 function handleLiveChatBroadcast(eventPayload){
@@ -11952,8 +12034,25 @@ function handleLiveChatBroadcast(eventPayload){
     const current=db?.liveState;
     if(!current?.prepared || current?.synced)return;
     liveChatShowMasterToast(message);
+    liveChatShowMasterPanel(message,payload.senderDeviceId);
     liveChatSpeakOnMaster(message);
   }catch(e){console.warn("Réception chat Live :",e);}
+}
+
+function handleLiveChatReplyBroadcast(eventPayload){
+  try{
+    const payload=eventPayload?.payload||eventPayload||{};
+    const message=liveChatCleanMessage(payload.message);
+    if(!message || !liveIsSpectator())return;
+    const target=String(payload.targetSpectatorDeviceId||"");
+    if(target && target!==liveDeviceId())return;
+    const creator=String(payload.creatorDeviceId||"");
+    const expected=liveChatCurrentTargetCreator();
+    if(creator && expected && creator!==expected)return;
+    liveChatAppend("spectatorLiveChatHistory","Maître",message,false);
+    setSpectatorLiveChatOpen(true);
+    liveChatSpeakOnSpectator(message);
+  }catch(e){console.warn("Réception réponse chat Live :",e);}
 }
 
 function setSpectatorLiveChatOpen(force){
@@ -11963,9 +12062,7 @@ function setSpectatorLiveChatOpen(force){
   const open=typeof force==="boolean"?force:panel.hidden;
   panel.hidden=!open;
   toggle.setAttribute("aria-expanded",open?"true":"false");
-  if(open){
-    setTimeout(()=>$("spectatorLiveChatInput")?.focus(),0);
-  }
+  if(open){setTimeout(()=>$("spectatorLiveChatInput")?.focus(),0);}
 }
 
 async function sendSpectatorLiveChat(){
@@ -11973,38 +12070,57 @@ async function sendSpectatorLiveChat(){
   const status=$("spectatorLiveChatStatus");
   const button=$("spectatorLiveChatSend");
   const message=liveChatCleanMessage(input?.value);
-  if(!message){if(status)status.textContent="Saisissez un message.";return;}
-  if(!liveIsSpectator()){if(status)status.textContent="Le chat est réservé au mode spectateur.";return;}
+  if(!message){liveChatSetTemporaryStatus(status,"Saisissez un message.");return;}
+  if(!liveIsSpectator()){liveChatSetTemporaryStatus(status,"Le chat est réservé au mode spectateur.");return;}
   const now=Date.now();
-  if(now-liveChatLastSentAt<2500){if(status)status.textContent="Attendez quelques secondes avant un nouvel envoi.";return;}
+  if(now-liveChatLastSentAt<1800){liveChatSetTemporaryStatus(status,"Attendez un instant avant un nouvel envoi.");return;}
   const target=liveChatCurrentTargetCreator();
-  if(!target){if(status)status.textContent="PC maître introuvable.";return;}
+  if(!target){liveChatSetTemporaryStatus(status,"PC maître introuvable.");return;}
   if(!cloudChannel || typeof cloudChannel.send!=="function"){
-    if(status)status.textContent="Connexion temps réel indisponible.";
-    return;
+    liveChatSetTemporaryStatus(status,"Connexion temps réel indisponible.");return;
   }
   try{
     if(button)button.disabled=true;
     if(status)status.textContent="Envoi…";
     const result=await cloudChannel.send({
-      type:"broadcast",
-      event:"live_chat",
-      payload:{
-        message,
-        targetCreatorDeviceId:target,
-        senderDeviceId:liveDeviceId(),
-        sentAt:Date.now()
-      }
+      type:"broadcast",event:"live_chat",
+      payload:{message,targetCreatorDeviceId:target,senderDeviceId:liveDeviceId(),sentAt:Date.now()}
     });
     liveChatLastSentAt=Date.now();
-    if(input)input.value="";
-    if(status)status.textContent=(result==="ok" || result?.status==="ok")?"Message envoyé au maître.":"Message envoyé.";
+    if(input){input.value="";input.focus();}
+    liveChatAppend("spectatorLiveChatHistory","Vous",message,true);
+    liveChatSetTemporaryStatus(status,(result==="ok" || result?.status==="ok")?"Message envoyé.":"Message envoyé.",1200);
   }catch(e){
     console.error("Envoi chat Live :",e);
-    if(status)status.textContent="Échec de l’envoi. Réessayez.";
-  }finally{
-    if(button)button.disabled=false;
+    liveChatSetTemporaryStatus(status,"Échec de l’envoi. Réessayez.",2200);
+  }finally{if(button)button.disabled=false;}
+}
+
+async function sendMasterLiveChat(){
+  const input=$("liveChatMasterInput");
+  const status=$("liveChatMasterStatus");
+  const button=$("liveChatMasterSend");
+  const message=liveChatCleanMessage(input?.value);
+  if(!message){liveChatSetTemporaryStatus(status,"Saisissez une réponse.");return;}
+  if(!liveIsCreator()){liveChatSetTemporaryStatus(status,"Seul le PC maître peut répondre.");return;}
+  if(!liveChatLastSpectatorDeviceId){liveChatSetTemporaryStatus(status,"Aucun spectateur destinataire.");return;}
+  if(!cloudChannel || typeof cloudChannel.send!=="function"){
+    liveChatSetTemporaryStatus(status,"Connexion temps réel indisponible.");return;
   }
+  try{
+    if(button)button.disabled=true;
+    if(status)status.textContent="Envoi…";
+    await cloudChannel.send({
+      type:"broadcast",event:"live_chat_reply",
+      payload:{message,targetSpectatorDeviceId:liveChatLastSpectatorDeviceId,creatorDeviceId:liveDeviceId(),sentAt:Date.now()}
+    });
+    if(input){input.value="";input.focus();}
+    liveChatAppend("liveChatMasterHistory","Vous",message,true);
+    liveChatSetTemporaryStatus(status,"Réponse envoyée.",1200);
+  }catch(e){
+    console.error("Réponse chat Live :",e);
+    liveChatSetTemporaryStatus(status,"Échec de l’envoi. Réessayez.",2200);
+  }finally{if(button)button.disabled=false;}
 }
 
 async function initCloudSync(){
@@ -12174,6 +12290,11 @@ async function initCloudSync(){
           "broadcast",
           {event:"live_chat"},
           handleLiveChatBroadcast
+        )
+        .on(
+          "broadcast",
+          {event:"live_chat_reply"},
+          handleLiveChatReplyBroadcast
         )
         .on(
           "postgres_changes",
@@ -18351,6 +18472,9 @@ if($("spectatorLiveChatSend"))$("spectatorLiveChatSend").onclick=sendSpectatorLi
 if($("spectatorLiveChatInput"))$("spectatorLiveChatInput").addEventListener("keydown",e=>{
   if(e.key==="Enter" && !e.shiftKey){e.preventDefault();sendSpectatorLiveChat();}
 });
+if($("liveChatMasterSend"))$("liveChatMasterSend").onclick=sendMasterLiveChat;
+if($("liveChatMasterInput"))$("liveChatMasterInput").addEventListener("keydown",e=>{if(e.key==="Enter" && !e.shiftKey){e.preventDefault();sendMasterLiveChat();}});
+if($("liveChatMasterClose"))$("liveChatMasterClose").onclick=()=>{const p=$("liveChatMasterPanel");if(p)p.hidden=true;};
 
 if($("spectatorServerLevel"))$("spectatorServerLevel").onclick=openLiveStructureViewer;
 
