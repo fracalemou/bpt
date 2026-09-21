@@ -9794,10 +9794,32 @@ body.bpt-mobile-device.bpt-mobile-portrait .bpt-logo span{
   font-size:28px !important;
 }
 </style>
+
+<style id="bpt-v230-settings-version-sync-indicator">
+/* 2.3.0 — version visible uniquement dans Paramètres ; indicateur de synchro masqué */
+#bptDeviceBadge{display:none !important;}
+#cloudStatus{display:none !important;}
+.settings-version-info{
+  display:inline-flex;
+  align-items:center;
+  margin-top:8px;
+  padding:5px 10px;
+  border:1px solid rgba(200,149,46,.45);
+  border-radius:999px;
+  background:rgba(200,149,46,.08);
+  color:#e8c39e;
+  font-size:12px;
+  font-weight:850;
+  letter-spacing:.02em;
+}
+body.bpt-mobile-device .settings-version-info{
+  border-color:rgba(66,213,232,.45);
+  background:rgba(66,213,232,.08);
+  color:#9fe8f1;
+}
+</style>
 </head>
 <body>
-<div id="bptDeviceBadge" class="desktop">Version PC</div>
-
 <script>
 (function(){
   function applyBptMobileClass(){
@@ -9822,18 +9844,16 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-function updateBptDeviceBadge(){
-  const badge=document.getElementById("bptDeviceBadge");
-  if(!badge)return;
+function updateBptSettingsVersion(){
+  const el=document.getElementById("settingsVersionInfo");
+  if(!el)return;
   const mobile=!!isBptMobileDevice();
-  badge.textContent=mobile?"Version téléphone 2.2.8":"Version PC 2.2.8";
-  badge.classList.toggle("mobile",mobile);
-  badge.classList.toggle("desktop",!mobile);
+  el.textContent=mobile?"Version téléphone 2.3.0":"Version PC 2.3.0";
 }
-window.addEventListener("resize",updateBptDeviceBadge,{passive:true});
-window.addEventListener("orientationchange",updateBptDeviceBadge,{passive:true});
-document.addEventListener("DOMContentLoaded",updateBptDeviceBadge);
-setTimeout(updateBptDeviceBadge,0);
+window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
+window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
+document.addEventListener("DOMContentLoaded",updateBptSettingsVersion);
+setTimeout(updateBptSettingsVersion,0);
 
 function simplifyRecordTextForMobile(text){
   if(!isBptMobileDevice())return String(text||"");
@@ -10692,6 +10712,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.3.0</div>
   </div>
   <div id="settingsLock" class="card" style="max-width:520px;margin:16px auto 0">
     <h2>Accès protégé</h2>
@@ -18848,5 +18869,46 @@ document.addEventListener("visibilitychange",()=>{
 })();
 </script>
 
+
+<script id="bpt-v229-orientation-stability">
+(function(){
+  function syncBptMobileOrientationStable(){
+    const root=document.documentElement;
+    const body=document.body;
+    if(!body)return;
+    const isMobile=root.classList.contains('bpt-mobile-device') || body.classList.contains('bpt-mobile-device') || (typeof isBptMobileDevice==='function' && isBptMobileDevice());
+    if(!isMobile)return;
+    const vv=window.visualViewport;
+    const w=(vv && vv.width) || window.innerWidth || root.clientWidth;
+    const h=(vv && vv.height) || window.innerHeight || root.clientHeight;
+    const portrait=h>=w;
+    for(const el of [root,body]){
+      el.classList.add('bpt-mobile-device');
+      el.classList.toggle('bpt-mobile-portrait',portrait);
+      el.classList.toggle('bpt-mobile-landscape',!portrait);
+    }
+  }
+  function settle(){
+    syncBptMobileOrientationStable();
+    [60,180,360].forEach(ms=>setTimeout(syncBptMobileOrientationStable,ms));
+  }
+  window.bptSyncMobileOrientation=settle;
+  window.addEventListener('resize',settle,{passive:true});
+  window.addEventListener('orientationchange',settle,{passive:true});
+  window.addEventListener('pageshow',settle,{passive:true});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)settle();});
+  if(window.visualViewport) window.visualViewport.addEventListener('resize',settle,{passive:true});
+  const start=()=>{
+    settle();
+    const obs=new MutationObserver(muts=>{
+      if(muts.some(m=>m.type==='attributes' && m.attributeName==='class')){
+        if(document.body.classList.contains('bpt-mobile-live-fullscreen')) settle();
+      }
+    });
+    obs.observe(document.body,{attributes:true,attributeFilter:['class']});
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true}); else start();
+})();
+</script>
 </body>
 </html>
