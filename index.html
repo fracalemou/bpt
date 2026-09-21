@@ -9833,7 +9833,7 @@ body.bpt-mobile-device .settings-version-info{
 #spectatorLiveChatSend{min-height:42px;padding:9px 14px;border-radius:10px;border:1px solid #c8952e;background:#c8952e;color:#10150f;font-weight:900;cursor:pointer;}
 #spectatorLiveChatSend:disabled{opacity:.45;cursor:default;}
 #spectatorLiveChatStatus{margin-top:7px;min-height:16px;font-size:11px;color:#b7c3bb;}
-.live-chat-master-toast{
+.live-chat-master-toast{display:none !important;
   position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:30000;
   display:none;max-width:min(720px,calc(100vw - 32px));padding:12px 16px;border-radius:13px;
   border:1px solid rgba(200,149,46,.55);background:rgba(10,18,14,.96);color:#fff8ea;
@@ -9898,6 +9898,38 @@ body.bpt-mobile-device.bpt-mobile-landscape .spectator-chat-popover{width:min(39
 #liveChatMasterStatus{margin-top:6px;min-height:14px;color:#b7c3bb;font-size:10px;}
 @media(max-width:700px){#liveChatMasterPanel{left:8px;right:8px;bottom:8px;width:auto}.live-chat-master-row{grid-template-columns:1fr}#liveChatMasterSend{width:100%}}
 </style>
+
+<style id="bpt-v234-chat-modal-tts">
+/* 2.3.4 — Chat Live sous forme de vraie popup, historique limité à 3 messages */
+.spectator-chat-popover, #liveChatMasterPanel{
+  position:fixed !important; inset:0 !important; z-index:31000 !important;
+  width:auto !important; max-width:none !important; margin:0 !important; padding:16px !important;
+  border:0 !important; border-radius:0 !important; background:rgba(0,0,0,.72) !important;
+  box-shadow:none !important; display:flex !important; align-items:center !important; justify-content:center !important;
+  box-sizing:border-box !important;
+}
+.spectator-chat-popover[hidden],#liveChatMasterPanel[hidden]{display:none !important;}
+.live-chat-modal-card{
+  width:min(430px,calc(100vw - 28px)); max-height:min(620px,calc(100dvh - 28px)); overflow:auto;
+  padding:16px; border:1px solid rgba(200,149,46,.65); border-radius:16px;
+  background:#101913; box-shadow:0 18px 55px rgba(0,0,0,.55); box-sizing:border-box; color:#fff8ea;
+}
+.live-chat-modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;}
+.live-chat-modal-head strong{font-size:16px;}
+.live-chat-modal-close{border:0;background:transparent;color:#fff8ea;font-size:24px;line-height:1;cursor:pointer;padding:2px 6px;}
+#spectatorLiveChatHistory,#liveChatMasterHistory{max-height:170px;margin:10px 0;}
+.live-chat-msg{font-size:13px;}
+@media(max-width:700px){
+  .spectator-chat-popover,#liveChatMasterPanel{padding:10px !important;}
+  .live-chat-modal-card{width:min(390px,calc(100vw - 16px));max-height:calc(100dvh - 20px);padding:13px;}
+  .spectator-chat-row,.live-chat-master-row{grid-template-columns:1fr !important;}
+  #spectatorLiveChatSend,#liveChatMasterSend{width:100% !important;}
+}
+body.bpt-mobile-device.bpt-mobile-landscape .live-chat-modal-card{width:min(560px,72vw);max-height:calc(100dvh - 12px);padding:10px 14px;}
+body.bpt-mobile-device.bpt-mobile-landscape #spectatorLiveChatHistory,
+body.bpt-mobile-device.bpt-mobile-landscape #liveChatMasterHistory{max-height:86px;margin:6px 0;}
+</style>
+
 </head>
 <body>
 <script>
@@ -9928,7 +9960,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.3.3":"Version PC 2.3.3";
+  el.textContent=mobile?"Version téléphone 2.3.4":"Version PC 2.3.4";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -9970,16 +10002,19 @@ function simplifyRecordTextForMobile(text){
         <button id="spectatorLiveChatToggle" class="spectator-chat-toggle-btn" type="button" aria-expanded="false">💬 Chat</button>
         <button id="spectatorServerExitBtn" class="spectator-server-exit" type="button">← Quitter le Live</button>
         <div class="spectator-chat-popover" id="spectatorLiveChatCard" hidden>
-          <div class="spectator-chat-title">
-            <strong>Message au maître</strong>
-            <span>lu à voix haute</span>
+          <div class="live-chat-modal-card" role="dialog" aria-modal="true" aria-labelledby="spectatorChatTitle">
+            <div class="live-chat-modal-head">
+              <strong id="spectatorChatTitle">💬 Chat avec le maître</strong>
+              <button id="spectatorLiveChatClose" class="live-chat-modal-close" type="button" aria-label="Fermer">×</button>
+            </div>
+            <div style="font-size:11px;color:#b7c3bb">Les messages reçus sont lus à voix haute.</div>
+            <div id="spectatorLiveChatHistory" aria-live="polite"></div>
+            <div class="spectator-chat-row">
+              <input id="spectatorLiveChatInput" type="text" maxlength="120" autocomplete="off" placeholder="Votre message…" aria-label="Message au maître">
+              <button id="spectatorLiveChatSend" type="button">Envoyer</button>
+            </div>
+            <div id="spectatorLiveChatStatus" aria-live="polite"></div>
           </div>
-          <div id="spectatorLiveChatHistory" aria-live="polite"></div>
-          <div class="spectator-chat-row">
-            <input id="spectatorLiveChatInput" type="text" maxlength="120" autocomplete="off" placeholder="Votre message…" aria-label="Message au maître">
-            <button id="spectatorLiveChatSend" type="button">Envoyer</button>
-          </div>
-          <div id="spectatorLiveChatStatus" aria-live="polite"></div>
         </div>
       </div>
     </div>
@@ -10019,16 +10054,19 @@ function simplifyRecordTextForMobile(text){
 </div>
 <div id="liveChatMasterToast" class="live-chat-master-toast" aria-live="polite"></div>
 <div id="liveChatMasterPanel" hidden aria-live="polite">
-  <div class="live-chat-master-head">
-    <strong>💬 Chat Live spectateur</strong>
-    <button id="liveChatMasterClose" type="button" aria-label="Fermer">×</button>
+  <div class="live-chat-modal-card" role="dialog" aria-modal="true" aria-labelledby="masterChatTitle">
+    <div class="live-chat-modal-head">
+      <strong id="masterChatTitle">💬 Chat Live spectateur</strong>
+      <button id="liveChatMasterClose" class="live-chat-modal-close" type="button" aria-label="Fermer">×</button>
+    </div>
+    <div style="font-size:11px;color:#b7c3bb">Les messages reçus sont lus à voix haute.</div>
+    <div id="liveChatMasterHistory"></div>
+    <div class="live-chat-master-row">
+      <input id="liveChatMasterInput" type="text" maxlength="120" autocomplete="off" placeholder="Répondre au spectateur…" aria-label="Réponse au spectateur">
+      <button id="liveChatMasterSend" type="button">Envoyer</button>
+    </div>
+    <div id="liveChatMasterStatus"></div>
   </div>
-  <div id="liveChatMasterHistory"></div>
-  <div class="live-chat-master-row">
-    <input id="liveChatMasterInput" type="text" maxlength="120" autocomplete="off" placeholder="Répondre au spectateur…" aria-label="Réponse au spectateur">
-    <button id="liveChatMasterSend" type="button">Envoyer</button>
-  </div>
-  <div id="liveChatMasterStatus"></div>
 </div>
 <header class="bpt-header">
   <div class="bpt-brand-wrap">
@@ -10819,7 +10857,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.3.3</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.3.4</div>
   </div>
   <div id="settingsLock" class="card" style="max-width:520px;margin:16px auto 0">
     <h2>Accès protégé</h2>
@@ -11981,7 +12019,7 @@ function liveChatAppend(historyId,who,message,isMine=false){
   body.textContent=message;
   item.append(meta,body);
   box.appendChild(item);
-  while(box.children.length>8)box.removeChild(box.firstElementChild);
+  while(box.children.length>3)box.removeChild(box.firstElementChild);
   box.scrollTop=box.scrollHeight;
 }
 
@@ -12001,16 +12039,61 @@ function liveChatShowMasterToast(message){
   liveChatToastTimer=setTimeout(()=>el.classList.remove("show"),6500);
 }
 
-function liveChatSpeak(text,prefix=""){
+let liveChatSpeechCurrent=null;
+let liveChatSpeechUnlocked=false;
+let liveChatSpeechRetryTimer=null;
+
+function liveChatPickFrenchVoice(){
+  try{
+    const voices=window.speechSynthesis?.getVoices?.()||[];
+    return voices.find(v=>String(v.lang||"").toLowerCase()==="fr-fr")
+      || voices.find(v=>String(v.lang||"").toLowerCase().startsWith("fr"))
+      || null;
+  }catch(_e){return null;}
+}
+
+function liveChatPrimeSpeech(){
+  try{
+    if(liveChatSpeechUnlocked || !("speechSynthesis" in window) || typeof SpeechSynthesisUtterance!=="function")return;
+    const synth=window.speechSynthesis;
+    synth.resume();
+    synth.getVoices?.();
+    const u=new SpeechSynthesisUtterance(" ");
+    u.lang="fr-FR";u.volume=0;u.rate=1;u.pitch=1;
+    liveChatSpeechUnlocked=true;
+    synth.speak(u);
+  }catch(e){console.warn("Initialisation synthèse vocale Live :",e);}
+}
+
+function liveChatSpeak(text,prefix="",retry=false){
   try{
     if(!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance!=="function")return false;
-    const spoken=(prefix?prefix+" ":"")+text;
+    const synth=window.speechSynthesis;
+    const spoken=((prefix?prefix+" ":"")+String(text||"").trim()).trim();
+    if(!spoken)return false;
+    clearTimeout(liveChatSpeechRetryTimer);
+    try{synth.cancel();}catch(_e){}
+    try{synth.resume();}catch(_e){}
     const utter=new SpeechSynthesisUtterance(spoken);
-    utter.lang="fr-FR";
-    utter.rate=1;
-    utter.pitch=1;
-    try{window.speechSynthesis.resume();}catch(_e){}
-    window.speechSynthesis.speak(utter);
+    utter.lang="fr-FR";utter.rate=.95;utter.pitch=1;utter.volume=1;
+    const voice=liveChatPickFrenchVoice();
+    if(voice)utter.voice=voice;
+    liveChatSpeechCurrent=utter;
+    utter.onend=()=>{if(liveChatSpeechCurrent===utter)liveChatSpeechCurrent=null;};
+    utter.onerror=(ev)=>{
+      console.warn("Synthèse vocale Live :",ev?.error||ev);
+      if(liveChatSpeechCurrent===utter)liveChatSpeechCurrent=null;
+      if(!retry){liveChatSpeechRetryTimer=setTimeout(()=>liveChatSpeak(text,prefix,true),450);}
+    };
+    synth.speak(utter);
+    if(!retry){
+      liveChatSpeechRetryTimer=setTimeout(()=>{
+        if(liveChatSpeechCurrent===utter && !synth.speaking && !synth.pending){
+          liveChatSpeechCurrent=null;
+          liveChatSpeak(text,prefix,true);
+        }
+      },500);
+    }
     return true;
   }catch(e){console.warn("Synthèse vocale Live :",e);return false;}
 }
@@ -12033,7 +12116,6 @@ function handleLiveChatBroadcast(eventPayload){
     if(target && target!==liveDeviceId())return;
     const current=db?.liveState;
     if(!current?.prepared || current?.synced)return;
-    liveChatShowMasterToast(message);
     liveChatShowMasterPanel(message,payload.senderDeviceId);
     liveChatSpeakOnMaster(message);
   }catch(e){console.warn("Réception chat Live :",e);}
@@ -12089,7 +12171,8 @@ async function sendSpectatorLiveChat(){
     liveChatLastSentAt=Date.now();
     if(input){input.value="";input.focus();}
     liveChatAppend("spectatorLiveChatHistory","Vous",message,true);
-    liveChatSetTemporaryStatus(status,(result==="ok" || result?.status==="ok")?"Message envoyé.":"Message envoyé.",1200);
+    liveChatSetTemporaryStatus(status,"Message envoyé.",700);
+    setTimeout(()=>setSpectatorLiveChatOpen(false),180);
   }catch(e){
     console.error("Envoi chat Live :",e);
     liveChatSetTemporaryStatus(status,"Échec de l’envoi. Réessayez.",2200);
@@ -12116,7 +12199,8 @@ async function sendMasterLiveChat(){
     });
     if(input){input.value="";input.focus();}
     liveChatAppend("liveChatMasterHistory","Vous",message,true);
-    liveChatSetTemporaryStatus(status,"Réponse envoyée.",1200);
+    liveChatSetTemporaryStatus(status,"Réponse envoyée.",700);
+    setTimeout(()=>{const p=$("liveChatMasterPanel");if(p)p.hidden=true;},180);
   }catch(e){
     console.error("Réponse chat Live :",e);
     liveChatSetTemporaryStatus(status,"Échec de l’envoi. Réessayez.",2200);
@@ -18467,14 +18551,22 @@ if($("liveFullscreenBtn"))$("liveFullscreenBtn").onclick=toggleLiveFullscreen;
 if($("liveFsLevel"))$("liveFsLevel").onclick=openLiveStructureViewer;
 if($("liveLevelLabel"))$("liveLevelLabel").onclick=openLiveStructureViewer;
 
-if($("spectatorLiveChatToggle"))$("spectatorLiveChatToggle").onclick=()=>setSpectatorLiveChatOpen();
-if($("spectatorLiveChatSend"))$("spectatorLiveChatSend").onclick=sendSpectatorLiveChat;
+if($("spectatorLiveChatToggle"))$("spectatorLiveChatToggle").onclick=()=>{liveChatPrimeSpeech();setSpectatorLiveChatOpen();};
+if($("spectatorLiveChatSend"))$("spectatorLiveChatSend").onclick=()=>{liveChatPrimeSpeech();sendSpectatorLiveChat();};
 if($("spectatorLiveChatInput"))$("spectatorLiveChatInput").addEventListener("keydown",e=>{
   if(e.key==="Enter" && !e.shiftKey){e.preventDefault();sendSpectatorLiveChat();}
 });
-if($("liveChatMasterSend"))$("liveChatMasterSend").onclick=sendMasterLiveChat;
+if($("liveChatMasterSend"))$("liveChatMasterSend").onclick=()=>{liveChatPrimeSpeech();sendMasterLiveChat();};
 if($("liveChatMasterInput"))$("liveChatMasterInput").addEventListener("keydown",e=>{if(e.key==="Enter" && !e.shiftKey){e.preventDefault();sendMasterLiveChat();}});
 if($("liveChatMasterClose"))$("liveChatMasterClose").onclick=()=>{const p=$("liveChatMasterPanel");if(p)p.hidden=true;};
+if($("spectatorLiveChatClose"))$("spectatorLiveChatClose").onclick=()=>setSpectatorLiveChatOpen(false);
+if($("spectatorLiveChatCard"))$("spectatorLiveChatCard").onclick=e=>{if(e.target===$("spectatorLiveChatCard"))setSpectatorLiveChatOpen(false);};
+if($("liveChatMasterPanel"))$("liveChatMasterPanel").onclick=e=>{if(e.target===$("liveChatMasterPanel"))e.currentTarget.hidden=true;};
+
+
+document.addEventListener("pointerdown",()=>{if(!liveChatSpeechUnlocked)liveChatPrimeSpeech();},{passive:true,capture:true});
+document.addEventListener("keydown",()=>{if(!liveChatSpeechUnlocked)liveChatPrimeSpeech();},{capture:true});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){setSpectatorLiveChatOpen(false);const p=$("liveChatMasterPanel");if(p)p.hidden=true;}},{capture:true});
 
 if($("spectatorServerLevel"))$("spectatorServerLevel").onclick=openLiveStructureViewer;
 
