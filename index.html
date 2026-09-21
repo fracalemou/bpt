@@ -4838,7 +4838,6 @@ body.spectator-live-open .spectator-global-exit{
   .tab-premium-hero p,
   .muted:not(.live-last-sync):not(.spectator-server-meta):not(.spectator-server-receive),
   .stack-step-hint,
-  #liveSoundStatus,
   .live-next + .muted,
   .spectator-server-list-head small{
     display:none !important;
@@ -5042,7 +5041,6 @@ body.spectator-live-open .spectator-global-exit{
   .small-note,
   .footnote,
   .live-last-sync,
-  #liveSoundStatus,
   .stack-step-hint,
   .spectator-server-receive,
   .spectator-server-list-head small,
@@ -5439,7 +5437,6 @@ body.spectator-live-open .spectator-global-exit{
 
 
 /* ===== V163 — Live allégé ===== */
-#liveSoundStatus,
 #liveSyncStatus{
   display:none !important;
 }
@@ -7294,8 +7291,6 @@ html.bpt-mobile-device #live .live-head .muted,
 body.bpt-mobile-device #live .live-head .muted,
 html.bpt-mobile-device #live .live-master-sync-diag,
 body.bpt-mobile-device #live .live-master-sync-diag,
-html.bpt-mobile-device #live #liveTestSoundBtn,
-body.bpt-mobile-device #live #liveTestSoundBtn,
 html.bpt-mobile-device #live .stack-step-hint,
 body.bpt-mobile-device #live .stack-step-hint,
 html.bpt-mobile-device #live #liveUndoHint,
@@ -10079,6 +10074,56 @@ body.bpt-mobile-device.bpt-mobile-landscape #liveChatBackdrop #liveChatSendBtn,
 html.bpt-mobile-device.bpt-mobile-landscape #liveChatBackdrop #liveChatSendBtn{width:auto !important;min-width:105px !important;}
 </style>
 
+
+<style id="bpt-v243-pc-fullscreen-actions-center">
+/* 2.4.3 — PC plein écran : actions réellement centrées, indépendantes de la grille. */
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-bottom-dock,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-bottom-dock{
+  position:absolute !important;
+  left:50% !important;
+  right:auto !important;
+  bottom:24px !important;
+  transform:translateX(-50%) !important;
+  width:min(560px,62vw) !important;
+  margin:0 !important;
+  padding:0 !important;
+  z-index:60 !important;
+  display:block !important;
+  background:transparent !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-mobile-main-controls,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-mobile-main-controls{
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:12px !important;
+  width:100% !important;
+  margin:0 !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-mobile-main-controls .live-fs-dock-btn,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-mobile-main-controls .live-fs-dock-btn{
+  width:100% !important;
+  min-width:0 !important;
+  min-height:50px !important;
+  margin:0 !important;
+}
+/* Réserver l'espace inférieur pour les actions centrées. */
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fullscreen-kpis,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fullscreen-kpis{
+  margin-bottom:82px !important;
+}
+</style>
+
+<script id="bpt-v243-disable-speech">
+/* 2.4.3 — Synthèse vocale explicitement neutralisée sur toute l'application. */
+(function(){
+  try{
+    if(window.speechSynthesis){
+      window.speechSynthesis.cancel();
+      try{window.speechSynthesis.speak=function(){ return undefined; };}catch(e){}
+    }
+  }catch(e){}
+})();
+</script>
 </head>
 <body>
 <script>
@@ -10109,7 +10154,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.4.2":"Version PC 2.4.2";
+  el.textContent=mobile?"Version téléphone 2.4.3":"Version PC 2.4.3";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -10494,8 +10539,7 @@ function simplifyRecordTextForMobile(text){
               <button class="btn ghost" id="liveNextLevelBtn">Niveau suivant</button>
             </div>
           </div>
-          <div id="liveSoundStatus" class="muted live-admin-only" style="display:none"></div>
-        </div>
+</div>
 
         <div class="card live-admin-panel">
           <h2>Partie</h2>
@@ -10978,7 +11022,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.4.2</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.4.3</div>
   </div>
   <div id="settingsLock" class="card" style="max-width:520px;margin:16px auto 0">
     <h2>Accès protégé</h2>
@@ -13834,8 +13878,6 @@ function liveRenderFullscreen(){
   $("liveFsTimer").classList.toggle("warning10",s.remainingSeconds<=10);
 }
 
-function testLiveSound(){ /* ancien test audio Live supprimé en 2.4.2 */ }
-
 function achievementPlayers(rowsOverride=null){
   const rows=Array.isArray(rowsOverride)?rowsOverride:(Array.isArray(db.history)?db.history:[]);
   const ranked=ranking();
@@ -16571,18 +16613,11 @@ function stopLiveCloudHeartbeat(){
   }
 }
 
-/* BPT 2.4.2 — ancien système audio/vocal du Live désactivé.
-   Seule l’alerte sonore discrète du chat reste active. */
+/* BPT 2.4.3 — seul le bip discret du chat est conservé. */
 let liveTenSecondWarningKey="";
 let liveThirtySecondWarningKey="";
 let liveDraftLevels=[];
 let liveDraftCustom=false;
-function liveEnsureAudio(){ return null; }
-function liveTone(){ /* désactivé */ }
-function liveWarningSound(){ /* désactivé */ }
-function liveLevelChangeSound(){ /* désactivé */ }
-function liveSpeakBlinds(){ /* désactivé */ }
-function liveSpeakThirtySeconds(){ /* désactivé */ }
 
 function liveFlashLevel(){
   const el=$("liveLevelLabel");
@@ -16686,7 +16721,6 @@ function applyLiveAccessMode(){
     $("spectatorGlobalExitBtn").style.display=spectatorOpen?"flex":"none";
   }
 
-  if($("liveTestSoundBtn"))$("liveTestSoundBtn").style.display=spectator?"none":"";
   if($("liveSyncBadge") && spectator)$("liveSyncBadge").textContent="LIVE · SPECTATEUR";
 
   return spectator;
@@ -16994,7 +17028,7 @@ async function liveLaunch(){
 async function liveStart(){
   if(!liveCreatorGuard())return;
   const s=ensureLiveState();if(!s.prepared)return;
-  liveEnsureAudio();
+
   if(s.running)return;
   s.running=true;if(!s.startedAt)s.startedAt=Date.now();s.runStartedAt=Date.now();s.endAt=Date.now()+s.remainingSeconds*1000;
   saveLocalOnly();liveRunTicker();liveRenderAll();
@@ -17020,12 +17054,12 @@ function liveRunTicker(){
     if(!liveIsSpectator()){
       if(s.remainingSeconds<=30 && s.remainingSeconds>10 && liveThirtySecondWarningKey!==warningKey){
         liveThirtySecondWarningKey=warningKey;
-        liveSpeakThirtySeconds();
+
       }
 
       if(s.remainingSeconds<=10 && s.remainingSeconds>0 && liveTenSecondWarningKey!==warningKey){
         liveTenSecondWarningKey=warningKey;
-        liveWarningSound();
+
       }
 
       if(s.remainingSeconds<=0)liveChangeLevel(1,true);
@@ -17122,7 +17156,7 @@ function liveAdjustTimer(deltaSeconds){
 async function liveChangeLevel(delta,auto=false){
   if(!liveCreatorGuard())return;
   const s=ensureLiveState();if(!s.prepared)return;
-  liveEnsureAudio();
+
   const oldIndex=s.levelIndex;
 
   if(s.running){
@@ -17141,9 +17175,9 @@ async function liveChangeLevel(delta,auto=false){
   saveLocalOnly();liveRenderAll();await livePushStateNow();
 
   if(s.levelIndex!==oldIndex){
-    liveLevelChangeSound();
+
     liveFlashLevel();
-    setTimeout(liveSpeakBlinds,450);
+
   }
 }
 function liveRenderTimerOnly(){
@@ -18561,7 +18595,7 @@ if($("playerProfilePhotoWrap"))$("playerProfilePhotoWrap").onclick=()=>{
 if($("gameSummaryCloseBtn"))$("gameSummaryCloseBtn").onclick=()=>$("gameSummaryBackdrop").style.display="none";
 if($("gameSummaryBackdrop"))$("gameSummaryBackdrop").onclick=e=>{if(e.target===$("gameSummaryBackdrop"))e.currentTarget.style.display="none";};
 
-// Live : affichage, plein écran et test audio
+// Live : affichage et plein écran
 if($("liveFullscreenBtn"))$("liveFullscreenBtn").onclick=toggleLiveFullscreen;
 if($("liveFsLevel"))$("liveFsLevel").onclick=openLiveStructureViewer;
 if($("liveLevelLabel"))$("liveLevelLabel").onclick=openLiveStructureViewer;
@@ -18629,7 +18663,7 @@ if($("liveResumeCancelBtn"))$("liveResumeCancelBtn").onclick=async()=>{
   await liveCancelCurrentGame({ask:false,showMessage:true});
   showView("live");
 };
-if($("liveTestSoundBtn"))$("liveTestSoundBtn").onclick=testLiveSound;
+
 document.addEventListener("fullscreenchange",()=>{
   const inLiveFullscreen=document.fullscreenElement===$("liveFullscreenDisplay");
   if($("liveFullscreenBtn"))$("liveFullscreenBtn").textContent=inLiveFullscreen?"Quitter plein écran":"Plein écran";
@@ -18814,7 +18848,7 @@ function mobileLiveCanControlDirect(){
 async function mobileLiveToggleDirect(){
   if(!mobileLiveCanControlDirect())return;
   const s=ensureLiveState();
-  liveEnsureAudio();
+
   if(s.running){
     s.remainingSeconds=Math.max(0,Math.ceil(((s.endAt||Date.now())-Date.now())/1000));
     s.elapsedBeforeMs=(s.elapsedBeforeMs||0)+(Date.now()-(s.runStartedAt||Date.now()));
@@ -18852,7 +18886,7 @@ async function mobileLiveChangeLevelDirect(delta){
   if(!mobileLiveCanControlDirect())return;
   const s=ensureLiveState();
   if(!Array.isArray(s.levels)||!s.levels.length)return;
-  liveEnsureAudio();
+
   const oldIndex=Number(s.levelIndex)||0;
   if(s.running){
     s.elapsedBeforeMs=(s.elapsedBeforeMs||0)+(Date.now()-(s.runStartedAt||Date.now()));
@@ -18870,9 +18904,9 @@ async function mobileLiveChangeLevelDirect(delta){
   liveRenderFullscreen();
   await livePushStateNow();
   if(s.levelIndex!==oldIndex){
-    liveLevelChangeSound();
+
     liveFlashLevel();
-    setTimeout(liveSpeakBlinds,450);
+
   }
 }
 
