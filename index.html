@@ -9796,7 +9796,7 @@ body.bpt-mobile-device.bpt-mobile-portrait .bpt-logo span{
 </style>
 
 <style id="bpt-v230-settings-version-sync-indicator">
-/* 2.3.0 — version visible uniquement dans Paramètres ; indicateur de synchro masqué */
+/* 2.3.1 — version visible uniquement dans Paramètres ; chat Live spectateur */
 #bptDeviceBadge{display:none !important;}
 #cloudStatus{display:none !important;}
 .settings-version-info{
@@ -9817,6 +9817,41 @@ body.bpt-mobile-device .settings-version-info{
   background:rgba(66,213,232,.08);
   color:#9fe8f1;
 }
+</style>
+
+<style id="bpt-v231-live-chat">
+.spectator-chat-card{
+  margin-top:12px;padding:12px;border:1px solid rgba(200,149,46,.35);border-radius:14px;
+  background:rgba(18,28,23,.78);box-sizing:border-box;
+}
+.spectator-chat-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
+.spectator-chat-title strong{font-size:14px;color:#fff8ea;}
+.spectator-chat-title span{font-size:11px;color:#b7c3bb;}
+.spectator-chat-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;}
+#spectatorLiveChatInput{width:100%;min-width:0;box-sizing:border-box;border:1px solid #405548;border-radius:10px;background:#101a15;color:#fff8ea;padding:11px 12px;font:inherit;outline:none;}
+#spectatorLiveChatInput:focus{border-color:#c8952e;box-shadow:0 0 0 2px rgba(200,149,46,.15);}
+#spectatorLiveChatSend{min-height:42px;padding:9px 14px;border-radius:10px;border:1px solid #c8952e;background:#c8952e;color:#10150f;font-weight:900;cursor:pointer;}
+#spectatorLiveChatSend:disabled{opacity:.45;cursor:default;}
+#spectatorLiveChatStatus{margin-top:7px;min-height:16px;font-size:11px;color:#b7c3bb;}
+.live-chat-master-toast{
+  position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:30000;
+  display:none;max-width:min(720px,calc(100vw - 32px));padding:12px 16px;border-radius:13px;
+  border:1px solid rgba(200,149,46,.55);background:rgba(10,18,14,.96);color:#fff8ea;
+  box-shadow:0 12px 36px rgba(0,0,0,.34);font-size:14px;font-weight:800;text-align:center;
+}
+.live-chat-master-toast.show{display:block;}
+@media (max-width:700px){
+  .spectator-chat-card{margin-top:8px;padding:9px;border-radius:11px;}
+  .spectator-chat-title{margin-bottom:6px;}
+  .spectator-chat-row{grid-template-columns:1fr;}
+  #spectatorLiveChatInput{padding:10px 11px;font-size:14px;}
+  #spectatorLiveChatSend{width:100%;min-height:40px;}
+}
+body.bpt-mobile-device.bpt-mobile-landscape .spectator-chat-card{margin-top:6px;padding:8px;}
+body.bpt-mobile-device.bpt-mobile-landscape .spectator-chat-title{margin-bottom:5px;}
+body.bpt-mobile-device.bpt-mobile-landscape .spectator-chat-row{grid-template-columns:minmax(0,1fr) 124px;gap:6px;}
+body.bpt-mobile-device.bpt-mobile-landscape #spectatorLiveChatInput{min-height:36px;padding:7px 9px;font-size:12px;}
+body.bpt-mobile-device.bpt-mobile-landscape #spectatorLiveChatSend{min-height:36px;padding:6px 9px;font-size:12px;}
 </style>
 </head>
 <body>
@@ -9848,7 +9883,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.3.0":"Version PC 2.3.0";
+  el.textContent=mobile?"Version téléphone 2.3.1":"Version PC 2.3.1";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -9911,6 +9946,19 @@ function simplifyRecordTextForMobile(text){
       </div>
     </div>
 
+
+    <div class="spectator-chat-card" id="spectatorLiveChatCard">
+      <div class="spectator-chat-title">
+        <strong>💬 Message au maître</strong>
+        <span>lu à voix haute sur le PC maître</span>
+      </div>
+      <div class="spectator-chat-row">
+        <input id="spectatorLiveChatInput" type="text" maxlength="120" autocomplete="off" placeholder="Votre message…" aria-label="Message au maître">
+        <button id="spectatorLiveChatSend" type="button">Envoyer</button>
+      </div>
+      <div id="spectatorLiveChatStatus" aria-live="polite"></div>
+    </div>
+
     <div class="spectator-server-players-card">
       <div class="spectator-server-list-head">
         <div>
@@ -9923,6 +9971,7 @@ function simplifyRecordTextForMobile(text){
     </div>
   </div>
 </div>
+<div id="liveChatMasterToast" class="live-chat-master-toast" aria-live="polite"></div>
 <header class="bpt-header">
   <div class="bpt-brand-wrap">
     <div class="bpt-logo" aria-label="BPT">
@@ -10712,7 +10761,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.3.0</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.3.1</div>
   </div>
   <div id="settingsLock" class="card" style="max-width:520px;margin:16px auto 0">
     <h2>Accès protégé</h2>
@@ -11838,6 +11887,94 @@ async function forceCloudSync(){
   }
 }
 
+
+let liveChatLastSentAt=0;
+let liveChatToastTimer=null;
+
+function liveChatCleanMessage(value){
+  return String(value||"").replace(/\s+/g," ").trim().slice(0,120);
+}
+
+function liveChatCurrentTargetCreator(){
+  const s=(spectatorServerLiveState?.prepared && !spectatorServerLiveState?.synced)
+    ? spectatorServerLiveState : db?.liveState;
+  return String(s?.creatorDeviceId||"");
+}
+
+function liveChatShowMasterToast(message){
+  const el=$("liveChatMasterToast");
+  if(!el)return;
+  el.textContent="Message spectateur : "+message;
+  el.classList.add("show");
+  clearTimeout(liveChatToastTimer);
+  liveChatToastTimer=setTimeout(()=>el.classList.remove("show"),6500);
+}
+
+function liveChatSpeakOnMaster(message){
+  try{
+    if(!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance!=="function")return;
+    const utter=new SpeechSynthesisUtterance("Message spectateur. "+message);
+    utter.lang="fr-FR";
+    utter.rate=1;
+    utter.pitch=1;
+    window.speechSynthesis.speak(utter);
+  }catch(e){console.warn("Synthèse vocale Live :",e);}
+}
+
+function handleLiveChatBroadcast(eventPayload){
+  try{
+    const payload=eventPayload?.payload||eventPayload||{};
+    const message=liveChatCleanMessage(payload.message);
+    if(!message)return;
+    if(!liveIsCreator())return;
+    const target=String(payload.targetCreatorDeviceId||"");
+    if(target && target!==liveDeviceId())return;
+    const current=db?.liveState;
+    if(!current?.prepared || current?.synced)return;
+    liveChatShowMasterToast(message);
+    liveChatSpeakOnMaster(message);
+  }catch(e){console.warn("Réception chat Live :",e);}
+}
+
+async function sendSpectatorLiveChat(){
+  const input=$("spectatorLiveChatInput");
+  const status=$("spectatorLiveChatStatus");
+  const button=$("spectatorLiveChatSend");
+  const message=liveChatCleanMessage(input?.value);
+  if(!message){if(status)status.textContent="Saisissez un message.";return;}
+  if(!liveIsSpectator()){if(status)status.textContent="Le chat est réservé au mode spectateur.";return;}
+  const now=Date.now();
+  if(now-liveChatLastSentAt<2500){if(status)status.textContent="Attendez quelques secondes avant un nouvel envoi.";return;}
+  const target=liveChatCurrentTargetCreator();
+  if(!target){if(status)status.textContent="PC maître introuvable.";return;}
+  if(!cloudChannel || typeof cloudChannel.send!=="function"){
+    if(status)status.textContent="Connexion temps réel indisponible.";
+    return;
+  }
+  try{
+    if(button)button.disabled=true;
+    if(status)status.textContent="Envoi…";
+    const result=await cloudChannel.send({
+      type:"broadcast",
+      event:"live_chat",
+      payload:{
+        message,
+        targetCreatorDeviceId:target,
+        senderDeviceId:liveDeviceId(),
+        sentAt:Date.now()
+      }
+    });
+    liveChatLastSentAt=Date.now();
+    if(input)input.value="";
+    if(status)status.textContent=(result==="ok" || result?.status==="ok")?"Message envoyé au maître.":"Message envoyé.";
+  }catch(e){
+    console.error("Envoi chat Live :",e);
+    if(status)status.textContent="Échec de l’envoi. Réessayez.";
+  }finally{
+    if(button)button.disabled=false;
+  }
+}
+
 async function initCloudSync(){
   setCloudStatus("busy","Connexion…");
 
@@ -12001,6 +12138,11 @@ async function initCloudSync(){
     try{
       cloudChannel=sbClient
         .channel("bpt-shared-state")
+        .on(
+          "broadcast",
+          {event:"live_chat"},
+          handleLiveChatBroadcast
+        )
         .on(
           "postgres_changes",
           {event:"*",schema:"public",table:"bpt_state",filter:"id=eq."+CLOUD_ROW_ID},
@@ -18171,6 +18313,12 @@ if($("gameSummaryBackdrop"))$("gameSummaryBackdrop").onclick=e=>{if(e.target===$
 if($("liveFullscreenBtn"))$("liveFullscreenBtn").onclick=toggleLiveFullscreen;
 if($("liveFsLevel"))$("liveFsLevel").onclick=openLiveStructureViewer;
 if($("liveLevelLabel"))$("liveLevelLabel").onclick=openLiveStructureViewer;
+
+if($("spectatorLiveChatSend"))$("spectatorLiveChatSend").onclick=sendSpectatorLiveChat;
+if($("spectatorLiveChatInput"))$("spectatorLiveChatInput").addEventListener("keydown",e=>{
+  if(e.key==="Enter" && !e.shiftKey){e.preventDefault();sendSpectatorLiveChat();}
+});
+
 if($("spectatorServerLevel"))$("spectatorServerLevel").onclick=openLiveStructureViewer;
 
 if($("spectatorTakeoverBtn"))$("spectatorTakeoverBtn").onclick=requestLiveTakeover;
