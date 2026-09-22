@@ -10184,7 +10184,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.6.3":"Version PC 2.6.3";
+  el.textContent=mobile?"Version téléphone 2.6.4":"Version PC 2.6.4";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -11050,7 +11050,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.6.3</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.6.4</div>
   </div>
   <div id="settingsLock" class="card" style="max-width:520px;margin:16px auto 0">
     <h2>Accès protégé</h2>
@@ -11323,6 +11323,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
+const GAME_PHOTO_BUCKET="bpt-photos"; // BPT 2.6.4 — photos de parties dans Supabase Storage
 
 let sbClient=null;
 let cloudReady=false;
@@ -11695,7 +11696,8 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.5.1 : les photos restent locales à l'appareil pour éviter un egress massif.
+    // BPT 2.6.4 : aucune image Base64 dans bpt_state. Les photos de parties
+    // sont stockées dans Supabase Storage ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
   };
@@ -12538,9 +12540,12 @@ async function initCloudSync(){
       cloudApplying=true;
 
       const localHistory=Array.isArray(db.history)?db.history:[];
+      const localGamePhotos=JSON.parse(JSON.stringify(ensureGamePhotos()));
       const remoteState=JSON.parse(JSON.stringify(row.data));
       db=remoteState;
       db.history=localHistory; // historique temporaire conservé jusqu'au fetch dédié
+      // Conserve d'éventuelles anciennes photos locales Base64 jusqu'à leur migration Storage.
+      db.gamePhotos=mergePhotoMaps(db.gamePhotos,localGamePhotos);
       cloudLocalDirty=false;
       cloudApplying=false;
 
@@ -12722,6 +12727,10 @@ async function initCloudSync(){
 
     clearInterval(cloudPollTimer);
     cloudPollTimer=setInterval(()=>{ if(!cloudRealtimeConnected)cloudPoll(); },CLOUD_FALLBACK_POLL_MS);
+
+    // BPT 2.6.4 : si cet appareil possède encore d'anciennes photos Base64 locales,
+    // tente de les migrer une fois vers Supabase Storage sans bloquer le démarrage.
+    setTimeout(()=>migrateLegacyLocalGamePhotosToStorage().catch(e=>console.warn("Migration photos :",e)),500);
 
   }catch(e){
     cloudApplying=false;
@@ -14500,67 +14509,197 @@ function gamePhotoKey(gameNo,seasonKey=null){
   return `${seasonKey||currentGamePhotoSeasonKey()}|${Number(gameNo)||0}`;
 }
 
-function getGamePhoto(gameNo,seasonKey=null){
-  return String(ensureGamePhotos()[gamePhotoKey(gameNo,seasonKey)]||"");
+function gamePhotoStorageSegment(value){
+  return String(value||"season")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-zA-Z0-9._-]+/g,"-")
+    .replace(/^-+|-+$/g,"") || "season";
 }
 
+function gamePhotoStoragePath(gameNo,seasonKey=null){
+  const season=gamePhotoStorageSegment(seasonKey||currentGamePhotoSeasonKey());
+  return `games/${season}/game-${Number(gameNo)||0}.jpg`;
+}
+
+function gamePhotoPublicUrlFromPath(path,version=""){
+  const clean=String(path||"").replace(/^\/+/,"");
+  if(!clean)return "";
+  const base=`${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(GAME_PHOTO_BUCKET)}/${clean.split("/").map(encodeURIComponent).join("/")}`;
+  return version?`${base}?v=${encodeURIComponent(version)}`:base;
+}
+
+function parseStoredGamePhotoRef(value){
+  const raw=String(value||"");
+  if(!raw.startsWith("storage:"))return null;
+  const body=raw.slice(8);
+  const idx=body.indexOf("#");
+  return {
+    path:idx>=0?body.slice(0,idx):body,
+    version:idx>=0?body.slice(idx+1):""
+  };
+}
+
+function getGamePhoto(gameNo,seasonKey=null){
+  const key=gamePhotoKey(gameNo,seasonKey);
+  const saved=String(ensureGamePhotos()[key]||"");
+  if(saved.startsWith("data:image/"))return saved; // ancienne photo locale, migrée automatiquement si possible
+  const ref=parseStoredGamePhotoRef(saved);
+  if(ref?.path)return gamePhotoPublicUrlFromPath(ref.path,ref.version||String(Math.floor(Date.now()/30000)));
+  if(/^https?:\/\//i.test(saved))return saved;
+
+  // BPT 2.6.4 : l'URL est déterministe. Un autre appareil peut donc retrouver
+  // la photo sans transférer l'image ni un Base64 dans bpt_state.
+  return gamePhotoPublicUrlFromPath(
+    gamePhotoStoragePath(gameNo,seasonKey),
+    String(Math.floor(Date.now()/30000))
+  );
+}
 
 function mergePhotoMaps(a,b){
   const out={};
   const left=(a && typeof a==="object" && !Array.isArray(a))?a:{};
   const right=(b && typeof b==="object" && !Array.isArray(b))?b:{};
-
-  // Les photos déjà présentes sur le serveur sont conservées.
-  Object.entries(left).forEach(([k,v])=>{
-    if(typeof v==="string" && v)out[k]=v;
-  });
-
-  // Une photo locale manquante côté serveur est ajoutée.
-  // Si les deux existent, la version locale est conservée sur cet appareil,
-  // puis publiée lors de syncSharedPhotosOnly().
-  Object.entries(right).forEach(([k,v])=>{
-    if(typeof v==="string" && v)out[k]=v;
-  });
-
+  Object.entries(left).forEach(([k,v])=>{ if(typeof v==="string" && v)out[k]=v; });
+  Object.entries(right).forEach(([k,v])=>{ if(typeof v==="string" && v)out[k]=v; });
   return out;
 }
 
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState || typeof remoteState!=="object")return false;
-
-  const localGame=ensureGamePhotos();
-  const localPlayers=ensurePlayerPhotos();
-  const mergedGame=mergePhotoMaps(remoteState.gamePhotos,localGame);
-  const mergedPlayers=mergePhotoMaps(remoteState.playerPhotos,localPlayers);
-
-  db.gamePhotos=mergedGame;
-  db.playerPhotos=mergedPlayers;
+  // Compatibilité historique uniquement : les nouvelles photos de parties vivent dans Storage.
+  db.gamePhotos=mergePhotoMaps(remoteState.gamePhotos,ensureGamePhotos());
+  db.playerPhotos=mergePhotoMaps(remoteState.playerPhotos,ensurePlayerPhotos());
   return true;
 }
 
-/*
-  Synchronisation dédiée aux photos.
-  Elle relit toujours bpt_state/main, fusionne uniquement gamePhotos/playerPhotos,
-  puis réécrit l'état serveur courant sans toucher au Live, à l'historique,
-  aux paramètres ni au propriétaire du Live.
-*/
-async function syncSharedPhotosOnly({silent=false}={}){
-  // BPT 2.5.1 : photothèque locale uniquement.
-  // Les images Base64 ne transitent plus par Supabase afin de préserver le quota Free.
+function ensureGamePhotoStorageClient(){
+  if(sbClient)return true;
+  if(!window.supabase || !window.supabase.createClient)return false;
+  try{
+    sbClient=window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY,
+      {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}}
+    );
+    return true;
+  }catch(e){
+    console.warn("BPT Storage init:",e);
+    return false;
+  }
+}
+
+function gamePhotoStorageErrorMessage(error){
+  const msg=String(error?.message||error||"");
+  if(/bucket.*not found|not found.*bucket/i.test(msg)){
+    return `Le bucket Supabase Storage « ${GAME_PHOTO_BUCKET} » n'existe pas encore.`;
+  }
+  if(/row-level security|rls|policy|permission|unauthorized|forbidden/i.test(msg)){
+    return `Supabase Storage refuse l'écriture dans « ${GAME_PHOTO_BUCKET} ». Vérifiez les politiques INSERT/UPDATE/DELETE du bucket.`;
+  }
+  return msg || "Erreur Supabase Storage.";
+}
+
+async function fileToCompressedBlob(file){
+  return new Promise((resolve,reject)=>{
+    if(!file){resolve(null);return;}
+    if(!String(file.type||"").startsWith("image/")){
+      reject(new Error("Le fichier sélectionné n’est pas une image."));
+      return;
+    }
+    const reader=new FileReader();
+    reader.onerror=()=>reject(new Error("Impossible de lire l’image."));
+    reader.onload=()=>{
+      const img=new Image();
+      img.onerror=()=>reject(new Error("Format d’image non reconnu."));
+      img.onload=()=>{
+        const max=900;
+        const ratio=Math.min(1,max/Math.max(img.width,img.height));
+        const w=Math.max(1,Math.round(img.width*ratio));
+        const h=Math.max(1,Math.round(img.height*ratio));
+        const canvas=document.createElement("canvas");
+        canvas.width=w;canvas.height=h;
+        const ctx=canvas.getContext("2d");
+        ctx.drawImage(img,0,0,w,h);
+        canvas.toBlob(blob=>{
+          if(blob)resolve(blob);
+          else reject(new Error("Impossible de compresser l’image."));
+        },"image/jpeg",0.76);
+      };
+      img.src=reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function dataUrlToBlob(dataUrl){
+  try{
+    const [head,body]=String(dataUrl||"").split(",",2);
+    const mime=(head.match(/^data:([^;]+)/)||[])[1]||"image/jpeg";
+    const bytes=atob(body||"");
+    const arr=new Uint8Array(bytes.length);
+    for(let i=0;i<bytes.length;i++)arr[i]=bytes.charCodeAt(i);
+    return new Blob([arr],{type:mime});
+  }catch(_e){ return null; }
+}
+
+async function uploadGamePhotoBlob(gameNo,seasonKey,blob,{silent=false}={}){
+  if(!blob)throw new Error("Image vide.");
+  if(!ensureGamePhotoStorageClient())throw new Error("Supabase Storage indisponible.");
+  const path=gamePhotoStoragePath(gameNo,seasonKey);
+  const {error}=await sbClient.storage
+    .from(GAME_PHOTO_BUCKET)
+    .upload(path,blob,{contentType:"image/jpeg",cacheControl:"60",upsert:true});
+  if(error)throw new Error(gamePhotoStorageErrorMessage(error));
+
+  ensureGamePhotos()[gamePhotoKey(gameNo,seasonKey)]=`storage:${path}#${Date.now()}`;
   saveLocalOnly();
-  cloudLocalDirty=false;
-  if(!silent)setCloudStatus("ok","Photo enregistrée localement","Les photos ne sont plus synchronisées entre appareils.");
+  if(!silent)setCloudStatus("ok","Photo sauvegardée","Supabase Storage · visible sur tous les appareils");
+  return path;
+}
+
+async function migrateLegacyLocalGamePhotosToStorage(){
+  if(!ensureGamePhotoStorageClient())return false;
+  const entries=Object.entries(ensureGamePhotos()).filter(([,v])=>String(v||"").startsWith("data:image/"));
+  if(!entries.length)return true;
+  let migrated=0;
+  for(const [key,dataUrl] of entries){
+    const split=String(key).lastIndexOf("|");
+    if(split<0)continue;
+    const season=key.slice(0,split);
+    const gameNo=Number(key.slice(split+1));
+    if(!gameNo)continue;
+    const blob=dataUrlToBlob(dataUrl);
+    if(!blob)continue;
+    try{
+      await uploadGamePhotoBlob(gameNo,season,blob,{silent:true});
+      migrated++;
+    }catch(e){
+      // Ne jamais supprimer l'ancienne photo locale si Storage n'est pas encore configuré.
+      console.warn("Migration photo locale différée :",e);
+      return false;
+    }
+  }
+  if(migrated){
+    saveLocalOnly();
+    renderLatestGame();
+    setCloudStatus("ok",`${migrated} photo${migrated>1?"s":""} migrée${migrated>1?"s":""}`,"Photos de parties transférées vers Supabase Storage.");
+  }
+  return true;
+}
+
+async function syncSharedPhotosOnly({silent=false}={}){
+  // Compatibilité avec les anciens appels : les images ne transitent jamais dans bpt_state.
+  saveLocalOnly();
+  if(!silent)setCloudStatus("ok","Photothèque Storage","Les photos de parties sont stockées séparément de l'état BPT.");
   return true;
 }
 
 async function syncSharedPhotosWithRetry(attempt=0){
-  if(sbClient && cloudReady){
-    await syncSharedPhotosOnly({silent:true});
+  if(ensureGamePhotoStorageClient()){
+    await migrateLegacyLocalGamePhotosToStorage();
     return;
   }
-  if(attempt<8){
-    setTimeout(()=>syncSharedPhotosWithRetry(attempt+1),1000);
-  }
+  if(attempt<8)setTimeout(()=>syncSharedPhotosWithRetry(attempt+1),1000);
 }
 
 async function saveSharedMetadataOnly(){
@@ -14570,26 +14709,33 @@ async function saveSharedMetadataOnly(){
 async function saveGamePhoto(gameNo,file,seasonKey=null){
   if(!file)return;
   try{
-    const dataUrl=await fileToCompressedDataUrl(file);
-    ensureGamePhotos()[gamePhotoKey(gameNo,seasonKey)]=dataUrl;
-    saveLocalOnly();
-
-    await syncSharedPhotosOnly({silent:false});
-
+    setCloudStatus("busy","Envoi de la photo…","Compression puis sauvegarde dans Supabase Storage.");
+    const blob=await fileToCompressedBlob(file);
+    await uploadGamePhotoBlob(gameNo,seasonKey,blob,{silent:false});
     renderLatestGame();
     if(typeof renderHistory==="function")renderHistory();
   }catch(e){
+    setCloudStatus("offline","Photo non sauvegardée",e?.message||String(e));
     alert(e?.message||String(e));
   }
 }
 
 async function deleteGamePhoto(gameNo,seasonKey=null){
   const key=gamePhotoKey(gameNo,seasonKey);
-  if(!ensureGamePhotos()[key])return;
   if(!confirm("Retirer la photo de cette partie ?"))return;
-  delete ensureGamePhotos()[key];
-  await saveSharedMetadataOnly();
-  renderLatestGame();
+  try{
+    if(!ensureGamePhotoStorageClient())throw new Error("Supabase Storage indisponible.");
+    const path=gamePhotoStoragePath(gameNo,seasonKey);
+    const {error}=await sbClient.storage.from(GAME_PHOTO_BUCKET).remove([path]);
+    if(error)throw new Error(gamePhotoStorageErrorMessage(error));
+    delete ensureGamePhotos()[key];
+    saveLocalOnly();
+    setCloudStatus("ok","Photo supprimée","La photo a été retirée de Supabase Storage.");
+    renderLatestGame();
+  }catch(e){
+    setCloudStatus("offline","Suppression impossible",e?.message||String(e));
+    alert(e?.message||String(e));
+  }
 }
 
 function latestGameEntries(){
@@ -15320,16 +15466,40 @@ function renderLatestGame(){
   if($("latestNextGameBtn"))$("latestNextGameBtn").disabled=idx>=games.length-1;
 
   const photo=getGamePhoto(gameNo,seasonKey);
-  if($("latestGamePhotoThumbBtn"))$("latestGamePhotoThumbBtn").style.display=photo?"block":"none";
-  if($("latestGamePhotoThumb")){
-    $("latestGamePhotoThumb").src=photo||"";
+  const photoRenderKey=gamePhotoKey(gameNo,seasonKey);
+  const thumb=$("latestGamePhotoThumb");
+  const thumbBtn=$("latestGamePhotoThumbBtn");
+  const placeholder=$("latestGamePhotoPlaceholder");
+  const deleteBtn=$("latestGamePhotoDeleteBtn");
+  const uploadLabel=$("latestGamePhotoUploadLabel");
+
+  // On affiche d'abord le placeholder. L'image Storage n'est déclarée présente
+  // qu'après son chargement réussi ; une URL déterministe inexistante renvoie simplement 404.
+  if(thumbBtn)thumbBtn.style.display="none";
+  if(placeholder)placeholder.style.display="flex";
+  if(deleteBtn)deleteBtn.style.display="none";
+  if(uploadLabel)uploadLabel.textContent="Ajouter une photo";
+  if(thumb){
+    thumb.dataset.photoKey=photoRenderKey;
+    thumb.onload=()=>{
+      if(thumb.dataset.photoKey!==photoRenderKey)return;
+      if(thumbBtn)thumbBtn.style.display="block";
+      if(placeholder)placeholder.style.display="none";
+      if(deleteBtn)deleteBtn.style.display="inline-flex";
+      if(uploadLabel)uploadLabel.textContent="Changer la photo";
+    };
+    thumb.onerror=()=>{
+      if(thumb.dataset.photoKey!==photoRenderKey)return;
+      if(thumbBtn)thumbBtn.style.display="none";
+      if(placeholder)placeholder.style.display="flex";
+      if(deleteBtn)deleteBtn.style.display="none";
+      if(uploadLabel)uploadLabel.textContent="Ajouter une photo";
+    };
+    thumb.src=photo||"";
   }
-  if($("latestGamePhotoPlaceholder"))$("latestGamePhotoPlaceholder").style.display=photo?"none":"flex";
-  if($("latestGamePhotoDeleteBtn"))$("latestGamePhotoDeleteBtn").style.display=photo?"inline-flex":"none";
-  if($("latestGamePhotoUploadLabel"))$("latestGamePhotoUploadLabel").textContent=photo?"Changer la photo":"Ajouter une photo";
-  if($("latestGamePhotoThumbBtn")){
-    $("latestGamePhotoThumbBtn").onclick=()=>openGamePhotoModal(
-      photo,
+  if(thumbBtn){
+    thumbBtn.onclick=()=>openGamePhotoModal(
+      thumb?.src||photo,
       `${gameDisplayTitle(first,gameNo)} · ${shortDate(first.date||"")}`
     );
   }
