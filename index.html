@@ -10112,35 +10112,8 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fu
 }
 </style>
 
-<script id="bpt-v252-disable-speech-hard">
-/* 2.5.2 — aucune synthèse vocale : vider la file puis neutraliser speak(). */
-(function(){
-  function killSpeech(){
-    try{
-      const ss=window.speechSynthesis;
-      if(!ss)return;
-      try{ss.resume();}catch(_e){}
-      try{ss.cancel();}catch(_e){}
-    }catch(_e){}
-  }
-  window.__bptKillSpeech=killSpeech;
-  killSpeech();
-  try{
-    if(window.SpeechSynthesis && window.SpeechSynthesis.prototype){
-      Object.defineProperty(window.SpeechSynthesis.prototype,'speak',{
-        configurable:true,writable:true,value:function(){ return undefined; }
-      });
-    }
-  }catch(_e){}
-  try{
-    if(window.speechSynthesis){
-      window.speechSynthesis.speak=function(){ return undefined; };
-    }
-  }catch(_e){}
-  setTimeout(killSpeech,100);
-  setTimeout(killSpeech,600);
-})();
-</script>
+
+<style id="bpt-v253-no-live-announcements">/* 2.5.3 — aucune annonce vocale automatique ; seul le bip Web Audio du chat est conservé. */</style>
 </head>
 <body>
 <script>
@@ -10171,7 +10144,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.5.2":"Version PC 2.5.2";
+  el.textContent=mobile?"Version téléphone 2.5.4":"Version PC 2.5.4";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -11038,7 +11011,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.5.2</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.5.4</div>
   </div>
   <div id="settingsLock" class="card" style="max-width:520px;margin:16px auto 0">
     <h2>Accès protégé</h2>
@@ -11229,12 +11202,12 @@ function simplifyRecordTextForMobile(text){
       </div>
       <button id="liveChatCloseBtn" type="button" aria-label="Fermer">×</button>
     </div>
-    <div id="liveChatHistory" aria-live="polite"></div>
+    <div id="liveChatHistory"></div>
     <div class="live-chat-compose">
       <input id="liveChatInput" type="text" maxlength="120" autocomplete="off" placeholder="Votre message…" aria-label="Message du Live">
       <button id="liveChatSendBtn" type="button">Envoyer</button>
     </div>
-    <div id="liveChatStatus" aria-live="polite"></div>
+    <div id="liveChatStatus"></div>
   </div>
 </div>
 
@@ -11379,6 +11352,8 @@ function bptChatSaveHistory(){
 }
 function bptChatAppend(msg){
   if(!msg?.text)return;
+  const id=String(msg.id||"");
+  if(id && bptChatMessages.some(m=>String(m?.id||"")===id))return;
   bptChatMessages.push(msg);
   bptChatMessages=bptChatMessages.slice(-3);
   bptChatSaveHistory();
@@ -11441,15 +11416,7 @@ function bptChatEnsureAudio(){
     return bptChatAudioCtx;
   }catch(_e){return null;}
 }
-function bptChatSilenceAnySpeech(){
-  try{
-    if(typeof window.__bptKillSpeech==="function")window.__bptKillSpeech();
-    else if(window.speechSynthesis){
-      try{window.speechSynthesis.resume();}catch(_e){}
-      try{window.speechSynthesis.cancel();}catch(_e){}
-    }
-  }catch(_e){}
-}
+
 function bptChatAlertSound(){
   const ctx=bptChatEnsureAudio();
   if(!ctx)return;
@@ -11479,9 +11446,15 @@ async function bptChatSend(){
   if(!text){bptChatSetStatus("Saisissez un message.");return;}
   if(Date.now()-bptChatLastSendAt<1000){bptChatSetStatus("Attendez un instant avant le prochain message.");return;}
   if(!cloudChannel || typeof cloudChannel.send!=="function"){bptChatSetStatus("Connexion temps réel indisponible.",2500);return;}
+  const st=bptChatState()||{};
   const msg={
     id:String(Date.now())+"-"+Math.random().toString(36).slice(2,8),
-    liveKey,text,senderDeviceId:typeof liveDeviceId==="function"?liveDeviceId():"",
+    liveKey,
+    creatorDeviceId:String(st.creatorDeviceId||""),
+    gameNo:Number(st.gameNo||0),
+    startedAt:st.startedAt||st.date||null,
+    text,
+    senderDeviceId:typeof liveDeviceId==="function"?liveDeviceId():"",
     senderLabel:bptChatRoleLabel(),sentAt:Date.now()
   };
   try{
@@ -11500,28 +11473,30 @@ async function bptChatSend(){
 function bptChatHandleBroadcast(eventPayload){
   const msg=eventPayload?.payload||eventPayload||{};
   const text=bptChatClean(msg.text);
-  if(!text || msg.liveKey!==bptChatLiveKey())return;
+  if(!text)return;
+  const st=bptChatState();
+  if(!st)return;
+  const currentCreator=String(st.creatorDeviceId||"");
+  const currentGame=Number(st.gameNo||0);
+  const msgCreator=String(msg.creatorDeviceId||"");
+  const msgGame=Number(msg.gameNo||0);
+  const sameLive = (msgCreator && msgGame)
+    ? (msgCreator===currentCreator && msgGame===currentGame)
+    : (String(msg.liveKey||"")===bptChatLiveKey());
+  if(!sameLive)return;
   const self=typeof liveDeviceId==="function"?liveDeviceId():"";
   if(String(msg.senderDeviceId||"")===String(self))return;
   const cleanMsg={...msg,text};
   bptChatAppend(cleanMsg);
   const open=document.getElementById("liveChatBackdrop")?.classList.contains("open");
   if(!open)bptChatSetUnread(bptChatUnread+1);
-  bptChatSilenceAnySpeech();
   bptChatAlertSound();
-  // Re-nettoyer la file vocale après le bip : certains navigateurs relancent
-  // une utterance précédemment mise en attente quelques centaines de ms plus tard.
-  setTimeout(bptChatSilenceAnySpeech,80);
-  setTimeout(bptChatSilenceAnySpeech,350);
-  setTimeout(bptChatSilenceAnySpeech,1200);
   // À la réception, le chat s'affiche immédiatement en popup.
   bptChatOpen();
 }
 
 // Amorçage audio discret à la première interaction utilisateur.
-document.addEventListener("pointerdown",()=>{bptChatSilenceAnySpeech();bptChatEnsureAudio();},{capture:true,passive:true,once:true});
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)bptChatSilenceAnySpeech();});
-window.addEventListener("focus",bptChatSilenceAnySpeech);
+document.addEventListener("pointerdown",()=>{bptChatEnsureAudio();},{capture:true,passive:true,once:true});
 document.addEventListener("keydown",()=>{bptChatEnsureAudio();},{capture:true,once:true});
 document.addEventListener("click",e=>{
   if(e.target?.closest?.(".live-chat-open-btn")){e.preventDefault();e.stopPropagation();bptChatOpen();return;}
@@ -19217,7 +19192,7 @@ document.addEventListener("visibilitychange",()=>{
 </div>
 
 
-<div id="globalHandoverRequest" class="global-handover-request" style="display:none" role="dialog" aria-live="assertive">
+<div id="globalHandoverRequest" class="global-handover-request" style="display:none" role="dialog">
   <div class="global-handover-card">
     <div>
       <div class="global-handover-kicker">BPT · LIVE</div>
