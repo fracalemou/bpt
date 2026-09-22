@@ -10153,7 +10153,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.4.4":"Version PC 2.4.4";
+  el.textContent=mobile?"Version téléphone 2.5.1":"Version PC 2.5.1";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -11020,7 +11020,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.4.4</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.5.1</div>
   </div>
   <div id="settingsLock" class="card" style="max-width:520px;margin:16px auto 0">
     <h2>Accès protégé</h2>
@@ -11301,6 +11301,13 @@ let cloudSaveTimer=null;
 let cloudPollTimer=null;
 let cloudLastRevision=0;
 let cloudChannel=null;
+let cloudRealtimeConnected=false;
+let cloudHistoryRealtimeTimer=null;
+let cloudLastHistoryRefreshAt=0;
+const CLOUD_FALLBACK_POLL_MS=60000;
+const CLOUD_HISTORY_FALLBACK_MS=10*60*1000;
+const SPECTATOR_FALLBACK_POLL_MS=30000;
+const HANDOVER_FALLBACK_POLL_MS=60000;
 
 /* ===== BPT 2.4.1 — Chat Live propre, commun à tous les participants ===== */
 const BPT_LIVE_CHAT_EVENT="live_chat_v2";
@@ -11416,6 +11423,14 @@ function bptChatEnsureAudio(){
     return bptChatAudioCtx;
   }catch(_e){return null;}
 }
+function bptChatSilenceAnySpeech(){
+  try{
+    if(window.speechSynthesis){
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.pause?.();
+    }
+  }catch(_e){}
+}
 function bptChatAlertSound(){
   const ctx=bptChatEnsureAudio();
   if(!ctx)return;
@@ -11473,13 +11488,16 @@ function bptChatHandleBroadcast(eventPayload){
   bptChatAppend(cleanMsg);
   const open=document.getElementById("liveChatBackdrop")?.classList.contains("open");
   if(!open)bptChatSetUnread(bptChatUnread+1);
-  if(isBptMobileDevice()) bptChatAlertSound();
+  bptChatSilenceAnySpeech();
+  bptChatAlertSound();
   // À la réception, le chat s'affiche immédiatement en popup.
   bptChatOpen();
 }
 
 // Amorçage audio discret à la première interaction utilisateur.
-document.addEventListener("pointerdown",()=>{bptChatEnsureAudio();},{capture:true,passive:true,once:true});
+document.addEventListener("pointerdown",()=>{bptChatSilenceAnySpeech();bptChatEnsureAudio();},{capture:true,passive:true,once:true});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)bptChatSilenceAnySpeech();});
+window.addEventListener("focus",bptChatSilenceAnySpeech);
 document.addEventListener("keydown",()=>{bptChatEnsureAudio();},{capture:true,once:true});
 document.addEventListener("click",e=>{
   if(e.target?.closest?.(".live-chat-open-btn")){e.preventDefault();e.stopPropagation();bptChatOpen();return;}
@@ -11615,6 +11633,92 @@ function mergeStateForPush(remote,local){
 
 function saveLocalOnly(){
   try{localStorage.setItem(STORE,JSON.stringify(db));}catch(e){}
+}
+
+function cloudBuildLeanPayload(){
+  const s=(db?.liveState && typeof db.liveState==="object")?db.liveState:null;
+  const payload={
+    players:clone(db?.players||[]),
+    history:[],
+    points:clone(db?.points||{}),
+    settings:clone(db?.settings||{}),
+    playerAliases:clone(db?.playerAliases||{}),
+    playerNicknames:clone(db?.playerNicknames||{}),
+    liveState:s?clone(s):null,
+    // BPT 2.5.1 : les photos restent locales à l'appareil pour éviter un egress massif.
+    gamePhotos:{},
+    playerPhotos:{}
+  };
+
+  if(s?.prepared && !s?.synced){
+    payload.liveWire={
+      wireVersion:2,
+      publishedAt:Date.now(),
+      creatorDeviceId:String(s.creatorDeviceId||""),
+      prepared:true,
+      synced:false,
+      running:!!s.running,
+      gameNo:s.gameNo,
+      date:s.date||"",
+      location:s.location||"",
+      levelIndex:Number(s.levelIndex||0),
+      levelSeconds:Number(s.levelSeconds||0),
+      remainingSeconds:Number(s.remainingSeconds||0),
+      endAt:s.endAt||null,
+      elapsedBeforeMs:Number(s.elapsedBeforeMs||0),
+      runStartedAt:s.runStartedAt||null,
+      startedAt:s.startedAt||null,
+      levels:clone(s.levels||[]),
+      players:clone(s.players||[]),
+      handoverRequest:s.handoverRequest?clone(s.handoverRequest):null
+    };
+  }else{
+    payload.liveWire=null;
+  }
+  return payload;
+}
+
+async function cloudPruneLegacyHeavyState(row){
+  if(!sbClient || !row?.data || typeof row.data!=="object")return row;
+  const gp=row.data.gamePhotos;
+  const pp=row.data.playerPhotos;
+  const hist=row.data.history;
+  const hasLegacyPhotos=(gp && Object.keys(gp).length)||(pp && Object.keys(pp).length);
+  const hasLegacyHistory=Array.isArray(hist) && hist.length>0;
+  if(!hasLegacyPhotos && !hasLegacyHistory)return row;
+
+  const active=(row.data?.liveWire?.prepared && !row.data?.liveWire?.synced)
+    ? row.data.liveWire
+    : row.data?.liveState;
+  const otherOwns=!!(active?.prepared && !active?.synced && active?.creatorDeviceId && active.creatorDeviceId!==liveDeviceId());
+  if(otherOwns)return row;
+
+  try{
+    const cleaned=clone(row.data);
+    cleaned.gamePhotos={};
+    cleaned.playerPhotos={};
+    cleaned.history=[];
+    const {data,error}=await sbClient
+      .from("bpt_state")
+      .upsert({id:CLOUD_ROW_ID,data:cleaned},{onConflict:"id"})
+      .select("data,revision,updated_at")
+      .single();
+    if(error)throw error;
+    return data||{...row,data:cleaned};
+  }catch(e){
+    console.warn("BPT nettoyage état lourd différé :",e);
+    return row;
+  }
+}
+
+function cloudScheduleHistoryRefresh(){
+  clearTimeout(cloudHistoryRealtimeTimer);
+  cloudHistoryRealtimeTimer=setTimeout(async()=>{
+    try{
+      await refreshCanonicalHistoryUI(false);
+      cloudLastHistoryRefreshAt=Date.now();
+    }catch(e){ console.warn("BPT history realtime refresh:",e); }
+  },600);
 }
 
 async function cloudFetchState(){
@@ -11884,38 +11988,8 @@ async function cloudPushNow(){
       await cloudSyncGamesAdditive();
     }
 
-    // La table d'état conserve joueurs/paramètres/live.
-    // L'historique officiel est désormais uniquement dans bpt_games.
-    const payload=JSON.parse(JSON.stringify(db));
-    payload.history=[];
-
-    // Flux spectateur dédié, sans modifier le routage général de l'application.
-    if(db.liveState?.prepared && !db.liveState?.synced){
-      const s=db.liveState;
-      payload.liveWire={
-        wireVersion:1,
-        publishedAt:Date.now(),
-        creatorDeviceId:String(s.creatorDeviceId||""),
-        prepared:true,
-        synced:false,
-        running:!!s.running,
-        gameNo:s.gameNo,
-        date:s.date||"",
-        location:s.location||"",
-        levelIndex:Number(s.levelIndex||0),
-        levelSeconds:Number(s.levelSeconds||0),
-        remainingSeconds:Number(s.remainingSeconds||0),
-        endAt:s.endAt||null,
-        elapsedBeforeMs:Number(s.elapsedBeforeMs||0),
-        runStartedAt:s.runStartedAt||null,
-        startedAt:s.startedAt||null,
-        levels:JSON.parse(JSON.stringify(s.levels||[])),
-        players:JSON.parse(JSON.stringify(s.players||[])),
-        handoverRequest:s.handoverRequest ? JSON.parse(JSON.stringify(s.handoverRequest)) : null
-      };
-    }else{
-      payload.liveWire=null;
-    }
+    // BPT 2.5.1 : état partagé aminci, sans historique ni photos Base64.
+    const payload=cloudBuildLeanPayload();
 
     const {data,error}=await sbClient
       .from("bpt_state")
@@ -12237,7 +12311,7 @@ async function applyCloudState(row){
 }
 
 async function cloudPoll(){
-  if(!sbClient || !cloudReady || cloudApplying)return;
+  if(!sbClient || !cloudReady || cloudApplying || document.hidden)return;
 
   try{
     const remote=await cloudFetchState();
@@ -12282,7 +12356,11 @@ async function cloudPoll(){
       return;
     }
 
-    await refreshCanonicalHistoryUI(false);
+    // En secours seulement : l'historique est normalement actualisé par Realtime.
+    if(!cloudRealtimeConnected && Date.now()-cloudLastHistoryRefreshAt>=CLOUD_HISTORY_FALLBACK_MS){
+      await refreshCanonicalHistoryUI(false);
+      cloudLastHistoryRefreshAt=Date.now();
+    }
 
   }catch(e){
     cloudLastError=e?.message||String(e);
@@ -12373,7 +12451,8 @@ async function initCloudSync(){
 
     // 1) PRIORITÉ ABSOLUE : état partagé / Live.
     // Le Live spectateur ne dépend plus de bpt_games_v2.
-    const row=await cloudFetchState();
+    let row=await cloudFetchState();
+    if(row && isValidBptState(row.data))row=await cloudPruneLegacyHeavyState(row);
 
     if(row && isValidBptState(row.data)){
       const initialRemoteLive=row.data?.liveState||null;
@@ -12481,9 +12560,8 @@ async function initCloudSync(){
 
     }else if(!row){
       // Première initialisation globale.
-      const payload=JSON.parse(JSON.stringify(db));
-      const initialHistory=Array.isArray(payload.history)?payload.history:[];
-      payload.history=[];
+      const initialHistory=Array.isArray(db.history)?clone(db.history):[];
+      const payload=cloudBuildLeanPayload();
 
       const {data,error}=await sbClient
         .from("bpt_state")
@@ -12524,20 +12602,27 @@ async function initCloudSync(){
           {event:"*",schema:"public",table:"bpt_state",filter:"id=eq."+CLOUD_ROW_ID},
           async payload=>{
             try{
-              const fresh=await cloudFetchState();
+              // Le payload postgres contient déjà la ligne modifiée : pas de SELECT supplémentaire.
+              let fresh=payload?.new;
+              if(!fresh || !isValidBptState(fresh.data))fresh=await cloudFetchState();
               if(!fresh || !isValidBptState(fresh.data))return;
 
-              const remoteLive=fresh.data?.liveState||null;
+              const remoteLive=(fresh.data?.liveWire?.prepared && !fresh.data?.liveWire?.synced)
+                ? fresh.data.liveWire
+                : (fresh.data?.liveState||null);
               const remoteCreator=String(remoteLive?.creatorDeviceId||"");
               const remoteActive=!!(remoteLive?.prepared && !remoteLive?.synced);
-              const ownedByThisDevice=
-                remoteActive && remoteCreator && remoteCreator===liveDeviceId();
+              const ownedByThisDevice=remoteActive && remoteCreator && remoteCreator===liveDeviceId();
 
-              if(ownedByThisDevice)return;
+              if(ownedByThisDevice){
+                const req=remoteLive?.handoverRequest||null;
+                if(req?.requesterDeviceId && req.requesterDeviceId!==liveDeviceId())
+                  showGlobalHandoverRequest(`${handoverDeviceLabel(req.requesterDeviceId)} demande à reprendre la gestion du Live.`);
+                else hideGlobalHandoverRequest();
+                return;
+              }
 
-              const ownedByOtherDevice=
-                remoteActive && remoteCreator && remoteCreator!==liveDeviceId();
-
+              const ownedByOtherDevice=remoteActive && remoteCreator && remoteCreator!==liveDeviceId();
               if(ownedByOtherDevice){
                 await applySpectatorLiveState(fresh);
                 return;
@@ -12546,24 +12631,31 @@ async function initCloudSync(){
               await applyCloudState(fresh);
             }catch(e){
               console.error("BPT realtime:",e);
-              if(liveIsSpectator()){
-                setCloudStatus("ok","Live spectateur connecté","Realtime indisponible, polling actif.");
-              }
             }
           }
+        )
+        .on(
+          "postgres_changes",
+          {event:"*",schema:"public",table:"bpt_games_v2"},
+          ()=>cloudScheduleHistoryRefresh()
         )
         .on(
           "broadcast",
           {event:BPT_LIVE_CHAT_EVENT},
           payload=>{ try{ bptChatHandleBroadcast(payload); }catch(e){ console.error("BPT chat receive:",e); } }
         )
-        .subscribe();
+        .subscribe(status=>{
+          cloudRealtimeConnected=(status==="SUBSCRIBED");
+          if(cloudRealtimeConnected){
+            stopSpectatorLivePolling();
+          }
+        });
     }catch(e){
       console.warn("Realtime indisponible, polling utilisé :",e);
     }
 
     clearInterval(cloudPollTimer);
-    cloudPollTimer=setInterval(cloudPoll,2000);
+    cloudPollTimer=setInterval(()=>{ if(!cloudRealtimeConnected)cloudPoll(); },CLOUD_FALLBACK_POLL_MS);
 
   }catch(e){
     cloudApplying=false;
@@ -12584,6 +12676,13 @@ async function initCloudSync(){
     }
   }
 }
+
+document.addEventListener("visibilitychange",()=>{
+  if(!document.hidden && sbClient && cloudReady){
+    // Un seul contrôle léger au retour au premier plan.
+    cloudPoll();
+  }
+});
 
 window.addEventListener("online",async()=>{
   if(!sbClient){
@@ -12763,35 +12862,8 @@ async function livePushStateNow(){
   setCloudStatus("busy","Synchronisation Live…");
 
   try{
-    const payload=JSON.parse(JSON.stringify(db));
-    payload.history=[];
-
-    if(db.liveState?.prepared && !db.liveState?.synced){
-      const s=db.liveState;
-      payload.liveWire={
-        wireVersion:1,
-        publishedAt:Date.now(),
-        creatorDeviceId:String(s.creatorDeviceId||""),
-        prepared:true,
-        synced:false,
-        running:!!s.running,
-        gameNo:s.gameNo,
-        date:s.date||"",
-        location:s.location||"",
-        levelIndex:Number(s.levelIndex||0),
-        levelSeconds:Number(s.levelSeconds||0),
-        remainingSeconds:Number(s.remainingSeconds||0),
-        endAt:s.endAt||null,
-        elapsedBeforeMs:Number(s.elapsedBeforeMs||0),
-        runStartedAt:s.runStartedAt||null,
-        startedAt:s.startedAt||null,
-        levels:JSON.parse(JSON.stringify(s.levels||[])),
-        players:JSON.parse(JSON.stringify(s.players||[])),
-        handoverRequest:s.handoverRequest ? JSON.parse(JSON.stringify(s.handoverRequest)) : null
-      };
-    }else{
-      payload.liveWire=null;
-    }
+    // BPT 2.5.1 : publication Live légère, sans photothèque ni historique.
+    const payload=cloudBuildLeanPayload();
 
     const {data,error}=await sbClient
       .from("bpt_state")
@@ -14307,64 +14379,12 @@ function mergeSharedPhotosIntoLocal(remoteState){
   aux paramètres ni au propriétaire du Live.
 */
 async function syncSharedPhotosOnly({silent=false}={}){
+  // BPT 2.5.1 : photothèque locale uniquement.
+  // Les images Base64 ne transitent plus par Supabase afin de préserver le quota Free.
   saveLocalOnly();
-
-  if(!sbClient || !cloudReady || cloudApplying){
-    cloudLocalDirty=true;
-    return false;
-  }
-
-  try{
-    const {data:row,error:readError}=await sbClient
-      .from("bpt_state")
-      .select("id,data,revision,updated_at")
-      .eq("id",CLOUD_ROW_ID)
-      .single();
-
-    if(readError)throw readError;
-
-    const remoteState=(row?.data && typeof row.data==="object")
-      ? JSON.parse(JSON.stringify(row.data))
-      : {};
-
-    const mergedGame=mergePhotoMaps(remoteState.gamePhotos,ensureGamePhotos());
-    const mergedPlayers=mergePhotoMaps(remoteState.playerPhotos,ensurePlayerPhotos());
-
-    // Met à jour immédiatement la bibliothèque locale avec l'union serveur + appareil.
-    db.gamePhotos=mergedGame;
-    db.playerPhotos=mergedPlayers;
-    saveLocalOnly();
-
-    // On repart de l'état serveur pour ne jamais écraser un Live publié par un autre flux.
-    remoteState.gamePhotos=mergedGame;
-    remoteState.playerPhotos=mergedPlayers;
-
-    const {data,error}=await sbClient
-      .from("bpt_state")
-      .upsert({id:CLOUD_ROW_ID,data:remoteState},{onConflict:"id"})
-      .select("revision,updated_at")
-      .single();
-
-    if(error)throw error;
-
-    cloudLastRevision=Math.max(
-      Number(cloudLastRevision||0),
-      Number(data?.revision||0)
-    );
-    cloudLocalDirty=false;
-    saveLocalOnly();
-
-    if(!silent){
-      setCloudStatus("ok","Synchronisé","Photothèque partagée enregistrée");
-    }
-    return true;
-  }catch(e){
-    cloudLastError=e?.message||String(e);
-    console.error("BPT photos sync:",e);
-    cloudLocalDirty=true;
-    if(!silent)setCloudStatus("offline","Erreur photos",cloudLastError);
-    return false;
-  }
+  cloudLocalDirty=false;
+  if(!silent)setCloudStatus("ok","Photo enregistrée localement","Les photos ne sont plus synchronisées entre appareils.");
+  return true;
 }
 
 async function syncSharedPhotosWithRetry(attempt=0){
@@ -14388,10 +14408,7 @@ async function saveGamePhoto(gameNo,file,seasonKey=null){
     ensureGamePhotos()[gamePhotoKey(gameNo,seasonKey)]=dataUrl;
     saveLocalOnly();
 
-    const ok=await syncSharedPhotosOnly({silent:false});
-    if(!ok){
-      alert("La photo est conservée sur cet appareil mais n’a pas encore pu être synchronisée. Elle sera renvoyée automatiquement lors d’une prochaine connexion.");
-    }
+    await syncSharedPhotosOnly({silent:false});
 
     renderLatestGame();
     if(typeof renderHistory==="function")renderHistory();
@@ -16237,7 +16254,7 @@ let liveSelected=new Set();
 let liveTicker=null;
 let liveCloudHeartbeat=null;
 let globalHandoverPollTimer=null;
-const LIVE_CLOUD_HEARTBEAT_MS=15000;
+const LIVE_CLOUD_HEARTBEAT_MS=120000;
 let spectatorSyncDeadline=Date.now()+LIVE_CLOUD_HEARTBEAT_MS;
 let spectatorSyncCountdownTimer=null;
 let spectatorLivePollTimer=null;
@@ -16276,8 +16293,8 @@ function startSpectatorLivePolling(){
     }
   };
 
-  pull();
-  spectatorLivePollTimer=setInterval(pull,3000);
+  if(!cloudRealtimeConnected)pull();
+  spectatorLivePollTimer=setInterval(()=>{ if(!cloudRealtimeConnected)pull(); },SPECTATOR_FALLBACK_POLL_MS);
 }
 
 function stopSpectatorLivePolling(){
@@ -16581,30 +16598,25 @@ function startGlobalHandoverPolling(){
   if(globalHandoverPollTimer)clearInterval(globalHandoverPollTimer);
   globalHandoverPollTimer=setInterval(()=>{
     const s=db?.liveState;
-    if(s?.prepared && !s.synced && liveIsCreator()){
-      masterCheckHandoverRequest();
-    }else{
-      hideGlobalHandoverRequest();
-    }
-  },3000);
+    if(!cloudRealtimeConnected && s?.prepared && !s.synced && liveIsCreator())masterCheckHandoverRequest();
+    else if(!s?.prepared || s.synced)hideGlobalHandoverRequest();
+  },HANDOVER_FALLBACK_POLL_MS);
   const s=db?.liveState;
-  if(s?.prepared && !s.synced && liveIsCreator()){
-    masterCheckHandoverRequest();
-  }
+  if(!cloudRealtimeConnected && s?.prepared && !s.synced && liveIsCreator())masterCheckHandoverRequest();
 }
 
 function startLiveCloudHeartbeat(){
   stopSpectatorLivePolling();
   if(liveCloudHeartbeat)clearInterval(liveCloudHeartbeat);
 
-  // Contrôle immédiat, puis à chaque heartbeat.
-  masterCheckHandoverRequest();
+  // Realtime traite les demandes de reprise ; polling uniquement en secours.
+  if(!cloudRealtimeConnected)masterCheckHandoverRequest();
 
   liveCloudHeartbeat=setInterval(async()=>{
     const s=db?.liveState;
     if(!s?.prepared || s?.synced || !liveIsCreator())return;
     try{
-      await masterCheckHandoverRequest();
+      if(!cloudRealtimeConnected)await masterCheckHandoverRequest();
       if(!liveIsCreator())return;
       await livePushStateNow();
     }catch(e){
