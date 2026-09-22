@@ -10113,7 +10113,7 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fu
 </style>
 
 
-<style id="bpt-v255-no-at-announcements">/* 2.5.5 — chat visuel + bip uniquement : aucune zone live/dialog/focus automatique pouvant déclencher une annonce système. */</style>
+<style id="bpt-v255-no-at-announcements">/* 2.5.8 — chat visuel + bip uniquement : aucune zone live/dialog/focus automatique pouvant déclencher une annonce système. */</style>
 </head>
 <body>
 <script>
@@ -10144,7 +10144,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.5.5":"Version PC 2.5.5";
+  el.textContent=mobile?"Version téléphone 2.5.8":"Version PC 2.5.8";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -11011,7 +11011,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.5.5</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.5.8</div>
   </div>
   <div id="settingsLock" class="card" style="max-width:520px;margin:16px auto 0">
     <h2>Accès protégé</h2>
@@ -11391,13 +11391,16 @@ function bptChatOpen(autoReceived=false){
   bptChatSetUnread(0);
   const bd=document.getElementById("liveChatBackdrop");
   if(bd){
-    // En plein écran natif PC, seuls les descendants de l'élément fullscreen sont visibles.
-    // On place donc temporairement la popup dans ce conteneur.
+    // Spectateur : placer la popup directement dans l'overlay spectateur.
+    // Cela évite une course avec la demande de plein écran déclenchée au premier geste mobile.
+    const spectatorOverlay=document.getElementById("spectatorServerOverlay");
+    const spectatorOpen=!!(spectatorOverlay && spectatorOverlay.style.display==="block");
     const fs=document.fullscreenElement || document.webkitFullscreenElement || null;
-    if(fs && bd.parentElement!==fs)fs.appendChild(bd);
+    const host=spectatorOpen ? spectatorOverlay : (fs || document.body);
+    if(host && bd.parentElement!==host)host.appendChild(bd);
     bd.classList.add("open");
   }
-  if(!autoReceived)setTimeout(()=>document.getElementById("liveChatInput")?.focus(),30);
+  // Aucun focus automatique : évite toute annonce vocale système à l’ouverture du chat.
 }
 function bptChatClose(){
   const bd=document.getElementById("liveChatBackdrop");
@@ -11491,8 +11494,9 @@ function bptChatHandleBroadcast(eventPayload){
   const open=document.getElementById("liveChatBackdrop")?.classList.contains("open");
   if(!open)bptChatSetUnread(bptChatUnread+1);
   bptChatAlertSound();
-  // À la réception, le chat s'affiche immédiatement en popup.
-  bptChatOpen(true);
+  // 2.5.8 : ne jamais ouvrir automatiquement la popup à la réception.
+  // Certains téléphones annoncent vocalement le nouveau contenu lorsqu'un panneau apparaît.
+  // Le bip + le badge signalent le message ; l'utilisateur ouvre ensuite le chat manuellement.
 }
 
 // Amorçage audio discret à la première interaction utilisateur.
@@ -18717,6 +18721,9 @@ document.querySelectorAll("nav button[data-view]").forEach(b=>{
   b.addEventListener("click",async()=>{
     const target=b.dataset.view;
     if(target==="live"){
+      // Clic manuel : l’utilisateur souhaite explicitement revenir dans le Live.
+      // On lève uniquement la suppression d’auto-ouverture posée par « Quitter le Live ».
+      spectatorAutoOpenSuppressed=false;
       await showView("live");
       return;
     }
