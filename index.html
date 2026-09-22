@@ -4720,8 +4720,7 @@ body.spectator-live-open .spectator-global-exit{
 
   #live:not(.live-spectator-mode) .live-controls .live-blind-duration-control,
   #live:not(.live-spectator-mode) .live-controls .live-level-nav,
-  #live:not(.live-spectator-mode) .live-controls #liveStartBtn,
-  #live:not(.live-spectator-mode) .live-controls #livePauseBtn{
+  #live:not(.live-spectator-mode) .live-controls #liveStartPauseBtn{
     grid-column:1 / -1;
   }
 
@@ -10154,7 +10153,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.4.3":"Version PC 2.4.3";
+  el.textContent=mobile?"Version téléphone 2.4.4":"Version PC 2.4.4";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -10519,8 +10518,7 @@ function simplifyRecordTextForMobile(text){
           <div id="liveTimer" class="live-timer">00:00</div>
           <div class="live-next">Niveau suivant : <strong id="liveNextBlinds">—</strong></div>
           <div class="live-controls live-admin-only">
-            <button class="btn" id="liveStartBtn">Démarrer / Reprendre</button>
-            <button class="btn secondary" id="livePauseBtn">Pause</button>
+            <button class="btn" id="liveStartPauseBtn">Démarrer</button>
             <button class="btn ghost" id="liveTimerBackBtn">⏪ − 1 min</button>
             <button class="btn ghost" id="liveTimerForwardBtn">+ 1 min ⏩</button>
 
@@ -11022,7 +11020,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.4.3</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.4.4</div>
   </div>
   <div id="settingsLock" class="card" style="max-width:520px;margin:16px auto 0">
     <h2>Accès protégé</h2>
@@ -11475,7 +11473,7 @@ function bptChatHandleBroadcast(eventPayload){
   bptChatAppend(cleanMsg);
   const open=document.getElementById("liveChatBackdrop")?.classList.contains("open");
   if(!open)bptChatSetUnread(bptChatUnread+1);
-  bptChatAlertSound();
+  if(isBptMobileDevice()) bptChatAlertSound();
   // À la réception, le chat s'affiche immédiatement en popup.
   bptChatOpen();
 }
@@ -13764,6 +13762,15 @@ async function liveFsApplyDuration(){
   await liveApplyBlindDuration();
   liveFsCloseDurationPopup();
   liveRenderFullscreen();
+}
+
+async function liveToggleStartPause(){
+  if(!liveCreatorGuard())return;
+  const s=ensureLiveState();
+  if(!s?.prepared || s.synced)return;
+  if(s.running)await livePause();
+  else await liveStart();
+  liveRenderAll();
 }
 
 async function liveFsTogglePauseResume(){
@@ -17648,6 +17655,10 @@ function liveRenderAll(){
   $("liveAvgStack").textContent=remainingCount?liveFmt(total/remainingCount):"0";
   $("livePrizePool").textContent=euro(s.players.length*s.buyIn);$("livePaid").textContent=Math.min(3,s.players.length);
   $("liveStateBadge").textContent=s.synced?"TERMINÉE":s.running?"EN COURS":(s.players.some(p=>p.place)?"PAUSE":"PRÊT");
+  if($("liveStartPauseBtn")){
+    $("liveStartPauseBtn").textContent=s.running ? "Pause" : (s.startedAt ? "Reprendre" : "Démarrer");
+    $("liveStartPauseBtn").disabled=!!s.synced;
+  }
   $("liveSyncBadge").textContent=spectator?"LIVE · SPECTATEUR":(s.synced?"SYNCHRONISÉE":(pendingGamesLoad().length?"EN ATTENTE":"NON SYNCHRONISÉE"));
   $("liveSyncBadge").style.background=spectator?"#315a78":(s.synced?"#79c594":"#c8952e");
   $("liveSyncStatus").innerHTML=s.synced
@@ -18531,8 +18542,7 @@ $("liveAddLevelBtn").onclick=()=>{
 ["liveStartStack","liveMinSB","liveDuration","liveUseAnte"].forEach(id=>$(id).addEventListener("change",livePreviewStructure));
 $("liveLaunchBtn").onclick=liveLaunch;
 $("liveBackPrepBtn").onclick=()=>{const s=ensureLiveState();if(s.synced){liveResetForNew();}else liveShowScreen("prep");};
-$("liveStartBtn").onclick=liveStart;
-$("livePauseBtn").onclick=livePause;
+$("liveStartPauseBtn").onclick=liveToggleStartPause;
 $("liveTimerBackBtn").onclick=()=>liveAdjustTimer(60);
 $("liveTimerForwardBtn").onclick=()=>liveAdjustTimer(-60);
 $("liveMinSB").addEventListener("keydown",e=>{
