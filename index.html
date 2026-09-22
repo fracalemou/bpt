@@ -10113,7 +10113,7 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fu
 </style>
 
 
-<style id="bpt-v253-no-live-announcements">/* 2.5.3 — aucune annonce vocale automatique ; seul le bip Web Audio du chat est conservé. */</style>
+<style id="bpt-v255-no-at-announcements">/* 2.5.5 — chat visuel + bip uniquement : aucune zone live/dialog/focus automatique pouvant déclencher une annonce système. */</style>
 </head>
 <body>
 <script>
@@ -10144,7 +10144,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.5.4":"Version PC 2.5.4";
+  el.textContent=mobile?"Version téléphone 2.5.5":"Version PC 2.5.5";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -11011,7 +11011,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.5.4</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.5.5</div>
   </div>
   <div id="settingsLock" class="card" style="max-width:520px;margin:16px auto 0">
     <h2>Accès protégé</h2>
@@ -11193,21 +11193,21 @@ function simplifyRecordTextForMobile(text){
 </div>
 
 
-<div id="liveChatBackdrop" aria-hidden="true">
-  <div class="live-chat-card" role="dialog" aria-modal="true" aria-labelledby="liveChatTitle">
+<div id="liveChatBackdrop">
+  <div class="live-chat-card">
     <div class="live-chat-head">
       <div>
         <h2 id="liveChatTitle">💬 Chat du Live</h2>
         <small>Les 3 derniers messages du Live</small>
       </div>
-      <button id="liveChatCloseBtn" type="button" aria-label="Fermer">×</button>
+      <button id="liveChatCloseBtn" type="button">×</button>
     </div>
-    <div id="liveChatHistory"></div>
+    <div id="liveChatHistory" aria-hidden="true"></div>
     <div class="live-chat-compose">
-      <input id="liveChatInput" type="text" maxlength="120" autocomplete="off" placeholder="Votre message…" aria-label="Message du Live">
+      <input id="liveChatInput" type="text" maxlength="120" autocomplete="off" placeholder="Votre message…">
       <button id="liveChatSendBtn" type="button">Envoyer</button>
     </div>
-    <div id="liveChatStatus"></div>
+    <div id="liveChatStatus" aria-hidden="true"></div>
   </div>
 </div>
 
@@ -11383,7 +11383,7 @@ function bptChatSetUnread(value){
     else{btn.classList.remove("live-chat-unread");delete btn.dataset.unread;}
   });
 }
-function bptChatOpen(){
+function bptChatOpen(autoReceived=false){
   const key=bptChatLiveKey();
   if(!key){bptChatSetStatus("Aucun Live actif.");return;}
   bptChatLoadHistory();
@@ -11395,14 +11395,14 @@ function bptChatOpen(){
     // On place donc temporairement la popup dans ce conteneur.
     const fs=document.fullscreenElement || document.webkitFullscreenElement || null;
     if(fs && bd.parentElement!==fs)fs.appendChild(bd);
-    bd.classList.add("open");bd.setAttribute("aria-hidden","false");
+    bd.classList.add("open");
   }
-  setTimeout(()=>document.getElementById("liveChatInput")?.focus(),30);
+  if(!autoReceived)setTimeout(()=>document.getElementById("liveChatInput")?.focus(),30);
 }
 function bptChatClose(){
   const bd=document.getElementById("liveChatBackdrop");
   if(bd){
-    bd.classList.remove("open");bd.setAttribute("aria-hidden","true");
+    bd.classList.remove("open");
     if(bd.parentElement!==document.body)document.body.appendChild(bd);
   }
 }
@@ -11492,7 +11492,7 @@ function bptChatHandleBroadcast(eventPayload){
   if(!open)bptChatSetUnread(bptChatUnread+1);
   bptChatAlertSound();
   // À la réception, le chat s'affiche immédiatement en popup.
-  bptChatOpen();
+  bptChatOpen(true);
 }
 
 // Amorçage audio discret à la première interaction utilisateur.
