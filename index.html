@@ -10112,15 +10112,33 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fu
 }
 </style>
 
-<script id="bpt-v243-disable-speech">
-/* 2.4.3 — Synthèse vocale explicitement neutralisée sur toute l'application. */
+<script id="bpt-v252-disable-speech-hard">
+/* 2.5.2 — aucune synthèse vocale : vider la file puis neutraliser speak(). */
 (function(){
+  function killSpeech(){
+    try{
+      const ss=window.speechSynthesis;
+      if(!ss)return;
+      try{ss.resume();}catch(_e){}
+      try{ss.cancel();}catch(_e){}
+    }catch(_e){}
+  }
+  window.__bptKillSpeech=killSpeech;
+  killSpeech();
+  try{
+    if(window.SpeechSynthesis && window.SpeechSynthesis.prototype){
+      Object.defineProperty(window.SpeechSynthesis.prototype,'speak',{
+        configurable:true,writable:true,value:function(){ return undefined; }
+      });
+    }
+  }catch(_e){}
   try{
     if(window.speechSynthesis){
-      window.speechSynthesis.cancel();
-      try{window.speechSynthesis.speak=function(){ return undefined; };}catch(e){}
+      window.speechSynthesis.speak=function(){ return undefined; };
     }
-  }catch(e){}
+  }catch(_e){}
+  setTimeout(killSpeech,100);
+  setTimeout(killSpeech,600);
 })();
 </script>
 </head>
@@ -10153,7 +10171,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.5.1":"Version PC 2.5.1";
+  el.textContent=mobile?"Version téléphone 2.5.2":"Version PC 2.5.2";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -11020,7 +11038,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.5.1</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.5.2</div>
   </div>
   <div id="settingsLock" class="card" style="max-width:520px;margin:16px auto 0">
     <h2>Accès protégé</h2>
@@ -11425,9 +11443,10 @@ function bptChatEnsureAudio(){
 }
 function bptChatSilenceAnySpeech(){
   try{
-    if(window.speechSynthesis){
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.pause?.();
+    if(typeof window.__bptKillSpeech==="function")window.__bptKillSpeech();
+    else if(window.speechSynthesis){
+      try{window.speechSynthesis.resume();}catch(_e){}
+      try{window.speechSynthesis.cancel();}catch(_e){}
     }
   }catch(_e){}
 }
@@ -11490,6 +11509,11 @@ function bptChatHandleBroadcast(eventPayload){
   if(!open)bptChatSetUnread(bptChatUnread+1);
   bptChatSilenceAnySpeech();
   bptChatAlertSound();
+  // Re-nettoyer la file vocale après le bip : certains navigateurs relancent
+  // une utterance précédemment mise en attente quelques centaines de ms plus tard.
+  setTimeout(bptChatSilenceAnySpeech,80);
+  setTimeout(bptChatSilenceAnySpeech,350);
+  setTimeout(bptChatSilenceAnySpeech,1200);
   // À la réception, le chat s'affiche immédiatement en popup.
   bptChatOpen();
 }
