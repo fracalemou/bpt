@@ -10118,9 +10118,10 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fu
 <style id="bpt-v260-avatars">
 .profile-avatar-column{display:flex;flex-direction:column;align-items:center;gap:10px;min-width:150px}
 .profile-avatar-wrap{width:132px;height:132px;border-radius:50%;padding:0;border:3px solid var(--gold);background:#111b16;overflow:hidden;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.28)}
-.profile-avatar,.profile-avatar-placeholder{width:100%;height:100%;object-fit:cover}
+.profile-avatar,.profile-avatar-placeholder{width:100%;height:100%}.profile-avatar{object-fit:cover;object-position:center 24%;border-radius:50%;transform:scale(.94);background:#111b16}.profile-avatar-placeholder{object-fit:cover}
 .profile-avatar-placeholder{display:flex;align-items:center;justify-content:center;font-size:56px;color:var(--gold);background:linear-gradient(145deg,#1e3027,#111b16)}
 .profile-avatar-btn{border:1px solid var(--gold);background:#1a2b22;color:var(--cream);border-radius:10px;padding:9px 13px;font-weight:900;cursor:pointer}
+.profile-avatar-name{min-height:18px;margin-top:-2px;color:#e8c39e;font-size:12px;font-weight:900;text-align:center;letter-spacing:.02em;max-width:150px;line-height:1.2}
 .player-avatar-admin{width:88px;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;text-align:center}
 .player-avatar-admin img,.player-avatar-admin-placeholder{width:58px;height:58px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);background:#142019}
 .player-avatar-admin-placeholder{display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:26px}
@@ -10184,7 +10185,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.7.4":"Version PC 2.7.4";
+  el.textContent=mobile?"Version téléphone 2.7.5":"Version PC 2.7.5";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -10956,6 +10957,7 @@ function simplifyRecordTextForMobile(text){
         <div id="playerProfileAvatarPlaceholder" class="profile-avatar-placeholder">♠</div>
         <img id="playerProfileAvatar" class="profile-avatar" alt="Avatar du joueur" style="display:none">
       </button>
+      <div id="playerProfileAvatarName" class="profile-avatar-name"></div>
       <button id="playerProfileAvatarBtn" class="profile-avatar-btn" type="button">Choisir un avatar</button>
     </div>
     <div>
@@ -11075,7 +11077,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.7.4</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.7.5</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -11288,7 +11290,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.4 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 2.7.5 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -11554,7 +11556,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.4 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.5 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -11928,7 +11930,7 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.7.4 : aucune image Base64 dans bpt_state. Les photos de parties
+    // BPT 2.7.5 : aucune image Base64 dans bpt_state. Les photos de parties
     // sont stockées dans Firebase ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
@@ -13979,6 +13981,7 @@ function renderProfile(preferredName=null){
     $("playerProfileName").textContent="—";
     if($("playerProfileAvatar")){$("playerProfileAvatar").style.display="none";$("playerProfileAvatar").src="";}
     if($("playerProfileAvatarPlaceholder"))$("playerProfileAvatarPlaceholder").style.display="flex";
+    if($("playerProfileAvatarName"))$("playerProfileAvatarName").textContent="";
     if($("playerProfileAvatarBtn")){
       $("playerProfileAvatarBtn").textContent="Choisir un avatar";
       $("playerProfileAvatarBtn").disabled=!name;
@@ -14008,6 +14011,9 @@ function renderProfile(preferredName=null){
   }
   if($("playerProfileAvatarPlaceholder")){
     $("playerProfileAvatarPlaceholder").style.display=profileAvatarId?"none":"flex";
+  }
+  if($("playerProfileAvatarName")){
+    $("playerProfileAvatarName").textContent=profileAvatarId?playerAvatarName(profileAvatarId):"Aucun avatar";
   }
   if($("playerProfileAvatarBtn")){
     $("playerProfileAvatarBtn").textContent=profileAvatarId?"Modifier l’avatar":"Choisir un avatar";
@@ -14786,7 +14792,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.4 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 2.7.5 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -18849,6 +18855,9 @@ async function showView(id){
   }
   if(id==="newgame")id="settings";
   if(id==="dashboard")dashboardRecordSelection=null;
+  // BPT 2.7.5 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
+  if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
 
   const spectatorLiveOpen=(id==="live" && liveIsSpectator());
