@@ -10184,7 +10184,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.7.3":"Version PC 2.7.3";
+  el.textContent=mobile?"Version téléphone 2.7.4":"Version PC 2.7.4";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -11075,7 +11075,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.7.3</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.7.4</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -11288,7 +11288,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.3 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 2.7.4 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -11441,16 +11441,13 @@ window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
         for(const h of this.handlers){
           if(h.kind==="postgres_changes" && h.filter?.table==="bpt_state"){
             const ref=rtdb.ref(`${ROOT}/state/main`);
-            // BPT 2.7.3 : traiter aussi le snapshot initial.
-            // Realtime Database déclenche immédiatement `value` lors de l'abonnement ;
-            // ignorer ce premier événement empêchait un téléphone ouvert après le démarrage
-            // du Live de découvrir l'état actif tant qu'aucune nouvelle écriture n'avait lieu.
-            const fn=s=>{ const val=s.val(); h.cb({new:val,old:null,eventType:"UPDATE"}); };
+            let first=true;
+            const fn=s=>{ const val=s.val(); if(first)first=false; h.cb({new:val,old:null,eventType:"UPDATE"}); };
             ref.on("value",fn); this.refs.push([ref,"value",fn]);
           }else if(h.kind==="postgres_changes" && h.filter?.table==="bpt_games_v2"){
             const ref=rtdb.ref(`${ROOT}/games`);
             let first=true;
-            const fn=s=>{ if(first){first=false; return;} h.cb({new:s.val(),eventType:"UPDATE"}); };
+            const fn=s=>{ if(first)first=false; h.cb({new:s.val(),eventType:"UPDATE"}); };
             ref.on("value",fn); this.refs.push([ref,"value",fn]);
           }else if(h.kind==="broadcast"){
             const ref=rtdb.ref(`${ROOT}/chat`).limitToLast(30);
@@ -11557,7 +11554,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.3 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.4 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -11931,7 +11928,7 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.7.3 : aucune image Base64 dans bpt_state. Les photos de parties
+    // BPT 2.7.4 : aucune image Base64 dans bpt_state. Les photos de parties
     // sont stockées dans Firebase ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
@@ -12987,7 +12984,7 @@ async function initCloudSync(){
         .subscribe(status=>{
           cloudRealtimeConnected=(status==="SUBSCRIBED");
           if(cloudRealtimeConnected){
-            stopSpectatorLivePolling();
+            if(!spectatorLivePollTimer)startSpectatorLivePolling();
           }
         });
     }catch(e){
@@ -12997,7 +12994,7 @@ async function initCloudSync(){
     clearInterval(cloudPollTimer);
     cloudPollTimer=setInterval(()=>{ if(!cloudRealtimeConnected)cloudPoll(); },CLOUD_FALLBACK_POLL_MS);
 
-    // BPT 2.7.3 : si cet appareil possède encore d'anciennes photos Base64 locales,
+    // BPT 2.7.4 : si cet appareil possède encore d'anciennes photos Base64 locales,
     // tente de les migrer une fois vers Firebase sans bloquer le démarrage.
     setTimeout(()=>migrateLegacyLocalGamePhotosToStorage().catch(e=>console.warn("Migration photos :",e)),500);
 
@@ -14789,7 +14786,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.3 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 2.7.4 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -16739,11 +16736,8 @@ function startSpectatorLivePolling(){
     }
   };
 
-  // BPT 2.7.3 : toujours faire une lecture immédiate de l'état courant.
-  // Même si le canal temps réel est déjà déclaré SUBSCRIBED, cette lecture garantit
-  // la détection d'un Live qui existait avant l'abonnement ou pendant son initialisation.
   pull();
-  spectatorLivePollTimer=setInterval(()=>{ if(!cloudRealtimeConnected)pull(); },SPECTATOR_FALLBACK_POLL_MS);
+  spectatorLivePollTimer=setInterval(()=>{ pull(); },5000);
 }
 
 function stopSpectatorLivePolling(){
@@ -19494,6 +19488,105 @@ if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus"
   }
 })();
 setTimeout(()=>startSpectatorLivePolling(),800);
+
+// ===== BPT 2.7.4 — Récepteur Live Firebase direct et indépendant =====
+let bptDirectLiveRef=null;
+let bptDirectLivePollTimer=null;
+let bptDirectLastRevision=-1;
+
+async function bptHandleDirectFirebaseLiveSnapshot(raw){
+  try{
+    const row=raw && typeof raw==="object" ? raw : null;
+    if(!row || !row.data || typeof row.data!=="object")return false;
+
+    const remote=chooseRemoteLiveForSpectator(row.data);
+    const creator=String(remote?.creatorDeviceId||"");
+    const mine=String(liveDeviceId());
+    const active=!!(remote?.prepared && !remote?.synced);
+
+    // Synchroniser aussi les avatarId légers, même hors Live.
+    if(Array.isArray(row.data?.players)){
+      if(mergeRemotePlayerAvatars(row.data.players)){
+        saveLocalOnly();
+        try{ renderPlayers(); }catch(_e){}
+        try{ if($("profilePlayerSelect")?.value)renderProfile($("profilePlayerSelect").value); }catch(_e){}
+      }
+    }
+
+    if(!active || !creator || creator===mine)return false;
+
+    spectatorServerLiveState=JSON.parse(JSON.stringify(remote));
+    spectatorServerLiveRevision=Number(row.revision||0);
+    cloudLastRevision=Math.max(Number(cloudLastRevision||0),spectatorServerLiveRevision);
+    cloudLocalDirty=false;
+
+    // Conserver une copie locale du Live distant pour toutes les fonctions historiques de l'application.
+    db.liveState=JSON.parse(JSON.stringify(remote));
+    saveLocalOnly();
+
+    setCloudStatus(
+      "ok",
+      "Live spectateur connecté",
+      `Firebase direct · partie #${remote.gameNo||"—"} · révision ${spectatorServerLiveRevision}`
+    );
+
+    // Affiche immédiatement le Live distant, même si le listener de compatibilité n'a rien reçu.
+    if(!spectatorAutoOpenSuppressed){
+      currentViewId="live";
+      renderSpectatorServerOverlay(remote);
+      startSpectatorOverlayTicker();
+      applyLiveAccessMode();
+    }else{
+      const liveNav=document.querySelector('nav button[data-view="live"]');
+      if(liveNav){ liveNav.textContent="● Live"; liveNav.classList.add("spectator-nav"); }
+    }
+
+    return true;
+  }catch(e){
+    console.error("BPT direct Firebase Live receiver:",e);
+    return false;
+  }
+}
+
+async function bptInstallDirectFirebaseLiveReceiver(){
+  try{
+    const env=await window.bptFirebaseEnsure?.();
+    const rtdb=env?.rtdb || window.bptFirebaseDb?.();
+    if(!rtdb)return false;
+
+    if(bptDirectLiveRef){ try{bptDirectLiveRef.off("value");}catch(_e){} }
+    bptDirectLiveRef=rtdb.ref("bpt/state/main");
+
+    const onValue=snap=>{
+      const row=snap.val();
+      const rev=Number(row?.revision||0);
+      bptDirectLastRevision=rev;
+      bptHandleDirectFirebaseLiveSnapshot(row);
+    };
+    bptDirectLiveRef.on("value",onValue);
+
+    // Lecture immédiate : couvre le cas où le Live était déjà lancé avant l'ouverture du téléphone/PC.
+    const first=await bptDirectLiveRef.once("value");
+    await bptHandleDirectFirebaseLiveSnapshot(first.val());
+
+    // Filet de sécurité : relire Firebase toutes les 5 s, même si le canal temps réel se croit connecté.
+    if(bptDirectLivePollTimer)clearInterval(bptDirectLivePollTimer);
+    bptDirectLivePollTimer=setInterval(async()=>{
+      try{
+        const snap=await bptDirectLiveRef.once("value");
+        await bptHandleDirectFirebaseLiveSnapshot(snap.val());
+      }catch(e){ console.warn("BPT direct Firebase poll:",e); }
+    },5000);
+
+    return true;
+  }catch(e){
+    console.error("BPT installation récepteur Firebase direct:",e);
+    return false;
+  }
+}
+
+setTimeout(()=>bptInstallDirectFirebaseLiveReceiver(),500);
+
 setTimeout(()=>startGlobalHandoverPolling(),1000);
 setTimeout(()=>syncSharedPhotosWithRetry(),1400);
 
