@@ -10184,12 +10184,37 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.7.0":"Version PC 2.7.0";
+  el.textContent=mobile?"Version téléphone 2.7.1":"Version PC 2.7.1";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
 document.addEventListener("DOMContentLoaded",updateBptSettingsVersion);
 setTimeout(updateBptSettingsVersion,0);
+
+function updateFirebaseDiagnostic(){
+  const stateEl=document.getElementById("firebaseDiagnosticState");
+  const projectEl=document.getElementById("firebaseDiagnosticProject");
+  if(!stateEl||!projectEl)return;
+  const cfg=window.BPT_FIREBASE_CONFIG||{};
+  projectEl.textContent=cfg.projectId||"—";
+  if(!navigator.onLine){
+    stateEl.textContent="Hors connexion";
+    return;
+  }
+  if(typeof cloudReady!=="undefined" && cloudReady){
+    stateEl.textContent="Connecté";
+    return;
+  }
+  if(typeof cloudLastError!=="undefined" && cloudLastError){
+    stateEl.textContent="Erreur";
+    stateEl.title=String(cloudLastError);
+    return;
+  }
+  stateEl.textContent="Connexion…";
+}
+document.addEventListener("DOMContentLoaded",()=>{updateFirebaseDiagnostic();setInterval(updateFirebaseDiagnostic,1500);});
+window.addEventListener("online",updateFirebaseDiagnostic);
+window.addEventListener("offline",updateFirebaseDiagnostic);
 
 function simplifyRecordTextForMobile(text){
   if(!isBptMobileDevice())return String(text||"");
@@ -11050,7 +11075,14 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.7.0</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.7.1</div>
+    <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
+        <strong>Backend</strong><span>Firebase</span>
+        <strong>État</strong><span id="firebaseDiagnosticState">Connexion…</span>
+        <strong>Projet</strong><span id="firebaseDiagnosticProject">bpt-championship</span>
+      </div>
+    </div>
   </div>
   <div id="settingsLock" class="card" style="max-width:520px;margin:16px auto 0">
     <h2>Accès protégé</h2>
@@ -11256,7 +11288,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.0 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 2.7.1 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -11522,7 +11554,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.0 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.1 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -11895,7 +11927,7 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.7.0 : aucune image Base64 dans bpt_state. Les photos de parties
+    // BPT 2.7.1 : aucune image Base64 dans bpt_state. Les photos de parties
     // sont stockées dans Firebase ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
@@ -12927,7 +12959,7 @@ async function initCloudSync(){
     clearInterval(cloudPollTimer);
     cloudPollTimer=setInterval(()=>{ if(!cloudRealtimeConnected)cloudPoll(); },CLOUD_FALLBACK_POLL_MS);
 
-    // BPT 2.7.0 : si cet appareil possède encore d'anciennes photos Base64 locales,
+    // BPT 2.7.1 : si cet appareil possède encore d'anciennes photos Base64 locales,
     // tente de les migrer une fois vers Firebase sans bloquer le démarrage.
     setTimeout(()=>migrateLegacyLocalGamePhotosToStorage().catch(e=>console.warn("Migration photos :",e)),500);
 
@@ -14719,7 +14751,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.0 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 2.7.1 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
