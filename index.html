@@ -10184,7 +10184,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.6.4":"Version PC 2.6.4";
+  el.textContent=mobile?"Version téléphone 2.7.0":"Version PC 2.7.0";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -11050,7 +11050,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.6.4</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.7.0</div>
   </div>
   <div id="settingsLock" class="card" style="max-width:520px;margin:16px auto 0">
     <h2>Accès protégé</h2>
@@ -11252,8 +11252,207 @@ function simplifyRecordTextForMobile(text){
 
 <footer>BPT — Gestion du championnat en HTML autonome</footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<div id="cloudStatus" title="État de la synchronisation partagée — cliquer pour recharger depuis Supabase" style="cursor:pointer">
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+<script>
+/* BPT 2.7.0 — Firebase Spark / Realtime Database compatibility layer.
+   Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
+window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
+  apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
+  authDomain: "bpt-championship.firebaseapp.com",
+  databaseURL: "https://bpt-championship-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "bpt-championship",
+  storageBucket: "bpt-championship.firebasestorage.app",
+  messagingSenderId: "90927856023",
+  appId: "1:90927856023:web:93f1fedc25b9ae71bb2cd2"
+};
+
+(function(){
+  const ROOT="bpt";
+  let app=null, rtdb=null, auth=null, readyPromise=null;
+
+  function configured(){
+    const c=window.BPT_FIREBASE_CONFIG||{};
+    return !!(c.apiKey && c.databaseURL && c.projectId && !String(c.apiKey).startsWith("__FIREBASE_"));
+  }
+  function err(message){ return {message:String(message||"Erreur Firebase")}; }
+  async function ensureFirebase(){
+    if(!configured()) throw new Error("Firebase n’est pas encore configuré dans ce fichier BPT.");
+    if(!window.firebase) throw new Error("Bibliothèque Firebase indisponible.");
+    if(!app){
+      app=(firebase.apps&&firebase.apps.length)?firebase.app():firebase.initializeApp(window.BPT_FIREBASE_CONFIG);
+      rtdb=firebase.database(app);
+      // L'authentification n'est pas requise pour la phase de migration.
+      // La Realtime Database peut fonctionner avec les règles de test Firebase.
+      try{ auth=firebase.auth(app); }catch(_e){ auth=null; }
+      readyPromise=Promise.resolve(null);
+    }
+    await readyPromise;
+    return {rtdb,auth};
+  }
+  window.bptFirebaseEnsure=ensureFirebase;
+  window.bptFirebaseConfigured=configured;
+  window.bptFirebaseDb=()=>rtdb;
+
+  function cleanKey(v){ return String(v||"").replace(/[.#$\[\]\/]/g,"_"); }
+  function hashString(str){
+    str=String(str||""); let h=2166136261;
+    for(let i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,16777619); }
+    return (h>>>0).toString(36);
+  }
+  function mapSnapToRows(snap){
+    const val=snap.val()||{};
+    return Object.entries(val).map(([id,row])=>({id,...(row||{})}));
+  }
+
+  class FirebaseQuery {
+    constructor(table){ this.table=table; this.op="select"; this.payload=null; this.opts={}; this.filters=[]; this.orderBy=null; }
+    select(){ return this; }
+    eq(field,value){ this.filters.push([field,"eq",value]); return this; }
+    not(field,op,value){ this.filters.push([field,"not",value]); return this; }
+    order(field,opts={}){ this.orderBy={field,ascending:opts.ascending!==false}; return this; }
+    upsert(payload,opts={}){ this.op="upsert"; this.payload=payload; this.opts=opts||{}; return this; }
+    update(payload){ this.op="update"; this.payload=payload; return this; }
+    delete(){ this.op="delete"; return this; }
+    single(){ return this._exec(true); }
+    maybeSingle(){ return this._exec(true); }
+    then(resolve,reject){ return this._exec(false).then(resolve,reject); }
+    async _exec(single){
+      try{
+        const {rtdb}=await ensureFirebase();
+        if(this.table==="bpt_state") return await this._state(rtdb,single);
+        if(this.table==="bpt_games_v2") return await this._games(rtdb,single);
+        return {data:single?null:[],error:err("Table Firebase inconnue: "+this.table)};
+      }catch(e){ return {data:single?null:[],error:err(e?.message||e)}; }
+    }
+    async _state(db,single){
+      const ref=db.ref(`${ROOT}/state/main`);
+      if(this.op==="select"){
+        const snap=await ref.once("value");
+        const row=snap.val();
+        return {data:row||null,error:null};
+      }
+      if(this.op==="upsert" || this.op==="update"){
+        const incoming=this.payload||{};
+        const snap=await ref.once("value");
+        const prev=snap.val()||{};
+        const row={
+          ...prev,
+          ...incoming,
+          id:incoming.id||prev.id||"main",
+          revision:Number(prev.revision||0)+1,
+          updated_at:new Date().toISOString()
+        };
+        await ref.set(row);
+        return {data:row,error:null};
+      }
+      if(this.op==="delete"){
+        await ref.remove(); return {data:null,error:null};
+      }
+      return {data:null,error:null};
+    }
+    async _games(db,single){
+      const base=db.ref(`${ROOT}/games`);
+      if(this.op==="select"){
+        const snap=await base.once("value");
+        let rows=mapSnapToRows(snap);
+        for(const [field,op,value] of this.filters){ if(op==="eq") rows=rows.filter(r=>String(r?.[field])===String(value)); }
+        if(this.orderBy){
+          const {field,ascending}=this.orderBy;
+          rows.sort((a,b)=>{ const av=a?.[field]??"", bv=b?.[field]??""; return (av<bv?-1:av>bv?1:0)*(ascending?1:-1); });
+        }
+        return {data:single?(rows[0]||null):rows,error:null};
+      }
+      if(this.op==="upsert"){
+        const incoming=this.payload||{};
+        let id;
+        if(incoming.game_key) id="g_"+hashString(incoming.game_key);
+        else id=cleanKey(incoming.id||base.push().key);
+        const ref=base.child(id);
+        const snap=await ref.once("value");
+        if(this.opts?.ignoreDuplicates && snap.exists()){
+          const row={id,...(snap.val()||{})};
+          return {data:single?row:[row],error:null};
+        }
+        const prev=snap.val()||{};
+        const row={...prev,...incoming,created_at:prev.created_at||incoming.created_at||new Date().toISOString()};
+        delete row.id;
+        await ref.set(row);
+        const out={id,...row};
+        return {data:single?out:[out],error:null};
+      }
+      if(this.op==="update"){
+        const idFilter=this.filters.find(x=>x[0]==="id"&&x[1]==="eq");
+        if(!idFilter) throw new Error("Identifiant de partie manquant.");
+        const id=cleanKey(idFilter[2]);
+        const ref=base.child(id);
+        await ref.update(this.payload||{});
+        const snap=await ref.once("value");
+        return {data:{id,...(snap.val()||{})},error:null};
+      }
+      if(this.op==="delete"){
+        const idFilter=this.filters.find(x=>x[0]==="id"&&x[1]==="eq");
+        if(idFilter) await base.child(cleanKey(idFilter[2])).remove();
+        else await base.remove();
+        return {data:null,error:null};
+      }
+      return {data:single?null:[],error:null};
+    }
+  }
+
+  class FirebaseChannel {
+    constructor(name){ this.name=name; this.handlers=[]; this.refs=[]; this.startedAt=Date.now(); }
+    on(kind,filter,cb){ this.handlers.push({kind,filter:filter||{},cb}); return this; }
+    subscribe(cb){
+      ensureFirebase().then(({rtdb})=>{
+        for(const h of this.handlers){
+          if(h.kind==="postgres_changes" && h.filter?.table==="bpt_state"){
+            const ref=rtdb.ref(`${ROOT}/state/main`);
+            let first=true;
+            const fn=s=>{ const val=s.val(); if(first){first=false; return;} h.cb({new:val,old:null,eventType:"UPDATE"}); };
+            ref.on("value",fn); this.refs.push([ref,"value",fn]);
+          }else if(h.kind==="postgres_changes" && h.filter?.table==="bpt_games_v2"){
+            const ref=rtdb.ref(`${ROOT}/games`);
+            let first=true;
+            const fn=s=>{ if(first){first=false; return;} h.cb({new:s.val(),eventType:"UPDATE"}); };
+            ref.on("value",fn); this.refs.push([ref,"value",fn]);
+          }else if(h.kind==="broadcast"){
+            const ref=rtdb.ref(`${ROOT}/chat`).limitToLast(30);
+            const fn=s=>{ const msg=s.val(); if(!msg || Number(msg.sentAt||0)<this.startedAt-1500) return; h.cb({payload:msg}); };
+            ref.on("child_added",fn); this.refs.push([ref,"child_added",fn]);
+          }
+        }
+        cb&&cb("SUBSCRIBED");
+      }).catch(e=>{ console.error("Firebase channel:",e); cb&&cb("CHANNEL_ERROR"); });
+      return this;
+    }
+    async send(evt){
+      try{
+        const {rtdb}=await ensureFirebase();
+        const msg=evt?.payload||{};
+        const ref=rtdb.ref(`${ROOT}/chat/${cleanKey(msg.id||rtdb.ref().push().key)}`);
+        await ref.set(msg);
+        return "ok";
+      }catch(e){ console.error("Firebase chat send:",e); return "error"; }
+    }
+    unsubscribe(){ for(const [ref,event,fn] of this.refs){ try{ref.off(event,fn);}catch(_e){} } this.refs=[]; }
+  }
+
+  const client={
+    from:(table)=>new FirebaseQuery(table),
+    channel:(name)=>new FirebaseChannel(name)
+  };
+  window.supabase={
+    createClient:()=>{
+      if(!configured()) throw new Error("Firebase à configurer : renseignez BPT_FIREBASE_CONFIG.");
+      ensureFirebase().catch(e=>console.error("Firebase init:",e));
+      return client;
+    }
+  };
+})();
+</script>
+<div id="cloudStatus" title="État de la synchronisation partagée — cliquer pour recharger depuis Firebase" style="cursor:pointer">
   <span id="cloudStatusDot">●</span>
   <span id="cloudStatusText">Connexion…</span>
 </div>
@@ -11323,7 +11522,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // BPT 2.6.4 — photos de parties dans Supabase Storage
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.0 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -11696,8 +11895,8 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.6.4 : aucune image Base64 dans bpt_state. Les photos de parties
-    // sont stockées dans Supabase Storage ; leur URL est déterministe.
+    // BPT 2.7.0 : aucune image Base64 dans bpt_state. Les photos de parties
+    // sont stockées dans Firebase ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
   };
@@ -11872,7 +12071,7 @@ async function cloudInsertGame(rows){
 
   const gameKey=historyGameSignature(clean);
 
-  // UPSERT + contrainte UNIQUE côté Supabase :
+  // UPSERT + contrainte UNIQUE côté Firebase :
   // même si deux navigateurs enregistrent la même partie simultanément,
   // une seule ligne officielle est conservée.
   const {data,error}=await sbClient
@@ -11932,7 +12131,7 @@ async function flushPendingGames(){
 
   if(remaining.length){
     setCloudStatus("offline",`${remaining.length} partie${remaining.length>1?"s":""} en attente`,
-      "Certaines parties n'ont pas encore pu être envoyées à Supabase.");
+      "Certaines parties n'ont pas encore pu être envoyées à Firebase.");
     return false;
   }
 
@@ -11955,7 +12154,7 @@ async function cloudReplaceAllGames(localHistory){
 }
 
 async function cloudUpdateSingleGame(gameNo, rows){
-  if(!sbClient)throw new Error("Supabase indisponible.");
+  if(!sbClient)throw new Error("Firebase indisponible.");
 
   const current=(db.history||[]).filter(r=>Number(r.game)===Number(gameNo));
   const cloudId=current.find(r=>r._cloudId)?._cloudId;
@@ -12506,7 +12705,7 @@ async function initCloudSync(){
   setCloudStatus("busy","Connexion…");
 
   if(!window.supabase || !window.supabase.createClient){
-    setCloudStatus("offline","Supabase indisponible","La bibliothèque Supabase n'a pas été chargée.");
+    setCloudStatus("offline","Firebase indisponible","La bibliothèque Firebase n'a pas été chargée.");
     return;
   }
 
@@ -12565,7 +12764,7 @@ async function initCloudSync(){
           setCloudStatus(
             "ok",
             "Live spectateur connecté",
-            `Partie #${db.liveState.gameNo||"—"} reçue depuis Supabase`
+            `Partie #${db.liveState.gameNo||"—"} reçue depuis Firebase`
           );
         }else{
           setCloudStatus(
@@ -12578,7 +12777,7 @@ async function initCloudSync(){
         setCloudStatus(
           "ok",
           "Connecté",
-          `État partagé Supabase reçu • révision ${cloudLastRevision}`
+          `État partagé Firebase reçu • révision ${cloudLastRevision}`
         );
       }
 
@@ -12645,7 +12844,7 @@ async function initCloudSync(){
       cloudReady=true;
       cloudLocalDirty=false;
       cloudLastError="";
-      setCloudStatus("ok","Connecté","État partagé Supabase initialisé.");
+      setCloudStatus("ok","Connecté","État partagé Firebase initialisé.");
 
       // Migration historique non bloquante.
       try{
@@ -12661,7 +12860,7 @@ async function initCloudSync(){
         console.warn("Migration historique différée :",historyError);
       }
     }else{
-      throw new Error("État partagé Supabase présent mais format non reconnu.");
+      throw new Error("État partagé Firebase présent mais format non reconnu.");
     }
 
     // Realtime : le Live reste prioritaire.
@@ -12728,8 +12927,8 @@ async function initCloudSync(){
     clearInterval(cloudPollTimer);
     cloudPollTimer=setInterval(()=>{ if(!cloudRealtimeConnected)cloudPoll(); },CLOUD_FALLBACK_POLL_MS);
 
-    // BPT 2.6.4 : si cet appareil possède encore d'anciennes photos Base64 locales,
-    // tente de les migrer une fois vers Supabase Storage sans bloquer le démarrage.
+    // BPT 2.7.0 : si cet appareil possède encore d'anciennes photos Base64 locales,
+    // tente de les migrer une fois vers Firebase sans bloquer le démarrage.
     setTimeout(()=>migrateLegacyLocalGamePhotosToStorage().catch(e=>console.warn("Migration photos :",e)),500);
 
   }catch(e){
@@ -12815,7 +13014,7 @@ function loadDB(){
 let db = loadDB();
 
 // Un Live distant conservé dans localStorage ne doit jamais être utilisé comme source.
-// Seul le navigateur créateur conserve son Live local ; les spectateurs relisent Supabase.
+// Seul le navigateur créateur conserve son Live local ; les spectateurs relisent Firebase.
 if(
   db?.liveState?.prepared &&
   db.liveState.creatorDeviceId &&
@@ -12840,7 +13039,7 @@ function saveDB(){
   scheduleCloudSave();
 }
 
-function ensureLiveSupabaseClient(){
+function ensureLiveFirebaseClient(){
   if(sbClient)return true;
   if(!window.supabase || !window.supabase.createClient)return false;
   try{
@@ -12851,7 +13050,7 @@ function ensureLiveSupabaseClient(){
     );
     return true;
   }catch(e){
-    console.error("BPT live Supabase client:",e);
+    console.error("BPT live Firebase client:",e);
     return false;
   }
 }
@@ -12879,7 +13078,7 @@ function chooseRemoteLiveForSpectator(data){
 let spectatorLiveSource="—";
 
 async function fetchLiveStateDirect(){
-  if(!ensureLiveSupabaseClient())return null;
+  if(!ensureLiveFirebaseClient())return null;
 
   const {data,error}=await sbClient
     .from("bpt_state")
@@ -12924,7 +13123,7 @@ async function fetchLiveStateDirect(){
 
 async function livePushStateNow(){
   saveLocalOnly();
-  if(!ensureLiveSupabaseClient())return false;
+  if(!ensureLiveFirebaseClient())return false;
 
   if(db.liveState){
     db.liveState.publishedAt=Date.now();
@@ -14499,243 +14698,99 @@ function ensureGamePhotos(){
 }
 
 function currentGamePhotoSeasonKey(){
-  if(typeof selectedSeasonKey!=="undefined" && selectedSeasonKey && selectedSeasonKey!=="all"){
-    return selectedSeasonKey;
-  }
+  if(typeof selectedSeasonKey!=="undefined" && selectedSeasonKey && selectedSeasonKey!=="all")return selectedSeasonKey;
   return CURRENT_SEASON_KEY;
 }
-
-function gamePhotoKey(gameNo,seasonKey=null){
-  return `${seasonKey||currentGamePhotoSeasonKey()}|${Number(gameNo)||0}`;
-}
-
+function gamePhotoKey(gameNo,seasonKey=null){ return `${seasonKey||currentGamePhotoSeasonKey()}|${Number(gameNo)||0}`; }
 function gamePhotoStorageSegment(value){
-  return String(value||"season")
-    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
-    .replace(/[^a-zA-Z0-9._-]+/g,"-")
-    .replace(/^-+|-+$/g,"") || "season";
+  return String(value||"season").normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-zA-Z0-9._-]+/g,"-").replace(/^-+|-+$/g,"") || "season";
 }
-
-function gamePhotoStoragePath(gameNo,seasonKey=null){
+function gamePhotoFirebasePath(gameNo,seasonKey=null){
   const season=gamePhotoStorageSegment(seasonKey||currentGamePhotoSeasonKey());
-  return `games/${season}/game-${Number(gameNo)||0}.jpg`;
+  return `bpt/photos/${season}/game-${Number(gameNo)||0}`;
 }
-
-function gamePhotoPublicUrlFromPath(path,version=""){
-  const clean=String(path||"").replace(/^\/+/,"");
-  if(!clean)return "";
-  const base=`${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(GAME_PHOTO_BUCKET)}/${clean.split("/").map(encodeURIComponent).join("/")}`;
-  return version?`${base}?v=${encodeURIComponent(version)}`:base;
-}
-
-function parseStoredGamePhotoRef(value){
-  const raw=String(value||"");
-  if(!raw.startsWith("storage:"))return null;
-  const body=raw.slice(8);
-  const idx=body.indexOf("#");
-  return {
-    path:idx>=0?body.slice(0,idx):body,
-    version:idx>=0?body.slice(idx+1):""
-  };
-}
-
-function getGamePhoto(gameNo,seasonKey=null){
-  const key=gamePhotoKey(gameNo,seasonKey);
-  const saved=String(ensureGamePhotos()[key]||"");
-  if(saved.startsWith("data:image/"))return saved; // ancienne photo locale, migrée automatiquement si possible
-  const ref=parseStoredGamePhotoRef(saved);
-  if(ref?.path)return gamePhotoPublicUrlFromPath(ref.path,ref.version||String(Math.floor(Date.now()/30000)));
-  if(/^https?:\/\//i.test(saved))return saved;
-
-  // BPT 2.6.4 : l'URL est déterministe. Un autre appareil peut donc retrouver
-  // la photo sans transférer l'image ni un Base64 dans bpt_state.
-  return gamePhotoPublicUrlFromPath(
-    gamePhotoStoragePath(gameNo,seasonKey),
-    String(Math.floor(Date.now()/30000))
-  );
-}
-
+const firebasePhotoCache={};
+const firebasePhotoRequested=new Set();
 function mergePhotoMaps(a,b){
-  const out={};
-  const left=(a && typeof a==="object" && !Array.isArray(a))?a:{};
-  const right=(b && typeof b==="object" && !Array.isArray(b))?b:{};
-  Object.entries(left).forEach(([k,v])=>{ if(typeof v==="string" && v)out[k]=v; });
-  Object.entries(right).forEach(([k,v])=>{ if(typeof v==="string" && v)out[k]=v; });
-  return out;
+  const out={}; const left=(a&&typeof a==="object"&&!Array.isArray(a))?a:{}; const right=(b&&typeof b==="object"&&!Array.isArray(b))?b:{};
+  Object.entries(left).forEach(([k,v])=>{if(typeof v==="string"&&v)out[k]=v;});
+  Object.entries(right).forEach(([k,v])=>{if(typeof v==="string"&&v)out[k]=v;}); return out;
 }
-
 function mergeSharedPhotosIntoLocal(remoteState){
-  if(!remoteState || typeof remoteState!=="object")return false;
-  // Compatibilité historique uniquement : les nouvelles photos de parties vivent dans Storage.
-  db.gamePhotos=mergePhotoMaps(remoteState.gamePhotos,ensureGamePhotos());
-  db.playerPhotos=mergePhotoMaps(remoteState.playerPhotos,ensurePlayerPhotos());
-  return true;
+  if(!remoteState||typeof remoteState!=="object")return false;
+  // BPT 2.7.0 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
-
-function ensureGamePhotoStorageClient(){
-  if(sbClient)return true;
-  if(!window.supabase || !window.supabase.createClient)return false;
-  try{
-    sbClient=window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_PUBLISHABLE_KEY,
-      {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}}
-    );
-    return true;
-  }catch(e){
-    console.warn("BPT Storage init:",e);
-    return false;
-  }
+async function ensureGamePhotoStorageClient(){
+  if(!window.bptFirebaseEnsure)return false;
+  try{ await window.bptFirebaseEnsure(); return true; }catch(e){ console.warn("BPT photo Firebase:",e); return false; }
 }
-
-function gamePhotoStorageErrorMessage(error){
-  const msg=String(error?.message||error||"");
-  if(/bucket.*not found|not found.*bucket/i.test(msg)){
-    return `Le bucket Supabase Storage « ${GAME_PHOTO_BUCKET} » n'existe pas encore.`;
-  }
-  if(/row-level security|rls|policy|permission|unauthorized|forbidden/i.test(msg)){
-    return `Supabase Storage refuse l'écriture dans « ${GAME_PHOTO_BUCKET} ». Vérifiez les politiques INSERT/UPDATE/DELETE du bucket.`;
-  }
-  return msg || "Erreur Supabase Storage.";
-}
-
+function firebasePhotoErrorMessage(error){ return String(error?.message||error||"Erreur Firebase photo."); }
 async function fileToCompressedBlob(file){
   return new Promise((resolve,reject)=>{
-    if(!file){resolve(null);return;}
-    if(!String(file.type||"").startsWith("image/")){
-      reject(new Error("Le fichier sélectionné n’est pas une image."));
-      return;
-    }
-    const reader=new FileReader();
-    reader.onerror=()=>reject(new Error("Impossible de lire l’image."));
-    reader.onload=()=>{
-      const img=new Image();
-      img.onerror=()=>reject(new Error("Format d’image non reconnu."));
-      img.onload=()=>{
-        const max=900;
-        const ratio=Math.min(1,max/Math.max(img.width,img.height));
-        const w=Math.max(1,Math.round(img.width*ratio));
-        const h=Math.max(1,Math.round(img.height*ratio));
-        const canvas=document.createElement("canvas");
-        canvas.width=w;canvas.height=h;
-        const ctx=canvas.getContext("2d");
-        ctx.drawImage(img,0,0,w,h);
-        canvas.toBlob(blob=>{
-          if(blob)resolve(blob);
-          else reject(new Error("Impossible de compresser l’image."));
-        },"image/jpeg",0.76);
-      };
-      img.src=reader.result;
-    };
-    reader.readAsDataURL(file);
+    if(!file){resolve(null);return;} if(!String(file.type||"").startsWith("image/")){reject(new Error("Le fichier sélectionné n’est pas une image."));return;}
+    const reader=new FileReader(); reader.onerror=()=>reject(new Error("Impossible de lire l’image."));
+    reader.onload=()=>{ const img=new Image(); img.onerror=()=>reject(new Error("Format d’image non reconnu."));
+      img.onload=()=>{ const max=800; const ratio=Math.min(1,max/Math.max(img.width,img.height)); const w=Math.max(1,Math.round(img.width*ratio)),h=Math.max(1,Math.round(img.height*ratio));
+        const canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;const ctx=canvas.getContext("2d");ctx.drawImage(img,0,0,w,h);
+        canvas.toBlob(blob=>blob?resolve(blob):reject(new Error("Impossible de compresser l’image.")),"image/jpeg",0.68);
+      }; img.src=reader.result; }; reader.readAsDataURL(file);
   });
 }
-
 function dataUrlToBlob(dataUrl){
-  try{
-    const [head,body]=String(dataUrl||"").split(",",2);
-    const mime=(head.match(/^data:([^;]+)/)||[])[1]||"image/jpeg";
-    const bytes=atob(body||"");
-    const arr=new Uint8Array(bytes.length);
-    for(let i=0;i<bytes.length;i++)arr[i]=bytes.charCodeAt(i);
-    return new Blob([arr],{type:mime});
-  }catch(_e){ return null; }
+  try{const [head,body]=String(dataUrl||"").split(",",2);const mime=(head.match(/^data:([^;]+)/)||[])[1]||"image/jpeg";const bytes=atob(body||"");const arr=new Uint8Array(bytes.length);for(let i=0;i<bytes.length;i++)arr[i]=bytes.charCodeAt(i);return new Blob([arr],{type:mime});}catch(_e){return null;}
 }
-
+function blobToDataUrl(blob){ return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||""));r.onerror=()=>reject(new Error("Impossible de préparer l’image."));r.readAsDataURL(blob);}); }
+async function fetchFirebaseGamePhoto(gameNo,seasonKey=null){
+  const key=gamePhotoKey(gameNo,seasonKey); if(firebasePhotoRequested.has(key))return firebasePhotoCache[key]||""; firebasePhotoRequested.add(key);
+  try{
+    if(!await ensureGamePhotoStorageClient())return "";
+    const dbx=window.bptFirebaseDb?.(); if(!dbx)return "";
+    const snap=await dbx.ref(gamePhotoFirebasePath(gameNo,seasonKey)).once("value");
+    const val=snap.val(); const data=typeof val==="string"?val:String(val?.data||"");
+    if(data.startsWith("data:image/")){ firebasePhotoCache[key]=data; if(typeof renderLatestGame==="function")setTimeout(renderLatestGame,0); return data; }
+  }catch(e){ console.warn("Lecture photo Firebase:",e); }
+  return "";
+}
+function getGamePhoto(gameNo,seasonKey=null){
+  const key=gamePhotoKey(gameNo,seasonKey); const local=String(ensureGamePhotos()[key]||"");
+  if(local.startsWith("data:image/")){ firebasePhotoCache[key]=local; return local; }
+  if(firebasePhotoCache[key])return firebasePhotoCache[key];
+  fetchFirebaseGamePhoto(gameNo,seasonKey); return "";
+}
 async function uploadGamePhotoBlob(gameNo,seasonKey,blob,{silent=false}={}){
-  if(!blob)throw new Error("Image vide.");
-  if(!ensureGamePhotoStorageClient())throw new Error("Supabase Storage indisponible.");
-  const path=gamePhotoStoragePath(gameNo,seasonKey);
-  const {error}=await sbClient.storage
-    .from(GAME_PHOTO_BUCKET)
-    .upload(path,blob,{contentType:"image/jpeg",cacheControl:"60",upsert:true});
-  if(error)throw new Error(gamePhotoStorageErrorMessage(error));
-
-  ensureGamePhotos()[gamePhotoKey(gameNo,seasonKey)]=`storage:${path}#${Date.now()}`;
-  saveLocalOnly();
-  if(!silent)setCloudStatus("ok","Photo sauvegardée","Supabase Storage · visible sur tous les appareils");
-  return path;
+  if(!blob)throw new Error("Image vide."); if(!await ensureGamePhotoStorageClient())throw new Error("Firebase indisponible.");
+  const dataUrl=await blobToDataUrl(blob);
+  // Garde-fou : les photos restent très petites et vivent hors de l'état Live.
+  if(dataUrl.length>700000)throw new Error("La photo compressée reste trop volumineuse. Choisissez une image plus légère.");
+  const dbx=window.bptFirebaseDb?.(); if(!dbx)throw new Error("Firebase Realtime Database indisponible.");
+  await dbx.ref(gamePhotoFirebasePath(gameNo,seasonKey)).set({data:dataUrl,updatedAt:Date.now()});
+  const key=gamePhotoKey(gameNo,seasonKey); firebasePhotoCache[key]=dataUrl; firebasePhotoRequested.add(key);
+  // Ne pas conserver le Base64 dans db/localStorage : uniquement un marqueur léger.
+  ensureGamePhotos()[key]="firebase"; saveLocalOnly();
+  if(!silent)setCloudStatus("ok","Photo sauvegardée","Firebase · chargée séparément du Live"); return true;
 }
-
 async function migrateLegacyLocalGamePhotosToStorage(){
-  if(!ensureGamePhotoStorageClient())return false;
-  const entries=Object.entries(ensureGamePhotos()).filter(([,v])=>String(v||"").startsWith("data:image/"));
-  if(!entries.length)return true;
+  if(!await ensureGamePhotoStorageClient())return false;
+  const entries=Object.entries(ensureGamePhotos()).filter(([,v])=>String(v||"").startsWith("data:image/")); if(!entries.length)return true;
   let migrated=0;
-  for(const [key,dataUrl] of entries){
-    const split=String(key).lastIndexOf("|");
-    if(split<0)continue;
-    const season=key.slice(0,split);
-    const gameNo=Number(key.slice(split+1));
-    if(!gameNo)continue;
-    const blob=dataUrlToBlob(dataUrl);
-    if(!blob)continue;
-    try{
-      await uploadGamePhotoBlob(gameNo,season,blob,{silent:true});
-      migrated++;
-    }catch(e){
-      // Ne jamais supprimer l'ancienne photo locale si Storage n'est pas encore configuré.
-      console.warn("Migration photo locale différée :",e);
-      return false;
-    }
+  for(const [key,dataUrl] of entries){ const split=String(key).lastIndexOf("|"); if(split<0)continue; const season=key.slice(0,split), gameNo=Number(key.slice(split+1)); if(!gameNo)continue; const blob=dataUrlToBlob(dataUrl); if(!blob)continue;
+    try{await uploadGamePhotoBlob(gameNo,season,blob,{silent:true});migrated++;}catch(e){console.warn("Migration photo locale différée :",e);return false;}
   }
-  if(migrated){
-    saveLocalOnly();
-    renderLatestGame();
-    setCloudStatus("ok",`${migrated} photo${migrated>1?"s":""} migrée${migrated>1?"s":""}`,"Photos de parties transférées vers Supabase Storage.");
-  }
-  return true;
+  if(migrated){saveLocalOnly();renderLatestGame();setCloudStatus("ok",`${migrated} photo${migrated>1?"s":""} migrée${migrated>1?"s":""}`,"Photos transférées dans Firebase Realtime Database.");} return true;
 }
-
-async function syncSharedPhotosOnly({silent=false}={}){
-  // Compatibilité avec les anciens appels : les images ne transitent jamais dans bpt_state.
-  saveLocalOnly();
-  if(!silent)setCloudStatus("ok","Photothèque Storage","Les photos de parties sont stockées séparément de l'état BPT.");
-  return true;
-}
-
-async function syncSharedPhotosWithRetry(attempt=0){
-  if(ensureGamePhotoStorageClient()){
-    await migrateLegacyLocalGamePhotosToStorage();
-    return;
-  }
-  if(attempt<8)setTimeout(()=>syncSharedPhotosWithRetry(attempt+1),1000);
-}
-
-async function saveSharedMetadataOnly(){
-  return await syncSharedPhotosOnly({silent:false});
-}
-
+async function syncSharedPhotosOnly({silent=false}={}){saveLocalOnly();if(!silent)setCloudStatus("ok","Photothèque Firebase","Photos stockées séparément de l'état BPT.");return true;}
+async function syncSharedPhotosWithRetry(attempt=0){if(await ensureGamePhotoStorageClient()){await migrateLegacyLocalGamePhotosToStorage();return;}if(attempt<8)setTimeout(()=>syncSharedPhotosWithRetry(attempt+1),1000);}
+async function saveSharedMetadataOnly(){return await syncSharedPhotosOnly({silent:false});}
 async function saveGamePhoto(gameNo,file,seasonKey=null){
-  if(!file)return;
-  try{
-    setCloudStatus("busy","Envoi de la photo…","Compression puis sauvegarde dans Supabase Storage.");
-    const blob=await fileToCompressedBlob(file);
-    await uploadGamePhotoBlob(gameNo,seasonKey,blob,{silent:false});
-    renderLatestGame();
-    if(typeof renderHistory==="function")renderHistory();
-  }catch(e){
-    setCloudStatus("offline","Photo non sauvegardée",e?.message||String(e));
-    alert(e?.message||String(e));
-  }
+  if(!file)return; try{setCloudStatus("busy","Envoi de la photo…","Compression puis sauvegarde dans Firebase.");const blob=await fileToCompressedBlob(file);await uploadGamePhotoBlob(gameNo,seasonKey,blob,{silent:false});renderLatestGame();if(typeof renderHistory==="function")renderHistory();}
+  catch(e){setCloudStatus("offline","Photo non sauvegardée",firebasePhotoErrorMessage(e));alert(firebasePhotoErrorMessage(e));}
 }
-
 async function deleteGamePhoto(gameNo,seasonKey=null){
-  const key=gamePhotoKey(gameNo,seasonKey);
-  if(!confirm("Retirer la photo de cette partie ?"))return;
-  try{
-    if(!ensureGamePhotoStorageClient())throw new Error("Supabase Storage indisponible.");
-    const path=gamePhotoStoragePath(gameNo,seasonKey);
-    const {error}=await sbClient.storage.from(GAME_PHOTO_BUCKET).remove([path]);
-    if(error)throw new Error(gamePhotoStorageErrorMessage(error));
-    delete ensureGamePhotos()[key];
-    saveLocalOnly();
-    setCloudStatus("ok","Photo supprimée","La photo a été retirée de Supabase Storage.");
-    renderLatestGame();
-  }catch(e){
-    setCloudStatus("offline","Suppression impossible",e?.message||String(e));
-    alert(e?.message||String(e));
-  }
+  const key=gamePhotoKey(gameNo,seasonKey); if(!confirm("Retirer la photo de cette partie ?"))return;
+  try{if(!await ensureGamePhotoStorageClient())throw new Error("Firebase indisponible.");const dbx=window.bptFirebaseDb?.();await dbx.ref(gamePhotoFirebasePath(gameNo,seasonKey)).remove();delete firebasePhotoCache[key];firebasePhotoRequested.delete(key);delete ensureGamePhotos()[key];saveLocalOnly();setCloudStatus("ok","Photo supprimée","Photo retirée de Firebase.");renderLatestGame();}
+  catch(e){setCloudStatus("offline","Suppression impossible",firebasePhotoErrorMessage(e));alert(firebasePhotoErrorMessage(e));}
 }
 
 function latestGameEntries(){
@@ -16343,7 +16398,7 @@ async function persistCompletedGame(rows){
     return {synced:present};
   }
 
-  setCloudStatus("offline","Partie en attente","La partie sera envoyée automatiquement dès que Supabase sera disponible.");
+  setCloudStatus("offline","Partie en attente","La partie sera envoyée automatiquement dès que Firebase sera disponible.");
   setTimeout(()=>showEndGameSummary(rows),80);
   return {synced:false};
 }
@@ -16667,7 +16722,7 @@ function showLiveHandoverRequest(req){
 }
 
 async function fetchMainStateRow(){
-  if(!ensureLiveSupabaseClient())return null;
+  if(!ensureLiveFirebaseClient())return null;
   const {data,error}=await sbClient
     .from("bpt_state")
     .select("data,revision,updated_at")
@@ -17779,7 +17834,7 @@ async function liveSyncChampionship(force=false){
     setCloudStatus(
       "offline",
       "Partie Live en attente",
-      "La partie Live est conservée localement et sera renvoyée automatiquement vers Supabase."
+      "La partie Live est conservée localement et sera renvoyée automatiquement vers Firebase."
     );
 
     if(force){
@@ -18187,7 +18242,7 @@ function renderCorrectionGameList(preferredGame=null,forceLoad=false){
   const target=exists?Number(previous):games[games.length-1][0];
   sel.value=String(target);
 
-  // La synchronisation Supabase tourne toutes les 2 secondes.
+  // La synchronisation Firebase tourne toutes les 2 secondes.
   // Ne jamais recharger l'éditeur pendant une saisie en cours :
   // sinon le lieu et les participants sont remis à leur ancienne valeur.
   const sameGame=currentBefore===target;
@@ -18571,7 +18626,7 @@ async function resetFullHistory(){
     if(ok){
       alert("Historique complet supprimé. Le classement a été remis à zéro et la suppression a été synchronisée.");
     }else{
-      alert("Historique supprimé localement, mais la synchronisation Supabase a échoué. Cliquez sur l'indicateur de synchronisation pour réessayer.");
+      alert("Historique supprimé localement, mais la synchronisation Firebase a échoué. Cliquez sur l'indicateur de synchronisation pour réessayer.");
     }
   }else{
     scheduleCloudSave();
