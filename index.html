@@ -802,6 +802,32 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
   vertical-align:middle;
 }
 
+#ranking .progress-indicator{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  min-width:52px;
+  font-weight:900;
+  white-space:nowrap;
+}
+#ranking .progress-arrow{
+  font-size:17px;
+  line-height:1;
+}
+#ranking .progress-up{color:#62d889}
+#ranking .progress-down{color:#ff6b6b}
+#ranking .progress-flat{color:#9aa9a0}
+#ranking .progress-new{
+  display:inline-block;
+  padding:3px 7px;
+  border-radius:999px;
+  background:rgba(200,149,46,.14);
+  color:#e8c39e;
+  font-size:11px;
+  font-weight:900;
+}
+
 .dashboard-hero{
   display:flex;
   align-items:center;
@@ -10196,7 +10222,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.7.10":"Version PC 2.7.10";
+  el.textContent=mobile?"Version téléphone 2.7.11":"Version PC 2.7.11";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -10890,7 +10916,6 @@ function simplifyRecordTextForMobile(text){
       <div class="ranking-sort-toolbar">
         <label for="rankingSortSelect"><span>Trier l’affichage par</span>
           <select id="rankingSortSelect" onchange="setRankingSort(this.value)">
-            <option value="rank">Classement</option>
             <option value="points">Points</option>
             <option value="progress">Progression</option>
             <option value="avgPoints">Moyenne de points</option>
@@ -10903,7 +10928,7 @@ function simplifyRecordTextForMobile(text){
             <option value="net">Solde net</option>
           </select>
         </label>
-        <span id="rankingSortHint" class="muted">Ordre officiel du championnat</span>
+        <span id="rankingSortHint" class="muted">Tri par points</span>
       </div>
       <div class="tablewrap"><table>
         <thead><tr>
@@ -11107,7 +11132,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.7.10</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.7.11</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -11320,7 +11345,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.10 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 2.7.11 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -11586,7 +11611,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.10 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.11 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -11960,7 +11985,7 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.7.10 : aucune image Base64 dans bpt_state. Les photos de parties
+    // BPT 2.7.11 : aucune image Base64 dans bpt_state. Les photos de parties
     // sont stockées dans Firebase ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
@@ -14850,7 +14875,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.10 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 2.7.11 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -15750,17 +15775,16 @@ function renderLatestGame(){
     : '<span class="muted">Aucun accomplissement à afficher pour les joueurs de cette partie.</span>';
 }
 
-let rankingSortKey="rank";
+let rankingSortKey="points";
 
 function setRankingSort(key){
-  const allowed=new Set(["rank","points","progress","avgPoints","gamesCount","wins","podiums","tabliers","kills","kpg","net"]);
-  rankingSortKey=allowed.has(String(key||""))?String(key):"rank";
+  const allowed=new Set(["points","progress","avgPoints","gamesCount","wins","podiums","tabliers","kills","kpg","net"]);
+  rankingSortKey=allowed.has(String(key||""))?String(key):"points";
   renderRanking();
 }
 
 function rankingRowsForDisplay(){
   const rows=[...ranking()];
-  if(rankingSortKey==="rank")return rows.sort((a,b)=>Number(a.rank||9999)-Number(b.rank||9999));
   return rows.sort((a,b)=>{
     const av=rankingSortKey==="progress"?(a.progress===null?-Infinity:Number(a.progress||0)):Number(a?.[rankingSortKey]||0);
     const bv=rankingSortKey==="progress"?(b.progress===null?-Infinity:Number(b.progress||0)):Number(b?.[rankingSortKey]||0);
@@ -15772,13 +15796,20 @@ function renderRanking(){
   const ks=killerStats();
   const select=$("rankingSortSelect");
   if(select && select.value!==rankingSortKey)select.value=rankingSortKey;
-  const labels={rank:"Ordre officiel du championnat",points:"Tri par points",progress:"Tri par progression",avgPoints:"Tri par moyenne de points",gamesCount:"Tri par participations",wins:"Tri par victoires",podiums:"Tri par podiums",tabliers:"Tri par tabliers",kills:"Tri par kills",kpg:"Tri par kills / partie",net:"Tri par solde net"};
-  if($("rankingSortHint"))$("rankingSortHint").textContent=labels[rankingSortKey]||labels.rank;
+  const labels={points:"Tri par points",progress:"Tri par progression",avgPoints:"Tri par moyenne de points",gamesCount:"Tri par participations",wins:"Tri par victoires",podiums:"Tri par podiums",tabliers:"Tri par tabliers",kills:"Tri par kills",kpg:"Tri par kills / partie",net:"Tri par solde net"};
+  if($("rankingSortHint"))$("rankingSortHint").textContent=labels[rankingSortKey]||labels.points;
   $("rankingBody").innerHTML=rankingRowsForDisplay().map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}">
     <td>${medalForRank(s.rank)} ${s.rank}</td>
     <td>${playerNameHtml(s.name,{button:true,buttonClass:"ranking-player-link",onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(s.name)}'))`})}</td>
     <td><b>${num(s.points,0)}</b></td>
-    <td>${s.progress===null?(isArchiveSeason()?"—":"Nouvelle entrée"):s.progress>0?"+"+s.progress:s.progress===0?"=":String(s.progress)}</td>
+    <td>${s.progress===null
+      ? (isArchiveSeason()?"—":'<span class="progress-new">Nouveau</span>')
+      : s.progress>0
+        ? `<span class="progress-indicator progress-up" title="Progression de ${s.progress} place${s.progress>1?"s":""}"><span class="progress-arrow">▲</span><strong>+${s.progress}</strong></span>`
+        : s.progress<0
+          ? `<span class="progress-indicator progress-down" title="Recul de ${Math.abs(s.progress)} place${Math.abs(s.progress)>1?"s":""}"><span class="progress-arrow">▼</span><strong>${s.progress}</strong></span>`
+          : '<span class="progress-indicator progress-flat" title="Position inchangée"><span class="progress-arrow">●</span><strong>0</strong></span>'
+    }</td>
     <td>${num(s.avgPoints,1)}</td>
     <td>${s.gamesCount}</td>
     <td>${s.wins}</td>
@@ -19079,9 +19110,9 @@ async function showView(id){
   if(id==="newgame")id="settings";
   const enteringSettings=(id==="settings" && currentViewId!=="settings");
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
-  if(enteringRanking)rankingSortKey="rank";
+  if(enteringRanking)rankingSortKey="points";
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 2.7.10 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 2.7.11 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
