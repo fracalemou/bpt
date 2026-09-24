@@ -10115,6 +10115,16 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fu
 
 <style id="bpt-v255-no-at-announcements">/* 2.6.3 — chat visuel + bip uniquement : aucune zone live/dialog/focus automatique pouvant déclencher une annonce système. */</style>
 
+<style id="bpt-v2710-ranking-sort">
+.ranking-sort-toolbar{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:0 0 12px}
+.ranking-sort-toolbar label{display:flex;align-items:center;gap:10px;font-weight:800}
+.ranking-sort-toolbar label span{white-space:nowrap;color:#dce7df}
+.ranking-sort-toolbar select{width:auto;min-width:190px}
+.profile-avatar-delete-btn{border:1px solid rgba(255,114,114,.45);background:transparent;color:#ff9e91;border-radius:10px;padding:7px 11px;font-weight:800;cursor:pointer}
+.profile-avatar-delete-btn:hover{background:rgba(169,67,67,.16)}
+@media(max-width:700px){.ranking-sort-toolbar{align-items:stretch;flex-direction:column}.ranking-sort-toolbar label{align-items:stretch;flex-direction:column;gap:6px}.ranking-sort-toolbar select{width:100%}}
+</style>
+
 <style id="bpt-v260-avatars">
 .profile-avatar-column{display:flex;flex-direction:column;align-items:center;gap:10px;min-width:150px}
 .profile-avatar-wrap{width:144px;height:144px;border-radius:50%;padding:0;border:3px solid var(--gold);background:#111b16;overflow:hidden;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.28);display:flex;align-items:center;justify-content:center}
@@ -10186,7 +10196,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.7.7":"Version PC 2.7.7";
+  el.textContent=mobile?"Version téléphone 2.7.10":"Version PC 2.7.10";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -10877,6 +10887,24 @@ function simplifyRecordTextForMobile(text){
       <span><strong>♛ Classement général</strong><small>Classement et statistiques individuelles</small></span>
     </summary>
     <div class="combined-block-content">
+      <div class="ranking-sort-toolbar">
+        <label for="rankingSortSelect"><span>Trier l’affichage par</span>
+          <select id="rankingSortSelect" onchange="setRankingSort(this.value)">
+            <option value="rank">Classement</option>
+            <option value="points">Points</option>
+            <option value="progress">Progression</option>
+            <option value="avgPoints">Moyenne de points</option>
+            <option value="gamesCount">Participations</option>
+            <option value="wins">Victoires</option>
+            <option value="podiums">Podiums</option>
+            <option value="tabliers">Tabliers</option>
+            <option value="kills">Kills</option>
+            <option value="kpg">Kills / partie</option>
+            <option value="net">Solde net</option>
+          </select>
+        </label>
+        <span id="rankingSortHint" class="muted">Ordre officiel du championnat</span>
+      </div>
       <div class="tablewrap"><table>
         <thead><tr>
           <th>Clt</th><th>Joueur</th><th>Points</th><th>Progression</th><th>Moy. pts</th>
@@ -10960,6 +10988,7 @@ function simplifyRecordTextForMobile(text){
       </button>
       <div id="playerProfileAvatarName" class="profile-avatar-name"></div>
       <button id="playerProfileAvatarBtn" class="profile-avatar-btn" type="button">Choisir un avatar</button>
+      <button id="playerProfileAvatarDeleteBtn" class="profile-avatar-delete-btn" type="button" style="display:none">Supprimer l’avatar</button>
     </div>
     <div>
       <div class="muted">Fiche joueur BPT</div>
@@ -11078,7 +11107,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.7.7</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.7.10</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -11291,7 +11320,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.7 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 2.7.10 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -11557,7 +11586,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.7 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.10 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -11931,7 +11960,7 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.7.7 : aucune image Base64 dans bpt_state. Les photos de parties
+    // BPT 2.7.10 : aucune image Base64 dans bpt_state. Les photos de parties
     // sont stockées dans Firebase ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
@@ -13911,6 +13940,25 @@ async function saveSelectedPlayerAvatar(){
   }
 }
 
+async function deleteSelectedPlayerAvatar(){
+  const player=String($("profilePlayerSelect")?.value||"").trim();
+  if(!player)return;
+  const rec=playerRecordByName(player);
+  if(!rec || !String(rec.avatarId||""))return;
+  const confirmed=await bptConfirm(`Supprimer l’avatar de ${player} ?`,`Supprimer l’avatar`,`Supprimer`);
+  if(!confirmed)return;
+  rec.avatarId="";
+  pendingPlayerAvatarId="";
+  saveLocalOnly();
+  renderProfile(player);
+  renderPlayers();
+  if(db?.liveState?.prepared && !db.liveState.synced && db.liveState.creatorDeviceId===liveDeviceId()){
+    await livePushStateNow();
+  }else{
+    scheduleCloudSave();
+  }
+}
+
 
 function playerSeasonBreakdown(name){
   const seasons=[
@@ -13987,6 +14035,7 @@ function renderProfile(preferredName=null){
       $("playerProfileAvatarBtn").textContent="Choisir un avatar";
       $("playerProfileAvatarBtn").disabled=!name;
     }
+    if($("playerProfileAvatarDeleteBtn"))$("playerProfileAvatarDeleteBtn").style.display="none";
     if($("playerProfileNickname"))$("playerProfileNickname").textContent="";
     if($("playerProfileOtherNicknames"))$("playerProfileOtherNicknames").textContent="";
     $("playerProfileRank").textContent="#—";
@@ -14023,6 +14072,10 @@ function renderProfile(preferredName=null){
   if($("playerProfileAvatarBtn")){
     $("playerProfileAvatarBtn").textContent=profileAvatarId?"Modifier l’avatar":"Choisir un avatar";
     $("playerProfileAvatarBtn").disabled=!name;
+  }
+  if($("playerProfileAvatarDeleteBtn")){
+    $("playerProfileAvatarDeleteBtn").style.display=profileAvatarId?"inline-flex":"none";
+    $("playerProfileAvatarDeleteBtn").disabled=!profileAvatarId;
   }
 
   const nicknameInfo=playerNicknameInfo(name);
@@ -14797,7 +14850,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.7 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 2.7.10 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -15697,9 +15750,31 @@ function renderLatestGame(){
     : '<span class="muted">Aucun accomplissement à afficher pour les joueurs de cette partie.</span>';
 }
 
+let rankingSortKey="rank";
+
+function setRankingSort(key){
+  const allowed=new Set(["rank","points","progress","avgPoints","gamesCount","wins","podiums","tabliers","kills","kpg","net"]);
+  rankingSortKey=allowed.has(String(key||""))?String(key):"rank";
+  renderRanking();
+}
+
+function rankingRowsForDisplay(){
+  const rows=[...ranking()];
+  if(rankingSortKey==="rank")return rows.sort((a,b)=>Number(a.rank||9999)-Number(b.rank||9999));
+  return rows.sort((a,b)=>{
+    const av=rankingSortKey==="progress"?(a.progress===null?-Infinity:Number(a.progress||0)):Number(a?.[rankingSortKey]||0);
+    const bv=rankingSortKey==="progress"?(b.progress===null?-Infinity:Number(b.progress||0)):Number(b?.[rankingSortKey]||0);
+    return bv-av || Number(a.rank||9999)-Number(b.rank||9999) || String(a.name||"").localeCompare(String(b.name||""),"fr");
+  });
+}
+
 function renderRanking(){
   const ks=killerStats();
-  $("rankingBody").innerHTML=ranking().map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}">
+  const select=$("rankingSortSelect");
+  if(select && select.value!==rankingSortKey)select.value=rankingSortKey;
+  const labels={rank:"Ordre officiel du championnat",points:"Tri par points",progress:"Tri par progression",avgPoints:"Tri par moyenne de points",gamesCount:"Tri par participations",wins:"Tri par victoires",podiums:"Tri par podiums",tabliers:"Tri par tabliers",kills:"Tri par kills",kpg:"Tri par kills / partie",net:"Tri par solde net"};
+  if($("rankingSortHint"))$("rankingSortHint").textContent=labels[rankingSortKey]||labels.rank;
+  $("rankingBody").innerHTML=rankingRowsForDisplay().map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}">
     <td>${medalForRank(s.rank)} ${s.rank}</td>
     <td>${playerNameHtml(s.name,{button:true,buttonClass:"ranking-player-link",onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(s.name)}'))`})}</td>
     <td><b>${num(s.points,0)}</b></td>
@@ -17271,6 +17346,136 @@ function liveCreatorGuard(){
   return false;
 }
 
+const BPT_LIVE_MAX_AGE_MS=6*60*60*1000;
+let bptLiveExpiryCleanupInProgress=false;
+let bptLiveExpiryLastKey="";
+
+function liveStartedTimestamp(state){
+  const ts=Number(state?.startedAt||0);
+  return Number.isFinite(ts) && ts>0 ? ts : 0;
+}
+
+function liveIsExpiredByAge(state,now=Date.now()){
+  if(!state?.prepared || state?.synced)return false;
+  const started=liveStartedTimestamp(state);
+  return !!started && (now-started)>=BPT_LIVE_MAX_AGE_MS;
+}
+
+function liveClearExpiredLocalState(){
+  const local=db?.liveState;
+  if(local && liveIsExpiredByAge(local)){
+    db.liveState=null;
+    try{ saveLocalOnly(); }catch(_e){}
+  }
+  try{ spectatorServerLiveState=null; }catch(_e){}
+  try{ spectatorServerLiveRevision=0; }catch(_e){}
+  try{ stopLiveCloudHeartbeat(); }catch(_e){}
+  try{ if(liveTicker){clearInterval(liveTicker);liveTicker=null;} }catch(_e){}
+  try{ document.body.classList.remove("spectator-live-open"); }catch(_e){}
+  try{ applyLiveAccessMode(); }catch(_e){}
+}
+
+async function liveExpireRemoteIfNeeded(state,{silent=false}={}){
+  if(!liveIsExpiredByAge(state))return false;
+  if(bptLiveExpiryCleanupInProgress)return true;
+
+  const started=liveStartedTimestamp(state);
+  const key=`${state?.creatorDeviceId||""}|${state?.gameNo||""}|${started}`;
+  bptLiveExpiryCleanupInProgress=true;
+  try{
+    const ensure=window.bptFirebaseEnsure;
+    if(typeof ensure!=="function")return true;
+    const {rtdb}=await ensure();
+    const ref=rtdb.ref("bpt/state/main");
+
+    await ref.transaction(current=>{
+      if(!current || !current.data)return current;
+      const wire=(current.data.liveWire?.prepared && !current.data.liveWire?.synced)?current.data.liveWire:null;
+      const legacy=(current.data.liveState?.prepared && !current.data.liveState?.synced)?current.data.liveState:null;
+      const active=wire||legacy;
+      if(!active || !liveIsExpiredByAge(active))return current;
+
+      current.data={...current.data,liveWire:null,liveState:null};
+      current.revision=Number(current.revision||0)+1;
+      current.updated_at=new Date().toISOString();
+      return current;
+    });
+
+    liveClearExpiredLocalState();
+    try{ setCloudStatus("ok","Aucun Live actif","Le Live précédent a été fermé automatiquement après 6 h."); }catch(_e){}
+    try{ if(currentViewId==="live")liveShowScreen("prep"); }catch(_e){}
+    try{ liveRenderAll(); }catch(_e){}
+
+    if(!silent && bptLiveExpiryLastKey!==key){
+      bptLiveExpiryLastKey=key;
+      try{ alert("Le Live a été fermé automatiquement : sa durée dépassait 6 heures. Aucun résultat n’a été enregistré."); }catch(_e){}
+    }
+    return true;
+  }catch(e){
+    console.warn("BPT expiration automatique Live 6 h :",e);
+    return true;
+  }finally{
+    bptLiveExpiryCleanupInProgress=false;
+  }
+}
+
+async function liveFetchServerActiveState(){
+  try{
+    const ensure=window.bptFirebaseEnsure;
+    if(typeof ensure!=="function")return null;
+    const {rtdb}=await ensure();
+    const snap=await rtdb.ref("bpt/state/main").once("value");
+    const row=snap.val()||null;
+    const data=row?.data||null;
+    const wire=(data?.liveWire?.prepared && !data?.liveWire?.synced) ? data.liveWire : null;
+    const legacy=(data?.liveState?.prepared && !data?.liveState?.synced) ? data.liveState : null;
+    const active=wire||legacy||null;
+    if(active && liveIsExpiredByAge(active)){
+      await liveExpireRemoteIfNeeded(active,{silent:true});
+      return null;
+    }
+    return active;
+  }catch(e){
+    console.warn("BPT contrôle exclusivité Live :",e);
+    return null;
+  }
+}
+
+async function liveExclusiveGuard({forNew=false,showAlert=true}={}){
+  const remote=await liveFetchServerActiveState();
+  if(remote?.prepared && !remote?.synced){
+    const owner=String(remote.creatorDeviceId||"");
+    const mine=owner && owner===liveDeviceId();
+
+    // Un Live distant appartient à un autre appareil : ce poste devient spectateur.
+    if(owner && !mine){
+      spectatorServerLiveState=clone(remote);
+      db.liveState=clone(remote);
+      saveLocalOnly();
+      applyLiveAccessMode();
+      liveShowScreen("game");
+      liveRenderAll();
+      liveMaybeAutoOpenSpectator();
+      if(showAlert)alert("Un Live est déjà en cours sur un autre appareil. Ce poste passe en mode spectateur.");
+      return false;
+    }
+
+    // Même sur le poste maître, on ne peut pas créer un deuxième Live tant que le premier n'est pas terminé/annulé.
+    if(forNew){
+      if(showAlert)alert("Un Live existe déjà. Terminez ou annulez cette partie avant d'en créer une nouvelle.");
+      return false;
+    }
+  }
+
+  // Sécurité locale complémentaire, utile avant la première synchro serveur.
+  const local=db?.liveState;
+  if(forNew && local?.prepared && !local?.synced){
+    if(showAlert)alert("Un Live existe déjà. Terminez ou annulez cette partie avant d'en créer une nouvelle.");
+    return false;
+  }
+  return true;
+}
+
 function ensureLiveState(){
   if(!db.liveState){
     db.liveState={
@@ -17442,6 +17647,7 @@ function liveShowScreen(which){
   if(which==="game")liveRenderAll();
 }
 async function liveLaunch(){
+  if(!(await liveExclusiveGuard({forNew:true})))return;
   const requiredLocation=String($("liveLocation")?.value||"").trim();
   if(!requiredLocation){
     alert("Le nom / lieu de la partie est obligatoire.");
@@ -17452,13 +17658,6 @@ async function liveLaunch(){
   if(!liveCreatorGuard())return;
   if(liveSelected.size<2){alert("Sélectionnez au moins 2 joueurs.");return;}
   const old=ensureLiveState();
-  if(
-    old.prepared &&
-    !old.synced &&
-    old.players.length &&
-    old.startedAt &&
-    !confirm("Une partie live non synchronisée existe déjà. La remplacer ?")
-  )return;
   const previousChatKey=bptChatLiveKey();
   if(liveTicker){clearInterval(liveTicker);liveTicker=null;}
   const names=[...liveSelected];
@@ -17502,6 +17701,7 @@ async function liveLaunch(){
 
 
 async function liveStart(){
+  if(!(await liveExclusiveGuard({forNew:false})))return;
   if(!liveCreatorGuard())return;
   const s=ensureLiveState();if(!s.prepared)return;
 
@@ -17512,6 +17712,7 @@ async function liveStart(){
   startLiveCloudHeartbeat();
 }
 async function livePause(){
+  if(!(await liveExclusiveGuard({forNew:false})))return;
   if(!liveCreatorGuard())return;
   const s=ensureLiveState();if(!s.running)return;
   s.remainingSeconds=Math.max(0,Math.ceil((s.endAt-Date.now())/1000));
@@ -17522,7 +17723,12 @@ async function livePause(){
 function liveRunTicker(){
   if(liveTicker)clearInterval(liveTicker);
   liveTicker=setInterval(()=>{
-    const s=ensureLiveState();if(!s.running)return;
+    const s=ensureLiveState();
+    if(liveIsExpiredByAge(s)){
+      liveExpireRemoteIfNeeded(s,{silent:false});
+      return;
+    }
+    if(!s.running)return;
     s.remainingSeconds=Math.max(0,Math.ceil((s.endAt-Date.now())/1000));
 
     const warningKey=`${s.gameNo||0}:${s.levelIndex}`;
@@ -18248,6 +18454,18 @@ function showLiveResumePrompt(){
 }
 
 async function liveResetForNew(){
+  const remote=await liveFetchServerActiveState();
+  if(remote?.prepared && !remote?.synced && String(remote.creatorDeviceId||"")!==liveDeviceId()){
+    spectatorServerLiveState=clone(remote);
+    db.liveState=clone(remote);
+    saveLocalOnly();
+    applyLiveAccessMode();
+    liveShowScreen("game");
+    liveRenderAll();
+    liveMaybeAutoOpenSpectator();
+    alert("Un Live est déjà en cours sur un autre appareil. Impossible d'en créer un nouveau.");
+    return;
+  }
   const s=ensureLiveState();
   if(s.prepared && !s.synced){
     const ok=await liveCancelCurrentGame({ask:true,showMessage:false});
@@ -18860,8 +19078,10 @@ async function showView(id){
   }
   if(id==="newgame")id="settings";
   const enteringSettings=(id==="settings" && currentViewId!=="settings");
+  const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
+  if(enteringRanking)rankingSortKey="rank";
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 2.7.7 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 2.7.10 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -19056,6 +19276,7 @@ $("liveFinalizeBtn").onclick=liveFinalizeGame;
 if($("profilePlayerSelect"))$("profilePlayerSelect").onchange=()=>renderProfile($("profilePlayerSelect").value);
 
 if($("playerProfileAvatarBtn"))$("playerProfileAvatarBtn").onclick=()=>openPlayerAvatarPicker();
+if($("playerProfileAvatarDeleteBtn"))$("playerProfileAvatarDeleteBtn").onclick=()=>deleteSelectedPlayerAvatar();
 if($("playerProfileAvatarWrap"))$("playerProfileAvatarWrap").onclick=()=>openPlayerAvatarPicker();
 if($("playerAvatarPickerClose"))$("playerAvatarPickerClose").onclick=closePlayerAvatarPicker;
 if($("playerAvatarPickerCancel"))$("playerAvatarPickerCancel").onclick=closePlayerAvatarPicker;
@@ -19509,6 +19730,18 @@ if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus"
   }
 })();
 setTimeout(()=>startSpectatorLivePolling(),800);
+// Garde-fou global : vérifie aussi les Live en pause toutes les 60 s.
+setInterval(async()=>{
+  try{
+    const local=db?.liveState;
+    if(local && liveIsExpiredByAge(local)){
+      await liveExpireRemoteIfNeeded(local,{silent:false});
+      return;
+    }
+    const remote=await liveFetchServerActiveState();
+    if(remote && liveIsExpiredByAge(remote))await liveExpireRemoteIfNeeded(remote,{silent:true});
+  }catch(_e){}
+},60000);
 
 // ===== BPT 2.7.4 — Récepteur Live Firebase direct et indépendant =====
 let bptDirectLiveRef=null;
@@ -19521,6 +19754,10 @@ async function bptHandleDirectFirebaseLiveSnapshot(raw){
     if(!row || !row.data || typeof row.data!=="object")return false;
 
     const remote=chooseRemoteLiveForSpectator(row.data);
+    if(remote && liveIsExpiredByAge(remote)){
+      await liveExpireRemoteIfNeeded(remote,{silent:true});
+      return false;
+    }
     const creator=String(remote?.creatorDeviceId||"");
     const mine=String(liveDeviceId());
     const active=!!(remote?.prepared && !remote?.synced);
