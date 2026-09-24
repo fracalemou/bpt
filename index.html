@@ -8048,7 +8048,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 2.7.16 — Classement / Parties / Profils / Dashboard */
+/* BPT 2.7.17 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8111,7 +8111,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.16 — Records / Impact / Courbes */
+/* BPT 2.7.17 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8134,6 +8134,50 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 .chart-dot{width:8px;height:8px;border-radius:50%;background:currentColor}
 @media(max-width:760px){
   .records-grid{grid-template-columns:1fr}
+}
+
+
+/* BPT 2.7.17 — blocs repliables */
+.collapsible-block{
+  margin-top:12px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:16px;
+  background:rgba(255,255,255,.025);
+  overflow:hidden;
+}
+.collapsible-block>summary{
+  list-style:none;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px 16px;
+  font-weight:900;
+  user-select:none;
+}
+.collapsible-block>summary::-webkit-details-marker{display:none}
+.collapsible-block>summary::after{
+  content:"▾";
+  font-size:16px;
+  opacity:.7;
+  transition:transform .18s ease;
+}
+.collapsible-block[open]>summary::after{transform:rotate(180deg)}
+.collapsible-block>summary span{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.collapsible-block>summary small{
+  color:var(--muted);
+  font-weight:600;
+}
+.collapsible-block-content{
+  padding:0 16px 16px;
+}
+.collapsible-block .card{
+  margin-top:0;
 }
 
 </style>
@@ -10311,7 +10355,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.7.16":"Version PC 2.7.16";
+  el.textContent=mobile?"Version téléphone 2.7.17":"Version PC 2.7.17";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -10803,17 +10847,24 @@ function simplifyRecordTextForMobile(text){
     <p id="dashDynamicsText">Les faits marquants du championnat apparaîtront ici après les premières parties.</p>
   </div>
 
-  <div class="card chart-card">
-    <div class="premium-eyebrow">Évolution du Top 5</div>
-    <div class="muted">Classement général après chaque partie.</div>
-    <div id="dashboardTop5Chart" class="chart-wrap"></div>
-    <div id="dashboardTop5Legend" class="chart-legend"></div>
-  </div>
+  <details class="collapsible-block">
+    <summary>
+      <span><strong>Évolution du Top 5</strong><small>Courbe du classement général après chaque partie</small></span>
+    </summary>
+    <div class="collapsible-block-content">
+      <div id="dashboardTop5Chart" class="chart-wrap"></div>
+      <div id="dashboardTop5Legend" class="chart-legend"></div>
+    </div>
+  </details>
 
-  <div class="card">
-    <div class="premium-eyebrow">Records du championnat</div>
-    <div id="dashboardRecords" class="records-grid"></div>
-  </div>
+  <details class="collapsible-block">
+    <summary>
+      <span><strong>Records du championnat</strong><small>Victoires, podiums, kills, moyenne et séries</small></span>
+    </summary>
+    <div class="collapsible-block-content">
+      <div id="dashboardRecords" class="records-grid"></div>
+    </div>
+  </details>
 
   <div class="premium-main-grid">
     <section class="premium-panel premium-podium-panel">
@@ -10947,10 +10998,14 @@ function simplifyRecordTextForMobile(text){
 
     <div id="latestGameHighlights" class="latestgame-highlights"></div>
 
-    <div class="card" style="margin-top:12px">
-      <div class="premium-eyebrow">Ce que cette partie change</div>
-      <div id="latestGameImpact" class="impact-list"></div>
-    </div>
+    <details class="collapsible-block">
+      <summary>
+        <span><strong>Ce que cette partie change</strong><small>Impact sur le classement général</small></span>
+      </summary>
+      <div class="collapsible-block-content">
+        <div id="latestGameImpact" class="impact-list"></div>
+      </div>
+    </details>
 
     <div class="latestgame-actions">
       <button class="btn ghost" id="latestGameCorrectionBtn" type="button">Corriger cette partie</button>
@@ -11030,29 +11085,36 @@ function simplifyRecordTextForMobile(text){
       <span><strong>♛ Classement général</strong><small>Classement et statistiques individuelles</small></span>
     </summary>
     <div class="combined-block-content">
-      <div class="ranking-filter-toolbar" id="rankingFilterToolbar">
-        <button class="ranking-filter-btn active" type="button" data-ranking-filter="all" onclick="setRankingFilter('all')">Tous</button>
-        <button class="ranking-filter-btn" type="button" data-ranking-filter="top5" onclick="setRankingFilter('top5')">Top 5</button>
-        <button class="ranking-filter-btn" type="button" data-ranking-filter="top10" onclick="setRankingFilter('top10')">Top 10</button>
-        <button class="ranking-filter-btn" type="button" data-ranking-filter="active" onclick="setRankingFilter('active')">Actifs récemment</button>
-      </div>
-      <div class="ranking-sort-toolbar">
-        <label for="rankingSortSelect"><span>Trier l’affichage par</span>
-          <select id="rankingSortSelect" onchange="setRankingSort(this.value)">
-            <option value="points">Points</option>
-            <option value="progress">Progression</option>
-            <option value="avgPoints">Moyenne de points</option>
-            <option value="gamesCount">Participations</option>
-            <option value="wins">Victoires</option>
-            <option value="podiums">Podiums</option>
-            <option value="tabliers">Tabliers</option>
-            <option value="kills">Kills</option>
-            <option value="kpg">Kills / partie</option>
-            <option value="net">Solde net</option>
-          </select>
-        </label>
-        <span id="rankingSortHint" class="muted">Tri par points</span>
-      </div>
+      <details class="collapsible-block">
+        <summary>
+          <span><strong>Filtres et tris</strong><small>Affiner l’affichage sans modifier le classement officiel</small></span>
+        </summary>
+        <div class="collapsible-block-content">
+          <div class="ranking-filter-toolbar" id="rankingFilterToolbar">
+            <button class="ranking-filter-btn active" type="button" data-ranking-filter="all" onclick="setRankingFilter('all')">Tous</button>
+            <button class="ranking-filter-btn" type="button" data-ranking-filter="top5" onclick="setRankingFilter('top5')">Top 5</button>
+            <button class="ranking-filter-btn" type="button" data-ranking-filter="top10" onclick="setRankingFilter('top10')">Top 10</button>
+            <button class="ranking-filter-btn" type="button" data-ranking-filter="active" onclick="setRankingFilter('active')">Actifs récemment</button>
+          </div>
+          <div class="ranking-sort-toolbar">
+            <label for="rankingSortSelect"><span>Trier l’affichage par</span>
+              <select id="rankingSortSelect" onchange="setRankingSort(this.value)">
+                <option value="points">Points</option>
+                <option value="progress">Progression</option>
+                <option value="avgPoints">Moyenne de points</option>
+                <option value="gamesCount">Participations</option>
+                <option value="wins">Victoires</option>
+                <option value="podiums">Podiums</option>
+                <option value="tabliers">Tabliers</option>
+                <option value="kills">Kills</option>
+                <option value="kpg">Kills / partie</option>
+                <option value="net">Solde net</option>
+              </select>
+            </label>
+            <span id="rankingSortHint" class="muted">Tri par points</span>
+          </div>
+        </div>
+      </details>
       <div class="tablewrap"><table>
         <thead><tr>
           <th>Clt</th><th>Joueur</th><th>Points</th><th>Progression</th><th>3 dernières</th><th>Moy. pts</th>
@@ -11151,58 +11213,65 @@ function simplifyRecordTextForMobile(text){
   <div id="playerProfileKpis" class="profile-kpis"></div>
 
   <div class="grid" style="margin-top:12px">
-    <div class="card span6">
-      <h2>Faits d’armes principaux</h2>
-      <div id="playerProfileFeats" class="profile-feats"></div>
-    </div>
+    <details class="collapsible-block span6">
+      <summary><span><strong>Faits d’armes principaux</strong><small>Performances marquantes du joueur</small></span></summary>
+      <div class="collapsible-block-content"><div id="playerProfileFeats" class="profile-feats"></div></div>
+    </details>
 
-    <div class="card span6">
-      <h2>Accomplissements débloqués</h2>
-      <div id="playerProfileAchievements" class="profile-achievements"></div>
-    </div>
+    <details class="collapsible-block span6">
+      <summary><span><strong>Accomplissements débloqués</strong><small>Badges et accomplissements du joueur</small></span></summary>
+      <div class="collapsible-block-content"><div id="playerProfileAchievements" class="profile-achievements"></div></div>
+    </details>
 
-    <div class="card span7">
-      <h2>Forme récente</h2>
-      <div class="muted" style="margin-bottom:8px">Les 5 dernières participations du joueur.</div>
-      <div id="playerProfileRecentForm" class="profile-form-strip"></div>
-
-      <div class="chart-card">
-        <h2 style="margin-top:18px">Évolution du classement</h2>
-        <div class="muted">Rang général du joueur au fil des parties.</div>
-        <div id="playerProfileRankChart" class="chart-wrap"></div>
+    <details class="collapsible-block span7">
+      <summary><span><strong>Forme & évolution</strong><small>5 dernières participations et courbe de classement</small></span></summary>
+      <div class="collapsible-block-content">
+        <div class="muted" style="margin-bottom:8px">Les 5 dernières participations du joueur.</div>
+        <div id="playerProfileRecentForm" class="profile-form-strip"></div>
+        <div class="chart-card">
+          <h2 style="margin-top:18px">Évolution du classement</h2>
+          <div class="muted">Rang général du joueur au fil des parties.</div>
+          <div id="playerProfileRankChart" class="chart-wrap"></div>
+        </div>
+        <h2 style="margin-top:18px">Historique des places en partie</h2>
+        <div id="playerProfilePlaces"></div>
       </div>
+    </details>
 
-      <h2 style="margin-top:18px">Historique des places en partie</h2>
-      <div id="playerProfilePlaces"></div>
-    </div>
+    <details class="collapsible-block span5">
+      <summary><span><strong>Rivalités</strong><small>Rival principal et confrontations directes</small></span></summary>
+      <div class="collapsible-block-content">
+        <h2>Rivalité principale</h2>
+        <div id="playerProfileMainRivalry" class="profile-rivalry-main"></div>
+        <h2 style="margin-top:18px">Confrontations directes — Kills</h2>
+        <div class="muted" style="margin-bottom:8px">Bilan des éliminations entre ce joueur et ses adversaires.</div>
+        <div id="playerProfileRivals"></div>
+      </div>
+    </details>
 
-    <div class="card span5">
-      <h2>Rivalité principale</h2>
-      <div id="playerProfileMainRivalry" class="profile-rivalry-main"></div>
-      <h2 style="margin-top:18px">Confrontations directes — Kills</h2>
-      <div class="muted" style="margin-bottom:8px">Bilan des éliminations entre ce joueur et ses adversaires.</div>
-      <div id="playerProfileRivals"></div>
-    </div>
+    <details class="collapsible-block span12">
+      <summary><span><strong>Historique du classement</strong><small>Rang général après chaque partie</small></span></summary>
+      <div class="collapsible-block-content">
+        <div id="playerProfileRankHistory"></div>
+      </div>
+    </details>
 
-    <div class="card span12">
-      <h2>Évolution au classement général</h2>
-      <div class="muted" style="margin-bottom:8px">Rang du joueur après chaque partie du championnat, à partir de sa première participation.</div>
-      <div id="playerProfileRankHistory"></div>
-    </div>
+    <details class="collapsible-block span12">
+      <summary><span><strong>Statistiques par saison</strong><small>Comparaison sur toutes les saisons disponibles</small></span></summary>
+      <div class="collapsible-block-content">
+        <div id="playerProfileSeasons" class="tablewrap"></div>
+      </div>
+    </details>
 
-    <div class="card span12">
-      <h2>Statistiques par saison</h2>
-      <div class="muted" style="margin-bottom:8px">Comparaison du joueur sur toutes les saisons disponibles.</div>
-      <div id="playerProfileSeasons" class="tablewrap"></div>
-    </div>
-
-    <div class="card span12">
-      <h2>Parties du joueur</h2>
-      <div id="playerProfileHistory" class="tablewrap"></div>
-    </div>
+    <details class="collapsible-block span12">
+      <summary><span><strong>Parties du joueur</strong><small>Historique complet des participations</small></span></summary>
+      <div class="collapsible-block-content">
+        <div id="playerProfileHistory" class="tablewrap"></div>
+      </div>
+    </details>
   </div>
 
-  <details class="combined-block profile-versus-block" open>
+  <details class="combined-block profile-versus-block">
     <summary>
       <span><strong>⚔ Versus</strong><small>Comparer ce joueur à un autre joueur du BPT</small></span>
     </summary>
@@ -11267,7 +11336,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.7.16</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.7.17</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -11483,7 +11552,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.16 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 2.7.17 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -11749,7 +11818,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.16 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.17 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -12123,7 +12192,7 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.7.16 : aucune image Base64 dans bpt_state. Les photos de parties
+    // BPT 2.7.17 : aucune image Base64 dans bpt_state. Les photos de parties
     // sont stockées dans Firebase ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
@@ -15109,7 +15178,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.16 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 2.7.17 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -19593,7 +19662,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 2.7.16 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 2.7.17 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
