@@ -10222,7 +10222,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.7.12":"Version PC 2.7.12";
+  el.textContent=mobile?"Version téléphone 2.7.13":"Version PC 2.7.13";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -11132,7 +11132,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.7.12</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.7.13</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -11306,7 +11306,7 @@ function simplifyRecordTextForMobile(text){
     <div id="gameSummaryContent"></div>
     <div class="row" style="justify-content:flex-end;margin-top:16px">
       <button class="btn ghost" id="gameSummaryCopyBtn" type="button">Copier le résumé</button>
-      <button class="btn secondary" id="gameSummaryEmailBtn" type="button">Envoyer par e-mail</button>
+      <button class="btn secondary" id="gameSummaryEmailBtn" type="button">Partager sur WhatsApp</button>
     </div>
   </div>
 </div>
@@ -11349,7 +11349,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.12 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 2.7.13 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -11615,7 +11615,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.12 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.13 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -11989,7 +11989,7 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.7.12 : aucune image Base64 dans bpt_state. Les photos de parties
+    // BPT 2.7.13 : aucune image Base64 dans bpt_state. Les photos de parties
     // sont stockées dans Firebase ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
@@ -14290,9 +14290,9 @@ async function copyEndGameSummary(){
 function emailEndGameSummary(){
   const txt=buildEndGameSummaryText(lastGameSummaryRows);
   if(!txt)return;
-  const first=(lastGameSummaryRows||[])[0]||{};
-  const subject=`BPT — Résumé partie #${first.game||""}`.trim();
-  window.location.href=`mailto:fracalemou@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(txt)}`;
+  const whatsappNumber="33603060657";
+  const url=`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(txt)}`;
+  window.open(url,"_blank","noopener,noreferrer");
 }
 
 function renderHistoryCards(){
@@ -14951,7 +14951,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.12 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 2.7.13 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -19188,7 +19188,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking)rankingSortKey="points";
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 2.7.12 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 2.7.13 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
