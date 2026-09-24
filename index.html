@@ -8047,6 +8047,69 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
     color:#38c9dc !important;
   }
 }
+
+/* BPT 2.7.15 — Classement / Parties / Profils / Dashboard */
+.ranking-filter-toolbar{
+  display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
+}
+.ranking-filter-btn{
+  border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.045);
+  color:var(--text);border-radius:999px;padding:7px 12px;font-weight:800;cursor:pointer
+}
+.ranking-filter-btn.active{
+  background:rgba(200,149,46,.18);border-color:rgba(200,149,46,.55);color:#f1c86a
+}
+.recent-form{
+  display:inline-flex;gap:4px;align-items:center;justify-content:center;white-space:nowrap
+}
+.form-chip{
+  min-width:25px;height:25px;padding:0 5px;border-radius:999px;
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:900;background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.09)
+}
+.form-chip.win{background:rgba(200,149,46,.18);border-color:rgba(200,149,46,.48);color:#f1c86a}
+.form-chip.podium{background:rgba(80,160,220,.13);border-color:rgba(80,160,220,.32)}
+.form-chip.bad{opacity:.72}
+.latestgame-highlights{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0
+}
+.latestgame-highlight{
+  padding:13px 14px;border:1px solid rgba(255,255,255,.08);border-radius:14px;
+  background:rgba(255,255,255,.035)
+}
+.latestgame-highlight span{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:800}
+.latestgame-highlight strong{display:block;margin-top:5px;font-size:16px}
+.latestgame-actions{display:flex;justify-content:flex-end;margin:12px 0 0}
+.profile-form-strip{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.profile-form-card{
+  min-width:74px;padding:9px 10px;border-radius:12px;background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);text-align:center
+}
+.profile-form-card strong{display:block;font-size:18px}
+.profile-form-card small{display:block;color:var(--muted);margin-top:2px}
+.profile-rivalry-main{
+  padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,.08);
+  background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.02))
+}
+.profile-rivalry-score{
+  display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-top:12px
+}
+.profile-rivalry-player{text-align:center}
+.profile-rivalry-player strong{display:block;font-size:20px}
+.profile-rivalry-center{text-align:center;color:var(--muted);font-weight:800}
+.dashboard-dynamics{
+  margin-top:14px;padding:16px 18px;border-radius:16px;border:1px solid rgba(200,149,46,.24);
+  background:linear-gradient(135deg,rgba(200,149,46,.09),rgba(255,255,255,.025))
+}
+.dashboard-dynamics .premium-eyebrow{margin-bottom:5px}
+.dashboard-dynamics p{margin:0;line-height:1.55;font-size:15px}
+@media(max-width:760px){
+  .latestgame-highlights{grid-template-columns:1fr}
+  .profile-rivalry-score{grid-template-columns:1fr}
+  .profile-rivalry-center{padding:4px 0}
+}
+
 </style>
 
 <style id="bpt-records-final-hierarchy">
@@ -10222,7 +10285,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.7.13":"Version PC 2.7.13";
+  el.textContent=mobile?"Version téléphone 2.7.15":"Version PC 2.7.15";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -10709,6 +10772,11 @@ function simplifyRecordTextForMobile(text){
     </div>
   </div>
 
+  <div class="dashboard-dynamics">
+    <div class="premium-eyebrow">Dynamique du championnat</div>
+    <p id="dashDynamicsText">Les faits marquants du championnat apparaîtront ici après les premières parties.</p>
+  </div>
+
   <div class="premium-main-grid">
     <section class="premium-panel premium-podium-panel">
       <div class="premium-panel-head">
@@ -10839,6 +10907,11 @@ function simplifyRecordTextForMobile(text){
   <div id="latestGameContent" style="display:none">
     <div class="latestgame-summary-line" id="latestGameSummary"></div>
 
+    <div id="latestGameHighlights" class="latestgame-highlights"></div>
+    <div class="latestgame-actions">
+      <button class="btn ghost" id="latestGameCorrectionBtn" type="button">Corriger cette partie</button>
+    </div>
+
     <div class="latestgame-podium-wrap">
       <div class="dashboard-section-label">Podium de la partie</div>
       <div id="latestGamePodium" class="podium-medals"></div>
@@ -10913,6 +10986,12 @@ function simplifyRecordTextForMobile(text){
       <span><strong>♛ Classement général</strong><small>Classement et statistiques individuelles</small></span>
     </summary>
     <div class="combined-block-content">
+      <div class="ranking-filter-toolbar" id="rankingFilterToolbar">
+        <button class="ranking-filter-btn active" type="button" data-ranking-filter="all" onclick="setRankingFilter('all')">Tous</button>
+        <button class="ranking-filter-btn" type="button" data-ranking-filter="top5" onclick="setRankingFilter('top5')">Top 5</button>
+        <button class="ranking-filter-btn" type="button" data-ranking-filter="top10" onclick="setRankingFilter('top10')">Top 10</button>
+        <button class="ranking-filter-btn" type="button" data-ranking-filter="active" onclick="setRankingFilter('active')">Actifs récemment</button>
+      </div>
       <div class="ranking-sort-toolbar">
         <label for="rankingSortSelect"><span>Trier l’affichage par</span>
           <select id="rankingSortSelect" onchange="setRankingSort(this.value)">
@@ -10932,7 +11011,7 @@ function simplifyRecordTextForMobile(text){
       </div>
       <div class="tablewrap"><table>
         <thead><tr>
-          <th>Clt</th><th>Joueur</th><th>Points</th><th>Progression</th><th>Moy. pts</th>
+          <th>Clt</th><th>Joueur</th><th>Points</th><th>Progression</th><th>3 dernières</th><th>Moy. pts</th>
           <th>Participations</th><th>Victoires</th><th>Podiums</th><th>Tabliers</th>
           <th>Kills</th><th>Kills/partie</th><th>Solde net</th><th>Bourreau</th><th>Victime</th>
         </tr></thead>
@@ -11039,12 +11118,17 @@ function simplifyRecordTextForMobile(text){
     </div>
 
     <div class="card span7">
-      <h2>Historique des places en partie</h2>
+      <h2>Forme récente</h2>
+      <div class="muted" style="margin-bottom:8px">Les 5 dernières participations du joueur.</div>
+      <div id="playerProfileRecentForm" class="profile-form-strip"></div>
+      <h2 style="margin-top:18px">Historique des places en partie</h2>
       <div id="playerProfilePlaces"></div>
     </div>
 
     <div class="card span5">
-      <h2>Confrontations directes — Kills</h2>
+      <h2>Rivalité principale</h2>
+      <div id="playerProfileMainRivalry" class="profile-rivalry-main"></div>
+      <h2 style="margin-top:18px">Confrontations directes — Kills</h2>
       <div class="muted" style="margin-bottom:8px">Bilan des éliminations entre ce joueur et ses adversaires.</div>
       <div id="playerProfileRivals"></div>
     </div>
@@ -11132,7 +11216,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.7.13</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.7.15</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -11305,8 +11389,7 @@ function simplifyRecordTextForMobile(text){
     </div>
     <div id="gameSummaryContent"></div>
     <div class="row" style="justify-content:flex-end;margin-top:16px">
-      <button class="btn ghost" id="gameSummaryCopyBtn" type="button">Copier le résumé</button>
-      <button class="btn secondary" id="gameSummaryEmailBtn" type="button">Partager sur WhatsApp</button>
+      <button class="btn secondary" id="gameSummaryViewGameBtn" type="button">Voir la partie</button>
     </div>
   </div>
 </div>
@@ -11349,7 +11432,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.13 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 2.7.15 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -11615,7 +11698,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.13 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.15 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -11989,7 +12072,7 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.7.13 : aucune image Base64 dans bpt_state. Les photos de parties
+    // BPT 2.7.15 : aucune image Base64 dans bpt_state. Les photos de parties
     // sont stockées dans Firebase ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
@@ -14073,6 +14156,8 @@ function renderProfile(preferredName=null){
     $("playerProfileFeats").innerHTML="";
     $("playerProfileAchievements").innerHTML='<span class="profile-no-achievement">Aucun accomplissement.</span>';
     $("playerProfilePlaces").innerHTML="";
+    if($("playerProfileRecentForm"))$("playerProfileRecentForm").innerHTML="";
+    if($("playerProfileMainRivalry"))$("playerProfileMainRivalry").innerHTML='<span class="muted">Aucune rivalité disponible.</span>';
     if($("playerProfileRankHistory"))$("playerProfileRankHistory").innerHTML="";
     $("playerProfileRivals").innerHTML="";
     $("playerProfileHistory").innerHTML="";
@@ -14165,6 +14250,33 @@ function renderProfile(preferredName=null){
   $("playerProfilePlaces").innerHTML=rows
     .map(r=>`<span class="place-chip ${Number(r.place)===1?"win":Number(r.place)<=3?"podium":""}" title="Partie #${r.game}">${r.place}</span>`)
     .join("") || '<span class="muted">Aucune partie.</span>';
+
+  if($("playerProfileRecentForm")){
+    const recentRows=rows.slice().sort((a,b)=>Number(b.game)-Number(a.game)).slice(0,5);
+    $("playerProfileRecentForm").innerHTML=recentRows.length
+      ? recentRows.map(r=>`<div class="profile-form-card">
+          <strong>${Number(r.place)===1?"🏆 "+r.place:r.place+"e"}</strong>
+          <small>Partie #${r.game}</small>
+          <small>${num(r.points||0,0)} pts</small>
+        </div>`).join("")
+      : '<span class="muted">Aucune partie.</span>';
+  }
+
+  if($("playerProfileMainRivalry")){
+    const rival=d.nemesis?.[0] || d.favoriteVictim?.[0] || "";
+    if(rival){
+      const h=versusHeadToHead(name,rival);
+      $("playerProfileMainRivalry").innerHTML=`
+        <div class="muted">Adversaire le plus marquant</div>
+        <div class="profile-rivalry-score">
+          <div class="profile-rivalry-player">${playerNameHtml(name)}<strong>${h.elim2By1}</strong><small>éliminations</small></div>
+          <div class="profile-rivalry-center">VS<br><small>${h.commonGames} partie${h.commonGames>1?"s":""} commune${h.commonGames>1?"s":""}</small></div>
+          <div class="profile-rivalry-player">${playerNameHtml(rival)}<strong>${h.elim1By2}</strong><small>éliminations</small></div>
+        </div>`;
+    }else{
+      $("playerProfileMainRivalry").innerHTML='<span class="muted">Pas encore assez de confrontations.</span>';
+    }
+  }
 
   renderPlayerRankHistory(name);
   renderPlayerSeasonBreakdown(name);
@@ -14276,23 +14388,10 @@ function showEndGameSummary(rows){
   backdrop.style.display="flex";
 }
 
-async function copyEndGameSummary(){
-  const txt=buildEndGameSummaryText(lastGameSummaryRows);
-  if(!txt)return;
-  try{
-    await navigator.clipboard.writeText(txt);
-    alert("Résumé copié.");
-  }catch(_e){
-    prompt("Copiez le résumé :",txt);
-  }
-}
-
-function emailEndGameSummary(){
-  const txt=buildEndGameSummaryText(lastGameSummaryRows);
-  if(!txt)return;
-  const whatsappNumber="33603060657";
-  const url=`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(txt)}`;
-  window.open(url,"_blank","noopener,noreferrer");
+function openLastGameFromSummary(){
+  const backdrop=$("gameSummaryBackdrop");
+  if(backdrop)backdrop.style.display="none";
+  showView("latestgame");
 }
 
 function renderHistoryCards(){
@@ -14951,7 +15050,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.13 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 2.7.15 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -15640,6 +15739,26 @@ function renderDashboard(){
     ? "Meilleur total de points sur les 3 dernières parties"
     : "Pas encore disponible";
 
+  if($("dashDynamicsText")){
+    if(!rank.length){
+      $("dashDynamicsText").textContent="Le championnat n’a pas encore suffisamment de données pour dégager une dynamique.";
+    }else{
+      const leader=rank[0];
+      const second=rank[1];
+      const gap=second?Number(leader.points||0)-Number(second.points||0):null;
+      const movers=rank.filter(r=>r.progress!==null && Number.isFinite(Number(r.progress)));
+      const bestMover=movers.slice().sort((a,b)=>Number(b.progress)-Number(a.progress))[0];
+      const worstMover=movers.slice().sort((a,b)=>Number(a.progress)-Number(b.progress))[0];
+      const sentences=[];
+      sentences.push(`${leader.name} mène avec ${num(leader.points,0)} points${second?`, soit ${num(gap,0)} point${Math.abs(gap)>1?"s":""} d’avance sur ${second.name}`:""}.`);
+      if(bestMover && Number(bestMover.progress)>0)sentences.push(`${bestMover.name} signe la plus forte progression : +${bestMover.progress} place${Number(bestMover.progress)>1?"s":""}.`);
+      if(worstMover && Number(worstMover.progress)<0)sentences.push(`${worstMover.name} recule de ${Math.abs(worstMover.progress)} place${Math.abs(worstMover.progress)>1?"s":""}.`);
+      if(lastWinner)sentences.push(`La dernière partie a été remportée par ${lastWinner.player}.`);
+      if(onFire?.players?.length)sentences.push(`La meilleure forme récente : ${onFire.players.join(", ")}.`);
+      $("dashDynamicsText").textContent=sentences.join(" ");
+    }
+  }
+
   const podium=rank.slice(0,3);
   $("dashPodium").innerHTML=podium.length ? podium.map((p,i)=>`
     <div class="premium-podium-card rank-${i+1}">
@@ -15805,6 +15924,21 @@ function renderLatestGame(){
     ["Cagnotte",euro(pot)]
   ].map(([label,value])=>`<div class="latestgame-summary-item"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join("");
 
+  const killerRanking=rows.slice().sort((a,b)=>Number(b.kills||0)-Number(a.kills||0));
+  const killerTop=killerRanking[0]||null;
+  const totalKills=rows.reduce((sum,r)=>sum+Number(r.kills||0),0);
+  const biggestNet=rows.slice().sort((a,b)=>Number(b.net||0)-Number(a.net||0))[0]||null;
+  if($("latestGameHighlights")){
+    $("latestGameHighlights").innerHTML=[
+      ["🔥 Killer de la partie",killerTop&&Number(killerTop.kills||0)>0?`${killerTop.player} · ${killerTop.kills} kill${Number(killerTop.kills)>1?"s":""}`:"—"],
+      ["♠ Éliminations",`${totalKills}`],
+      ["€ Meilleur net",biggestNet?`${biggestNet.player} · ${euro(biggestNet.net||0)}`:"—"]
+    ].map(([label,value])=>`<div class="latestgame-highlight"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join("");
+  }
+  if($("latestGameCorrectionBtn")){
+    $("latestGameCorrectionBtn").onclick=()=>openCorrectionForGame(gameNo);
+  }
+
   $("latestGamePodium").innerHTML=rows.slice(0,3).map((r,i)=>`
     <div class="podium-medal-item rank-${i+1}">
       <button class="player-link podium-real-name" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(r.player)}</button>
@@ -15852,6 +15986,7 @@ function renderLatestGame(){
 }
 
 let rankingSortKey="points";
+let rankingFilterKey="all";
 
 function setRankingSort(key){
   const allowed=new Set(["points","progress","avgPoints","gamesCount","wins","podiums","tabliers","kills","kpg","net"]);
@@ -15859,8 +15994,44 @@ function setRankingSort(key){
   renderRanking();
 }
 
+function setRankingFilter(key){
+  const allowed=new Set(["all","top5","top10","active"]);
+  rankingFilterKey=allowed.has(String(key||""))?String(key):"all";
+  renderRanking();
+}
+
+function recentGameNumbers(limit=3){
+  return groupedGames().map(([g])=>Number(g)).filter(Number.isFinite).sort((a,b)=>a-b).slice(-limit);
+}
+
+function playerRecentForm(name,limit=3){
+  const games=recentGameNumbers(limit);
+  const rows=(db.history||[]).filter(r=>r.player===name && games.includes(Number(r.game)));
+  return games.map(g=>{
+    const r=rows.find(x=>Number(x.game)===g);
+    return r?Number(r.place)||null:null;
+  });
+}
+
+function recentFormHtml(name,limit=3){
+  const values=playerRecentForm(name,limit);
+  if(!values.length || values.every(v=>v===null))return '<span class="muted">—</span>';
+  return `<span class="recent-form">${values.map(v=>{
+    if(v===null)return '<span class="form-chip bad">–</span>';
+    const cls=v===1?"win":v<=3?"podium":"";
+    return `<span class="form-chip ${cls}" title="${v}e place">${v}</span>`;
+  }).join("")}</span>`;
+}
+
 function rankingRowsForDisplay(){
-  const rows=[...ranking()];
+  let rows=[...ranking()];
+  if(rankingFilterKey==="top5")rows=rows.filter(r=>Number(r.rank)<=5);
+  else if(rankingFilterKey==="top10")rows=rows.filter(r=>Number(r.rank)<=10);
+  else if(rankingFilterKey==="active"){
+    const recent=new Set(recentGameNumbers(3));
+    const activeNames=new Set((db.history||[]).filter(r=>recent.has(Number(r.game))).map(r=>r.player));
+    rows=rows.filter(r=>activeNames.has(r.name));
+  }
   return rows.sort((a,b)=>{
     const av=rankingSortKey==="progress"?(a.progress===null?-Infinity:Number(a.progress||0)):Number(a?.[rankingSortKey]||0);
     const bv=rankingSortKey==="progress"?(b.progress===null?-Infinity:Number(b.progress||0)):Number(b?.[rankingSortKey]||0);
@@ -15874,6 +16045,7 @@ function renderRanking(){
   if(select && select.value!==rankingSortKey)select.value=rankingSortKey;
   const labels={points:"Tri par points",progress:"Tri par progression",avgPoints:"Tri par moyenne de points",gamesCount:"Tri par participations",wins:"Tri par victoires",podiums:"Tri par podiums",tabliers:"Tri par tabliers",kills:"Tri par kills",kpg:"Tri par kills / partie",net:"Tri par solde net"};
   if($("rankingSortHint"))$("rankingSortHint").textContent=labels[rankingSortKey]||labels.points;
+  document.querySelectorAll("[data-ranking-filter]").forEach(btn=>btn.classList.toggle("active",btn.dataset.rankingFilter===rankingFilterKey));
   $("rankingBody").innerHTML=rankingRowsForDisplay().map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}">
     <td>${medalForRank(s.rank)} ${s.rank}</td>
     <td>${playerNameHtml(s.name,{button:true,buttonClass:"ranking-player-link",onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(s.name)}'))`})}</td>
@@ -15886,6 +16058,7 @@ function renderRanking(){
           ? `<span class="progress-indicator progress-down" title="Recul de ${Math.abs(s.progress)} place${Math.abs(s.progress)>1?"s":""}"><span class="progress-arrow">▼</span><strong>${s.progress}</strong></span>`
           : '<span class="progress-indicator progress-flat" title="Position inchangée"><span class="progress-arrow">●</span><strong>0</strong></span>'
     }</td>
+    <td>${recentFormHtml(s.name,3)}</td>
     <td>${num(s.avgPoints,1)}</td>
     <td>${s.gamesCount}</td>
     <td>${s.wins}</td>
@@ -18614,6 +18787,17 @@ function setCorrectionDirty(dirty=true){
   if(el)el.style.display=correctionFormDirty?"inline-block":"none";
 }
 
+function openCorrectionForGame(gameNo){
+  showView("settings");
+  setTimeout(()=>{
+    if(correctionUnlocked){
+      renderCorrectionGameList(Number(gameNo),true);
+      const target=$("correctionGameSelect");
+      target?.scrollIntoView({behavior:"smooth",block:"center"});
+    }
+  },0);
+}
+
 function correctionGames(){
   return groupedGames().sort((a,b)=>a[0]-b[0]);
 }
@@ -19186,9 +19370,9 @@ async function showView(id){
   if(id==="newgame")id="settings";
   const enteringSettings=(id==="settings" && currentViewId!=="settings");
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
-  if(enteringRanking)rankingSortKey="points";
+  if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 2.7.13 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 2.7.15 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -19398,8 +19582,7 @@ if($("playerAvatarPickerBackdrop"))$("playerAvatarPickerBackdrop").onclick=e=>{i
 
 // Résumé de fin de partie
 if($("gameSummaryCloseBtn"))$("gameSummaryCloseBtn").onclick=()=>$("gameSummaryBackdrop").style.display="none";
-if($("gameSummaryCopyBtn"))$("gameSummaryCopyBtn").onclick=copyEndGameSummary;
-if($("gameSummaryEmailBtn"))$("gameSummaryEmailBtn").onclick=emailEndGameSummary;
+if($("gameSummaryViewGameBtn"))$("gameSummaryViewGameBtn").onclick=openLastGameFromSummary;
 if($("gameSummaryBackdrop"))$("gameSummaryBackdrop").onclick=e=>{if(e.target===$("gameSummaryBackdrop"))e.currentTarget.style.display="none";};
 
 // Live : affichage et plein écran
