@@ -8048,7 +8048,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 2.7.15 — Classement / Parties / Profils / Dashboard */
+/* BPT 2.7.16 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8108,6 +8108,32 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   .latestgame-highlights{grid-template-columns:1fr}
   .profile-rivalry-score{grid-template-columns:1fr}
   .profile-rivalry-center{padding:4px 0}
+}
+
+
+/* BPT 2.7.16 — Records / Impact / Courbes */
+.records-grid{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
+}
+.record-card{
+  padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.035)
+}
+.record-card span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.07em;font-weight:800}
+.record-card strong{display:block;margin-top:5px;font-size:17px}
+.impact-list{display:grid;gap:8px;margin-top:10px}
+.impact-item{
+  padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.07);
+  background:rgba(255,255,255,.03);line-height:1.45
+}
+.chart-card{margin-top:14px}
+.chart-wrap{position:relative;width:100%;overflow:hidden}
+.chart-wrap svg{display:block;width:100%;height:auto}
+.chart-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.chart-legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.chart-dot{width:8px;height:8px;border-radius:50%;background:currentColor}
+@media(max-width:760px){
+  .records-grid{grid-template-columns:1fr}
 }
 
 </style>
@@ -10285,7 +10311,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.7.15":"Version PC 2.7.15";
+  el.textContent=mobile?"Version téléphone 2.7.16":"Version PC 2.7.16";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -10777,6 +10803,18 @@ function simplifyRecordTextForMobile(text){
     <p id="dashDynamicsText">Les faits marquants du championnat apparaîtront ici après les premières parties.</p>
   </div>
 
+  <div class="card chart-card">
+    <div class="premium-eyebrow">Évolution du Top 5</div>
+    <div class="muted">Classement général après chaque partie.</div>
+    <div id="dashboardTop5Chart" class="chart-wrap"></div>
+    <div id="dashboardTop5Legend" class="chart-legend"></div>
+  </div>
+
+  <div class="card">
+    <div class="premium-eyebrow">Records du championnat</div>
+    <div id="dashboardRecords" class="records-grid"></div>
+  </div>
+
   <div class="premium-main-grid">
     <section class="premium-panel premium-podium-panel">
       <div class="premium-panel-head">
@@ -10908,6 +10946,12 @@ function simplifyRecordTextForMobile(text){
     <div class="latestgame-summary-line" id="latestGameSummary"></div>
 
     <div id="latestGameHighlights" class="latestgame-highlights"></div>
+
+    <div class="card" style="margin-top:12px">
+      <div class="premium-eyebrow">Ce que cette partie change</div>
+      <div id="latestGameImpact" class="impact-list"></div>
+    </div>
+
     <div class="latestgame-actions">
       <button class="btn ghost" id="latestGameCorrectionBtn" type="button">Corriger cette partie</button>
     </div>
@@ -11121,6 +11165,13 @@ function simplifyRecordTextForMobile(text){
       <h2>Forme récente</h2>
       <div class="muted" style="margin-bottom:8px">Les 5 dernières participations du joueur.</div>
       <div id="playerProfileRecentForm" class="profile-form-strip"></div>
+
+      <div class="chart-card">
+        <h2 style="margin-top:18px">Évolution du classement</h2>
+        <div class="muted">Rang général du joueur au fil des parties.</div>
+        <div id="playerProfileRankChart" class="chart-wrap"></div>
+      </div>
+
       <h2 style="margin-top:18px">Historique des places en partie</h2>
       <div id="playerProfilePlaces"></div>
     </div>
@@ -11216,7 +11267,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.7.15</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.7.16</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -11432,7 +11483,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.15 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 2.7.16 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -11698,7 +11749,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.15 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.16 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -12072,7 +12123,7 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.7.15 : aucune image Base64 dans bpt_state. Les photos de parties
+    // BPT 2.7.16 : aucune image Base64 dans bpt_state. Les photos de parties
     // sont stockées dans Firebase ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
@@ -14157,6 +14208,7 @@ function renderProfile(preferredName=null){
     $("playerProfileAchievements").innerHTML='<span class="profile-no-achievement">Aucun accomplissement.</span>';
     $("playerProfilePlaces").innerHTML="";
     if($("playerProfileRecentForm"))$("playerProfileRecentForm").innerHTML="";
+    if($("playerProfileRankChart"))$("playerProfileRankChart").innerHTML="";
     if($("playerProfileMainRivalry"))$("playerProfileMainRivalry").innerHTML='<span class="muted">Aucune rivalité disponible.</span>';
     if($("playerProfileRankHistory"))$("playerProfileRankHistory").innerHTML="";
     $("playerProfileRivals").innerHTML="";
@@ -14260,6 +14312,13 @@ function renderProfile(preferredName=null){
           <small>${num(r.points||0,0)} pts</small>
         </div>`).join("")
       : '<span class="muted">Aucune partie.</span>';
+  }
+
+
+  if($("playerProfileRankChart")){
+    const snaps=rankingSnapshotByGame();
+    const vals=snaps.map(s=>({x:s.game,y:s.ranks[name]})).filter(v=>Number.isFinite(v.y));
+    renderLineChart("playerProfileRankChart",[{name,values:vals}],{reverseY:true,label:`Évolution du classement de ${name}`});
   }
 
   if($("playerProfileMainRivalry")){
@@ -15050,7 +15109,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.15 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 2.7.16 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -15759,6 +15818,27 @@ function renderDashboard(){
     }
   }
 
+
+  // Records
+  if($("dashboardRecords")){
+    $("dashboardRecords").innerHTML=championshipRecords()
+      .map(([label,value])=>`<div class="record-card"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`)
+      .join("");
+  }
+
+  // Top 5 evolution chart
+  const snapshots=rankingSnapshotByGame();
+  const currentTop5=rank.slice(0,5).map(r=>r.name);
+  const series=currentTop5.map(name=>({
+    name,
+    values:snapshots.map(s=>({x:s.game,y:s.ranks[name]})).filter(v=>Number.isFinite(v.y))
+  })).filter(s=>s.values.length);
+  renderLineChart("dashboardTop5Chart",series,{reverseY:true,label:"Évolution du Top 5"});
+  if($("dashboardTop5Legend")){
+    const colors=["#f1c86a","#62d889","#6fb7ff","#ff8b7b","#c89cff"];
+    $("dashboardTop5Legend").innerHTML=series.map((s,i)=>`<span class="chart-legend-item" style="color:${colors[i%colors.length]}"><span class="chart-dot"></span>${esc(s.name)}</span>`).join("");
+  }
+
   const podium=rank.slice(0,3);
   $("dashPodium").innerHTML=podium.length ? podium.map((p,i)=>`
     <div class="premium-podium-card rank-${i+1}">
@@ -15939,6 +16019,13 @@ function renderLatestGame(){
     $("latestGameCorrectionBtn").onclick=()=>openCorrectionForGame(gameNo);
   }
 
+  if($("latestGameImpact")){
+    const impacts=latestGameImpactItems(gameNo);
+    $("latestGameImpact").innerHTML=impacts.length
+      ? impacts.map(t=>`<div class="impact-item">${esc(t)}</div>`).join("")
+      : '<div class="impact-item muted">Cette partie ne modifie pas significativement le classement général.</div>';
+  }
+
   $("latestGamePodium").innerHTML=rows.slice(0,3).map((r,i)=>`
     <div class="podium-medal-item rank-${i+1}">
       <button class="player-link podium-real-name" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(r.player)}</button>
@@ -15998,6 +16085,140 @@ function setRankingFilter(key){
   const allowed=new Set(["all","top5","top10","active"]);
   rankingFilterKey=allowed.has(String(key||""))?String(key):"all";
   renderRanking();
+}
+
+
+function chartEscape(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+function renderLineChart(containerId,series,options={}){
+  const el=$(containerId);
+  if(!el)return;
+  if(!Array.isArray(series)||!series.length){
+    el.innerHTML='<div class="muted" style="padding:14px 0">Pas encore assez de données.</div>';
+    return;
+  }
+  const width=760,height=250,padL=42,padR=20,padT=18,padB=34;
+  const allPts=series.flatMap(s=>s.values||[]).filter(v=>v&&Number.isFinite(v.y));
+  if(!allPts.length){
+    el.innerHTML='<div class="muted" style="padding:14px 0">Pas encore assez de données.</div>';
+    return;
+  }
+  const xs=allPts.map(v=>v.x), ys=allPts.map(v=>v.y);
+  const minX=Math.min(...xs),maxX=Math.max(...xs);
+  let minY=Math.min(...ys),maxY=Math.max(...ys);
+  if(options.reverseY){ minY=Math.min(1,minY); }
+  if(minY===maxY){maxY=minY+1}
+  const sx=x=>padL+((x-minX)/Math.max(1,maxX-minX))*(width-padL-padR);
+  const sy=y=>{
+    const t=(y-minY)/(maxY-minY);
+    return options.reverseY
+      ? padT+t*(height-padT-padB)
+      : height-padB-t*(height-padT-padB);
+  };
+  const grid=[];
+  const ticks=5;
+  for(let i=0;i<=ticks;i++){
+    const yv=minY+(maxY-minY)*(i/ticks);
+    const yy=sy(yv);
+    grid.push(`<line x1="${padL}" y1="${yy}" x2="${width-padR}" y2="${yy}" stroke="rgba(255,255,255,.08)" stroke-width="1"/>`);
+    grid.push(`<text x="${padL-8}" y="${yy+4}" fill="rgba(255,255,255,.45)" font-size="11" text-anchor="end">${Math.round(yv)}</text>`);
+  }
+  const palette=["#f1c86a","#62d889","#6fb7ff","#ff8b7b","#c89cff"];
+  const paths=series.map((s,idx)=>{
+    const vals=(s.values||[]).filter(v=>v&&Number.isFinite(v.y));
+    const pts=vals.map(v=>`${sx(v.x)},${sy(v.y)}`).join(" ");
+    const color=palette[idx%palette.length];
+    const circles=vals.map(v=>`<circle cx="${sx(v.x)}" cy="${sy(v.y)}" r="3.2" fill="${color}"><title>${chartEscape(s.name)} — partie #${v.x} : ${v.y}</title></circle>`).join("");
+    return `<polyline fill="none" stroke="${color}" stroke-width="2.5" points="${pts}" stroke-linecap="round" stroke-linejoin="round"/>${circles}`;
+  }).join("");
+  const minGame=Math.round(minX),maxGame=Math.round(maxX);
+  const labels=`<text x="${padL}" y="${height-8}" fill="rgba(255,255,255,.45)" font-size="11">#${minGame}</text>
+  <text x="${width-padR}" y="${height-8}" fill="rgba(255,255,255,.45)" font-size="11" text-anchor="end">#${maxGame}</text>`;
+  el.innerHTML=`<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${chartEscape(options.label||"Graphique")}">${grid.join("")}${paths}${labels}</svg>`;
+}
+
+function rankingSnapshotByGame(){
+  const groups=groupedGames().slice().sort((a,b)=>Number(a[0])-Number(b[0]));
+  const players=[...new Set((db.players||[]).map(p=>p.name).concat((db.history||[]).map(r=>r.player)))];
+  const snapshots=[];
+  for(const [gameNo] of groups){
+    const hist=(db.history||[]).filter(r=>Number(r.game)<=Number(gameNo));
+    const stats=players.map(name=>{
+      const rows=hist.filter(r=>r.player===name);
+      const points=rows.reduce((s,r)=>s+Number(r.points||0),0);
+      return {name,points};
+    }).filter(x=>x.points>0);
+    stats.sort((a,b)=>b.points-a.points || a.name.localeCompare(b.name));
+    snapshots.push({
+      game:Number(gameNo),
+      ranks:Object.fromEntries(stats.map((r,i)=>[r.name,i+1])),
+      points:Object.fromEntries(stats.map(r=>[r.name,r.points]))
+    });
+  }
+  return snapshots;
+}
+
+function championshipRecords(){
+  const rank=ranking();
+  const hist=db.history||[];
+  if(!rank.length)return [];
+  const bestBy=(key)=>rank.slice().sort((a,b)=>Number(b[key]||0)-Number(a[key]||0))[0];
+  const wins=bestBy("wins"), podiums=bestBy("podiums"), kills=bestBy("kills"), avg=bestBy("avgPoints"), net=bestBy("net");
+
+  let bestProgress=null;
+  rank.forEach(r=>{
+    if(r.progress!==null && Number(r.progress)>0 && (!bestProgress || Number(r.progress)>Number(bestProgress.progress))) bestProgress=r;
+  });
+
+  let bestStreak={name:"",value:0};
+  for(const p of (db.players||[])){
+    const rows=hist.filter(r=>r.player===p.name).slice().sort((a,b)=>Number(a.game)-Number(b.game));
+    let cur=0,max=0;
+    rows.forEach(r=>{cur=Number(r.place)<=3?cur+1:0;max=Math.max(max,cur)});
+    if(max>bestStreak.value)bestStreak={name:p.name,value:max};
+  }
+
+  return [
+    ["Plus de victoires",wins?`${wins.name} · ${wins.wins}`:"—"],
+    ["Plus de podiums",podiums?`${podiums.name} · ${podiums.podiums}`:"—"],
+    ["Plus de kills",kills?`${kills.name} · ${kills.kills}`:"—"],
+    ["Meilleure moyenne",avg?`${avg.name} · ${num(avg.avgPoints,1)} pts`:"—"],
+    ["Plus forte progression",bestProgress?`${bestProgress.name} · +${bestProgress.progress}`:"—"],
+    ["Plus gros solde net",net?`${net.name} · ${euro(net.net||0)}`:"—"],
+    ["Série de podiums",bestStreak.value?`${bestStreak.name} · ${bestStreak.value}`:"—"]
+  ];
+}
+
+function latestGameImpactItems(gameNo){
+  const snapshots=rankingSnapshotByGame();
+  const cur=snapshots.find(s=>s.game===Number(gameNo));
+  const idx=snapshots.findIndex(s=>s.game===Number(gameNo));
+  const prev=idx>0?snapshots[idx-1]:null;
+  if(!cur)return [];
+  const items=[];
+  const curLeader=Object.entries(cur.ranks).sort((a,b)=>a[1]-b[1])[0]?.[0];
+  const prevLeader=prev?Object.entries(prev.ranks).sort((a,b)=>a[1]-b[1])[0]?.[0]:null;
+  if(curLeader && prevLeader && curLeader!==prevLeader)items.push(`Nouveau leader : ${curLeader} prend la tête du championnat.`);
+  if(curLeader && !prevLeader)items.push(`${curLeader} prend la tête du championnat.`);
+
+  if(prev){
+    const movers=Object.keys(cur.ranks).map(name=>({
+      name,
+      before:prev.ranks[name]??null,
+      after:cur.ranks[name]??null
+    })).filter(x=>x.before&&x.after).map(x=>({...x,delta:x.before-x.after}));
+    const up=movers.slice().sort((a,b)=>b.delta-a.delta)[0];
+    const down=movers.slice().sort((a,b)=>a.delta-b.delta)[0];
+    if(up&&up.delta>0)items.push(`${up.name} gagne ${up.delta} place${up.delta>1?"s":""} au classement général.`);
+    if(down&&down.delta<0)items.push(`${down.name} perd ${Math.abs(down.delta)} place${Math.abs(down.delta)>1?"s":""}.`);
+
+    for(const name of Object.keys(cur.ranks)){
+      if(cur.ranks[name]<=3 && (!prev.ranks[name] || prev.ranks[name]>3)){
+        items.push(`${name} entre dans le Top 3.`);
+      }
+    }
+  }
+  return [...new Set(items)].slice(0,5);
 }
 
 function recentGameNumbers(limit=3){
@@ -19372,7 +19593,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 2.7.15 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 2.7.16 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
