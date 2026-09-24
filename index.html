@@ -10222,7 +10222,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.7.11":"Version PC 2.7.11";
+  el.textContent=mobile?"Version téléphone 2.7.12":"Version PC 2.7.12";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -11132,7 +11132,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.7.11</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version PC 2.7.12</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -11304,6 +11304,10 @@ function simplifyRecordTextForMobile(text){
       <button class="btn ghost" id="gameSummaryCloseBtn">Fermer</button>
     </div>
     <div id="gameSummaryContent"></div>
+    <div class="row" style="justify-content:flex-end;margin-top:16px">
+      <button class="btn ghost" id="gameSummaryCopyBtn" type="button">Copier le résumé</button>
+      <button class="btn secondary" id="gameSummaryEmailBtn" type="button">Envoyer par e-mail</button>
+    </div>
   </div>
 </div>
 
@@ -11345,7 +11349,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.11 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 2.7.12 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -11611,7 +11615,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.11 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.12 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -11985,7 +11989,7 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.7.11 : aucune image Base64 dans bpt_state. Les photos de parties
+    // BPT 2.7.12 : aucune image Base64 dans bpt_state. Les photos de parties
     // sont stockées dans Firebase ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
@@ -14188,35 +14192,107 @@ function openPlayerProfile(name){
   setTimeout(()=>renderProfile(name),0);
 }
 
+let lastGameSummaryRows=[];
+
+function buildEndGameSummaryText(rows){
+  if(!Array.isArray(rows)||!rows.length)return "";
+  const sorted=rows.slice().sort((a,b)=>Number(a.place)-Number(b.place));
+  const first=sorted[0]||{};
+  const title=`BPT — Partie #${first.game||"—"}`;
+  const meta=[
+    first.date?shortDate(first.date):"",
+    first.location||"",
+    `${sorted.length} joueur${sorted.length>1?"s":""}`
+  ].filter(Boolean).join(" · ");
+  const lines=[title,meta,""];
+  const podium=sorted.slice(0,3);
+  if(podium.length){
+    lines.push("PODIUM");
+    podium.forEach(r=>{
+      const medal=Number(r.place)===1?"🥇":Number(r.place)===2?"🥈":"🥉";
+      lines.push(`${medal} ${r.player} — ${num(r.points,0)} pts — ${r.kills||0} kill${Number(r.kills||0)>1?"s":""}`);
+    });
+    lines.push("");
+  }
+  lines.push("CLASSEMENT COMPLET");
+  sorted.forEach(r=>{
+    const killer=Number(r.place)===1?"Vainqueur":(r.killer||"—");
+    lines.push(`${r.place}. ${r.player} — ${num(r.points,0)} pts — ${r.kills||0} kill${Number(r.kills||0)>1?"s":""} — Éliminé par : ${killer} — Net : ${euro(r.net)}`);
+  });
+  return lines.join("\n");
+}
+
 function showEndGameSummary(rows){
   const backdrop=$("gameSummaryBackdrop"),content=$("gameSummaryContent");
   if(!backdrop||!content||!Array.isArray(rows)||!rows.length)return;
+  lastGameSummaryRows=clone(rows);
   const sorted=rows.slice().sort((a,b)=>Number(a.place)-Number(b.place));
   const first=sorted[0];
+
   content.innerHTML=`
     <div class="muted" style="margin-top:6px">Partie #${first.game} · ${esc(shortDate(first.date))}${first.location?" · "+esc(first.location):""} · ${sorted.length} joueurs</div>
+
     <div class="summary-podium">
-      ${sorted.slice(0,3).map((r,i)=>`<div class="summary-place"><b>${esc(r.player)}</b><div class="podium-nickname">${playerNicknameInfo(r.player).primary?`(${esc(playerNicknameInfo(r.player).primary)})`:""}</div><div class="big">${medalForRank(i+1)}</div><div>${num(r.points,0)} pts · ${euro(r.gross)}</div><div class="muted">${r.kills||0} kill${Number(r.kills||0)>1?"s":""}</div></div>`).join("")}
+      ${sorted.slice(0,3).map((r,i)=>`<div class="summary-place">
+        <b>${esc(r.player)}</b>
+        <div class="podium-nickname">${playerNicknameInfo(r.player).primary?`(${esc(playerNicknameInfo(r.player).primary)})`:""}</div>
+        <div class="big">${medalForRank(i+1)}</div>
+        <div>${num(r.points,0)} pts · ${euro(r.gross)}</div>
+        <div class="muted">${r.kills||0} kill${Number(r.kills||0)>1?"s":""}</div>
+      </div>`).join("")}
     </div>
-    <div class="summary-eliminations">
-      <h3>Résumé des éliminations</h3>
-      <div class="tablewrap"><table class="summary-table">
-        <thead><tr><th>Place</th><th>Joueur</th><th>Éliminé par</th><th>Niveau</th><th>Heure</th></tr></thead>
+
+    <h3 style="margin-top:18px">Classement complet</h3>
+    <div class="tablewrap">
+      <table class="summary-table">
+        <thead>
+          <tr>
+            <th>Place</th>
+            <th>Joueur</th>
+            <th>Points</th>
+            <th>Kills</th>
+            <th>Éliminé par</th>
+            <th>Niveau</th>
+            <th>Heure</th>
+            <th>Gain</th>
+            <th>Net</th>
+          </tr>
+        </thead>
         <tbody>
           ${sorted.map(r=>`<tr>
             <td>${r.place}</td>
             <td>${playerNameHtml(r.player)}</td>
-            <td>${Number(r.place)===1?"Vainqueur":(r.killer?playerNameHtml(r.killer):"—")}</td>
+            <td>${num(r.points,0)}</td>
+            <td>${r.kills||0}</td>
+            <td>${Number(r.place)===1?"🏆 Vainqueur":(r.killer?playerNameHtml(r.killer):"—")}</td>
             <td>${r.outLevel?`N${Number(r.outLevel)}`:"—"}</td>
             <td>${esc(r.outTime||"—")}</td>
+            <td>${euro(r.gross)}</td>
+            <td>${euro(r.net)}</td>
           </tr>`).join("")}
         </tbody>
-      </table></div>
-    </div>
-    <div class="tablewrap"><table class="summary-table"><thead><tr><th>Place</th><th>Joueur</th><th>Points</th><th>Kills</th><th>Net</th></tr></thead><tbody>
-      ${sorted.map(r=>`<tr><td>${r.place}</td><td>${playerNameHtml(r.player)}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${euro(r.net)}</td></tr>`).join("")}
-    </tbody></table></div>`;
+      </table>
+    </div>`;
   backdrop.style.display="flex";
+}
+
+async function copyEndGameSummary(){
+  const txt=buildEndGameSummaryText(lastGameSummaryRows);
+  if(!txt)return;
+  try{
+    await navigator.clipboard.writeText(txt);
+    alert("Résumé copié.");
+  }catch(_e){
+    prompt("Copiez le résumé :",txt);
+  }
+}
+
+function emailEndGameSummary(){
+  const txt=buildEndGameSummaryText(lastGameSummaryRows);
+  if(!txt)return;
+  const first=(lastGameSummaryRows||[])[0]||{};
+  const subject=`BPT — Résumé partie #${first.game||""}`.trim();
+  window.location.href=`mailto:fracalemou@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(txt)}`;
 }
 
 function renderHistoryCards(){
@@ -14875,7 +14951,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.11 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 2.7.12 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -19112,7 +19188,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking)rankingSortKey="points";
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 2.7.11 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 2.7.12 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -19322,6 +19398,8 @@ if($("playerAvatarPickerBackdrop"))$("playerAvatarPickerBackdrop").onclick=e=>{i
 
 // Résumé de fin de partie
 if($("gameSummaryCloseBtn"))$("gameSummaryCloseBtn").onclick=()=>$("gameSummaryBackdrop").style.display="none";
+if($("gameSummaryCopyBtn"))$("gameSummaryCopyBtn").onclick=copyEndGameSummary;
+if($("gameSummaryEmailBtn"))$("gameSummaryEmailBtn").onclick=emailEndGameSummary;
 if($("gameSummaryBackdrop"))$("gameSummaryBackdrop").onclick=e=>{if(e.target===$("gameSummaryBackdrop"))e.currentTarget.style.display="none";};
 
 // Live : affichage et plein écran
