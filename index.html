@@ -7,7 +7,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<!-- BPT LIVE V3.24 CHAT MODAL ABOVE FULLSCREEN -->
+<!-- BPT LIVE V3.25 REMAINING SHADOW FIX -->
 <title>BPT — Gestion du championnat</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23173a2b'/%3E%3Cpath d='M32 10c-6 10-18 15-18 26 0 7 5 12 11 12 3 0 5-1 7-4-1 5-3 8-7 10h14c-4-2-6-5-7-10 2 3 4 4 7 4 6 0 11-5 11-12 0-11-12-16-18-26z' fill='%23c8952e'/%3E%3C/svg%3E">
 <style>
@@ -13831,6 +13831,36 @@ body:has(#live3Fullscreen.open){
     width:min(96vw,520px) !important;
     max-height:88dvh !important;
     margin:auto !important;
+  }
+}
+</style>
+
+
+<style id="bpt-live3-v325-remaining-clean">
+#live3Fullscreen .bpt-live3-fs-head{
+  overflow:hidden !important;
+  clip-path:inset(0) !important;
+}
+
+#live3Fullscreen .bpt-live3-fs-rem{
+  overflow:hidden !important;
+  clip-path:inset(0) !important;
+  box-shadow:none !important;
+  filter:none !important;
+  text-shadow:none !important;
+  transform:none !important;
+}
+
+#live3Fullscreen .bpt-live3-fs-rem strong,
+#live3Fullscreen .bpt-live3-fs-rem span{
+  box-shadow:none !important;
+  filter:none !important;
+  text-shadow:none !important;
+}
+
+@media(max-width:700px){
+  #live3Fullscreen .bpt-live3-fs-rem{
+    max-height:34px !important;
   }
 }
 </style>
