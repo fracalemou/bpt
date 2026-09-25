@@ -8048,7 +8048,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 2.7.41 — Classement / Parties / Profils / Dashboard */
+/* BPT 2.7.42 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8111,7 +8111,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.41 — Records / Impact / Courbes */
+/* BPT 2.7.42 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8137,7 +8137,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.41 — blocs repliables */
+/* BPT 2.7.42 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -11551,7 +11551,7 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs
 
 <style id="bpt-v2300-clean-fullscreen-refactor">
 /* ================================
-   BPT 2.7.41 — CLEAN FULLSCREEN REFACTOR
+   BPT 2.7.42 — CLEAN FULLSCREEN REFACTOR
    One final authoritative layout for fullscreen / mobile live.
    ================================ */
 
@@ -11931,7 +11931,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 
 
 <style id="bpt-v231-fullscreen-component">
-/* BPT 2.7.41 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
+/* BPT 2.7.42 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
 #liveFullscreenDisplay,
 #liveFullscreenDisplay:fullscreen,
 #liveFullscreenDisplay:-webkit-full-screen,
@@ -12072,7 +12072,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-actions{width:100% !important;grid-template-columns:1fr 1fr !important;gap:8px !important}
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-action{min-height:46px !important;font-size:12px !important;letter-spacing:.02em !important}
 
-/* BPT 2.7.41 — direct mobile fullscreen classes on the target itself */
+/* BPT 2.7.42 — direct mobile fullscreen classes on the target itself */
 #liveFullscreenDisplay.bptfs-mobile{height:100dvh !important;}
 #liveFullscreenDisplay.bptfs-mobile::before,
 #liveFullscreenDisplay.bptfs-mobile::after{display:none !important;}
@@ -12201,7 +12201,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="2.7.41";
+const BPT_APP_VERSION="2.7.42";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -13193,7 +13193,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 2.7.41</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 2.7.42</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -13409,7 +13409,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.41 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 2.7.42 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -13675,7 +13675,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.41 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.42 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -14049,7 +14049,7 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.7.41 : aucune image Base64 dans bpt_state. Les photos de parties
+    // BPT 2.7.42 : aucune image Base64 dans bpt_state. Les photos de parties
     // sont stockées dans Firebase ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
@@ -14076,7 +14076,8 @@ function cloudBuildLeanPayload(){
       chatSessionId:s.chatSessionId||null,
       levels:clone(s.levels||[]),
       players:clone(s.players||[]),
-      handoverRequest:s.handoverRequest?clone(s.handoverRequest):null
+      handoverRequest:s.handoverRequest?clone(s.handoverRequest):null,
+      handoverGrant:s.handoverGrant?clone(s.handoverGrant):null
     };
   }else{
     payload.liveWire=null;
@@ -14797,7 +14798,7 @@ async function cloudPoll(){
 
 let liveAutoOpenDone=false;
 async function autoOpenActiveLiveOnStartup(){
-  // BPT 2.7.41 : plus d'ouverture automatique du Live au démarrage.
+  // BPT 2.7.42 : plus d'ouverture automatique du Live au démarrage.
   // L'application s'ouvre toujours sur Accueil ; le Live actif est indiqué sur l'onglet Live.
   liveAutoOpenDone=true;
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -17114,7 +17115,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.41 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 2.7.42 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -19321,6 +19322,11 @@ function startSpectatorLivePolling(){
         return;
       }
 
+      if(wire?.handoverGrant?.targetDeviceId===liveDeviceId()){
+        const claimed=await claimGrantedLiveTakeover();
+        if(claimed)return;
+      }
+
       if(wire && creator && creator!==liveDeviceId()){
         spectatorServerLiveState=JSON.parse(JSON.stringify(wire));
 
@@ -19461,6 +19467,14 @@ async function masterCheckHandoverRequest(){
       return;
     }
 
+    const grant=wire.handoverGrant||null;
+    if(grant?.targetDeviceId){
+      s.handoverGrant=clone(grant);
+      s.handoverRequest=null;
+      hideGlobalHandoverRequest();
+      return;
+    }
+
     const req=wire.handoverRequest||null;
     if(req?.requesterDeviceId && req.requesterDeviceId!==liveDeviceId()){
       s.handoverRequest=clone(req);
@@ -19474,6 +19488,98 @@ async function masterCheckHandoverRequest(){
   }catch(e){
     console.warn("Contrôle reprise Live :",e);
   }
+}
+
+
+async function claimGrantedLiveTakeover(){
+  try{
+    const requester=liveDeviceId();
+    let claimed=false;
+
+    const written=await updateMainStateHandover(current=>{
+      const data=current?.data||{};
+      const wire=(data.liveWire?.prepared && !data.liveWire?.synced)
+        ? data.liveWire
+        : ((data.liveState?.prepared && !data.liveState?.synced) ? data.liveState : null);
+
+      if(!wire)return;
+
+      const grant=wire.handoverGrant||null;
+      if(String(grant?.targetDeviceId||"")!==requester)return;
+
+      const currentOwner=String(wire.creatorDeviceId||"");
+      if(!currentOwner || currentOwner===requester)return current;
+
+      claimed=true;
+      current.data={...data};
+
+      if(data.liveWire?.prepared && !data.liveWire?.synced){
+        current.data.liveWire={
+          ...data.liveWire,
+          creatorDeviceId:requester,
+          handoverRequest:null,
+          handoverGrant:null,
+          publishedAt:Date.now()
+        };
+      }
+
+      if(data.liveState?.prepared && !data.liveState?.synced){
+        current.data.liveState={
+          ...data.liveState,
+          creatorDeviceId:requester,
+          handoverRequest:null,
+          handoverGrant:null
+        };
+      }
+
+      return current;
+    });
+
+    if(!claimed || !written?.data)return false;
+
+    const active=(written.data.liveWire?.prepared && !written.data.liveWire?.synced)
+      ? written.data.liveWire
+      : written.data.liveState;
+
+    if(active?.creatorDeviceId===requester){
+      activateTransferredLive(active);
+
+      // Sur téléphone, une reprise réussie ouvre ensuite le plein écran local.
+      if(isBptMobileDevice()){
+        setTimeout(()=>{
+          try{
+            if(!document.body.classList.contains("bpt-mobile-live-fullscreen")){
+              toggleLiveFullscreen();
+            }
+          }catch(_e){}
+        },100);
+      }
+      return true;
+    }
+
+    return false;
+  }catch(e){
+    console.error("BPT claim takeover:",e);
+    return false;
+  }
+}
+
+let bptTakeoverClaimTimer=null;
+function startTakeoverClaimWatcher(){
+  if(bptTakeoverClaimTimer)clearInterval(bptTakeoverClaimTimer);
+
+  let attempts=0;
+  const check=async()=>{
+    attempts++;
+    const ok=await claimGrantedLiveTakeover();
+    if(ok || attempts>=60){
+      clearInterval(bptTakeoverClaimTimer);
+      bptTakeoverClaimTimer=null;
+    }
+  };
+
+  check();
+  bptTakeoverClaimTimer=setInterval(check,1000);
 }
 
 async function requestLiveTakeover(){
@@ -19527,6 +19633,9 @@ async function requestLiveTakeover(){
       $("spectatorTakeoverBtn").disabled=true;
       $("spectatorTakeoverBtn").textContent="Demande envoyée…";
     }
+
+    // Attendre l'accord du maître sans changer son rôle prématurément.
+    startTakeoverClaimWatcher();
     return true;
   }catch(e){
     console.error("BPT takeover request:",e);
@@ -19579,7 +19688,7 @@ async function approveLiveTakeover(){
 
   try{
     const owner=liveDeviceId();
-    let newCreator="";
+    let targetDeviceId="";
 
     const written=await updateMainStateHandover(current=>{
       const data=current.data||{};
@@ -19592,49 +19701,50 @@ async function approveLiveTakeover(){
       const req=wire.handoverRequest||null;
       if(!req?.requesterDeviceId)return;
 
-      newCreator=String(req.requesterDeviceId);
+      targetDeviceId=String(req.requesterDeviceId);
+      const grant={
+        targetDeviceId,
+        grantedByDeviceId:owner,
+        grantedAt:Date.now()
+      };
+
       current.data={...data};
 
       if(data.liveWire?.prepared && !data.liveWire?.synced){
         current.data.liveWire={
           ...data.liveWire,
-          creatorDeviceId:newCreator,
-          handoverRequest:null,
+          handoverGrant:grant,
           publishedAt:Date.now()
         };
       }
+
       if(data.liveState?.prepared && !data.liveState?.synced){
         current.data.liveState={
           ...data.liveState,
-          creatorDeviceId:newCreator,
-          handoverRequest:null
+          handoverGrant:grant
         };
       }
+
       return current;
     });
 
-    if(!newCreator || !written?.data){
+    if(!targetDeviceId || !written?.data){
       alert("La demande de reprise n'est plus disponible.");
       return false;
     }
 
-    stopLiveCloudHeartbeat();
-
-    const writtenWire=(written.data.liveWire?.prepared && !written.data.liveWire?.synced)
-      ? written.data.liveWire
-      : written.data.liveState;
-
-    spectatorServerLiveState=JSON.parse(JSON.stringify(writtenWire));
-    db.liveState=JSON.parse(JSON.stringify(writtenWire));
-    saveLocalOnly();
-
-    applyLiveAccessMode();
-    startSpectatorLivePolling();
-
-    if(currentViewId==="live"){
-      renderSpectatorServerOverlay(writtenWire);
+    // Important : le PC reste maître jusqu'à ce que le téléphone
+    // réclame effectivement le Live et change creatorDeviceId.
+    if(db.liveState){
+      db.liveState.handoverGrant={
+        targetDeviceId,
+        grantedByDeviceId:owner,
+        grantedAt:Date.now()
+      };
+      saveLocalOnly();
     }
 
+    setCloudStatus("busy","Transfert en attente","Le téléphone doit confirmer la reprise du Live.");
     return true;
   }catch(e){
     console.error("BPT approve takeover:",e);
@@ -19642,6 +19752,7 @@ async function approveLiveTakeover(){
     return false;
   }
 }
+
 
 function activateTransferredLive(wire){
   if(!wire?.prepared || wire.creatorDeviceId!==liveDeviceId())return false;
@@ -20272,13 +20383,25 @@ async function liveLaunch(){
   liveRenderAll();
   liveRenderFullscreen();
 
-  // Le clic sur « Lancer la partie » ouvre immédiatement le bon plein écran :
-  // applicatif sur téléphone, natif navigateur sur PC.
-  // Le chrono reste arrêté jusqu'au bouton « Démarrer » du plein écran.
-  await toggleLiveFullscreen();
-
+  // Publier le Live d'abord. Le téléphone ne doit entrer en plein écran
+  // qu'après confirmation que le Live est bien visible sur le serveur.
   await livePushStateNow();
   startLiveCloudHeartbeat();
+
+  if(isBptMobileDevice()){
+    // Le téléphone est le créateur : ouvrir son propre plein écran local.
+    setTimeout(()=>{
+      try{
+        if(!document.body.classList.contains("bpt-mobile-live-fullscreen")){
+          toggleLiveFullscreen();
+        }
+      }catch(e){
+        console.warn("Ouverture plein écran mobile après création :",e);
+      }
+    },100);
+  }else{
+    await toggleLiveFullscreen();
+  }
 }
 
 
@@ -21707,7 +21830,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 2.7.41 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 2.7.42 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -22370,7 +22493,7 @@ liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 (async()=>{
   await initCloudSync();
-  // BPT 2.7.41 : l'ouverture par défaut est toujours Accueil.
+  // BPT 2.7.42 : l'ouverture par défaut est toujours Accueil.
   spectatorAutoOpenSuppressed=true;
   document.body.classList.remove("spectator-live-open");
   await showView("dashboard");
