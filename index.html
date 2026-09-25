@@ -7,7 +7,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<!-- BPT NO LIVE / SHARED DATA -->
+<!-- BPT LIVE V3 REBUILD CORE -->
 <title>BPT — Gestion du championnat</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23173a2b'/%3E%3Cpath d='M32 10c-6 10-18 15-18 26 0 7 5 12 11 12 3 0 5-1 7-4-1 5-3 8-7 10h14c-4-2-6-5-7-10 2 3 4 4 7 4 6 0 11-5 11-12 0-11-12-16-18-26z' fill='%23c8952e'/%3E%3C/svg%3E">
 <style>
@@ -12182,6 +12182,91 @@ nav button[data-view="live"],#live,#liveFullscreenDisplay,#spectatorServerOverla
 #globalHandoverRequest,.live-chat-panel,.live-chat-backdrop,.live-handover-request,
 .live-fullscreen-display{display:none!important}
 </style>
+
+<style id="bpt-live3-styles">
+#live3NavBtn{position:relative}
+#live3NavBtn.live3-active::before{
+  content:"";display:inline-block;width:9px;height:9px;border-radius:50%;
+  background:#ff4d4f;box-shadow:0 0 8px rgba(255,77,79,.65);margin-right:7px
+}
+.bpt-live3-hero-row,.bpt-live3-game-head{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.bpt-live3-role-badge{padding:8px 12px;border-radius:999px;background:#e8ece8;font-weight:800;font-size:12px}
+.bpt-live3-role-badge.master{background:#d7f4df;color:#155b2b}
+.bpt-live3-role-badge.spectator{background:#e6efff;color:#174d9f}
+.bpt-live3-panel{margin-bottom:16px}
+.bpt-live3-title,.bpt-live3-section-title{font-weight:900;font-size:18px;margin-bottom:12px}
+.bpt-live3-section-title{margin-top:18px}
+.bpt-live3-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.bpt-live3-grid label,.bpt-live3-modal-card label{display:grid;gap:6px;font-weight:700;font-size:13px}
+.bpt-live3-player-picker{display:flex;flex-wrap:wrap;gap:8px}
+.bpt-live3-player-check{display:flex;align-items:center;gap:7px;padding:8px 10px;border:1px solid #d8d0c1;border-radius:999px;background:#fff;cursor:pointer}
+.bpt-live3-actions,.bpt-live3-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}
+.bpt-live3-game-location{font-size:24px;font-weight:900}
+.bpt-live3-game-head-actions{display:flex;gap:8px;flex-wrap:wrap}
+.bpt-live3-main{display:grid;gap:16px;justify-items:center;padding:18px 0}
+.bpt-live3-blinds{text-align:center}.bpt-live3-blinds strong{display:block;font-size:44px;line-height:1}.bpt-live3-blinds small{font-weight:800}
+.bpt-live3-timer{font-size:clamp(70px,12vw,150px);line-height:.9;font-weight:950;letter-spacing:-.05em}
+.bpt-live3-kpis{display:grid;grid-template-columns:repeat(4,minmax(120px,1fr));gap:10px;width:min(900px,100%)}
+.bpt-live3-kpis>div{padding:12px;border:1px solid #d8d0c1;border-radius:14px;text-align:center;background:#fff}
+.bpt-live3-kpis span{display:block;font-size:12px;color:#687168}.bpt-live3-kpis strong{display:block;font-size:20px;margin-top:4px}
+.bpt-live3-players{display:flex;flex-wrap:wrap;gap:10px}
+.bpt-live3-player{display:flex;align-items:center;gap:9px;padding:8px 12px;border:1px solid #d8d0c1;border-radius:14px;background:#fff}
+.bpt-live3-player.out{opacity:.5;text-decoration:line-through}
+.bpt-live3-player-dot{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:#355e50;color:#fff;font-weight:900}
+.bpt-live3-takeover-box{margin-top:16px;padding:14px;border:1px solid #d9b56b;background:#fff8e7;border-radius:14px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.bpt-live3-note{margin-top:18px;padding:10px 12px;border-radius:12px;background:#f5f1e8;color:#6d665b;font-size:12px}
+
+.bpt-live3-fullscreen{display:none;position:fixed;inset:0;z-index:999999;background:#0a1110;color:#fff;padding:18px}
+.bpt-live3-fullscreen.open{display:block}
+.bpt-live3-fs-shell{height:100%;display:grid;grid-template-rows:70px 110px minmax(160px,1fr) 84px 60px minmax(110px,145px);gap:10px;position:relative}
+.bpt-live3-fs-head{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
+.bpt-live3-fs-brand{font-size:34px;font-weight:950;letter-spacing:.06em}
+.bpt-live3-fs-chat{justify-self:center;border:1px solid #40504c;background:#14201d;color:#fff;border-radius:999px;padding:10px 16px;font-weight:800}
+.bpt-live3-fs-rem{justify-self:end;text-align:right}.bpt-live3-fs-rem strong{font-size:34px}.bpt-live3-fs-rem span{display:block;font-size:12px;opacity:.7}
+.bpt-live3-fs-blinds{text-align:center;align-self:center}.bpt-live3-fs-blinds span{display:block;font-size:12px;opacity:.7}.bpt-live3-fs-blinds strong{display:block;font-size:56px}.bpt-live3-fs-blinds small{font-weight:800}
+.bpt-live3-fs-timer{display:grid;place-items:center}.bpt-live3-fs-timer>div{font-size:clamp(110px,18vw,230px);font-weight:950;letter-spacing:-.06em;line-height:.85}
+.bpt-live3-fs-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:min(850px,100%);justify-self:center}
+.bpt-live3-fs-kpis>div{border:1px solid #33413d;border-radius:14px;padding:10px;text-align:center;background:#111b18}
+.bpt-live3-fs-kpis span{display:block;font-size:12px;opacity:.65}.bpt-live3-fs-kpis strong{font-size:19px}
+.bpt-live3-fs-actions{display:flex;justify-content:center;gap:12px}
+.bpt-live3-fs-actions button{min-width:220px;border:0;border-radius:12px;font-weight:900;font-size:17px;padding:0 18px}
+#live3FsStartPauseBtn{background:#d2a33c;color:#17120b}#live3FsEliminateBtn{background:#9f3c3c;color:#fff}
+.bpt-live3-fs-players{border:1px solid #2d3b37;border-radius:14px;padding:10px 14px;background:#0f1715;overflow:hidden}
+.bpt-live3-fs-players-title{text-align:center;font-size:12px;opacity:.65;margin-bottom:8px}
+.bpt-live3-fs-player-list{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.bpt-live3-fs-player{display:flex;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;background:#17231f;border:1px solid #31413b;font-size:13px}
+.bpt-live3-fs-player.out{display:none}
+.bpt-live3-fs-exit{position:absolute;right:4px;top:76px;width:42px;height:42px;border-radius:50%;border:1px solid #42514d;background:#14201d;color:#fff;font-size:28px}
+.bpt-live3-modal{display:none;position:fixed;inset:0;z-index:1000000;background:rgba(0,0,0,.58);padding:20px;align-items:center;justify-content:center}
+.bpt-live3-modal.open{display:flex}
+.bpt-live3-modal-card{width:min(520px,100%);background:#fff;color:#1b211d;border-radius:18px;padding:18px;box-shadow:0 20px 80px rgba(0,0,0,.35)}
+.bpt-live3-modal-card select,.bpt-live3-modal-card input{width:100%}
+.bpt-live3-modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+.bpt-live3-chat-head{display:flex;justify-content:space-between;align-items:center}
+.bpt-live3-chat-messages{display:grid;gap:8px;max-height:280px;overflow:auto;margin:12px 0}
+.bpt-live3-chat-msg{padding:9px 10px;border-radius:12px;background:#f1eee8}.bpt-live3-chat-msg small{display:block;color:#6d665b;margin-bottom:3px}
+.bpt-live3-chat-compose{display:grid;grid-template-columns:1fr auto;gap:8px}
+
+@media(max-width:700px){
+  .bpt-live3-grid{grid-template-columns:1fr 1fr}
+  .bpt-live3-hero-row,.bpt-live3-game-head{align-items:flex-start;flex-direction:column}
+  .bpt-live3-kpis{grid-template-columns:1fr 1fr}
+  .bpt-live3-timer{font-size:74px}
+  .bpt-live3-blinds strong{font-size:36px}
+  .bpt-live3-fullscreen{padding:10px}
+  .bpt-live3-fs-shell{grid-template-rows:54px 76px minmax(120px,1fr) 68px 52px minmax(92px,120px);gap:7px}
+  .bpt-live3-fs-brand{font-size:25px}
+  .bpt-live3-fs-chat span{display:none}
+  .bpt-live3-fs-chat{padding:8px 11px}
+  .bpt-live3-fs-rem strong{font-size:26px}
+  .bpt-live3-fs-blinds strong{font-size:38px}
+  .bpt-live3-fs-timer>div{font-size:clamp(72px,22vw,126px)}
+  .bpt-live3-fs-kpis{gap:6px}.bpt-live3-fs-kpis>div{padding:7px 5px}.bpt-live3-fs-kpis strong{font-size:14px}
+  .bpt-live3-fs-actions button{min-width:0;flex:1;font-size:14px;padding:0 8px}
+  .bpt-live3-fs-player-list{gap:5px}.bpt-live3-fs-player{font-size:11px;padding:5px 7px}
+  .bpt-live3-fs-exit{top:58px;width:36px;height:36px;font-size:23px}
+}
+</style>
 </head>
 <body>
 <script>
@@ -12330,6 +12415,7 @@ function simplifyRecordTextForMobile(text){
 </header>
 <nav id="nav">
   
+  <button data-view="live3" id="live3NavBtn">● Live</button>
   <button data-view="dashboard" class="active">⌂ Accueil</button>
   <button data-view="latestgame">◷ Parties</button>
   <button data-view="ranking">♛ Classement</button>
@@ -12338,6 +12424,185 @@ function simplifyRecordTextForMobile(text){
   <button data-view="settings">⚙ Paramètres</button>
 </nav>
 <main>
+
+<section id="live3" class="view bpt-live3-view">
+  <div class="hero tab-premium-hero bpt-live3-hero">
+    <div class="bpt-live3-hero-row">
+      <div>
+        <div class="home-kicker">BPT · Live V3</div>
+        <h1>Gestion de la partie en direct</h1>
+        <p id="live3Subtitle">Nouveau moteur Live indépendant du championnat partagé.</p>
+      </div>
+      <div id="live3RoleBadge" class="bpt-live3-role-badge">AUCUN LIVE</div>
+    </div>
+  </div>
+
+  <div id="live3Prep" class="bpt-live3-panel">
+    <div class="card">
+      <div class="bpt-live3-title">Créer un Live</div>
+      <div class="bpt-live3-grid">
+        <label>Nom / lieu
+          <input id="live3Location" placeholder="Ex. Soirée chez Martin">
+        </label>
+        <label>Date
+          <input id="live3Date" type="date">
+        </label>
+        <label>Tapis de départ
+          <input id="live3Stack" type="number" min="100" step="100" value="20000">
+        </label>
+        <label>Buy-in (€)
+          <input id="live3BuyIn" type="number" min="0" step="1" value="20">
+        </label>
+        <label>Petite blind de départ
+          <input id="live3StartSB" type="number" min="1" step="5" value="25">
+        </label>
+        <label>Durée d'un niveau (min)
+          <input id="live3LevelMin" type="number" min="3" max="60" step="1" value="15">
+        </label>
+        <label>Ante
+          <select id="live3UseAnte">
+            <option value="no">Non</option>
+            <option value="yes">Oui</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="bpt-live3-section-title">Joueurs</div>
+      <div id="live3PlayerPicker" class="bpt-live3-player-picker"></div>
+
+      <div class="bpt-live3-actions">
+        <button id="live3CreateBtn" class="btn primary" type="button">Créer la partie</button>
+        <span id="live3CreateStatus" class="muted"></span>
+      </div>
+    </div>
+  </div>
+
+  <div id="live3Game" class="bpt-live3-panel" style="display:none">
+    <div class="card bpt-live3-game-card">
+      <div class="bpt-live3-game-head">
+        <div>
+          <div id="live3GameLocation" class="bpt-live3-game-location">—</div>
+          <div id="live3GameMeta" class="muted">—</div>
+        </div>
+        <div class="bpt-live3-game-head-actions">
+          <button id="live3ChatBtn" class="btn ghost" type="button">💬 Chat</button>
+          <button id="live3FullscreenBtn" class="btn ghost" type="button">Plein écran</button>
+          <button id="live3QuitViewBtn" class="btn ghost" type="button">Quitter le Live</button>
+        </div>
+      </div>
+
+      <div class="bpt-live3-main">
+        <div class="bpt-live3-blinds">
+          <span class="muted">BLINDS</span>
+          <strong id="live3Blinds">—</strong>
+          <small id="live3Ante"></small>
+        </div>
+        <div id="live3Timer" class="bpt-live3-timer">00:00</div>
+        <div class="bpt-live3-kpis">
+          <div><span>Joueurs</span><strong id="live3Remaining">0</strong></div>
+          <div><span>Tapis moyen</span><strong id="live3AvgStack">0</strong></div>
+          <div><span>Temps écoulé</span><strong id="live3Elapsed">00:00</strong></div>
+          <div><span>Prochain niveau</span><strong id="live3Next">—</strong></div>
+        </div>
+      </div>
+
+      <div id="live3MasterControls" class="bpt-live3-controls">
+        <button id="live3StartPauseBtn" class="btn primary" type="button">Démarrer</button>
+        <button id="live3PrevLevelBtn" class="btn ghost" type="button">Niveau précédent</button>
+        <button id="live3NextLevelBtn" class="btn ghost" type="button">Niveau suivant</button>
+        <button id="live3MinusBtn" class="btn ghost" type="button">− 1 min</button>
+        <button id="live3PlusBtn" class="btn ghost" type="button">+ 1 min</button>
+        <button id="live3EliminateBtn" class="btn danger" type="button">Sortir un joueur</button>
+        <button id="live3EndBtn" class="btn danger" type="button">Terminer le Live</button>
+      </div>
+
+      <div id="live3SpectatorControls" class="bpt-live3-controls" style="display:none">
+        <button id="live3TakeoverBtn" class="btn primary" type="button">Demander la reprise de gestion</button>
+        <span id="live3TakeoverStatus" class="muted"></span>
+      </div>
+
+      <div id="live3TakeoverRequest" class="bpt-live3-takeover-box" style="display:none">
+        <strong>Demande de reprise</strong>
+        <span id="live3TakeoverText">Un autre appareil demande la gestion.</span>
+        <div>
+          <button id="live3ApproveTakeoverBtn" class="btn primary" type="button">Autoriser</button>
+          <button id="live3RejectTakeoverBtn" class="btn ghost" type="button">Refuser</button>
+        </div>
+      </div>
+
+      <div class="bpt-live3-section-title">Joueurs à la table</div>
+      <div id="live3Players" class="bpt-live3-players"></div>
+
+      <div class="bpt-live3-note">
+        Le Live V3 est isolé du classement et de l'historique. Pour cette première reconstruction,
+        terminer le Live ne crée pas automatiquement une partie dans le championnat.
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="live3Fullscreen" class="bpt-live3-fullscreen" aria-hidden="true">
+  <div class="bpt-live3-fs-shell">
+    <header class="bpt-live3-fs-head">
+      <div class="bpt-live3-fs-brand">BPT</div>
+      <button id="live3FsChatBtn" class="bpt-live3-fs-chat" type="button">💬 <span>Chat</span></button>
+      <div class="bpt-live3-fs-rem"><strong id="live3FsRemaining">0</strong><span>restants</span></div>
+    </header>
+    <section class="bpt-live3-fs-blinds">
+      <span>BLINDS</span>
+      <strong id="live3FsBlinds">—</strong>
+      <small id="live3FsAnte"></small>
+    </section>
+    <section class="bpt-live3-fs-timer">
+      <div id="live3FsTimer">00:00</div>
+    </section>
+    <section class="bpt-live3-fs-kpis">
+      <div><span>Tapis moyen</span><strong id="live3FsAvg">0</strong></div>
+      <div><span>Temps écoulé</span><strong id="live3FsElapsed">00:00</strong></div>
+      <div><span>Prochain</span><strong id="live3FsNext">—</strong></div>
+    </section>
+    <section id="live3FsMasterActions" class="bpt-live3-fs-actions">
+      <button id="live3FsStartPauseBtn" type="button">Démarrer</button>
+      <button id="live3FsEliminateBtn" type="button">Sortir un joueur</button>
+    </section>
+    <section class="bpt-live3-fs-players">
+      <div class="bpt-live3-fs-players-title">Joueurs à la table</div>
+      <div id="live3FsPlayers" class="bpt-live3-fs-player-list"></div>
+    </section>
+    <button id="live3FsExitBtn" class="bpt-live3-fs-exit" type="button" aria-label="Quitter le plein écran">×</button>
+  </div>
+</div>
+
+<div id="live3ElimModal" class="bpt-live3-modal" aria-hidden="true">
+  <div class="bpt-live3-modal-card">
+    <h2>Sortir un joueur</h2>
+    <label>Joueur éliminé
+      <select id="live3ElimPlayer"></select>
+    </label>
+    <label>Éliminé par
+      <select id="live3ElimKiller"></select>
+    </label>
+    <div class="bpt-live3-modal-actions">
+      <button id="live3ElimConfirmBtn" class="btn danger" type="button">Confirmer</button>
+      <button id="live3ElimCancelBtn" class="btn ghost" type="button">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<div id="live3ChatModal" class="bpt-live3-modal" aria-hidden="true">
+  <div class="bpt-live3-modal-card bpt-live3-chat-card">
+    <div class="bpt-live3-chat-head">
+      <h2>💬 Chat du Live</h2>
+      <button id="live3ChatCloseBtn" class="btn ghost" type="button">×</button>
+    </div>
+    <div id="live3ChatMessages" class="bpt-live3-chat-messages"></div>
+    <div class="bpt-live3-chat-compose">
+      <input id="live3ChatInput" maxlength="120" placeholder="Votre message…">
+      <button id="live3ChatSendBtn" class="btn primary" type="button">Envoyer</button>
+    </div>
+  </div>
+</div>
+
 
 <section id="live" class="view">
   <div class="hero tab-premium-hero live-tab-hero">
@@ -22401,6 +22666,511 @@ document.addEventListener("visibilitychange",()=>{
   window.addEventListener("DOMContentLoaded",()=>{clean();setTimeout(clean,500);setTimeout(clean,1800);});
   window.addEventListener("pageshow",clean);
   document.addEventListener("visibilitychange",()=>{if(!document.hidden)clean();});
+})();
+</script>
+
+<script id="bpt-live3-module">
+(function(){
+  "use strict";
+
+  const PATH="bpt/live_v3/current";
+  const DEVICE_KEY="bpt_live3_device_id";
+  const $3=(id)=>document.getElementById(id);
+
+  let current=null;
+  let ref=null;
+  let ticker=null;
+  let listenerInstalled=false;
+  let advancing=false;
+
+  function uid(){
+    let id=localStorage.getItem(DEVICE_KEY);
+    if(!id){
+      id="d3_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,9);
+      localStorage.setItem(DEVICE_KEY,id);
+    }
+    return id;
+  }
+  function deviceLabel(){
+    const mobile=window.matchMedia&&window.matchMedia("(max-width:700px)").matches;
+    return mobile?"Téléphone":"PC";
+  }
+  function clone(v){return JSON.parse(JSON.stringify(v));}
+  function fmt(n){return Math.round(Number(n)||0).toLocaleString("fr-FR");}
+  function time(sec){
+    sec=Math.max(0,Math.ceil(Number(sec)||0));
+    const m=Math.floor(sec/60),s=sec%60;
+    return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  }
+  function isActive(){return !!(current&&current.active);}
+  function isOwner(){return !!(isActive()&&String(current.ownerId||"")===uid());}
+  function alivePlayers(){
+    return (current?.players||[]).filter(p=>p.status!=="out"&&p.status!=="winner");
+  }
+  function remainingCount(){
+    const alive=alivePlayers();
+    const winner=(current?.players||[]).find(p=>p.status==="winner");
+    return alive.length||(winner?1:0);
+  }
+  function remainingSeconds(){
+    if(!current)return 0;
+    if(current.running&&current.deadline){
+      return Math.max(0,Math.ceil((Number(current.deadline)-Date.now())/1000));
+    }
+    return Math.max(0,Number(current.remainingSec)||0);
+  }
+  function elapsedSeconds(){
+    if(!current)return 0;
+    const base=Number(current.elapsedSec)||0;
+    if(current.running&&current.runStartedAt)return base+Math.max(0,Math.floor((Date.now()-Number(current.runStartedAt))/1000));
+    return base;
+  }
+  function level(){
+    return current?.levels?.[Number(current.levelIndex)||0]||null;
+  }
+  function nextLevel(){
+    return current?.levels?.[(Number(current.levelIndex)||0)+1]||null;
+  }
+  function buildLevels(sb,durationMin,useAnte){
+    const factors=[1,2,3,4,6,8,12,16,24,32,40,50,60,80,100,120,160,200];
+    return factors.map((f,i)=>{
+      const small=Math.max(1,Math.round(sb*f));
+      const big=small*2;
+      const ante=useAnte?(i<3?0:Math.max(1,Math.round(big/4))):0;
+      return {level:i+1,sb:small,bb:big,ante,durationSec:Math.max(180,Number(durationMin||15)*60)};
+    });
+  }
+  function initials(name){
+    return String(name||"?").trim().split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toUpperCase()||"?";
+  }
+
+  async function ensureRef(){
+    const env=await window.bptFirebaseEnsure?.();
+    if(!env?.rtdb)throw new Error("Firebase indisponible");
+    if(!ref)ref=env.rtdb.ref(PATH);
+    return ref;
+  }
+
+  async function installListener(){
+    if(listenerInstalled)return true;
+    try{
+      const r=await ensureRef();
+      r.on("value",snap=>{
+        current=snap.val()||null;
+        onState();
+      },err=>{
+        console.warn("Live V3 listener:",err);
+        listenerInstalled=false;
+      });
+      listenerInstalled=true;
+      return true;
+    }catch(e){
+      console.warn("Live V3 install:",e);
+      setTimeout(installListener,1800);
+      return false;
+    }
+  }
+
+  async function ownerTransaction(mutator){
+    const r=await ensureRef();
+    let changed=false;
+    const session=current?.sessionId||"";
+    const res=await r.transaction(server=>{
+      if(!server?.active)return server;
+      if(String(server.sessionId||"")!==session)return server;
+      if(String(server.ownerId||"")!==uid())return server;
+      const next=mutator(clone(server));
+      if(!next)return server;
+      next.updatedAt=Date.now();
+      changed=true;
+      return next;
+    });
+    return changed?res.snapshot.val():null;
+  }
+
+  async function createLive(){
+    const location=String($3("live3Location")?.value||"").trim();
+    const selected=[...document.querySelectorAll('#live3PlayerPicker input[type="checkbox"]:checked')].map(x=>x.value);
+    if(!location){alert("Indiquez le nom / lieu de la partie.");return;}
+    if(selected.length<2){alert("Sélectionnez au moins 2 joueurs.");return;}
+
+    $3("live3CreateBtn").disabled=true;
+    $3("live3CreateStatus").textContent="Création…";
+
+    try{
+      const r=await ensureRef();
+      let created=false;
+      const now=Date.now();
+      const state={
+        version:3,active:true,sessionId:"L3_"+now.toString(36)+"_"+Math.random().toString(36).slice(2,7),
+        ownerId:uid(),ownerLabel:deviceLabel(),createdAt:now,updatedAt:now,
+        location,date:$3("live3Date").value||new Date().toISOString().slice(0,10),
+        startStack:Math.max(100,Number($3("live3Stack").value)||20000),
+        buyIn:Math.max(0,Number($3("live3BuyIn").value)||0),
+        running:false,startedAt:null,runStartedAt:null,deadline:null,elapsedSec:0,
+        levelIndex:0,
+        levels:buildLevels(
+          Math.max(1,Number($3("live3StartSB").value)||25),
+          Math.max(3,Number($3("live3LevelMin").value)||15),
+          $3("live3UseAnte").value==="yes"
+        ),
+        remainingSec:Math.max(3,Number($3("live3LevelMin").value)||15)*60,
+        players:selected.map(name=>({name,status:"in",place:null,killer:"",outAt:null})),
+        takeoverRequest:null,chat:[]
+      };
+      await r.transaction(server=>{
+        if(server?.active)return server;
+        created=true;
+        return state;
+      });
+      if(!created){
+        alert("Un Live est déjà actif. Ouvrez l'onglet Live pour le suivre.");
+      }
+    }catch(e){
+      console.error(e);
+      alert("Impossible de créer le Live : "+(e?.message||e));
+    }finally{
+      $3("live3CreateBtn").disabled=false;
+      $3("live3CreateStatus").textContent="";
+    }
+  }
+
+  async function toggleStartPause(){
+    if(!isOwner())return;
+    await ownerTransaction(s=>{
+      const now=Date.now();
+      if(s.running){
+        const rem=Math.max(0,Math.ceil((Number(s.deadline||now)-now)/1000));
+        s.remainingSec=rem;
+        s.elapsedSec=Number(s.elapsedSec||0)+Math.max(0,Math.floor((now-Number(s.runStartedAt||now))/1000));
+        s.running=false;s.runStartedAt=null;s.deadline=null;
+      }else{
+        const rem=Math.max(0,Number(s.remainingSec)||0);
+        s.running=true;
+        if(!s.startedAt)s.startedAt=now;
+        s.runStartedAt=now;
+        s.deadline=now+rem*1000;
+      }
+      return s;
+    });
+  }
+
+  async function adjustMinute(delta){
+    if(!isOwner())return;
+    await ownerTransaction(s=>{
+      const now=Date.now();
+      if(s.running){
+        const rem=Math.max(0,Math.ceil((Number(s.deadline||now)-now)/1000)+delta);
+        s.deadline=now+rem*1000;
+        s.runStartedAt=now;
+      }else{
+        s.remainingSec=Math.max(0,Number(s.remainingSec||0)+delta);
+      }
+      return s;
+    });
+  }
+
+  async function changeLevel(delta,auto=false){
+    if(!isOwner())return;
+    await ownerTransaction(s=>{
+      const oldIdx=Number(s.levelIndex)||0;
+      const idx=Math.max(0,Math.min((s.levels?.length||1)-1,oldIdx+delta));
+      if(idx===oldIdx&&!auto)return s;
+      const now=Date.now();
+      if(s.running&&s.runStartedAt){
+        s.elapsedSec=Number(s.elapsedSec||0)+Math.max(0,Math.floor((now-Number(s.runStartedAt))/1000));
+      }
+      s.levelIndex=idx;
+      s.remainingSec=Number(s.levels[idx]?.durationSec||900);
+      if(s.running){
+        s.runStartedAt=now;
+        s.deadline=now+s.remainingSec*1000;
+      }else{
+        s.runStartedAt=null;s.deadline=null;
+      }
+      return s;
+    });
+  }
+
+  async function autoAdvanceIfNeeded(){
+    if(advancing||!isOwner()||!current?.running||remainingSeconds()>0)return;
+    if((Number(current.levelIndex)||0)>=(current.levels?.length||1)-1)return;
+    advancing=true;
+    try{await changeLevel(1,true);}finally{advancing=false;}
+  }
+
+  function openElim(){
+    if(!isOwner())return;
+    const alive=alivePlayers();
+    $3("live3ElimPlayer").innerHTML=alive.map(p=>`<option>${escapeHtml(p.name)}</option>`).join("");
+    $3("live3ElimKiller").innerHTML='<option value="">— Aucun / inconnu —</option>'+alive.map(p=>`<option>${escapeHtml(p.name)}</option>`).join("");
+    $3("live3ElimModal").classList.add("open");
+    $3("live3ElimModal").setAttribute("aria-hidden","false");
+  }
+
+  async function eliminate(){
+    if(!isOwner())return;
+    const victim=$3("live3ElimPlayer").value;
+    const killer=$3("live3ElimKiller").value;
+    if(!victim)return;
+    await ownerTransaction(s=>{
+      const alive=s.players.filter(p=>p.status==="in");
+      const p=s.players.find(x=>x.name===victim&&x.status==="in");
+      if(!p)return s;
+      p.status="out";p.place=alive.length;p.killer=killer||"";p.outAt=Date.now();
+      const survivors=s.players.filter(x=>x.status==="in");
+      if(survivors.length===1){
+        survivors[0].status="winner";
+        survivors[0].place=1;
+      }
+      return s;
+    });
+    closeElim();
+  }
+  function closeElim(){
+    $3("live3ElimModal").classList.remove("open");
+    $3("live3ElimModal").setAttribute("aria-hidden","true");
+  }
+
+  async function endLive(){
+    if(!isOwner())return;
+    if(!confirm("Terminer ce Live ?"))return;
+    await ownerTransaction(s=>{
+      if(s.running&&s.runStartedAt){
+        const now=Date.now();
+        s.elapsedSec=Number(s.elapsedSec||0)+Math.max(0,Math.floor((now-Number(s.runStartedAt))/1000));
+      }
+      s.active=false;s.running=false;s.deadline=null;s.runStartedAt=null;s.endedAt=Date.now();
+      s.takeoverRequest=null;
+      return s;
+    });
+    closeFullscreen();
+    showView("dashboard");
+  }
+
+  async function requestTakeover(){
+    if(!isActive()||isOwner())return;
+    const r=await ensureRef();
+    let sent=false;
+    await r.transaction(s=>{
+      if(!s?.active||String(s.ownerId||"")===uid())return s;
+      s=clone(s);
+      s.takeoverRequest={requesterId:uid(),requesterLabel:deviceLabel(),requestedAt:Date.now()};
+      s.updatedAt=Date.now();sent=true;return s;
+    });
+    if(sent)$3("live3TakeoverStatus").textContent="Demande envoyée.";
+  }
+
+  async function approveTakeover(){
+    if(!isOwner()||!current?.takeoverRequest?.requesterId)return;
+    const target=current.takeoverRequest.requesterId;
+    const label=current.takeoverRequest.requesterLabel||"Autre appareil";
+    await ownerTransaction(s=>{
+      if(String(s.takeoverRequest?.requesterId||"")!==target)return s;
+      s.ownerId=target;s.ownerLabel=label;s.takeoverRequest=null;return s;
+    });
+  }
+
+  async function rejectTakeover(){
+    if(!isOwner())return;
+    await ownerTransaction(s=>{s.takeoverRequest=null;return s;});
+  }
+
+  async function sendChat(){
+    if(!isActive())return;
+    const input=$3("live3ChatInput");
+    const message=String(input.value||"").trim();
+    if(!message)return;
+    const r=await ensureRef();
+    const session=current.sessionId;
+    await r.transaction(s=>{
+      if(!s?.active||String(s.sessionId||"")!==session)return s;
+      s=clone(s);
+      const list=Array.isArray(s.chat)?s.chat:[];
+      list.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),from:deviceLabel(),deviceId:uid(),text:message,at:Date.now()});
+      s.chat=list.slice(-20);s.updatedAt=Date.now();return s;
+    });
+    input.value="";
+  }
+
+  function openChat(){
+    renderChat();
+    $3("live3ChatModal").classList.add("open");
+    $3("live3ChatModal").setAttribute("aria-hidden","false");
+  }
+  function closeChat(){
+    $3("live3ChatModal").classList.remove("open");
+    $3("live3ChatModal").setAttribute("aria-hidden","true");
+  }
+  function renderChat(){
+    const list=(current?.chat||[]).slice(-3);
+    $3("live3ChatMessages").innerHTML=list.length?list.map(m=>{
+      const d=new Date(Number(m.at)||Date.now()).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+      return `<div class="bpt-live3-chat-msg"><small>${escapeHtml(m.from||"Appareil")} · ${d}</small>${escapeHtml(m.text||"")}</div>`;
+    }).join(""):'<div class="muted">Aucun message.</div>';
+  }
+
+  function openFullscreen(){
+    if(!isActive())return;
+    $3("live3Fullscreen").classList.add("open");
+    $3("live3Fullscreen").setAttribute("aria-hidden","false");
+    document.body.style.overflow="hidden";
+    render();
+  }
+  function closeFullscreen(){
+    $3("live3Fullscreen").classList.remove("open");
+    $3("live3Fullscreen").setAttribute("aria-hidden","true");
+    document.body.style.overflow="";
+  }
+
+  function renderPrepPlayers(){
+    const host=$3("live3PlayerPicker");
+    if(!host)return;
+    const players=(window.db?.players||[]).filter(p=>p.active!==false).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name),"fr"));
+    host.innerHTML=players.map(p=>`<label class="bpt-live3-player-check"><input type="checkbox" value="${escapeAttr(p.name)}" checked> <span>${escapeHtml(p.name)}</span></label>`).join("");
+  }
+
+  function renderPlayers(target,fullscreen=false){
+    if(!target)return;
+    const players=current?.players||[];
+    target.innerHTML=players.map(p=>{
+      const cls=p.status==="out"?" out":"";
+      const place=p.place?` · ${p.place}e`:"";
+      if(fullscreen)return `<div class="bpt-live3-fs-player${cls}"><span>${escapeHtml(p.name)}${place}</span></div>`;
+      return `<div class="bpt-live3-player${cls}"><div class="bpt-live3-player-dot">${initials(p.name)}</div><div><strong>${escapeHtml(p.name)}</strong><small>${place}${p.killer?` · par ${escapeHtml(p.killer)}`:""}</small></div></div>`;
+    }).join("");
+  }
+
+  function render(){
+    const active=isActive();
+    const owner=isOwner();
+    const role=$3("live3RoleBadge");
+    const prep=$3("live3Prep"),game=$3("live3Game");
+
+    $3("live3NavBtn")?.classList.toggle("live3-active",active);
+
+    if(!active){
+      if(prep)prep.style.display="";
+      if(game)game.style.display="none";
+      if(role){role.textContent="AUCUN LIVE";role.className="bpt-live3-role-badge";}
+      renderPrepPlayers();
+      return;
+    }
+
+    if(prep)prep.style.display="none";
+    if(game)game.style.display="";
+    if(role){
+      role.textContent=owner?"MAÎTRE":"SPECTATEUR";
+      role.className="bpt-live3-role-badge "+(owner?"master":"spectator");
+    }
+
+    const lv=level(),nx=nextLevel(),rem=remainingSeconds(),count=remainingCount();
+    const total=(current.players?.length||0)*Number(current.startStack||0);
+    const avg=count?total/count:0;
+    const blinds=lv?`${fmt(lv.sb)} / ${fmt(lv.bb)}`:"—";
+    const ante=lv?.ante?`ANTE ${fmt(lv.ante)}`:"";
+    const next=nx?`${fmt(nx.sb)} / ${fmt(nx.bb)}${nx.ante?` · ante ${fmt(nx.ante)}`:""}`:"Dernier niveau";
+
+    $3("live3GameLocation").textContent=current.location||"Live BPT";
+    $3("live3GameMeta").textContent=`${current.date||""} · ${current.players?.length||0} joueurs · maître : ${current.ownerLabel||"appareil"}`;
+    $3("live3Blinds").textContent=blinds;$3("live3Ante").textContent=ante;
+    $3("live3Timer").textContent=time(rem);$3("live3Remaining").textContent=String(count);
+    $3("live3AvgStack").textContent=fmt(avg);$3("live3Elapsed").textContent=time(elapsedSeconds());$3("live3Next").textContent=next;
+    $3("live3StartPauseBtn").textContent=current.running?"Pause":(current.startedAt?"Reprendre":"Démarrer");
+
+    $3("live3MasterControls").style.display=owner?"flex":"none";
+    $3("live3SpectatorControls").style.display=owner?"none":"flex";
+
+    const req=current.takeoverRequest;
+    const requestBox=$3("live3TakeoverRequest");
+    if(owner&&req?.requesterId&&req.requesterId!==uid()){
+      requestBox.style.display="flex";
+      $3("live3TakeoverText").textContent=`${req.requesterLabel||"Un appareil"} demande à reprendre la gestion.`;
+    }else requestBox.style.display="none";
+
+    renderPlayers($3("live3Players"),false);
+
+    $3("live3FsBlinds").textContent=blinds;$3("live3FsAnte").textContent=ante;
+    $3("live3FsTimer").textContent=time(rem);$3("live3FsRemaining").textContent=String(count);
+    $3("live3FsAvg").textContent=fmt(avg);$3("live3FsElapsed").textContent=time(elapsedSeconds());$3("live3FsNext").textContent=next;
+    $3("live3FsStartPauseBtn").textContent=current.running?"Pause":(current.startedAt?"Reprendre":"Démarrer");
+    $3("live3FsMasterActions").style.display=owner?"flex":"none";
+    renderPlayers($3("live3FsPlayers"),true);
+    renderChat();
+  }
+
+  function onState(){
+    render();
+    autoAdvanceIfNeeded();
+  }
+
+  function escapeHtml(v){
+    return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+  function escapeAttr(v){return escapeHtml(v);}
+
+  function bind(){
+    const today=new Date().toISOString().slice(0,10);
+    if($3("live3Date"))$3("live3Date").value=today;
+
+    $3("live3CreateBtn")?.addEventListener("click",createLive);
+    $3("live3StartPauseBtn")?.addEventListener("click",toggleStartPause);
+    $3("live3PrevLevelBtn")?.addEventListener("click",()=>changeLevel(-1));
+    $3("live3NextLevelBtn")?.addEventListener("click",()=>changeLevel(1));
+    $3("live3MinusBtn")?.addEventListener("click",()=>adjustMinute(-60));
+    $3("live3PlusBtn")?.addEventListener("click",()=>adjustMinute(60));
+    $3("live3EliminateBtn")?.addEventListener("click",openElim);
+    $3("live3EndBtn")?.addEventListener("click",endLive);
+    $3("live3TakeoverBtn")?.addEventListener("click",requestTakeover);
+    $3("live3ApproveTakeoverBtn")?.addEventListener("click",approveTakeover);
+    $3("live3RejectTakeoverBtn")?.addEventListener("click",rejectTakeover);
+
+    $3("live3FullscreenBtn")?.addEventListener("click",openFullscreen);
+    $3("live3FsExitBtn")?.addEventListener("click",closeFullscreen);
+    $3("live3FsStartPauseBtn")?.addEventListener("click",toggleStartPause);
+    $3("live3FsEliminateBtn")?.addEventListener("click",openElim);
+
+    $3("live3ElimConfirmBtn")?.addEventListener("click",eliminate);
+    $3("live3ElimCancelBtn")?.addEventListener("click",closeElim);
+    $3("live3ElimModal")?.addEventListener("click",e=>{if(e.target===$3("live3ElimModal"))closeElim();});
+
+    $3("live3ChatBtn")?.addEventListener("click",openChat);
+    $3("live3FsChatBtn")?.addEventListener("click",openChat);
+    $3("live3ChatCloseBtn")?.addEventListener("click",closeChat);
+    $3("live3ChatSendBtn")?.addEventListener("click",sendChat);
+    $3("live3ChatInput")?.addEventListener("keydown",e=>{if(e.key==="Enter")sendChat();});
+    $3("live3ChatModal")?.addEventListener("click",e=>{if(e.target===$3("live3ChatModal"))closeChat();});
+
+    $3("live3QuitViewBtn")?.addEventListener("click",()=>showView("dashboard"));
+
+    document.addEventListener("keydown",e=>{
+      if(e.key==="Escape"){
+        if($3("live3ChatModal")?.classList.contains("open"))closeChat();
+        else if($3("live3ElimModal")?.classList.contains("open"))closeElim();
+        else if($3("live3Fullscreen")?.classList.contains("open"))closeFullscreen();
+      }
+    });
+
+    // When the user enters the tab, refresh local UI; never auto-open fullscreen.
+    $3("live3NavBtn")?.addEventListener("click",()=>setTimeout(render,0));
+
+    renderPrepPlayers();
+    installListener();
+
+    ticker=setInterval(()=>{
+      if(isActive()){
+        render();
+        autoAdvanceIfNeeded();
+      }
+    },1000);
+
+    window.addEventListener("online",installListener);
+    document.addEventListener("visibilitychange",()=>{if(!document.hidden)installListener();});
+  }
+
+  window.BPTLive3={render,installListener,getState:()=>clone(current),deviceId:uid};
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",bind);
+  else bind();
 })();
 </script>
 </body>
