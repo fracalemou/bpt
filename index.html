@@ -7,7 +7,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<!-- BPT LIVE V3.10 PLAYER TEXT FIX -->
+<!-- BPT LIVE V3.15 TITLE CONTRAST -->
 <title>BPT — Gestion du championnat</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23173a2b'/%3E%3Cpath d='M32 10c-6 10-18 15-18 26 0 7 5 12 11 12 3 0 5-1 7-4-1 5-3 8-7 10h14c-4-2-6-5-7-10 2 3 4 4 7 4 6 0 11-5 11-12 0-11-12-16-18-26z' fill='%23c8952e'/%3E%3C/svg%3E">
 <style>
@@ -12315,6 +12315,812 @@ nav button[data-view="live"],#live,#liveFullscreenDisplay,#spectatorServerOverla
   .bpt-live3-fs-exit{top:58px;width:36px;height:36px;font-size:23px}
 }
 </style>
+
+<style id="bpt-live3-ui-polish">
+/* --- Global contrast and readability for Live V3 --- */
+#live3,
+#live3 *{
+  box-sizing:border-box;
+}
+
+#live3 .muted{
+  color:#5f655f !important;
+}
+
+#live3 .card{
+  background:#f8f5ef;
+  border:1px solid #d2c7b7;
+  border-radius:18px;
+  box-shadow:0 8px 24px rgba(0,0,0,.04);
+}
+
+#live3 .home-kicker{
+  color:#476457 !important;
+}
+
+#live3 h1,
+#live3 h2,
+#live3 h3,
+#live3 .bpt-live3-title,
+#live3 .bpt-live3-section-title,
+#live3 .bpt-live3-game-location{
+  color:#1d2621 !important;
+}
+
+#live3 label{
+  color:#313a35 !important;
+}
+
+#live3 input,
+#live3 select{
+  background:#fffdfa !important;
+  color:#1f2823 !important;
+  border:1px solid #bcae9b !important;
+  border-radius:12px !important;
+  min-height:42px;
+  padding:10px 12px;
+  font-weight:700;
+}
+
+#live3 input::placeholder{
+  color:#7a7f78 !important;
+}
+
+/* --- Create live action row --- */
+#live3 .bpt-live3-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  align-items:center;
+  justify-content:flex-start;
+}
+
+/* --- Buttons: more ergonomic and evenly distributed --- */
+#live3 .btn{
+  min-height:44px;
+  padding:10px 16px;
+  border-radius:12px !important;
+  font-weight:900 !important;
+  letter-spacing:.01em;
+  border:1px solid transparent;
+  box-shadow:none;
+}
+
+#live3 .btn.primary{
+  background:#355e50 !important;
+  color:#fff !important;
+  border-color:#355e50 !important;
+}
+
+#live3 .btn.primary:hover{
+  background:#2f5347 !important;
+  border-color:#2f5347 !important;
+}
+
+#live3 .btn.ghost{
+  background:#f4efe6 !important;
+  color:#24302a !important;
+  border-color:#b7ab99 !important;
+}
+
+#live3 .btn.ghost:hover{
+  background:#ede6da !important;
+  border-color:#958876 !important;
+}
+
+#live3 .btn.danger{
+  background:#9a3f3f !important;
+  color:#fff !important;
+  border-color:#8e3535 !important;
+}
+
+#live3 .btn.danger:hover{
+  background:#842f2f !important;
+  border-color:#7b2a2a !important;
+}
+
+/* --- Main control groups --- */
+#live3 .bpt-live3-controls{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(160px,1fr));
+  gap:12px;
+  align-items:stretch;
+  width:100%;
+}
+
+#live3 .bpt-live3-controls .btn,
+#live3 .bpt-live3-controls .muted{
+  width:100%;
+}
+
+#live3 #live3MasterControls .btn,
+#live3 #live3SpectatorControls .btn{
+  justify-self:stretch;
+}
+
+#live3 #live3SpectatorControls{
+  grid-template-columns:minmax(220px,320px) 1fr;
+}
+
+#live3 #live3TakeoverStatus{
+  display:flex;
+  align-items:center;
+  padding:0 8px;
+  font-weight:700;
+}
+
+/* --- Header action buttons --- */
+#live3 .bpt-live3-game-head-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:flex-end;
+}
+
+#live3 .bpt-live3-game-head-actions .btn{
+  min-width:140px;
+}
+
+/* --- KPIs and main numbers --- */
+#live3 .bpt-live3-blinds{
+  color:#223028;
+}
+
+#live3 .bpt-live3-blinds strong{
+  color:#18211d !important;
+}
+
+#live3 .bpt-live3-timer{
+  color:#18211d !important;
+}
+
+#live3 .bpt-live3-kpis{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(120px,1fr));
+  gap:12px;
+  width:min(980px,100%);
+}
+
+#live3 .bpt-live3-kpis > div{
+  background:#fffdfa;
+  border:1px solid #d2c7b7;
+  border-radius:14px;
+  padding:13px 12px;
+}
+
+#live3 .bpt-live3-kpis span{
+  color:#5a605b !important;
+  font-weight:700;
+}
+
+#live3 .bpt-live3-kpis strong{
+  color:#1b241f !important;
+}
+
+/* --- Players chips --- */
+#live3 .bpt-live3-player-check{
+  background:#f2ede4;
+  border-color:#b6aa99;
+  color:#1f2a26 !important;
+}
+
+#live3 .bpt-live3-player-check:hover{
+  background:#f8f3ea;
+  border-color:#8d806e;
+}
+
+#live3 .bpt-live3-player-check:has(input:checked){
+  background:#d9e5dd;
+  border-color:#769486;
+  box-shadow:0 0 0 2px rgba(53,94,80,.08);
+}
+
+#live3 .bpt-live3-player{
+  background:#fffdfa;
+  border:1px solid #d2c7b7;
+  border-radius:14px;
+}
+
+#live3 .bpt-live3-player strong,
+#live3 .bpt-live3-player small{
+  color:#1f2924 !important;
+}
+
+#live3 .bpt-live3-player.out small{
+  color:#6d746e !important;
+}
+
+/* --- Takeover box clearer --- */
+#live3 .bpt-live3-takeover-box{
+  background:#fff4de;
+  border-color:#d8b16a;
+  color:#2c2417;
+}
+
+#live3 .bpt-live3-takeover-box strong,
+#live3 .bpt-live3-takeover-box span{
+  color:#2c2417 !important;
+}
+
+/* --- Fullscreen ergonomic controls --- */
+.bpt-live3-fs-chat{
+  background:#14211c !important;
+  border-color:#475752 !important;
+  color:#fff !important;
+}
+
+.bpt-live3-fs-actions{
+  display:flex;
+  justify-content:center;
+  gap:14px;
+  flex-wrap:wrap;
+}
+
+.bpt-live3-fs-actions button{
+  min-height:52px;
+  padding:0 20px;
+  border-radius:14px;
+  font-weight:900;
+  box-shadow:none;
+}
+
+#live3FsStartPauseBtn{
+  background:#d1a13c !important;
+  color:#1e180f !important;
+}
+
+#live3FsEliminateBtn{
+  background:#9a3f3f !important;
+  color:#fff !important;
+}
+
+/* --- Mobile layout --- */
+@media (max-width: 900px){
+  #live3 .bpt-live3-controls{
+    grid-template-columns:repeat(2,minmax(150px,1fr));
+  }
+  #live3 #live3SpectatorControls{
+    grid-template-columns:1fr;
+  }
+}
+
+@media (max-width: 700px){
+  #live3 .bpt-live3-grid{
+    grid-template-columns:1fr;
+  }
+
+  #live3 .bpt-live3-kpis{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  #live3 .bpt-live3-controls{
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+
+  #live3 .bpt-live3-game-head-actions{
+    width:100%;
+    justify-content:stretch;
+  }
+
+  #live3 .bpt-live3-game-head-actions .btn{
+    min-width:0;
+    flex:1 1 calc(50% - 10px);
+  }
+
+  #live3 .bpt-live3-actions{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  #live3 .bpt-live3-actions .btn{
+    width:100%;
+  }
+}
+</style>
+
+
+<style id="bpt-live3-text-contrast-fix">
+/* Force readable text in Live V3 regardless of inherited application theme */
+#live3,
+#live3 .hero,
+#live3 .card,
+#live3 .bpt-live3-panel{
+  color:#1d2621 !important;
+}
+
+#live3 .hero h1,
+#live3 .hero h2,
+#live3 .hero h3,
+#live3 h1,
+#live3 h2,
+#live3 h3,
+#live3 .bpt-live3-title,
+#live3 .bpt-live3-section-title,
+#live3 .bpt-live3-game-location{
+  color:#17201c !important;
+  -webkit-text-fill-color:#17201c !important;
+  opacity:1 !important;
+}
+
+#live3 .hero p,
+#live3 p,
+#live3 #live3Subtitle,
+#live3 .muted,
+#live3 small,
+#live3 label{
+  color:#4f5852 !important;
+  -webkit-text-fill-color:#4f5852 !important;
+  opacity:1 !important;
+}
+
+#live3 .home-kicker{
+  color:#355e50 !important;
+  -webkit-text-fill-color:#355e50 !important;
+  opacity:1 !important;
+}
+
+#live3 .bpt-live3-role-badge{
+  color:#24302a !important;
+  -webkit-text-fill-color:#24302a !important;
+}
+
+#live3 .bpt-live3-role-badge.master{
+  color:#174b29 !important;
+  -webkit-text-fill-color:#174b29 !important;
+}
+
+#live3 .bpt-live3-role-badge.spectator{
+  color:#184983 !important;
+  -webkit-text-fill-color:#184983 !important;
+}
+</style>
+
+
+<style id="bpt-live3-form-contrast-fix">
+/* Labels and form fields must remain readable under every inherited theme */
+#live3 .bpt-live3-grid label,
+#live3 .bpt-live3-modal-card label{
+  color:#202923 !important;
+  -webkit-text-fill-color:#202923 !important;
+  opacity:1 !important;
+  font-weight:800 !important;
+}
+
+#live3 .bpt-live3-grid input,
+#live3 .bpt-live3-grid select,
+#live3 .bpt-live3-modal-card input,
+#live3 .bpt-live3-modal-card select{
+  color:#17201c !important;
+  -webkit-text-fill-color:#17201c !important;
+  background:#fffdfa !important;
+  border-color:#aa9d8b !important;
+  opacity:1 !important;
+}
+
+#live3 .bpt-live3-grid input::placeholder,
+#live3 .bpt-live3-modal-card input::placeholder{
+  color:#70766f !important;
+  -webkit-text-fill-color:#70766f !important;
+  opacity:1 !important;
+}
+
+#live3 .bpt-live3-grid input:disabled{
+  color:#4b534e !important;
+  -webkit-text-fill-color:#4b534e !important;
+  background:#eee8de !important;
+  opacity:1 !important;
+}
+</style>
+
+
+<style id="bpt-live3-sport-club-theme">
+/* ===== LIVE V3 — SPORT CLUB / BPT THEME ===== */
+
+#live3{
+  color:var(--text) !important;
+}
+
+#live3 .tab-premium-hero,
+#live3 .hero{
+  background:linear-gradient(135deg,#173a2b 0%,#101b15 72%) !important;
+  border:1px solid #315441 !important;
+  color:var(--text) !important;
+  box-shadow:0 12px 32px rgba(0,0,0,.16);
+}
+
+#live3 .home-kicker{
+  color:var(--gold) !important;
+  -webkit-text-fill-color:var(--gold) !important;
+}
+
+#live3 h1,
+#live3 h2,
+#live3 h3,
+#live3 .bpt-live3-title,
+#live3 .bpt-live3-section-title,
+#live3 .bpt-live3-game-location{
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+}
+
+#live3 .hero p,
+#live3 #live3Subtitle{
+  color:#d6dfd9 !important;
+  -webkit-text-fill-color:#d6dfd9 !important;
+}
+
+#live3 .card{
+  background:linear-gradient(180deg,#18231d 0%,#141f19 100%) !important;
+  border:1px solid #32473a !important;
+  color:var(--text) !important;
+  border-radius:16px !important;
+  box-shadow:0 12px 32px rgba(0,0,0,.18);
+}
+
+#live3 .muted,
+#live3 small{
+  color:#b7c3bb !important;
+  -webkit-text-fill-color:#b7c3bb !important;
+}
+
+#live3 label,
+#live3 .bpt-live3-grid label,
+#live3 .bpt-live3-modal-card label{
+  color:#eef3ef !important;
+  -webkit-text-fill-color:#eef3ef !important;
+  font-weight:800 !important;
+}
+
+#live3 input,
+#live3 select{
+  background:#101a15 !important;
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  border:1px solid #3c5546 !important;
+  border-radius:10px !important;
+  min-height:44px;
+  padding:10px 12px;
+  font-weight:750;
+}
+
+#live3 input::placeholder{
+  color:#87968d !important;
+  -webkit-text-fill-color:#87968d !important;
+}
+
+#live3 input:focus,
+#live3 select:focus{
+  outline:none !important;
+  border-color:var(--gold) !important;
+  box-shadow:0 0 0 3px rgba(200,149,46,.16) !important;
+}
+
+/* Role badge */
+#live3 .bpt-live3-role-badge{
+  background:#26372e !important;
+  color:#e6eee8 !important;
+  -webkit-text-fill-color:#e6eee8 !important;
+  border:1px solid #40584a;
+  font-weight:900;
+  letter-spacing:.05em;
+}
+
+#live3 .bpt-live3-role-badge.master{
+  background:#173a2b !important;
+  color:#8bd4a3 !important;
+  -webkit-text-fill-color:#8bd4a3 !important;
+  border-color:#397656;
+}
+
+#live3 .bpt-live3-role-badge.spectator{
+  background:#202c38 !important;
+  color:#8bb4df !important;
+  -webkit-text-fill-color:#8bb4df !important;
+  border-color:#3f5a72;
+}
+
+/* Player selector = sport roster chips */
+#live3 .bpt-live3-player-picker{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  padding:0;
+  border:0;
+  background:transparent;
+}
+
+#live3 .bpt-live3-player-check{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:9px 13px;
+  border-radius:999px;
+  border:1px solid #43584b;
+  background:#202d26 !important;
+  color:#f1f5f2 !important;
+  font-weight:850;
+  cursor:pointer;
+  transition:.12s ease;
+}
+
+#live3 .bpt-live3-player-check span{
+  color:#f1f5f2 !important;
+  -webkit-text-fill-color:#f1f5f2 !important;
+}
+
+#live3 .bpt-live3-player-check:hover{
+  border-color:#6d8977;
+  background:#283a30 !important;
+  transform:translateY(-1px);
+}
+
+#live3 .bpt-live3-player-check:has(input:checked){
+  background:#173a2b !important;
+  border-color:var(--gold) !important;
+  box-shadow:0 0 0 2px rgba(200,149,46,.10);
+}
+
+#live3 .bpt-live3-player-check input[type="checkbox"]{
+  accent-color:var(--gold) !important;
+}
+
+/* Main scoreboard area */
+#live3 .bpt-live3-main{
+  background:#101a15;
+  border:1px solid #2f4337;
+  border-radius:18px;
+  padding:24px 18px !important;
+}
+
+#live3 .bpt-live3-blinds{
+  color:#aebdb3 !important;
+}
+
+#live3 .bpt-live3-blinds strong{
+  color:var(--gold) !important;
+  -webkit-text-fill-color:var(--gold) !important;
+  text-shadow:0 2px 0 rgba(0,0,0,.2);
+}
+
+#live3 .bpt-live3-timer{
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  font-variant-numeric:tabular-nums;
+  text-shadow:0 4px 18px rgba(0,0,0,.28);
+}
+
+/* KPI tiles */
+#live3 .bpt-live3-kpis{
+  gap:10px !important;
+}
+
+#live3 .bpt-live3-kpis>div{
+  background:#1a2720 !important;
+  border:1px solid #354b3e !important;
+  border-radius:13px !important;
+  padding:13px 12px !important;
+}
+
+#live3 .bpt-live3-kpis span{
+  color:#9fafa5 !important;
+  -webkit-text-fill-color:#9fafa5 !important;
+  font-weight:750;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+
+#live3 .bpt-live3-kpis strong{
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  font-size:22px !important;
+}
+
+/* Buttons */
+#live3 .btn{
+  min-height:46px;
+  padding:10px 16px !important;
+  border-radius:10px !important;
+  font-weight:900 !important;
+  letter-spacing:.01em;
+  border:1px solid transparent !important;
+  transition:transform .1s ease, filter .1s ease, background .1s ease;
+}
+
+#live3 .btn:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.06);
+}
+
+#live3 .btn.primary{
+  background:var(--gold) !important;
+  color:#17120b !important;
+  -webkit-text-fill-color:#17120b !important;
+  border-color:#d6a84a !important;
+}
+
+#live3 .btn.ghost{
+  background:#26372e !important;
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  border-color:#40584a !important;
+}
+
+#live3 .btn.danger{
+  background:#8f4545 !important;
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  border-color:#a85b5b !important;
+}
+
+/* Action distribution */
+#live3 .bpt-live3-controls{
+  display:grid !important;
+  grid-template-columns:repeat(4,minmax(150px,1fr));
+  gap:10px !important;
+  width:100%;
+}
+
+#live3 .bpt-live3-controls .btn{
+  width:100%;
+}
+
+#live3 .bpt-live3-game-head-actions{
+  display:flex;
+  gap:9px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+#live3 .bpt-live3-game-head-actions .btn{
+  min-width:130px;
+}
+
+/* Players in active game */
+#live3 .bpt-live3-player{
+  background:#1d2b23 !important;
+  border:1px solid #3a5143 !important;
+  color:#fff !important;
+}
+
+#live3 .bpt-live3-player strong{
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+}
+
+#live3 .bpt-live3-player small{
+  color:#aebbb2 !important;
+  -webkit-text-fill-color:#aebbb2 !important;
+}
+
+#live3 .bpt-live3-player-dot{
+  background:var(--gold) !important;
+  color:#17120b !important;
+}
+
+/* Takeover request */
+#live3 .bpt-live3-takeover-box{
+  background:#2b2517 !important;
+  border-color:#8b6b2d !important;
+  color:#fff !important;
+}
+
+#live3 .bpt-live3-takeover-box strong,
+#live3 .bpt-live3-takeover-box span{
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+}
+
+/* Fullscreen = club scoreboard */
+.bpt-live3-fullscreen{
+  background:
+    radial-gradient(circle at 50% -20%,rgba(47,109,80,.22),transparent 48%),
+    #0b120e !important;
+}
+
+.bpt-live3-fs-shell{
+  color:#fff;
+}
+
+.bpt-live3-fs-brand{
+  color:var(--gold) !important;
+}
+
+.bpt-live3-fs-blinds strong{
+  color:var(--gold) !important;
+}
+
+.bpt-live3-fs-kpis>div{
+  background:#17231d !important;
+  border-color:#344a3d !important;
+}
+
+.bpt-live3-fs-kpis span{
+  color:#9ea9a1 !important;
+}
+
+.bpt-live3-fs-kpis strong{
+  color:#fff !important;
+}
+
+#live3FsStartPauseBtn{
+  background:var(--gold) !important;
+  color:#17120b !important;
+}
+
+#live3FsEliminateBtn{
+  background:#8f4545 !important;
+  color:#fff !important;
+}
+
+.bpt-live3-fs-player{
+  background:#1c2a22 !important;
+  border-color:#405548 !important;
+  color:#fff !important;
+}
+
+/* Mobile */
+@media(max-width:900px){
+  #live3 .bpt-live3-controls{
+    grid-template-columns:repeat(2,minmax(140px,1fr));
+  }
+}
+
+@media(max-width:700px){
+  #live3 .bpt-live3-grid{
+    grid-template-columns:1fr !important;
+  }
+
+  #live3 .bpt-live3-controls{
+    grid-template-columns:1fr 1fr !important;
+  }
+
+  #live3 .bpt-live3-game-head-actions{
+    width:100%;
+  }
+
+  #live3 .bpt-live3-game-head-actions .btn{
+    flex:1 1 calc(50% - 8px);
+    min-width:0;
+  }
+
+  #live3 .bpt-live3-kpis{
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  }
+
+  #live3 .bpt-live3-main{
+    padding:18px 12px !important;
+  }
+}
+</style>
+
+
+<style id="bpt-live3-title-contrast">
+#live3 .bpt-live3-hero-row h1,
+#live3 .hero h1{
+  color:#ffffff !important;
+  -webkit-text-fill-color:#ffffff !important;
+  font-size:clamp(30px,4vw,46px) !important;
+  font-weight:950 !important;
+  line-height:1.05 !important;
+  letter-spacing:-.025em !important;
+  text-shadow:0 2px 10px rgba(0,0,0,.45) !important;
+  opacity:1 !important;
+}
+
+#live3 .bpt-live3-hero-row{
+  padding:4px 0;
+}
+
+#live3 #live3Subtitle{
+  color:#d9e3dc !important;
+  -webkit-text-fill-color:#d9e3dc !important;
+  font-size:15px !important;
+  font-weight:650 !important;
+  margin-top:8px !important;
+}
+</style>
+
 </head>
 <body>
 <script>
