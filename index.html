@@ -8048,7 +8048,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 2.7.17 — Classement / Parties / Profils / Dashboard */
+/* BPT 2.7.18 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8111,7 +8111,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.17 — Records / Impact / Courbes */
+/* BPT 2.7.18 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8137,7 +8137,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.17 — blocs repliables */
+/* BPT 2.7.18 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -10325,6 +10325,299 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fu
 }
 </style>
 
+
+<style id="bpt-v218-live-fullscreen-refresh">
+  /* ===== V218 — Live plein écran simplifié, avatars + sortie ===== */
+  #liveFullscreenDisplay,
+  #liveFullscreenDisplay:fullscreen,
+  #liveFullscreenDisplay:-webkit-full-screen,
+  body.bpt-mobile-live-fullscreen #liveFullscreenDisplay{
+    box-sizing:border-box;
+    width:100%;
+    min-height:100%;
+    background:
+      radial-gradient(circle at top center, rgba(37,99,235,.18), transparent 42%),
+      linear-gradient(180deg, #071423 0%, #0a1828 48%, #08111d 100%);
+    color:#eef4ff;
+    padding:22px 26px 18px;
+    display:flex !important;
+    flex-direction:column;
+    gap:16px;
+    overflow:auto;
+  }
+  #liveFullscreenDisplay .live-fullscreen-top-actions{
+    display:flex !important;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin:0;
+    position:relative;
+    z-index:5;
+  }
+  #liveFullscreenDisplay .live-fullscreen-brand{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    margin:0;
+    padding:10px 14px;
+    border-radius:14px;
+    background:rgba(10,22,36,.72);
+    border:1px solid rgba(87,145,255,.18);
+    color:#f8fbff;
+    font-size:14px;
+    letter-spacing:.14em;
+    font-weight:900;
+    text-transform:uppercase;
+  }
+  #liveFullscreenDisplay .live-fullscreen-top-right{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  #liveFullscreenDisplay .live-fullscreen-exit{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:44px;
+    padding:0 16px;
+    border-radius:12px;
+    border:1px solid rgba(121,167,255,.28);
+    background:rgba(14,28,44,.78);
+    color:#e9f1ff;
+    font-weight:800;
+    opacity:1;
+    box-shadow:none;
+  }
+  #liveFullscreenDisplay .live-fullscreen-exit:hover{
+    background:rgba(26,46,70,.92);
+  }
+  #liveFullscreenDisplay .live-fs-hidden-meta{
+    display:none !important;
+  }
+  #liveFullscreenDisplay .live-fs-main{
+    display:grid;
+    grid-template-columns:minmax(280px, 430px) 1fr;
+    gap:20px;
+    align-items:stretch;
+  }
+  #liveFullscreenDisplay .live-fs-blinds-spotlight,
+  #liveFullscreenDisplay .live-fs-timer-panel,
+  #liveFullscreenDisplay .live-fullscreen-kpi{
+    border-radius:22px;
+    border:1px solid rgba(97,154,255,.18);
+    background:linear-gradient(180deg, rgba(13,27,44,.86), rgba(7,18,30,.92));
+    box-shadow:0 16px 36px rgba(0,0,0,.22);
+  }
+  #liveFullscreenDisplay .live-fs-blinds-spotlight{
+    padding:22px 24px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:14px;
+    min-height:255px;
+  }
+  #liveFullscreenDisplay .live-fs-blinds-spotlight .live-fs-eyebrow,
+  #liveFullscreenDisplay .live-fs-timer-panel .live-fullscreen-timer-label,
+  #liveFullscreenDisplay .live-fs-players-title,
+  #liveFullscreenDisplay .live-fullscreen-kpi span{
+    color:#8fb3f1;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.16em;
+    font-weight:800;
+  }
+  #liveFullscreenDisplay .live-fs-blinds-value{
+    font-size:clamp(56px, 7vw, 104px);
+    line-height:.92;
+    font-weight:1000;
+    color:#ffffff;
+    letter-spacing:-.05em;
+  }
+  #liveFullscreenDisplay .live-fs-next-line{
+    color:#d4e3ff;
+    font-size:18px;
+    font-weight:700;
+  }
+  #liveFullscreenDisplay .live-fs-next-line strong{
+    color:#ffffff;
+    font-weight:900;
+  }
+  #liveFullscreenDisplay .live-fs-timer-panel{
+    min-height:255px;
+    padding:20px 24px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    gap:12px;
+  }
+  #liveFullscreenDisplay .live-fs-timer-panel .live-fullscreen-timer-label{
+    margin:0;
+  }
+  #liveFullscreenDisplay .live-fullscreen-timer{
+    margin:0;
+    font-size:clamp(86px, 12vw, 200px);
+    line-height:.9;
+    letter-spacing:-.06em;
+    color:#ffffff;
+    text-shadow:none;
+  }
+  #liveFullscreenDisplay .live-fullscreen-timer.warning30{color:#f3d37a;}
+  #liveFullscreenDisplay .live-fullscreen-timer.warning10{color:#ff8e8e;}
+
+  #liveFullscreenDisplay .live-fullscreen-kpis{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:14px;
+    margin:0;
+  }
+  #liveFullscreenDisplay .live-fullscreen-kpi{
+    min-height:108px;
+    padding:16px 18px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:6px;
+  }
+  #liveFullscreenDisplay .live-fullscreen-kpi strong{
+    color:#ffffff;
+    font-size:clamp(26px,3.2vw,44px);
+    line-height:1;
+  }
+  #liveFullscreenDisplay .live-fs-duration-kpi .live-fs-duration-edit-btn{
+    align-self:flex-start;
+    margin-top:4px;
+  }
+  #liveFullscreenDisplay .live-fs-duration-edit-btn{
+    border-radius:999px;
+    border:1px solid rgba(120,168,255,.28);
+    background:rgba(16,46,82,.72);
+    color:#ecf4ff;
+    font-weight:800;
+    padding:6px 12px;
+  }
+  #liveFullscreenDisplay .live-fs-bottom-dock{
+    margin:0;
+    display:flex !important;
+    justify-content:center;
+  }
+  #liveFullscreenDisplay .live-mobile-main-controls{
+    display:flex;
+    gap:16px;
+    justify-content:center;
+    width:100%;
+    flex-wrap:wrap;
+  }
+  #liveFullscreenDisplay .live-fs-dock-btn{
+    min-width:250px;
+    min-height:62px;
+    border-radius:18px;
+    font-size:28px;
+    font-weight:900;
+    letter-spacing:.01em;
+    border:1px solid rgba(123,172,255,.22);
+    box-shadow:none;
+  }
+  #liveFullscreenDisplay .live-fs-dock-btn.primary{
+    background:linear-gradient(180deg,#174c87,#123c69);
+    color:#fff;
+  }
+  #liveFullscreenDisplay .live-fs-dock-btn.danger{
+    background:linear-gradient(180deg,#7a2432,#611b27);
+    color:#fff;
+  }
+
+  #liveFullscreenDisplay .live-fs-players-wrap{
+    margin-top:auto;
+    border-radius:20px;
+    border:1px solid rgba(97,154,255,.16);
+    background:rgba(9,18,29,.76);
+    padding:14px 16px 12px;
+    box-shadow:0 12px 28px rgba(0,0,0,.18);
+  }
+  #liveFullscreenDisplay .live-fs-players-title{
+    margin-bottom:12px;
+  }
+  #liveFullscreenDisplay .live-fs-players{
+    display:flex;
+    align-items:flex-start;
+    gap:18px;
+    overflow-x:auto;
+    padding-bottom:4px;
+  }
+  #liveFullscreenDisplay .live-fs-players::-webkit-scrollbar{height:8px;}
+  #liveFullscreenDisplay .live-fs-players::-webkit-scrollbar-thumb{background:rgba(123,172,255,.22);border-radius:999px;}
+  #liveFullscreenDisplay .live-fs-player-item{
+    min-width:86px;
+    max-width:104px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    text-align:center;
+    flex:0 0 auto;
+  }
+  #liveFullscreenDisplay .live-fs-player-avatar{
+    width:68px;
+    height:68px;
+    border-radius:999px;
+    border:2px solid rgba(113,166,255,.42);
+    background:radial-gradient(circle at 30% 20%, rgba(54,106,178,.55), rgba(14,31,47,.96));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    box-shadow:0 8px 18px rgba(0,0,0,.22);
+  }
+  #liveFullscreenDisplay .live-fs-player-avatar img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+  #liveFullscreenDisplay .live-fs-player-fallback{
+    color:#fff;
+    font-size:24px;
+    font-weight:900;
+    letter-spacing:.04em;
+  }
+  #liveFullscreenDisplay .live-fs-player-name{
+    color:#eef5ff;
+    font-size:17px;
+    font-weight:800;
+    line-height:1.1;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    width:100%;
+  }
+
+  @media (max-width: 1100px){
+    #liveFullscreenDisplay .live-fs-main{grid-template-columns:1fr;}
+    #liveFullscreenDisplay .live-fullscreen-kpis{grid-template-columns:repeat(2,minmax(0,1fr));}
+  }
+  @media (max-width: 760px){
+    #liveFullscreenDisplay,
+    body.bpt-mobile-live-fullscreen #liveFullscreenDisplay{
+      padding:16px 14px 14px;
+      gap:12px;
+    }
+    #liveFullscreenDisplay .live-fullscreen-top-actions{align-items:flex-start;}
+    #liveFullscreenDisplay .live-fullscreen-top-right{width:auto;}
+    #liveFullscreenDisplay .live-fs-blinds-spotlight,
+    #liveFullscreenDisplay .live-fs-timer-panel{min-height:unset;}
+    #liveFullscreenDisplay .live-fullscreen-kpis{grid-template-columns:repeat(2,minmax(0,1fr));}
+    #liveFullscreenDisplay .live-fullscreen-kpi{min-height:92px;padding:14px;}
+    #liveFullscreenDisplay .live-fullscreen-kpi strong{font-size:28px;}
+    #liveFullscreenDisplay .live-fs-dock-btn{min-width:unset;width:100%;font-size:22px;min-height:54px;}
+    #liveFullscreenDisplay .live-mobile-main-controls{flex-direction:column;}
+    #liveFullscreenDisplay .live-fs-player-item{min-width:72px;max-width:86px;}
+    #liveFullscreenDisplay .live-fs-player-avatar{width:56px;height:56px;}
+    #liveFullscreenDisplay .live-fs-player-name{font-size:14px;}
+  }
+</style>
+
 </head>
 <body>
 <script>
@@ -10355,7 +10648,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.7.17":"Version PC 2.7.17";
+  el.textContent=mobile?"Version téléphone 2.7.18":"Version PC 2.7.17";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -10604,24 +10897,28 @@ function simplifyRecordTextForMobile(text){
 
 
       <div id="liveFullscreenDisplay" class="live-fullscreen-display" aria-label="Affichage plein écran du Live">
-        <div class="live-fullscreen-top-actions live-admin-only">
-          <button id="liveFsChatBtn" class="live-fullscreen-exit live-chat-open-btn" type="button">💬 Chat</button>
-          <button id="liveFullscreenExitBtn" class="live-fullscreen-exit" type="button">Quitter plein écran</button>
+        <div class="live-fullscreen-top-actions">
+          <div class="live-fullscreen-brand">BPT · Boucherie Poker Tour · Live</div>
+          <div class="live-fullscreen-top-right">
+            <button id="liveFsChatBtn" class="live-fullscreen-exit live-chat-open-btn live-admin-only" type="button">💬 Chat</button>
+            <button id="liveFullscreenExitBtn" class="live-fullscreen-exit" type="button">Quitter le plein écran</button>
+          </div>
         </div>
-        <div class="live-fullscreen-brand">BPT · LIVE</div>
 
-        <button class="live-fullscreen-level live-fs-level-clickable" id="liveFsLevel" type="button" title="Voir la structure">NIVEAU 1</button>
-        <div class="live-fullscreen-next-compact">Suivant : <strong id="liveFsNext">—</strong></div>
-        <div class="live-fullscreen-blinds" id="liveFsBlinds">— / —</div>
-        <div class="live-fullscreen-ante" id="liveFsAnte">Ante —</div>
+        <button class="live-fullscreen-level live-fs-level-clickable live-fs-hidden-meta" id="liveFsLevel" type="button" title="Voir la structure">NIVEAU 1</button>
+        <div class="live-fullscreen-ante live-fs-hidden-meta" id="liveFsAnte">Ante —</div>
 
-        <div class="live-fullscreen-timer-label">TEMPS RESTANT</div>
-        <div class="live-fs-timer-row live-admin-only">
-          <button id="liveFsPrevLevelBtn" class="live-fs-timer-side-btn" type="button">← Niveau</button>
-          <button id="liveFsMinusMinuteBtn" class="live-fs-timer-side-btn" type="button">−1 min</button>
-          <div class="live-fullscreen-timer" id="liveFsTimer">00:00</div>
-          <button id="liveFsPlusMinuteBtn" class="live-fs-timer-side-btn" type="button">+1 min</button>
-          <button id="liveFsNextLevelBtn" class="live-fs-timer-side-btn" type="button">Niveau →</button>
+        <div class="live-fs-main">
+          <div class="live-fs-blinds-spotlight">
+            <div class="live-fs-eyebrow">Blindes en cours</div>
+            <div class="live-fs-blinds-value" id="liveFsBlinds">— / —</div>
+            <div class="live-fs-next-line">Suivant : <strong id="liveFsNext">—</strong></div>
+          </div>
+
+          <div class="live-fs-timer-panel">
+            <div class="live-fullscreen-timer-label">Temps restant</div>
+            <div class="live-fullscreen-timer" id="liveFsTimer">00:00</div>
+          </div>
         </div>
 
         <div class="live-fullscreen-kpis">
@@ -10633,7 +10930,6 @@ function simplifyRecordTextForMobile(text){
           <div class="live-fullscreen-kpi live-fullscreen-kpi-stack">
             <span>Stack moyen</span>
             <strong id="liveFsAvgStack">—</strong>
-
           </div>
           <div class="live-fullscreen-kpi">
             <span>Joueurs restants</span>
@@ -10650,6 +10946,11 @@ function simplifyRecordTextForMobile(text){
             <button id="liveFsPauseResumeBtn" class="live-fs-dock-btn primary" type="button">Démarrer</button>
             <button id="liveFsEliminateOpenBtn" class="live-fs-dock-btn danger" type="button">Sortir un joueur</button>
           </div>
+        </div>
+
+        <div class="live-fs-players-wrap">
+          <div class="live-fs-players-title">Joueurs à la table</div>
+          <div id="liveFsPlayers" class="live-fs-players"></div>
         </div>
 
         <div id="liveFsDurationPopup" class="live-fs-duration-popup live-admin-only" style="display:none">
@@ -11552,7 +11853,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.17 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 2.7.18 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -11818,7 +12119,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.17 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.18 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -12192,7 +12493,7 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.7.17 : aucune image Base64 dans bpt_state. Les photos de parties
+    // BPT 2.7.18 : aucune image Base64 dans bpt_state. Les photos de parties
     // sont stockées dans Firebase ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
@@ -14758,20 +15059,35 @@ function liveRenderFullscreen(){
 
   const alive=liveAlive();
   const winner=s.players.find(p=>p.status==="Vainqueur"||Number(p.place)===1);
-  const remainingCount=alive.length || (winner?1:0);
+  const displayPlayers=alive.length ? alive : (winner ? [winner] : []);
+  const remainingCount=displayPlayers.length;
   const total=s.players.length*s.startStack;
 
-  $("liveFsLevel").textContent=`NIVEAU ${level.level}`;
-  $("liveFsBlinds").textContent=`${liveFmt(level.sb)} / ${liveFmt(level.bb)}`;
-  $("liveFsAnte").textContent=Number(level.ante)>0?`ANTE ${liveFmt(level.ante)}`:"";
-  $("liveFsTimer").textContent=liveTime(s.remainingSeconds);
-  $("liveFsLevelDuration").textContent=`${level.durationMin} min`;
-  $("liveFsAvgStack").textContent=remainingCount?liveFmt(total/remainingCount):"0";
-  $("liveFsRemaining").textContent=String(remainingCount);
-  $("liveFsElapsed").textContent=liveTime(liveElapsedSeconds(s));
-  $("liveFsNext").textContent=next
-    ? `${liveFmt(next.sb)} / ${liveFmt(next.bb)}${next.ante?" · ante "+liveFmt(next.ante):""}`
+  if($("liveFsLevel"))$("liveFsLevel").textContent=`NIVEAU ${level.level}`;
+  if($("liveFsBlinds"))$("liveFsBlinds").textContent=`${liveFmt(level.sb)} / ${liveFmt(level.bb)}`;
+  if($("liveFsAnte"))$("liveFsAnte").textContent=Number(level.ante)>0?`ANTE ${liveFmt(level.ante)}`:"";
+  if($("liveFsTimer"))$("liveFsTimer").textContent=liveTime(s.remainingSeconds);
+  if($("liveFsLevelDuration"))$("liveFsLevelDuration").textContent=`${level.durationMin} min`;
+  if($("liveFsAvgStack"))$("liveFsAvgStack").textContent=remainingCount?liveFmt(total/remainingCount):"0";
+  if($("liveFsRemaining"))$("liveFsRemaining").textContent=String(remainingCount);
+  if($("liveFsElapsed"))$("liveFsElapsed").textContent=liveTime(liveElapsedSeconds(s));
+  if($("liveFsNext"))$("liveFsNext").textContent=next
+    ? `${liveFmt(next.sb)} / ${liveFmt(next.bb)}`
     : "Dernier niveau";
+
+  if($("liveFsPlayers")){
+    $("liveFsPlayers").innerHTML=displayPlayers.length
+      ? displayPlayers.map(p=>{
+          const real=String(p?.name||"").trim();
+          const shortName=liveShortPlayerName(real);
+          const avatarId=playerAvatarId(real);
+          const avatarHtml=avatarId
+            ? `<img src="${playerAvatarDataUrl(avatarId)}" alt="Avatar de ${esc(shortName)}">`
+            : `<div class="live-fs-player-fallback">${esc(livePlayerInitials(real))}</div>`;
+          return `<div class="live-fs-player-item"><div class="live-fs-player-avatar">${avatarHtml}</div><div class="live-fs-player-name" title="${esc(real)}">${esc(shortName)}</div></div>`;
+        }).join("")
+      : `<div class="muted">Aucun joueur affiché.</div>`;
+  }
 
   if($("liveFsPauseResumeBtn")){
     $("liveFsPauseResumeBtn").textContent=s.running
@@ -14786,8 +15102,10 @@ function liveRenderFullscreen(){
   if($("liveFsPlusMinuteBtn"))$("liveFsPlusMinuteBtn").disabled=!!s.synced;
   if($("liveFsDurationBtn"))$("liveFsDurationBtn").disabled=!!s.synced;
 
-  $("liveFsTimer").classList.toggle("warning30",s.remainingSeconds<=30 && s.remainingSeconds>10);
-  $("liveFsTimer").classList.toggle("warning10",s.remainingSeconds<=10);
+  if($("liveFsTimer")){
+    $("liveFsTimer").classList.toggle("warning30",s.remainingSeconds<=30 && s.remainingSeconds>10);
+    $("liveFsTimer").classList.toggle("warning10",s.remainingSeconds<=10);
+  }
 }
 
 function achievementPlayers(rowsOverride=null){
@@ -15178,7 +15496,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.17 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 2.7.18 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -15362,6 +15680,18 @@ function playerDisplayWithRealName(name){
   return nick && normalizePlayerLookupName(nick)!==normalizePlayerLookupName(real)
     ? `${real} · (${nick})`
     : real;
+}
+
+function liveShortPlayerName(name){
+  const real=String(name||"").trim();
+  const nick=String(playerNicknameInfo(real).primary||"").trim();
+  if(nick)return nick;
+  const first=real.split(/\s+/).filter(Boolean)[0]||"";
+  return first||real||"Joueur";
+}
+function livePlayerInitials(name){
+  const label=liveShortPlayerName(name);
+  return label.split(/\s+/).filter(Boolean).slice(0,2).map(s=>s.charAt(0).toUpperCase()).join("") || "J";
 }
 
 async function savePlayerNickname(name,value){
@@ -19662,7 +19992,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 2.7.17 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 2.7.18 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -19968,6 +20298,17 @@ document.addEventListener("fullscreenchange",()=>{
       liveShowScreen("game");
       liveRenderAll();
     }
+  }
+});
+
+
+document.addEventListener("keydown",(e)=>{
+  if(e.key!=="Escape")return;
+  const fsEl=document.fullscreenElement;
+  const mobileFs=document.body.classList.contains("bpt-mobile-live-fullscreen");
+  if(fsEl===$("liveFullscreenDisplay") || mobileFs){
+    e.preventDefault();
+    $("liveFullscreenExitBtn")?.click();
   }
 });
 
