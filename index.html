@@ -8048,7 +8048,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 2.7.28 — Classement / Parties / Profils / Dashboard */
+/* BPT 2.7.29 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8111,7 +8111,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.28 — Records / Impact / Courbes */
+/* BPT 2.7.29 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8137,7 +8137,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.28 — blocs repliables */
+/* BPT 2.7.29 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -11455,6 +11455,99 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs
 }
 </style>
 
+
+<style id="bpt-v229-live-alignment-finish">
+/* Desktop fullscreen finishing pass */
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-frame,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-frame{
+  grid-template-rows:76px 140px 220px 84px 64px minmax(128px,1fr) !important;
+  gap:10px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fullscreen-brand,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fullscreen-brand{
+  grid-row:1 !important;
+  align-self:center !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-top-row,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-top-row{
+  grid-row:2 !important;
+  grid-template-columns:260px minmax(640px,900px) 300px !important;
+  gap:18px !important;
+  align-items:start !important;
+  margin-top:0 !important;
+}
+/* keep left column as spacer but aligned with BPT block */
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-top-row > :first-child,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-top-row > :first-child{
+  visibility:hidden !important;
+  height:100% !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-blinds-card,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-blinds-card{
+  justify-self:center !important;
+  align-self:start !important;
+  width:100% !important;
+  max-width:900px !important;
+  min-height:140px !important;
+  margin-left:0 !important;
+  margin-right:0 !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-remaining-card,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-remaining-card{
+  justify-self:end !important;
+  align-self:start !important;
+  width:100% !important;
+  min-height:140px !important;
+  margin-top:0 !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-timer-zone,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-timer-zone{
+  grid-row:3 !important;
+  width:min(860px,100%) !important;
+  margin-top:2px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fullscreen-kpis,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fullscreen-kpis{
+  grid-row:4 !important;
+  width:min(790px,100%) !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-bottom-dock,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-bottom-dock{
+  grid-row:5 !important;
+  width:min(820px,100%) !important;
+  margin-top:0 !important;
+  margin-bottom:0 !important;
+  align-self:center !important;
+  justify-self:center !important;
+  z-index:3 !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-players-wrap,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-players-wrap{
+  grid-row:6 !important;
+  min-height:128px !important;
+  padding:12px 16px 8px !important;
+  margin-top:2px !important;
+  z-index:1 !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-players-title,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-players-title{
+  margin-bottom:8px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-players-list,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-players-list{
+  padding-top:0 !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-player-avatar,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-player-avatar{
+  width:52px !important;
+  height:52px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-player-name,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-player-name{
+  margin-top:2px !important;
+}
+</style>
+
 </head>
 <body>
 <script>
@@ -11481,7 +11574,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="2.7.28";
+const BPT_APP_VERSION="2.7.29";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -12473,7 +12566,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 2.7.28</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 2.7.29</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -12689,7 +12782,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.28 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 2.7.29 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -12955,7 +13048,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.28 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.29 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -13329,7 +13422,7 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.7.28 : aucune image Base64 dans bpt_state. Les photos de parties
+    // BPT 2.7.29 : aucune image Base64 dans bpt_state. Les photos de parties
     // sont stockées dans Firebase ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
@@ -14077,7 +14170,7 @@ async function cloudPoll(){
 
 let liveAutoOpenDone=false;
 async function autoOpenActiveLiveOnStartup(){
-  // BPT 2.7.28 : plus d'ouverture automatique du Live au démarrage.
+  // BPT 2.7.29 : plus d'ouverture automatique du Live au démarrage.
   // L'application s'ouvre toujours sur Accueil ; le Live actif est indiqué sur l'onglet Live.
   liveAutoOpenDone=true;
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -16307,7 +16400,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.28 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 2.7.29 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -20863,7 +20956,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 2.7.28 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 2.7.29 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -21528,7 +21621,7 @@ liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 (async()=>{
   await initCloudSync();
-  // BPT 2.7.28 : l'ouverture par défaut est toujours Accueil.
+  // BPT 2.7.29 : l'ouverture par défaut est toujours Accueil.
   spectatorAutoOpenSuppressed=true;
   document.body.classList.remove("spectator-live-open");
   await showView("dashboard");
