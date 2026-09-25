@@ -7,7 +7,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<!-- BPT LIVE V3.26 AUTO FINISH HISTORY SUMMARY -->
+<!-- BPT LIVE V3.27 UNDO ELIM NO PREFILL -->
 <title>BPT — Gestion du championnat</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23173a2b'/%3E%3Cpath d='M32 10c-6 10-18 15-18 26 0 7 5 12 11 12 3 0 5-1 7-4-1 5-3 8-7 10h14c-4-2-6-5-7-10 2 3 4 4 7 4 6 0 11-5 11-12 0-11-12-16-18-26z' fill='%23c8952e'/%3E%3C/svg%3E">
 <style>
@@ -13865,6 +13865,21 @@ body:has(#live3Fullscreen.open){
 }
 </style>
 
+
+<style id="bpt-live3-v327-undo">
+#live3UndoElimBtn{
+  background:#26372e !important;
+  color:#fff !important;
+  border-color:#40584a !important;
+}
+#live3UndoElimBtn:disabled{
+  opacity:.42 !important;
+  cursor:not-allowed !important;
+  transform:none !important;
+  filter:none !important;
+}
+</style>
+
 </head>
 <body>
 <script>
@@ -14104,6 +14119,7 @@ function simplifyRecordTextForMobile(text){
         <button id="live3MinusBtn" class="btn ghost" type="button">− 1 min</button>
         <button id="live3PlusBtn" class="btn ghost" type="button">+ 1 min</button>
         <button id="live3EliminateBtn" class="btn danger" type="button">Sortir un joueur</button>
+        <button id="live3UndoElimBtn" class="btn ghost" type="button" disabled>↶ Annuler la dernière élimination</button>
         <button id="live3EndBtn" class="btn danger bpt-live3-end-control" type="button">Terminer le Live</button>
       </div>
 
@@ -24563,27 +24579,36 @@ document.addEventListener("visibilitychange",()=>{
     if(!victimSelect||!killerSelect)return;
 
     const alive=alivePlayers();
-    const prevVictim=String(victimSelect.value||"");
-    const prevKiller=String(killerSelect.value||"");
+    const selectedVictim=String(victimSelect.value||"");
 
-    victimSelect.innerHTML=alive.length
-      ? alive.map(p=>`<option value="${escapeAttr(p.name)}">${escapeHtml(p.name)}</option>`).join("")
-      : '<option value="">Aucun joueur en jeu</option>';
+    victimSelect.innerHTML=
+      '<option value="">— Choisir le joueur éliminé —</option>'+
+      alive.map(p=>`<option value="${escapeAttr(p.name)}">${escapeHtml(p.name)}</option>`).join("");
 
-    if(prevVictim && alive.some(p=>p.name===prevVictim))victimSelect.value=prevVictim;
+    // Aucun joueur n'est présélectionné à l'ouverture.
+    if(selectedVictim && alive.some(p=>p.name===selectedVictim)){
+      victimSelect.value=selectedVictim;
+    }else{
+      victimSelect.value="";
+    }
 
     const victim=String(victimSelect.value||"");
-    const killers=alive.filter(p=>p.name!==victim);
+    const killers=alive.filter(p=>!victim || p.name!==victim);
 
     killerSelect.innerHTML=
-      '<option value="">— Aucun / inconnu —</option>'+
+      '<option value="">— Choisir l’éliminateur —</option>'+
       killers.map(p=>`<option value="${escapeAttr(p.name)}">${escapeHtml(p.name)}</option>`).join("");
 
-    if(prevKiller && killers.some(p=>p.name===prevKiller))killerSelect.value=prevKiller;
+    // Toujours forcer un choix explicite de l'éliminateur.
+    killerSelect.value="";
   }
 
   function openElim(){
     if(!isOwner())return;
+    const victim=$3("live3ElimPlayer");
+    const killer=$3("live3ElimKiller");
+    if(victim)victim.value="";
+    if(killer)killer.value="";
     refreshEliminationLists();
     $3("live3ElimModal").classList.add("open");
     $3("live3ElimModal").setAttribute("aria-hidden","false");
@@ -24595,7 +24620,10 @@ document.addEventListener("visibilitychange",()=>{
     const victim=String($3("live3ElimPlayer").value||"");
     const killer=String($3("live3ElimKiller").value||"");
 
-    if(!victim)return;
+    if(!victim){
+      alert("Choisissez le joueur éliminé.");
+      return;
+    }
     if(!killer){
       alert("Choisissez le joueur qui a réalisé l’élimination.");
       return;
@@ -24660,6 +24688,83 @@ document.addEventListener("visibilitychange",()=>{
     if(updated && (updated.players||[]).filter(p=>p.status==="winner" || Number(p.place)===1).length===1){
       await finalizeWinnerLive(updated);
     }
+  }
+
+  function lastEliminatedPlayer(state=current){
+    const out=(state?.players||[])
+      .filter(p=>p && p.status==="out" && Number(p.outAt)>0)
+      .sort((a,b)=>Number(b.outAt||0)-Number(a.outAt||0));
+    return out[0]||null;
+  }
+
+  function updateUndoEliminationButton(){
+    const btn=$3("live3UndoElimBtn");
+    if(!btn)return;
+
+    const last=lastEliminatedPlayer();
+    const allowed=isOwner() && isActive() && !!last && !current?.publishedToHistory;
+
+    btn.disabled=!allowed;
+    btn.textContent=last && allowed
+      ? `↶ Annuler la sortie de ${last.name}`
+      : "↶ Annuler la dernière élimination";
+  }
+
+  async function undoLastElimination(){
+    if(!isOwner() || !isActive())return;
+    if(current?.publishedToHistory){
+      alert("Cette partie est déjà publiée dans l’historique : l’élimination ne peut plus être annulée depuis le Live.");
+      return;
+    }
+
+    const last=lastEliminatedPlayer();
+    if(!last){
+      alert("Aucune élimination à annuler.");
+      return;
+    }
+
+    if(!confirm(`Annuler la sortie de ${last.name} ?`))return;
+
+    await ownerTransaction(s=>{
+      if(s.publishedToHistory)return s;
+
+      const players=Array.isArray(s.players)?s.players:[];
+      const candidates=players
+        .filter(p=>p && p.status==="out" && Number(p.outAt)>0)
+        .sort((a,b)=>Number(b.outAt||0)-Number(a.outAt||0));
+
+      const target=candidates[0];
+      if(!target)return s;
+
+      // Si un vainqueur avait été temporairement déterminé mais non publié,
+      // le remettre en jeu avant de restaurer le sortant.
+      players.forEach(p=>{
+        if(p.status==="winner"){
+          p.status="in";
+          p.place=null;
+          p.killer="";
+          p.outAt=null;
+          p.outLevel=null;
+          p.outTime="";
+        }
+      });
+
+      target.status="in";
+      target.place=null;
+      target.killer="";
+      target.outAt=null;
+      target.outLevel=null;
+      target.outTime="";
+
+      s.winnerName="";
+      s.finishedAt=null;
+      s.finishReason="";
+      s.endedAt=null;
+
+      return s;
+    });
+
+    updateUndoEliminationButton();
   }
 
   function closeElim(){
@@ -24970,6 +25075,7 @@ document.addEventListener("visibilitychange",()=>{
       if(game)game.style.display="none";
       if(role){role.textContent="AUCUN LIVE";role.className="bpt-live3-role-badge";}
       renderPrepPlayers();
+      updateUndoEliminationButton();
       return;
     }
 
@@ -25029,6 +25135,7 @@ document.addEventListener("visibilitychange",()=>{
     }else requestBox.style.display="none";
 
     renderPlayers($3("live3Players"),false);
+    updateUndoEliminationButton();
 
     $3("live3FsBlinds").textContent=blinds;$3("live3FsAnte").textContent=ante;
     $3("live3FsTimer").textContent=time(rem);$3("live3FsRemaining").textContent=String(count);
@@ -25250,6 +25357,7 @@ document.addEventListener("visibilitychange",()=>{
     $3("live3PlusBtn")?.addEventListener("click",()=>adjustMinute(60));
 
     $3("live3EliminateBtn")?.addEventListener("click",openElim);
+    $3("live3UndoElimBtn")?.addEventListener("click",undoLastElimination);
     $3("live3EndBtn")?.addEventListener("click",endLive);
     $3("live3TakeoverBtn")?.addEventListener("click",requestTakeover);
     $3("live3ApproveTakeoverBtn")?.addEventListener("click",approveTakeover);
