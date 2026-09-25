@@ -7,7 +7,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<!-- BPT LIVE V3.27 UNDO ELIM NO PREFILL -->
+<!-- BPT LIVE V3.28 VISIBLE UNDO ELIM -->
 <title>BPT — Gestion du championnat</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23173a2b'/%3E%3Cpath d='M32 10c-6 10-18 15-18 26 0 7 5 12 11 12 3 0 5-1 7-4-1 5-3 8-7 10h14c-4-2-6-5-7-10 2 3 4 4 7 4 6 0 11-5 11-12 0-11-12-16-18-26z' fill='%23c8952e'/%3E%3C/svg%3E">
 <style>
@@ -13880,6 +13880,71 @@ body:has(#live3Fullscreen.open){
 }
 </style>
 
+
+<style id="bpt-live3-v328-visible-undo">
+#live3 .bpt-live3-undo-box{
+  margin-top:12px;
+  padding:12px 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  border:1px solid #5a665f;
+  border-radius:12px;
+  background:#1d2923;
+}
+
+#live3 .bpt-live3-undo-copy{
+  display:grid;
+  gap:3px;
+}
+
+#live3 .bpt-live3-undo-copy strong{
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  font-size:14px;
+}
+
+#live3 .bpt-live3-undo-copy span{
+  color:#b9c5bd !important;
+  -webkit-text-fill-color:#b9c5bd !important;
+  font-size:12px;
+}
+
+#live3 #live3UndoElimBtn{
+  min-width:240px;
+  background:#34473c !important;
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  border:1px solid #65776b !important;
+}
+
+#live3 #live3UndoElimBtn:not(:disabled){
+  background:#c8952e !important;
+  color:#17120b !important;
+  -webkit-text-fill-color:#17120b !important;
+  border-color:#d7a748 !important;
+  box-shadow:0 0 0 2px rgba(200,149,46,.12);
+}
+
+#live3 #live3UndoElimBtn:disabled{
+  opacity:.62 !important;
+  cursor:not-allowed !important;
+}
+
+@media(max-width:700px){
+  #live3 .bpt-live3-undo-box{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  #live3 #live3UndoElimBtn{
+    min-width:0;
+    width:100%;
+  }
+}
+</style>
+
 </head>
 <body>
 <script>
@@ -14119,8 +14184,17 @@ function simplifyRecordTextForMobile(text){
         <button id="live3MinusBtn" class="btn ghost" type="button">− 1 min</button>
         <button id="live3PlusBtn" class="btn ghost" type="button">+ 1 min</button>
         <button id="live3EliminateBtn" class="btn danger" type="button">Sortir un joueur</button>
-        <button id="live3UndoElimBtn" class="btn ghost" type="button" disabled>↶ Annuler la dernière élimination</button>
         <button id="live3EndBtn" class="btn danger bpt-live3-end-control" type="button">Terminer le Live</button>
+      </div>
+
+      <div id="live3UndoElimBox" class="bpt-live3-undo-box bpt-live3-owner-only">
+        <div class="bpt-live3-undo-copy">
+          <strong>Correction d’une élimination</strong>
+          <span id="live3UndoElimHint">Aucune élimination à annuler.</span>
+        </div>
+        <button id="live3UndoElimBtn" class="btn ghost" type="button" disabled>
+          ↶ Annuler la dernière élimination
+        </button>
       </div>
 
       <div id="live3SpectatorControls" class="bpt-live3-controls bpt-live3-spectator-only" style="display:none">
@@ -24699,15 +24773,24 @@ document.addEventListener("visibilitychange",()=>{
 
   function updateUndoEliminationButton(){
     const btn=$3("live3UndoElimBtn");
+    const hint=$3("live3UndoElimHint");
     if(!btn)return;
 
     const last=lastEliminatedPlayer();
     const allowed=isOwner() && isActive() && !!last && !current?.publishedToHistory;
 
     btn.disabled=!allowed;
-    btn.textContent=last && allowed
-      ? `↶ Annuler la sortie de ${last.name}`
-      : "↶ Annuler la dernière élimination";
+
+    if(last && allowed){
+      btn.textContent=`↶ Annuler la sortie de ${last.name}`;
+      if(hint)hint.textContent=`Dernière sortie enregistrée : ${last.name}.`;
+    }else if(current?.publishedToHistory){
+      btn.textContent="↶ Partie déjà publiée";
+      if(hint)hint.textContent="La partie est déjà publiée dans l’historique.";
+    }else{
+      btn.textContent="↶ Annuler la dernière élimination";
+      if(hint)hint.textContent="Aucune élimination à annuler.";
+    }
   }
 
   async function undoLastElimination(){
@@ -25116,6 +25199,9 @@ document.addEventListener("visibilitychange",()=>{
     // spectateur = bouton de demande de gestion visible
     if($3("live3MasterControls")){
       $3("live3MasterControls").style.setProperty("display",owner?"grid":"none","important");
+    }
+    if($3("live3UndoElimBox")){
+      $3("live3UndoElimBox").style.setProperty("display",owner?"flex":"none","important");
     }
     if($3("live3SpectatorControls")){
       $3("live3SpectatorControls").style.setProperty("display",owner?"none":"grid","important");
