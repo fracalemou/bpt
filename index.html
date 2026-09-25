@@ -8048,7 +8048,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 2.7.33 — Classement / Parties / Profils / Dashboard */
+/* BPT 2.7.34 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8111,7 +8111,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.33 — Records / Impact / Courbes */
+/* BPT 2.7.34 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8137,7 +8137,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.33 — blocs repliables */
+/* BPT 2.7.34 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -11551,7 +11551,7 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs
 
 <style id="bpt-v2300-clean-fullscreen-refactor">
 /* ================================
-   BPT 2.7.33 — CLEAN FULLSCREEN REFACTOR
+   BPT 2.7.34 — CLEAN FULLSCREEN REFACTOR
    One final authoritative layout for fullscreen / mobile live.
    ================================ */
 
@@ -11931,7 +11931,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 
 
 <style id="bpt-v231-fullscreen-component">
-/* BPT 2.7.33 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
+/* BPT 2.7.34 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
 #liveFullscreenDisplay,
 #liveFullscreenDisplay:fullscreen,
 #liveFullscreenDisplay:-webkit-full-screen,
@@ -12072,7 +12072,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-actions{width:100% !important;grid-template-columns:1fr 1fr !important;gap:8px !important}
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-action{min-height:46px !important;font-size:12px !important;letter-spacing:.02em !important}
 
-/* BPT 2.7.33 — direct mobile fullscreen classes on the target itself */
+/* BPT 2.7.34 — direct mobile fullscreen classes on the target itself */
 #liveFullscreenDisplay.bptfs-mobile{height:100dvh !important;}
 #liveFullscreenDisplay.bptfs-mobile::before,
 #liveFullscreenDisplay.bptfs-mobile::after{display:none !important;}
@@ -12201,7 +12201,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="2.7.33";
+const BPT_APP_VERSION="2.7.34";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -13193,7 +13193,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 2.7.33</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 2.7.34</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -13409,7 +13409,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.33 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 2.7.34 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -13675,7 +13675,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.33 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.34 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -14049,7 +14049,7 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.7.33 : aucune image Base64 dans bpt_state. Les photos de parties
+    // BPT 2.7.34 : aucune image Base64 dans bpt_state. Les photos de parties
     // sont stockées dans Firebase ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
@@ -14797,7 +14797,7 @@ async function cloudPoll(){
 
 let liveAutoOpenDone=false;
 async function autoOpenActiveLiveOnStartup(){
-  // BPT 2.7.33 : plus d'ouverture automatique du Live au démarrage.
+  // BPT 2.7.34 : plus d'ouverture automatique du Live au démarrage.
   // L'application s'ouvre toujours sur Accueil ; le Live actif est indiqué sur l'onglet Live.
   liveAutoOpenDone=true;
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -16394,25 +16394,47 @@ window.addEventListener("resize",syncLiveFullscreenModeClasses,{passive:true});
 window.addEventListener("orientationchange",syncLiveFullscreenModeClasses,{passive:true});
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)syncLiveFullscreenModeClasses();});
 
+let bptMobileFullscreenTransition=false;
+let bptMobileFullscreenRenderTimer=null;
+function scheduleMobileFullscreenRender(delay=180){
+  if(bptMobileFullscreenRenderTimer)clearTimeout(bptMobileFullscreenRenderTimer);
+  bptMobileFullscreenRenderTimer=setTimeout(()=>{
+    bptMobileFullscreenRenderTimer=null;
+    syncLiveFullscreenModeClasses();
+    liveRenderFullscreen();
+    bptMobileFullscreenTransition=false;
+  },delay);
+}
+
 async function toggleLiveFullscreen(){
   const target=$("liveFullscreenDisplay");
   if(!target)return;
   syncLiveFullscreenModeClasses();
 
-  // Téléphone : plein écran applicatif, sans API plein écran du navigateur.
+  // Téléphone : transition applicative allégée et verrouillée.
   if(isBptMobileDevice()){
+    if(bptMobileFullscreenTransition)return;
+    bptMobileFullscreenTransition=true;
+
     const opening=!document.body.classList.contains("bpt-mobile-live-fullscreen");
     document.body.classList.toggle("bpt-mobile-live-fullscreen",opening);
     target.setAttribute("aria-hidden",opening?"false":"true");
     if($("liveFullscreenBtn"))$("liveFullscreenBtn").textContent=opening?"Quitter plein écran":"Plein écran";
-    const handover=$('globalHandoverRequest');
+
+    const handover=$("globalHandoverRequest");
     if(opening){
       if(handover && handover.parentElement!==target)target.appendChild(handover);
       bindMobileHandoverControls();
-      liveRenderFullscreen();
+      syncLiveFullscreenModeClasses();
       window.scrollTo({top:0,left:0,behavior:"auto"});
-    }else if(handover && handover.parentElement!==document.body){
-      document.body.appendChild(handover);
+      scheduleMobileFullscreenRender(180);
+    }else{
+      if(handover && handover.parentElement!==document.body)document.body.appendChild(handover);
+      if(bptMobileFullscreenRenderTimer){clearTimeout(bptMobileFullscreenRenderTimer);bptMobileFullscreenRenderTimer=null;}
+      setTimeout(()=>{
+        syncLiveFullscreenModeClasses();
+        bptMobileFullscreenTransition=false;
+      },120);
     }
     return;
   }
@@ -17046,7 +17068,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.33 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 2.7.34 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -19273,7 +19295,7 @@ function startSpectatorLivePolling(){
   };
 
   pull();
-  spectatorLivePollTimer=setInterval(()=>{ pull(); },5000);
+  spectatorLivePollTimer=setInterval(()=>{ pull(); },isBptMobileDevice()?15000:5000);
 }
 
 function stopSpectatorLivePolling(){
@@ -19294,6 +19316,7 @@ function spectatorSyncSecondsLeft(){
 function startSpectatorSyncCountdown(){
   if(spectatorSyncCountdownTimer)clearInterval(spectatorSyncCountdownTimer);
   resetSpectatorSyncCountdown();
+  const tickMs=isBptMobileDevice()?1000:500;
   spectatorSyncCountdownTimer=setInterval(()=>{
     const el=$("spectatorSyncCountdown");
     if(!el)return;
@@ -19303,7 +19326,7 @@ function startSpectatorSyncCountdown(){
       left=spectatorSyncSecondsLeft();
     }
     el.textContent=`${left} s`;
-  },250);
+  },tickMs);
 }
 
 function stopSpectatorSyncCountdown(){
@@ -20261,7 +20284,7 @@ function liveRunTicker(){
       if(s.remainingSeconds<=0)liveChangeLevel(1,true);
     }
     liveRenderTimerOnly();
-  },250);
+  },isBptMobileDevice()?500:250);
 }
 
 
@@ -21636,7 +21659,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 2.7.33 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 2.7.34 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -21897,26 +21920,24 @@ if($("liveFullscreenExitBtn"))$("liveFullscreenExitBtn").onclick=async(ev)=>{
   ev?.preventDefault?.();
   ev?.stopPropagation?.();
   if(isBptMobileDevice()){
+    if(bptMobileFullscreenTransition)return false;
+    bptMobileFullscreenTransition=true;
     document.body.classList.remove("bpt-mobile-live-fullscreen");
     $("liveFullscreenDisplay")?.setAttribute("aria-hidden","true");
     if($("liveFullscreenBtn"))$("liveFullscreenBtn").textContent="Plein écran";
-    const handover=$('globalHandoverRequest');
+    const handover=$("globalHandoverRequest");
     if(handover && handover.parentElement!==document.body)document.body.appendChild(handover);
-    // Rester explicitement sur l'écran Live maître après fermeture.
     currentViewId="live";
     document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
     $("live")?.classList.add("active");
     $("livePrepScreen")?.classList.remove("active");
     $("liveGameScreen")?.classList.add("active");
-    liveRenderAll();
-    // Certaines délégations historiques s'exécutent après le onclick : réaffirmer l'écran au tick suivant.
+    if(bptMobileFullscreenRenderTimer){clearTimeout(bptMobileFullscreenRenderTimer);bptMobileFullscreenRenderTimer=null;}
     setTimeout(()=>{
-      if(!document.body.classList.contains("bpt-mobile-live-fullscreen")){
-        $("live")?.classList.add("active");
-        $("livePrepScreen")?.classList.remove("active");
-        $("liveGameScreen")?.classList.add("active");
-      }
-    },0);
+      syncLiveFullscreenModeClasses();
+      liveRenderTimerOnly();
+      bptMobileFullscreenTransition=false;
+    },140);
     return false;
   }
   await document.exitFullscreen?.();
@@ -22301,7 +22322,7 @@ liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 (async()=>{
   await initCloudSync();
-  // BPT 2.7.33 : l'ouverture par défaut est toujours Accueil.
+  // BPT 2.7.34 : l'ouverture par défaut est toujours Accueil.
   spectatorAutoOpenSuppressed=true;
   document.body.classList.remove("spectator-live-open");
   await showView("dashboard");
@@ -22409,7 +22430,7 @@ async function bptInstallDirectFirebaseLiveReceiver(){
         const snap=await bptDirectLiveRef.once("value");
         await bptHandleDirectFirebaseLiveSnapshot(snap.val());
       }catch(e){ console.warn("BPT direct Firebase poll:",e); }
-    },5000);
+    },isBptMobileDevice()?15000:5000);
 
     return true;
   }catch(e){
@@ -22777,6 +22798,26 @@ document.addEventListener("visibilitychange",()=>{
     if(bd)bd.onclick=e=>{if(e.target===e.currentTarget)closePlayerAvatarPicker();};
   };
   bind();
+})();
+</script>
+
+
+<script id="bpt-v234-mobile-transition-stability">
+(function(){
+  let t=null;
+  function stable(){
+    if(!isBptMobileDevice())return;
+    if(t)clearTimeout(t);
+    t=setTimeout(()=>{
+      syncLiveFullscreenModeClasses();
+      if(document.body.classList.contains("bpt-mobile-live-fullscreen") && !bptMobileFullscreenTransition){
+        liveRenderTimerOnly();
+      }
+    },220);
+  }
+  window.addEventListener("resize",stable,{passive:true});
+  window.addEventListener("orientationchange",stable,{passive:true});
+  if(window.visualViewport)window.visualViewport.addEventListener("resize",stable,{passive:true});
 })();
 </script>
 
