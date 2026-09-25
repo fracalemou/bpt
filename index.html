@@ -8048,7 +8048,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 2.7.40 — Classement / Parties / Profils / Dashboard */
+/* BPT 2.7.41 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8111,7 +8111,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.40 — Records / Impact / Courbes */
+/* BPT 2.7.41 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8137,7 +8137,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.40 — blocs repliables */
+/* BPT 2.7.41 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -11551,7 +11551,7 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs
 
 <style id="bpt-v2300-clean-fullscreen-refactor">
 /* ================================
-   BPT 2.7.40 — CLEAN FULLSCREEN REFACTOR
+   BPT 2.7.41 — CLEAN FULLSCREEN REFACTOR
    One final authoritative layout for fullscreen / mobile live.
    ================================ */
 
@@ -11931,7 +11931,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 
 
 <style id="bpt-v231-fullscreen-component">
-/* BPT 2.7.40 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
+/* BPT 2.7.41 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
 #liveFullscreenDisplay,
 #liveFullscreenDisplay:fullscreen,
 #liveFullscreenDisplay:-webkit-full-screen,
@@ -12072,7 +12072,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-actions{width:100% !important;grid-template-columns:1fr 1fr !important;gap:8px !important}
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-action{min-height:46px !important;font-size:12px !important;letter-spacing:.02em !important}
 
-/* BPT 2.7.40 — direct mobile fullscreen classes on the target itself */
+/* BPT 2.7.41 — direct mobile fullscreen classes on the target itself */
 #liveFullscreenDisplay.bptfs-mobile{height:100dvh !important;}
 #liveFullscreenDisplay.bptfs-mobile::before,
 #liveFullscreenDisplay.bptfs-mobile::after{display:none !important;}
@@ -12201,7 +12201,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="2.7.40";
+const BPT_APP_VERSION="2.7.41";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -13193,7 +13193,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 2.7.40</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 2.7.41</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -13409,7 +13409,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.40 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 2.7.41 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -13675,7 +13675,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.40 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.41 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -14049,7 +14049,7 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.7.40 : aucune image Base64 dans bpt_state. Les photos de parties
+    // BPT 2.7.41 : aucune image Base64 dans bpt_state. Les photos de parties
     // sont stockées dans Firebase ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
@@ -14797,7 +14797,7 @@ async function cloudPoll(){
 
 let liveAutoOpenDone=false;
 async function autoOpenActiveLiveOnStartup(){
-  // BPT 2.7.40 : plus d'ouverture automatique du Live au démarrage.
+  // BPT 2.7.41 : plus d'ouverture automatique du Live au démarrage.
   // L'application s'ouvre toujours sur Accueil ; le Live actif est indiqué sur l'onglet Live.
   liveAutoOpenDone=true;
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -14849,7 +14849,7 @@ async function initCloudSync(){
     if(row && isValidBptState(row.data))row=await cloudPruneLegacyHeavyState(row);
 
     if(row && isValidBptState(row.data)){
-      const initialRemoteLive=row.data?.liveState||null;
+      const initialRemoteLive=chooseRemoteLiveForSpectator(row.data)||null;
       const initialRemoteCreator=String(initialRemoteLive?.creatorDeviceId||"");
       const initialRemoteActive=!!(initialRemoteLive?.prepared && !initialRemoteLive?.synced);
 
@@ -17114,7 +17114,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.40 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 2.7.41 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -21707,7 +21707,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 2.7.40 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 2.7.41 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -22370,7 +22370,7 @@ liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 (async()=>{
   await initCloudSync();
-  // BPT 2.7.40 : l'ouverture par défaut est toujours Accueil.
+  // BPT 2.7.41 : l'ouverture par défaut est toujours Accueil.
   spectatorAutoOpenSuppressed=true;
   document.body.classList.remove("spectator-live-open");
   await showView("dashboard");
@@ -22443,6 +22443,16 @@ async function bptHandleDirectFirebaseLiveSnapshot(raw){
     if(currentViewId!=="live")$("live")?.classList.remove("active");
     if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
 
+    // Si l'utilisateur a déjà ouvert l'onglet Live sur le téléphone,
+    // afficher immédiatement le Live distant sans attendre un autre cycle.
+    if(currentViewId==="live"){
+      try{
+        liveShowScreen("game");
+        liveRenderAll();
+        liveMaybeAutoOpenSpectator();
+      }catch(_e){}
+    }
+
     return true;
   }catch(e){
     console.error("BPT direct Firebase Live receiver:",e);
@@ -22487,7 +22497,46 @@ async function bptInstallDirectFirebaseLiveReceiver(){
   }
 }
 
-setTimeout(()=>bptInstallDirectFirebaseLiveReceiver(),500);
+let bptDirectReceiverInstallTimer=null;
+let bptDirectReceiverInstallBusy=false;
+let bptDirectReceiverInstalled=false;
+
+async function bptEnsureDirectFirebaseLiveReceiver(){
+  if(bptDirectReceiverInstallBusy)return false;
+  bptDirectReceiverInstallBusy=true;
+  try{
+    const ok=await bptInstallDirectFirebaseLiveReceiver();
+    bptDirectReceiverInstalled=!!ok;
+    if(ok){
+      if(bptDirectReceiverInstallTimer){
+        clearTimeout(bptDirectReceiverInstallTimer);
+        bptDirectReceiverInstallTimer=null;
+      }
+      return true;
+    }
+  }catch(e){
+    console.warn("BPT receiver retry:",e);
+  }finally{
+    bptDirectReceiverInstallBusy=false;
+  }
+
+  // Téléphone : Firebase/CDN peut être plus lent à devenir disponible.
+  // Réessayer jusqu'à installation au lieu d'abandonner après 500 ms.
+  if(!bptDirectReceiverInstallTimer){
+    bptDirectReceiverInstallTimer=setTimeout(()=>{
+      bptDirectReceiverInstallTimer=null;
+      bptEnsureDirectFirebaseLiveReceiver();
+    },1500);
+  }
+  return false;
+}
+
+setTimeout(()=>bptEnsureDirectFirebaseLiveReceiver(),500);
+window.addEventListener("online",()=>setTimeout(bptEnsureDirectFirebaseLiveReceiver,100),{passive:true});
+window.addEventListener("pageshow",()=>setTimeout(bptEnsureDirectFirebaseLiveReceiver,100),{passive:true});
+document.addEventListener("visibilitychange",()=>{
+  if(!document.hidden)setTimeout(bptEnsureDirectFirebaseLiveReceiver,100);
+});
 
 setTimeout(()=>startGlobalHandoverPolling(),1000);
 setTimeout(()=>syncSharedPhotosWithRetry(),1400);
