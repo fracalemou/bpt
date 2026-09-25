@@ -8048,7 +8048,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 2.7.31 — Classement / Parties / Profils / Dashboard */
+/* BPT 2.7.32 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8111,7 +8111,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.31 — Records / Impact / Courbes */
+/* BPT 2.7.32 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8137,7 +8137,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.31 — blocs repliables */
+/* BPT 2.7.32 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -11551,7 +11551,7 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs
 
 <style id="bpt-v2300-clean-fullscreen-refactor">
 /* ================================
-   BPT 2.7.31 — CLEAN FULLSCREEN REFACTOR
+   BPT 2.7.32 — CLEAN FULLSCREEN REFACTOR
    One final authoritative layout for fullscreen / mobile live.
    ================================ */
 
@@ -11931,7 +11931,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 
 
 <style id="bpt-v231-fullscreen-component">
-/* BPT 2.7.31 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
+/* BPT 2.7.32 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
 #liveFullscreenDisplay,
 #liveFullscreenDisplay:fullscreen,
 #liveFullscreenDisplay:-webkit-full-screen,
@@ -11960,8 +11960,8 @@ body.bpt-mobile-live-fullscreen #liveFullscreenDisplay{
   width:min(1540px,calc(100% - 48px)) !important;height:100% !important;margin:0 auto !important;
   display:grid !important;
   grid-template-areas:"header" "blinds" "timer" "kpis" "actions" "players" !important;
-  grid-template-rows:100px 158px minmax(220px,1fr) 84px 64px 132px !important;
-  row-gap:10px !important;
+  grid-template-rows:94px 146px minmax(210px,1fr) 82px 54px 144px !important;
+  row-gap:8px !important;
   align-content:stretch !important;
 }
 #liveFullscreenDisplay .bptfs-header{grid-area:header !important;display:grid !important;grid-template-columns:1fr auto !important;align-items:center !important;gap:20px !important}
@@ -11991,12 +11991,12 @@ body.bpt-mobile-live-fullscreen #liveFullscreenDisplay{
 #liveFullscreenDisplay .bptfs-kpi span{display:block !important;font-size:11px !important;letter-spacing:.14em !important;text-transform:uppercase !important;font-weight:900 !important;color:#dcecff !important;margin-bottom:4px !important}
 #liveFullscreenDisplay .bptfs-kpi strong{display:block !important;font-size:32px !important;line-height:1 !important;font-weight:1000 !important}
 
-#liveFullscreenDisplay .bptfs-actions{grid-area:actions !important;justify-self:center !important;align-self:center !important;width:min(820px,72vw) !important;display:grid !important;grid-template-columns:1fr 1fr !important;gap:14px !important;position:static !important;transform:none !important;margin:0 !important;padding:0 !important;z-index:3 !important}
-#liveFullscreenDisplay .bptfs-action{width:100% !important;min-height:56px !important;border-radius:15px !important;border:1px solid rgba(125,175,255,.22) !important;color:#fff !important;font-size:20px !important;font-weight:950 !important;text-transform:uppercase !important;letter-spacing:.08em !important;position:static !important;transform:none !important;margin:0 !important}
+#liveFullscreenDisplay .bptfs-actions{grid-area:actions !important;justify-self:center !important;align-self:center !important;width:min(700px,62vw) !important;display:grid !important;grid-template-columns:1fr 1fr !important;gap:12px !important;position:static !important;transform:none !important;margin:0 !important;padding:0 !important;z-index:3 !important}
+#liveFullscreenDisplay .bptfs-action{width:100% !important;min-height:46px !important;border-radius:14px !important;border:1px solid rgba(125,175,255,.22) !important;color:#fff !important;font-size:17px !important;font-weight:950 !important;text-transform:uppercase !important;letter-spacing:.06em !important;position:static !important;transform:none !important;margin:0 !important;padding:0 14px !important}
 #liveFullscreenDisplay .bptfs-action.primary{background:linear-gradient(180deg,#13a8e3,#087eae) !important}
 #liveFullscreenDisplay .bptfs-action.danger{background:linear-gradient(180deg,#c32243,#981a35) !important}
 
-#liveFullscreenDisplay .bptfs-players{grid-area:players !important;align-self:end !important;width:100% !important;height:126px !important;border:1px solid rgba(100,158,242,.16) !important;border-radius:20px 20px 0 0 !important;background:rgba(5,17,30,.80) !important;padding:10px 16px 8px !important;display:flex !important;flex-direction:column !important;overflow:hidden !important;position:static !important;z-index:1 !important}
+#liveFullscreenDisplay .bptfs-players{grid-area:players !important;align-self:end !important;width:100% !important;height:140px !important;border:1px solid rgba(100,158,242,.16) !important;border-radius:20px 20px 0 0 !important;background:rgba(5,17,30,.80) !important;padding:12px 16px 10px !important;display:flex !important;flex-direction:column !important;overflow:hidden !important;position:static !important;z-index:1 !important}
 #liveFullscreenDisplay .bptfs-players-title{font-size:11px !important;letter-spacing:.14em !important;text-transform:uppercase !important;font-weight:900 !important;color:#dcecff !important;margin-bottom:6px !important}
 #liveFullscreenDisplay .bptfs-player-list{flex:1 !important;display:flex !important;align-items:flex-end !important;justify-content:space-evenly !important;gap:10px !important;overflow-x:auto !important;overflow-y:hidden !important}
 #liveFullscreenDisplay .bptfs-player-list .live-fs-player-item{min-width:66px !important;max-width:88px !important;display:flex !important;flex-direction:column !important;align-items:center !important;gap:4px !important;text-align:center !important;flex:0 0 auto !important}
@@ -12071,6 +12071,57 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-kpi strong{font-size:18px !important}
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-actions{width:100% !important;grid-template-columns:1fr 1fr !important;gap:8px !important}
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-action{min-height:46px !important;font-size:12px !important;letter-spacing:.02em !important}
+
+/* BPT 2.7.32 — direct mobile fullscreen classes on the target itself */
+#liveFullscreenDisplay.bptfs-mobile{height:100dvh !important;}
+#liveFullscreenDisplay.bptfs-mobile::before,
+#liveFullscreenDisplay.bptfs-mobile::after{display:none !important;}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-players{display:none !important;}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-mobile-tools{display:flex !important;gap:6px !important;justify-self:end !important;}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-tool-btn{width:38px !important;height:38px !important;border-radius:10px !important;border:1px solid rgba(120,168,255,.22) !important;background:#0b2035 !important;color:#fff !important;font-size:22px !important;font-weight:900 !important;padding:0 !important;}
+
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-portrait .bptfs-shell{width:100% !important;height:100% !important;padding:10px !important;grid-template-areas:"header" "blinds" "timer" "kpis" "actions" !important;grid-template-rows:60px 110px minmax(180px,1fr) 76px 58px !important;row-gap:9px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-portrait .bptfs-header{grid-template-columns:1fr auto auto !important;gap:7px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-portrait .bptfs-brand-big{font-size:42px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-portrait .bptfs-brand-stack{font-size:9px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-portrait .bptfs-remaining{width:108px !important;min-height:54px !important;padding:5px 7px !important;border-radius:13px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-portrait .bptfs-remaining .bptfs-card-label{font-size:8px !important;letter-spacing:.06em !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-portrait .bptfs-remaining-value{font-size:26px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-portrait .bptfs-blinds{width:100% !important;height:110px !important;border-radius:17px !important;padding:8px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-portrait .bptfs-blinds-value{font-size:58px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-portrait .bptfs-card-label{font-size:9px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-portrait .bptfs-timer{width:100% !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-portrait .bptfs-timer-value{font-size:min(30vw,120px) !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-portrait .bptfs-progress{height:9px !important;width:92% !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-portrait .bptfs-kpis{width:100% !important;grid-template-columns:1fr 1fr !important;gap:7px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-portrait .bptfs-kpi{min-height:72px !important;padding:7px !important;gap:7px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-portrait .bptfs-kpi-icon{font-size:24px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-portrait .bptfs-kpi span{font-size:8px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-portrait .bptfs-kpi strong{font-size:21px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-portrait .bptfs-actions{width:100% !important;grid-template-columns:1fr 1fr !important;gap:7px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-portrait .bptfs-action{min-height:50px !important;font-size:12px !important;letter-spacing:.03em !important;}
+
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-landscape .bptfs-shell{width:100% !important;height:100% !important;padding:8px 10px !important;grid-template-areas:"header header" "blinds timer" "kpis timer" "actions actions" !important;grid-template-columns:42% 58% !important;grid-template-rows:56px 104px minmax(70px,1fr) 52px !important;gap:7px 10px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-landscape .bptfs-header{grid-template-columns:1fr auto auto !important;gap:8px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-landscape .bptfs-brand-big{font-size:40px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-landscape .bptfs-brand-stack{font-size:8px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-landscape .bptfs-remaining{width:120px !important;min-height:48px !important;padding:4px 7px !important;border-radius:12px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-landscape .bptfs-remaining .bptfs-card-label{font-size:7px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-landscape .bptfs-remaining-value{font-size:24px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-landscape .bptfs-blinds{width:100% !important;height:100% !important;border-radius:15px !important;padding:6px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-landscape .bptfs-blinds-value{font-size:48px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-landscape .bptfs-card-label{font-size:8px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-landscape .bptfs-timer{width:100% !important;height:100% !important;align-self:center !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-landscape .bptfs-timer-value{font-size:min(18vw,92px) !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-landscape .bptfs-progress{height:7px !important;width:90% !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-landscape .bptfs-kpis{width:100% !important;grid-template-columns:1fr !important;gap:5px !important;align-self:start !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-landscape .bptfs-kpi{min-height:46px !important;padding:5px 8px !important;gap:7px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-landscape .bptfs-kpi-icon{font-size:20px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-landscape .bptfs-kpi span{font-size:7px !important;margin-bottom:1px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-landscape .bptfs-kpi strong{font-size:18px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-landscape .bptfs-actions{width:100% !important;grid-template-columns:1fr 1fr !important;gap:8px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-landscape .bptfs-action{min-height:46px !important;font-size:12px !important;letter-spacing:.02em !important;}
+
 </style>
 
 </head>
@@ -12099,7 +12150,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="2.7.31";
+const BPT_APP_VERSION="2.7.32";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -13088,7 +13139,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 2.7.31</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 2.7.32</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -13304,7 +13355,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.31 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 2.7.32 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -13570,7 +13621,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.31 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.32 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -13944,7 +13995,7 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.7.31 : aucune image Base64 dans bpt_state. Les photos de parties
+    // BPT 2.7.32 : aucune image Base64 dans bpt_state. Les photos de parties
     // sont stockées dans Firebase ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
@@ -14692,7 +14743,7 @@ async function cloudPoll(){
 
 let liveAutoOpenDone=false;
 async function autoOpenActiveLiveOnStartup(){
-  // BPT 2.7.31 : plus d'ouverture automatique du Live au démarrage.
+  // BPT 2.7.32 : plus d'ouverture automatique du Live au démarrage.
   // L'application s'ouvre toujours sur Accueil ; le Live actif est indiqué sur l'onglet Live.
   liveAutoOpenDone=true;
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -16272,9 +16323,27 @@ function updateLiveTimerUrgency(){
   el.classList.toggle("live-warning-10",s.remainingSeconds<=10);
 }
 
+
+function syncLiveFullscreenModeClasses(){
+  const target=$("liveFullscreenDisplay");
+  if(!target)return;
+  const mobile=isBptMobileDevice();
+  const vv=window.visualViewport;
+  const w=(vv && vv.width) || window.innerWidth || document.documentElement.clientWidth;
+  const h=(vv && vv.height) || window.innerHeight || document.documentElement.clientHeight;
+  const portrait=h>=w;
+  target.classList.toggle("bptfs-mobile", !!mobile);
+  target.classList.toggle("bptfs-mobile-portrait", !!(mobile && portrait));
+  target.classList.toggle("bptfs-mobile-landscape", !!(mobile && !portrait));
+}
+window.addEventListener("resize",syncLiveFullscreenModeClasses,{passive:true});
+window.addEventListener("orientationchange",syncLiveFullscreenModeClasses,{passive:true});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)syncLiveFullscreenModeClasses();});
+
 async function toggleLiveFullscreen(){
   const target=$("liveFullscreenDisplay");
   if(!target)return;
+  syncLiveFullscreenModeClasses();
 
   // Téléphone : plein écran applicatif, sans API plein écran du navigateur.
   if(isBptMobileDevice()){
@@ -16474,6 +16543,7 @@ async function liveFsEliminate(){
 
 // Sortir un joueur reste disponible indépendamment de la pause/reprise du chrono.
 function liveRenderFullscreen(){
+  syncLiveFullscreenModeClasses();
   const s=ensureLiveState();
   if(!s.prepared)return;
 
@@ -16922,7 +16992,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.31 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 2.7.32 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -21478,7 +21548,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 2.7.31 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 2.7.32 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -22143,7 +22213,7 @@ liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 (async()=>{
   await initCloudSync();
-  // BPT 2.7.31 : l'ouverture par défaut est toujours Accueil.
+  // BPT 2.7.32 : l'ouverture par défaut est toujours Accueil.
   spectatorAutoOpenSuppressed=true;
   document.body.classList.remove("spectator-live-open");
   await showView("dashboard");
