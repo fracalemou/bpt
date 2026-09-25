@@ -7,6 +7,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
+<!-- BPT NO LIVE / SHARED DATA -->
 <title>BPT — Gestion du championnat</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23173a2b'/%3E%3Cpath d='M32 10c-6 10-18 15-18 26 0 7 5 12 11 12 3 0 5-1 7-4-1 5-3 8-7 10h14c-4-2-6-5-7-10 2 3 4 4 7 4 6 0 11-5 11-12 0-11-12-16-18-26z' fill='%23c8952e'/%3E%3C/svg%3E">
 <style>
@@ -8048,7 +8049,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT EMERGENCY-PHONE-MASTER — Classement / Parties / Profils / Dashboard */
+/* BPT 2.7.41 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -12175,6 +12176,12 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 #liveFullscreenDisplay.bptfs-mobile .bptfs-chat-icon{font-size:19px !important;}
 </style>
 
+
+<style id="bpt-no-live-mode">
+nav button[data-view="live"],#live,#liveFullscreenDisplay,#spectatorServerOverlay,
+#globalHandoverRequest,.live-chat-panel,.live-chat-backdrop,.live-handover-request,
+.live-fullscreen-display{display:none!important}
+</style>
 </head>
 <body>
 <script>
@@ -12322,7 +12329,7 @@ function simplifyRecordTextForMobile(text){
   </div>
 </header>
 <nav id="nav">
-  <button data-view="live">Live</button>
+  
   <button data-view="dashboard" class="active">⌂ Accueil</button>
   <button data-view="latestgame">◷ Parties</button>
   <button data-view="ranking">♛ Classement</button>
@@ -14040,48 +14047,18 @@ function saveLocalOnly(){
 }
 
 function cloudBuildLeanPayload(){
-  const s=(db?.liveState && typeof db.liveState==="object")?db.liveState:null;
-  const payload={
+  return {
     players:clone(db?.players||[]),
     history:[],
     points:clone(db?.points||{}),
     settings:clone(db?.settings||{}),
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
-    liveState:s?clone(s):null,
-    // BPT 2.7.41 : aucune image Base64 dans bpt_state. Les photos de parties
-    // sont stockées dans Firebase ; leur URL est déterministe.
+    liveState:null,
+    liveWire:null,
     gamePhotos:{},
     playerPhotos:{}
   };
-
-  if(s?.prepared && !s?.synced){
-    payload.liveWire={
-      wireVersion:2,
-      publishedAt:Date.now(),
-      creatorDeviceId:String(s.creatorDeviceId||""),
-      prepared:true,
-      synced:false,
-      running:!!s.running,
-      gameNo:s.gameNo,
-      date:s.date||"",
-      location:s.location||"",
-      levelIndex:Number(s.levelIndex||0),
-      levelSeconds:Number(s.levelSeconds||0),
-      remainingSeconds:Number(s.remainingSeconds||0),
-      endAt:s.endAt||null,
-      elapsedBeforeMs:Number(s.elapsedBeforeMs||0),
-      runStartedAt:s.runStartedAt||null,
-      startedAt:s.startedAt||null,
-      chatSessionId:s.chatSessionId||null,
-      levels:clone(s.levels||[]),
-      players:clone(s.players||[]),
-      handoverRequest:s.handoverRequest?clone(s.handoverRequest):null
-    };
-  }else{
-    payload.liveWire=null;
-  }
-  return payload;
 }
 
 async function cloudPruneLegacyHeavyState(row){
@@ -14563,31 +14540,7 @@ function startSpectatorOverlayTicker(){
   },250);
 }
 
-async function renderSpectatorFromServer(row){
-  const wire=spectatorWireFromRow(row);
-  if(!wire)return false;
-
-  const creator=String(wire.creatorDeviceId||"");
-  if(!creator || creator===liveDeviceId())return false;
-
-  spectatorServerLiveState=JSON.parse(JSON.stringify(wire));
-  spectatorServerLiveRevision=Number(row.revision||0);
-  cloudLastRevision=spectatorServerLiveRevision;
-  cloudLocalDirty=false;
-
-  currentViewId="live";
-  renderSpectatorServerOverlay(wire);
-  startSpectatorOverlayTicker();
-  // Le plein écran spectateur est celui de l'application : overlay 100 % du viewport.
-  // Aucun appel au plein écran natif du navigateur n'est nécessaire.
-
-  setCloudStatus(
-    "ok",
-    "Live spectateur connecté",
-    `main.liveWire · niveau ${Number(wire.levelIndex||0)+1} · ${Array.isArray(wire.players)?wire.players.length:0} joueurs`
-  );
-  return true;
-}
+async function renderSpectatorFromServer(){return false;}
 
 function mergeRemotePlayerAvatars(remotePlayers){
   if(!Array.isArray(remotePlayers) || !Array.isArray(db?.players))return false;
@@ -14662,19 +14615,11 @@ async function applySpectatorLiveState(row,{fromDirectPoll=false}={}){
 
 async function applyCloudState(row){
   if(!row || !isValidBptState(row.data))return false;
-  const remoteCreator=String(row.data?.liveState?.creatorDeviceId||"");
-  const thisDevice=liveDeviceId();
-  const remoteActive=!!(row.data?.liveState?.prepared && !row.data?.liveState?.synced);
-  const thisDeviceOwnsRemoteLive=remoteActive && remoteCreator && remoteCreator===thisDevice;
-
-  if(remoteActive && remoteCreator && remoteCreator!==thisDevice){
-    return await applySpectatorLiveState(row);
-  }
-
-  if(cloudLocalDirty && thisDeviceOwnsRemoteLive)return false;
 
   const rev=Number(row.revision||0);
   const remoteState=JSON.parse(JSON.stringify(row.data));
+  remoteState.liveState=null;
+  remoteState.liveWire=null;
 
   // La photothèque est additive : une photo déjà connue localement ne doit jamais
   // disparaître parce qu'un autre appareil possède un état plus ancien.
@@ -15282,88 +15227,7 @@ async function fetchLiveStateDirect(){
   return row;
 }
 
-async function livePushStateNow(){
-  saveLocalOnly();
-
-  if(db.liveState){
-    db.liveState.publishedAt=Date.now();
-    if(db.liveState.running && db.liveState.endAt){
-      db.liveState.remainingSeconds=Math.max(0,Math.ceil((db.liveState.endAt-Date.now())/1000));
-    }
-  }
-
-  try{
-    const ensure=window.bptFirebaseEnsure;
-    if(typeof ensure!=="function")return false;
-    const {rtdb}=await ensure();
-    if(!rtdb)return false;
-
-    const s=db.liveState;
-    const wire=(s?.prepared && !s?.synced) ? {
-      wireVersion:2,
-      publishedAt:Date.now(),
-      creatorDeviceId:String(s.creatorDeviceId||liveDeviceId()),
-      prepared:true,
-      synced:false,
-      running:!!s.running,
-      gameNo:s.gameNo,
-      date:s.date||"",
-      location:s.location||"",
-      startStack:Number(s.startStack||0),
-      minSB:Number(s.minSB||0),
-      targetMinutes:Number(s.targetMinutes||0),
-      useAnte:!!s.useAnte,
-      buyIn:Number(s.buyIn||0),
-      levelIndex:Number(s.levelIndex||0),
-      levelSeconds:Number(s.levelSeconds||0),
-      remainingSeconds:Number(s.remainingSeconds||0),
-      endAt:s.endAt||null,
-      elapsedBeforeMs:Number(s.elapsedBeforeMs||0),
-      runStartedAt:s.runStartedAt||null,
-      startedAt:s.startedAt||null,
-      chatSessionId:String(s.chatSessionId||""),
-      levels:JSON.parse(JSON.stringify(s.levels||[])),
-      players:JSON.parse(JSON.stringify(s.players||[])),
-      handoverRequest:s.handoverRequest ? JSON.parse(JSON.stringify(s.handoverRequest)) : null
-    } : null;
-
-    const ref=rtdb.ref("bpt/state/main");
-    const result=await ref.transaction(current=>{
-      const row=(current && typeof current==="object") ? current : {};
-      const data=(row.data && typeof row.data==="object") ? row.data : {};
-      return {
-        ...row,
-        data:{
-          ...data,
-          liveWire:wire
-        },
-        revision:Number(row.revision||0)+1,
-        updated_at:new Date().toISOString()
-      };
-    });
-
-    const written=result?.snapshot?.val?.()||null;
-    const serverWire=written?.data?.liveWire||null;
-    cloudLastRevision=Number(written?.revision||cloudLastRevision||0);
-    cloudLocalDirty=false;
-    cloudLastError="";
-
-    try{ liveSetLastSyncNow(); }catch(_e){}
-    try{
-      const hh=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
-      setCloudStatus("ok","Live publié",`Firebase · ${hh}`);
-    }catch(_e){}
-
-    return wire ? !!serverWire : true;
-  }catch(e){
-    cloudLastError=e?.message||String(e);
-    cloudLocalDirty=true;
-    console.warn("BPT Firebase Live push:",e);
-    try{ setCloudStatus("offline","Téléphone autonome","La partie continue localement."); }catch(_e){}
-    return false;
-  }
-}
-
+async function livePushStateNow(){return false;}
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
 function euro(n){return Number(n||0).toLocaleString("fr-FR",{minimumFractionDigits:0,maximumFractionDigits:2})+" €";}
 function shortDate(v){
@@ -19319,49 +19183,9 @@ let spectatorSyncCountdownTimer=null;
 let spectatorLivePollTimer=null;
 let spectatorLastPublishedAt=0;
 
-function startSpectatorLivePolling(){
-  if(spectatorLivePollTimer)clearInterval(spectatorLivePollTimer);
+function startSpectatorLivePolling(){return;}
 
-  const pull=async()=>{
-    try{
-      const row=await fetchLiveStateDirect();
-      const wire=spectatorWireFromRow(row);
-      const creator=String(wire?.creatorDeviceId||"");
-
-      if(wire && creator===liveDeviceId()){
-        activateTransferredLive(wire);
-        return;
-      }
-
-      if(wire && creator && creator!==liveDeviceId()){
-        spectatorServerLiveState=JSON.parse(JSON.stringify(wire));
-
-        if(spectatorOverlayIsOpen() || currentViewId==="live"){
-          renderSpectatorServerOverlay(wire);
-          startSpectatorOverlayTicker();
-        }else{
-          const liveNav=document.querySelector('nav button[data-view="live"]');
-          if(liveNav){
-            liveNav.textContent="● Live";
-            liveNav.classList.add("spectator-nav");
-          }
-        }
-      }
-    }catch(e){
-      console.warn("BPT spectator direct poll:",e);
-    }
-  };
-
-  pull();
-  spectatorLivePollTimer=setInterval(()=>{ pull(); },isBptMobileDevice()?15000:5000);
-}
-
-function stopSpectatorLivePolling(){
-  if(spectatorLivePollTimer){
-    clearInterval(spectatorLivePollTimer);
-    spectatorLivePollTimer=null;
-  }
-}
+function stopSpectatorLivePolling(){return;}
 
 function resetSpectatorSyncCountdown(){
   spectatorSyncDeadline=Date.now()+LIVE_CLOUD_HEARTBEAT_MS;
@@ -19405,31 +19229,9 @@ function showLiveHandoverRequest(req){
   return;
 }
 
-async function fetchMainStateRow(){
-  const ensure=window.bptFirebaseEnsure;
-  if(typeof ensure!=="function")throw new Error("Firebase indisponible.");
-  const {rtdb}=await ensure();
-  if(!rtdb)throw new Error("Realtime Database indisponible.");
-  const snap=await rtdb.ref("bpt/state/main").once("value");
-  return snap.val()||null;
-}
+async function fetchMainStateRow(){return null;}
 
-async function updateMainStateHandover(mutator){
-  const ensure=window.bptFirebaseEnsure;
-  if(typeof ensure!=="function")throw new Error("Firebase indisponible.");
-  const {rtdb}=await ensure();
-  if(!rtdb)throw new Error("Realtime Database indisponible.");
-  const ref=rtdb.ref("bpt/state/main");
-  const result=await ref.transaction(current=>{
-    if(!current || !current.data)return;
-    const next=mutator(JSON.parse(JSON.stringify(current)));
-    if(!next)return;
-    next.revision=Number(next.revision||0)+1;
-    next.updated_at=new Date().toISOString();
-    return next;
-  });
-  return result?.snapshot?.val?.() || null;
-}
+async function updateMainStateHandover(){return null;}
 
 
 function showGlobalHandoverRequest(message){
@@ -19447,213 +19249,13 @@ function hideGlobalHandoverRequest(){
   if(box)box.style.display="none";
 }
 
-async function masterCheckHandoverRequest(){
-  const s=ensureLiveState();
-  if(!s?.prepared || s.synced || !liveIsCreator()){
-    hideGlobalHandoverRequest();
-    return;
-  }
+async function masterCheckHandoverRequest(){return;}
 
-  try{
-    const row=await fetchMainStateRow();
-    const wire=row?.data?.liveWire||null;
+async function requestLiveTakeover(){return false;}
 
-    if(!wire?.prepared || wire?.synced){
-      hideGlobalHandoverRequest();
-      return;
-    }
+async function rejectLiveTakeover(){return false;}
 
-    const serverOwner=String(wire.creatorDeviceId||"");
-    if(serverOwner && serverOwner!==liveDeviceId()){
-      stopLiveCloudHeartbeat();
-      db.liveState={...clone(wire),synced:false,prepared:true};
-      saveLocalOnly();
-      hideGlobalHandoverRequest();
-      startSpectatorLivePolling();
-      return;
-    }
-
-    const req=wire.handoverRequest||null;
-    if(req?.requesterDeviceId && req.requesterDeviceId!==liveDeviceId()){
-      s.handoverRequest=clone(req);
-      showGlobalHandoverRequest(
-        `${handoverDeviceLabel(req.requesterDeviceId)} demande à reprendre la gestion du Live.`
-      );
-    }else{
-      s.handoverRequest=null;
-      hideGlobalHandoverRequest();
-    }
-  }catch(e){
-    console.warn("Contrôle reprise Live :",e);
-  }
-}
-
-async function requestLiveTakeover(){
-  try{
-    const requester=liveDeviceId();
-    let found=false;
-
-    const written=await updateMainStateHandover(current=>{
-      const data=current.data||{};
-      const wire=(data.liveWire?.prepared && !data.liveWire?.synced)
-        ? data.liveWire
-        : ((data.liveState?.prepared && !data.liveState?.synced) ? data.liveState : null);
-
-      if(!wire)return;
-      found=true;
-
-      if(String(wire.creatorDeviceId||"")===requester){
-        return current;
-      }
-
-      const request={
-        requesterDeviceId:requester,
-        requestedAt:Date.now()
-      };
-
-      current.data={...data};
-      if(data.liveWire?.prepared && !data.liveWire?.synced){
-        current.data.liveWire={...data.liveWire,handoverRequest:request,publishedAt:Date.now()};
-      }
-      if(data.liveState?.prepared && !data.liveState?.synced){
-        current.data.liveState={...data.liveState,handoverRequest:request};
-      }
-      return current;
-    });
-
-    if(!found || !written?.data){
-      alert("Le Live n'est plus disponible.");
-      return false;
-    }
-
-    const active=(written.data.liveWire?.prepared && !written.data.liveWire?.synced)
-      ? written.data.liveWire
-      : written.data.liveState;
-
-    if(active?.creatorDeviceId===requester){
-      activateTransferredLive(active);
-      return true;
-    }
-
-    if($("spectatorTakeoverBtn")){
-      $("spectatorTakeoverBtn").disabled=true;
-      $("spectatorTakeoverBtn").textContent="Demande envoyée…";
-    }
-    return true;
-  }catch(e){
-    console.error("BPT takeover request:",e);
-    alert("Impossible d'envoyer la demande de reprise du Live.");
-    return false;
-  }
-}
-
-async function rejectLiveTakeover(){
-  hideGlobalHandoverRequest();
-
-  try{
-    const owner=liveDeviceId();
-    let rejected=false;
-
-    await updateMainStateHandover(current=>{
-      const data=current.data||{};
-      const wire=(data.liveWire?.prepared && !data.liveWire?.synced)
-        ? data.liveWire
-        : ((data.liveState?.prepared && !data.liveState?.synced) ? data.liveState : null);
-
-      if(!wire || String(wire.creatorDeviceId||"")!==owner)return;
-
-      const req=wire.handoverRequest||null;
-      if(!req?.requesterDeviceId)return;
-      rejected=true;
-
-      current.data={...data};
-      if(data.liveWire?.prepared && !data.liveWire?.synced){
-        current.data.liveWire={...data.liveWire,handoverRequest:null,publishedAt:Date.now()};
-      }
-      if(data.liveState?.prepared && !data.liveState?.synced){
-        current.data.liveState={...data.liveState,handoverRequest:null};
-      }
-      return current;
-    });
-
-    if(db.liveState)db.liveState.handoverRequest=null;
-    saveLocalOnly();
-    return rejected;
-  }catch(e){
-    console.error("BPT reject takeover:",e);
-    alert("Impossible de refuser la demande de reprise du Live.");
-    return false;
-  }
-}
-
-async function approveLiveTakeover(){
-  hideGlobalHandoverRequest();
-
-  try{
-    const owner=liveDeviceId();
-    let newCreator="";
-
-    const written=await updateMainStateHandover(current=>{
-      const data=current.data||{};
-      const wire=(data.liveWire?.prepared && !data.liveWire?.synced)
-        ? data.liveWire
-        : ((data.liveState?.prepared && !data.liveState?.synced) ? data.liveState : null);
-
-      if(!wire || String(wire.creatorDeviceId||"")!==owner)return;
-
-      const req=wire.handoverRequest||null;
-      if(!req?.requesterDeviceId)return;
-
-      newCreator=String(req.requesterDeviceId);
-      current.data={...data};
-
-      if(data.liveWire?.prepared && !data.liveWire?.synced){
-        current.data.liveWire={
-          ...data.liveWire,
-          creatorDeviceId:newCreator,
-          handoverRequest:null,
-          publishedAt:Date.now()
-        };
-      }
-      if(data.liveState?.prepared && !data.liveState?.synced){
-        current.data.liveState={
-          ...data.liveState,
-          creatorDeviceId:newCreator,
-          handoverRequest:null
-        };
-      }
-      return current;
-    });
-
-    if(!newCreator || !written?.data){
-      alert("La demande de reprise n'est plus disponible.");
-      return false;
-    }
-
-    stopLiveCloudHeartbeat();
-
-    const writtenWire=(written.data.liveWire?.prepared && !written.data.liveWire?.synced)
-      ? written.data.liveWire
-      : written.data.liveState;
-
-    spectatorServerLiveState=JSON.parse(JSON.stringify(writtenWire));
-    db.liveState=JSON.parse(JSON.stringify(writtenWire));
-    saveLocalOnly();
-
-    applyLiveAccessMode();
-    startSpectatorLivePolling();
-
-    if(currentViewId==="live"){
-      renderSpectatorServerOverlay(writtenWire);
-    }
-
-    return true;
-  }catch(e){
-    console.error("BPT approve takeover:",e);
-    alert("Impossible d’autoriser la reprise du Live.");
-    return false;
-  }
-}
+async function approveLiveTakeover(){return false;}
 
 function activateTransferredLive(wire){
   if(!wire?.prepared || wire.creatorDeviceId!==liveDeviceId())return false;
@@ -19683,48 +19285,11 @@ function activateTransferredLive(wire){
 }
 
 
-function startGlobalHandoverPolling(){
-  if(globalHandoverPollTimer)clearInterval(globalHandoverPollTimer);
+function startGlobalHandoverPolling(){return;}
 
-  const check=()=>{
-    const s=db?.liveState;
-    if(s?.prepared && !s.synced && liveIsCreator()){
-      masterCheckHandoverRequest();
-    }else if(!s?.prepared || s.synced){
-      hideGlobalHandoverRequest();
-    }
-  };
+function startLiveCloudHeartbeat(){return;}
 
-  globalHandoverPollTimer=setInterval(check,HANDOVER_FALLBACK_POLL_MS);
-  check();
-}
-
-function startLiveCloudHeartbeat(){
-  stopSpectatorLivePolling();
-  if(liveCloudHeartbeat)clearInterval(liveCloudHeartbeat);
-
-  // Realtime traite les demandes de reprise ; polling uniquement en secours.
-  if(!cloudRealtimeConnected)masterCheckHandoverRequest();
-
-  liveCloudHeartbeat=setInterval(async()=>{
-    const s=db?.liveState;
-    if(!s?.prepared || s?.synced || !liveIsCreator())return;
-    try{
-      if(!cloudRealtimeConnected)await masterCheckHandoverRequest();
-      if(!liveIsCreator())return;
-      await livePushStateNow();
-    }catch(e){
-      console.warn("BPT Live heartbeat:",e);
-    }
-  },LIVE_CLOUD_HEARTBEAT_MS);
-}
-
-function stopLiveCloudHeartbeat(){
-  if(liveCloudHeartbeat){
-    clearInterval(liveCloudHeartbeat);
-    liveCloudHeartbeat=null;
-  }
-}
+function stopLiveCloudHeartbeat(){return;}
 
 /* BPT 2.4.3 — seul le bip discret du chat est conservé. */
 let liveTenSecondWarningKey="";
@@ -19984,48 +19549,10 @@ async function liveExpireRemoteIfNeeded(state,{silent=false}={}){
   }
 }
 
-async function liveFetchServerActiveState(){
-  try{
-    const ensure=window.bptFirebaseEnsure;
-    if(typeof ensure!=="function")return null;
-    const {rtdb}=await ensure();
-    const snap=await rtdb.ref("bpt/state/main").once("value");
-    const row=snap.val()||null;
-    const data=row?.data||null;
-    const wire=(data?.liveWire?.prepared && !data?.liveWire?.synced) ? data.liveWire : null;
-    const legacy=(data?.liveState?.prepared && !data?.liveState?.synced) ? data.liveState : null;
-    const active=wire||legacy||null;
-    if(active && liveIsExpiredByAge(active)){
-      await liveExpireRemoteIfNeeded(active,{silent:true});
-      return null;
-    }
-    return active;
-  }catch(e){
-    console.warn("BPT contrôle exclusivité Live :",e);
-    return null;
-  }
-}
+async function liveFetchServerActiveState(){return null;}
 
 
-async function liveFetchServerActiveStateStrict(){
-  const ensure=window.bptFirebaseEnsure;
-  if(typeof ensure!=="function"){
-    throw new Error("Firebase indisponible : impossible de vérifier si un Live est déjà en cours.");
-  }
-  const {rtdb}=await ensure();
-  if(!rtdb)throw new Error("Realtime Database indisponible.");
-  const snap=await rtdb.ref("bpt/state/main").once("value");
-  const row=snap.val()||null;
-  const data=row?.data||null;
-  const wire=(data?.liveWire?.prepared && !data?.liveWire?.synced) ? data.liveWire : null;
-  const legacy=(data?.liveState?.prepared && !data?.liveState?.synced) ? data.liveState : null;
-  const active=wire||legacy||null;
-  if(active && liveIsExpiredByAge(active)){
-    await liveExpireRemoteIfNeeded(active,{silent:true});
-    return null;
-  }
-  return active;
-}
+async function liveFetchServerActiveStateStrict(){return null;}
 
 async function liveExclusiveGuard({forNew=false,showAlert=true}={}){
   let remote=null;
@@ -20242,13 +19769,7 @@ function liveShowScreen(which){
   if(which==="game")liveRenderAll();
 }
 async function liveLaunch(){
-  const mobileMaster=isBptMobileDevice();
-  if(!mobileMaster && !(await liveExclusiveGuard({forNew:true})))return;
-  if(mobileMaster){
-    spectatorServerLiveState=null;
-    spectatorServerLiveRevision=0;
-    try{ document.body.classList.remove("spectator-live-open"); }catch(_e){}
-  }
+  if(!(await liveExclusiveGuard({forNew:true})))return;
   const requiredLocation=String($("liveLocation")?.value||"").trim();
   if(!requiredLocation){
     alert("Le nom / lieu de la partie est obligatoire.");
@@ -20256,7 +19777,7 @@ async function liveLaunch(){
     return;
   }
 
-  if(!mobileMaster && !liveCreatorGuard())return;
+  if(!liveCreatorGuard())return;
   if(liveSelected.size<2){alert("Sélectionnez au moins 2 joueurs.");return;}
   const old=ensureLiveState();
   const previousChatKey=bptChatLiveKey();
@@ -20290,15 +19811,11 @@ async function liveLaunch(){
   liveRenderAll();
   liveRenderFullscreen();
 
-  // Mode urgence : sur téléphone, la création est terminée ici.
-  // La synchronisation ne doit jamais bloquer l'interface.
-  if(mobileMaster){
-    Promise.resolve(livePushStateNow()).catch(()=>{});
-    startLiveCloudHeartbeat();
-    return;
-  }
-
+  // Le clic sur « Lancer la partie » ouvre immédiatement le bon plein écran :
+  // applicatif sur téléphone, natif navigateur sur PC.
+  // Le chrono reste arrêté jusqu'au bouton « Démarrer » du plein écran.
   await toggleLiveFullscreen();
+
   await livePushStateNow();
   startLiveCloudHeartbeat();
 }
@@ -20306,68 +19823,25 @@ async function liveLaunch(){
 
 
 async function liveStart(){
-  const mobileMaster=isBptMobileDevice();
+  if(!(await liveExclusiveGuard({forNew:false})))return;
+  if(!liveCreatorGuard())return;
+  const s=ensureLiveState();if(!s.prepared)return;
 
-  if(!mobileMaster){
-    if(!(await liveExclusiveGuard({forNew:false})))return;
-    if(!liveCreatorGuard())return;
-  }
-
-  const s=ensureLiveState();
-  if(!s.prepared || s.synced)return;
-  if(mobileMaster && s.creatorDeviceId!==liveDeviceId())return;
   if(s.running)return;
-
-  s.running=true;
-  if(!s.startedAt)s.startedAt=Date.now();
-  s.runStartedAt=Date.now();
-  s.endAt=Date.now()+Math.max(0,Number(s.remainingSeconds||0))*1000;
-
-  saveLocalOnly();
-  liveRunTicker();
-  liveRenderAll();
-  liveRenderFullscreen();
-
-  if(mobileMaster){
-    Promise.resolve(livePushStateNow()).catch(()=>{});
-    startLiveCloudHeartbeat();
-    return;
-  }
-
+  s.running=true;if(!s.startedAt)s.startedAt=Date.now();s.runStartedAt=Date.now();s.endAt=Date.now()+s.remainingSeconds*1000;
+  saveLocalOnly();liveRunTicker();liveRenderAll();
   await livePushStateNow();
   startLiveCloudHeartbeat();
 }
-
 async function livePause(){
-  const mobileMaster=isBptMobileDevice();
-
-  if(!mobileMaster){
-    if(!(await liveExclusiveGuard({forNew:false})))return;
-    if(!liveCreatorGuard())return;
-  }
-
-  const s=ensureLiveState();
-  if(!s.running)return;
-  if(mobileMaster && s.creatorDeviceId!==liveDeviceId())return;
-
+  if(!(await liveExclusiveGuard({forNew:false})))return;
+  if(!liveCreatorGuard())return;
+  const s=ensureLiveState();if(!s.running)return;
   s.remainingSeconds=Math.max(0,Math.ceil((s.endAt-Date.now())/1000));
   s.elapsedBeforeMs=(s.elapsedBeforeMs||0)+(Date.now()-(s.runStartedAt||Date.now()));
-  s.running=false;
-  s.runStartedAt=null;
-  s.endAt=null;
-
-  saveLocalOnly();
-  liveRenderAll();
-  liveRenderFullscreen();
-
-  if(mobileMaster){
-    Promise.resolve(livePushStateNow()).catch(()=>{});
-    return;
-  }
-
+  s.running=false;s.runStartedAt=null;s.endAt=null;saveLocalOnly();liveRenderAll();
   await livePushStateNow();
 }
-
 function liveRunTicker(){
   if(liveTicker)clearInterval(liveTicker);
   liveTicker=setInterval(()=>{
@@ -21757,6 +21231,7 @@ async function openSpectatorLive(){
 }
 
 async function showView(id){
+  if(id==="live")id="dashboard";
   if(id==="versus")id="profile";
   if(id==="achievements")id="records";
   if(id==="history")id="ranking";
@@ -22460,70 +21935,7 @@ let bptDirectLiveRef=null;
 let bptDirectLivePollTimer=null;
 let bptDirectLastRevision=-1;
 
-async function bptHandleDirectFirebaseLiveSnapshot(raw){
-  try{
-    const row=raw && typeof raw==="object" ? raw : null;
-    if(!row || !row.data || typeof row.data!=="object")return false;
-
-    const remote=chooseRemoteLiveForSpectator(row.data);
-    if(remote && liveIsExpiredByAge(remote)){
-      await liveExpireRemoteIfNeeded(remote,{silent:true});
-      return false;
-    }
-    const creator=String(remote?.creatorDeviceId||"");
-    const mine=String(liveDeviceId());
-    const active=!!(remote?.prepared && !remote?.synced);
-
-    // Synchroniser aussi les avatarId légers, même hors Live.
-    if(Array.isArray(row.data?.players)){
-      if(mergeRemotePlayerAvatars(row.data.players)){
-        saveLocalOnly();
-        try{ renderPlayers(); }catch(_e){}
-        try{ if($("profilePlayerSelect")?.value)renderProfile($("profilePlayerSelect").value); }catch(_e){}
-      }
-    }
-
-    if(!active || !creator || creator===mine)return false;
-
-    spectatorServerLiveState=JSON.parse(JSON.stringify(remote));
-    spectatorServerLiveRevision=Number(row.revision||0);
-    cloudLastRevision=Math.max(Number(cloudLastRevision||0),spectatorServerLiveRevision);
-    cloudLocalDirty=false;
-
-    // Conserver une copie locale du Live distant pour toutes les fonctions historiques de l'application.
-    db.liveState=JSON.parse(JSON.stringify(remote));
-    saveLocalOnly();
-
-    setCloudStatus(
-      "ok",
-      "Live spectateur connecté",
-      `Firebase direct · partie #${remote.gameNo||"—"} · révision ${spectatorServerLiveRevision}`
-    );
-
-    // Ne jamais ouvrir automatiquement le Live : mise à jour silencieuse de l'indicateur.
-    const liveNav=document.querySelector('nav button[data-view="live"]');
-    if(liveNav)liveNav.classList.add("spectator-nav");
-    applyLiveAccessMode();
-    document.body.classList.remove("spectator-live-open");
-    if(currentViewId!=="live")$("live")?.classList.remove("active");
-    if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
-
-    // Si l'utilisateur a déjà ouvert l'onglet Live sur le téléphone,
-    // afficher immédiatement le Live distant sans attendre un autre cycle.
-    if(currentViewId==="live"){
-      try{
-        liveShowScreen("game");
-        liveRenderAll();
-        liveMaybeAutoOpenSpectator();
-      }catch(_e){}
-    }
-
-    return true;
-  }catch(e){
-    console.error("BPT direct Firebase Live receiver:",e);
-    return false;
-  }
-}
+async function bptHandleDirectFirebaseLiveSnapshot(){return false;}
 
 async function bptInstallDirectFirebaseLiveReceiver(){
   try{
@@ -22566,35 +21978,7 @@ let bptDirectReceiverInstallTimer=null;
 let bptDirectReceiverInstallBusy=false;
 let bptDirectReceiverInstalled=false;
 
-async function bptEnsureDirectFirebaseLiveReceiver(){
-  if(bptDirectReceiverInstallBusy)return false;
-  bptDirectReceiverInstallBusy=true;
-  try{
-    const ok=await bptInstallDirectFirebaseLiveReceiver();
-    bptDirectReceiverInstalled=!!ok;
-    if(ok){
-      if(bptDirectReceiverInstallTimer){
-        clearTimeout(bptDirectReceiverInstallTimer);
-        bptDirectReceiverInstallTimer=null;
-      }
-      return true;
-    }
-  }catch(e){
-    console.warn("BPT receiver retry:",e);
-  }finally{
-    bptDirectReceiverInstallBusy=false;
-  }
-
-  // Téléphone : Firebase/CDN peut être plus lent à devenir disponible.
-  // Réessayer jusqu'à installation au lieu d'abandonner après 500 ms.
-  if(!bptDirectReceiverInstallTimer){
-    bptDirectReceiverInstallTimer=setTimeout(()=>{
-      bptDirectReceiverInstallTimer=null;
-      bptEnsureDirectFirebaseLiveReceiver();
-    },1500);
-  }
-  return false;
-}
+async function bptEnsureDirectFirebaseLiveReceiver(){return false;}
 
 setTimeout(()=>bptEnsureDirectFirebaseLiveReceiver(),500);
 window.addEventListener("online",()=>setTimeout(bptEnsureDirectFirebaseLiveReceiver,100),{passive:true});
@@ -22984,23 +22368,39 @@ document.addEventListener("visibilitychange",()=>{
 </script>
 
 
-<script id="bpt-emergency-phone-master-banner">
+<script id="bpt-no-live-runtime">
 (function(){
-  function mobile(){
-    return document.documentElement.classList.contains("bpt-mobile-device")
-      || document.body.classList.contains("bpt-mobile-device")
-      || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
+  function clean(){
+    try{
+      if(window.db && typeof db==="object"){
+        db.liveState=null;
+        if(typeof saveLocalOnly==="function")saveLocalOnly();
+      }
+    }catch(_e){}
+    try{
+      if(typeof stopLiveCloudHeartbeat==="function")stopLiveCloudHeartbeat();
+      if(typeof stopSpectatorLivePolling==="function")stopSpectatorLivePolling();
+    }catch(_e){}
+    try{
+      if(typeof bptDirectLiveRef!=="undefined" && bptDirectLiveRef){
+        bptDirectLiveRef.off("value");
+        bptDirectLiveRef=null;
+      }
+      if(typeof bptDirectLivePollTimer!=="undefined" && bptDirectLivePollTimer){
+        clearInterval(bptDirectLivePollTimer);
+        bptDirectLivePollTimer=null;
+      }
+    }catch(_e){}
+    document.querySelector('nav button[data-view="live"]')?.remove();
+    const live=document.getElementById("live");
+    if(live)live.style.display="none";
+    const hand=document.getElementById("globalHandoverRequest");
+    if(hand)hand.style.display="none";
+    document.body.classList.remove("spectator-live-open","bpt-mobile-live-fullscreen","live-fullscreen-open");
   }
-  function show(){
-    if(!mobile() || document.getElementById("bptEmergencyPhoneMaster"))return;
-    const el=document.createElement("div");
-    el.id="bptEmergencyPhoneMaster";
-    el.textContent="MODE LIVE : téléphone maître · fonctionnement local prioritaire";
-    el.style.cssText="position:fixed;left:50%;bottom:8px;transform:translateX(-50%);z-index:999999;background:rgba(0,0,0,.78);color:#fff;padding:7px 11px;border-radius:999px;font:600 11px system-ui,sans-serif;pointer-events:none;white-space:nowrap;max-width:94vw;overflow:hidden;text-overflow:ellipsis";
-    document.body.appendChild(el);
-  }
-  window.addEventListener("DOMContentLoaded",()=>setTimeout(show,300));
-  window.addEventListener("pageshow",show);
+  window.addEventListener("DOMContentLoaded",()=>{clean();setTimeout(clean,500);setTimeout(clean,1800);});
+  window.addEventListener("pageshow",clean);
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)clean();});
 })();
 </script>
 </body>
