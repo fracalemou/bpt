@@ -8048,7 +8048,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 2.7.24 — Classement / Parties / Profils / Dashboard */
+/* BPT 2.7.25 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8111,7 +8111,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.24 — Records / Impact / Courbes */
+/* BPT 2.7.25 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8137,7 +8137,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.24 — blocs repliables */
+/* BPT 2.7.25 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -10804,6 +10804,277 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fu
 nav#nav button[data-view="live"]{position:relative;}
 nav#nav button[data-view="live"].live-running::before{content:"";display:inline-block;width:9px;height:9px;border-radius:999px;background:#ff4d4f;box-shadow:0 0 0 2px rgba(255,77,79,.18),0 0 10px rgba(255,77,79,.55);margin-right:8px;vertical-align:middle;}
 </style>
+
+<style id="bpt-v225-fullscreen-responsive-final">
+/* Hide old metadata that should not appear in the fullscreen */
+#liveFullscreenDisplay .live-fs-hidden-meta{display:none !important;}
+
+/* PC: native browser fullscreen already supplies the X/Escape, so no duplicated controls. */
+html:not(.bpt-mobile-device) #liveFullscreenDisplay .live-fs-exit-floating{
+  display:none !important;
+}
+
+/* Common 16:9 desktop composition */
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen{
+  padding:18px 28px 16px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-frame,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-frame{
+  width:min(1420px,100%) !important;
+  height:100% !important;
+  grid-template-rows:auto auto minmax(160px,1fr) auto auto minmax(120px,.9fr) !important;
+  gap:10px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fullscreen-brand,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fullscreen-brand{
+  justify-self:start !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-top-row,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-top-row{
+  grid-template-columns:1fr minmax(520px,760px) 280px !important;
+  align-items:start !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-top-row > :first-child,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-top-row > :first-child{
+  visibility:hidden;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-blinds-card,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-blinds-card{
+  justify-self:center !important;
+  width:100% !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-remaining-card,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-remaining-card{
+  justify-self:end !important;
+  width:100% !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-timer-zone,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-timer-zone{
+  align-self:center !important;
+  justify-self:center !important;
+  width:min(760px,100%) !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fullscreen-kpis,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fullscreen-kpis{
+  width:min(780px,100%) !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-bottom-dock,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-bottom-dock{
+  width:min(700px,100%) !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-players-wrap,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-players-wrap{
+  width:100% !important;
+  align-self:end !important;
+}
+
+/* Mobile fullscreen: no duplicated top controls either; the app/browser back gesture exits. */
+body.bpt-mobile-device.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-exit-floating{
+  display:none !important;
+}
+
+/* Phone portrait */
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay{
+  height:100dvh !important;
+  padding:10px 10px 8px !important;
+  overflow:hidden !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-frame{
+  width:100% !important;
+  height:100% !important;
+  display:grid !important;
+  grid-template-rows:auto auto minmax(128px,1.25fr) auto auto minmax(104px,.9fr) !important;
+  gap:7px !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-brand{
+  justify-self:center !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-brand-big{
+  font-size:46px !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-brand-stack{
+  font-size:10px !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-top-row{
+  display:grid !important;
+  grid-template-columns:1fr 115px !important;
+  gap:8px !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-top-row > :first-child{
+  display:none !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-blinds-card{
+  min-height:96px !important;
+  padding:8px 10px !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-blinds-value{
+  font-size:54px !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-remaining-card{
+  min-height:96px !important;
+  padding:8px !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-remaining-head{
+  gap:5px !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-remaining-icon{
+  font-size:17px !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-remaining-value{
+  font-size:32px !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-timer{
+  font-size:min(28vw,118px) !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-progress{
+  width:82% !important;
+  height:8px !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-kpis{
+  grid-template-columns:1fr 1fr !important;
+  gap:7px !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-stat-card{
+  min-height:62px !important;
+  padding:7px 9px !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-stat-icon{
+  font-size:26px !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-kpi strong{
+  font-size:22px !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-mobile-main-controls{
+  flex-direction:row !important;
+  gap:7px !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-dock-btn{
+  width:auto !important;
+  flex:1 1 0 !important;
+  min-height:44px !important;
+  font-size:13px !important;
+  letter-spacing:.04em !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-player-avatar{
+  width:50px !important;
+  height:50px !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-player-item{
+  min-width:62px !important;
+  max-width:72px !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-player-name{
+  font-size:10px !important;
+  padding:4px 7px !important;
+}
+
+/* Phone landscape */
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay{
+  height:100dvh !important;
+  padding:7px 10px !important;
+  overflow:hidden !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-frame{
+  width:100% !important;
+  height:100% !important;
+  display:grid !important;
+  grid-template-columns:150px minmax(280px,1fr) 150px;
+  grid-template-rows:auto minmax(120px,1fr) auto auto;
+  gap:7px 10px !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-brand{
+  grid-column:1;grid-row:1 / span 2;
+  align-self:start !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-brand-big{
+  font-size:44px !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-brand-stack{
+  font-size:9px !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-top-row{
+  display:contents !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-top-row > :first-child{
+  display:none !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-blinds-card{
+  grid-column:2;grid-row:1;
+  min-height:86px !important;
+  padding:7px 10px !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-blinds-value{
+  font-size:52px !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-remaining-card{
+  grid-column:3;grid-row:1;
+  min-height:86px !important;
+  padding:7px !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-remaining-value{
+  font-size:30px !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-timer-zone{
+  grid-column:2;grid-row:2;
+  align-self:center !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-timer{
+  font-size:min(15vw,92px) !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-progress{
+  height:7px !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-kpis{
+  grid-column:1;grid-row:3;
+  grid-template-columns:1fr !important;
+  gap:5px !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-stat-card{
+  min-height:44px !important;
+  padding:5px 7px !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-stat-icon{
+  font-size:20px !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fullscreen-kpi strong{
+  font-size:18px !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-bottom-dock{
+  grid-column:2;grid-row:3;
+  align-self:center !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-mobile-main-controls{
+  flex-direction:row !important;
+  gap:7px !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-dock-btn{
+  width:auto !important;
+  min-width:0 !important;
+  flex:1 1 0 !important;
+  min-height:42px !important;
+  font-size:12px !important;
+  letter-spacing:.03em !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-players-wrap{
+  grid-column:1 / 4;grid-row:4;
+  min-height:92px !important;
+  padding:6px 9px !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-players-title{
+  margin-bottom:4px !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-player-avatar{
+  width:46px !important;height:46px !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-player-item{
+  min-width:58px !important;max-width:68px !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-player-name{
+  font-size:9px !important;padding:3px 6px !important;
+}
+</style>
+
 </head>
 <body>
 <script>
@@ -10830,7 +11101,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="2.7.24";
+const BPT_APP_VERSION="2.7.25";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -11822,7 +12093,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 2.7.24</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 2.7.25</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -12038,7 +12309,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.24 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 2.7.25 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -12304,7 +12575,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.24 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.25 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -12678,7 +12949,7 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.7.24 : aucune image Base64 dans bpt_state. Les photos de parties
+    // BPT 2.7.25 : aucune image Base64 dans bpt_state. Les photos de parties
     // sont stockées dans Firebase ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
@@ -13426,7 +13697,7 @@ async function cloudPoll(){
 
 let liveAutoOpenDone=false;
 async function autoOpenActiveLiveOnStartup(){
-  // BPT 2.7.24 : plus d'ouverture automatique du Live au démarrage.
+  // BPT 2.7.25 : plus d'ouverture automatique du Live au démarrage.
   // L'application s'ouvre toujours sur Accueil ; le Live actif est indiqué sur l'onglet Live.
   liveAutoOpenDone=true;
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -15656,7 +15927,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.24 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 2.7.25 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -18335,7 +18606,7 @@ function applyLiveAccessMode(){
 }
 
 let spectatorAutoOpenInProgress=false;
-let spectatorAutoOpenSuppressed=false;
+let spectatorAutoOpenSuppressed=true;
 let spectatorFullscreenGestureArmed=false;
 
 async function spectatorTryFullscreen(){
@@ -18501,36 +18772,66 @@ async function liveFetchServerActiveState(){
   }
 }
 
+
+async function liveFetchServerActiveStateStrict(){
+  const ensure=window.bptFirebaseEnsure;
+  if(typeof ensure!=="function"){
+    throw new Error("Firebase indisponible : impossible de vérifier si un Live est déjà en cours.");
+  }
+  const {rtdb}=await ensure();
+  if(!rtdb)throw new Error("Realtime Database indisponible.");
+  const snap=await rtdb.ref("bpt/state/main").once("value");
+  const row=snap.val()||null;
+  const data=row?.data||null;
+  const wire=(data?.liveWire?.prepared && !data?.liveWire?.synced) ? data.liveWire : null;
+  const legacy=(data?.liveState?.prepared && !data?.liveState?.synced) ? data.liveState : null;
+  const active=wire||legacy||null;
+  if(active && liveIsExpiredByAge(active)){
+    await liveExpireRemoteIfNeeded(active,{silent:true});
+    return null;
+  }
+  return active;
+}
+
 async function liveExclusiveGuard({forNew=false,showAlert=true}={}){
-  const remote=await liveFetchServerActiveState();
+  let remote=null;
+  try{
+    remote=await liveFetchServerActiveStateStrict();
+  }catch(e){
+    console.error("BPT vérification exclusivité Live :",e);
+    if(showAlert)alert("Impossible de vérifier l’état du Live sur le serveur. Par sécurité, la création d’un nouveau Live est bloquée. Vérifiez la connexion puis réessayez.");
+    return false;
+  }
+
   if(remote?.prepared && !remote?.synced){
     const owner=String(remote.creatorDeviceId||"");
     const mine=owner && owner===liveDeviceId();
 
-    // Un Live distant appartient à un autre appareil : ce poste devient spectateur.
-    if(owner && !mine){
+    if(!mine){
       spectatorServerLiveState=clone(remote);
       db.liveState=clone(remote);
       saveLocalOnly();
       applyLiveAccessMode();
-      liveShowScreen("game");
-      liveRenderAll();
-      if(currentViewId==="live")liveMaybeAutoOpenSpectator(); else if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
-      if(showAlert)alert("Un Live est déjà en cours sur un autre appareil. Ce poste passe en mode spectateur.");
+      if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
+
+      if(currentViewId==="live"){
+        liveShowScreen("game");
+        liveRenderAll();
+        liveMaybeAutoOpenSpectator();
+      }
+      if(showAlert)alert("Un Live est déjà en cours sur un autre appareil. Impossible d’en créer un nouveau.");
       return false;
     }
 
-    // Même sur le poste maître, on ne peut pas créer un deuxième Live tant que le premier n'est pas terminé/annulé.
     if(forNew){
-      if(showAlert)alert("Un Live existe déjà. Terminez ou annulez cette partie avant d'en créer une nouvelle.");
+      if(showAlert)alert("Un Live existe déjà sur cet appareil. Terminez ou annulez cette partie avant d’en créer une nouvelle.");
       return false;
     }
   }
 
-  // Sécurité locale complémentaire, utile avant la première synchro serveur.
   const local=db?.liveState;
   if(forNew && local?.prepared && !local?.synced){
-    if(showAlert)alert("Un Live existe déjà. Terminez ou annulez cette partie avant d'en créer une nouvelle.");
+    if(showAlert)alert("Un Live existe déjà. Terminez ou annulez cette partie avant d’en créer une nouvelle.");
     return false;
   }
   return true;
@@ -20085,32 +20386,38 @@ let currentViewId="dashboard";
 
 async function resolveLiveEntryMode(){
   try{
-    const row=await fetchLiveStateDirect();
-    const wire=row?.data?.liveWire||null;
-    const remote=(wire?.prepared && !wire?.synced) ? wire : row?.data?.liveState;
+    const remote=await liveFetchServerActiveStateStrict();
     const creator=String(remote?.creatorDeviceId||"");
     const remoteActive=!!(remote?.prepared && !remote?.synced);
 
     if(remoteActive){
-      if(creator && creator!==liveDeviceId()){
-        return {mode:"spectator",row};
-      }
+      // Keep the direct state locally so the indicator and spectator view are immediately correct.
       if(creator && creator===liveDeviceId()){
-        // Ce navigateur est le créateur du Live existant.
-        db.liveState=JSON.parse(JSON.stringify(remote));
+        db.liveState=clone(remote);
         saveLocalOnly();
-        return {mode:"creator",row};
+        if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
+        return {mode:"creator",row:null,remote};
       }
 
-      // Compatibilité ancien Live sans creatorDeviceId :
-      // s'il existe côté serveur, on ne crée pas une seconde partie concurrente.
-      return {mode:"spectator",row};
+      spectatorServerLiveState=clone(remote);
+      db.liveState=clone(remote);
+      saveLocalOnly();
+      if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
+
+      // Build a row-shaped object for the existing spectator renderer.
+      return {
+        mode:"spectator",
+        row:{data:{liveWire:clone(remote),liveState:clone(remote)},revision:Number(spectatorServerLiveRevision||0)},
+        remote
+      };
     }
 
-    // Aucun Live actif côté serveur : ce navigateur peut en créer un.
     spectatorServerLiveState=null;
     spectatorServerLiveRevision=0;
-    return {mode:"create",row};
+    if(db?.liveState && !db.liveState.synced)db.liveState=null;
+    saveLocalOnly();
+    if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
+    return {mode:"create",row:null};
   }catch(e){
     console.error("BPT resolve Live mode:",e);
     return {mode:"error",error:e};
@@ -20152,7 +20459,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 2.7.24 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 2.7.25 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -20802,7 +21109,7 @@ liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 (async()=>{
   await initCloudSync();
-  // BPT 2.7.24 : l'ouverture par défaut est toujours Accueil.
+  // BPT 2.7.25 : l'ouverture par défaut est toujours Accueil.
   spectatorAutoOpenSuppressed=true;
   document.body.classList.remove("spectator-live-open");
   await showView("dashboard");
@@ -20867,16 +21174,13 @@ async function bptHandleDirectFirebaseLiveSnapshot(raw){
       `Firebase direct · partie #${remote.gameNo||"—"} · révision ${spectatorServerLiveRevision}`
     );
 
-    // Affiche immédiatement le Live distant, même si le listener de compatibilité n'a rien reçu.
-    if(!spectatorAutoOpenSuppressed){
-      currentViewId="live";
-      renderSpectatorServerOverlay(remote);
-      startSpectatorOverlayTicker();
-      applyLiveAccessMode();
-    }else{
-      const liveNav=document.querySelector('nav button[data-view="live"]');
-      if(liveNav){ liveNav.classList.add("spectator-nav"); if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator(); }
-    }
+    // Ne jamais ouvrir automatiquement le Live : mise à jour silencieuse de l'indicateur.
+    const liveNav=document.querySelector('nav button[data-view="live"]');
+    if(liveNav)liveNav.classList.add("spectator-nav");
+    applyLiveAccessMode();
+    document.body.classList.remove("spectator-live-open");
+    if(currentViewId!=="live")$("live")?.classList.remove("active");
+    if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
 
     return true;
   }catch(e){
@@ -21178,8 +21482,12 @@ document.addEventListener("visibilitychange",()=>{
   };
 
   window.bptHasActiveLive=function(){
-    const remote=(window.spectatorServerLiveState && spectatorServerLiveState.prepared && !spectatorServerLiveState.synced) ? spectatorServerLiveState : null;
-    const local=(window.db && db.liveState && db.liveState.prepared && !db.liveState.synced) ? db.liveState : null;
+    const remote=(typeof spectatorServerLiveState!=="undefined" &&
+      spectatorServerLiveState?.prepared && !spectatorServerLiveState?.synced)
+      ? spectatorServerLiveState : null;
+    const local=(typeof db!=="undefined" &&
+      db?.liveState?.prepared && !db?.liveState?.synced)
+      ? db.liveState : null;
     return !!(remote || local);
   };
 
