@@ -7,7 +7,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<!-- BPT LIVE V3.3 DYNAMIC PLAYER STRUCTURE -->
+<!-- BPT LIVE V3.10 PLAYER TEXT FIX -->
 <title>BPT — Gestion du championnat</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23173a2b'/%3E%3Cpath d='M32 10c-6 10-18 15-18 26 0 7 5 12 11 12 3 0 5-1 7-4-1 5-3 8-7 10h14c-4-2-6-5-7-10 2 3 4 4 7 4 6 0 11-5 11-12 0-11-12-16-18-26z' fill='%23c8952e'/%3E%3C/svg%3E">
 <style>
@@ -12198,11 +12198,56 @@ nav button[data-view="live"],#live,#liveFullscreenDisplay,#spectatorServerOverla
 .bpt-live3-section-title{margin-top:18px}
 .bpt-live3-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .bpt-live3-grid label,.bpt-live3-modal-card label{display:grid;gap:6px;font-weight:700;font-size:13px}
-.bpt-live3-player-picker{display:flex;flex-wrap:wrap;gap:8px}
-.bpt-live3-structure-preview{margin-top:14px;padding:12px 14px;border:1px solid #d8d0c1;border-radius:14px;background:#faf8f3}
-.bpt-live3-structure-preview strong{display:block;margin-bottom:6px}
-
-.bpt-live3-player-check{display:flex;align-items:center;gap:7px;padding:8px 10px;border:1px solid #d8d0c1;border-radius:999px;background:#fff;cursor:pointer}
+.bpt-live3-player-picker{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  padding:0;
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  min-height:0;
+}
+.bpt-live3-player-check{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 11px;
+  border:1px solid #b8ad9d;
+  border-radius:999px;
+  background:#f2ede4;
+  color:#1f2a26 !important;
+  cursor:pointer;
+  font-weight:800;
+  line-height:1.2;
+  transition:border-color .12s ease, background .12s ease, box-shadow .12s ease;
+}
+.bpt-live3-player-check:hover{
+  border-color:#8f8170;
+  background:#f7f2e9;
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+}
+.bpt-live3-player-check span{
+  color:#1f2a26 !important;
+  -webkit-text-fill-color:#1f2a26 !important;
+  opacity:1 !important;
+  visibility:visible !important;
+}
+.bpt-live3-player-check:has(input:checked){
+  background:#dbe6df;
+  border-color:#7e9a8e;
+}
+.bpt-live3-player-check input[type="checkbox"]{
+  appearance:auto;
+  -webkit-appearance:checkbox;
+  width:18px;
+  height:18px;
+  min-width:18px;
+  accent-color:#355e50;
+  opacity:1 !important;
+  visibility:visible !important;
+}
 .bpt-live3-actions,.bpt-live3-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}
 .bpt-live3-game-location{font-size:24px;font-weight:900}
 .bpt-live3-game-head-actions{display:flex;gap:8px;flex-wrap:wrap}
@@ -12463,13 +12508,7 @@ function simplifyRecordTextForMobile(text){
           <input type="text" value="BPT fixe · 18 niveaux · sans ante" disabled>
         </label>
       </div>
-
-      <div class="bpt-live3-structure-preview">
-        <strong>Structure BPT</strong>
-        <div id="live3StructurePreview" class="muted"></div>
-      </div>
-
-      <div class="bpt-live3-section-title">Joueurs</div>
+<div class="bpt-live3-section-title">Joueurs</div>
       <div id="live3PlayerPicker" class="bpt-live3-player-picker"></div>
 
       <div class="bpt-live3-actions">
@@ -12534,12 +12573,7 @@ function simplifyRecordTextForMobile(text){
 
       <div class="bpt-live3-section-title">Joueurs à la table</div>
       <div id="live3Players" class="bpt-live3-players"></div>
-
-      <div class="bpt-live3-note">
-        Le Live V3 est isolé du classement et de l'historique. Pour cette première reconstruction,
-        terminer le Live ne crée pas automatiquement une partie dans le championnat.
-      </div>
-    </div>
+</div>
   </div>
 </section>
 
@@ -22788,22 +22822,7 @@ document.addEventListener("visibilitychange",()=>{
     return computeStructure(targetHours,playerCount,startStack).levels;
   }
 
-  function renderStructurePreview(){
-    const hours=Math.max(1,Number($3("live3TargetHours")?.value)||4);
-    const players=Math.max(2,selectedPlayerCount());
-    const stack=Math.max(100,Number($3("live3Stack")?.value)||20000);
-    const structure=computeStructure(hours,players,stack);
-    const per=structure.levelSeconds||0;
-    const mm=Math.floor(per/60),ss=per%60;
-    const durationLabel=ss?`${mm} min ${String(ss).padStart(2,"0")} s`:`${mm} min`;
-    const blinds=structure.levels.map(l=>`${l.sb}/${l.bb}`).join(" · ");
-
-    if($3("live3StructurePreview")){
-      $3("live3StructurePreview").textContent=
-        `${players} joueurs · ${durationLabel} par niveau · fin visée vers ${fmt(structure.targetEndBB)} BB `+
-        `(${structure.levels.length} niveaux, dernier ${fmt(structure.expectedEndBB)} BB) · ${blinds}`;
-    }
-  }
+  function renderStructurePreview(){ return; }
   function initials(name){
     return String(name||"?").trim().split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toUpperCase()||"?";
   }
@@ -23096,8 +23115,10 @@ document.addEventListener("visibilitychange",()=>{
   function renderPrepPlayers(){
     const host=$3("live3PlayerPicker");
     if(!host)return;
-    const players=(window.db?.players||[]).filter(p=>p.active!==false).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name),"fr"));
-    host.innerHTML=players.map(p=>`<label class="bpt-live3-player-check"><input type="checkbox" value="${escapeAttr(p.name)}" checked> <span>${escapeHtml(p.name)}</span></label>`).join("");
+    const players=(db?.players||[]).filter(p=>p && p.active===true && String(p.name||"").trim()).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name),"fr"));
+    host.innerHTML=players.length
+      ? players.map(p=>`<label class="bpt-live3-player-check"><input type="checkbox" value="${escapeAttr(p.name)}"> <span>${escapeHtml(p.name)}</span></label>`).join("")
+      : '<div class="muted">Aucun joueur actif disponible. Activez d’abord les joueurs dans la liste des joueurs.</div>';
     setTimeout(renderStructurePreview,0);
   }
 
