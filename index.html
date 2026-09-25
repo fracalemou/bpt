@@ -8048,7 +8048,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 2.7.26 — Classement / Parties / Profils / Dashboard */
+/* BPT 2.7.27 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8111,7 +8111,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.26 — Records / Impact / Courbes */
+/* BPT 2.7.27 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8137,7 +8137,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.26 — blocs repliables */
+/* BPT 2.7.27 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -11139,6 +11139,190 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs
   height:72px !important;
 }
 </style>
+
+<style id="bpt-v227-live-visual-balance">
+/* ===== V227 — Blindes + timer recentrés, avatars plus petits en bas ===== */
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen{
+  padding:14px 26px 12px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-frame,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-frame{
+  display:flex !important;
+  flex-direction:column !important;
+  width:min(1440px,100%) !important;
+  height:100% !important;
+  gap:8px !important;
+  overflow:hidden !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fullscreen-brand,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fullscreen-brand{
+  flex:0 0 auto !important;
+  margin:0 !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-brand-big,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-brand-big{
+  font-size:62px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-brand-stack,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-brand-stack{
+  font-size:13px !important;
+}
+
+/* Zone principale : visuellement centrée dans l'espace disponible */
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-top-row,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-top-row{
+  flex:0 0 auto !important;
+  display:grid !important;
+  grid-template-columns:1fr minmax(620px,800px) 270px !important;
+  gap:14px !important;
+  align-items:center !important;
+  margin-top:auto !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-top-row > :first-child,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-top-row > :first-child{
+  visibility:hidden !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-blinds-card,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-blinds-card{
+  width:100% !important;
+  min-height:150px !important;
+  padding:14px 24px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-blinds-value,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-blinds-value{
+  font-size:clamp(96px,8.2vw,146px) !important;
+  line-height:.86 !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-remaining-card,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-remaining-card{
+  width:100% !important;
+  min-height:150px !important;
+  padding:14px 16px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-remaining-value,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-remaining-value{
+  font-size:54px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-timer-zone,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-timer-zone{
+  flex:0 0 auto !important;
+  width:min(840px,100%) !important;
+  margin:4px auto 0 !important;
+  gap:5px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fullscreen-timer,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fullscreen-timer{
+  font-size:clamp(132px,14vh,192px) !important;
+  line-height:.86 !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-progress,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-progress{
+  width:min(700px,88%) !important;
+  height:12px !important;
+}
+
+/* Partie basse compacte */
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fullscreen-kpis,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fullscreen-kpis{
+  flex:0 0 auto !important;
+  width:min(620px,100%) !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:10px !important;
+  margin:2px auto 0 !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-stat-card,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-stat-card{
+  min-height:62px !important;
+  padding:8px 12px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-stat-icon,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-stat-icon{
+  font-size:30px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fullscreen-kpi strong,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fullscreen-kpi strong{
+  font-size:28px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-bottom-dock,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-bottom-dock{
+  flex:0 0 auto !important;
+  width:min(650px,100%) !important;
+  margin:0 auto !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-dock-btn,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-dock-btn{
+  min-height:48px !important;
+  min-width:0 !important;
+  flex:1 1 0 !important;
+  font-size:16px !important;
+  border-radius:13px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-mobile-main-controls,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-mobile-main-controls{
+  flex-wrap:nowrap !important;
+}
+
+/* Avatars : tout en bas, plus petits, après les boutons */
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-players-wrap,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-players-wrap{
+  flex:0 0 auto !important;
+  width:100% !important;
+  min-height:96px !important;
+  max-height:116px !important;
+  margin-top:auto !important;
+  padding:8px 14px 7px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-players-title,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-players-title{
+  margin-bottom:5px !important;
+  font-size:9px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-players,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-players{
+  align-items:center !important;
+  justify-content:space-around !important;
+  gap:12px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-player-item,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-player-item{
+  min-width:64px !important;
+  max-width:78px !important;
+  gap:3px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-player-avatar,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-player-avatar{
+  width:52px !important;
+  height:52px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-player-fallback,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-player-fallback{
+  font-size:18px !important;
+}
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .live-fs-player-name,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs-player-name{
+  font-size:10px !important;
+  padding:3px 7px !important;
+}
+
+/* Le même principe sur téléphone : avatars sous les boutons, mais compacts */
+body.bpt-mobile-device.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-players-wrap{
+  order:99 !important;
+}
+body.bpt-mobile-device.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-player-avatar{
+  width:44px !important;
+  height:44px !important;
+}
+body.bpt-mobile-device.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-player-item{
+  min-width:54px !important;
+  max-width:64px !important;
+  gap:3px !important;
+}
+body.bpt-mobile-device.bpt-mobile-live-fullscreen #liveFullscreenDisplay .live-fs-player-name{
+  font-size:9px !important;
+  padding:3px 6px !important;
+}
+</style>
 </head>
 <body>
 <script>
@@ -11165,7 +11349,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="2.7.26";
+const BPT_APP_VERSION="2.7.27";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -12157,7 +12341,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 2.7.26</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 2.7.27</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -12373,7 +12557,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.26 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 2.7.27 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -12639,7 +12823,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.26 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.27 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -13013,7 +13197,7 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.7.26 : aucune image Base64 dans bpt_state. Les photos de parties
+    // BPT 2.7.27 : aucune image Base64 dans bpt_state. Les photos de parties
     // sont stockées dans Firebase ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
@@ -13761,7 +13945,7 @@ async function cloudPoll(){
 
 let liveAutoOpenDone=false;
 async function autoOpenActiveLiveOnStartup(){
-  // BPT 2.7.26 : plus d'ouverture automatique du Live au démarrage.
+  // BPT 2.7.27 : plus d'ouverture automatique du Live au démarrage.
   // L'application s'ouvre toujours sur Accueil ; le Live actif est indiqué sur l'onglet Live.
   liveAutoOpenDone=true;
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -15991,7 +16175,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.26 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 2.7.27 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -20547,7 +20731,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 2.7.26 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 2.7.27 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -21212,7 +21396,7 @@ liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 (async()=>{
   await initCloudSync();
-  // BPT 2.7.26 : l'ouverture par défaut est toujours Accueil.
+  // BPT 2.7.27 : l'ouverture par défaut est toujours Accueil.
   spectatorAutoOpenSuppressed=true;
   document.body.classList.remove("spectator-live-open");
   await showView("dashboard");
