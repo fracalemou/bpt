@@ -8048,7 +8048,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 2.7.18 — Classement / Parties / Profils / Dashboard */
+/* BPT 2.7.20 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8111,7 +8111,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.18 — Records / Impact / Courbes */
+/* BPT 2.7.20 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8137,7 +8137,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.18 — blocs repliables */
+/* BPT 2.7.20 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -10326,8 +10326,8 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fu
 </style>
 
 
-<style id="bpt-v218-live-fullscreen-refresh">
-  /* ===== V218 — Live plein écran simplifié, avatars + sortie ===== */
+<style id="bpt-v220-live-fullscreen-refresh">
+  /* ===== V220 — Live plein écran conforme à la maquette attendue ===== */
   #liveFullscreenDisplay,
   #liveFullscreenDisplay:fullscreen,
   #liveFullscreenDisplay:-webkit-full-screen,
@@ -10336,285 +10336,264 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fu
     width:100%;
     min-height:100%;
     background:
-      radial-gradient(circle at top center, rgba(37,99,235,.18), transparent 42%),
-      linear-gradient(180deg, #071423 0%, #0a1828 48%, #08111d 100%);
-    color:#eef4ff;
-    padding:22px 26px 18px;
+      radial-gradient(circle at 50% 12%, rgba(38,110,214,.14), transparent 34%),
+      radial-gradient(circle at left 40%, rgba(20,78,150,.10), transparent 28%),
+      radial-gradient(circle at right 58%, rgba(20,78,150,.10), transparent 28%),
+      linear-gradient(180deg, #04111d 0%, #071829 46%, #04111d 100%);
+    color:#eff6ff;
+    padding:18px 24px 14px;
     display:flex !important;
     flex-direction:column;
-    gap:16px;
+    gap:14px;
     overflow:auto;
-  }
-  #liveFullscreenDisplay .live-fullscreen-top-actions{
-    display:flex !important;
-    align-items:center;
-    justify-content:space-between;
-    gap:12px;
-    margin:0;
     position:relative;
-    z-index:5;
   }
+  #liveFullscreenDisplay::before,
+  #liveFullscreenDisplay::after{
+    content:"♠";
+    position:absolute;
+    color:rgba(122,177,255,.08);
+    font-size:24vw;
+    line-height:1;
+    pointer-events:none;
+    user-select:none;
+  }
+  #liveFullscreenDisplay::before{left:-3vw;bottom:18vh;transform:rotate(-8deg);}
+  #liveFullscreenDisplay::after{right:-2vw;bottom:20vh;transform:rotate(10deg);}
+
+  #liveFullscreenDisplay .live-fs-frame{
+    width:min(1440px,100%);
+    margin:0 auto;
+    position:relative;
+    z-index:1;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+
+  #liveFullscreenDisplay .live-fullscreen-top-actions{display:none !important;}
   #liveFullscreenDisplay .live-fullscreen-brand{
+    align-self:flex-start;
     display:inline-flex;
-    align-items:center;
-    gap:10px;
-    margin:0;
-    padding:10px 14px;
-    border-radius:14px;
-    background:rgba(10,22,36,.72);
-    border:1px solid rgba(87,145,255,.18);
-    color:#f8fbff;
-    font-size:14px;
-    letter-spacing:.14em;
+    align-items:flex-start;
+    gap:16px;
+    color:#ffffff;
     font-weight:900;
     text-transform:uppercase;
+    letter-spacing:.08em;
+    margin-bottom:2px;
   }
-  #liveFullscreenDisplay .live-fullscreen-top-right{
+  #liveFullscreenDisplay .live-fs-brand-big{
+    font-size:92px;
+    line-height:.82;
+    letter-spacing:-.07em;
+    font-weight:1000;
+  }
+  #liveFullscreenDisplay .live-fs-brand-stack{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    font-size:20px;
+    line-height:1.15;
+    letter-spacing:.14em;
+    padding-top:8px;
+  }
+  #liveFullscreenDisplay .live-fs-exit-floating{
+    position:absolute;
+    top:2px;
+    right:0;
     display:flex;
     align-items:center;
     gap:10px;
   }
   #liveFullscreenDisplay .live-fullscreen-exit{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    min-height:44px;
-    padding:0 16px;
-    border-radius:12px;
-    border:1px solid rgba(121,167,255,.28);
-    background:rgba(14,28,44,.78);
-    color:#e9f1ff;
-    font-weight:800;
-    opacity:1;
-    box-shadow:none;
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:40px;padding:0 14px;border-radius:12px;
+    border:1px solid rgba(121,167,255,.18);
+    background:rgba(10,24,40,.72);color:#e8f1ff;font-weight:800;
+    box-shadow:none;font-size:14px;
   }
-  #liveFullscreenDisplay .live-fullscreen-exit:hover{
-    background:rgba(26,46,70,.92);
-  }
-  #liveFullscreenDisplay .live-fs-hidden-meta{
-    display:none !important;
-  }
-  #liveFullscreenDisplay .live-fs-main{
+  #liveFullscreenDisplay .live-fullscreen-exit:hover{background:rgba(20,38,60,.9);}
+
+  #liveFullscreenDisplay .live-fs-top-row{
     display:grid;
-    grid-template-columns:minmax(280px, 430px) 1fr;
-    gap:20px;
-    align-items:stretch;
+    grid-template-columns:1.15fr 1.8fr .9fr;
+    gap:18px;
+    align-items:start;
   }
-  #liveFullscreenDisplay .live-fs-blinds-spotlight,
-  #liveFullscreenDisplay .live-fs-timer-panel,
-  #liveFullscreenDisplay .live-fullscreen-kpi{
-    border-radius:22px;
-    border:1px solid rgba(97,154,255,.18);
-    background:linear-gradient(180deg, rgba(13,27,44,.86), rgba(7,18,30,.92));
-    box-shadow:0 16px 36px rgba(0,0,0,.22);
+  #liveFullscreenDisplay .live-fs-top-row > div{min-width:0;}
+  #liveFullscreenDisplay .live-fs-card,
+  #liveFullscreenDisplay .live-fs-stat-card,
+  #liveFullscreenDisplay .live-fs-players-wrap{
+    border:1px solid rgba(93,151,255,.16);
+    background:linear-gradient(180deg, rgba(8,22,38,.82), rgba(5,16,28,.88));
+    box-shadow:0 16px 34px rgba(0,0,0,.16);
   }
-  #liveFullscreenDisplay .live-fs-blinds-spotlight{
-    padding:22px 24px;
+  #liveFullscreenDisplay .live-fs-card{
+    border-radius:24px;
+  }
+  #liveFullscreenDisplay .live-fs-blinds-card{
+    padding:20px 26px 18px;
+    min-height:178px;
     display:flex;
     flex-direction:column;
     justify-content:center;
-    gap:14px;
-    min-height:255px;
+    align-items:center;
+    text-align:center;
+    gap:10px;
   }
-  #liveFullscreenDisplay .live-fs-blinds-spotlight .live-fs-eyebrow,
-  #liveFullscreenDisplay .live-fs-timer-panel .live-fullscreen-timer-label,
+  #liveFullscreenDisplay .live-fs-card-label,
+  #liveFullscreenDisplay .live-fs-timer-label,
   #liveFullscreenDisplay .live-fs-players-title,
-  #liveFullscreenDisplay .live-fullscreen-kpi span{
-    color:#8fb3f1;
+  #liveFullscreenDisplay .live-fs-stat-card span{
+    color:#d9ebff;
+    opacity:.92;
     font-size:12px;
     text-transform:uppercase;
-    letter-spacing:.16em;
+    letter-spacing:.18em;
     font-weight:800;
   }
+  #liveFullscreenDisplay .live-fs-blinds-title{
+    display:flex;align-items:center;gap:14px;
+  }
+  #liveFullscreenDisplay .live-fs-blinds-icon{font-size:30px;color:#19a9ff;filter:drop-shadow(0 0 10px rgba(25,169,255,.22));}
   #liveFullscreenDisplay .live-fs-blinds-value{
-    font-size:clamp(56px, 7vw, 104px);
-    line-height:.92;
+    font-size:clamp(78px,8.4vw,138px);
+    line-height:.9;
     font-weight:1000;
-    color:#ffffff;
-    letter-spacing:-.05em;
+    letter-spacing:-.06em;
+    color:#fff;
   }
-  #liveFullscreenDisplay .live-fs-next-line{
-    color:#d4e3ff;
-    font-size:18px;
-    font-weight:700;
+  #liveFullscreenDisplay .live-fs-blinds-value .sep{color:#19a9ff; padding:0 .08em;}
+
+  #liveFullscreenDisplay .live-fs-remaining-card{
+    min-height:178px;
+    border-radius:22px;
+    padding:18px 22px;
+    display:flex;flex-direction:column;justify-content:flex-start;align-items:center;text-align:center;gap:10px;
   }
-  #liveFullscreenDisplay .live-fs-next-line strong{
-    color:#ffffff;
-    font-weight:900;
+  #liveFullscreenDisplay .live-fs-remaining-head{display:flex;align-items:center;gap:14px;}
+  #liveFullscreenDisplay .live-fs-remaining-icon{font-size:34px;}
+  #liveFullscreenDisplay .live-fs-remaining-value{font-size:clamp(38px,4.5vw,76px);font-weight:1000;letter-spacing:-.05em;line-height:1;color:#fff;}
+  #liveFullscreenDisplay .live-fs-remaining-total{opacity:.66;font-weight:800;}
+
+  #liveFullscreenDisplay .live-fs-timer-zone{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+    margin-top:4px;gap:10px;
   }
-  #liveFullscreenDisplay .live-fs-timer-panel{
-    min-height:255px;
-    padding:20px 24px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-    gap:12px;
-  }
-  #liveFullscreenDisplay .live-fs-timer-panel .live-fullscreen-timer-label{
-    margin:0;
-  }
+  #liveFullscreenDisplay .live-fs-timer-label{margin-top:2px;}
   #liveFullscreenDisplay .live-fullscreen-timer{
     margin:0;
-    font-size:clamp(86px, 12vw, 200px);
+    font-size:clamp(120px,13.5vw,236px);
     line-height:.9;
-    letter-spacing:-.06em;
-    color:#ffffff;
-    text-shadow:none;
+    letter-spacing:-.07em;
+    color:#fff;
   }
   #liveFullscreenDisplay .live-fullscreen-timer.warning30{color:#f3d37a;}
   #liveFullscreenDisplay .live-fullscreen-timer.warning10{color:#ff8e8e;}
+  #liveFullscreenDisplay .live-fs-progress{
+    width:min(620px,90%);
+    height:20px;
+    border-radius:999px;
+    background:rgba(132,160,196,.28);
+    overflow:hidden;
+    box-shadow:inset 0 1px 2px rgba(255,255,255,.05);
+  }
+  #liveFullscreenDisplay .live-fs-progress-fill{
+    height:100%;
+    width:0%;
+    border-radius:999px;
+    background:linear-gradient(90deg,#13b6ff,#2cc7ff);
+    transition:width .25s ease;
+  }
 
   #liveFullscreenDisplay .live-fullscreen-kpis{
+    width:min(1100px,100%);
+    margin:0 auto;
     display:grid;
-    grid-template-columns:repeat(4,minmax(0,1fr));
-    gap:14px;
-    margin:0;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:18px;
   }
-  #liveFullscreenDisplay .live-fullscreen-kpi{
-    min-height:108px;
-    padding:16px 18px;
+  #liveFullscreenDisplay .live-fullscreen-kpi,
+  #liveFullscreenDisplay .live-fs-stat-card{
+    border-radius:18px;
+    min-height:104px;
+    padding:14px 18px;
     display:flex;
-    flex-direction:column;
+    align-items:center;
     justify-content:center;
-    gap:6px;
+    gap:18px;
   }
-  #liveFullscreenDisplay .live-fullscreen-kpi strong{
+  #liveFullscreenDisplay .live-fs-stat-icon{font-size:54px;color:#cfe7ff;opacity:.95;}
+  #liveFullscreenDisplay .live-fs-stat-content{display:flex;flex-direction:column;gap:6px;align-items:flex-start;}
+  #liveFullscreenDisplay .live-fullscreen-kpi strong,
+  #liveFullscreenDisplay .live-fs-stat-value{
     color:#ffffff;
-    font-size:clamp(26px,3.2vw,44px);
+    font-size:clamp(30px,3vw,54px);
     line-height:1;
+    font-weight:1000;
+    letter-spacing:-.04em;
   }
-  #liveFullscreenDisplay .live-fs-duration-kpi .live-fs-duration-edit-btn{
-    align-self:flex-start;
-    margin-top:4px;
-  }
-  #liveFullscreenDisplay .live-fs-duration-edit-btn{
-    border-radius:999px;
-    border:1px solid rgba(120,168,255,.28);
-    background:rgba(16,46,82,.72);
-    color:#ecf4ff;
-    font-weight:800;
-    padding:6px 12px;
-  }
+
   #liveFullscreenDisplay .live-fs-bottom-dock{
-    margin:0;
+    width:min(780px,100%);
+    margin:2px auto 0;
     display:flex !important;
     justify-content:center;
   }
-  #liveFullscreenDisplay .live-mobile-main-controls{
-    display:flex;
-    gap:16px;
-    justify-content:center;
-    width:100%;
-    flex-wrap:wrap;
-  }
+  #liveFullscreenDisplay .live-mobile-main-controls{display:flex;gap:18px;justify-content:center;width:100%;flex-wrap:wrap;}
   #liveFullscreenDisplay .live-fs-dock-btn{
-    min-width:250px;
-    min-height:62px;
-    border-radius:18px;
-    font-size:28px;
-    font-weight:900;
-    letter-spacing:.01em;
-    border:1px solid rgba(123,172,255,.22);
-    box-shadow:none;
+    min-width:320px;min-height:74px;border-radius:18px;font-size:24px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;
+    border:1px solid rgba(130,178,255,.22);box-shadow:none;
   }
-  #liveFullscreenDisplay .live-fs-dock-btn.primary{
-    background:linear-gradient(180deg,#174c87,#123c69);
-    color:#fff;
-  }
-  #liveFullscreenDisplay .live-fs-dock-btn.danger{
-    background:linear-gradient(180deg,#7a2432,#611b27);
-    color:#fff;
-  }
+  #liveFullscreenDisplay .live-fs-dock-btn.primary{background:linear-gradient(180deg,#0c9ed8,#0b7bb0);color:#fff;}
+  #liveFullscreenDisplay .live-fs-dock-btn.danger{background:linear-gradient(180deg,#b31f3e,#8f1730);color:#fff;}
 
   #liveFullscreenDisplay .live-fs-players-wrap{
-    margin-top:auto;
+    width:min(1480px,100%);
+    margin-top:4px;
     border-radius:20px;
-    border:1px solid rgba(97,154,255,.16);
-    background:rgba(9,18,29,.76);
-    padding:14px 16px 12px;
-    box-shadow:0 12px 28px rgba(0,0,0,.18);
+    padding:16px 18px 12px;
   }
-  #liveFullscreenDisplay .live-fs-players-title{
-    margin-bottom:12px;
-  }
+  #liveFullscreenDisplay .live-fs-players-title{margin-bottom:14px;}
   #liveFullscreenDisplay .live-fs-players{
-    display:flex;
-    align-items:flex-start;
-    gap:18px;
-    overflow-x:auto;
-    padding-bottom:4px;
+    display:flex;align-items:flex-start;justify-content:space-around;gap:18px;overflow-x:auto;padding-bottom:4px;
   }
-  #liveFullscreenDisplay .live-fs-players::-webkit-scrollbar{height:8px;}
-  #liveFullscreenDisplay .live-fs-players::-webkit-scrollbar-thumb{background:rgba(123,172,255,.22);border-radius:999px;}
   #liveFullscreenDisplay .live-fs-player-item{
-    min-width:86px;
-    max-width:104px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:8px;
-    text-align:center;
-    flex:0 0 auto;
+    min-width:100px;max-width:120px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;flex:0 0 auto;
   }
   #liveFullscreenDisplay .live-fs-player-avatar{
-    width:68px;
-    height:68px;
-    border-radius:999px;
-    border:2px solid rgba(113,166,255,.42);
-    background:radial-gradient(circle at 30% 20%, rgba(54,106,178,.55), rgba(14,31,47,.96));
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    overflow:hidden;
-    box-shadow:0 8px 18px rgba(0,0,0,.22);
+    width:94px;height:94px;border-radius:999px;border:2px solid rgba(255,184,99,.68);
+    background:radial-gradient(circle at 30% 20%, rgba(33,95,166,.45), rgba(8,20,32,.98));
+    display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 10px 22px rgba(0,0,0,.16);
   }
-  #liveFullscreenDisplay .live-fs-player-avatar img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    display:block;
-  }
-  #liveFullscreenDisplay .live-fs-player-fallback{
-    color:#fff;
-    font-size:24px;
-    font-weight:900;
-    letter-spacing:.04em;
-  }
+  #liveFullscreenDisplay .live-fs-player-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+  #liveFullscreenDisplay .live-fs-player-fallback{color:#fff;font-size:32px;font-weight:1000;letter-spacing:.04em;}
   #liveFullscreenDisplay .live-fs-player-name{
-    color:#eef5ff;
-    font-size:17px;
-    font-weight:800;
-    line-height:1.1;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    width:100%;
+    color:#fff;font-size:16px;font-weight:800;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
+    border:1px solid rgba(136,173,226,.24);
+    background:rgba(8,20,35,.54);
+    border-radius:999px;
+    padding:8px 16px;
   }
 
-  @media (max-width: 1100px){
-    #liveFullscreenDisplay .live-fs-main{grid-template-columns:1fr;}
-    #liveFullscreenDisplay .live-fullscreen-kpis{grid-template-columns:repeat(2,minmax(0,1fr));}
+  @media (max-width: 1180px){
+    #liveFullscreenDisplay .live-fs-top-row{grid-template-columns:1fr;}
+    #liveFullscreenDisplay .live-fs-blinds-card,
+    #liveFullscreenDisplay .live-fs-remaining-card{min-height:unset;}
   }
-  @media (max-width: 760px){
+  @media (max-width: 820px){
     #liveFullscreenDisplay,
-    body.bpt-mobile-live-fullscreen #liveFullscreenDisplay{
-      padding:16px 14px 14px;
-      gap:12px;
-    }
-    #liveFullscreenDisplay .live-fullscreen-top-actions{align-items:flex-start;}
-    #liveFullscreenDisplay .live-fullscreen-top-right{width:auto;}
-    #liveFullscreenDisplay .live-fs-blinds-spotlight,
-    #liveFullscreenDisplay .live-fs-timer-panel{min-height:unset;}
-    #liveFullscreenDisplay .live-fullscreen-kpis{grid-template-columns:repeat(2,minmax(0,1fr));}
-    #liveFullscreenDisplay .live-fullscreen-kpi{min-height:92px;padding:14px;}
-    #liveFullscreenDisplay .live-fullscreen-kpi strong{font-size:28px;}
-    #liveFullscreenDisplay .live-fs-dock-btn{min-width:unset;width:100%;font-size:22px;min-height:54px;}
+    body.bpt-mobile-live-fullscreen #liveFullscreenDisplay{padding:14px 12px 12px;gap:12px;}
+    #liveFullscreenDisplay .live-fs-brand-big{font-size:60px;}
+    #liveFullscreenDisplay .live-fs-brand-stack{font-size:14px;padding-top:4px;}
+    #liveFullscreenDisplay .live-fullscreen-kpis{grid-template-columns:1fr;}
+    #liveFullscreenDisplay .live-fs-dock-btn{min-width:unset;width:100%;font-size:20px;min-height:62px;}
     #liveFullscreenDisplay .live-mobile-main-controls{flex-direction:column;}
-    #liveFullscreenDisplay .live-fs-player-item{min-width:72px;max-width:86px;}
-    #liveFullscreenDisplay .live-fs-player-avatar{width:56px;height:56px;}
-    #liveFullscreenDisplay .live-fs-player-name{font-size:14px;}
+    #liveFullscreenDisplay .live-fs-players{justify-content:flex-start;}
+    #liveFullscreenDisplay .live-fs-player-avatar{width:72px;height:72px;}
+    #liveFullscreenDisplay .live-fs-player-name{font-size:14px;padding:7px 12px;}
+    #liveFullscreenDisplay .live-fs-exit-floating{position:static;justify-content:flex-end;margin-top:6px;}
   }
 </style>
 
@@ -10648,7 +10627,7 @@ function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
   const mobile=!!isBptMobileDevice();
-  el.textContent=mobile?"Version téléphone 2.7.18":"Version PC 2.7.17";
+  el.textContent=mobile?"Version téléphone 2.7.20":"Version PC 2.7.17";
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -10897,60 +10876,59 @@ function simplifyRecordTextForMobile(text){
 
 
       <div id="liveFullscreenDisplay" class="live-fullscreen-display" aria-label="Affichage plein écran du Live">
-        <div class="live-fullscreen-top-actions">
-          <div class="live-fullscreen-brand">BPT · Boucherie Poker Tour · Live</div>
-          <div class="live-fullscreen-top-right">
+        <div class="live-fs-frame">
+          <div class="live-fullscreen-brand">
+            <div class="live-fs-brand-big">BPT</div>
+            <div class="live-fs-brand-stack">Boucherie<br>Poker<br>Tour</div>
+          </div>
+          <div class="live-fs-exit-floating">
             <button id="liveFsChatBtn" class="live-fullscreen-exit live-chat-open-btn live-admin-only" type="button">💬 Chat</button>
             <button id="liveFullscreenExitBtn" class="live-fullscreen-exit" type="button">Quitter le plein écran</button>
           </div>
-        </div>
 
-        <button class="live-fullscreen-level live-fs-level-clickable live-fs-hidden-meta" id="liveFsLevel" type="button" title="Voir la structure">NIVEAU 1</button>
-        <div class="live-fullscreen-ante live-fs-hidden-meta" id="liveFsAnte">Ante —</div>
+          <button class="live-fullscreen-level live-fs-level-clickable live-fs-hidden-meta" id="liveFsLevel" type="button" title="Voir la structure">NIVEAU 1</button>
+          <div class="live-fullscreen-ante live-fs-hidden-meta" id="liveFsAnte">Ante —</div>
 
-        <div class="live-fs-main">
-          <div class="live-fs-blinds-spotlight">
-            <div class="live-fs-eyebrow">Blindes en cours</div>
-            <div class="live-fs-blinds-value" id="liveFsBlinds">— / —</div>
-            <div class="live-fs-next-line">Suivant : <strong id="liveFsNext">—</strong></div>
+          <div class="live-fs-top-row">
+            <div></div>
+            <div class="live-fs-card live-fs-blinds-card">
+              <div class="live-fs-blinds-title"><div class="live-fs-blinds-icon">🪙</div><div class="live-fs-card-label">Blindes</div></div>
+              <div class="live-fs-blinds-value" id="liveFsBlinds">— / —</div>
+            </div>
+            <div class="live-fs-card live-fs-remaining-card">
+              <div class="live-fs-remaining-head"><div class="live-fs-remaining-icon">👥</div><div class="live-fs-card-label">Joueurs restants</div></div>
+              <div class="live-fs-remaining-value" id="liveFsRemainingDisplay">—</div>
+            </div>
           </div>
 
-          <div class="live-fs-timer-panel">
-            <div class="live-fullscreen-timer-label">Temps restant</div>
+          <div class="live-fs-timer-zone">
+            <div class="live-fs-timer-label">Temps restant</div>
             <div class="live-fullscreen-timer" id="liveFsTimer">00:00</div>
+            <div class="live-fs-progress"><div id="liveFsProgressFill" class="live-fs-progress-fill"></div></div>
           </div>
-        </div>
 
-        <div class="live-fullscreen-kpis">
-          <div class="live-fullscreen-kpi live-fs-duration-kpi">
-            <span>Durée du niveau</span>
-            <strong id="liveFsLevelDuration">—</strong>
-            <button id="liveFsDurationBtn" class="live-fs-duration-edit-btn live-admin-only" type="button">Modifier</button>
+          <div class="live-fullscreen-kpis">
+            <div class="live-fs-stat-card live-fullscreen-kpi live-fullscreen-kpi-stack">
+              <div class="live-fs-stat-icon">🪙</div>
+              <div class="live-fs-stat-content"><span>Stack moyen</span><strong id="liveFsAvgStack">—</strong></div>
+            </div>
+            <div class="live-fs-stat-card live-fullscreen-kpi">
+              <div class="live-fs-stat-icon">⏱️</div>
+              <div class="live-fs-stat-content"><span>Durée écoulée</span><strong id="liveFsElapsed">00:00:00</strong></div>
+            </div>
           </div>
-          <div class="live-fullscreen-kpi live-fullscreen-kpi-stack">
-            <span>Stack moyen</span>
-            <strong id="liveFsAvgStack">—</strong>
-          </div>
-          <div class="live-fullscreen-kpi">
-            <span>Joueurs restants</span>
-            <strong id="liveFsRemaining">—</strong>
-          </div>
-          <div class="live-fullscreen-kpi">
-            <span>Durée écoulée</span>
-            <strong id="liveFsElapsed">00:00:00</strong>
-          </div>
-        </div>
 
-        <div class="live-fs-bottom-dock live-admin-only">
-          <div class="live-mobile-main-controls">
-            <button id="liveFsPauseResumeBtn" class="live-fs-dock-btn primary" type="button">Démarrer</button>
-            <button id="liveFsEliminateOpenBtn" class="live-fs-dock-btn danger" type="button">Sortir un joueur</button>
+          <div class="live-fs-bottom-dock live-admin-only">
+            <div class="live-mobile-main-controls">
+              <button id="liveFsPauseResumeBtn" class="live-fs-dock-btn primary" type="button">Démarrer</button>
+              <button id="liveFsEliminateOpenBtn" class="live-fs-dock-btn danger" type="button">Sortir un joueur</button>
+            </div>
           </div>
-        </div>
 
-        <div class="live-fs-players-wrap">
-          <div class="live-fs-players-title">Joueurs à la table</div>
-          <div id="liveFsPlayers" class="live-fs-players"></div>
+          <div class="live-fs-players-wrap">
+            <div class="live-fs-players-title">Joueurs à la table</div>
+            <div id="liveFsPlayers" class="live-fs-players"></div>
+          </div>
         </div>
 
         <div id="liveFsDurationPopup" class="live-fs-duration-popup live-admin-only" style="display:none">
@@ -11853,7 +11831,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.18 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 2.7.20 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -12119,7 +12097,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.18 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.20 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -12493,7 +12471,7 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.7.18 : aucune image Base64 dans bpt_state. Les photos de parties
+    // BPT 2.7.20 : aucune image Base64 dans bpt_state. Les photos de parties
     // sont stockées dans Firebase ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
@@ -15062,18 +15040,20 @@ function liveRenderFullscreen(){
   const displayPlayers=alive.length ? alive : (winner ? [winner] : []);
   const remainingCount=displayPlayers.length;
   const total=s.players.length*s.startStack;
+  const levelSeconds=Math.max(1, Number(level.durationMin||0)*60);
+  const progress=Math.max(0, Math.min(100, ((levelSeconds - Number(s.remainingSeconds||0)) / levelSeconds) * 100));
 
   if($("liveFsLevel"))$("liveFsLevel").textContent=`NIVEAU ${level.level}`;
-  if($("liveFsBlinds"))$("liveFsBlinds").textContent=`${liveFmt(level.sb)} / ${liveFmt(level.bb)}`;
+  if($("liveFsBlinds"))$("liveFsBlinds").innerHTML=`${liveFmt(level.sb)} <span class="sep">/</span> ${liveFmt(level.bb)}`;
   if($("liveFsAnte"))$("liveFsAnte").textContent=Number(level.ante)>0?`ANTE ${liveFmt(level.ante)}`:"";
   if($("liveFsTimer"))$("liveFsTimer").textContent=liveTime(s.remainingSeconds);
   if($("liveFsLevelDuration"))$("liveFsLevelDuration").textContent=`${level.durationMin} min`;
   if($("liveFsAvgStack"))$("liveFsAvgStack").textContent=remainingCount?liveFmt(total/remainingCount):"0";
   if($("liveFsRemaining"))$("liveFsRemaining").textContent=String(remainingCount);
+  if($("liveFsRemainingDisplay"))$("liveFsRemainingDisplay").innerHTML=`${remainingCount} <span class="live-fs-remaining-total">/ ${s.players.length}</span>`;
   if($("liveFsElapsed"))$("liveFsElapsed").textContent=liveTime(liveElapsedSeconds(s));
-  if($("liveFsNext"))$("liveFsNext").textContent=next
-    ? `${liveFmt(next.sb)} / ${liveFmt(next.bb)}`
-    : "Dernier niveau";
+  if($("liveFsNext"))$("liveFsNext").textContent=next ? `${liveFmt(next.sb)} / ${liveFmt(next.bb)}` : "Dernier niveau";
+  if($("liveFsProgressFill"))$("liveFsProgressFill").style.width=`${progress}%`;
 
   if($("liveFsPlayers")){
     $("liveFsPlayers").innerHTML=displayPlayers.length
@@ -15496,7 +15476,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.18 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 2.7.20 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -19992,7 +19972,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 2.7.18 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 2.7.20 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
