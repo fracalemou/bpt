@@ -7,7 +7,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<!-- BPT LIVE V3.16 SINGLEPAGE FULLSCREEN CHAT SOUND -->
+<!-- BPT LIVE V3.18 FULLSCREEN POLISH ELIM CHAT -->
 <title>BPT — Gestion du championnat</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23173a2b'/%3E%3Cpath d='M32 10c-6 10-18 15-18 26 0 7 5 12 11 12 3 0 5-1 7-4-1 5-3 8-7 10h14c-4-2-6-5-7-10 2 3 4 4 7 4 6 0 11-5 11-12 0-11-12-16-18-26z' fill='%23c8952e'/%3E%3C/svg%3E">
 <style>
@@ -13320,6 +13320,158 @@ nav button[data-view="live"],#live,#liveFullscreenDisplay,#spectatorServerOverla
 }
 </style>
 
+
+<style id="bpt-live3-v318-fullscreen">
+html:has(#live3Fullscreen.open),
+body:has(#live3Fullscreen.open){
+  margin:0 !important;
+  padding:0 !important;
+  overflow:hidden !important;
+  overscroll-behavior:none !important;
+}
+
+#live3Fullscreen.bpt-live3-fullscreen{
+  position:fixed !important;
+  inset:0 !important;
+  width:100vw !important;
+  height:100dvh !important;
+  min-height:100dvh !important;
+  max-height:100dvh !important;
+  margin:0 !important;
+  padding:8px !important;
+  border:0 !important;
+  border-radius:0 !important;
+  overflow:hidden !important;
+  z-index:2147483647 !important;
+  background:#0b120e !important;
+}
+
+#live3Fullscreen .bpt-live3-fs-shell{
+  width:100% !important;
+  height:100% !important;
+  max-height:100% !important;
+  overflow:hidden !important;
+  display:grid !important;
+  grid-template-rows:
+    minmax(42px,6.5vh)
+    minmax(78px,13vh)
+    minmax(150px,1fr)
+    minmax(58px,9vh)
+    minmax(46px,7.5vh)
+    minmax(66px,11vh) !important;
+  gap:5px !important;
+}
+
+#live3Fullscreen .bpt-live3-fs-blinds strong{
+  font-size:clamp(46px,10vh,82px) !important;
+  line-height:.92 !important;
+}
+#live3Fullscreen .bpt-live3-fs-blinds span,
+#live3Fullscreen .bpt-live3-fs-blinds small{
+  font-size:clamp(11px,1.8vh,15px) !important;
+}
+
+#live3Fullscreen .bpt-live3-fs-timer>div{
+  font-size:clamp(118px,27vh,280px) !important;
+  line-height:.74 !important;
+  letter-spacing:-.065em !important;
+}
+
+#live3Fullscreen .bpt-live3-fs-kpis{
+  width:min(900px,100%) !important;
+  gap:6px !important;
+}
+#live3Fullscreen .bpt-live3-fs-kpis>div{
+  min-height:0 !important;
+  padding:6px 8px !important;
+}
+
+#live3Fullscreen .bpt-live3-fs-actions{
+  display:grid !important;
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  gap:6px !important;
+  width:min(900px,100%) !important;
+  justify-self:center !important;
+}
+#live3Fullscreen .bpt-live3-fs-actions button{
+  min-width:0 !important;
+  min-height:40px !important;
+  padding:4px 8px !important;
+  font-size:clamp(11px,1.8vh,15px) !important;
+}
+#live3Fullscreen .bpt-live3-fs-players{
+  min-height:0 !important;
+  overflow:hidden !important;
+  padding:5px 8px !important;
+}
+#live3Fullscreen .bpt-live3-fs-player-list{
+  max-height:100% !important;
+  overflow:hidden !important;
+  gap:4px !important;
+}
+
+#live3FsChatActionBtn{
+  background:#26372e !important;
+  color:#fff !important;
+  border:1px solid #40584a !important;
+}
+#live3FsExitActionBtn{
+  background:#202923 !important;
+  color:#fff !important;
+  border:1px solid #47554d !important;
+}
+
+@media(max-width:700px){
+  #live3Fullscreen.bpt-live3-fullscreen{padding:5px !important;}
+  #live3Fullscreen .bpt-live3-fs-shell{
+    grid-template-rows:
+      minmax(38px,6vh)
+      minmax(68px,12vh)
+      minmax(130px,1fr)
+      minmax(52px,9vh)
+      minmax(42px,7vh)
+      minmax(56px,10vh) !important;
+  }
+  #live3Fullscreen .bpt-live3-fs-blinds strong{
+    font-size:clamp(40px,11vh,66px) !important;
+  }
+  #live3Fullscreen .bpt-live3-fs-timer>div{
+    font-size:clamp(98px,25vh,178px) !important;
+  }
+  #live3Fullscreen .bpt-live3-fs-actions button{
+    font-size:10.5px !important;
+    padding:3px !important;
+  }
+}
+@supports not (height:100dvh){
+  #live3Fullscreen.bpt-live3-fullscreen{
+    height:100vh !important;
+    min-height:100vh !important;
+    max-height:100vh !important;
+  }
+}
+</style>
+
+
+<style id="bpt-live3-v318-chat-badge">
+.bpt-live3-chat-button{position:relative}
+.bpt-live3-chat-unread{
+  display:inline-grid;
+  place-items:center;
+  min-width:20px;
+  height:20px;
+  padding:0 6px;
+  margin-left:5px;
+  border-radius:999px;
+  background:#d94b4b;
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  font-size:11px;
+  font-weight:950;
+  line-height:1;
+}
+</style>
+
 </head>
 <body>
 <script>
@@ -13531,7 +13683,7 @@ function simplifyRecordTextForMobile(text){
           <div id="live3GameMeta" class="muted">—</div>
         </div>
         <div class="bpt-live3-game-head-actions">
-          <button id="live3ChatBtn" class="btn ghost" type="button">💬 Chat</button>
+          <button id="live3ChatBtn" class="btn ghost bpt-live3-chat-button" type="button">💬 Chat <span id="live3ChatUnread" class="bpt-live3-chat-unread" style="display:none">0</span></button>
           <button id="live3FullscreenBtn" class="btn ghost" type="button">Plein écran</button>
           <button id="live3QuitViewBtn" class="btn ghost" type="button">Quitter le Live</button>
         </div>
@@ -13586,7 +13738,7 @@ function simplifyRecordTextForMobile(text){
   <div class="bpt-live3-fs-shell">
     <header class="bpt-live3-fs-head">
       <div class="bpt-live3-fs-brand">BPT</div>
-      <button id="live3FsChatBtn" class="bpt-live3-fs-chat" type="button">💬 <span>Chat</span></button>
+      <button id="live3FsChatBtn" class="bpt-live3-fs-chat bpt-live3-chat-button" type="button">💬 <span>Chat</span> <span id="live3FsHeaderChatUnread" class="bpt-live3-chat-unread" style="display:none">0</span></button>
       <div class="bpt-live3-fs-rem"><strong id="live3FsRemaining">0</strong><span>restants</span></div>
     </header>
     <section class="bpt-live3-fs-blinds">
@@ -23728,6 +23880,7 @@ document.addEventListener("visibilitychange",()=>{
   let advancing=false;
   let lastChatMessageId=null;
   let chatSoundPrimed=false;
+  let unreadChatCount=0;
 
   function uid(){
     let id=localStorage.getItem(DEVICE_KEY);
@@ -23997,32 +24150,65 @@ document.addEventListener("visibilitychange",()=>{
   }
 
 
+  function refreshEliminationLists(){
+    const victimSelect=$3("live3ElimPlayer");
+    const killerSelect=$3("live3ElimKiller");
+    if(!victimSelect||!killerSelect)return;
+
+    const alive=alivePlayers();
+    const prevVictim=String(victimSelect.value||"");
+    const prevKiller=String(killerSelect.value||"");
+
+    victimSelect.innerHTML=alive.length
+      ? alive.map(p=>`<option value="${escapeAttr(p.name)}">${escapeHtml(p.name)}</option>`).join("")
+      : '<option value="">Aucun joueur en jeu</option>';
+
+    if(prevVictim && alive.some(p=>p.name===prevVictim))victimSelect.value=prevVictim;
+
+    const victim=String(victimSelect.value||"");
+    const killers=alive.filter(p=>p.name!==victim);
+
+    killerSelect.innerHTML=
+      '<option value="">— Aucun / inconnu —</option>'+
+      killers.map(p=>`<option value="${escapeAttr(p.name)}">${escapeHtml(p.name)}</option>`).join("");
+
+    if(prevKiller && killers.some(p=>p.name===prevKiller))killerSelect.value=prevKiller;
+  }
+
   function openElim(){
     if(!isOwner())return;
-    const alive=alivePlayers();
-    $3("live3ElimPlayer").innerHTML=alive.map(p=>`<option>${escapeHtml(p.name)}</option>`).join("");
-    $3("live3ElimKiller").innerHTML='<option value="">— Aucun / inconnu —</option>'+alive.map(p=>`<option>${escapeHtml(p.name)}</option>`).join("");
+    refreshEliminationLists();
     $3("live3ElimModal").classList.add("open");
     $3("live3ElimModal").setAttribute("aria-hidden","false");
   }
 
   async function eliminate(){
     if(!isOwner())return;
-    const victim=$3("live3ElimPlayer").value;
-    const killer=$3("live3ElimKiller").value;
+    const victim=String($3("live3ElimPlayer").value||"");
+    const killer=String($3("live3ElimKiller").value||"");
     if(!victim)return;
+
     await ownerTransaction(s=>{
-      const alive=s.players.filter(p=>p.status==="in");
-      const p=s.players.find(x=>x.name===victim&&x.status==="in");
-      if(!p)return s;
-      p.status="out";p.place=alive.length;p.killer=killer||"";p.outAt=Date.now();
-      const survivors=s.players.filter(x=>x.status==="in");
+      const alive=(s.players||[]).filter(p=>p.status==="in");
+      const victimPlayer=alive.find(p=>p.name===victim);
+      if(!victimPlayer)return s;
+
+      const killerPlayer=killer ? alive.find(p=>p.name===killer && p.name!==victim) : null;
+      const validKiller=killerPlayer ? killerPlayer.name : "";
+
+      victimPlayer.status="out";
+      victimPlayer.place=alive.length;
+      victimPlayer.killer=validKiller;
+      victimPlayer.outAt=Date.now();
+
+      const survivors=(s.players||[]).filter(x=>x.status==="in");
       if(survivors.length===1){
         survivors[0].status="winner";
         survivors[0].place=1;
       }
       return s;
     });
+
     closeElim();
   }
   function closeElim(){
@@ -24091,7 +24277,18 @@ document.addEventListener("visibilitychange",()=>{
     input.value="";
   }
 
+  function updateUnreadBadges(){
+    ["live3ChatUnread","live3FsChatUnread","live3FsHeaderChatUnread"].forEach(id=>{
+      const el=$3(id);
+      if(!el)return;
+      el.textContent=String(unreadChatCount);
+      el.style.display=unreadChatCount>0?"inline-grid":"none";
+    });
+  }
+
   function openChat(){
+    unreadChatCount=0;
+    updateUnreadBadges();
     renderChat();
     $3("live3ChatModal").classList.add("open");
     $3("live3ChatModal").setAttribute("aria-hidden","false");
@@ -24179,8 +24376,21 @@ document.addEventListener("visibilitychange",()=>{
     $3("live3AvgStack").textContent=fmt(avg);$3("live3Elapsed").textContent=time(elapsedSeconds());$3("live3Next").textContent=next;
     $3("live3StartPauseBtn").textContent=current.running?"Pause":(current.startedAt?"Reprendre":"Démarrer");
 
-    $3("live3MasterControls").style.display=owner?"flex":"none";
-    $3("live3SpectatorControls").style.display=owner?"none":"flex";
+    // Visibilité stricte selon le rôle :
+    // maître = aucun bouton de demande de gestion
+    // spectateur = bouton de demande de gestion visible
+    if($3("live3MasterControls")){
+      $3("live3MasterControls").style.display=owner?"grid":"none";
+    }
+    if($3("live3SpectatorControls")){
+      $3("live3SpectatorControls").style.display=owner?"none":"grid";
+    }
+    if($3("live3TakeoverBtn")){
+      $3("live3TakeoverBtn").style.display=owner?"none":"";
+      $3("live3TakeoverBtn").disabled=owner;
+    }
+
+    if(owner && $3("live3TakeoverStatus"))$3("live3TakeoverStatus").textContent="";
 
     const req=current.takeoverRequest;
     const requestBox=$3("live3TakeoverRequest");
@@ -24243,7 +24453,54 @@ document.addEventListener("visibilitychange",()=>{
     }
   }
 
+  function playChatReceiveSound(){
+    try{
+      const AudioCtx=window.AudioContext||window.webkitAudioContext;
+      if(!AudioCtx)return;
+      const ctx=new AudioCtx();
+      const osc=ctx.createOscillator();
+      const gain=ctx.createGain();
+      osc.type="sine";
+      osc.frequency.setValueAtTime(720,ctx.currentTime);
+      gain.gain.setValueAtTime(0.0001,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.04,ctx.currentTime+0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+0.13);
+      osc.connect(gain);gain.connect(ctx.destination);
+      osc.start();osc.stop(ctx.currentTime+0.14);
+      osc.onended=()=>{try{ctx.close();}catch(_e){}};
+    }catch(_e){}
+  }
+
+  function maybeNotifyChat(){
+    const list=Array.isArray(current?.chat)?current.chat:[];
+    const latest=list[list.length-1]||null;
+    if(!latest){
+      lastChatMessageId=null;
+      return;
+    }
+
+    const latestId=String(latest.id||"");
+    if(!chatSoundPrimed){
+      lastChatMessageId=latestId;
+      chatSoundPrimed=true;
+      return;
+    }
+
+    if(latestId && latestId!==lastChatMessageId){
+      const fromOther=String(latest.deviceId||"")!==uid();
+      lastChatMessageId=latestId;
+      if(fromOther){
+        if(!$3("live3ChatModal")?.classList.contains("open")){
+          unreadChatCount++;
+          updateUnreadBadges();
+        }
+        playChatReceiveSound();
+      }
+    }
+  }
+
   function onState(){
+    maybeNotifyChat();
     maybeNotifyChat();
     render();
     autoAdvanceIfNeeded();
@@ -24283,8 +24540,11 @@ document.addEventListener("visibilitychange",()=>{
     $3("live3FsEliminateBtn")?.addEventListener("click",openElim);
     $3("live3FsChatActionBtn")?.addEventListener("click",openChat);
     $3("live3FsExitActionBtn")?.addEventListener("click",closeFullscreen);
+    $3("live3FsChatActionBtn")?.addEventListener("click",openChat);
+    $3("live3FsExitActionBtn")?.addEventListener("click",closeFullscreen);
 
     $3("live3ElimConfirmBtn")?.addEventListener("click",eliminate);
+    $3("live3ElimPlayer")?.addEventListener("change",refreshEliminationLists);
     $3("live3ElimCancelBtn")?.addEventListener("click",closeElim);
     $3("live3ElimModal")?.addEventListener("click",e=>{if(e.target===$3("live3ElimModal"))closeElim();});
 
