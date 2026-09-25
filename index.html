@@ -1,4 +1,9 @@
 <!doctype html>
+<!--
+BPT LIVE V3.30 MOBILE PLAYER SELECTOR
+Base stable figée à partir de la V3.29.
+Conserver cette version comme point de retour avant toute évolution ultérieure.
+-->
 <!-- BPT: Live spectateur auto + durée écoulée + rôle maître/spectateur stabilisé -->
 <html lang="fr">
 <head>
@@ -7,7 +12,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<!-- BPT LIVE V3.29 ADD NEW PLAYER PRELIVE -->
+<!-- BPT BASE PROPRE LIVE V3 -->
 <title>BPT — Gestion du championnat</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23173a2b'/%3E%3Cpath d='M32 10c-6 10-18 15-18 26 0 7 5 12 11 12 3 0 5-1 7-4-1 5-3 8-7 10h14c-4-2-6-5-7-10 2 3 4 4 7 4 6 0 11-5 11-12 0-11-12-16-18-26z' fill='%23c8952e'/%3E%3C/svg%3E">
 <style>
@@ -13994,6 +13999,184 @@ body:has(#live3Fullscreen.open){
 }
 </style>
 
+
+<style id="bpt-live3-v330-mobile-player-selector">
+.bpt-live3-mobile-player-select{
+  display:none !important;
+}
+
+@media(max-width:700px){
+  #live3 .bpt-live3-player-picker{
+    display:none !important;
+  }
+
+  #live3 .bpt-live3-mobile-player-select{
+    display:flex !important;
+    width:100%;
+    align-items:center;
+    justify-content:center;
+    min-height:50px;
+    margin:0 0 12px;
+    background:#24352c !important;
+    color:#fff !important;
+    -webkit-text-fill-color:#fff !important;
+    border:1px solid #496052 !important;
+    font-size:14px;
+  }
+
+  #live3 .bpt-live3-mobile-player-select span{
+    color:var(--gold) !important;
+    -webkit-text-fill-color:var(--gold) !important;
+    font-size:17px;
+    margin:0 3px;
+  }
+}
+
+#live3MobilePlayerModal{
+  z-index:2200000 !important;
+}
+
+#live3MobilePlayerModal .bpt-live3-mobile-player-card{
+  width:min(680px,100%);
+  max-height:min(92dvh,900px);
+  display:grid;
+  grid-template-rows:auto auto auto minmax(0,1fr) auto;
+  gap:12px;
+  background:#141f19 !important;
+  color:#fff !important;
+  overflow:hidden;
+  border:1px solid #405548;
+}
+
+.bpt-live3-mobile-player-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+
+.bpt-live3-mobile-player-head h2{
+  margin:2px 0 0;
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+}
+
+.bpt-live3-mobile-player-search{
+  width:100%;
+  min-height:46px;
+  background:#0f1813 !important;
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  border:1px solid #42594b !important;
+  border-radius:12px;
+  padding:10px 12px;
+  font-size:16px;
+}
+
+.bpt-live3-mobile-player-summary{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  color:#d5dfd8;
+}
+
+.bpt-live3-mobile-player-summary strong{
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+}
+
+.bpt-live3-mobile-clear{
+  appearance:none;
+  border:0;
+  background:transparent;
+  color:#d6aa4c;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.bpt-live3-mobile-player-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  overflow:auto;
+  align-content:start;
+  padding:2px 2px 8px;
+}
+
+.bpt-live3-mobile-player-option{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-height:48px;
+  padding:9px 10px;
+  border:1px solid #405548;
+  border-radius:12px;
+  background:#1d2b23;
+  color:#fff;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.bpt-live3-mobile-player-option input{
+  width:19px;
+  height:19px;
+  flex:0 0 19px;
+  accent-color:#c8952e;
+}
+
+.bpt-live3-mobile-player-option span{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+}
+
+.bpt-live3-mobile-player-option.is-selected{
+  background:#263d31;
+  border-color:#c8952e;
+}
+
+.bpt-live3-mobile-player-option.is-new-player{
+  border-color:#c8952e;
+}
+
+.bpt-live3-mobile-player-footer{
+  display:grid;
+  grid-template-columns:1fr 1.5fr;
+  gap:10px;
+  padding-top:4px;
+}
+
+@media(max-width:420px){
+  #live3MobilePlayerModal{
+    padding:6px !important;
+    align-items:stretch !important;
+  }
+
+  #live3MobilePlayerModal .bpt-live3-mobile-player-card{
+    width:100%;
+    height:calc(100dvh - 12px);
+    max-height:none;
+    border-radius:14px;
+    padding:14px;
+  }
+
+  .bpt-live3-mobile-player-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:7px;
+  }
+
+  .bpt-live3-mobile-player-option{
+    min-height:46px;
+    padding:8px;
+    font-size:12px;
+  }
+}
+</style>
+
 </head>
 <body>
 <script>
@@ -14188,6 +14371,11 @@ function simplifyRecordTextForMobile(text){
         </label>
       </div>
 <div class="bpt-live3-section-title">Joueurs</div>
+
+      <button id="live3MobilePlayerSelectBtn" class="btn ghost bpt-live3-mobile-player-select" type="button">
+        Choisir les joueurs · <span id="live3MobileSelectedCount">0</span> sélectionné(s)
+      </button>
+
       <div id="live3PlayerPicker" class="bpt-live3-player-picker"></div>
 
       <div class="bpt-live3-new-player">
@@ -14310,6 +14498,36 @@ function simplifyRecordTextForMobile(text){
       <div id="live3FsPlayers" class="bpt-live3-fs-player-list"></div>
     </section>
     <button id="live3FsExitBtn" class="bpt-live3-fs-exit" type="button" aria-label="Quitter le plein écran" style="display:none">×</button>
+  </div>
+</div>
+
+
+<div id="live3MobilePlayerModal" class="bpt-live3-modal bpt-live3-player-select-modal" aria-hidden="true">
+  <div class="bpt-live3-modal-card bpt-live3-mobile-player-card">
+    <div class="bpt-live3-mobile-player-head">
+      <div>
+        <div class="home-kicker">BPT · Nouvelle partie</div>
+        <h2>Choisir les joueurs</h2>
+      </div>
+      <button id="live3MobilePlayerCloseBtn" class="btn ghost" type="button">×</button>
+    </div>
+
+    <input id="live3MobilePlayerSearch" class="bpt-live3-mobile-player-search"
+           type="search" placeholder="Rechercher un joueur…">
+
+    <div class="bpt-live3-mobile-player-summary">
+      <strong><span id="live3MobileModalCount">0</span> sélectionné(s)</strong>
+      <button id="live3MobileClearPlayersBtn" class="bpt-live3-mobile-clear" type="button">Tout décocher</button>
+    </div>
+
+    <div id="live3MobilePlayerGrid" class="bpt-live3-mobile-player-grid"></div>
+
+    <div class="bpt-live3-mobile-player-footer">
+      <button id="live3MobilePlayerCancelBtn" class="btn ghost" type="button">Annuler</button>
+      <button id="live3MobilePlayerValidateBtn" class="btn primary" type="button">
+        Valider la sélection
+      </button>
+    </div>
   </div>
 </div>
 
@@ -25189,6 +25407,84 @@ document.addEventListener("visibilitychange",()=>{
     document.body.style.overflow="";
   }
 
+  function updateMobilePlayerSelectionCount(){
+    const count=selectedPlayerCount();
+    const top=$3("live3MobileSelectedCount");
+    const modal=$3("live3MobileModalCount");
+    if(top)top.textContent=String(count);
+    if(modal)modal.textContent=String(
+      document.querySelectorAll('#live3MobilePlayerGrid input[type="checkbox"]:checked').length
+    );
+  }
+
+  function renderMobilePlayerSelector(){
+    const grid=$3("live3MobilePlayerGrid");
+    if(!grid)return;
+
+    const selected=new Set(
+      [...document.querySelectorAll('#live3PlayerPicker input[type="checkbox"]:checked')]
+        .map(cb=>cb.value)
+    );
+
+    const pickerOptions=[
+      ...document.querySelectorAll('#live3PlayerPicker input[type="checkbox"]')
+    ].map(cb=>({
+      name:cb.value,
+      isNew:!!cb.closest(".bpt-live3-player-check")?.classList.contains("is-new-player")
+    }));
+
+    const q=String($3("live3MobilePlayerSearch")?.value||"")
+      .trim()
+      .toLocaleLowerCase("fr");
+
+    const filtered=pickerOptions.filter(p=>
+      !q || p.name.toLocaleLowerCase("fr").includes(q)
+    );
+
+    grid.innerHTML=filtered.length
+      ? filtered.map(p=>{
+          const checked=selected.has(p.name);
+          return `<label class="bpt-live3-mobile-player-option${checked?" is-selected":""}${p.isNew?" is-new-player":""}">
+            <input type="checkbox" value="${escapeAttr(p.name)}" ${checked?"checked":""}>
+            <span>${escapeHtml(p.name)}</span>
+          </label>`;
+        }).join("")
+      : '<div class="muted" style="grid-column:1/-1;padding:16px 4px">Aucun joueur trouvé.</div>';
+
+    updateMobilePlayerSelectionCount();
+  }
+
+  function openMobilePlayerSelector(){
+    renderMobilePlayerSelector();
+    const modal=$3("live3MobilePlayerModal");
+    if(!modal)return;
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden","false");
+    setTimeout(()=>{try{$3("live3MobilePlayerSearch")?.focus({preventScroll:true});}catch(_e){}},40);
+  }
+
+  function closeMobilePlayerSelector(){
+    const modal=$3("live3MobilePlayerModal");
+    if(!modal)return;
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden","true");
+  }
+
+  function validateMobilePlayerSelector(){
+    const selected=new Set(
+      [...document.querySelectorAll('#live3MobilePlayerGrid input[type="checkbox"]:checked')]
+        .map(cb=>cb.value)
+    );
+
+    document.querySelectorAll('#live3PlayerPicker input[type="checkbox"]').forEach(cb=>{
+      cb.checked=selected.has(cb.value);
+    });
+
+    updateMobilePlayerSelectionCount();
+    renderStructurePreview();
+    closeMobilePlayerSelector();
+  }
+
   function renderPrepPlayers(){
     const host=$3("live3PlayerPicker");
     if(!host)return;
@@ -25231,6 +25527,10 @@ document.addEventListener("visibilitychange",()=>{
         }).join("")
       : '<div class="muted">Aucun joueur actif. Ajoutez un nouveau joueur ci-dessous.</div>';
 
+    updateMobilePlayerSelectionCount();
+    if($3("live3MobilePlayerModal")?.classList.contains("open")){
+      renderMobilePlayerSelector();
+    }
     setTimeout(renderStructurePreview,0);
   }
 
@@ -25262,6 +25562,7 @@ document.addEventListener("visibilitychange",()=>{
       const existing=[...document.querySelectorAll('#live3PlayerPicker input[type="checkbox"]')]
         .find(cb=>String(cb.value).localeCompare(canonical,"fr",{sensitivity:"base"})===0);
       if(existing)existing.checked=true;
+      updateMobilePlayerSelectionCount();
       input.value="";
       if(hint)hint.textContent=`${canonical} est déjà un joueur actif et a été sélectionné.`;
       renderStructurePreview();
@@ -25582,7 +25883,35 @@ document.addEventListener("visibilitychange",()=>{
     $3("live3TargetHours")?.addEventListener("input",renderStructurePreview);
     $3("live3Stack")?.addEventListener("input",renderStructurePreview);
     $3("live3PlayerPicker")?.addEventListener("change",e=>{
-      if(e.target?.matches('input[type="checkbox"]'))renderStructurePreview();
+      if(e.target?.matches('input[type="checkbox"]')){
+        updateMobilePlayerSelectionCount();
+        renderStructurePreview();
+      }
+    });
+
+    $3("live3MobilePlayerSelectBtn")?.addEventListener("click",openMobilePlayerSelector);
+    $3("live3MobilePlayerCloseBtn")?.addEventListener("click",closeMobilePlayerSelector);
+    $3("live3MobilePlayerCancelBtn")?.addEventListener("click",closeMobilePlayerSelector);
+    $3("live3MobilePlayerValidateBtn")?.addEventListener("click",validateMobilePlayerSelector);
+    $3("live3MobilePlayerSearch")?.addEventListener("input",renderMobilePlayerSelector);
+    $3("live3MobileClearPlayersBtn")?.addEventListener("click",()=>{
+      document.querySelectorAll('#live3MobilePlayerGrid input[type="checkbox"]').forEach(cb=>cb.checked=false);
+      document.querySelectorAll('#live3MobilePlayerGrid .bpt-live3-mobile-player-option').forEach(el=>el.classList.remove("is-selected"));
+      updateMobilePlayerSelectionCount();
+    });
+    $3("live3MobilePlayerGrid")?.addEventListener("change",e=>{
+      if(e.target?.matches('input[type="checkbox"]')){
+        e.target.closest(".bpt-live3-mobile-player-option")?.classList.toggle("is-selected",e.target.checked);
+        const modalCount=$3("live3MobileModalCount");
+        if(modalCount){
+          modalCount.textContent=String(
+            document.querySelectorAll('#live3MobilePlayerGrid input[type="checkbox"]:checked').length
+          );
+        }
+      }
+    });
+    $3("live3MobilePlayerModal")?.addEventListener("click",e=>{
+      if(e.target===$3("live3MobilePlayerModal"))closeMobilePlayerSelector();
     });
 
     $3("live3AddNewPlayerBtn")?.addEventListener("click",addTemporaryLivePlayer);
