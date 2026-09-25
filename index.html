@@ -7,7 +7,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<!-- BPT LIVE V3.28 VISIBLE UNDO ELIM -->
+<!-- BPT LIVE V3.29 ADD NEW PLAYER PRELIVE -->
 <title>BPT — Gestion du championnat</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23173a2b'/%3E%3Cpath d='M32 10c-6 10-18 15-18 26 0 7 5 12 11 12 3 0 5-1 7-4-1 5-3 8-7 10h14c-4-2-6-5-7-10 2 3 4 4 7 4 6 0 11-5 11-12 0-11-12-16-18-26z' fill='%23c8952e'/%3E%3C/svg%3E">
 <style>
@@ -13945,6 +13945,55 @@ body:has(#live3Fullscreen.open){
 }
 </style>
 
+
+<style id="bpt-live3-v329-new-player">
+#live3 .bpt-live3-new-player{
+  display:grid;
+  grid-template-columns:minmax(220px,1fr) auto;
+  gap:10px;
+  margin-top:14px;
+  max-width:680px;
+}
+
+#live3 .bpt-live3-new-player input{
+  min-width:0;
+}
+
+#live3 .bpt-live3-new-player-hint{
+  margin-top:6px;
+  font-size:12px;
+}
+
+#live3 .bpt-live3-player-check.is-new-player{
+  border-color:#c8952e !important;
+}
+
+#live3 .bpt-live3-player-check .bpt-live3-new-badge{
+  display:inline-flex;
+  align-items:center;
+  margin-left:2px;
+  padding:2px 6px;
+  border-radius:999px;
+  background:#c8952e;
+  color:#17120b !important;
+  -webkit-text-fill-color:#17120b !important;
+  font-size:9px;
+  font-weight:950;
+  text-transform:uppercase;
+  letter-spacing:.03em;
+}
+
+@media(max-width:700px){
+  #live3 .bpt-live3-new-player{
+    grid-template-columns:1fr;
+  }
+
+  #live3 #live3AddNewPlayerBtn{
+    width:100%;
+  }
+}
+</style>
+
 </head>
 <body>
 <script>
@@ -14140,6 +14189,14 @@ function simplifyRecordTextForMobile(text){
       </div>
 <div class="bpt-live3-section-title">Joueurs</div>
       <div id="live3PlayerPicker" class="bpt-live3-player-picker"></div>
+
+      <div class="bpt-live3-new-player">
+        <input id="live3NewPlayerName" type="text" maxlength="60" placeholder="Ajouter un nouveau joueur">
+        <button id="live3AddNewPlayerBtn" class="btn ghost" type="button">+ Ajouter à la partie</button>
+      </div>
+      <div id="live3NewPlayerHint" class="muted bpt-live3-new-player-hint">
+        Le joueur sera ajouté aux joueurs actifs lorsque la partie sera publiée dans l’historique.
+      </div>
 
       <div class="bpt-live3-actions">
         <button id="live3CreateBtn" class="btn primary" type="button">Créer la partie</button>
@@ -24379,6 +24436,11 @@ document.addEventListener("visibilitychange",()=>{
   // Empêche plusieurs publications simultanées de la même fin de Live.
   let winnerFinalizationInProgress=false;
 
+  // Joueurs ajoutés uniquement pour la préparation du Live courant.
+  // Ils ne deviennent joueurs actifs permanents qu'après publication
+  // de la partie dans l'historique.
+  const live3TemporaryPlayers=new Set();
+
   function uid(){
     let id=localStorage.getItem(DEVICE_KEY);
     if(!id){
@@ -24572,6 +24634,9 @@ document.addEventListener("visibilitychange",()=>{
       });
       if(!created){
         alert("Un Live est déjà actif. Ouvrez l'onglet Live pour le suivre.");
+      }else{
+        live3TemporaryPlayers.clear();
+        if($3("live3NewPlayerName"))$3("live3NewPlayerName").value="";
       }
     }catch(e){
       console.error(e);
@@ -25127,11 +25192,96 @@ document.addEventListener("visibilitychange",()=>{
   function renderPrepPlayers(){
     const host=$3("live3PlayerPicker");
     if(!host)return;
-    const players=(db?.players||[]).filter(p=>p && p.active===true && String(p.name||"").trim()).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name),"fr"));
-    host.innerHTML=players.length
-      ? players.map(p=>`<label class="bpt-live3-player-check"><input type="checkbox" value="${escapeAttr(p.name)}"> <span>${escapeHtml(p.name)}</span></label>`).join("")
-      : '<div class="muted">Aucun joueur actif disponible. Activez d’abord les joueurs dans la liste des joueurs.</div>';
+
+    const previouslySelected=new Set(
+      [...host.querySelectorAll('input[type="checkbox"]:checked')].map(x=>x.value)
+    );
+
+    const activePlayers=(db?.players||[])
+      .filter(p=>p && p.active===true && String(p.name||"").trim())
+      .map(p=>String(p.name).trim());
+
+    const knownMap=new Map(
+      (db?.players||[])
+        .filter(p=>p && String(p.name||"").trim())
+        .map(p=>[String(p.name).trim().toLocaleLowerCase("fr"),String(p.name).trim()])
+    );
+
+    const tempPlayers=[...live3TemporaryPlayers]
+      .map(name=>{
+        const canonical=knownMap.get(String(name).trim().toLocaleLowerCase("fr"));
+        return canonical||String(name).trim();
+      })
+      .filter(Boolean);
+
+    const allNames=[...new Set([...activePlayers,...tempPlayers])]
+      .sort((a,b)=>a.localeCompare(b,"fr",{sensitivity:"base"}));
+
+    host.innerHTML=allNames.length
+      ? allNames.map(name=>{
+          const isTemp=tempPlayers.some(
+            n=>n.localeCompare(name,"fr",{sensitivity:"base"})===0
+          );
+          const checked=previouslySelected.has(name)||isTemp;
+          return `<label class="bpt-live3-player-check${isTemp?" is-new-player":""}">
+            <input type="checkbox" value="${escapeAttr(name)}" ${checked?"checked":""}>
+            <span>${escapeHtml(name)}</span>
+            ${isTemp?'<em class="bpt-live3-new-badge">nouveau</em>':""}
+          </label>`;
+        }).join("")
+      : '<div class="muted">Aucun joueur actif. Ajoutez un nouveau joueur ci-dessous.</div>';
+
     setTimeout(renderStructurePreview,0);
+  }
+
+  function addTemporaryLivePlayer(){
+    const input=$3("live3NewPlayerName");
+    const hint=$3("live3NewPlayerHint");
+    if(!input)return;
+
+    const clean=String(input.value||"").trim().replace(/\s+/g," ");
+    if(!clean){
+      if(hint)hint.textContent="Saisissez le nom du joueur.";
+      input.focus();
+      return;
+    }
+
+    const known=(db?.players||[]).find(
+      p=>String(p?.name||"").trim().localeCompare(clean,"fr",{sensitivity:"base"})===0
+    );
+
+    const canonical=known ? String(known.name).trim() : clean;
+
+    const activeAlready=(db?.players||[]).some(
+      p=>p?.active===true &&
+         String(p.name||"").trim().localeCompare(canonical,"fr",{sensitivity:"base"})===0
+    );
+
+    if(activeAlready){
+      // Le joueur est déjà visible : on se contente de le cocher.
+      const existing=[...document.querySelectorAll('#live3PlayerPicker input[type="checkbox"]')]
+        .find(cb=>String(cb.value).localeCompare(canonical,"fr",{sensitivity:"base"})===0);
+      if(existing)existing.checked=true;
+      input.value="";
+      if(hint)hint.textContent=`${canonical} est déjà un joueur actif et a été sélectionné.`;
+      renderStructurePreview();
+      return;
+    }
+
+    const duplicateTemp=[...live3TemporaryPlayers].some(
+      n=>String(n).localeCompare(canonical,"fr",{sensitivity:"base"})===0
+    );
+
+    if(!duplicateTemp)live3TemporaryPlayers.add(canonical);
+
+    input.value="";
+    renderPrepPlayers();
+
+    if(hint){
+      hint.textContent=known
+        ? `${canonical} participera à cette partie et redeviendra actif lors de la publication.`
+        : `${canonical} participera à cette partie et sera ajouté aux joueurs actifs lors de la publication.`;
+    }
   }
 
   function renderPlayers(target,fullscreen=false){
@@ -25433,6 +25583,14 @@ document.addEventListener("visibilitychange",()=>{
     $3("live3Stack")?.addEventListener("input",renderStructurePreview);
     $3("live3PlayerPicker")?.addEventListener("change",e=>{
       if(e.target?.matches('input[type="checkbox"]'))renderStructurePreview();
+    });
+
+    $3("live3AddNewPlayerBtn")?.addEventListener("click",addTemporaryLivePlayer);
+    $3("live3NewPlayerName")?.addEventListener("keydown",e=>{
+      if(e.key==="Enter"){
+        e.preventDefault();
+        addTemporaryLivePlayer();
+      }
     });
 
     $3("live3CreateBtn")?.addEventListener("click",createLive);
