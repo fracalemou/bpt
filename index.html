@@ -7,7 +7,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<!-- BPT LIVE V3.25 REMAINING SHADOW FIX -->
+<!-- BPT LIVE V3.26 AUTO FINISH HISTORY SUMMARY -->
 <title>BPT — Gestion du championnat</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23173a2b'/%3E%3Cpath d='M32 10c-6 10-18 15-18 26 0 7 5 12 11 12 3 0 5-1 7-4-1 5-3 8-7 10h14c-4-2-6-5-7-10 2 3 4 4 7 4 6 0 11-5 11-12 0-11-12-16-18-26z' fill='%23c8952e'/%3E%3C/svg%3E">
 <style>
@@ -24286,6 +24286,9 @@ document.addEventListener("visibilitychange",()=>{
   let blindSoundLastSecond=null;
   let blindSoundPrimed=false;
 
+  // Empêche plusieurs publications simultanées de la même fin de Live.
+  let winnerFinalizationInProgress=false;
+
   function uid(){
     let id=localStorage.getItem(DEVICE_KEY);
     if(!id){
@@ -24588,41 +24591,231 @@ document.addEventListener("visibilitychange",()=>{
 
   async function eliminate(){
     if(!isOwner())return;
+
     const victim=String($3("live3ElimPlayer").value||"");
     const killer=String($3("live3ElimKiller").value||"");
-    if(!victim)return;
 
-    await ownerTransaction(s=>{
+    if(!victim)return;
+    if(!killer){
+      alert("Choisissez le joueur qui a réalisé l’élimination.");
+      return;
+    }
+
+    const beforeAlive=alivePlayers();
+    if(!beforeAlive.some(p=>p.name===killer && p.name!==victim)){
+      alert("L’éliminateur doit être un joueur encore en jeu.");
+      refreshEliminationLists();
+      return;
+    }
+
+    const updated=await ownerTransaction(s=>{
       const alive=(s.players||[]).filter(p=>p.status==="in");
       const victimPlayer=alive.find(p=>p.name===victim);
       if(!victimPlayer)return s;
 
-      const killerPlayer=killer ? alive.find(p=>p.name===killer && p.name!==victim) : null;
-      const validKiller=killerPlayer ? killerPlayer.name : "";
+      const killerPlayer=alive.find(p=>p.name===killer && p.name!==victim);
+      if(!killerPlayer)return s;
 
       victimPlayer.status="out";
       victimPlayer.place=alive.length;
-      victimPlayer.killer=validKiller;
+      victimPlayer.killer=killerPlayer.name;
       victimPlayer.outAt=Date.now();
+      victimPlayer.outLevel=(Number(s.levelIndex)||0)+1;
+      victimPlayer.outTime=new Date().toLocaleTimeString("fr-FR");
 
       const survivors=(s.players||[]).filter(x=>x.status==="in");
       if(survivors.length===1){
+        const now=Date.now();
+
+        if(s.running && s.runStartedAt){
+          s.elapsedSec=Number(s.elapsedSec||0)+Math.max(
+            0,
+            Math.floor((now-Number(s.runStartedAt||now))/1000)
+          );
+        }
+
         survivors[0].status="winner";
         survivors[0].place=1;
+        survivors[0].killer="";
+        survivors[0].outAt=null;
+        survivors[0].outLevel=null;
+        survivors[0].outTime="";
+
+        s.running=false;
+        s.runStartedAt=null;
+        s.deadline=null;
+        s.remainingSec=Math.max(0,Number(s.remainingSec)||0);
+        s.winnerName=survivors[0].name;
+        s.finishedAt=now;
+        s.finishReason="winner";
       }
+
       return s;
     });
 
     closeElim();
+
+    // Dès qu'un vainqueur unique existe, le Live est terminé,
+    // résumé puis publication dans l'historique du championnat.
+    if(updated && (updated.players||[]).filter(p=>p.status==="winner" || Number(p.place)===1).length===1){
+      await finalizeWinnerLive(updated);
+    }
   }
+
   function closeElim(){
     $3("live3ElimModal").classList.remove("open");
     $3("live3ElimModal").setAttribute("aria-hidden","true");
   }
 
+
+  function buildHistoryRowsFromLive3(state){
+    if(!state || !Array.isArray(state.players))return [];
+
+    const players=state.players.slice();
+    const n=players.length;
+    const finalGameNo=nextGameNo();
+    const stake=Math.max(0,Number(state.buyIn)||0);
+
+    const killCounts={};
+    players.forEach(p=>{
+      const killer=String(p.killer||"").trim();
+      if(killer)killCounts[killer]=(killCounts[killer]||0)+1;
+    });
+
+    return players
+      .slice()
+      .sort((a,b)=>Number(a.place||999)-Number(b.place||999))
+      .map(p=>{
+        const place=Number(p.place)||0;
+        const gross=plannedGain(place,n,stake);
+
+        return {
+          game:finalGameNo,
+          date:state.date||new Date().toISOString().slice(0,10),
+          location:state.location||"",
+          player:p.name,
+          place,
+          killer:place===1?"":String(p.killer||""),
+          outLevel:p.outLevel||null,
+          outTime:p.outTime||"",
+          tablier:n>=Number(db?.settings?.tablierMinPlayers||10)&&place===1,
+          n,
+          points:pointsFor(place,n),
+          stake,
+          gross,
+          net:gross-stake,
+          kills:killCounts[p.name]||0,
+          win:place===1,
+          podium:place<=3
+        };
+      });
+  }
+
+  async function markLive3Published(state,rows,synced){
+    try{
+      const r=await ensureRef();
+      const sessionId=String(state?.sessionId||"");
+      const signature=historyGameSignature(rows);
+
+      await r.transaction(server=>{
+        if(!server || String(server.sessionId||"")!==sessionId)return server;
+        if(String(server.ownerId||"")!==uid())return server;
+
+        const next=clone(server);
+        const now=Date.now();
+
+        if(next.running && next.runStartedAt){
+          next.elapsedSec=Number(next.elapsedSec||0)+Math.max(
+            0,
+            Math.floor((now-Number(next.runStartedAt||now))/1000)
+          );
+        }
+
+        next.active=false;
+        next.running=false;
+        next.runStartedAt=null;
+        next.deadline=null;
+        next.endedAt=now;
+        next.finishedAt=next.finishedAt||now;
+        next.finishReason="winner";
+        next.publishedToHistory=true;
+        next.historySynced=!!synced;
+        next.historySignature=signature;
+        next.takeoverRequest=null;
+        next.updatedAt=now;
+
+        return next;
+      });
+    }catch(e){
+      console.warn("Live V3 fin serveur :",e);
+    }
+  }
+
+  async function finalizeWinnerLive(state){
+    if(winnerFinalizationInProgress)return;
+
+    const winners=(state?.players||[]).filter(
+      p=>p.status==="winner" || Number(p.place)===1
+    );
+
+    if(winners.length!==1)return;
+
+    const n=(state.players||[]).length;
+    const places=(state.players||[]).map(p=>Number(p.place)||0);
+
+    if(
+      n<2 ||
+      places.some(p=>p<1) ||
+      new Set(places).size!==n
+    ){
+      alert("Impossible de terminer automatiquement le Live : le classement final est incomplet.");
+      return;
+    }
+
+    winnerFinalizationInProgress=true;
+
+    try{
+      const rows=buildHistoryRowsFromLive3(state);
+      const validation=validateCompletedGameRows(rows);
+
+      if(validation){
+        throw new Error(validation);
+      }
+
+      closeFullscreen();
+
+      // Même circuit que les parties saisies manuellement :
+      // ajout local, calculs, file d'attente, publication serveur,
+      // rafraîchissement du classement et résumé de fin.
+      const result=await persistCompletedGame(rows);
+
+      await markLive3Published(state,rows,result?.synced===true);
+
+      // Le résumé standard BPT est déjà déclenché par persistCompletedGame().
+      // On revient sur la dernière partie pour que le résultat publié soit visible derrière.
+      try{
+        if(typeof showView==="function")showView("latestgame");
+      }catch(_e){}
+
+      const notice=championshipPointsNotice(n);
+      if(notice){
+        setTimeout(()=>alert(notice),250);
+      }
+
+    }catch(e){
+      console.error("Finalisation automatique Live V3 :",e);
+      alert(
+        "Le vainqueur est déterminé, mais la publication dans l’historique a échoué : "+
+        (e?.message||e)
+      );
+    }finally{
+      winnerFinalizationInProgress=false;
+    }
+  }
+
   async function endLive(){
     if(!isOwner())return;
-    if(!confirm("Terminer ce Live ?"))return;
+    if(!confirm("Terminer ce Live sans publier de résultat ?\n\nLa publication dans l’historique est automatique lorsqu’un vainqueur est déterminé."))return;
     await ownerTransaction(s=>{
       if(s.running&&s.runStartedAt){
         const now=Date.now();
