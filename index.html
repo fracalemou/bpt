@@ -7,7 +7,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<!-- BPT LIVE V3.20 RESPONSIVE SPECTATOR CHAT FIX -->
+<!-- BPT LIVE V3.24 CHAT MODAL ABOVE FULLSCREEN -->
 <title>BPT — Gestion du championnat</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23173a2b'/%3E%3Cpath d='M32 10c-6 10-18 15-18 26 0 7 5 12 11 12 3 0 5-1 7-4-1 5-3 8-7 10h14c-4-2-6-5-7-10 2 3 4 4 7 4 6 0 11-5 11-12 0-11-12-16-18-26z' fill='%23c8952e'/%3E%3C/svg%3E">
 <style>
@@ -13676,6 +13676,165 @@ body:has(#live3Fullscreen.open){
 }
 </style>
 
+
+<style id="bpt-live3-v322-fullscreen-top-clean">
+#live3Fullscreen .bpt-live3-fs-head{
+  display:grid !important;
+  grid-template-columns:1fr auto !important;
+  align-items:center !important;
+  column-gap:12px !important;
+  min-height:40px !important;
+  overflow:hidden !important;
+}
+
+#live3Fullscreen .bpt-live3-fs-brand{
+  justify-self:start !important;
+  align-self:center !important;
+}
+
+#live3Fullscreen .bpt-live3-fs-rem{
+  justify-self:end !important;
+  align-self:center !important;
+}
+
+#live3Fullscreen .bpt-live3-fs-chat{
+  display:none !important;
+}
+
+#live3Fullscreen{
+  overflow:hidden !important;
+}
+
+@media (max-width:700px){
+  #live3Fullscreen .bpt-live3-fs-head{
+    min-height:34px !important;
+    column-gap:8px !important;
+  }
+}
+</style>
+
+
+<style id="bpt-live3-v323-modal-takeover-fix">
+/* Live V3 modals must sit above fullscreen */
+#live3ChatModal,
+#live3ElimModal{
+  z-index:2147483647 !important;
+}
+
+#live3ChatModal.open,
+#live3ElimModal.open{
+  display:flex !important;
+}
+
+#live3ChatModal .bpt-live3-modal-card,
+#live3ElimModal .bpt-live3-modal-card{
+  position:relative !important;
+  z-index:2147483647 !important;
+}
+
+/* Spectator fullscreen action bar must remain visible */
+#live3Fullscreen.bpt-live3-role-spectator #live3FsSpectatorActions{
+  display:grid !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  position:relative !important;
+  z-index:20 !important;
+}
+
+#live3Fullscreen.bpt-live3-role-spectator #live3FsTakeoverActionBtn{
+  display:block !important;
+  visibility:visible !important;
+  opacity:1 !important;
+}
+
+/* Ensure owner controls stay hidden for spectators */
+#live3Fullscreen.bpt-live3-role-spectator #live3FsMasterActions{
+  display:none !important;
+}
+
+/* Mobile chat modal: centered and usable over fullscreen */
+@media(max-width:700px){
+  #live3ChatModal{
+    padding:8px !important;
+    align-items:center !important;
+    justify-content:center !important;
+  }
+
+  #live3ChatModal .bpt-live3-chat-card{
+    width:min(96vw,520px) !important;
+    max-height:88dvh !important;
+    overflow:hidden !important;
+    display:flex !important;
+    flex-direction:column !important;
+  }
+
+  #live3ChatModal .bpt-live3-chat-messages{
+    flex:1 1 auto !important;
+    min-height:120px !important;
+    max-height:none !important;
+    overflow:auto !important;
+  }
+
+  #live3ChatModal .bpt-live3-chat-compose{
+    flex:0 0 auto !important;
+  }
+}
+</style>
+
+
+<style id="bpt-live3-v324-chat-layer-fix">
+/* Clear stacking hierarchy:
+   fullscreen < modal backdrop < modal card */
+#live3Fullscreen.bpt-live3-fullscreen{
+  z-index:1000000 !important;
+}
+
+#live3ChatModal,
+#live3ElimModal{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:2000000 !important;
+  isolation:isolate !important;
+}
+
+#live3ChatModal.open,
+#live3ElimModal.open{
+  display:flex !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  pointer-events:auto !important;
+}
+
+#live3ChatModal .bpt-live3-modal-card,
+#live3ElimModal .bpt-live3-modal-card{
+  position:relative !important;
+  z-index:2000001 !important;
+  pointer-events:auto !important;
+}
+
+/* Prevent fullscreen children from escaping above the modal */
+#live3Fullscreen,
+#live3Fullscreen *{
+  z-index:auto;
+}
+#live3Fullscreen.bpt-live3-fullscreen{
+  z-index:1000000 !important;
+}
+
+/* Mobile: popup remains fully visible above fullscreen */
+@media(max-width:700px){
+  #live3ChatModal{
+    padding:8px !important;
+  }
+
+  #live3ChatModal .bpt-live3-chat-card{
+    width:min(96vw,520px) !important;
+    max-height:88dvh !important;
+    margin:auto !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <script>
@@ -13942,7 +14101,7 @@ function simplifyRecordTextForMobile(text){
   <div class="bpt-live3-fs-shell">
     <header class="bpt-live3-fs-head">
       <div class="bpt-live3-fs-brand">BPT</div>
-      <button id="live3FsChatBtn" class="bpt-live3-fs-chat bpt-live3-chat-button" type="button">💬 <span>Chat</span> <span id="live3FsHeaderChatUnread" class="bpt-live3-chat-unread" hidden style="display:none">0</span></button>
+      
       <div class="bpt-live3-fs-rem"><strong id="live3FsRemaining">0</strong><span>restants</span></div>
     </header>
     <section class="bpt-live3-fs-blinds">
@@ -24091,6 +24250,12 @@ document.addEventListener("visibilitychange",()=>{
   let chatSoundPrimed=false;
   let unreadChatCount=0;
 
+  // Alertes sonores de blind : mémorisation locale pour éviter les doublons
+  let blindSoundSessionId=null;
+  let blindSoundLevelIndex=null;
+  let blindSoundLastSecond=null;
+  let blindSoundPrimed=false;
+
   function uid(){
     let id=localStorage.getItem(DEVICE_KEY);
     if(!id){
@@ -24500,8 +24665,28 @@ document.addEventListener("visibilitychange",()=>{
     unreadChatCount=0;
     updateUnreadBadges();
     renderChat();
-    $3("live3ChatModal").classList.add("open");
-    $3("live3ChatModal").setAttribute("aria-hidden","false");
+
+    const modal=$3("live3ChatModal");
+    const fullscreen=$3("live3Fullscreen");
+    if(!modal)return;
+
+    if(fullscreen){
+      fullscreen.style.setProperty("z-index","1000000","important");
+    }
+
+    modal.style.setProperty("position","fixed","important");
+    modal.style.setProperty("inset","0","important");
+    modal.style.setProperty("z-index","2000000","important");
+    modal.style.setProperty("visibility","visible","important");
+    modal.style.setProperty("opacity","1","important");
+    modal.style.setProperty("pointer-events","auto","important");
+
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden","false");
+
+    setTimeout(()=>{
+      try{$3("live3ChatInput")?.focus({preventScroll:true});}catch(_e){}
+    },50);
   }
   function closeChat(){
     $3("live3ChatModal").classList.remove("open");
@@ -24632,9 +24817,12 @@ document.addEventListener("visibilitychange",()=>{
     if(fsMaster) fsMaster.style.setProperty("display",owner?"grid":"none","important");
     if(fsSpectator){
       fsSpectator.style.setProperty("display",owner?"none":"grid","important");
+      fsSpectator.style.setProperty("visibility",owner?"hidden":"visible","important");
       const myRequest=current.takeoverRequest && current.takeoverRequest.requesterId===uid();
       const btn=$3("live3FsTakeoverActionBtn");
       if(btn){
+        btn.style.setProperty("display",owner?"none":"block","important");
+        btn.style.setProperty("visibility",owner?"hidden":"visible","important");
         btn.textContent=myRequest ? "Demande envoyée…" : "Demander la gestion";
         btn.disabled=!!myRequest;
       }
@@ -24644,6 +24832,110 @@ document.addEventListener("visibilitychange",()=>{
     renderChat();
   }
 
+
+  function playBlindTone(kind="tick"){
+    try{
+      const AudioCtx=window.AudioContext||window.webkitAudioContext;
+      if(!AudioCtx)return;
+
+      const ctx=new AudioCtx();
+      const now=ctx.currentTime;
+      const osc=ctx.createOscillator();
+      const gain=ctx.createGain();
+
+      osc.type="sine";
+
+      if(kind==="level"){
+        // Bip de changement : plus grave, plus long et plus présent.
+        osc.frequency.setValueAtTime(560,now);
+        osc.frequency.exponentialRampToValueAtTime(880,now+0.18);
+        gain.gain.setValueAtTime(0.0001,now);
+        gain.gain.exponentialRampToValueAtTime(0.13,now+0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001,now+0.42);
+        osc.start(now);
+        osc.stop(now+0.44);
+      }else if(kind==="thirty"){
+        // Alerte 30 secondes : bip court distinct.
+        osc.frequency.setValueAtTime(620,now);
+        gain.gain.setValueAtTime(0.0001,now);
+        gain.gain.exponentialRampToValueAtTime(0.055,now+0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001,now+0.17);
+        osc.start(now);
+        osc.stop(now+0.18);
+      }else{
+        // Décompte 5 -> 1 : bip bref et net.
+        osc.frequency.setValueAtTime(820,now);
+        gain.gain.setValueAtTime(0.0001,now);
+        gain.gain.exponentialRampToValueAtTime(0.07,now+0.008);
+        gain.gain.exponentialRampToValueAtTime(0.0001,now+0.11);
+        osc.start(now);
+        osc.stop(now+0.12);
+      }
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.onended=()=>{try{ctx.close();}catch(_e){}};
+    }catch(_e){}
+  }
+
+  function resetBlindSoundState(){
+    blindSoundSessionId=String(current?.sessionId||"");
+    blindSoundLevelIndex=Number(current?.levelIndex)||0;
+    blindSoundLastSecond=null;
+  }
+
+  function handleBlindSoundAlerts(){
+    if(!current?.active || !current?.running){
+      blindSoundLastSecond=null;
+      if(current?.active){
+        blindSoundSessionId=String(current.sessionId||"");
+        blindSoundLevelIndex=Number(current.levelIndex)||0;
+      }
+      return;
+    }
+
+    const sessionId=String(current.sessionId||"");
+    const levelIndex=Number(current.levelIndex)||0;
+    const rem=remainingSeconds();
+
+    // Première observation du Live : on initialise sans annoncer un faux changement.
+    if(!blindSoundPrimed){
+      blindSoundPrimed=true;
+      blindSoundSessionId=sessionId;
+      blindSoundLevelIndex=levelIndex;
+      blindSoundLastSecond=rem;
+      return;
+    }
+
+    // Nouvelle session Live : réinitialisation silencieuse.
+    if(blindSoundSessionId!==sessionId){
+      blindSoundSessionId=sessionId;
+      blindSoundLevelIndex=levelIndex;
+      blindSoundLastSecond=rem;
+      return;
+    }
+
+    // Changement réel de niveau : annonce forte, une seule fois.
+    if(blindSoundLevelIndex!==levelIndex){
+      blindSoundLevelIndex=levelIndex;
+      blindSoundLastSecond=rem;
+      playBlindTone("level");
+      return;
+    }
+
+    // Ne jamais répéter une annonce pour la même seconde.
+    if(blindSoundLastSecond===rem)return;
+    blindSoundLastSecond=rem;
+
+    if(rem===30){
+      playBlindTone("thirty");
+      return;
+    }
+
+    if(rem>=1 && rem<=5){
+      playBlindTone("tick");
+    }
+  }
 
   function playChatReceiveSound(){
     try{
@@ -24699,6 +24991,7 @@ document.addEventListener("visibilitychange",()=>{
   function onState(){
     maybeNotifyChat();
     render();
+    handleBlindSoundAlerts();
     autoAdvanceIfNeeded();
   }
 
@@ -24707,7 +25000,16 @@ document.addEventListener("visibilitychange",()=>{
   }
   function escapeAttr(v){return escapeHtml(v);}
 
+  function primeBlindAudio(){
+    blindSoundPrimed=blindSoundPrimed||false;
+    // Les navigateurs mobiles autorisent les sons après une interaction utilisateur.
+    // Aucun son n'est joué ici.
+  }
+
   function bind(){
+    ["pointerdown","touchstart","keydown"].forEach(evt=>{
+      document.addEventListener(evt,primeBlindAudio,{once:true,passive:true});
+    });
     const today=new Date().toISOString().slice(0,10);
     if($3("live3Date"))$3("live3Date").value=today;
     renderStructurePreview();
@@ -24739,9 +25041,6 @@ document.addEventListener("visibilitychange",()=>{
     $3("live3FsTakeoverActionBtn")?.addEventListener("click",requestTakeover);
     $3("live3FsSpectatorChatBtn")?.addEventListener("click",openChat);
     $3("live3FsSpectatorExitBtn")?.addEventListener("click",closeFullscreen);
-    $3("live3FsTakeoverActionBtn")?.addEventListener("click",requestTakeover);
-    $3("live3FsSpectatorChatBtn")?.addEventListener("click",openChat);
-    $3("live3FsSpectatorExitBtn")?.addEventListener("click",closeFullscreen);
     $3("live3FsChatActionBtn")?.addEventListener("click",openChat);
     $3("live3FsExitActionBtn")?.addEventListener("click",closeFullscreen);
 
@@ -24751,7 +25050,6 @@ document.addEventListener("visibilitychange",()=>{
     $3("live3ElimModal")?.addEventListener("click",e=>{if(e.target===$3("live3ElimModal"))closeElim();});
 
     $3("live3ChatBtn")?.addEventListener("click",openChat);
-    $3("live3FsChatBtn")?.addEventListener("click",openChat);
     $3("live3ChatCloseBtn")?.addEventListener("click",closeChat);
     $3("live3ChatSendBtn")?.addEventListener("click",sendChat);
     $3("live3ChatInput")?.addEventListener("keydown",e=>{if(e.key==="Enter")sendChat();});
@@ -24776,9 +25074,10 @@ document.addEventListener("visibilitychange",()=>{
     ticker=setInterval(()=>{
       if(isActive()){
         render();
+        handleBlindSoundAlerts();
         autoAdvanceIfNeeded();
       }
-    },1000);
+    },250);
 
     window.addEventListener("online",installListener);
     document.addEventListener("visibilitychange",()=>{if(!document.hidden)installListener();});
