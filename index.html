@@ -7,7 +7,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<!-- BPT LIVE V3 REBUILD CORE -->
+<!-- BPT LIVE V3.3 DYNAMIC PLAYER STRUCTURE -->
 <title>BPT — Gestion du championnat</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23173a2b'/%3E%3Cpath d='M32 10c-6 10-18 15-18 26 0 7 5 12 11 12 3 0 5-1 7-4-1 5-3 8-7 10h14c-4-2-6-5-7-10 2 3 4 4 7 4 6 0 11-5 11-12 0-11-12-16-18-26z' fill='%23c8952e'/%3E%3C/svg%3E">
 <style>
@@ -12199,6 +12199,9 @@ nav button[data-view="live"],#live,#liveFullscreenDisplay,#spectatorServerOverla
 .bpt-live3-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .bpt-live3-grid label,.bpt-live3-modal-card label{display:grid;gap:6px;font-weight:700;font-size:13px}
 .bpt-live3-player-picker{display:flex;flex-wrap:wrap;gap:8px}
+.bpt-live3-structure-preview{margin-top:14px;padding:12px 14px;border:1px solid #d8d0c1;border-radius:14px;background:#faf8f3}
+.bpt-live3-structure-preview strong{display:block;margin-bottom:6px}
+
 .bpt-live3-player-check{display:flex;align-items:center;gap:7px;padding:8px 10px;border:1px solid #d8d0c1;border-radius:999px;background:#fff;cursor:pointer}
 .bpt-live3-actions,.bpt-live3-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:16px}
 .bpt-live3-game-location{font-size:24px;font-weight:900}
@@ -12451,20 +12454,19 @@ function simplifyRecordTextForMobile(text){
           <input id="live3Stack" type="number" min="100" step="100" value="20000">
         </label>
         <label>Buy-in (€)
-          <input id="live3BuyIn" type="number" min="0" step="1" value="20">
+          <input id="live3BuyIn" type="number" min="0" step="1" value="5">
         </label>
-        <label>Petite blind de départ
-          <input id="live3StartSB" type="number" min="1" step="5" value="25">
+        <label>Durée souhaitée de la partie (heures)
+          <input id="live3TargetHours" type="number" min="1" max="12" step="0.5" value="4">
         </label>
-        <label>Durée d'un niveau (min)
-          <input id="live3LevelMin" type="number" min="3" max="60" step="1" value="15">
+        <label>Structure
+          <input type="text" value="BPT fixe · 18 niveaux · sans ante" disabled>
         </label>
-        <label>Ante
-          <select id="live3UseAnte">
-            <option value="no">Non</option>
-            <option value="yes">Oui</option>
-          </select>
-        </label>
+      </div>
+
+      <div class="bpt-live3-structure-preview">
+        <strong>Structure BPT</strong>
+        <div id="live3StructurePreview" class="muted"></div>
       </div>
 
       <div class="bpt-live3-section-title">Joueurs</div>
@@ -12588,6 +12590,7 @@ function simplifyRecordTextForMobile(text){
     </div>
   </div>
 </div>
+
 
 <div id="live3ChatModal" class="bpt-live3-modal" aria-hidden="true">
   <div class="bpt-live3-modal-card bpt-live3-chat-card">
@@ -22731,14 +22734,75 @@ document.addEventListener("visibilitychange",()=>{
   function nextLevel(){
     return current?.levels?.[(Number(current.levelIndex)||0)+1]||null;
   }
-  function buildLevels(sb,durationMin,useAnte){
-    const factors=[1,2,3,4,6,8,12,16,24,32,40,50,60,80,100,120,160,200];
-    return factors.map((f,i)=>{
-      const small=Math.max(1,Math.round(sb*f));
-      const big=small*2;
-      const ante=useAnte?(i<3?0:Math.max(1,Math.round(big/4))):0;
-      return {level:i+1,sb:small,bb:big,ante,durationSec:Math.max(180,Number(durationMin||15)*60)};
+  const BPT_SB_STRUCTURE=[25,50,75,100,150,200,300,400,500,600,800,1000,1200,1500,2000,3000,4000,5000];
+
+  function selectedPlayerCount(){
+    return document.querySelectorAll('#live3PlayerPicker input[type="checkbox"]:checked').length;
+  }
+
+  function computeStructure(targetHours,playerCount,startStack){
+    const n=Math.max(2,Number(playerCount)||2);
+    const stack=Math.max(100,Number(startStack)||20000);
+
+    // Repère BPT : en fin de tournoi, heads-up à ~10 BB de tapis moyen par joueur.
+    // Avec 2 joueurs restants, chacun possède en moyenne la moitié des jetons :
+    //   tapis moyen = (n * stack) / 2
+    // donc BB cible = tapis moyen / 10 = (n * stack) / 20.
+    const targetEndBB=(n*stack)/20;
+
+    let endIndex=0;
+    let bestDistance=Infinity;
+    BPT_SB_STRUCTURE.forEach((sb,i)=>{
+      const bb=sb*2;
+      const d=Math.abs(bb-targetEndBB);
+      if(d<bestDistance){
+        bestDistance=d;
+        endIndex=i;
+      }
     });
+
+    // Ne jamais dépasser la structure disponible.
+    endIndex=Math.max(0,Math.min(BPT_SB_STRUCTURE.length-1,endIndex));
+    const usedSB=BPT_SB_STRUCTURE.slice(0,endIndex+1);
+
+    const totalSeconds=Math.max(3600,Number(targetHours||4)*3600);
+    const levelSeconds=Math.max(180,Math.round(totalSeconds/usedSB.length));
+
+    const levels=usedSB.map((sb,i)=>({
+      level:i+1,
+      sb,
+      bb:sb*2,
+      ante:0,
+      durationSec:levelSeconds
+    }));
+
+    return {
+      levels,
+      targetEndBB,
+      levelSeconds,
+      expectedEndBB:levels[levels.length-1]?.bb||0
+    };
+  }
+
+  function buildLevels(targetHours,playerCount,startStack){
+    return computeStructure(targetHours,playerCount,startStack).levels;
+  }
+
+  function renderStructurePreview(){
+    const hours=Math.max(1,Number($3("live3TargetHours")?.value)||4);
+    const players=Math.max(2,selectedPlayerCount());
+    const stack=Math.max(100,Number($3("live3Stack")?.value)||20000);
+    const structure=computeStructure(hours,players,stack);
+    const per=structure.levelSeconds||0;
+    const mm=Math.floor(per/60),ss=per%60;
+    const durationLabel=ss?`${mm} min ${String(ss).padStart(2,"0")} s`:`${mm} min`;
+    const blinds=structure.levels.map(l=>`${l.sb}/${l.bb}`).join(" · ");
+
+    if($3("live3StructurePreview")){
+      $3("live3StructurePreview").textContent=
+        `${players} joueurs · ${durationLabel} par niveau · fin visée vers ${fmt(structure.targetEndBB)} BB `+
+        `(${structure.levels.length} niveaux, dernier ${fmt(structure.expectedEndBB)} BB) · ${blinds}`;
+    }
   }
   function initials(name){
     return String(name||"?").trim().split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toUpperCase()||"?";
@@ -22809,12 +22873,17 @@ document.addEventListener("visibilitychange",()=>{
         buyIn:Math.max(0,Number($3("live3BuyIn").value)||0),
         running:false,startedAt:null,runStartedAt:null,deadline:null,elapsedSec:0,
         levelIndex:0,
+        targetHours:Math.max(1,Number($3("live3TargetHours").value)||4),
         levels:buildLevels(
-          Math.max(1,Number($3("live3StartSB").value)||25),
-          Math.max(3,Number($3("live3LevelMin").value)||15),
-          $3("live3UseAnte").value==="yes"
+          Math.max(1,Number($3("live3TargetHours").value)||4),
+          selected.length,
+          Math.max(100,Number($3("live3Stack").value)||20000)
         ),
-        remainingSec:Math.max(3,Number($3("live3LevelMin").value)||15)*60,
+        remainingSec:buildLevels(
+          Math.max(1,Number($3("live3TargetHours").value)||4),
+          selected.length,
+          Math.max(100,Number($3("live3Stack").value)||20000)
+        )[0].durationSec,
         players:selected.map(name=>({name,status:"in",place:null,killer:"",outAt:null})),
         takeoverRequest:null,chat:[]
       };
@@ -22898,6 +22967,7 @@ document.addEventListener("visibilitychange",()=>{
     advancing=true;
     try{await changeLevel(1,true);}finally{advancing=false;}
   }
+
 
   function openElim(){
     if(!isOwner())return;
@@ -23028,6 +23098,7 @@ document.addEventListener("visibilitychange",()=>{
     if(!host)return;
     const players=(window.db?.players||[]).filter(p=>p.active!==false).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name),"fr"));
     host.innerHTML=players.map(p=>`<label class="bpt-live3-player-check"><input type="checkbox" value="${escapeAttr(p.name)}" checked> <span>${escapeHtml(p.name)}</span></label>`).join("");
+    setTimeout(renderStructurePreview,0);
   }
 
   function renderPlayers(target,fullscreen=false){
@@ -23112,6 +23183,12 @@ document.addEventListener("visibilitychange",()=>{
   function bind(){
     const today=new Date().toISOString().slice(0,10);
     if($3("live3Date"))$3("live3Date").value=today;
+    renderStructurePreview();
+    $3("live3TargetHours")?.addEventListener("input",renderStructurePreview);
+    $3("live3Stack")?.addEventListener("input",renderStructurePreview);
+    $3("live3PlayerPicker")?.addEventListener("change",e=>{
+      if(e.target?.matches('input[type="checkbox"]'))renderStructurePreview();
+    });
 
     $3("live3CreateBtn")?.addEventListener("click",createLive);
     $3("live3StartPauseBtn")?.addEventListener("click",toggleStartPause);
@@ -23119,6 +23196,7 @@ document.addEventListener("visibilitychange",()=>{
     $3("live3NextLevelBtn")?.addEventListener("click",()=>changeLevel(1));
     $3("live3MinusBtn")?.addEventListener("click",()=>adjustMinute(-60));
     $3("live3PlusBtn")?.addEventListener("click",()=>adjustMinute(60));
+
     $3("live3EliminateBtn")?.addEventListener("click",openElim);
     $3("live3EndBtn")?.addEventListener("click",endLive);
     $3("live3TakeoverBtn")?.addEventListener("click",requestTakeover);
