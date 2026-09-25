@@ -8048,7 +8048,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 2.7.30 — Classement / Parties / Profils / Dashboard */
+/* BPT 2.7.31 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8111,7 +8111,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.30 — Records / Impact / Courbes */
+/* BPT 2.7.31 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8137,7 +8137,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.30 — blocs repliables */
+/* BPT 2.7.31 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -11551,7 +11551,7 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs
 
 <style id="bpt-v2300-clean-fullscreen-refactor">
 /* ================================
-   BPT 2.7.30 — CLEAN FULLSCREEN REFACTOR
+   BPT 2.7.31 — CLEAN FULLSCREEN REFACTOR
    One final authoritative layout for fullscreen / mobile live.
    ================================ */
 
@@ -11929,6 +11929,150 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 }
 </style>
 
+
+<style id="bpt-v231-fullscreen-component">
+/* BPT 2.7.31 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
+#liveFullscreenDisplay,
+#liveFullscreenDisplay:fullscreen,
+#liveFullscreenDisplay:-webkit-full-screen,
+body.bpt-mobile-live-fullscreen #liveFullscreenDisplay{
+  box-sizing:border-box !important;
+  width:100% !important;
+  height:100vh !important;
+  min-height:0 !important;
+  margin:0 !important;
+  padding:0 !important;
+  overflow:hidden !important;
+  background:
+    radial-gradient(circle at 50% 20%,rgba(29,101,193,.13),transparent 35%),
+    linear-gradient(180deg,#051321 0%,#071929 52%,#04111c 100%) !important;
+  color:#fff !important;
+  position:relative !important;
+}
+#liveFullscreenDisplay::before,#liveFullscreenDisplay::after{
+  content:"♠";position:absolute;bottom:12vh;color:rgba(102,162,235,.07);font-size:23vw;line-height:1;pointer-events:none;
+}
+#liveFullscreenDisplay::before{left:-4vw;transform:rotate(-9deg)}
+#liveFullscreenDisplay::after{right:-4vw;transform:rotate(9deg)}
+#liveFullscreenDisplay .bptfs-hidden{display:none !important}
+#liveFullscreenDisplay .bptfs-shell{
+  position:relative !important;z-index:1 !important;
+  width:min(1540px,calc(100% - 48px)) !important;height:100% !important;margin:0 auto !important;
+  display:grid !important;
+  grid-template-areas:"header" "blinds" "timer" "kpis" "actions" "players" !important;
+  grid-template-rows:100px 158px minmax(220px,1fr) 84px 64px 132px !important;
+  row-gap:10px !important;
+  align-content:stretch !important;
+}
+#liveFullscreenDisplay .bptfs-header{grid-area:header !important;display:grid !important;grid-template-columns:1fr auto !important;align-items:center !important;gap:20px !important}
+#liveFullscreenDisplay .bptfs-brand{display:flex !important;align-items:center !important;gap:16px !important;justify-self:start !important}
+#liveFullscreenDisplay .bptfs-brand-big{font-size:78px !important;line-height:.8 !important;letter-spacing:-.07em !important;font-weight:1000 !important}
+#liveFullscreenDisplay .bptfs-brand-stack{text-transform:uppercase !important;font-size:17px !important;line-height:1.04 !important;letter-spacing:.13em !important;font-weight:900 !important}
+#liveFullscreenDisplay .bptfs-mobile-tools{display:none !important}
+#liveFullscreenDisplay .bptfs-remaining{justify-self:end !important;width:280px !important;min-height:88px !important;border:1px solid rgba(100,158,242,.18) !important;border-radius:20px !important;background:rgba(6,18,32,.72) !important;display:flex !important;flex-direction:column !important;justify-content:center !important;align-items:center !important;gap:8px !important;padding:10px 18px !important}
+#liveFullscreenDisplay .bptfs-card-label{font-size:12px !important;letter-spacing:.15em !important;text-transform:uppercase !important;font-weight:900 !important;color:#dcecff !important;text-align:center !important}
+#liveFullscreenDisplay .bptfs-remaining-value{font-size:54px !important;line-height:1 !important;font-weight:1000 !important;letter-spacing:-.04em !important}
+#liveFullscreenDisplay .live-fs-remaining-total{opacity:.62 !important}
+
+#liveFullscreenDisplay .bptfs-blinds{grid-area:blinds !important;justify-self:center !important;align-self:center !important;width:min(900px,74vw) !important;height:148px !important;border:1px solid rgba(100,158,242,.18) !important;border-radius:24px !important;background:rgba(6,18,32,.72) !important;display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:center !important;gap:10px !important;padding:14px 28px !important}
+#liveFullscreenDisplay .bptfs-blinds-value{font-size:112px !important;line-height:.88 !important;font-weight:1000 !important;letter-spacing:-.06em !important}
+#liveFullscreenDisplay .bptfs-blinds-value .sep{color:#1aafff !important;padding:0 .08em !important}
+
+#liveFullscreenDisplay .bptfs-timer{grid-area:timer !important;justify-self:center !important;align-self:center !important;width:min(900px,78vw) !important;display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:center !important;gap:8px !important}
+#liveFullscreenDisplay .bptfs-timer-value{font-size:158px !important;line-height:.88 !important;font-weight:1000 !important;letter-spacing:-.06em !important;color:#fff !important}
+#liveFullscreenDisplay .bptfs-timer-value.warning30{color:#f3d37a !important}
+#liveFullscreenDisplay .bptfs-timer-value.warning10{color:#ff8e8e !important}
+#liveFullscreenDisplay .bptfs-progress{width:100% !important;height:14px !important;border-radius:999px !important;background:rgba(139,165,198,.28) !important;overflow:hidden !important;margin-top:10px !important}
+#liveFullscreenDisplay .bptfs-progress-fill{height:100% !important;width:0;border-radius:999px !important;background:linear-gradient(90deg,#11b4ff,#2cc7ff) !important;transition:width .2s ease !important}
+
+#liveFullscreenDisplay .bptfs-kpis{grid-area:kpis !important;justify-self:center !important;align-self:center !important;width:min(760px,68vw) !important;display:grid !important;grid-template-columns:1fr 1fr !important;gap:14px !important}
+#liveFullscreenDisplay .bptfs-kpi{min-height:78px !important;border:1px solid rgba(100,158,242,.16) !important;border-radius:16px !important;background:rgba(6,18,32,.72) !important;display:flex !important;align-items:center !important;justify-content:center !important;gap:18px !important;padding:10px 18px !important}
+#liveFullscreenDisplay .bptfs-kpi-icon{font-size:38px !important}
+#liveFullscreenDisplay .bptfs-kpi span{display:block !important;font-size:11px !important;letter-spacing:.14em !important;text-transform:uppercase !important;font-weight:900 !important;color:#dcecff !important;margin-bottom:4px !important}
+#liveFullscreenDisplay .bptfs-kpi strong{display:block !important;font-size:32px !important;line-height:1 !important;font-weight:1000 !important}
+
+#liveFullscreenDisplay .bptfs-actions{grid-area:actions !important;justify-self:center !important;align-self:center !important;width:min(820px,72vw) !important;display:grid !important;grid-template-columns:1fr 1fr !important;gap:14px !important;position:static !important;transform:none !important;margin:0 !important;padding:0 !important;z-index:3 !important}
+#liveFullscreenDisplay .bptfs-action{width:100% !important;min-height:56px !important;border-radius:15px !important;border:1px solid rgba(125,175,255,.22) !important;color:#fff !important;font-size:20px !important;font-weight:950 !important;text-transform:uppercase !important;letter-spacing:.08em !important;position:static !important;transform:none !important;margin:0 !important}
+#liveFullscreenDisplay .bptfs-action.primary{background:linear-gradient(180deg,#13a8e3,#087eae) !important}
+#liveFullscreenDisplay .bptfs-action.danger{background:linear-gradient(180deg,#c32243,#981a35) !important}
+
+#liveFullscreenDisplay .bptfs-players{grid-area:players !important;align-self:end !important;width:100% !important;height:126px !important;border:1px solid rgba(100,158,242,.16) !important;border-radius:20px 20px 0 0 !important;background:rgba(5,17,30,.80) !important;padding:10px 16px 8px !important;display:flex !important;flex-direction:column !important;overflow:hidden !important;position:static !important;z-index:1 !important}
+#liveFullscreenDisplay .bptfs-players-title{font-size:11px !important;letter-spacing:.14em !important;text-transform:uppercase !important;font-weight:900 !important;color:#dcecff !important;margin-bottom:6px !important}
+#liveFullscreenDisplay .bptfs-player-list{flex:1 !important;display:flex !important;align-items:flex-end !important;justify-content:space-evenly !important;gap:10px !important;overflow-x:auto !important;overflow-y:hidden !important}
+#liveFullscreenDisplay .bptfs-player-list .live-fs-player-item{min-width:66px !important;max-width:88px !important;display:flex !important;flex-direction:column !important;align-items:center !important;gap:4px !important;text-align:center !important;flex:0 0 auto !important}
+#liveFullscreenDisplay .bptfs-player-list .live-fs-player-avatar{width:54px !important;height:54px !important;margin:0 !important;display:flex !important;align-items:center !important;justify-content:center !important}
+#liveFullscreenDisplay .bptfs-player-list .live-fs-player-avatar.has-image{overflow:visible !important;border:0 !important;background:transparent !important;box-shadow:none !important;border-radius:0 !important}
+#liveFullscreenDisplay .bptfs-player-list .live-fs-player-avatar.has-image img{width:100% !important;height:100% !important;object-fit:contain !important;object-position:center !important}
+#liveFullscreenDisplay .bptfs-player-list .live-fs-player-avatar:not(.has-image){border:2px solid rgba(255,184,99,.68) !important;border-radius:999px !important;background:#10243d !important}
+#liveFullscreenDisplay .bptfs-player-list .live-fs-player-name{font-size:11px !important;line-height:1 !important;padding:4px 8px !important;border-radius:999px !important;border:1px solid rgba(136,173,226,.24) !important;background:rgba(8,20,35,.60) !important;color:#fff !important;max-width:88px !important;white-space:nowrap !important;overflow:hidden !important;text-overflow:ellipsis !important}
+
+/* Desktop native fullscreen: browser provides Escape/X; hide our mobile tools. */
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:fullscreen .bptfs-mobile-tools,
+html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .bptfs-mobile-tools{display:none !important}
+
+/* -------- Mobile shared -------- */
+body.bpt-mobile-device.bpt-mobile-live-fullscreen #liveFullscreenDisplay{height:100dvh !important}
+body.bpt-mobile-device.bpt-mobile-live-fullscreen #liveFullscreenDisplay::before,
+body.bpt-mobile-device.bpt-mobile-live-fullscreen #liveFullscreenDisplay::after{display:none !important}
+body.bpt-mobile-device.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-players{display:none !important}
+body.bpt-mobile-device.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-mobile-tools{display:flex !important;gap:6px !important;justify-self:end !important}
+body.bpt-mobile-device.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-tool-btn{width:38px !important;height:38px !important;border-radius:10px !important;border:1px solid rgba(120,168,255,.22) !important;background:#0b2035 !important;color:#fff !important;font-size:22px !important;font-weight:900 !important;padding:0 !important}
+
+/* Portrait */
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-shell{
+  width:100% !important;height:100% !important;padding:10px !important;
+  grid-template-areas:"header" "blinds" "timer" "kpis" "actions" !important;
+  grid-template-rows:60px 110px minmax(180px,1fr) 76px 58px !important;row-gap:9px !important;
+}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-header{grid-template-columns:1fr auto auto !important;gap:7px !important}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-brand-big{font-size:42px !important}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-brand-stack{font-size:9px !important}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-remaining{width:108px !important;min-height:54px !important;padding:5px 7px !important;border-radius:13px !important}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-remaining .bptfs-card-label{font-size:8px !important;letter-spacing:.06em !important}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-remaining-value{font-size:26px !important}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-blinds{width:100% !important;height:110px !important;border-radius:17px !important;padding:8px !important}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-blinds-value{font-size:58px !important}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-card-label{font-size:9px !important}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-timer{width:100% !important}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-timer-value{font-size:min(30vw,120px) !important}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-progress{height:9px !important;width:92% !important}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-kpis{width:100% !important;grid-template-columns:1fr 1fr !important;gap:7px !important}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-kpi{min-height:72px !important;padding:7px !important;gap:7px !important}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-kpi-icon{font-size:24px !important}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-kpi span{font-size:8px !important}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-kpi strong{font-size:21px !important}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-actions{width:100% !important;grid-template-columns:1fr 1fr !important;gap:7px !important}
+body.bpt-mobile-device.bpt-mobile-portrait.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-action{min-height:50px !important;font-size:12px !important;letter-spacing:.03em !important}
+
+/* Landscape */
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-shell{
+  width:100% !important;height:100% !important;padding:8px 10px !important;
+  grid-template-areas:"header header" "blinds timer" "kpis timer" "actions actions" !important;
+  grid-template-columns:42% 58% !important;
+  grid-template-rows:56px 104px minmax(70px,1fr) 52px !important;
+  gap:7px 10px !important;
+}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-header{grid-template-columns:1fr auto auto !important;gap:8px !important}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-brand-big{font-size:40px !important}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-brand-stack{font-size:8px !important}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-remaining{width:120px !important;min-height:48px !important;padding:4px 7px !important;border-radius:12px !important}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-remaining .bptfs-card-label{font-size:7px !important}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-remaining-value{font-size:24px !important}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-blinds{width:100% !important;height:100% !important;border-radius:15px !important;padding:6px !important}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-blinds-value{font-size:48px !important}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-card-label{font-size:8px !important}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-timer{width:100% !important;height:100% !important;align-self:center !important}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-timer-value{font-size:min(18vw,92px) !important}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-progress{height:7px !important;width:90% !important}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-kpis{width:100% !important;grid-template-columns:1fr !important;gap:5px !important;align-self:start !important}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-kpi{min-height:46px !important;padding:5px 8px !important;gap:7px !important}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-kpi-icon{font-size:20px !important}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-kpi span{font-size:7px !important;margin-bottom:1px !important}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-kpi strong{font-size:18px !important}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-actions{width:100% !important;grid-template-columns:1fr 1fr !important;gap:8px !important}
+body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-action{min-height:46px !important;font-size:12px !important;letter-spacing:.02em !important}
+</style>
+
 </head>
 <body>
 <script>
@@ -11955,7 +12099,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="2.7.30";
+const BPT_APP_VERSION="2.7.31";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -12208,59 +12352,56 @@ function simplifyRecordTextForMobile(text){
 
 
       <div id="liveFullscreenDisplay" class="live-fullscreen-display" aria-label="Affichage plein écran du Live">
-        <div class="live-fs-frame">
-          <div class="live-fullscreen-brand">
-            <div class="live-fs-brand-big">BPT</div>
-            <div class="live-fs-brand-stack">Boucherie<br>Poker<br>Tour</div>
-          </div>
-          <div class="live-fs-exit-floating">
-            <button id="liveFsChatBtn" class="live-fullscreen-exit live-chat-open-btn live-admin-only" type="button">💬 Chat</button>
-            <button id="liveFullscreenExitBtn" class="live-fullscreen-exit" type="button">Quitter le plein écran</button>
-          </div>
-
-          <button class="live-fullscreen-level live-fs-level-clickable live-fs-hidden-meta" id="liveFsLevel" type="button" title="Voir la structure">NIVEAU 1</button>
-          <div class="live-fullscreen-ante live-fs-hidden-meta" id="liveFsAnte">Ante —</div>
-
-          <div class="live-fs-top-row">
-            <div></div>
-            <div class="live-fs-card live-fs-blinds-card">
-              <div class="live-fs-blinds-title"><div class="live-fs-blinds-icon">🪙</div><div class="live-fs-card-label">Blindes</div></div>
-              <div class="live-fs-blinds-value" id="liveFsBlinds">— / —</div>
+        <div class="bptfs-shell">
+          <div class="bptfs-header">
+            <div class="bptfs-brand" aria-label="Boucherie Poker Tour">
+              <div class="bptfs-brand-big">BPT</div>
+              <div class="bptfs-brand-stack">Boucherie<br>Poker<br>Tour</div>
             </div>
-            <div class="live-fs-card live-fs-remaining-card">
-              <div class="live-fs-remaining-head"><div class="live-fs-remaining-icon">👥</div><div class="live-fs-card-label">Joueurs restants</div></div>
-              <div class="live-fs-remaining-value" id="liveFsRemainingDisplay">—</div>
+            <div class="bptfs-mobile-tools">
+              <button id="liveFsChatBtn" class="bptfs-tool-btn live-chat-open-btn live-admin-only" type="button">💬</button>
+              <button id="liveFullscreenExitBtn" class="bptfs-tool-btn" type="button" aria-label="Quitter le plein écran">×</button>
+            </div>
+            <div class="bptfs-remaining">
+              <div class="bptfs-card-label">👥 Joueurs restants</div>
+              <div id="liveFsRemainingDisplay" class="bptfs-remaining-value">—</div>
             </div>
           </div>
 
-          <div class="live-fs-timer-zone">
-            <div class="live-fs-timer-label">Temps restant</div>
-            <div class="live-fullscreen-timer" id="liveFsTimer">00:00</div>
-            <div class="live-fs-progress"><div id="liveFsProgressFill" class="live-fs-progress-fill"></div></div>
-          </div>
+          <button id="liveFsLevel" class="bptfs-hidden live-fs-level-clickable" type="button" title="Voir la structure">NIVEAU 1</button>
+          <div id="liveFsAnte" class="bptfs-hidden">Ante —</div>
 
-          <div class="live-fullscreen-kpis">
-            <div class="live-fs-stat-card live-fullscreen-kpi live-fullscreen-kpi-stack">
-              <div class="live-fs-stat-icon">🪙</div>
-              <div class="live-fs-stat-content"><span>Stack moyen</span><strong id="liveFsAvgStack">—</strong></div>
-            </div>
-            <div class="live-fs-stat-card live-fullscreen-kpi">
-              <div class="live-fs-stat-icon">⏱️</div>
-              <div class="live-fs-stat-content"><span>Durée écoulée</span><strong id="liveFsElapsed">00:00:00</strong></div>
-            </div>
-          </div>
+          <section class="bptfs-blinds" aria-label="Blindes en cours">
+            <div class="bptfs-card-label">🪙 Blindes</div>
+            <div id="liveFsBlinds" class="bptfs-blinds-value">— / —</div>
+          </section>
 
-          <div class="live-fs-bottom-dock live-admin-only">
-            <div class="live-mobile-main-controls">
-              <button id="liveFsPauseResumeBtn" class="live-fs-dock-btn primary" type="button">Démarrer</button>
-              <button id="liveFsEliminateOpenBtn" class="live-fs-dock-btn danger" type="button">Sortir un joueur</button>
-            </div>
-          </div>
+          <section class="bptfs-timer" aria-label="Temps restant">
+            <div class="bptfs-card-label">Temps restant</div>
+            <div id="liveFsTimer" class="bptfs-timer-value">00:00</div>
+            <div class="bptfs-progress"><div id="liveFsProgressFill" class="bptfs-progress-fill"></div></div>
+          </section>
 
-          <div class="live-fs-players-wrap">
-            <div class="live-fs-players-title">Joueurs à la table</div>
-            <div id="liveFsPlayers" class="live-fs-players"></div>
-          </div>
+          <section class="bptfs-kpis">
+            <div class="bptfs-kpi">
+              <div class="bptfs-kpi-icon">🪙</div>
+              <div><span>Stack moyen</span><strong id="liveFsAvgStack">—</strong></div>
+            </div>
+            <div class="bptfs-kpi">
+              <div class="bptfs-kpi-icon">⏱️</div>
+              <div><span>Durée écoulée</span><strong id="liveFsElapsed">00:00:00</strong></div>
+            </div>
+          </section>
+
+          <section class="bptfs-actions live-admin-only">
+            <button id="liveFsPauseResumeBtn" class="bptfs-action primary" type="button">Démarrer</button>
+            <button id="liveFsEliminateOpenBtn" class="bptfs-action danger" type="button">Sortir un joueur</button>
+          </section>
+
+          <section class="bptfs-players">
+            <div class="bptfs-players-title">Joueurs à la table</div>
+            <div id="liveFsPlayers" class="bptfs-player-list"></div>
+          </section>
         </div>
 
         <div id="liveFsDurationPopup" class="live-fs-duration-popup live-admin-only" style="display:none">
@@ -12947,7 +13088,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 2.7.30</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 2.7.31</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -13163,7 +13304,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.30 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 2.7.31 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -13429,7 +13570,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.30 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.31 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -13803,7 +13944,7 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.7.30 : aucune image Base64 dans bpt_state. Les photos de parties
+    // BPT 2.7.31 : aucune image Base64 dans bpt_state. Les photos de parties
     // sont stockées dans Firebase ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
@@ -14551,7 +14692,7 @@ async function cloudPoll(){
 
 let liveAutoOpenDone=false;
 async function autoOpenActiveLiveOnStartup(){
-  // BPT 2.7.30 : plus d'ouverture automatique du Live au démarrage.
+  // BPT 2.7.31 : plus d'ouverture automatique du Live au démarrage.
   // L'application s'ouvre toujours sur Accueil ; le Live actif est indiqué sur l'onglet Live.
   liveAutoOpenDone=true;
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -16781,7 +16922,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.30 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 2.7.31 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -21337,7 +21478,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 2.7.30 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 2.7.31 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -22002,7 +22143,7 @@ liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 (async()=>{
   await initCloudSync();
-  // BPT 2.7.30 : l'ouverture par défaut est toujours Accueil.
+  // BPT 2.7.31 : l'ouverture par défaut est toujours Accueil.
   spectatorAutoOpenSuppressed=true;
   document.body.classList.remove("spectator-live-open");
   await showView("dashboard");
