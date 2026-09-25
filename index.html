@@ -8048,7 +8048,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 2.7.34 — Classement / Parties / Profils / Dashboard */
+/* BPT 2.7.37 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8111,7 +8111,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.34 — Records / Impact / Courbes */
+/* BPT 2.7.37 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8137,7 +8137,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.34 — blocs repliables */
+/* BPT 2.7.37 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -11551,7 +11551,7 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs
 
 <style id="bpt-v2300-clean-fullscreen-refactor">
 /* ================================
-   BPT 2.7.34 — CLEAN FULLSCREEN REFACTOR
+   BPT 2.7.37 — CLEAN FULLSCREEN REFACTOR
    One final authoritative layout for fullscreen / mobile live.
    ================================ */
 
@@ -11931,7 +11931,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 
 
 <style id="bpt-v231-fullscreen-component">
-/* BPT 2.7.34 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
+/* BPT 2.7.37 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
 #liveFullscreenDisplay,
 #liveFullscreenDisplay:fullscreen,
 #liveFullscreenDisplay:-webkit-full-screen,
@@ -12072,7 +12072,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-actions{width:100% !important;grid-template-columns:1fr 1fr !important;gap:8px !important}
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-action{min-height:46px !important;font-size:12px !important;letter-spacing:.02em !important}
 
-/* BPT 2.7.34 — direct mobile fullscreen classes on the target itself */
+/* BPT 2.7.37 — direct mobile fullscreen classes on the target itself */
 #liveFullscreenDisplay.bptfs-mobile{height:100dvh !important;}
 #liveFullscreenDisplay.bptfs-mobile::before,
 #liveFullscreenDisplay.bptfs-mobile::after{display:none !important;}
@@ -12175,6 +12175,169 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 #liveFullscreenDisplay.bptfs-mobile .bptfs-chat-icon{font-size:19px !important;}
 </style>
 
+
+<style id="bpt-v236-mobile-light-single">
+/* BPT 2.7.37 — mobile fullscreen unique, light and orientation-agnostic */
+#liveFullscreenDisplay.bptfs-mobile{
+  height:100dvh !important;
+  width:100vw !important;
+  padding:8px !important;
+  overflow:hidden !important;
+}
+#liveFullscreenDisplay.bptfs-mobile::before,
+#liveFullscreenDisplay.bptfs-mobile::after{display:none !important;}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-shell{
+  width:100% !important;
+  height:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+  display:grid !important;
+  grid-template-areas:
+    "header"
+    "blinds"
+    "timer"
+    "kpis"
+    "actions" !important;
+  grid-template-columns:1fr !important;
+  grid-template-rows:52px 92px minmax(150px,1fr) 68px 50px !important;
+  gap:7px !important;
+}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-header{
+  grid-area:header !important;
+  display:grid !important;
+  grid-template-columns:1fr auto 1fr !important;
+  gap:6px !important;
+  align-items:center !important;
+}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-brand{gap:8px !important;}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-brand-big{font-size:36px !important;}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-brand-stack{font-size:8px !important;line-height:1 !important;padding-top:2px !important;}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-chat-btn{
+  min-width:40px !important;
+  min-height:36px !important;
+  padding:0 8px !important;
+}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-chat-label{display:none !important;}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-remaining{
+  width:102px !important;
+  min-height:46px !important;
+  padding:4px 6px !important;
+  border-radius:12px !important;
+}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-remaining .bptfs-card-label{font-size:7px !important;letter-spacing:.04em !important;}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-remaining-value{font-size:24px !important;}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-mobile-tools{
+  position:fixed !important;right:6px !important;top:6px !important;display:flex !important;z-index:20 !important;
+}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-tool-btn{width:34px !important;height:34px !important;font-size:20px !important;}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-blinds{
+  grid-area:blinds !important;
+  width:100% !important;
+  height:92px !important;
+  padding:6px 10px !important;
+  border-radius:15px !important;
+  gap:4px !important;
+}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-card-label{font-size:8px !important;}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-blinds-value{font-size:50px !important;}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-timer{
+  grid-area:timer !important;
+  width:100% !important;
+  align-self:center !important;
+  justify-self:center !important;
+  gap:6px !important;
+}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-timer-value{
+  font-size:clamp(72px,23vw,118px) !important;
+  line-height:.9 !important;
+}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-progress{width:92% !important;height:8px !important;margin-top:4px !important;}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-kpis{
+  grid-area:kpis !important;
+  width:100% !important;
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:6px !important;
+}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-kpi{min-height:64px !important;padding:5px 8px !important;gap:6px !important;}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-kpi-icon{font-size:20px !important;}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-kpi span{font-size:7px !important;margin-bottom:1px !important;}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-kpi strong{font-size:19px !important;}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-actions{
+  grid-area:actions !important;
+  width:100% !important;
+  display:grid !important;
+  grid-template-columns:1fr 1fr !important;
+  gap:6px !important;
+}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-action{
+  min-height:46px !important;
+  font-size:11px !important;
+  letter-spacing:.02em !important;
+  padding:0 8px !important;
+}
+#liveFullscreenDisplay.bptfs-mobile .bptfs-players{display:none !important;}
+</style>
+
+
+<style id="bpt-v237-mobile-overlay">
+/* Mobile fullscreen is a simple fixed overlay; no orientation-specific layout. */
+#liveFullscreenDisplay.bptfs-mobile{display:none !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open{
+  display:block !important;
+  position:fixed !important;
+  inset:0 !important;
+  z-index:2147483000 !important;
+  width:100vw !important;
+  height:100dvh !important;
+  min-height:100dvh !important;
+  overflow:hidden !important;
+  padding:8px !important;
+  margin:0 !important;
+}
+body.bpt-mobile-live-fullscreen{overflow:hidden !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-shell{
+  width:100% !important;
+  height:100% !important;
+  padding:6px !important;
+  margin:0 !important;
+  display:grid !important;
+  grid-template-areas:"header" "blinds" "timer" "kpis" "actions" !important;
+  grid-template-rows:58px 96px minmax(150px,1fr) 70px 52px !important;
+  gap:7px !important;
+}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-header{
+  grid-area:header !important;
+  display:grid !important;
+  grid-template-columns:1fr auto 1fr !important;
+  align-items:center !important;
+  gap:6px !important;
+}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-brand-big{font-size:38px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-brand-stack{font-size:8px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-chat-btn{min-width:42px !important;min-height:36px !important;padding:0 8px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-chat-label{display:none !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-remaining{width:98px !important;min-height:46px !important;padding:4px 6px !important;border-radius:12px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-remaining .bptfs-card-label{font-size:7px !important;letter-spacing:.04em !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-remaining-value{font-size:24px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-mobile-tools{display:flex !important;position:absolute !important;right:7px !important;top:7px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-tool-btn{width:32px !important;height:32px !important;font-size:20px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-blinds{grid-area:blinds !important;width:100% !important;height:96px !important;padding:6px !important;border-radius:15px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-blinds-value{font-size:52px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-card-label{font-size:8px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-timer{grid-area:timer !important;width:100% !important;height:100% !important;align-self:center !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-timer-value{font-size:min(27vw,105px) !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-progress{width:90% !important;height:8px !important;margin-top:6px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-kpis{grid-area:kpis !important;width:100% !important;grid-template-columns:1fr 1fr !important;gap:6px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-kpi{min-height:66px !important;padding:6px 8px !important;gap:7px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-kpi-icon{font-size:21px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-kpi span{font-size:7px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-kpi strong{font-size:19px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-actions{grid-area:actions !important;width:100% !important;grid-template-columns:1fr 1fr !important;gap:6px !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-action{min-height:46px !important;font-size:11px !important;letter-spacing:.02em !important;}
+#liveFullscreenDisplay.bptfs-mobile.bptfs-mobile-open .bptfs-players{display:none !important;}
+</style>
+
 </head>
 <body>
 <script>
@@ -12201,7 +12364,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="2.7.34";
+const BPT_APP_VERSION="2.7.37";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -13193,7 +13356,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 2.7.34</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 2.7.37</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -13409,7 +13572,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.34 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 2.7.37 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -13675,7 +13838,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.34 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.37 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -14049,7 +14212,7 @@ function cloudBuildLeanPayload(){
     playerAliases:clone(db?.playerAliases||{}),
     playerNicknames:clone(db?.playerNicknames||{}),
     liveState:s?clone(s):null,
-    // BPT 2.7.34 : aucune image Base64 dans bpt_state. Les photos de parties
+    // BPT 2.7.37 : aucune image Base64 dans bpt_state. Les photos de parties
     // sont stockées dans Firebase ; leur URL est déterministe.
     gamePhotos:{},
     playerPhotos:{}
@@ -14797,7 +14960,7 @@ async function cloudPoll(){
 
 let liveAutoOpenDone=false;
 async function autoOpenActiveLiveOnStartup(){
-  // BPT 2.7.34 : plus d'ouverture automatique du Live au démarrage.
+  // BPT 2.7.37 : plus d'ouverture automatique du Live au démarrage.
   // L'application s'ouvre toujours sur Accueil ; le Live actif est indiqué sur l'onglet Live.
   liveAutoOpenDone=true;
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -16382,64 +16545,39 @@ function syncLiveFullscreenModeClasses(){
   const target=$("liveFullscreenDisplay");
   if(!target)return;
   const mobile=isBptMobileDevice();
-  const vv=window.visualViewport;
-  const w=(vv && vv.width) || window.innerWidth || document.documentElement.clientWidth;
-  const h=(vv && vv.height) || window.innerHeight || document.documentElement.clientHeight;
-  const portrait=h>=w;
   target.classList.toggle("bptfs-mobile", !!mobile);
-  target.classList.toggle("bptfs-mobile-portrait", !!(mobile && portrait));
-  target.classList.toggle("bptfs-mobile-landscape", !!(mobile && !portrait));
+  target.classList.remove("bptfs-mobile-portrait","bptfs-mobile-landscape");
 }
-window.addEventListener("resize",syncLiveFullscreenModeClasses,{passive:true});
-window.addEventListener("orientationchange",syncLiveFullscreenModeClasses,{passive:true});
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)syncLiveFullscreenModeClasses();});
+let bptMobileFsClassTimer=null;
+function scheduleLiveFullscreenModeSync(){
+  clearTimeout(bptMobileFsClassTimer);
+  bptMobileFsClassTimer=setTimeout(syncLiveFullscreenModeClasses,120);
+}
+window.addEventListener("resize",scheduleLiveFullscreenModeSync,{passive:true});
+window.addEventListener("orientationchange",scheduleLiveFullscreenModeSync,{passive:true});
 
 let bptMobileFullscreenTransition=false;
-let bptMobileFullscreenRenderTimer=null;
-function scheduleMobileFullscreenRender(delay=180){
-  if(bptMobileFullscreenRenderTimer)clearTimeout(bptMobileFullscreenRenderTimer);
-  bptMobileFullscreenRenderTimer=setTimeout(()=>{
-    bptMobileFullscreenRenderTimer=null;
-    syncLiveFullscreenModeClasses();
-    liveRenderFullscreen();
-    bptMobileFullscreenTransition=false;
-  },delay);
-}
 
 async function toggleLiveFullscreen(){
   const target=$("liveFullscreenDisplay");
   if(!target)return;
   syncLiveFullscreenModeClasses();
 
-  // Téléphone : transition applicative allégée et verrouillée.
+  // Téléphone : overlay fixe ultra-léger, sans reparenting DOM ni temporisation.
   if(isBptMobileDevice()){
-    if(bptMobileFullscreenTransition)return;
-    bptMobileFullscreenTransition=true;
-
-    const opening=!document.body.classList.contains("bpt-mobile-live-fullscreen");
+    const opening=!target.classList.contains("bptfs-mobile-open");
+    target.classList.toggle("bptfs-mobile-open",opening);
     document.body.classList.toggle("bpt-mobile-live-fullscreen",opening);
     target.setAttribute("aria-hidden",opening?"false":"true");
     if($("liveFullscreenBtn"))$("liveFullscreenBtn").textContent=opening?"Quitter plein écran":"Plein écran";
-
-    const handover=$("globalHandoverRequest");
     if(opening){
-      if(handover && handover.parentElement!==target)target.appendChild(handover);
-      bindMobileHandoverControls();
-      syncLiveFullscreenModeClasses();
-      window.scrollTo({top:0,left:0,behavior:"auto"});
-      scheduleMobileFullscreenRender(180);
-    }else{
-      if(handover && handover.parentElement!==document.body)document.body.appendChild(handover);
-      if(bptMobileFullscreenRenderTimer){clearTimeout(bptMobileFullscreenRenderTimer);bptMobileFullscreenRenderTimer=null;}
-      setTimeout(()=>{
-        syncLiveFullscreenModeClasses();
-        bptMobileFullscreenTransition=false;
-      },120);
+      liveRenderFullscreen();
+      liveRenderFullscreenTickOnly();
     }
     return;
   }
 
-  // PC : comportement plein écran navigateur conservé.
+  // PC : plein écran navigateur natif.
   try{
     if(document.fullscreenElement){
       await document.exitFullscreen?.();
@@ -16618,6 +16756,42 @@ async function liveFsEliminate(){
 }
 
 // Sortir un joueur reste disponible indépendamment de la pause/reprise du chrono.
+let bptFullscreenPlayersSignature="";
+
+function liveRenderFullscreenTickOnly(){
+  const s=ensureLiveState();
+  if(!s?.prepared)return;
+
+  const level=s.levels?.[s.levelIndex];
+  if(!level)return;
+
+  const levelSeconds=Math.max(1,Number(level.durationMin||0)*60);
+  const progress=Math.max(0,Math.min(100,((levelSeconds-Number(s.remainingSeconds||0))/levelSeconds)*100));
+
+  const timer=$("liveFsTimer");
+  if(timer){
+    const value=liveTime(s.remainingSeconds);
+    if(timer.textContent!==value)timer.textContent=value;
+    timer.classList.toggle("warning30",s.remainingSeconds<=30 && s.remainingSeconds>10);
+    timer.classList.toggle("warning10",s.remainingSeconds<=10);
+  }
+
+  const elapsed=$("liveFsElapsed");
+  if(elapsed){
+    const value=liveTime(liveElapsedSeconds(s));
+    if(elapsed.textContent!==value)elapsed.textContent=value;
+  }
+
+  const fill=$("liveFsProgressFill");
+  if(fill)fill.style.width=`${progress}%`;
+
+  const pause=$("liveFsPauseResumeBtn");
+  if(pause){
+    const label=s.running ? "Pause" : (s.startedAt ? "Reprendre" : "Démarrer");
+    if(pause.textContent!==label)pause.textContent=label;
+  }
+}
+
 function liveRenderFullscreen(){
   syncLiveFullscreenModeClasses();
   const s=ensureLiveState();
@@ -16648,17 +16822,27 @@ function liveRenderFullscreen(){
   if($("liveFsProgressFill"))$("liveFsProgressFill").style.width=`${progress}%`;
 
   if($("liveFsPlayers")){
-    $("liveFsPlayers").innerHTML=displayPlayers.length
-      ? displayPlayers.map(p=>{
-          const real=String(p?.name||"").trim();
-          const shortName=liveShortPlayerName(real);
-          const avatarId=playerAvatarId(real);
-          const avatarHtml=avatarId
-            ? `<img src="${playerAvatarDataUrl(avatarId)}" alt="Avatar de ${esc(shortName)}">`
-            : `<div class="live-fs-player-fallback">${esc(livePlayerInitials(real))}</div>`;
-          return `<div class="live-fs-player-item"><div class="live-fs-player-avatar ${avatarId?"has-image":""}">${avatarHtml}</div><div class="live-fs-player-name" title="${esc(real)}">${esc(shortName)}</div></div>`;
-        }).join("")
-      : `<div class="muted">Aucun joueur affiché.</div>`;
+    if(isBptMobileDevice()){
+      // Les avatars sont masqués sur mobile : ne pas générer les images Base64.
+      if($("liveFsPlayers").innerHTML!=="")$("liveFsPlayers").innerHTML="";
+      bptFullscreenPlayersSignature="";
+    }else{
+      const signature=displayPlayers.map(p=>`${String(p?.name||"")}:${playerAvatarId(String(p?.name||""))}`).join("|");
+      if(signature!==bptFullscreenPlayersSignature){
+        bptFullscreenPlayersSignature=signature;
+        $("liveFsPlayers").innerHTML=displayPlayers.length
+          ? displayPlayers.map(p=>{
+              const real=String(p?.name||"").trim();
+              const shortName=liveShortPlayerName(real);
+              const avatarId=playerAvatarId(real);
+              const avatarHtml=avatarId
+                ? `<img src="${playerAvatarDataUrl(avatarId)}" alt="Avatar de ${esc(shortName)}">`
+                : `<div class="live-fs-player-fallback">${esc(livePlayerInitials(real))}</div>`;
+              return `<div class="live-fs-player-item"><div class="live-fs-player-avatar ${avatarId?"has-image":""}">${avatarHtml}</div><div class="live-fs-player-name" title="${esc(real)}">${esc(shortName)}</div></div>`;
+            }).join("")
+          : `<div class="muted">Aucun joueur affiché.</div>`;
+      }
+    }
   }
 
   if($("liveFsPauseResumeBtn")){
@@ -17068,7 +17252,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.34 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 2.7.37 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -20284,7 +20468,7 @@ function liveRunTicker(){
       if(s.remainingSeconds<=0)liveChangeLevel(1,true);
     }
     liveRenderTimerOnly();
-  },isBptMobileDevice()?500:250);
+  },isBptMobileDevice()?1000:250);
 }
 
 
@@ -20414,7 +20598,9 @@ function liveRenderTimerOnly(){
   }
   updateLiveTimerUrgency();
   const liveFs=$("liveFullscreenDisplay");
-  if(document.fullscreenElement===liveFs || (liveFs && getComputedStyle(liveFs).display!=="none"))liveRenderFullscreen();
+  if(document.fullscreenElement===liveFs || (liveFs && getComputedStyle(liveFs).display!=="none")){
+    liveRenderFullscreenTickOnly();
+  }
 }
 function liveRefreshElimLists(resetKiller=false){
   const s=ensureLiveState();
@@ -21659,7 +21845,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 2.7.34 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 2.7.37 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -22322,7 +22508,7 @@ liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 (async()=>{
   await initCloudSync();
-  // BPT 2.7.34 : l'ouverture par défaut est toujours Accueil.
+  // BPT 2.7.37 : l'ouverture par défaut est toujours Accueil.
   spectatorAutoOpenSuppressed=true;
   document.body.classList.remove("spectator-live-open");
   await showView("dashboard");
@@ -22801,25 +22987,6 @@ document.addEventListener("visibilitychange",()=>{
 })();
 </script>
 
-
-<script id="bpt-v234-mobile-transition-stability">
-(function(){
-  let t=null;
-  function stable(){
-    if(!isBptMobileDevice())return;
-    if(t)clearTimeout(t);
-    t=setTimeout(()=>{
-      syncLiveFullscreenModeClasses();
-      if(document.body.classList.contains("bpt-mobile-live-fullscreen") && !bptMobileFullscreenTransition){
-        liveRenderTimerOnly();
-      }
-    },220);
-  }
-  window.addEventListener("resize",stable,{passive:true});
-  window.addEventListener("orientationchange",stable,{passive:true});
-  if(window.visualViewport)window.visualViewport.addEventListener("resize",stable,{passive:true});
-})();
-</script>
 
 </body>
 </html>
