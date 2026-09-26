@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V3.82 SIMPLIFIED CONNECTION HISTORY
+BPT LIVE V3.83 PWA
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -8052,7 +8052,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 3.82 — Classement / Parties / Profils / Dashboard */
+/* BPT 3.83 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8115,7 +8115,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 3.82 — Records / Impact / Courbes */
+/* BPT 3.83 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8141,7 +8141,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 3.82 — blocs repliables */
+/* BPT 3.83 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -8185,7 +8185,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.82 — sélecteur joueurs mobile : noms toujours visibles ===== */
+/* ===== BPT 3.83 — sélecteur joueurs mobile : noms toujours visibles ===== */
 @media (max-width:700px){
   #live3MobilePlayerModal .bpt-live3-mobile-player-grid{
     grid-template-columns:1fr 1fr !important;
@@ -8255,7 +8255,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.82 — présence globale application ===== */
+/* ===== BPT 3.83 — présence globale application ===== */
 .bpt-header{position:relative}
 .bpt-online-presence{
   position:absolute;
@@ -8313,7 +8313,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.82 — sélecteur mobile joueurs lisible en 2 colonnes ===== */
+/* ===== BPT 3.83 — sélecteur mobile joueurs lisible en 2 colonnes ===== */
 #live3MobilePlayerGrid{
   display:grid !important;
   grid-template-columns:repeat(2, minmax(0,1fr)) !important;
@@ -8382,7 +8382,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 
 
 
-/* ===== BPT 3.82 — photo mobile simple ===== */
+/* ===== BPT 3.83 — photo mobile simple ===== */
 @media(max-width:700px){
   #latestgame .game-photo-actions{
     display:flex;
@@ -8405,7 +8405,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.82 — commandes photo discrètes ===== */
+/* ===== BPT 3.83 — commandes photo discrètes ===== */
 
 
 #latestgame .game-photo-actions{
@@ -8454,7 +8454,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.82 — commandes photo discrètes PC + mobile ===== */
+/* ===== BPT 3.83 — commandes photo discrètes PC + mobile ===== */
 
 
 #latestgame .game-photo-actions{
@@ -11868,7 +11868,7 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs
 
 <style id="bpt-v2300-clean-fullscreen-refactor">
 /* ================================
-   BPT 3.82 — CLEAN FULLSCREEN REFACTOR
+   BPT 3.83 — CLEAN FULLSCREEN REFACTOR
    One final authoritative layout for fullscreen / mobile live.
    ================================ */
 
@@ -12248,7 +12248,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 
 
 <style id="bpt-v231-fullscreen-component">
-/* BPT 3.82 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
+/* BPT 3.83 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
 #liveFullscreenDisplay,
 #liveFullscreenDisplay:fullscreen,
 #liveFullscreenDisplay:-webkit-full-screen,
@@ -12389,7 +12389,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-actions{width:100% !important;grid-template-columns:1fr 1fr !important;gap:8px !important}
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-action{min-height:46px !important;font-size:12px !important;letter-spacing:.02em !important}
 
-/* BPT 3.82 — direct mobile fullscreen classes on the target itself */
+/* BPT 3.83 — direct mobile fullscreen classes on the target itself */
 #liveFullscreenDisplay.bptfs-mobile{height:100dvh !important;}
 #liveFullscreenDisplay.bptfs-mobile::before,
 #liveFullscreenDisplay.bptfs-mobile::after{display:none !important;}
@@ -14654,6 +14654,14 @@ body:has(#live3Fullscreen.open){
 }
 </style>
 
+
+<link rel="manifest" href="./manifest.webmanifest">
+<meta name="theme-color" content="#0f171d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BPT">
+<link rel="apple-touch-icon" href="./icon-192.png">
+
 </head>
 <body>
 <script>
@@ -14680,7 +14688,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="3.82";
+const BPT_APP_VERSION="3.83";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -15960,7 +15968,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 3.82</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 3.83</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -16227,7 +16235,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 3.82 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 3.83 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -17653,7 +17661,7 @@ async function cloudPoll(){
 
 let liveAutoOpenDone=false;
 async function autoOpenActiveLiveOnStartup(){
-  // BPT 3.82 : plus d'ouverture automatique du Live au démarrage.
+  // BPT 3.83 : plus d'ouverture automatique du Live au démarrage.
   // L'application s'ouvre toujours sur Accueil ; le Live actif est indiqué sur l'onglet Live.
   liveAutoOpenDone=true;
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -20117,7 +20125,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 3.82 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 3.83 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -24503,7 +24511,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 3.82 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 3.83 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -25166,7 +25174,7 @@ liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 (async()=>{
   await initCloudSync();
-  // BPT 3.82 : l'ouverture par défaut est toujours Accueil.
+  // BPT 3.83 : l'ouverture par défaut est toujours Accueil.
   spectatorAutoOpenSuppressed=true;
   document.body.classList.remove("spectator-live-open");
   await showView("dashboard");
@@ -27835,6 +27843,70 @@ setTimeout(()=>{
       }));
     }
   }catch(_e){}
+})();
+</script>
+
+
+<div id="bptPwaUpdate" style="
+  display:none; position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
+  z-index:30000; background:#111820; border:1px solid #42505b; border-radius:12px;
+  padding:10px 12px; box-shadow:0 10px 30px rgba(0,0,0,.35); max-width:92vw;
+  align-items:center; gap:10px; color:#f4f6f8; font-size:13px;">
+  <span>Nouvelle version BPT disponible</span>
+  <button id="bptPwaUpdateBtn" class="btn secondary" type="button" style="padding:6px 10px;font-size:12px">Mettre à jour</button>
+</div>
+
+<script id="bpt-pwa-bootstrap">
+(function(){
+  if(!("serviceWorker" in navigator)) return;
+
+  let refreshing=false;
+  let waitingWorker=null;
+
+  function showUpdate(worker){
+    waitingWorker=worker;
+    const box=document.getElementById("bptPwaUpdate");
+    if(box) box.style.display="flex";
+  }
+
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{
+    if(refreshing)return;
+    refreshing=true;
+    location.reload();
+  });
+
+  window.addEventListener("load",async ()=>{
+    try{
+      const reg=await navigator.serviceWorker.register("./service-worker.js",{scope:"./"});
+
+      if(reg.waiting) showUpdate(reg.waiting);
+
+      reg.addEventListener("updatefound",()=>{
+        const worker=reg.installing;
+        if(!worker)return;
+        worker.addEventListener("statechange",()=>{
+          if(worker.state==="installed" && navigator.serviceWorker.controller){
+            showUpdate(worker);
+          }
+        });
+      });
+
+      // Vérifie une éventuelle nouvelle version à chaque chargement.
+      try{ await reg.update(); }catch(_e){}
+    }catch(e){
+      console.warn("PWA BPT :",e);
+    }
+  });
+
+  document.addEventListener("click",e=>{
+    const btn=e.target?.closest?.("#bptPwaUpdateBtn");
+    if(!btn)return;
+    if(waitingWorker){
+      waitingWorker.postMessage({type:"SKIP_WAITING"});
+    }else{
+      location.reload();
+    }
+  });
 })();
 </script>
 
