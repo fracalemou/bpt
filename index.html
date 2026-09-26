@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V3.55 IDENTITY ON SITE ENTRY
+BPT LIVE V3.59 PRESENCE 5MIN TIMEOUT
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -8054,7 +8054,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 3.55 — Classement / Parties / Profils / Dashboard */
+/* BPT 3.59 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8117,7 +8117,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 3.55 — Records / Impact / Courbes */
+/* BPT 3.59 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8143,7 +8143,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 3.55 — blocs repliables */
+/* BPT 3.59 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -8184,6 +8184,134 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 .collapsible-block .card{
   margin-top:0;
+}
+
+
+/* ===== BPT 3.59 — sélecteur joueurs mobile : noms toujours visibles ===== */
+@media (max-width:700px){
+  #live3MobilePlayerModal .bpt-live3-mobile-player-grid{
+    grid-template-columns:1fr 1fr !important;
+    gap:8px !important;
+  }
+
+  #live3MobilePlayerModal .bpt-live3-mobile-player-item{
+    display:flex !important;
+    align-items:center !important;
+    gap:8px !important;
+    min-height:44px !important;
+    padding:9px 10px !important;
+    border:1px solid #3a4d42 !important;
+    border-radius:9px !important;
+    background:#17231d !important;
+    color:#f7f4ec !important;
+    overflow:visible !important;
+  }
+
+  #live3MobilePlayerModal .bpt-live3-mobile-player-item input[type="checkbox"]{
+    flex:0 0 auto !important;
+    width:18px !important;
+    height:18px !important;
+    margin:0 !important;
+  }
+
+  #live3MobilePlayerModal .bpt-live3-mobile-player-name{
+    display:block !important;
+    flex:1 1 auto !important;
+    min-width:0 !important;
+    color:#f7f4ec !important;
+    font-size:14px !important;
+    font-weight:700 !important;
+    line-height:1.2 !important;
+    white-space:normal !important;
+    overflow:visible !important;
+    text-overflow:clip !important;
+    word-break:break-word !important;
+  }
+
+  #live3MobilePlayerModal .bpt-live3-mobile-player-nickname{
+    display:block !important;
+    color:#d9bd7b !important;
+    font-size:11px !important;
+    font-weight:600 !important;
+    margin-top:2px !important;
+    white-space:normal !important;
+  }
+
+  #live3MobilePlayerModal .bpt-live3-mobile-player-text{
+    display:block !important;
+    flex:1 1 auto !important;
+    min-width:0 !important;
+    overflow:visible !important;
+  }
+
+  #live3MobilePlayerModal .bpt-live3-mobile-player-item:has(input:checked){
+    background:#21412f !important;
+    border-color:#c8952e !important;
+  }
+}
+
+@media (max-width:430px){
+  #live3MobilePlayerModal .bpt-live3-mobile-player-grid{
+    grid-template-columns:1fr !important;
+  }
+}
+
+
+/* ===== BPT 3.59 — présence globale application ===== */
+.bpt-header{position:relative}
+.bpt-online-presence{
+  position:absolute;
+  top:50%;
+  right:16px;
+  transform:translateY(-50%);
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-width:58px;
+  height:34px;
+  padding:0 10px;
+  border:1px solid rgba(200,149,46,.55);
+  border-radius:999px;
+  background:rgba(13,24,18,.92);
+  color:#fff8ea;
+  z-index:80;
+  cursor:default;
+  box-shadow:0 6px 18px rgba(0,0,0,.22);
+}
+.bpt-online-dot{color:#79c594;font-size:11px;line-height:1}
+#bptOnlineCount{font-size:14px;line-height:1}
+.bpt-online-tooltip{
+  position:absolute;
+  top:calc(100% + 8px);
+  right:0;
+  min-width:130px;
+  max-width:240px;
+  padding:8px 10px;
+  border-radius:8px;
+  border:1px solid #3a4d42;
+  background:#111c16;
+  color:#f7f4ec;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.35;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transform:translateY(-3px);
+  transition:opacity .15s ease,transform .15s ease,visibility .15s ease;
+  box-shadow:0 10px 28px rgba(0,0,0,.32);
+  white-space:normal;
+}
+.bpt-online-presence:hover .bpt-online-tooltip,
+.bpt-online-presence:focus .bpt-online-tooltip{
+  opacity:1;
+  visibility:visible;
+  transform:translateY(0);
+}
+@media(max-width:700px){
+  .bpt-online-presence{right:10px;height:30px;min-width:52px;padding:0 8px}
+  .bpt-online-tooltip{max-width:200px}
+  .bpt-header .brand{padding-right:64px}
 }
 
 </style>
@@ -11557,7 +11685,7 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs
 
 <style id="bpt-v2300-clean-fullscreen-refactor">
 /* ================================
-   BPT 3.55 — CLEAN FULLSCREEN REFACTOR
+   BPT 3.59 — CLEAN FULLSCREEN REFACTOR
    One final authoritative layout for fullscreen / mobile live.
    ================================ */
 
@@ -11937,7 +12065,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 
 
 <style id="bpt-v231-fullscreen-component">
-/* BPT 3.55 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
+/* BPT 3.59 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
 #liveFullscreenDisplay,
 #liveFullscreenDisplay:fullscreen,
 #liveFullscreenDisplay:-webkit-full-screen,
@@ -12078,7 +12206,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-actions{width:100% !important;grid-template-columns:1fr 1fr !important;gap:8px !important}
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-action{min-height:46px !important;font-size:12px !important;letter-spacing:.02em !important}
 
-/* BPT 3.55 — direct mobile fullscreen classes on the target itself */
+/* BPT 3.59 — direct mobile fullscreen classes on the target itself */
 #liveFullscreenDisplay.bptfs-mobile{height:100dvh !important;}
 #liveFullscreenDisplay.bptfs-mobile::before,
 #liveFullscreenDisplay.bptfs-mobile::after{display:none !important;}
@@ -14369,7 +14497,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="3.55";
+const BPT_APP_VERSION="3.59";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -14488,6 +14616,13 @@ function simplifyRecordTextForMobile(text){
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
+
+  <div id="bptOnlinePresence" class="bpt-online-presence" tabindex="0" aria-label="Personnes connectées">
+    <span class="bpt-online-dot">●</span>
+    <strong id="bptOnlineCount">0</strong>
+    <div id="bptOnlineTooltip" class="bpt-online-tooltip">Personne</div>
+  </div>
+
 </header>
 <nav id="nav">
   
@@ -14732,7 +14867,7 @@ function simplifyRecordTextForMobile(text){
   <div class="bpt-live3-modal-card bpt-live3-spectator-id-card">
     <div class="home-kicker">BPT · Identification</div>
     <h2>Identification obligatoire</h2>
-    <p class="muted">Choisissez votre nom pour utiliser BPT sur cet appareil.</p>
+    <p class="muted">Confirmez votre identité pour ouvrir BPT sur cet appareil.</p>
 
     <select id="live3SpectatorNameInput" class="bpt-live3-spectator-select">
       <option value="">— Choisir votre nom —</option>
@@ -15639,7 +15774,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 3.55</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 3.59</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -15855,7 +15990,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 3.55 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 3.59 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -17228,7 +17363,7 @@ async function cloudPoll(){
 
 let liveAutoOpenDone=false;
 async function autoOpenActiveLiveOnStartup(){
-  // BPT 3.55 : plus d'ouverture automatique du Live au démarrage.
+  // BPT 3.59 : plus d'ouverture automatique du Live au démarrage.
   // L'application s'ouvre toujours sur Accueil ; le Live actif est indiqué sur l'onglet Live.
   liveAutoOpenDone=true;
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -19692,7 +19827,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 3.55 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 3.59 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -24078,7 +24213,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 3.55 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 3.59 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -24741,7 +24876,7 @@ liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 (async()=>{
   await initCloudSync();
-  // BPT 3.55 : l'ouverture par défaut est toujours Accueil.
+  // BPT 3.59 : l'ouverture par défaut est toujours Accueil.
   spectatorAutoOpenSuppressed=true;
   document.body.classList.remove("spectator-live-open");
   await showView("dashboard");
@@ -25254,6 +25389,16 @@ document.addEventListener("visibilitychange",()=>{
   let spectatorHeartbeat=null;
   let viewerRenderSignature="";
   let liveIdentityConfirmed=false;
+  const LIVE_IDENTITY_SESSION_KEY="bpt_live3_identity_confirmed_session";
+
+  function identityConfirmedThisSession(){
+    return sessionStorage.getItem(LIVE_IDENTITY_SESSION_KEY)==="1";
+  }
+
+  function markIdentityConfirmedThisSession(){
+    sessionStorage.setItem(LIVE_IDENTITY_SESSION_KEY,"1");
+    liveIdentityConfirmed=true;
+  }
   let spectatorSelectSignature="";
   let lastChatMessageId=null;
   let chatSoundPrimed=false;
@@ -25420,11 +25565,100 @@ document.addEventListener("visibilitychange",()=>{
     return liveIdentityName();
   }
 
+  const APP_PRESENCE_PATH="bpt/app_presence";
+  const APP_PRESENCE_HEARTBEAT_MS=15000;
+  const APP_PRESENCE_STALE_MS=300000;
+  let appPresenceTimer=null;
+  let appPresenceListenerInstalled=false;
+
+  function appPresenceInitials(name){
+    const parts=String(name||"").trim().split(/\s+/).filter(Boolean);
+    if(!parts.length)return "?";
+    if(parts.length===1)return parts[0].slice(0,2).toUpperCase();
+    return (parts[0][0]+parts[parts.length-1][0]).toUpperCase();
+  }
+
+  function renderAppPresence(viewers){
+    const countEl=document.getElementById("bptOnlineCount");
+    const tipEl=document.getElementById("bptOnlineTooltip");
+    if(!countEl||!tipEl)return;
+
+    const now=Date.now();
+    const active=Object.values(viewers||{})
+      .filter(v=>v && String(v.name||"").trim() && now-Number(v.lastSeen||0)<APP_PRESENCE_STALE_MS)
+      .sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"fr",{sensitivity:"base"}));
+
+    countEl.textContent=String(active.length);
+    tipEl.textContent=active.length
+      ? active.map(v=>appPresenceInitials(v.name)).join(" · ")
+      : "Personne";
+  }
+
+  async function updateAppPresence(){
+    if(!liveIdentityName() || !identityConfirmedThisSession())return;
+
+    try{
+      if(!window.bptFirebaseEnsure)return;
+      await window.bptFirebaseEnsure();
+
+      const dbx=window.bptFirebaseDb?.();
+      if(!dbx)return;
+
+      const ref=dbx.ref(`${APP_PRESENCE_PATH}/${uid()}`);
+      await ref.set({
+        name:liveIdentityName(),
+        initials:appPresenceInitials(liveIdentityName()),
+        lastSeen:Date.now()
+      });
+
+      try{ref.onDisconnect().remove();}catch(_e){}
+    }catch(e){
+      console.warn("Présence application :",e);
+    }
+  }
+
+  async function installAppPresenceListener(){
+    if(appPresenceListenerInstalled)return;
+
+    try{
+      if(!window.bptFirebaseEnsure)return;
+      await window.bptFirebaseEnsure();
+
+      const dbx=window.bptFirebaseDb?.();
+      if(!dbx)return;
+
+      const base=dbx.ref(APP_PRESENCE_PATH);
+      base.on("value",snap=>renderAppPresence(snap.val()||{}));
+      appPresenceListenerInstalled=true;
+    }catch(e){
+      console.warn("Lecture présence application :",e);
+    }
+  }
+
+  function startAppPresence(){
+    installAppPresenceListener();
+    updateAppPresence();
+
+    clearInterval(appPresenceTimer);
+    appPresenceTimer=setInterval(updateAppPresence,APP_PRESENCE_HEARTBEAT_MS);
+  }
+
+  window.addEventListener("beforeunload",()=>{
+    try{
+      const dbx=window.bptFirebaseDb?.();
+      if(dbx)dbx.ref(`${APP_PRESENCE_PATH}/${uid()}`).remove();
+    }catch(_e){}
+  });
+
+
+
   function requireIdentityOnSiteEntry(){
+    liveIdentityConfirmed=identityConfirmedThisSession();
+
+    // À chaque nouvelle session navigateur/app, une confirmation est obligatoire,
+    // même si le nom a été mémorisé et même sans Live en cours.
     if(liveIdentityConfirmed && liveIdentityName())return;
 
-    // Le nom peut être mémorisé, mais chaque nouvelle ouverture du site
-    // doit demander explicitement qui utilise cet appareil.
     setTimeout(()=>{
       try{ openSpectatorIdentity(true); }catch(e){ console.warn("Identification BPT :",e); }
     },120);
@@ -25523,7 +25757,8 @@ document.addEventListener("visibilitychange",()=>{
     }
 
     localStorage.setItem(LIVE_IDENTITY_KEY,clean);
-    liveIdentityConfirmed=true;
+    markIdentityConfirmedThisSession();
+    startAppPresence();
 
     // Si aucun Live n'est actif, ce joueur est le futur maître :
     // préremplir le lieu avec son nom.
@@ -26580,7 +26815,7 @@ document.addEventListener("visibilitychange",()=>{
           viewerRenderSignature="inactive";
         }
       }
-      if(!liveIdentityConfirmed)openSpectatorIdentity(true);
+      if(!identityConfirmedThisSession())openSpectatorIdentity(true);
       return;
     }
 
@@ -26591,7 +26826,7 @@ document.addEventListener("visibilitychange",()=>{
       role.className="bpt-live3-role-badge "+(owner?"master":"spectator");
     }
 
-    if(!liveIdentityConfirmed){
+    if(!identityConfirmedThisSession()){
       openSpectatorIdentity(true);
     }
 
@@ -27035,14 +27270,12 @@ document.addEventListener("visibilitychange",()=>{
     launch();
   }
 
-  window.addEventListener("pageshow",event=>{
-    if(event.persisted){
-      setTimeout(()=>{
-        try{
-          if(typeof requireIdentityOnSiteEntry==="function")requireIdentityOnSiteEntry();
-        }catch(_e){}
-      },100);
-    }
+  window.addEventListener("pageshow",()=>{
+    setTimeout(()=>{
+      try{
+        if(typeof requireIdentityOnSiteEntry==="function")requireIdentityOnSiteEntry();
+      }catch(_e){}
+    },100);
   });
 })();
 </script>
@@ -27053,6 +27286,44 @@ setTimeout(()=>{
     migrateLegacyPhotoMapsToUrls().catch(e=>console.warn("Migration photos existantes :",e));
   }
 },3000);
+</script>
+
+
+<script id="bpt-app-presence-launcher">
+(function(){
+  function launchPresence(){
+    setTimeout(()=>{
+      try{
+        if(typeof installAppPresenceListener==="function")installAppPresenceListener();
+        if(typeof identityConfirmedThisSession==="function" &&
+           identityConfirmedThisSession() &&
+           typeof startAppPresence==="function"){
+          startAppPresence();
+        }
+      }catch(e){
+        console.warn("Démarrage présence BPT :",e);
+      }
+    },700);
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",launchPresence,{once:true});
+  }else{
+    launchPresence();
+  }
+
+  document.addEventListener("visibilitychange",()=>{
+    if(!document.hidden){
+      try{
+        if(typeof identityConfirmedThisSession==="function" &&
+           identityConfirmedThisSession() &&
+           typeof startAppPresence==="function"){
+          startAppPresence();
+        }
+      }catch(_e){}
+    }
+  });
+})();
 </script>
 
 </body>
