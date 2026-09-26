@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V3.69 CLEAN MOBILE PHOTO UI
+BPT LIVE V3.74 MOBILE PHOTO FIX PROTECTED SETTINGS
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -7159,8 +7159,6 @@ body.bpt-mobile-device #dashboard .premium-panel h2{
 /* Parties : uniquement navigation, vainqueur, podium et résultat. */
 html.bpt-mobile-device #latestgame .latestgame-photo-placeholder,
 body.bpt-mobile-device #latestgame .latestgame-photo-placeholder,
-html.bpt-mobile-device #latestgame .game-photo-actions,
-body.bpt-mobile-device #latestgame .game-photo-actions,
 html.bpt-mobile-device #latestgame .latestgame-detail:nth-child(2),
 body.bpt-mobile-device #latestgame .latestgame-detail:nth-child(2),
 html.bpt-mobile-device #latestgame .latestgame-full-history,
@@ -8054,7 +8052,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 3.69 — Classement / Parties / Profils / Dashboard */
+/* BPT 3.74 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8117,7 +8115,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 3.69 — Records / Impact / Courbes */
+/* BPT 3.74 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8143,7 +8141,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 3.69 — blocs repliables */
+/* BPT 3.74 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -8187,7 +8185,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.69 — sélecteur joueurs mobile : noms toujours visibles ===== */
+/* ===== BPT 3.74 — sélecteur joueurs mobile : noms toujours visibles ===== */
 @media (max-width:700px){
   #live3MobilePlayerModal .bpt-live3-mobile-player-grid{
     grid-template-columns:1fr 1fr !important;
@@ -8257,7 +8255,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.69 — présence globale application ===== */
+/* ===== BPT 3.74 — présence globale application ===== */
 .bpt-header{position:relative}
 .bpt-online-presence{
   position:absolute;
@@ -8315,7 +8313,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.69 — sélecteur mobile joueurs lisible en 2 colonnes ===== */
+/* ===== BPT 3.74 — sélecteur mobile joueurs lisible en 2 colonnes ===== */
 #live3MobilePlayerGrid{
   display:grid !important;
   grid-template-columns:repeat(2, minmax(0,1fr)) !important;
@@ -8382,135 +8380,27 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.69 — ajout photo depuis téléphone ===== */
-.game-photo-mobile-btn{display:none}
+
+
+/* ===== BPT 3.74 — photo mobile simple ===== */
 @media(max-width:700px){
-  .game-photo-actions{
-    display:flex !important;
-    flex-direction:column !important;
-    gap:8px !important;
-    align-items:stretch !important;
-  }
-
-  .game-photo-upload-label{
-    display:none !important;
-  }
-
-  .game-photo-mobile-btn{
-    display:block !important;
-    width:100% !important;
-    min-height:44px !important;
-    font-size:14px !important;
-    font-weight:800 !important;
-    text-align:center !important;
-  }
-
-  #latestGamePhotoDeleteBtn{
-    width:100% !important;
-    min-height:42px !important;
-  }
-}
-
-
-/* ===== BPT 3.69 — picker photo natif mobile ===== */
-.bpt-photo-file-input{
-  position:absolute !important;
-  width:1px !important;
-  height:1px !important;
-  padding:0 !important;
-  margin:-1px !important;
-  overflow:hidden !important;
-  clip:rect(0,0,0,0) !important;
-  white-space:nowrap !important;
-  border:0 !important;
-  opacity:.001 !important;
-  pointer-events:none !important;
-}
-
-@media(max-width:700px){
-  .game-photo-upload-label{display:none !important}
-
-  .game-photo-mobile-btn{
-    display:flex !important;
-    align-items:center !important;
-    justify-content:center !important;
-    width:100% !important;
-    min-height:46px !important;
-    cursor:pointer !important;
-    user-select:none !important;
-    -webkit-user-select:none !important;
-  }
-}
-
-
-/* ===== BPT 3.69 — ajout / retrait photo mobile ===== */
-@media(max-width:700px){
-  .game-photo-actions{
-    display:grid !important;
-    grid-template-columns:1fr !important;
-    gap:8px !important;
-    width:100% !important;
-  }
-
-  #latestGamePhotoMobileBtn,
-  #latestGamePhotoDeleteBtn{
-    width:100% !important;
-    min-height:46px !important;
-    border-radius:10px !important;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    text-align:center;
-  }
-
-  #latestGamePhotoDeleteBtn[style*="display: none"]{
-    display:none !important;
-  }
-}
-
-
-/* ===== BPT 3.69 — interface photo mobile unique ===== */
-.bpt-photo-file-input{
-  position:absolute;
-  width:1px;
-  height:1px;
-  padding:0;
-  margin:-1px;
-  overflow:hidden;
-  clip:rect(0,0,0,0);
-  white-space:nowrap;
-  border:0;
-}
-
-.game-photo-mobile-btn{
-  display:none;
-}
-
-@media(max-width:700px){
-  .game-photo-upload-label{
-    display:none;
-  }
-
-  .game-photo-actions{
+  #latestgame .game-photo-actions{
     display:flex;
     flex-direction:column;
-    gap:8px;
     align-items:stretch;
+    gap:8px;
+    width:100%;
   }
 
-  .game-photo-mobile-btn{
+  #latestGamePhotoAddBtn,
+  #latestGamePhotoDeleteBtn{
+    width:100%;
+    min-height:46px;
     display:flex;
     align-items:center;
     justify-content:center;
-    width:100%;
-    min-height:46px;
     box-sizing:border-box;
-    cursor:pointer;
-  }
-
-  #latestGamePhotoDeleteBtn{
-    width:100%;
-    min-height:44px;
+    font-size:13px !important;
   }
 }
 
@@ -11885,7 +11775,7 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs
 
 <style id="bpt-v2300-clean-fullscreen-refactor">
 /* ================================
-   BPT 3.69 — CLEAN FULLSCREEN REFACTOR
+   BPT 3.74 — CLEAN FULLSCREEN REFACTOR
    One final authoritative layout for fullscreen / mobile live.
    ================================ */
 
@@ -12265,7 +12155,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 
 
 <style id="bpt-v231-fullscreen-component">
-/* BPT 3.69 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
+/* BPT 3.74 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
 #liveFullscreenDisplay,
 #liveFullscreenDisplay:fullscreen,
 #liveFullscreenDisplay:-webkit-full-screen,
@@ -12406,7 +12296,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-actions{width:100% !important;grid-template-columns:1fr 1fr !important;gap:8px !important}
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-action{min-height:46px !important;font-size:12px !important;letter-spacing:.02em !important}
 
-/* BPT 3.69 — direct mobile fullscreen classes on the target itself */
+/* BPT 3.74 — direct mobile fullscreen classes on the target itself */
 #liveFullscreenDisplay.bptfs-mobile{height:100dvh !important;}
 #liveFullscreenDisplay.bptfs-mobile::before,
 #liveFullscreenDisplay.bptfs-mobile::after{display:none !important;}
@@ -14697,7 +14587,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="3.69";
+const BPT_APP_VERSION="3.74";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -15596,14 +15486,13 @@ function simplifyRecordTextForMobile(text){
         <small>Photo de la partie</small>
       </div>
       <div class="game-photo-actions">
-        <label class="btn ghost game-photo-upload-label" for="latestGamePhotoInput">
-          <span id="latestGamePhotoUploadLabel">Ajouter une photo</span>
+        <label class="btn ghost game-photo-upload-label" id="latestGamePhotoAddBtn" for="latestGamePhotoInput">
+          <span id="latestGamePhotoUploadLabel">📷 Ajouter une photo</span>
         </label>
         <input id="latestGamePhotoInput"
                class="bpt-photo-file-input"
                type="file"
                accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif">
-        <label class="btn ghost game-photo-mobile-btn" id="latestGamePhotoMobileBtn" for="latestGamePhotoInput">📷 Ajouter une photo</label>
         <button class="btn ghost game-photo-delete-btn" id="latestGamePhotoDeleteBtn" type="button" style="display:none">🗑 Retirer la photo</button>
       </div>
     </div>
@@ -15974,6 +15863,33 @@ function simplifyRecordTextForMobile(text){
 </section>
 
 <section id="settings" class="view">
+<div class="hero tab-premium-hero">
+    <div class="home-kicker">BPT · Administration</div>
+    <h1>Paramètres du championnat</h1>
+    <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 3.74</div>
+    <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
+        <strong>Backend</strong><span>Firebase</span>
+        <strong>État</strong><span id="firebaseDiagnosticState">Connexion…</span>
+        <strong>Projet</strong><span id="firebaseDiagnosticProject">bpt-championship</span>
+      </div>
+    </div>
+  </div>
+  <div id="settingsLock" class="card" style="max-width:520px;margin:16px auto 0">
+    <h2>Accès protégé</h2>
+    <p class="muted">Saisissez le mot de passe administrateur pour accéder aux paramètres.</p>
+    <div class="row" style="align-items:flex-end;gap:10px">
+      <div class="field" style="flex:1 1 220px;margin:0">
+        <label for="settingsPassword">Mot de passe</label>
+        <input id="settingsPassword" type="password" autocomplete="current-password" inputmode="numeric" placeholder="Mot de passe">
+      </div>
+      <button class="btn" id="unlockSettingsBtn" type="button">Déverrouiller</button>
+    </div>
+    <div id="settingsPasswordError" style="margin-top:10px;color:#ff8f8f;font-weight:800"></div>
+  </div>
+
+  <div id="settingsProtectedContent" style="display:none">
   <details class="settings-block" open>
     <summary>Historique des connexions</summary>
     <div class="settings-block-content" style="padding:14px 18px 18px">
@@ -16026,33 +15942,6 @@ function simplifyRecordTextForMobile(text){
     </div>
   </details>
 
-  <div class="hero tab-premium-hero">
-    <div class="home-kicker">BPT · Administration</div>
-    <h1>Paramètres du championnat</h1>
-    <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 3.69</div>
-    <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
-      <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
-        <strong>Backend</strong><span>Firebase</span>
-        <strong>État</strong><span id="firebaseDiagnosticState">Connexion…</span>
-        <strong>Projet</strong><span id="firebaseDiagnosticProject">bpt-championship</span>
-      </div>
-    </div>
-  </div>
-  <div id="settingsLock" class="card" style="max-width:520px;margin:16px auto 0">
-    <h2>Accès protégé</h2>
-    <p class="muted">Saisissez le mot de passe administrateur pour accéder aux paramètres.</p>
-    <div class="row" style="align-items:flex-end;gap:10px">
-      <div class="field" style="flex:1 1 220px;margin:0">
-        <label for="settingsPassword">Mot de passe</label>
-        <input id="settingsPassword" type="password" autocomplete="current-password" inputmode="numeric" placeholder="Mot de passe">
-      </div>
-      <button class="btn" id="unlockSettingsBtn" type="button">Déverrouiller</button>
-    </div>
-    <div id="settingsPasswordError" style="margin-top:10px;color:#ff8f8f;font-weight:800"></div>
-  </div>
-
-  <div id="settingsProtectedContent" style="display:none">
 
   <details class="settings-block">
     <summary>Gestion des joueurs</summary>
@@ -16246,7 +16135,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 3.69 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 3.74 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -17671,7 +17560,7 @@ async function cloudPoll(){
 
 let liveAutoOpenDone=false;
 async function autoOpenActiveLiveOnStartup(){
-  // BPT 3.69 : plus d'ouverture automatique du Live au démarrage.
+  // BPT 3.74 : plus d'ouverture automatique du Live au démarrage.
   // L'application s'ouvre toujours sur Accueil ; le Live actif est indiqué sur l'onglet Live.
   liveAutoOpenDone=true;
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -20135,7 +20024,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 3.69 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 3.74 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -21102,7 +20991,7 @@ function renderLatestGame(){
   if(thumbBtn)thumbBtn.style.display="none";
   if(placeholder)placeholder.style.display="flex";
   if(deleteBtn)deleteBtn.style.display="none";
-  if(uploadLabel)uploadLabel.textContent="Ajouter une photo";
+  if(uploadLabel)uploadLabel.textContent="📷 Ajouter une photo";
   if(thumb){
     thumb.dataset.photoKey=photoRenderKey;
     thumb.onload=()=>{
@@ -21110,14 +20999,14 @@ function renderLatestGame(){
       if(thumbBtn)thumbBtn.style.display="block";
       if(placeholder)placeholder.style.display="none";
       if(deleteBtn)deleteBtn.style.display="inline-flex";
-      if(uploadLabel)uploadLabel.textContent="Changer la photo";
+      if(uploadLabel)uploadLabel.textContent="📷 Changer la photo";
     };
     thumb.onerror=()=>{
       if(thumb.dataset.photoKey!==photoRenderKey)return;
       if(thumbBtn)thumbBtn.style.display="none";
       if(placeholder)placeholder.style.display="flex";
       if(deleteBtn)deleteBtn.style.display="none";
-      if(uploadLabel)uploadLabel.textContent="Ajouter une photo";
+      if(uploadLabel)uploadLabel.textContent="📷 Ajouter une photo";
     };
     thumb.src=photo||"";
   }
@@ -24521,7 +24410,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 3.69 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 3.74 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -25184,7 +25073,7 @@ liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 (async()=>{
   await initCloudSync();
-  // BPT 3.69 : l'ouverture par défaut est toujours Accueil.
+  // BPT 3.74 : l'ouverture par défaut est toujours Accueil.
   spectatorAutoOpenSuppressed=true;
   document.body.classList.remove("spectator-live-open");
   await showView("dashboard");
