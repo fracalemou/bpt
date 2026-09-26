@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V3.61 UNIQUE ONLINE INITIALS
+BPT LIVE V3.62 MOBILE PHOTO PICKER
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -8054,7 +8054,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 3.61 — Classement / Parties / Profils / Dashboard */
+/* BPT 3.62 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8117,7 +8117,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 3.61 — Records / Impact / Courbes */
+/* BPT 3.62 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8143,7 +8143,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 3.61 — blocs repliables */
+/* BPT 3.62 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -8187,7 +8187,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.61 — sélecteur joueurs mobile : noms toujours visibles ===== */
+/* ===== BPT 3.62 — sélecteur joueurs mobile : noms toujours visibles ===== */
 @media (max-width:700px){
   #live3MobilePlayerModal .bpt-live3-mobile-player-grid{
     grid-template-columns:1fr 1fr !important;
@@ -8257,7 +8257,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.61 — présence globale application ===== */
+/* ===== BPT 3.62 — présence globale application ===== */
 .bpt-header{position:relative}
 .bpt-online-presence{
   position:absolute;
@@ -8315,7 +8315,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.61 — sélecteur mobile joueurs lisible en 2 colonnes ===== */
+/* ===== BPT 3.62 — sélecteur mobile joueurs lisible en 2 colonnes ===== */
 #live3MobilePlayerGrid{
   display:grid !important;
   grid-template-columns:repeat(2, minmax(0,1fr)) !important;
@@ -8378,6 +8378,36 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 @media (max-width:380px){
   #live3MobilePlayerGrid .bpt-live3-mobile-player-name{
     font-size:12px !important;
+  }
+}
+
+
+/* ===== BPT 3.62 — ajout photo depuis téléphone ===== */
+.game-photo-mobile-btn{display:none}
+@media(max-width:700px){
+  .game-photo-actions{
+    display:flex !important;
+    flex-direction:column !important;
+    gap:8px !important;
+    align-items:stretch !important;
+  }
+
+  .game-photo-upload-label{
+    display:none !important;
+  }
+
+  .game-photo-mobile-btn{
+    display:block !important;
+    width:100% !important;
+    min-height:44px !important;
+    font-size:14px !important;
+    font-weight:800 !important;
+    text-align:center !important;
+  }
+
+  #latestGamePhotoDeleteBtn{
+    width:100% !important;
+    min-height:42px !important;
   }
 }
 
@@ -11752,7 +11782,7 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs
 
 <style id="bpt-v2300-clean-fullscreen-refactor">
 /* ================================
-   BPT 3.61 — CLEAN FULLSCREEN REFACTOR
+   BPT 3.62 — CLEAN FULLSCREEN REFACTOR
    One final authoritative layout for fullscreen / mobile live.
    ================================ */
 
@@ -12132,7 +12162,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 
 
 <style id="bpt-v231-fullscreen-component">
-/* BPT 3.61 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
+/* BPT 3.62 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
 #liveFullscreenDisplay,
 #liveFullscreenDisplay:fullscreen,
 #liveFullscreenDisplay:-webkit-full-screen,
@@ -12273,7 +12303,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-actions{width:100% !important;grid-template-columns:1fr 1fr !important;gap:8px !important}
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-action{min-height:46px !important;font-size:12px !important;letter-spacing:.02em !important}
 
-/* BPT 3.61 — direct mobile fullscreen classes on the target itself */
+/* BPT 3.62 — direct mobile fullscreen classes on the target itself */
 #liveFullscreenDisplay.bptfs-mobile{height:100dvh !important;}
 #liveFullscreenDisplay.bptfs-mobile::before,
 #liveFullscreenDisplay.bptfs-mobile::after{display:none !important;}
@@ -14564,7 +14594,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="3.61";
+const BPT_APP_VERSION="3.62";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -15465,8 +15495,9 @@ function simplifyRecordTextForMobile(text){
       <div class="game-photo-actions">
         <label class="btn ghost game-photo-upload-label">
           <span id="latestGamePhotoUploadLabel">Ajouter une photo</span>
-          <input id="latestGamePhotoInput" type="file" accept="image/*" hidden>
+          <input id="latestGamePhotoInput" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif" capture="environment" hidden>
         </label>
+        <button class="btn ghost game-photo-mobile-btn" id="latestGamePhotoMobileBtn" type="button">📷 Choisir une photo</button>
         <button class="btn ghost" id="latestGamePhotoDeleteBtn" type="button" style="display:none">Retirer</button>
       </div>
     </div>
@@ -15841,7 +15872,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 3.61</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 3.62</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -16057,7 +16088,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 3.61 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 3.62 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -16259,6 +16290,20 @@ window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
 </div>
 <script>
 const $ = id => document.getElementById(id);
+
+document.addEventListener("click",e=>{
+  const btn=e.target?.closest?.("#latestGamePhotoMobileBtn");
+  if(!btn)return;
+  e.preventDefault();
+  const input=document.getElementById("latestGamePhotoInput");
+  if(input){
+    input.value="";
+    // On mobile, allow gallery/files selection rather than forcing camera.
+    input.removeAttribute("capture");
+    input.click();
+  }
+});
+
 
 function bptDialog({title="Information",message="",confirmText="OK",cancelText=null,danger=false}={}){
   return new Promise(resolve=>{
@@ -17430,7 +17475,7 @@ async function cloudPoll(){
 
 let liveAutoOpenDone=false;
 async function autoOpenActiveLiveOnStartup(){
-  // BPT 3.61 : plus d'ouverture automatique du Live au démarrage.
+  // BPT 3.62 : plus d'ouverture automatique du Live au démarrage.
   // L'application s'ouvre toujours sur Accueil ; le Live actif est indiqué sur l'onglet Live.
   liveAutoOpenDone=true;
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -19894,7 +19939,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 3.61 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 3.62 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -24280,7 +24325,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 3.61 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 3.62 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -24943,7 +24988,7 @@ liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 (async()=>{
   await initCloudSync();
-  // BPT 3.61 : l'ouverture par défaut est toujours Accueil.
+  // BPT 3.62 : l'ouverture par défaut est toujours Accueil.
   spectatorAutoOpenSuppressed=true;
   document.body.classList.remove("spectator-live-open");
   await showView("dashboard");
