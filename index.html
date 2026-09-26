@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V3.52 PARTY1 ESTIMATE
+BPT LIVE V3.55 IDENTITY ON SITE ENTRY
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -8054,7 +8054,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 3.52 — Classement / Parties / Profils / Dashboard */
+/* BPT 3.55 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8117,7 +8117,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 3.52 — Records / Impact / Courbes */
+/* BPT 3.55 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8143,7 +8143,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 3.52 — blocs repliables */
+/* BPT 3.55 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -11557,7 +11557,7 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs
 
 <style id="bpt-v2300-clean-fullscreen-refactor">
 /* ================================
-   BPT 3.52 — CLEAN FULLSCREEN REFACTOR
+   BPT 3.55 — CLEAN FULLSCREEN REFACTOR
    One final authoritative layout for fullscreen / mobile live.
    ================================ */
 
@@ -11937,7 +11937,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 
 
 <style id="bpt-v231-fullscreen-component">
-/* BPT 3.52 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
+/* BPT 3.55 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
 #liveFullscreenDisplay,
 #liveFullscreenDisplay:fullscreen,
 #liveFullscreenDisplay:-webkit-full-screen,
@@ -12078,7 +12078,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-actions{width:100% !important;grid-template-columns:1fr 1fr !important;gap:8px !important}
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-action{min-height:46px !important;font-size:12px !important;letter-spacing:.02em !important}
 
-/* BPT 3.52 — direct mobile fullscreen classes on the target itself */
+/* BPT 3.55 — direct mobile fullscreen classes on the target itself */
 #liveFullscreenDisplay.bptfs-mobile{height:100dvh !important;}
 #liveFullscreenDisplay.bptfs-mobile::before,
 #liveFullscreenDisplay.bptfs-mobile::after{display:none !important;}
@@ -14369,7 +14369,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="3.52";
+const BPT_APP_VERSION="3.55";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -14638,7 +14638,7 @@ function simplifyRecordTextForMobile(text){
 
       <div id="live3SpectatorControls" class="bpt-live3-controls bpt-live3-spectator-only" style="display:none">
         <button id="live3TakeoverBtn" class="btn primary" type="button">Demander la reprise de gestion</button>
-        <button id="live3ChangeSpectatorNameBtn" class="btn ghost" type="button">Changer mon nom</button>
+        <button id="live3ChangeSpectatorNameBtn" class="btn ghost" type="button">Changer mon identité</button>
         <span id="live3TakeoverStatus" class="muted"></span>
       </div>
 
@@ -14730,9 +14730,9 @@ function simplifyRecordTextForMobile(text){
 
 <div id="live3SpectatorIdentityModal" class="bpt-live3-modal" aria-hidden="true">
   <div class="bpt-live3-modal-card bpt-live3-spectator-id-card">
-    <div class="home-kicker">BPT · Spectateur</div>
-    <h2>Qui regarde ?</h2>
-    <p class="muted">Indiquez votre nom pour accéder au Live.</p>
+    <div class="home-kicker">BPT · Identification</div>
+    <h2>Identification obligatoire</h2>
+    <p class="muted">Choisissez votre nom pour utiliser BPT sur cet appareil.</p>
 
     <select id="live3SpectatorNameInput" class="bpt-live3-spectator-select">
       <option value="">— Choisir votre nom —</option>
@@ -14740,7 +14740,7 @@ function simplifyRecordTextForMobile(text){
 
     <div class="bpt-live3-modal-actions">
       <button id="live3SpectatorIdentityConfirmBtn" class="btn primary" type="button" disabled>
-        Accéder au Live
+        Continuer
       </button>
     </div>
   </div>
@@ -15639,7 +15639,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 3.52</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 3.55</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -15855,7 +15855,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 3.52 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 3.55 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -16121,7 +16121,54 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 3.52 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos";
+const BPT_PHOTO_MAX_BYTES=550000;
+
+function bptSafeFilePart(value){
+  return String(value||"")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-zA-Z0-9_-]+/g,"-")
+    .replace(/^-+|-+$/g,"")
+    .slice(0,80)||"photo";
+}
+
+function bptSupabaseStorageHeaders(contentType="application/json"){
+  return {
+    "apikey":SUPABASE_PUBLISHABLE_KEY,
+    "Authorization":"Bearer "+SUPABASE_PUBLISHABLE_KEY,
+    "Content-Type":contentType
+  };
+}
+
+function bptPhotoPublicUrl(path){
+  const clean=String(path||"").replace(/^\/+/,"");
+  return `${SUPABASE_URL}/storage/v1/object/public/${GAME_PHOTO_BUCKET}/${clean}`;
+}
+
+async function bptUploadPhotoBlobToUrl(path,blob){
+  if(!blob)throw new Error("Image vide.");
+  if(blob.size>BPT_PHOTO_MAX_BYTES)throw new Error("La photo compressée est encore trop volumineuse.");
+
+  const clean=String(path||"").replace(/^\/+/,"");
+  const endpoint=`${SUPABASE_URL}/storage/v1/object/${GAME_PHOTO_BUCKET}/${clean}`;
+
+  const res=await fetch(endpoint,{
+    method:"POST",
+    headers:{
+      ...bptSupabaseStorageHeaders(blob.type||"image/jpeg"),
+      "x-upsert":"true"
+    },
+    body:blob
+  });
+
+  if(!res.ok){
+    let msg="";
+    try{msg=await res.text();}catch(_e){}
+    throw new Error(`Stockage photo impossible (${res.status})${msg?": "+msg.slice(0,180):""}`);
+  }
+
+  return bptPhotoPublicUrl(clean);
+}
 
 let sbClient=null;
 let cloudReady=false;
@@ -17181,7 +17228,7 @@ async function cloudPoll(){
 
 let liveAutoOpenDone=false;
 async function autoOpenActiveLiveOnStartup(){
-  // BPT 3.52 : plus d'ouverture automatique du Live au démarrage.
+  // BPT 3.55 : plus d'ouverture automatique du Live au démarrage.
   // L'application s'ouvre toujours sur Accueil ; le Live actif est indiqué sur l'onglet Live.
   liveAutoOpenDone=true;
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -19645,7 +19692,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 3.52 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 3.55 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -19668,34 +19715,109 @@ function dataUrlToBlob(dataUrl){
   try{const [head,body]=String(dataUrl||"").split(",",2);const mime=(head.match(/^data:([^;]+)/)||[])[1]||"image/jpeg";const bytes=atob(body||"");const arr=new Uint8Array(bytes.length);for(let i=0;i<bytes.length;i++)arr[i]=bytes.charCodeAt(i);return new Blob([arr],{type:mime});}catch(_e){return null;}
 }
 function blobToDataUrl(blob){ return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||""));r.onerror=()=>reject(new Error("Impossible de préparer l’image."));r.readAsDataURL(blob);}); }
+
+async function migrateLegacyGamePhotoToUrl(gameNo,seasonKey,legacyValue){
+  const raw=String(legacyValue||"");
+  if(!raw.startsWith("data:image/"))return raw;
+
+  const blob=dataUrlToBlob(raw);
+  if(!blob)return raw;
+
+  try{
+    return await uploadGamePhotoBlob(gameNo,seasonKey,blob,{silent:true});
+  }catch(e){
+    console.warn("Migration photo partie vers URL :",e);
+    return raw;
+  }
+}
+
+async function migrateLegacyPhotoMapsToUrls(){
+  const gameMap=ensureGamePhotos();
+
+  for(const [key,value] of Object.entries(gameMap)){
+    const raw=String(value||"");
+    if(!raw.startsWith("data:image/"))continue;
+
+    const parts=String(key).split("|");
+    const gameNo=Number(parts[parts.length-1])||0;
+    const seasonKey=parts.length>1?parts.slice(0,-1).join("|"):null;
+    if(!gameNo)continue;
+
+    const url=await migrateLegacyGamePhotoToUrl(gameNo,seasonKey,raw);
+    if(/^https?:\/\//i.test(url)){
+      gameMap[key]=url;
+      firebasePhotoCache[key]=url;
+    }
+  }
+
+  saveLocalOnly();
+}
+
 async function fetchFirebaseGamePhoto(gameNo,seasonKey=null){
   const key=gamePhotoKey(gameNo,seasonKey); if(firebasePhotoRequested.has(key))return firebasePhotoCache[key]||""; firebasePhotoRequested.add(key);
   try{
     if(!await ensureGamePhotoStorageClient())return "";
     const dbx=window.bptFirebaseDb?.(); if(!dbx)return "";
     const snap=await dbx.ref(gamePhotoFirebasePath(gameNo,seasonKey)).once("value");
-    const val=snap.val(); const data=typeof val==="string"?val:String(val?.data||"");
-    if(data.startsWith("data:image/")){ firebasePhotoCache[key]=data; if(typeof renderLatestGame==="function")setTimeout(renderLatestGame,0); return data; }
+    const val=snap.val();
+    const data=typeof val==="string"?val:String(val?.url||val?.data||"");
+    if(data.startsWith("data:image/")){
+      firebasePhotoCache[key]=data;
+
+      setTimeout(async()=>{
+        const migrated=await migrateLegacyGamePhotoToUrl(gameNo,seasonKey,data);
+        if(/^https?:\/\//i.test(migrated)){
+          firebasePhotoCache[key]=migrated;
+          ensureGamePhotos()[key]=migrated;
+          saveLocalOnly();
+          if(typeof renderLatestGame==="function")renderLatestGame();
+        }
+      },0);
+
+      if(typeof renderLatestGame==="function")setTimeout(renderLatestGame,0);
+      return data;
+    }
+
+    if(/^https?:\/\//i.test(data)){
+      firebasePhotoCache[key]=data;
+      if(typeof renderLatestGame==="function")setTimeout(renderLatestGame,0);
+      return data;
+    }
   }catch(e){ console.warn("Lecture photo Firebase:",e); }
   return "";
 }
 function getGamePhoto(gameNo,seasonKey=null){
   const key=gamePhotoKey(gameNo,seasonKey); const local=String(ensureGamePhotos()[key]||"");
-  if(local.startsWith("data:image/")){ firebasePhotoCache[key]=local; return local; }
+  if(local.startsWith("data:image/") || /^https?:\/\//i.test(local)){ firebasePhotoCache[key]=local; return local; }
   if(firebasePhotoCache[key])return firebasePhotoCache[key];
   fetchFirebaseGamePhoto(gameNo,seasonKey); return "";
 }
 async function uploadGamePhotoBlob(gameNo,seasonKey,blob,{silent=false}={}){
-  if(!blob)throw new Error("Image vide."); if(!await ensureGamePhotoStorageClient())throw new Error("Firebase indisponible.");
-  const dataUrl=await blobToDataUrl(blob);
-  // Garde-fou : les photos restent très petites et vivent hors de l'état Live.
-  if(dataUrl.length>700000)throw new Error("La photo compressée reste trop volumineuse. Choisissez une image plus légère.");
-  const dbx=window.bptFirebaseDb?.(); if(!dbx)throw new Error("Firebase Realtime Database indisponible.");
-  await dbx.ref(gamePhotoFirebasePath(gameNo,seasonKey)).set({data:dataUrl,updatedAt:Date.now()});
-  const key=gamePhotoKey(gameNo,seasonKey); firebasePhotoCache[key]=dataUrl; firebasePhotoRequested.add(key);
-  // Ne pas conserver le Base64 dans db/localStorage : uniquement un marqueur léger.
-  ensureGamePhotos()[key]="firebase"; saveLocalOnly();
-  if(!silent)setCloudStatus("ok","Photo sauvegardée","Firebase · chargée séparément du Live"); return true;
+  if(!blob)throw new Error("Image vide.");
+
+  const key=gamePhotoKey(gameNo,seasonKey);
+  const safeSeason=bptSafeFilePart(seasonKey||"season");
+  const path=`games/${safeSeason}/game-${Number(gameNo)||0}.jpg`;
+  const url=await bptUploadPhotoBlobToUrl(path,blob);
+
+  // Firebase ne conserve plus que l'URL publique.
+  if(await ensureGamePhotoStorageClient()){
+    const dbx=window.bptFirebaseDb?.();
+    if(dbx){
+      await dbx.ref(gamePhotoFirebasePath(gameNo,seasonKey)).set({
+        url,
+        updatedAt:Date.now()
+      });
+    }
+  }
+
+  ensureGamePhotos()[key]=url;
+  firebasePhotoCache[key]=url;
+  saveLocalOnly();
+
+  if(typeof renderLatestGame==="function")renderLatestGame();
+  if(!silent)alert("Photo enregistrée.");
+  return url;
 }
 async function migrateLegacyLocalGamePhotosToStorage(){
   if(!await ensureGamePhotoStorageClient())return false;
@@ -23956,7 +24078,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 3.52 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 3.55 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -24619,7 +24741,7 @@ liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 (async()=>{
   await initCloudSync();
-  // BPT 3.52 : l'ouverture par défaut est toujours Accueil.
+  // BPT 3.55 : l'ouverture par défaut est toujours Accueil.
   spectatorAutoOpenSuppressed=true;
   document.body.classList.remove("spectator-live-open");
   await showView("dashboard");
@@ -25119,7 +25241,8 @@ document.addEventListener("visibilitychange",()=>{
 
   const PATH="bpt/live_v3/current";
   const DEVICE_KEY="bpt_live3_device_id";
-  const SPECTATOR_NAME_KEY="bpt_live3_spectator_name";
+  const LIVE_IDENTITY_KEY="bpt_live3_identity_name";
+  const LEGACY_SPECTATOR_NAME_KEY="bpt_live3_spectator_name";
   const VIEWER_STALE_MS=300000;
   const $3=(id)=>document.getElementById(id);
 
@@ -25130,6 +25253,7 @@ document.addEventListener("visibilitychange",()=>{
   let advancing=false;
   let spectatorHeartbeat=null;
   let viewerRenderSignature="";
+  let liveIdentityConfirmed=false;
   let spectatorSelectSignature="";
   let lastChatMessageId=null;
   let chatSoundPrimed=false;
@@ -25280,15 +25404,37 @@ document.addEventListener("visibilitychange",()=>{
     return String(name||"?").trim().split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toUpperCase()||"?";
   }
 
+  function liveIdentityName(){
+    const currentName=String(localStorage.getItem(LIVE_IDENTITY_KEY)||"").trim();
+    if(currentName)return currentName;
+
+    const legacy=String(localStorage.getItem(LEGACY_SPECTATOR_NAME_KEY)||"").trim();
+    if(legacy){
+      localStorage.setItem(LIVE_IDENTITY_KEY,legacy);
+      return legacy;
+    }
+    return "";
+  }
+
   function spectatorName(){
-    return String(localStorage.getItem(SPECTATOR_NAME_KEY)||"").trim();
+    return liveIdentityName();
+  }
+
+  function requireIdentityOnSiteEntry(){
+    if(liveIdentityConfirmed && liveIdentityName())return;
+
+    // Le nom peut être mémorisé, mais chaque nouvelle ouverture du site
+    // doit demander explicitement qui utilise cet appareil.
+    setTimeout(()=>{
+      try{ openSpectatorIdentity(true); }catch(e){ console.warn("Identification BPT :",e); }
+    },120);
   }
 
   function populateSpectatorNameList(){
     const select=$3("live3SpectatorNameInput");
     if(!select)return;
 
-    const currentValue=String(select.value||spectatorName()||"").trim();
+    const currentValue=String(select.value||liveIdentityName()||"").trim();
     const names=(db?.players||[])
       .filter(p=>p && p.active===true && String(p.name||"").trim())
       .map(p=>String(p.name).trim())
@@ -25313,11 +25459,14 @@ document.addEventListener("visibilitychange",()=>{
   }
 
   function openSpectatorIdentity(force=false){
-    if(isOwner())return;
-    if(!isActive())return;
+    if(!force){
+      if(isOwner())return;
+      if(!isActive())return;
+      if(liveIdentityConfirmed)return;
+    }
 
-    const existing=spectatorName();
-    if(existing && !force)return;
+    const existing=liveIdentityName();
+    if(existing && !force && liveIdentityConfirmed)return;
 
     const modal=$3("live3SpectatorIdentityModal");
     if(!modal)return;
@@ -25373,15 +25522,24 @@ document.addEventListener("visibilitychange",()=>{
       return;
     }
 
-    localStorage.setItem(SPECTATOR_NAME_KEY,clean);
+    localStorage.setItem(LIVE_IDENTITY_KEY,clean);
+    liveIdentityConfirmed=true;
+
+    // Si aucun Live n'est actif, ce joueur est le futur maître :
+    // préremplir le lieu avec son nom.
+    if(!isActive()){
+      const loc=$3("live3Location");
+      if(loc)loc.value=clean;
+    }
+
     closeSpectatorIdentity();
     await updateViewerPresence();
     render();
   }
 
   async function updateViewerPresence(){
-    if(!isActive() || isOwner())return;
-    const name=spectatorName();
+    if(!isActive() || isOwner() || !liveIdentityConfirmed)return;
+    const name=liveIdentityName();
     if(!name)return;
 
     try{
@@ -25463,7 +25621,7 @@ document.addEventListener("visibilitychange",()=>{
   function startSpectatorHeartbeat(){
     if(spectatorHeartbeat)return;
     spectatorHeartbeat=setInterval(()=>{
-      if(isActive() && !isOwner() && spectatorName()){
+      if(isActive() && !isOwner() && liveIdentityConfirmed && liveIdentityName()){
         updateViewerPresence();
       }
     },15000);
@@ -25514,7 +25672,12 @@ document.addEventListener("visibilitychange",()=>{
   }
 
   async function createLive(){
-    const location=String($3("live3Location")?.value||"").trim();
+    if(!liveIdentityConfirmed || !liveIdentityName()){
+      openSpectatorIdentity(true);
+      return;
+    }
+
+    const location=String($3("live3Location")?.value||liveIdentityName()||"").trim();
     const selected=[...document.querySelectorAll('#live3PlayerPicker input[type="checkbox"]:checked')].map(x=>x.value);
     if(!location){alert("Indiquez le nom / lieu de la partie.");return;}
     if(selected.length<2){alert("Sélectionnez au moins 2 joueurs.");return;}
@@ -25528,7 +25691,7 @@ document.addEventListener("visibilitychange",()=>{
       const now=Date.now();
       const state={
         version:3,active:true,sessionId:"L3_"+now.toString(36)+"_"+Math.random().toString(36).slice(2,7),
-        ownerId:uid(),ownerLabel:deviceLabel(),createdAt:now,updatedAt:now,
+        ownerId:uid(),ownerLabel:liveIdentityName()||deviceLabel(),createdAt:now,updatedAt:now,
         location,date:$3("live3Date").value||new Date().toISOString().slice(0,10),
         startStack:Math.max(100,Number($3("live3Stack").value)||20000),
         buyIn:Math.max(0,Number($3("live3BuyIn").value)||0),
@@ -26094,7 +26257,7 @@ document.addEventListener("visibilitychange",()=>{
     await r.transaction(s=>{
       if(!s?.active||String(s.ownerId||"")===uid())return s;
       s=clone(s);
-      s.takeoverRequest={requesterId:uid(),requesterLabel:spectatorName()||deviceLabel(),requestedAt:Date.now()};
+      s.takeoverRequest={requesterId:uid(),requesterLabel:liveIdentityName()||deviceLabel(),requestedAt:Date.now()};
       s.updatedAt=Date.now();sent=true;return s;
     });
     if(sent)$3("live3TakeoverStatus").textContent="Demande envoyée.";
@@ -26272,6 +26435,13 @@ document.addEventListener("visibilitychange",()=>{
     closeMobilePlayerSelector();
   }
 
+  function prefillLiveLocationFromIdentity(){
+    const loc=$3("live3Location");
+    if(!loc || isActive())return;
+    const name=liveIdentityName();
+    if(name && !String(loc.value||"").trim())loc.value=name;
+  }
+
   function renderPrepPlayers(){
     const host=$3("live3PlayerPicker");
     if(!host)return;
@@ -26315,6 +26485,7 @@ document.addEventListener("visibilitychange",()=>{
       : '<div class="muted">Aucun joueur actif. Ajoutez un nouveau joueur ci-dessous.</div>';
 
     updateMobilePlayerSelectionCount();
+    prefillLiveLocationFromIdentity();
     if($3("live3MobilePlayerModal")?.classList.contains("open")){
       renderMobilePlayerSelector();
     }
@@ -26394,7 +26565,12 @@ document.addEventListener("visibilitychange",()=>{
     if(!active){
       if(prep)prep.style.display="";
       if(game)game.style.display="none";
-      if(role){role.textContent="AUCUN LIVE";role.className="bpt-live3-role-badge";}
+      if(role){
+        role.textContent=liveIdentityConfirmed && liveIdentityName()
+          ? `PRÊT · ${liveIdentityName()}`
+          : "IDENTIFICATION";
+        role.className="bpt-live3-role-badge";
+      }
       renderPrepPlayers();
       updateUndoEliminationButton();
       if($3("live3ViewerInfo")){
@@ -26404,19 +26580,19 @@ document.addEventListener("visibilitychange",()=>{
           viewerRenderSignature="inactive";
         }
       }
-      closeSpectatorIdentity();
+      if(!liveIdentityConfirmed)openSpectatorIdentity(true);
       return;
     }
 
     if(prep)prep.style.display="none";
     if(game)game.style.display="";
     if(role){
-      role.textContent=owner?"MAÎTRE":"SPECTATEUR";
+      role.textContent=owner?`MAÎTRE · ${current?.ownerLabel||liveIdentityName()||deviceLabel()}`:`SPECTATEUR · ${liveIdentityName()||"—"}`;
       role.className="bpt-live3-role-badge "+(owner?"master":"spectator");
     }
 
-    if(!owner && !spectatorName()){
-      openSpectatorIdentity(false);
+    if(!liveIdentityConfirmed){
+      openSpectatorIdentity(true);
     }
 
     // La présence est maintenue par le heartbeat (15 s) et par
@@ -26442,7 +26618,7 @@ document.addEventListener("visibilitychange",()=>{
     const next=nx?`${fmt(nx.sb)} / ${fmt(nx.bb)}${nx.ante?` · ante ${fmt(nx.ante)}`:""}`:"Dernier niveau";
 
     $3("live3GameLocation").textContent=current.location||"Live BPT";
-    $3("live3GameMeta").textContent=`${current.date||""} · ${current.players?.length||0} joueurs · maître : ${current.ownerLabel||"appareil"}`;
+    $3("live3GameMeta").textContent=`${current.date||""} · ${current.players?.length||0} joueurs · maître : ${current.ownerLabel||"—"}`;
     $3("live3Blinds").textContent=blinds;$3("live3Ante").textContent=ante;
     const blindDurationMin=currentBlindDurationMinutes();
     if($3("live3BlindDurationLabel"))$3("live3BlindDurationLabel").textContent=`Durée : ${blindDurationMin} min`;
@@ -26794,9 +26970,12 @@ document.addEventListener("visibilitychange",()=>{
     $3("live3QuitViewBtn")?.addEventListener("click",()=>showView("dashboard"));
 
     document.addEventListener("visibilitychange",()=>{
-      if(!document.hidden && isActive() && !isOwner()){
-        if(!spectatorName())openSpectatorIdentity(false);
-        else updateViewerPresence();
+      if(!document.hidden){
+        if(!liveIdentityConfirmed){
+          openSpectatorIdentity(true);
+        }else if(isActive() && !isOwner()){
+          updateViewerPresence();
+        }
       }
     });
 
@@ -26832,5 +27011,49 @@ document.addEventListener("visibilitychange",()=>{
   else bind();
 })();
 </script>
+
+
+<script id="bpt-identity-entry-gate">
+(function(){
+  function launch(){
+    setTimeout(()=>{
+      try{
+        if(typeof requireIdentityOnSiteEntry==="function"){
+          requireIdentityOnSiteEntry();
+        }else if(typeof openSpectatorIdentity==="function"){
+          openSpectatorIdentity(true);
+        }
+      }catch(e){
+        console.warn("Ouverture identification BPT :",e);
+      }
+    },250);
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",launch,{once:true});
+  }else{
+    launch();
+  }
+
+  window.addEventListener("pageshow",event=>{
+    if(event.persisted){
+      setTimeout(()=>{
+        try{
+          if(typeof requireIdentityOnSiteEntry==="function")requireIdentityOnSiteEntry();
+        }catch(_e){}
+      },100);
+    }
+  });
+})();
+</script>
+
+<script id="bpt-photo-url-migration-launcher">
+setTimeout(()=>{
+  if(typeof migrateLegacyPhotoMapsToUrls==="function"){
+    migrateLegacyPhotoMapsToUrls().catch(e=>console.warn("Migration photos existantes :",e));
+  }
+},3000);
+</script>
+
 </body>
 </html>
