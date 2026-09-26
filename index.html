@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V3.48 HIDE ELIM CLOCK KEEP PLAYTIME
+BPT LIVE V3.50 LEGACY PLAYTIME 2115
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -8054,7 +8054,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 3.48 — Classement / Parties / Profils / Dashboard */
+/* BPT 3.50 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8117,7 +8117,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 3.48 — Records / Impact / Courbes */
+/* BPT 3.50 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8143,7 +8143,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 3.48 — blocs repliables */
+/* BPT 3.50 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -11557,7 +11557,7 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs
 
 <style id="bpt-v2300-clean-fullscreen-refactor">
 /* ================================
-   BPT 3.48 — CLEAN FULLSCREEN REFACTOR
+   BPT 3.50 — CLEAN FULLSCREEN REFACTOR
    One final authoritative layout for fullscreen / mobile live.
    ================================ */
 
@@ -11937,7 +11937,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 
 
 <style id="bpt-v231-fullscreen-component">
-/* BPT 3.48 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
+/* BPT 3.50 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
 #liveFullscreenDisplay,
 #liveFullscreenDisplay:fullscreen,
 #liveFullscreenDisplay:-webkit-full-screen,
@@ -12078,7 +12078,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-actions{width:100% !important;grid-template-columns:1fr 1fr !important;gap:8px !important}
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-action{min-height:46px !important;font-size:12px !important;letter-spacing:.02em !important}
 
-/* BPT 3.48 — direct mobile fullscreen classes on the target itself */
+/* BPT 3.50 — direct mobile fullscreen classes on the target itself */
 #liveFullscreenDisplay.bptfs-mobile{height:100dvh !important;}
 #liveFullscreenDisplay.bptfs-mobile::before,
 #liveFullscreenDisplay.bptfs-mobile::after{display:none !important;}
@@ -14369,7 +14369,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="3.48";
+const BPT_APP_VERSION="3.50";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -15639,7 +15639,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 3.48</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 3.50</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -15855,7 +15855,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 3.48 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 3.50 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -16121,7 +16121,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 3.48 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 3.50 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -17181,7 +17181,7 @@ async function cloudPoll(){
 
 let liveAutoOpenDone=false;
 async function autoOpenActiveLiveOnStartup(){
-  // BPT 3.48 : plus d'ouverture automatique du Live au démarrage.
+  // BPT 3.50 : plus d'ouverture automatique du Live au démarrage.
   // L'application s'ouvre toujours sur Accueil ; le Live actif est indiqué sur l'onglet Live.
   liveAutoOpenDone=true;
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -18656,7 +18656,7 @@ function showEndGameSummary(rows){
             <td>${r.kills||0}</td>
             <td>${Number(r.place)===1?"🏆 Vainqueur":(r.killer?playerNameHtml(r.killer):"—")}</td>
             <td>${r.outLevel?`N${Number(r.outLevel)}`:"—"}</td>
-            <td>${Number(r.place)===1?"—":esc(formatElapsedElimination(r.outElapsedSec)||"—")}</td>
+            <td>${esc(playTimeDisplay(r))}</td>
             <td>${euro(r.gross)}</td>
             <td>${euro(r.net)}</td>
           </tr>`).join("")}
@@ -18690,7 +18690,7 @@ function renderHistoryCards(){
         <div class="history-winner">🏆 ${win?playerNameHtml(win.player):"—"} <span>· ${num(win?.points||0,0)} pts</span></div>
       </summary>
       <div class="history-game-body"><div class="tablewrap"><table><thead><tr><th>Place</th><th>Joueur</th><th>Pts</th><th>Kills</th><th>Éliminé par</th><th>Temps de jeu</th><th>Gain</th><th>Net</th></tr></thead><tbody>
-        ${sorted.map(r=>`<tr><td>${r.place}</td><td>${playerNameHtml(r.player,{button:true,onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))`})}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${Number(r.place)===1?"🏆":(r.killer?playerNameHtml(r.killer):"—")}</td><td>${Number(r.place)===1?"—":esc(formatElapsedElimination(r.outElapsedSec)||"—")}</td><td>${euro(r.gross)}</td><td>${euro(r.net)}</td></tr>`).join("")}
+        ${sorted.map(r=>`<tr><td>${r.place}</td><td>${playerNameHtml(r.player,{button:true,onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))`})}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${Number(r.place)===1?"🏆":(r.killer?playerNameHtml(r.killer):"—")}</td><td>${esc(playTimeDisplay(r))}</td><td>${euro(r.gross)}</td><td>${euro(r.net)}</td></tr>`).join("")}
       </tbody></table></div></div>
     </details>`;
   }).join("");
@@ -19147,16 +19147,21 @@ function achievementPlayers(rowsOverride=null){
   });
 
   // Badges temps : uniquement sur les parties qui ont un temps relatif fiable.
-  const timedElims=rows.filter(r=>
-    Number(r.place)>1 &&
-    Number.isFinite(Number(r.outElapsedSec)) &&
-    Number(r.outElapsedSec)>0
-  );
+  const timedElims=rows
+    .filter(r=>Number(r.place)>1)
+    .map(r=>({
+      ...r,
+      _elapsedForStats:
+        Number(r.outElapsedSec)>0
+          ? Number(r.outElapsedSec)
+          : legacyElapsedFromOutTime(r.outTime)
+    }))
+    .filter(r=>Number(r._elapsedForStats)>0);
 
   const timedByPlayer={};
   for(const r of timedElims){
     if(!timedByPlayer[r.player])timedByPlayer[r.player]=[];
-    timedByPlayer[r.player].push(Number(r.outElapsedSec));
+    timedByPlayer[r.player].push(Number(r._elapsedForStats));
   }
 
   let sprinterNames=[];
@@ -19173,10 +19178,10 @@ function achievementPlayers(rowsOverride=null){
   let prematureNames=[];
   let prematureRecordSec=0;
   if(timedElims.length){
-    prematureRecordSec=Math.min(...timedElims.map(r=>Number(r.outElapsedSec)));
+    prematureRecordSec=Math.min(...timedElims.map(r=>Number(r._elapsedForStats)));
     prematureNames=[...new Set(
       timedElims
-        .filter(r=>Number(r.outElapsedSec)===prematureRecordSec)
+        .filter(r=>Number(r._elapsedForStats)===prematureRecordSec)
         .map(r=>r.player)
     )];
   }
@@ -19466,6 +19471,44 @@ function formatElapsedElimination(totalSec){
   return h>0 ? `${h} h ${String(m).padStart(2,"0")}` : `${m} min`;
 }
 
+function legacyElapsedFromOutTime(outTime){
+  const raw=String(outTime||"").trim();
+  if(!raw)return 0;
+
+  const m=raw.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  if(!m)return 0;
+
+  const h=Number(m[1]);
+  const min=Number(m[2]);
+  const sec=Number(m[3]||0);
+  if(h<0||h>23||min<0||min>59||sec<0||sec>59)return 0;
+
+  // Anciennes parties BPT : heure de départ conventionnelle 21 h 15.
+  const startSec=21*3600+15*60;
+  let outSec=h*3600+min*60+sec;
+
+  // Si l'élimination est après minuit, on bascule au jour suivant.
+  if(outSec<startSec)outSec+=24*3600;
+
+  const elapsed=outSec-startSec;
+
+  // Garde-fou : on n'affiche que des durées plausibles de tournoi.
+  if(elapsed<=0 || elapsed>12*3600)return 0;
+  return elapsed;
+}
+
+function playTimeDisplay(row){
+  if(Number(row?.place)===1)return "—";
+
+  const direct=Number(row?.outElapsedSec)||0;
+  if(direct>0)return formatElapsedElimination(direct);
+
+  const legacy=legacyElapsedFromOutTime(row?.outTime);
+  if(legacy>0)return formatElapsedElimination(legacy);
+
+  return "Non disponible";
+}
+
 function gameUnlockedAchievements(gameNo){
   const history=Array.isArray(db.history)?db.history:[];
   const g=Number(gameNo);
@@ -19543,7 +19586,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 3.48 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 3.50 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -20544,7 +20587,7 @@ function renderLatestGame(){
       <td>${num(r.kills||0,0)}</td>
       <td>${Number(r.place)===1?"🏆":(r.killer?playerNameHtml(r.killer):"—")}</td>
       <td>${r.outLevel?`N${Number(r.outLevel)}`:"—"}</td>
-      <td>${Number(r.place)===1?"—":esc(formatElapsedElimination(r.outElapsedSec)||"—")}</td>
+      <td>${esc(playTimeDisplay(r))}</td>
       <td>${euro(r.gross||0)}</td>
       <td>${euro(r.net||0)}</td>
     </tr>`).join("")}</tbody>
@@ -23854,7 +23897,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 3.48 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 3.50 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -24517,7 +24560,7 @@ liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 (async()=>{
   await initCloudSync();
-  // BPT 3.48 : l'ouverture par défaut est toujours Accueil.
+  // BPT 3.50 : l'ouverture par défaut est toujours Accueil.
   spectatorAutoOpenSuppressed=true;
   document.body.classList.remove("spectator-live-open");
   await showView("dashboard");
@@ -25443,7 +25486,7 @@ document.addEventListener("visibilitychange",()=>{
           selected.length,
           Math.max(100,Number($3("live3Stack").value)||20000)
         )[0].durationSec,
-        players:selected.map(name=>({name,status:"in",place:null,killer:"",outAt:null})),
+        players:selected.map(name=>({name,status:"in",place:null,killer:"",outAt:null,outLevel:null,outTime:"",outElapsedSec:null})),
         viewers:{},takeoverRequest:null,chat:[]
       };
       await r.transaction(server=>{
@@ -25663,7 +25706,7 @@ document.addEventListener("visibilitychange",()=>{
       victimPlayer.outTime=new Date(elimNow).toLocaleTimeString("fr-FR");
       victimPlayer.outElapsedSec=Math.max(
         1,
-        Math.floor(
+        Math.round(
           Number(s.elapsedSec||0) +
           (s.running && s.runStartedAt
             ? Math.max(0,(elimNow-Number(s.runStartedAt||elimNow))/1000)
