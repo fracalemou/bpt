@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V3.62 MOBILE PHOTO PICKER
+BPT LIVE V3.63 PHOTO HOST CONFIG
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -8054,7 +8054,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 3.62 — Classement / Parties / Profils / Dashboard */
+/* BPT 3.63 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8117,7 +8117,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 3.62 — Records / Impact / Courbes */
+/* BPT 3.63 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8143,7 +8143,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 3.62 — blocs repliables */
+/* BPT 3.63 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -8187,7 +8187,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.62 — sélecteur joueurs mobile : noms toujours visibles ===== */
+/* ===== BPT 3.63 — sélecteur joueurs mobile : noms toujours visibles ===== */
 @media (max-width:700px){
   #live3MobilePlayerModal .bpt-live3-mobile-player-grid{
     grid-template-columns:1fr 1fr !important;
@@ -8257,7 +8257,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.62 — présence globale application ===== */
+/* ===== BPT 3.63 — présence globale application ===== */
 .bpt-header{position:relative}
 .bpt-online-presence{
   position:absolute;
@@ -8315,7 +8315,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.62 — sélecteur mobile joueurs lisible en 2 colonnes ===== */
+/* ===== BPT 3.63 — sélecteur mobile joueurs lisible en 2 colonnes ===== */
 #live3MobilePlayerGrid{
   display:grid !important;
   grid-template-columns:repeat(2, minmax(0,1fr)) !important;
@@ -8382,7 +8382,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.62 — ajout photo depuis téléphone ===== */
+/* ===== BPT 3.63 — ajout photo depuis téléphone ===== */
 .game-photo-mobile-btn{display:none}
 @media(max-width:700px){
   .game-photo-actions{
@@ -11782,7 +11782,7 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs
 
 <style id="bpt-v2300-clean-fullscreen-refactor">
 /* ================================
-   BPT 3.62 — CLEAN FULLSCREEN REFACTOR
+   BPT 3.63 — CLEAN FULLSCREEN REFACTOR
    One final authoritative layout for fullscreen / mobile live.
    ================================ */
 
@@ -12162,7 +12162,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 
 
 <style id="bpt-v231-fullscreen-component">
-/* BPT 3.62 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
+/* BPT 3.63 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
 #liveFullscreenDisplay,
 #liveFullscreenDisplay:fullscreen,
 #liveFullscreenDisplay:-webkit-full-screen,
@@ -12303,7 +12303,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-actions{width:100% !important;grid-template-columns:1fr 1fr !important;gap:8px !important}
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-action{min-height:46px !important;font-size:12px !important;letter-spacing:.02em !important}
 
-/* BPT 3.62 — direct mobile fullscreen classes on the target itself */
+/* BPT 3.63 — direct mobile fullscreen classes on the target itself */
 #liveFullscreenDisplay.bptfs-mobile{height:100dvh !important;}
 #liveFullscreenDisplay.bptfs-mobile::before,
 #liveFullscreenDisplay.bptfs-mobile::after{display:none !important;}
@@ -14594,7 +14594,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="3.62";
+const BPT_APP_VERSION="3.63";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -15868,11 +15868,32 @@ function simplifyRecordTextForMobile(text){
 </section>
 
 <section id="settings" class="view">
+  <details class="settings-block" open>
+    <summary>Photos des parties</summary>
+    <div class="settings-block-content" style="padding:14px 18px 18px">
+      <p class="muted" style="margin-top:0">
+        Les photos sont hébergées hors Firebase. Firebase ne conserve que leur URL.
+      </p>
+      <div class="grid" style="align-items:end">
+        <label class="span6">Cloudinary · Cloud name
+          <input id="photoHostCloudName" type="text" autocomplete="off" placeholder="ex. mon-cloud">
+        </label>
+        <label class="span6">Cloudinary · Upload preset (Unsigned)
+          <input id="photoHostUploadPreset" type="text" autocomplete="off" placeholder="ex. bpt_unsigned">
+        </label>
+        <div class="span12">
+          <button id="photoHostSaveBtn" class="btn secondary" type="button">Enregistrer l’hébergement photo</button>
+          <span id="photoHostSaveStatus" class="muted" style="margin-left:10px"></span>
+        </div>
+      </div>
+    </div>
+  </details>
+
   <div class="hero tab-premium-hero">
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 3.62</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 3.63</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -16088,7 +16109,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 3.62 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 3.63 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -16291,6 +16312,33 @@ window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
 <script>
 const $ = id => document.getElementById(id);
 
+function renderPhotoHostSettings(){
+  const cfg=typeof bptPhotoHostConfig==="function" ? bptPhotoHostConfig() : {cloudName:"",uploadPreset:""};
+  const c=$("photoHostCloudName"),p=$("photoHostUploadPreset"),s=$("photoHostSaveStatus");
+  if(c && document.activeElement!==c)c.value=cfg.cloudName||"";
+  if(p && document.activeElement!==p)p.value=cfg.uploadPreset||"";
+  if(s)s.textContent=(cfg.cloudName&&cfg.uploadPreset)?"Configuré":"À configurer";
+}
+
+document.addEventListener("click",e=>{
+  const btn=e.target?.closest?.("#photoHostSaveBtn");
+  if(!btn)return;
+  const c=String($("photoHostCloudName")?.value||"").trim();
+  const p=String($("photoHostUploadPreset")?.value||"").trim();
+  const s=$("photoHostSaveStatus");
+  if(!c||!p){
+    if(s)s.textContent="Cloud name et Upload preset requis.";
+    return;
+  }
+  saveBptPhotoHostConfig(c,p);
+  if(s)s.textContent="Enregistré";
+});
+
+document.addEventListener("DOMContentLoaded",()=>{
+  setTimeout(renderPhotoHostSettings,300);
+});
+
+
 document.addEventListener("click",e=>{
   const btn=e.target?.closest?.("#latestGamePhotoMobileBtn");
   if(!btn)return;
@@ -16368,8 +16416,30 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos";
+const GAME_PHOTO_BUCKET="bpt-photos"; // legacy only; no new photo is uploaded to Supabase
 const BPT_PHOTO_MAX_BYTES=550000;
+const PHOTO_HOST_CONFIG_KEY="bpt_photo_host_config_v1";
+
+function bptPhotoHostConfig(){
+  try{
+    const v=JSON.parse(localStorage.getItem(PHOTO_HOST_CONFIG_KEY)||"{}");
+    return {
+      cloudName:String(v.cloudName||"").trim(),
+      uploadPreset:String(v.uploadPreset||"").trim()
+    };
+  }catch(_e){
+    return {cloudName:"",uploadPreset:""};
+  }
+}
+
+function saveBptPhotoHostConfig(cloudName,uploadPreset){
+  const cfg={
+    cloudName:String(cloudName||"").trim(),
+    uploadPreset:String(uploadPreset||"").trim()
+  };
+  localStorage.setItem(PHOTO_HOST_CONFIG_KEY,JSON.stringify(cfg));
+  return cfg;
+}
 
 function bptSafeFilePart(value){
   return String(value||"")
@@ -16379,42 +16449,33 @@ function bptSafeFilePart(value){
     .slice(0,80)||"photo";
 }
 
-function bptSupabaseStorageHeaders(contentType="application/json"){
-  return {
-    "apikey":SUPABASE_PUBLISHABLE_KEY,
-    "Authorization":"Bearer "+SUPABASE_PUBLISHABLE_KEY,
-    "Content-Type":contentType
-  };
-}
-
-function bptPhotoPublicUrl(path){
-  const clean=String(path||"").replace(/^\/+/,"");
-  return `${SUPABASE_URL}/storage/v1/object/public/${GAME_PHOTO_BUCKET}/${clean}`;
-}
-
 async function bptUploadPhotoBlobToUrl(path,blob){
   if(!blob)throw new Error("Image vide.");
   if(blob.size>BPT_PHOTO_MAX_BYTES)throw new Error("La photo compressée est encore trop volumineuse.");
 
-  const clean=String(path||"").replace(/^\/+/,"");
-  const endpoint=`${SUPABASE_URL}/storage/v1/object/${GAME_PHOTO_BUCKET}/${clean}`;
-
-  const res=await fetch(endpoint,{
-    method:"POST",
-    headers:{
-      ...bptSupabaseStorageHeaders(blob.type||"image/jpeg"),
-      "x-upsert":"true"
-    },
-    body:blob
-  });
-
-  if(!res.ok){
-    let msg="";
-    try{msg=await res.text();}catch(_e){}
-    throw new Error(`Stockage photo impossible (${res.status})${msg?": "+msg.slice(0,180):""}`);
+  const cfg=bptPhotoHostConfig();
+  if(!cfg.cloudName || !cfg.uploadPreset){
+    throw new Error("Hébergement photo non configuré. Renseignez Cloud name et Upload preset dans Paramètres.");
   }
 
-  return bptPhotoPublicUrl(clean);
+  const form=new FormData();
+  form.append("file",blob,"bpt-photo.jpg");
+  form.append("upload_preset",cfg.uploadPreset);
+  form.append("folder","bpt");
+  form.append("public_id",bptSafeFilePart(path.replace(/\.[^.]+$/,"")));
+
+  const endpoint=`https://api.cloudinary.com/v1_1/${encodeURIComponent(cfg.cloudName)}/image/upload`;
+  const res=await fetch(endpoint,{method:"POST",body:form});
+
+  let data={};
+  try{data=await res.json();}catch(_e){}
+
+  if(!res.ok || !data?.secure_url){
+    const msg=String(data?.error?.message||`HTTP ${res.status}`);
+    throw new Error("Hébergement photo impossible : "+msg);
+  }
+
+  return String(data.secure_url);
 }
 
 let sbClient=null;
@@ -17475,7 +17536,7 @@ async function cloudPoll(){
 
 let liveAutoOpenDone=false;
 async function autoOpenActiveLiveOnStartup(){
-  // BPT 3.62 : plus d'ouverture automatique du Live au démarrage.
+  // BPT 3.63 : plus d'ouverture automatique du Live au démarrage.
   // L'application s'ouvre toujours sur Accueil ; le Live actif est indiqué sur l'onglet Live.
   liveAutoOpenDone=true;
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -19939,14 +20000,14 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 3.62 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 3.63 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
   if(!window.bptFirebaseEnsure)return false;
   try{ await window.bptFirebaseEnsure(); return true; }catch(e){ console.warn("BPT photo Firebase:",e); return false; }
 }
-function firebasePhotoErrorMessage(error){ return String(error?.message||error||"Erreur Firebase photo."); }
+function firebasePhotoErrorMessage(error){ return String(error?.message||error||"Erreur Photo."); }
 async function fileToCompressedBlob(file){
   return new Promise((resolve,reject)=>{
     if(!file){resolve(null);return;} if(!String(file.type||"").startsWith("image/")){reject(new Error("Le fichier sélectionné n’est pas une image."));return;}
@@ -24325,7 +24386,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 3.62 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 3.63 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -24988,7 +25049,7 @@ liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 (async()=>{
   await initCloudSync();
-  // BPT 3.62 : l'ouverture par défaut est toujours Accueil.
+  // BPT 3.63 : l'ouverture par défaut est toujours Accueil.
   spectatorAutoOpenSuppressed=true;
   document.body.classList.remove("spectator-live-open");
   await showView("dashboard");
