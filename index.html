@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V3.43 GAME DURATION FIX
+BPT LIVE V3.46 STABLE VIEWER LIST
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -14329,6 +14329,20 @@ body:has(#live3Fullscreen.open){
 }
 </style>
 
+
+<style id="bpt-live3-v346-viewer-stability">
+#live3 .bpt-live3-viewer-info{
+  min-height:24px;
+  contain:layout paint;
+}
+
+#live3 .bpt-live3-viewer-chip,
+#live3 .bpt-live3-viewer-count{
+  backface-visibility:hidden;
+  transform:translateZ(0);
+}
+</style>
+
 </head>
 <body>
 <script>
@@ -25016,6 +25030,7 @@ document.addEventListener("visibilitychange",()=>{
   let listenerInstalled=false;
   let advancing=false;
   let spectatorHeartbeat=null;
+  let viewerRenderSignature="";
   let lastChatMessageId=null;
   let chatSoundPrimed=false;
   let unreadChatCount=0;
@@ -25299,21 +25314,35 @@ document.addEventListener("visibilitychange",()=>{
 
     if(!isOwner()){
       host.style.display="none";
-      host.innerHTML="";
+      if(viewerRenderSignature!=="hidden"){
+        host.innerHTML="";
+        viewerRenderSignature="hidden";
+      }
       return;
     }
 
     const viewers=activeViewers();
+    const signature=viewers.map(v=>`${v.id}:${v.name}`).join("|");
+
     host.style.display="flex";
 
     if(!viewers.length){
-      host.innerHTML='<span class="muted">Aucun spectateur connecté</span>';
+      const emptySig="owner:empty";
+      if(viewerRenderSignature!==emptySig){
+        host.innerHTML='<span class="muted">Aucun spectateur connecté</span>';
+        viewerRenderSignature=emptySig;
+      }
       return;
     }
+
+    const fullSig=`owner:${signature}`;
+    if(viewerRenderSignature===fullSig)return;
 
     host.innerHTML=
       `<span class="bpt-live3-viewer-count">${viewers.length} spectateur${viewers.length>1?"s":""}</span>`+
       viewers.map(v=>`<span class="bpt-live3-viewer-chip">${escapeHtml(v.name)}</span>`).join("");
+
+    viewerRenderSignature=fullSig;
   }
 
   function startSpectatorHeartbeat(){
@@ -25982,7 +26011,7 @@ document.addEventListener("visibilitychange",()=>{
       if(!s?.active||String(s.sessionId||"")!==session)return s;
       s=clone(s);
       const list=Array.isArray(s.chat)?s.chat:[];
-      list.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),from:deviceLabel(),deviceId:uid(),text:message,at:Date.now()});
+      list.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),from:isOwner()?deviceLabel():(spectatorName()||deviceLabel()),deviceId:uid(),text:message,at:Date.now()});
       s.chat=list.slice(-20);s.updatedAt=Date.now();return s;
     });
     input.value="";
@@ -26255,7 +26284,10 @@ document.addEventListener("visibilitychange",()=>{
       updateUndoEliminationButton();
       if($3("live3ViewerInfo")){
         $3("live3ViewerInfo").style.display="none";
-        $3("live3ViewerInfo").innerHTML="";
+        if(viewerRenderSignature!=="inactive"){
+          $3("live3ViewerInfo").innerHTML="";
+          viewerRenderSignature="inactive";
+        }
       }
       closeSpectatorIdentity();
       return;
