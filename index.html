@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V3.83 PWA
+BPT LIVE V3.85 IN-APP INSTALL BUTTON
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -8052,7 +8052,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 3.83 — Classement / Parties / Profils / Dashboard */
+/* BPT 3.85 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8115,7 +8115,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 3.83 — Records / Impact / Courbes */
+/* BPT 3.85 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8141,7 +8141,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 3.83 — blocs repliables */
+/* BPT 3.85 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -8185,7 +8185,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.83 — sélecteur joueurs mobile : noms toujours visibles ===== */
+/* ===== BPT 3.85 — sélecteur joueurs mobile : noms toujours visibles ===== */
 @media (max-width:700px){
   #live3MobilePlayerModal .bpt-live3-mobile-player-grid{
     grid-template-columns:1fr 1fr !important;
@@ -8255,7 +8255,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.83 — présence globale application ===== */
+/* ===== BPT 3.85 — présence globale application ===== */
 .bpt-header{position:relative}
 .bpt-online-presence{
   position:absolute;
@@ -8313,7 +8313,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.83 — sélecteur mobile joueurs lisible en 2 colonnes ===== */
+/* ===== BPT 3.85 — sélecteur mobile joueurs lisible en 2 colonnes ===== */
 #live3MobilePlayerGrid{
   display:grid !important;
   grid-template-columns:repeat(2, minmax(0,1fr)) !important;
@@ -8382,7 +8382,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 
 
 
-/* ===== BPT 3.83 — photo mobile simple ===== */
+/* ===== BPT 3.85 — photo mobile simple ===== */
 @media(max-width:700px){
   #latestgame .game-photo-actions{
     display:flex;
@@ -8405,7 +8405,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.83 — commandes photo discrètes ===== */
+/* ===== BPT 3.85 — commandes photo discrètes ===== */
 
 
 #latestgame .game-photo-actions{
@@ -8454,7 +8454,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.83 — commandes photo discrètes PC + mobile ===== */
+/* ===== BPT 3.85 — commandes photo discrètes PC + mobile ===== */
 
 
 #latestgame .game-photo-actions{
@@ -8494,6 +8494,31 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   #latestGamePhotoDeleteBtn{
     padding:4px 8px !important;
     font-size:10px !important;
+  }
+}
+
+
+/* ===== BPT 3.85 — bouton Installer dans l'application ===== */
+.bpt-install-inline{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin:0 0 10px 0;
+  flex-wrap:wrap;
+}
+#bptInstallInlineBtn{
+  padding:5px 9px !important;
+  font-size:11px !important;
+  min-height:0 !important;
+}
+#bptInstallInlineStatus{
+  font-size:10px;
+  opacity:.72;
+}
+@media(max-width:700px){
+  .bpt-install-inline{
+    justify-content:flex-start;
+    margin-bottom:8px;
   }
 }
 
@@ -11868,7 +11893,7 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs
 
 <style id="bpt-v2300-clean-fullscreen-refactor">
 /* ================================
-   BPT 3.83 — CLEAN FULLSCREEN REFACTOR
+   BPT 3.85 — CLEAN FULLSCREEN REFACTOR
    One final authoritative layout for fullscreen / mobile live.
    ================================ */
 
@@ -12248,7 +12273,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 
 
 <style id="bpt-v231-fullscreen-component">
-/* BPT 3.83 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
+/* BPT 3.85 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
 #liveFullscreenDisplay,
 #liveFullscreenDisplay:fullscreen,
 #liveFullscreenDisplay:-webkit-full-screen,
@@ -12389,7 +12414,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-actions{width:100% !important;grid-template-columns:1fr 1fr !important;gap:8px !important}
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-action{min-height:46px !important;font-size:12px !important;letter-spacing:.02em !important}
 
-/* BPT 3.83 — direct mobile fullscreen classes on the target itself */
+/* BPT 3.85 — direct mobile fullscreen classes on the target itself */
 #liveFullscreenDisplay.bptfs-mobile{height:100dvh !important;}
 #liveFullscreenDisplay.bptfs-mobile::before,
 #liveFullscreenDisplay.bptfs-mobile::after{display:none !important;}
@@ -14664,6 +14689,32 @@ body:has(#live3Fullscreen.open){
 
 </head>
 <body>
+
+<div id="bptInstallBanner" style="
+  display:none; position:fixed; right:14px; bottom:14px; z-index:29990;
+  background:#111820; border:1px solid #394854; border-radius:12px;
+  padding:8px 10px; box-shadow:0 8px 24px rgba(0,0,0,.30);">
+  <button id="bptInstallBtn" class="btn secondary" type="button" style="font-size:12px;padding:7px 10px">
+    Installer BPT
+  </button>
+</div>
+
+<div id="bptIosInstallHelp" style="
+  display:none; position:fixed; inset:0; z-index:30010; background:rgba(0,0,0,.68);
+  align-items:center; justify-content:center; padding:18px;">
+  <div style="max-width:420px;width:100%;background:#111820;border:1px solid #42505b;
+              border-radius:14px;padding:18px;color:#f4f6f8;">
+    <h3 style="margin-top:0">Installer BPT sur iPhone</h3>
+    <p style="margin-bottom:10px">Dans Safari :</p>
+    <ol style="margin:0 0 14px 20px;padding:0">
+      <li>touchez <strong>Partager</strong></li>
+      <li>choisissez <strong>Sur l’écran d’accueil</strong></li>
+      <li>validez avec <strong>Ajouter</strong></li>
+    </ol>
+    <button id="bptIosInstallClose" class="btn ghost" type="button">Fermer</button>
+  </div>
+</div>
+
 <script>
 (function(){
   function applyBptMobileClass(){
@@ -14688,7 +14739,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="3.83";
+const BPT_APP_VERSION="3.85";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -14829,6 +14880,11 @@ function simplifyRecordTextForMobile(text){
 
 <section id="live3" class="view bpt-live3-view">
   <div class="hero tab-premium-hero bpt-live3-hero">
+    <div class="bpt-install-inline">
+      <button id="bptInstallInlineBtn" class="btn ghost" type="button">Installer BPT</button>
+      <span id="bptInstallInlineStatus" class="muted">PC · Android · iPhone</span>
+    </div>
+
     <div class="bpt-live3-hero-row">
       <div>
         <div class="home-kicker">BPT · Live V3</div>
@@ -15968,7 +16024,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 3.83</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 3.85</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -16235,7 +16291,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 3.83 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 3.85 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -17661,7 +17717,7 @@ async function cloudPoll(){
 
 let liveAutoOpenDone=false;
 async function autoOpenActiveLiveOnStartup(){
-  // BPT 3.83 : plus d'ouverture automatique du Live au démarrage.
+  // BPT 3.85 : plus d'ouverture automatique du Live au démarrage.
   // L'application s'ouvre toujours sur Accueil ; le Live actif est indiqué sur l'onglet Live.
   liveAutoOpenDone=true;
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -20125,7 +20181,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 3.83 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 3.85 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -24511,7 +24567,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 3.83 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 3.85 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -25174,7 +25230,7 @@ liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 (async()=>{
   await initCloudSync();
-  // BPT 3.83 : l'ouverture par défaut est toujours Accueil.
+  // BPT 3.85 : l'ouverture par défaut est toujours Accueil.
   spectatorAutoOpenSuppressed=true;
   document.body.classList.remove("spectator-live-open");
   await showView("dashboard");
@@ -27906,6 +27962,100 @@ setTimeout(()=>{
     }else{
       location.reload();
     }
+  });
+})();
+</script>
+
+
+<script id="bpt-pwa-install-button">
+(function(){
+  let deferredPrompt=null;
+
+  const isIos=()=>/iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone=()=>window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone===true;
+
+
+  function syncInlineInstallState(){
+    const btn=document.getElementById("bptInstallInlineBtn");
+    const status=document.getElementById("bptInstallInlineStatus");
+    if(!btn)return;
+
+    if(isStandalone()){
+      btn.style.display="none";
+      if(status)status.textContent="BPT installé";
+      return;
+    }
+
+    btn.style.display="";
+    if(status){
+      if(isIos())status.textContent="iPhone : aide d’installation";
+      else if(deferredPrompt)status.textContent="Installation disponible";
+      else status.textContent="PC / Android";
+    }
+  }
+
+  function showInstallButton(){
+    const banner=document.getElementById("bptInstallBanner");
+    if(!banner || isStandalone())return;
+    banner.style.display="block";
+  }
+
+  function hideInstallButton(){
+    const banner=document.getElementById("bptInstallBanner");
+    if(banner)banner.style.display="none";
+  }
+
+  window.addEventListener("beforeinstallprompt",e=>{
+    e.preventDefault();
+    deferredPrompt=e;
+    showInstallButton();
+    syncInlineInstallState();
+  });
+
+  window.addEventListener("appinstalled",()=>{
+    deferredPrompt=null;
+    hideInstallButton();
+    syncInlineInstallState();
+  });
+
+  document.addEventListener("DOMContentLoaded",()=>{
+    if(isStandalone()){
+      hideInstallButton();
+      syncInlineInstallState();
+      return;
+    }
+
+    // iOS does not expose beforeinstallprompt, but we can still show help.
+    if(isIos())showInstallButton();
+    syncInlineInstallState();
+  });
+
+  document.addEventListener("click",async e=>{
+    if(e.target?.closest?.("#bptIosInstallClose")){
+      const help=document.getElementById("bptIosInstallHelp");
+      if(help)help.style.display="none";
+      return;
+    }
+
+    if(!e.target?.closest?.("#bptInstallBtn") && !e.target?.closest?.("#bptInstallInlineBtn"))return;
+
+    if(isIos()){
+      const help=document.getElementById("bptIosInstallHelp");
+      if(help)help.style.display="flex";
+      return;
+    }
+
+    if(!deferredPrompt){
+      alert("L’installation n’est pas disponible automatiquement sur ce navigateur. Utilisez Chrome ou Edge, puis réessayez.");
+      return;
+    }
+
+    deferredPrompt.prompt();
+    try{
+      await deferredPrompt.userChoice;
+    }catch(_e){}
+    deferredPrompt=null;
+    hideInstallButton();
   });
 })();
 </script>
