@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V3.40 NICKNAMES TIMES FUN BADGES
+BPT LIVE V3.41 SHORT NICKNAME DYNAMICS
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -19423,7 +19423,7 @@ function playerNicknameSecondary(name){
 function funPlayerLabel(name){
   const real=String(name||"").trim();
   const nick=playerNicknameInfo(real).primary;
-  return nick ? `${real} « ${nick} »` : real;
+  return nick || real;
 }
 
 function formatGameDuration(totalSec){
@@ -20238,29 +20238,29 @@ function renderDashboard(){
 
       if(second){
         if(Math.abs(gap)<=5){
-          sentences.push(`${L(leader.name)} garde le fauteuil de patron, mais ${L(second.name)} lui respire franchement dans le cou : seulement ${num(gap,0)} point${Math.abs(gap)>1?"s":""} d’écart.`);
+          sentences.push(`${L(leader.name)} garde le fauteuil de patron. ${L(second.name)} n’est qu’à ${num(gap,0)} point${Math.abs(gap)>1?"s":""}.`);
         }else{
-          sentences.push(`${L(leader.name)} squatte la première place avec ${num(leader.points||0,0)} points. ${L(second.name)} est à ${num(gap,0)} point${Math.abs(gap)>1?"s":""} derrière — rien d’irrattrapable, mais il va falloir arrêter de distribuer les jetons.`);
+          sentences.push(`${L(leader.name)} squatte la première place. ${L(second.name)} pointe à ${num(gap,0)} point${Math.abs(gap)>1?"s":""}.`);
         }
       }else{
-        sentences.push(`${L(leader.name)} est seul en haut pour l’instant. Profitez-en pour prendre une capture, ça ne durera peut-être pas.`);
+        sentences.push(`${L(leader.name)} est seul en haut. Pour combien de temps ?`);
       }
 
       if(bestMover && Number(bestMover.progress)>0){
-        sentences.push(`${L(bestMover.name)} a trouvé l’ascenseur : +${bestMover.progress} place${Number(bestMover.progress)>1?"s":""} au classement.`);
+        sentences.push(`${L(bestMover.name)} prend l’ascenseur : +${bestMover.progress} place${Number(bestMover.progress)>1?"s":""}.`);
       }
 
       if(worstMover && Number(worstMover.progress)<0 && worstMover.name!==bestMover?.name){
-        sentences.push(`${L(worstMover.name)}, lui, a visiblement pris l’escalier dans le mauvais sens : ${Math.abs(worstMover.progress)} place${Math.abs(worstMover.progress)>1?"s":""} de perdue${Math.abs(worstMover.progress)>1?"s":""}.`);
+        sentences.push(`${L(worstMover.name)} prend l’escalier à l’envers : -${Math.abs(worstMover.progress)} place${Math.abs(worstMover.progress)>1?"s":""}.`);
       }
 
       if(lastWinner){
-        sentences.push(`Dernier à avoir ramassé tous les jetons : ${L(lastWinner.player)}. Il est donc officiellement autorisé à être insupportable jusqu’à la prochaine partie.`);
+        sentences.push(`${L(lastWinner.player)} est officiellement autorisé à être insupportable jusqu’à la prochaine partie.`);
       }
 
       if(onFire?.players?.length){
         const hot=onFire.players.map(L).join(", ");
-        sentences.push(`En ce moment, la table chauffe surtout du côté de ${hot}.`);
+        sentences.push(`En ce moment, ça chauffe chez ${hot}.`);
       }
 
       $("dashDynamicsText").textContent=sentences.slice(0,4).join(" ");
@@ -20482,7 +20482,7 @@ function renderLatestGame(){
         const unlocked=gameUnlockedAchievements(gameNo);
         if(!unlocked.length)return "Aucun nouveau";
         return unlocked.slice(0,3)
-          .map(a=>`${a.icon} ${a.name}`)
+          .map(a=>`${a.icon} ${a.name} — ${(a.players||[]).map(funPlayerLabel).join(", ")}`)
           .join(" · ")+(unlocked.length>3?` · +${unlocked.length-3}`:"");
       })()]
     ].map(([label,value])=>`<div class="latestgame-highlight"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join("");
@@ -20536,7 +20536,7 @@ function renderLatestGame(){
     ? [...byPlayer.entries()]
         .sort((a,b)=>a[0].localeCompare(b[0],"fr"))
         .map(([player,items])=>`<div class="latest-achievement-player">
-          ${playerNameHtml(player,{button:true,buttonClass:"latest-achievement-player-name",onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(player)}'))`})}
+          <button class="latest-achievement-player-name" type="button" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(player)}'))">${esc(funPlayerLabel(player))}</button>
           <div class="latest-achievement-list">
             ${items.map(a=>`<span class="latest-achievement-pill" title="${esc(a.desc)}">${a.icon} ${esc(a.name)}</span>`).join("")}
           </div>
