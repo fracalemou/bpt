@@ -1,4 +1,9 @@
 <!doctype html>
+<!--
+BPT LIVE V3.82 SIMPLIFIED CONNECTION HISTORY
+Base stable figée à partir de la V3.29.
+Conserver cette version comme point de retour avant toute évolution ultérieure.
+-->
 <!-- BPT: Live spectateur auto + durée écoulée + rôle maître/spectateur stabilisé -->
 <html lang="fr">
 <head>
@@ -7,7 +12,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<!-- BPT LIVE V3.29 ADD NEW PLAYER PRELIVE -->
+<!-- BPT BASE PROPRE LIVE V3 -->
 <title>BPT — Gestion du championnat</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23173a2b'/%3E%3Cpath d='M32 10c-6 10-18 15-18 26 0 7 5 12 11 12 3 0 5-1 7-4-1 5-3 8-7 10h14c-4-2-6-5-7-10 2 3 4 4 7 4 6 0 11-5 11-12 0-11-12-16-18-26z' fill='%23c8952e'/%3E%3C/svg%3E">
 <style>
@@ -7154,8 +7159,6 @@ body.bpt-mobile-device #dashboard .premium-panel h2{
 /* Parties : uniquement navigation, vainqueur, podium et résultat. */
 html.bpt-mobile-device #latestgame .latestgame-photo-placeholder,
 body.bpt-mobile-device #latestgame .latestgame-photo-placeholder,
-html.bpt-mobile-device #latestgame .game-photo-actions,
-body.bpt-mobile-device #latestgame .game-photo-actions,
 html.bpt-mobile-device #latestgame .latestgame-detail:nth-child(2),
 body.bpt-mobile-device #latestgame .latestgame-detail:nth-child(2),
 html.bpt-mobile-device #latestgame .latestgame-full-history,
@@ -8049,7 +8052,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 2.7.41 — Classement / Parties / Profils / Dashboard */
+/* BPT 3.82 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8112,7 +8115,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.41 — Records / Impact / Courbes */
+/* BPT 3.82 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8138,7 +8141,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.41 — blocs repliables */
+/* BPT 3.82 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -8179,6 +8182,319 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 .collapsible-block .card{
   margin-top:0;
+}
+
+
+/* ===== BPT 3.82 — sélecteur joueurs mobile : noms toujours visibles ===== */
+@media (max-width:700px){
+  #live3MobilePlayerModal .bpt-live3-mobile-player-grid{
+    grid-template-columns:1fr 1fr !important;
+    gap:8px !important;
+  }
+
+  #live3MobilePlayerModal .bpt-live3-mobile-player-item{
+    display:flex !important;
+    align-items:center !important;
+    gap:8px !important;
+    min-height:44px !important;
+    padding:9px 10px !important;
+    border:1px solid #3a4d42 !important;
+    border-radius:9px !important;
+    background:#17231d !important;
+    color:#f7f4ec !important;
+    overflow:visible !important;
+  }
+
+  #live3MobilePlayerModal .bpt-live3-mobile-player-item input[type="checkbox"]{
+    flex:0 0 auto !important;
+    width:18px !important;
+    height:18px !important;
+    margin:0 !important;
+  }
+
+  #live3MobilePlayerModal .bpt-live3-mobile-player-name{
+    display:block !important;
+    flex:1 1 auto !important;
+    min-width:0 !important;
+    color:#f7f4ec !important;
+    font-size:14px !important;
+    font-weight:700 !important;
+    line-height:1.2 !important;
+    white-space:normal !important;
+    overflow:visible !important;
+    text-overflow:clip !important;
+    word-break:break-word !important;
+  }
+
+  #live3MobilePlayerModal .bpt-live3-mobile-player-nickname{
+    display:block !important;
+    color:#d9bd7b !important;
+    font-size:11px !important;
+    font-weight:600 !important;
+    margin-top:2px !important;
+    white-space:normal !important;
+  }
+
+  #live3MobilePlayerModal .bpt-live3-mobile-player-text{
+    display:block !important;
+    flex:1 1 auto !important;
+    min-width:0 !important;
+    overflow:visible !important;
+  }
+
+  #live3MobilePlayerModal .bpt-live3-mobile-player-item:has(input:checked){
+    background:#21412f !important;
+    border-color:#c8952e !important;
+  }
+}
+
+@media (max-width:430px){
+  #live3MobilePlayerModal .bpt-live3-mobile-player-grid{
+    grid-template-columns:1fr !important;
+  }
+}
+
+
+/* ===== BPT 3.82 — présence globale application ===== */
+.bpt-header{position:relative}
+.bpt-online-presence{
+  position:absolute;
+  top:50%;
+  right:16px;
+  transform:translateY(-50%);
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-width:58px;
+  height:34px;
+  padding:0 10px;
+  border:1px solid rgba(200,149,46,.55);
+  border-radius:999px;
+  background:rgba(13,24,18,.92);
+  color:#fff8ea;
+  z-index:80;
+  cursor:default;
+  box-shadow:0 6px 18px rgba(0,0,0,.22);
+}
+.bpt-online-dot{color:#79c594;font-size:11px;line-height:1}
+#bptOnlineCount{font-size:14px;line-height:1}
+.bpt-online-tooltip{
+  position:absolute;
+  top:calc(100% + 8px);
+  right:0;
+  min-width:130px;
+  max-width:240px;
+  padding:8px 10px;
+  border-radius:8px;
+  border:1px solid #3a4d42;
+  background:#111c16;
+  color:#f7f4ec;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.35;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transform:translateY(-3px);
+  transition:opacity .15s ease,transform .15s ease,visibility .15s ease;
+  box-shadow:0 10px 28px rgba(0,0,0,.32);
+  white-space:normal;
+}
+.bpt-online-presence:hover .bpt-online-tooltip,
+.bpt-online-presence:focus .bpt-online-tooltip{
+  opacity:1;
+  visibility:visible;
+  transform:translateY(0);
+}
+@media(max-width:700px){
+  .bpt-online-presence{right:10px;height:30px;min-width:52px;padding:0 8px}
+  .bpt-online-tooltip{max-width:200px}
+  .bpt-header .brand{padding-right:64px}
+}
+
+
+/* ===== BPT 3.82 — sélecteur mobile joueurs lisible en 2 colonnes ===== */
+#live3MobilePlayerGrid{
+  display:grid !important;
+  grid-template-columns:repeat(2, minmax(0,1fr)) !important;
+  gap:8px !important;
+}
+
+#live3MobilePlayerGrid .bpt-live3-mobile-player-option{
+  display:flex !important;
+  align-items:flex-start !important;
+  gap:8px !important;
+  min-height:56px !important;
+  padding:10px 9px !important;
+  border:1px solid #41584a !important;
+  border-radius:12px !important;
+  background:#1d2b23 !important;
+  color:#ffffff !important;
+  cursor:pointer !important;
+  overflow:hidden !important;
+}
+
+#live3MobilePlayerGrid .bpt-live3-mobile-player-option.is-selected{
+  border-color:#c8952e !important;
+  background:#24352b !important;
+  box-shadow:inset 0 0 0 1px rgba(200,149,46,.25) !important;
+}
+
+#live3MobilePlayerGrid .bpt-live3-mobile-player-option input[type="checkbox"]{
+  flex:0 0 auto !important;
+  width:18px !important;
+  height:18px !important;
+  margin:1px 0 0 0 !important;
+}
+
+#live3MobilePlayerGrid .bpt-live3-mobile-player-name{
+  display:block !important;
+  flex:1 1 auto !important;
+  min-width:0 !important;
+  color:#ffffff !important;
+  -webkit-text-fill-color:#ffffff !important;
+  font-size:13px !important;
+  font-weight:800 !important;
+  line-height:1.22 !important;
+  white-space:normal !important;
+  word-break:break-word !important;
+  overflow:visible !important;
+  text-overflow:clip !important;
+}
+
+#live3MobilePlayerGrid .bpt-live3-mobile-player-option.is-new-player .bpt-live3-mobile-player-name{
+  color:#ffe8ad !important;
+  -webkit-text-fill-color:#ffe8ad !important;
+}
+
+@media (max-width:700px){
+  #live3MobilePlayerGrid{
+    grid-template-columns:repeat(2, minmax(0,1fr)) !important;
+  }
+}
+
+@media (max-width:380px){
+  #live3MobilePlayerGrid .bpt-live3-mobile-player-name{
+    font-size:12px !important;
+  }
+}
+
+
+
+
+/* ===== BPT 3.82 — photo mobile simple ===== */
+@media(max-width:700px){
+  #latestgame .game-photo-actions{
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:8px;
+    width:100%;
+  }
+
+  #latestGamePhotoAddBtn,
+  #latestGamePhotoDeleteBtn{
+    width:100%;
+    min-height:46px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-sizing:border-box;
+    font-size:13px !important;
+  }
+}
+
+
+/* ===== BPT 3.82 — commandes photo discrètes ===== */
+
+
+#latestgame .game-photo-actions{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+#latestGamePhotoAddBtn,
+#latestGamePhotoDeleteBtn{
+  width:auto !important;
+  min-height:0 !important;
+  padding:4px 8px !important;
+  border-radius:8px !important;
+  font-size:10px !important;
+  line-height:1.2 !important;
+  font-weight:700 !important;
+  opacity:.82;
+}
+
+#latestGamePhotoAddBtn:hover,
+#latestGamePhotoDeleteBtn:hover{
+  opacity:1;
+}
+
+@media(max-width:700px){
+  #latestgame .game-photo-actions{
+    display:flex;
+    flex-direction:row;
+    justify-content:center;
+    align-items:center;
+    gap:6px;
+    width:auto;
+  }
+
+  #latestGamePhotoAddBtn,
+  #latestGamePhotoDeleteBtn{
+    width:auto !important;
+    min-width:0 !important;
+    min-height:0 !important;
+    padding:4px 8px !important;
+    font-size:10px !important;
+  }
+}
+
+
+/* ===== BPT 3.82 — commandes photo discrètes PC + mobile ===== */
+
+
+#latestgame .game-photo-actions{
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  flex-wrap:wrap;
+  width:auto;
+}
+
+#latestGamePhotoAddBtn,
+#latestGamePhotoDeleteBtn{
+  width:auto !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  padding:4px 9px !important;
+  border-radius:8px !important;
+  font-size:10px !important;
+  line-height:1.2 !important;
+  font-weight:700 !important;
+  opacity:.82;
+}
+
+#latestGamePhotoAddBtn:hover,
+#latestGamePhotoDeleteBtn:hover{
+  opacity:1;
+}
+
+@media(max-width:700px){
+  #latestgame .game-photo-actions{
+    gap:6px;
+  }
+
+  #latestGamePhotoAddBtn,
+  #latestGamePhotoDeleteBtn{
+    padding:4px 8px !important;
+    font-size:10px !important;
+  }
 }
 
 </style>
@@ -11552,7 +11868,7 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs
 
 <style id="bpt-v2300-clean-fullscreen-refactor">
 /* ================================
-   BPT 2.7.41 — CLEAN FULLSCREEN REFACTOR
+   BPT 3.82 — CLEAN FULLSCREEN REFACTOR
    One final authoritative layout for fullscreen / mobile live.
    ================================ */
 
@@ -11932,7 +12248,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 
 
 <style id="bpt-v231-fullscreen-component">
-/* BPT 2.7.41 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
+/* BPT 3.82 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
 #liveFullscreenDisplay,
 #liveFullscreenDisplay:fullscreen,
 #liveFullscreenDisplay:-webkit-full-screen,
@@ -12073,7 +12389,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-actions{width:100% !important;grid-template-columns:1fr 1fr !important;gap:8px !important}
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-action{min-height:46px !important;font-size:12px !important;letter-spacing:.02em !important}
 
-/* BPT 2.7.41 — direct mobile fullscreen classes on the target itself */
+/* BPT 3.82 — direct mobile fullscreen classes on the target itself */
 #liveFullscreenDisplay.bptfs-mobile{height:100dvh !important;}
 #liveFullscreenDisplay.bptfs-mobile::before,
 #liveFullscreenDisplay.bptfs-mobile::after{display:none !important;}
@@ -13994,6 +14310,350 @@ body:has(#live3Fullscreen.open){
 }
 </style>
 
+
+<style id="bpt-live3-v330-mobile-player-selector">
+.bpt-live3-mobile-player-select{
+  display:none !important;
+}
+
+@media(max-width:700px){
+  #live3 .bpt-live3-player-picker{
+    display:none !important;
+  }
+
+  #live3 .bpt-live3-mobile-player-select{
+    display:flex !important;
+    width:100%;
+    align-items:center;
+    justify-content:center;
+    min-height:50px;
+    margin:0 0 12px;
+    background:#24352c !important;
+    color:#fff !important;
+    -webkit-text-fill-color:#fff !important;
+    border:1px solid #496052 !important;
+    font-size:14px;
+  }
+
+  #live3 .bpt-live3-mobile-player-select span{
+    color:var(--gold) !important;
+    -webkit-text-fill-color:var(--gold) !important;
+    font-size:17px;
+    margin:0 3px;
+  }
+}
+
+#live3MobilePlayerModal{
+  z-index:2200000 !important;
+}
+
+#live3MobilePlayerModal .bpt-live3-mobile-player-card{
+  width:min(680px,100%);
+  max-height:min(92dvh,900px);
+  display:grid;
+  grid-template-rows:auto auto auto minmax(0,1fr) auto;
+  gap:12px;
+  background:#141f19 !important;
+  color:#fff !important;
+  overflow:hidden;
+  border:1px solid #405548;
+}
+
+.bpt-live3-mobile-player-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+}
+
+.bpt-live3-mobile-player-head h2{
+  margin:2px 0 0;
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+}
+
+.bpt-live3-mobile-player-search{
+  width:100%;
+  min-height:46px;
+  background:#0f1813 !important;
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  border:1px solid #42594b !important;
+  border-radius:12px;
+  padding:10px 12px;
+  font-size:16px;
+}
+
+.bpt-live3-mobile-player-summary{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  color:#d5dfd8;
+}
+
+.bpt-live3-mobile-player-summary strong{
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+}
+
+.bpt-live3-mobile-clear{
+  appearance:none;
+  border:0;
+  background:transparent;
+  color:#d6aa4c;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.bpt-live3-mobile-player-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  overflow:auto;
+  align-content:start;
+  padding:2px 2px 8px;
+}
+
+.bpt-live3-mobile-player-option{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  min-height:48px;
+  padding:9px 10px;
+  border:1px solid #405548;
+  border-radius:12px;
+  background:#1d2b23;
+  color:#fff;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.bpt-live3-mobile-player-option input{
+  width:19px;
+  height:19px;
+  flex:0 0 19px;
+  accent-color:#c8952e;
+}
+
+.bpt-live3-mobile-player-option span{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+}
+
+.bpt-live3-mobile-player-option.is-selected{
+  background:#263d31;
+  border-color:#c8952e;
+}
+
+.bpt-live3-mobile-player-option.is-new-player{
+  border-color:#c8952e;
+}
+
+.bpt-live3-mobile-player-footer{
+  display:grid;
+  grid-template-columns:1fr 1.5fr;
+  gap:10px;
+  padding-top:4px;
+}
+
+@media(max-width:420px){
+  #live3MobilePlayerModal{
+    padding:6px !important;
+    align-items:stretch !important;
+  }
+
+  #live3MobilePlayerModal .bpt-live3-mobile-player-card{
+    width:100%;
+    height:calc(100dvh - 12px);
+    max-height:none;
+    border-radius:14px;
+    padding:14px;
+  }
+
+  .bpt-live3-mobile-player-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:7px;
+  }
+
+  .bpt-live3-mobile-player-option{
+    min-height:46px;
+    padding:8px;
+    font-size:12px;
+  }
+}
+</style>
+
+
+<style id="bpt-live3-v331-spectator-identity">
+#live3SpectatorIdentityModal{
+  z-index:2300000 !important;
+}
+
+#live3SpectatorIdentityModal .bpt-live3-spectator-id-card{
+  width:min(460px,100%);
+  background:#141f19 !important;
+  border:1px solid #405548 !important;
+  color:#fff !important;
+}
+
+#live3SpectatorIdentityModal h2{
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  margin:4px 0 6px;
+}
+
+#live3SpectatorIdentityModal .bpt-live3-spectator-select{
+  width:100%;
+  min-height:48px;
+  margin-top:12px;
+  background:#0f1813 !important;
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  border:1px solid #455d4e !important;
+  border-radius:12px;
+  padding:10px 12px;
+  font-size:16px;
+}
+
+#live3 .bpt-live3-viewer-info{
+  margin-top:6px;
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:6px;
+  color:#d8e2db;
+  font-size:12px;
+}
+
+#live3 .bpt-live3-viewer-chip{
+  display:inline-flex;
+  align-items:center;
+  padding:3px 8px;
+  border-radius:999px;
+  background:#25362d;
+  border:1px solid #43594c;
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  font-weight:750;
+}
+
+#live3 .bpt-live3-viewer-count{
+  color:var(--gold) !important;
+  -webkit-text-fill-color:var(--gold) !important;
+  font-weight:900;
+}
+</style>
+
+
+<style id="bpt-live3-v337-blind-duration">
+#live3 .bpt-live3-duration-label{
+  display:block;
+  margin-top:5px;
+  color:#c7d2cb !important;
+  -webkit-text-fill-color:#c7d2cb !important;
+  font-size:12px;
+  font-weight:800;
+}
+
+#live3Fullscreen .bpt-live3-fs-duration-label{
+  display:block;
+  margin-top:3px;
+  color:#c9d3cc !important;
+  -webkit-text-fill-color:#c9d3cc !important;
+  font-size:clamp(10px,1.2vw,13px) !important;
+  font-weight:800;
+}
+
+#live3 .bpt-live3-duration-editor{
+  margin-top:12px;
+  padding:12px 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  border:1px solid #405548;
+  border-radius:12px;
+  background:#17231d;
+}
+
+#live3 .bpt-live3-duration-editor-copy{
+  display:grid;
+  gap:3px;
+}
+
+#live3 .bpt-live3-duration-editor-copy strong{
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  font-size:14px;
+}
+
+#live3 .bpt-live3-duration-editor-copy span{
+  color:#aebbb2 !important;
+  -webkit-text-fill-color:#aebbb2 !important;
+  font-size:12px;
+}
+
+#live3 .bpt-live3-duration-editor-controls{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex:0 0 auto;
+}
+
+#live3 .bpt-live3-duration-editor-controls input{
+  width:76px !important;
+  min-height:42px;
+  text-align:center;
+  font-size:16px;
+}
+
+#live3 .bpt-live3-duration-editor-controls span{
+  color:#d8e1db !important;
+  -webkit-text-fill-color:#d8e1db !important;
+  font-weight:800;
+}
+
+@media(max-width:700px){
+  #live3 .bpt-live3-duration-editor{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  #live3 .bpt-live3-duration-editor-controls{
+    display:grid;
+    grid-template-columns:76px auto 1fr;
+    width:100%;
+  }
+
+  #live3 .bpt-live3-duration-editor-controls .btn{
+    width:100%;
+  }
+
+  #live3Fullscreen .bpt-live3-fs-duration-label{
+    font-size:9px !important;
+  }
+}
+</style>
+
+
+<style id="bpt-live3-v346-viewer-stability">
+#live3 .bpt-live3-viewer-info{
+  min-height:24px;
+  contain:layout paint;
+}
+
+#live3 .bpt-live3-viewer-chip,
+#live3 .bpt-live3-viewer-count{
+  backface-visibility:hidden;
+  transform:translateZ(0);
+}
+</style>
+
 </head>
 <body>
 <script>
@@ -14020,7 +14680,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="2.7.41";
+const BPT_APP_VERSION="3.82";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -14139,6 +14799,13 @@ function simplifyRecordTextForMobile(text){
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
+
+  <div id="bptOnlinePresence" class="bpt-online-presence" tabindex="0" aria-label="Personnes connectées">
+    <span class="bpt-online-dot">●</span>
+    <strong id="bptOnlineCount">0</strong>
+    <div id="bptOnlineTooltip" class="bpt-online-tooltip">Personne</div>
+  </div>
+
 </header>
 <nav id="nav">
   
@@ -14175,19 +14842,38 @@ function simplifyRecordTextForMobile(text){
           <input id="live3Date" type="date">
         </label>
         <label>Tapis de départ
-          <input id="live3Stack" type="number" min="100" step="100" value="20000">
+          <input id="live3Stack" type="number" min="1000" step="1000" value="20000">
         </label>
         <label>Buy-in (€)
           <input id="live3BuyIn" type="number" min="0" step="1" value="5">
         </label>
-        <label>Durée souhaitée de la partie (heures)
-          <input id="live3TargetHours" type="number" min="1" max="12" step="0.5" value="4">
+        <label>Durée souhaitée de la partie
+          <select id="live3TargetHours">
+            <option value="2">2 h 00</option>
+            <option value="2.5">2 h 30</option>
+            <option value="3">3 h 00</option>
+            <option value="3.5">3 h 30</option>
+            <option value="4" selected>4 h 00</option>
+            <option value="4.5">4 h 30</option>
+            <option value="5">5 h 00</option>
+            <option value="5.5">5 h 30</option>
+            <option value="6">6 h 00</option>
+            <option value="6.5">6 h 30</option>
+            <option value="7">7 h 00</option>
+            <option value="7.5">7 h 30</option>
+            <option value="8">8 h 00</option>
+          </select>
         </label>
         <label>Structure
           <input type="text" value="BPT fixe · 18 niveaux · sans ante" disabled>
         </label>
       </div>
 <div class="bpt-live3-section-title">Joueurs</div>
+
+      <button id="live3MobilePlayerSelectBtn" class="btn ghost bpt-live3-mobile-player-select" type="button">
+        Choisir les joueurs · <span id="live3MobileSelectedCount">0</span> sélectionné(s)
+      </button>
+
       <div id="live3PlayerPicker" class="bpt-live3-player-picker"></div>
 
       <div class="bpt-live3-new-player">
@@ -14211,6 +14897,7 @@ function simplifyRecordTextForMobile(text){
         <div>
           <div id="live3GameLocation" class="bpt-live3-game-location">—</div>
           <div id="live3GameMeta" class="muted">—</div>
+          <div id="live3ViewerInfo" class="bpt-live3-viewer-info" style="display:none"></div>
         </div>
         <div class="bpt-live3-game-head-actions">
           <button id="live3ChatBtn" class="btn ghost bpt-live3-chat-button" type="button">💬 Chat <span id="live3ChatUnread" class="bpt-live3-chat-unread" hidden style="display:none">0</span></button>
@@ -14224,12 +14911,13 @@ function simplifyRecordTextForMobile(text){
           <span class="muted">BLINDS</span>
           <strong id="live3Blinds">—</strong>
           <small id="live3Ante"></small>
+          <small id="live3BlindDurationLabel" class="bpt-live3-duration-label">Durée : —</small>
         </div>
         <div id="live3Timer" class="bpt-live3-timer">00:00</div>
         <div class="bpt-live3-kpis">
           <div><span>Joueurs</span><strong id="live3Remaining">0</strong></div>
           <div><span>Tapis moyen</span><strong id="live3AvgStack">0</strong></div>
-          <div><span>Temps écoulé</span><strong id="live3Elapsed">00:00</strong></div>
+          <div><span>Temps écoulé</span><strong id="live3Elapsed">0 min</strong></div>
           <div><span>Prochain niveau</span><strong id="live3Next">—</strong></div>
         </div>
       </div>
@@ -14244,6 +14932,18 @@ function simplifyRecordTextForMobile(text){
         <button id="live3EndBtn" class="btn danger bpt-live3-end-control" type="button">Terminer le Live</button>
       </div>
 
+      <div id="live3BlindDurationEditor" class="bpt-live3-duration-editor bpt-live3-owner-only">
+        <div class="bpt-live3-duration-editor-copy">
+          <strong>Durée des blinds</strong>
+          <span>Modifie le niveau en cours et tous les niveaux suivants.</span>
+        </div>
+        <div class="bpt-live3-duration-editor-controls">
+          <input id="live3BlindDurationInput" type="number" min="5" max="60" step="1" value="18" inputmode="numeric">
+          <span>min</span>
+          <button id="live3ApplyBlindDurationBtn" class="btn ghost" type="button">Appliquer</button>
+        </div>
+      </div>
+
       <div id="live3UndoElimBox" class="bpt-live3-undo-box bpt-live3-owner-only">
         <div class="bpt-live3-undo-copy">
           <strong>Correction d’une élimination</strong>
@@ -14256,6 +14956,7 @@ function simplifyRecordTextForMobile(text){
 
       <div id="live3SpectatorControls" class="bpt-live3-controls bpt-live3-spectator-only" style="display:none">
         <button id="live3TakeoverBtn" class="btn primary" type="button">Demander la reprise de gestion</button>
+        <button id="live3ChangeSpectatorNameBtn" class="btn ghost" type="button">Changer mon identité</button>
         <span id="live3TakeoverStatus" class="muted"></span>
       </div>
 
@@ -14285,13 +14986,14 @@ function simplifyRecordTextForMobile(text){
       <span>BLINDS</span>
       <strong id="live3FsBlinds">—</strong>
       <small id="live3FsAnte"></small>
+      <small id="live3FsBlindDurationLabel" class="bpt-live3-fs-duration-label">Durée : —</small>
     </section>
     <section class="bpt-live3-fs-timer">
       <div id="live3FsTimer">00:00</div>
     </section>
     <section class="bpt-live3-fs-kpis">
       <div><span>Tapis moyen</span><strong id="live3FsAvg">0</strong></div>
-      <div><span>Temps écoulé</span><strong id="live3FsElapsed">00:00</strong></div>
+      <div><span>Temps écoulé</span><strong id="live3FsElapsed">0 min</strong></div>
       <div><span>Prochain</span><strong id="live3FsNext">—</strong></div>
     </section>
     <section id="live3FsMasterActions" class="bpt-live3-fs-actions bpt-live3-owner-only">
@@ -14310,6 +15012,55 @@ function simplifyRecordTextForMobile(text){
       <div id="live3FsPlayers" class="bpt-live3-fs-player-list"></div>
     </section>
     <button id="live3FsExitBtn" class="bpt-live3-fs-exit" type="button" aria-label="Quitter le plein écran" style="display:none">×</button>
+  </div>
+</div>
+
+
+<div id="live3MobilePlayerModal" class="bpt-live3-modal bpt-live3-player-select-modal" aria-hidden="true">
+  <div class="bpt-live3-modal-card bpt-live3-mobile-player-card">
+    <div class="bpt-live3-mobile-player-head">
+      <div>
+        <div class="home-kicker">BPT · Nouvelle partie</div>
+        <h2>Choisir les joueurs</h2>
+      </div>
+      <button id="live3MobilePlayerCloseBtn" class="btn ghost" type="button">×</button>
+    </div>
+
+    <input id="live3MobilePlayerSearch" class="bpt-live3-mobile-player-search"
+           type="search" placeholder="Rechercher un joueur…">
+
+    <div class="bpt-live3-mobile-player-summary">
+      <strong><span id="live3MobileModalCount">0</span> sélectionné(s)</strong>
+      <button id="live3MobileClearPlayersBtn" class="bpt-live3-mobile-clear" type="button">Tout décocher</button>
+    </div>
+
+    <div id="live3MobilePlayerGrid" class="bpt-live3-mobile-player-grid"></div>
+
+    <div class="bpt-live3-mobile-player-footer">
+      <button id="live3MobilePlayerCancelBtn" class="btn ghost" type="button">Annuler</button>
+      <button id="live3MobilePlayerValidateBtn" class="btn primary" type="button">
+        Valider la sélection
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<div id="live3SpectatorIdentityModal" class="bpt-live3-modal" aria-hidden="true">
+  <div class="bpt-live3-modal-card bpt-live3-spectator-id-card">
+    <div class="home-kicker">BPT · Identification</div>
+    <h2>Identification obligatoire</h2>
+    <p class="muted">Confirmez votre identité pour ouvrir BPT sur cet appareil.</p>
+
+    <select id="live3SpectatorNameInput" class="bpt-live3-spectator-select">
+      <option value="">— Choisir votre nom —</option>
+    </select>
+
+    <div class="bpt-live3-modal-actions">
+      <button id="live3SpectatorIdentityConfirmBtn" class="btn primary" type="button" disabled>
+        Continuer
+      </button>
+    </div>
   </div>
 </div>
 
@@ -14714,7 +15465,7 @@ function simplifyRecordTextForMobile(text){
 
   <div class="dashboard-dynamics">
     <div class="premium-eyebrow">Dynamique du championnat</div>
-    <p id="dashDynamicsText">Les faits marquants du championnat apparaîtront ici après les premières parties.</p>
+    <p id="dashDynamicsText">Les petites histoires, remontées et gamelles du championnat apparaîtront ici.</p>
   </div>
 
   <details class="collapsible-block">
@@ -14828,11 +15579,14 @@ function simplifyRecordTextForMobile(text){
         <small>Photo de la partie</small>
       </div>
       <div class="game-photo-actions">
-        <label class="btn ghost game-photo-upload-label">
-          <span id="latestGamePhotoUploadLabel">Ajouter une photo</span>
-          <input id="latestGamePhotoInput" type="file" accept="image/*" hidden>
+        <label class="btn ghost game-photo-upload-label" id="latestGamePhotoAddBtn" for="latestGamePhotoInput">
+          <span id="latestGamePhotoUploadLabel">Ajouter</span>
         </label>
-        <button class="btn ghost" id="latestGamePhotoDeleteBtn" type="button" style="display:none">Retirer</button>
+        <input id="latestGamePhotoInput"
+               class="bpt-photo-file-input"
+               type="file"
+               accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif" hidden>
+        <button class="btn ghost game-photo-delete-btn" id="latestGamePhotoDeleteBtn" type="button" style="display:none">Retirer</button>
       </div>
     </div>
 
@@ -15202,11 +15956,11 @@ function simplifyRecordTextForMobile(text){
 </section>
 
 <section id="settings" class="view">
-  <div class="hero tab-premium-hero">
+<div class="hero tab-premium-hero">
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 2.7.41</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 3.82</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -15229,6 +15983,57 @@ function simplifyRecordTextForMobile(text){
   </div>
 
   <div id="settingsProtectedContent" style="display:none">
+  <details class="settings-block" open>
+    <summary>Historique des connexions</summary>
+    <div class="settings-block-content" style="padding:14px 18px 18px">
+      <div class="row" style="justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px">
+        <div>
+          <strong>Connexions des 7 derniers jours</strong>
+          <div class="muted" style="font-size:12px;margin-top:3px">
+            Une entrée est enregistrée à chaque nouvelle session sur PC ou téléphone.
+          </div>
+        </div>
+        <button id="refreshConnectionHistoryBtn" class="btn ghost" type="button">Actualiser</button>
+      </div>
+      <div id="connectionHistorySummary" class="muted" style="margin-bottom:8px">Chargement…</div>
+      <div class="tablewrap">
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th>Joueur</th>
+              <th>Dernière connexion</th>
+              <th>Connexions sur 7 jours</th>
+            </tr>
+          </thead>
+          <tbody id="connectionHistoryBody">
+            <tr><td colspan="3" class="muted">Aucune donnée.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+
+  <details class="settings-block" open>
+    <summary>Photos des parties</summary>
+    <div class="settings-block-content" style="padding:14px 18px 18px">
+      <p class="muted" style="margin-top:0">
+        Les photos sont hébergées hors Firebase. Firebase ne conserve que leur URL.
+      </p>
+      <div class="grid" style="align-items:end">
+        <label class="span6">Cloudinary · Cloud name
+          <input id="photoHostCloudName" type="text" autocomplete="off" placeholder="ex. mon-cloud">
+        </label>
+        <label class="span6">Cloudinary · Upload preset (Unsigned)
+          <input id="photoHostUploadPreset" type="text" autocomplete="off" placeholder="ex. bpt_unsigned">
+        </label>
+        <div class="span12">
+          <button id="photoHostSaveBtn" class="btn secondary" type="button">Enregistrer l’hébergement photo</button>
+          <span id="photoHostSaveStatus" class="muted" style="margin-left:10px"></span>
+        </div>
+      </div>
+    </div>
+  </details>
+
 
   <details class="settings-block">
     <summary>Gestion des joueurs</summary>
@@ -15422,7 +16227,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.41 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 3.82 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -15625,6 +16430,41 @@ window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
 <script>
 const $ = id => document.getElementById(id);
 
+
+document.addEventListener("click",e=>{
+  if(e.target?.closest?.("#refreshConnectionHistoryBtn")){
+    if(typeof loadConnectionHistory==="function")loadConnectionHistory();
+  }
+});
+
+
+function renderPhotoHostSettings(){
+  const cfg=typeof bptPhotoHostConfig==="function" ? bptPhotoHostConfig() : {cloudName:"",uploadPreset:""};
+  const c=$("photoHostCloudName"),p=$("photoHostUploadPreset"),s=$("photoHostSaveStatus");
+  if(c && document.activeElement!==c)c.value=cfg.cloudName||"";
+  if(p && document.activeElement!==p)p.value=cfg.uploadPreset||"";
+  if(s)s.textContent=(cfg.cloudName&&cfg.uploadPreset)?"Configuration partagée active":"À configurer";
+}
+
+document.addEventListener("click",e=>{
+  const btn=e.target?.closest?.("#photoHostSaveBtn");
+  if(!btn)return;
+  const c=String($("photoHostCloudName")?.value||"").trim();
+  const p=String($("photoHostUploadPreset")?.value||"").trim();
+  const s=$("photoHostSaveStatus");
+  if(!c||!p){
+    if(s)s.textContent="Cloud name et Upload preset requis.";
+    return;
+  }
+  saveBptPhotoHostConfig(c,p);
+  if(s)s.textContent="Enregistré";
+});
+
+document.addEventListener("DOMContentLoaded",()=>{
+  setTimeout(renderPhotoHostSettings,300);
+});
+
+
 function bptDialog({title="Information",message="",confirmText="OK",cancelText=null,danger=false}={}){
   return new Promise(resolve=>{
     const backdrop=$("bptModalBackdrop");
@@ -15688,7 +16528,72 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.41 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // legacy only; no new photo is uploaded to Supabase
+const BPT_PHOTO_MAX_BYTES=550000;
+const PHOTO_HOST_CONFIG_KEY="bpt_photo_host_config_v1";
+const BPT_SHARED_PHOTO_CLOUD_NAME="peesjsvk";
+const BPT_SHARED_PHOTO_UPLOAD_PRESET="BPTchampionship";
+
+function bptPhotoHostConfig(){
+  try{
+    const v=JSON.parse(localStorage.getItem(PHOTO_HOST_CONFIG_KEY)||"{}");
+    return {
+      cloudName:String(v.cloudName||BPT_SHARED_PHOTO_CLOUD_NAME||"").trim(),
+      uploadPreset:String(v.uploadPreset||BPT_SHARED_PHOTO_UPLOAD_PRESET||"").trim()
+    };
+  }catch(_e){
+    return {
+      cloudName:BPT_SHARED_PHOTO_CLOUD_NAME,
+      uploadPreset:BPT_SHARED_PHOTO_UPLOAD_PRESET
+    };
+  }
+}
+
+function saveBptPhotoHostConfig(cloudName,uploadPreset){
+  const cfg={
+    cloudName:String(cloudName||"").trim(),
+    uploadPreset:String(uploadPreset||"").trim()
+  };
+  localStorage.setItem(PHOTO_HOST_CONFIG_KEY,JSON.stringify(cfg));
+  return cfg;
+}
+
+function bptSafeFilePart(value){
+  return String(value||"")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-zA-Z0-9_-]+/g,"-")
+    .replace(/^-+|-+$/g,"")
+    .slice(0,80)||"photo";
+}
+
+async function bptUploadPhotoBlobToUrl(path,blob){
+  if(!blob)throw new Error("Image vide.");
+  if(blob.size>BPT_PHOTO_MAX_BYTES)throw new Error("La photo compressée est encore trop volumineuse.");
+
+  const cfg=bptPhotoHostConfig();
+  if(!cfg.cloudName || !cfg.uploadPreset){
+    throw new Error("Hébergement photo non configuré. Renseignez Cloud name et Upload preset dans Paramètres.");
+  }
+
+  const form=new FormData();
+  form.append("file",blob,"bpt-photo.jpg");
+  form.append("upload_preset",cfg.uploadPreset);
+  form.append("folder","bpt");
+  form.append("public_id",bptSafeFilePart(path.replace(/\.[^.]+$/,"")));
+
+  const endpoint=`https://api.cloudinary.com/v1_1/${encodeURIComponent(cfg.cloudName)}/image/upload`;
+  const res=await fetch(endpoint,{method:"POST",body:form});
+
+  let data={};
+  try{data=await res.json();}catch(_e){}
+
+  if(!res.ok || !data?.secure_url){
+    const msg=String(data?.error?.message||`HTTP ${res.status}`);
+    throw new Error("Hébergement photo impossible : "+msg);
+  }
+
+  return String(data.secure_url);
+}
 
 let sbClient=null;
 let cloudReady=false;
@@ -16748,7 +17653,7 @@ async function cloudPoll(){
 
 let liveAutoOpenDone=false;
 async function autoOpenActiveLiveOnStartup(){
-  // BPT 2.7.41 : plus d'ouverture automatique du Live au démarrage.
+  // BPT 3.82 : plus d'ouverture automatique du Live au démarrage.
   // L'application s'ouvre toujours sur Accueil ; le Live actif est indiqué sur l'onglet Live.
   liveAutoOpenDone=true;
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -18182,7 +19087,12 @@ function showEndGameSummary(rows){
   const first=sorted[0];
 
   content.innerHTML=`
-    <div class="muted" style="margin-top:6px">Partie #${first.game} · ${esc(shortDate(first.date))}${first.location?" · "+esc(first.location):""} · ${sorted.length} joueurs</div>
+    <div class="muted" style="margin-top:6px">Partie #${first.game} · ${esc(shortDate(first.date))}${first.location?" · "+esc(first.location):""} · ${sorted.length} joueurs${(
+  Number(first.gameDurationSec)>0 ||
+  (Number(first.gameFinishedAt)>0 && Number(first.gameStartedAt)>0)
+)?" · "+esc(formatGameDuration(
+  Number(first.gameDurationSec)||Math.floor((Number(first.gameFinishedAt)-Number(first.gameStartedAt))/1000)
+)):""}</div>
 
     <div class="summary-podium">
       ${sorted.slice(0,3).map((r,i)=>`<div class="summary-place">
@@ -18205,7 +19115,7 @@ function showEndGameSummary(rows){
             <th>Kills</th>
             <th>Éliminé par</th>
             <th>Niveau</th>
-            <th>Heure</th>
+            <th>Temps de jeu</th>
             <th>Gain</th>
             <th>Net</th>
           </tr>
@@ -18218,7 +19128,7 @@ function showEndGameSummary(rows){
             <td>${r.kills||0}</td>
             <td>${Number(r.place)===1?"🏆 Vainqueur":(r.killer?playerNameHtml(r.killer):"—")}</td>
             <td>${r.outLevel?`N${Number(r.outLevel)}`:"—"}</td>
-            <td>${esc(r.outTime||"—")}</td>
+            <td>${esc(playTimeDisplay(r, rows))}</td>
             <td>${euro(r.gross)}</td>
             <td>${euro(r.net)}</td>
           </tr>`).join("")}
@@ -18243,11 +19153,16 @@ function renderHistoryCards(){
     return `<details class="history-game">
       <summary>
         <div class="history-game-title">${esc(gameDisplayTitle(f,g))}</div>
-        <div><div>${esc(shortDate(f.date||""))}${f.location?" · "+esc(f.location):""} · ${rows.length} joueurs</div><div class="history-game-meta">Cagnotte ${euro(rows.length*Number(f.stake||0))}</div></div>
+        <div><div>${esc(shortDate(f.date||""))}${f.location?" · "+esc(f.location):""} · ${rows.length} joueurs</div><div class="history-game-meta">Cagnotte ${euro(rows.length*Number(f.stake||0))}${(
+  Number(f.gameDurationSec)>0 ||
+  (Number(f.gameFinishedAt)>0 && Number(f.gameStartedAt)>0)
+)?" · "+esc(formatGameDuration(
+  Number(f.gameDurationSec)||Math.floor((Number(f.gameFinishedAt)-Number(f.gameStartedAt))/1000)
+)):""}</div></div>
         <div class="history-winner">🏆 ${win?playerNameHtml(win.player):"—"} <span>· ${num(win?.points||0,0)} pts</span></div>
       </summary>
-      <div class="history-game-body"><div class="tablewrap"><table><thead><tr><th>Place</th><th>Joueur</th><th>Pts</th><th>Kills</th><th>Éliminé par</th><th>Gain</th><th>Net</th></tr></thead><tbody>
-        ${sorted.map(r=>`<tr><td>${r.place}</td><td>${playerNameHtml(r.player,{button:true,onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))`})}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${r.killer?playerNameHtml(r.killer):"—"}</td><td>${euro(r.gross)}</td><td>${euro(r.net)}</td></tr>`).join("")}
+      <div class="history-game-body"><div class="tablewrap"><table><thead><tr><th>Place</th><th>Joueur</th><th>Pts</th><th>Kills</th><th>Éliminé par</th><th>Temps de jeu</th><th>Gain</th><th>Net</th></tr></thead><tbody>
+        ${sorted.map(r=>`<tr><td>${r.place}</td><td>${playerNameHtml(r.player,{button:true,onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))`})}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${Number(r.place)===1?"🏆":(r.killer?playerNameHtml(r.killer):"—")}</td><td>${esc(playTimeDisplay(r, rows))}</td><td>${euro(r.gross)}</td><td>${euro(r.net)}</td></tr>`).join("")}
       </tbody></table></div></div>
     </details>`;
   }).join("");
@@ -18703,6 +19618,70 @@ function achievementPlayers(rowsOverride=null){
     dynamic:true
   });
 
+  // Badges temps : uniquement sur les parties qui ont un temps relatif fiable.
+  const byGameForTiming={};
+  rows.forEach(r=>{
+    const g=Number(r.game||0);
+    if(!byGameForTiming[g])byGameForTiming[g]=[];
+    byGameForTiming[g].push(r);
+  });
+
+  const timedElims=rows
+    .filter(r=>Number(r.place)>1)
+    .map(r=>({
+      ...r,
+      _elapsedForStats:bestElapsedForRow(r, byGameForTiming[Number(r.game||0)]||[])
+    }))
+    .filter(r=>Number(r._elapsedForStats)>0);
+
+  const timedByPlayer={};
+  for(const r of timedElims){
+    if(!timedByPlayer[r.player])timedByPlayer[r.player]=[];
+    timedByPlayer[r.player].push(Number(r._elapsedForStats));
+  }
+
+  let sprinterNames=[];
+  const averages=Object.entries(timedByPlayer).map(([name,times])=>({
+    name,
+    avg:times.reduce((s,v)=>s+v,0)/times.length,
+    count:times.length
+  }));
+  if(averages.length){
+    const bestAvg=Math.min(...averages.map(x=>x.avg));
+    sprinterNames=averages.filter(x=>Math.abs(x.avg-bestAvg)<1).map(x=>x.name);
+  }
+
+  let prematureNames=[];
+  let prematureRecordSec=0;
+  if(timedElims.length){
+    prematureRecordSec=Math.min(...timedElims.map(r=>Number(r._elapsedForStats)));
+    prematureNames=[...new Set(
+      timedElims
+        .filter(r=>Number(r._elapsedForStats)===prematureRecordSec)
+        .map(r=>r.player)
+    )];
+  }
+
+  result.push({
+    icon:"🏃",
+    name:"Sprinter",
+    desc:sprinterNames.length
+      ? `Élimination la plus précoce en moyenne (${formatElapsedElimination(Math.min(...averages.map(x=>x.avg)))}).`
+      : "Élimination la plus précoce en moyenne.",
+    players:sprinterNames,
+    dynamic:true
+  });
+
+  result.push({
+    icon:"💨",
+    name:"Éjaculateur précoce",
+    desc:prematureRecordSec
+      ? `Record de la saison : élimination après seulement ${formatElapsedElimination(prematureRecordSec)} de jeu.`
+      : "Record de la saison pour l’élimination la plus rapide.",
+    players:prematureNames,
+    dynamic:true
+  });
+
   return result;
 }
 
@@ -18944,6 +19923,148 @@ function playerNicknameSecondary(name){
   return nick?`(${nick})`:"";
 }
 
+function funPlayerLabel(name){
+  const real=String(name||"").trim();
+  const nick=playerNicknameInfo(real).primary;
+  return nick || real;
+}
+
+function formatGameDuration(totalSec){
+  const sec=Math.max(0,Number(totalSec)||0);
+  if(!sec)return "—";
+  const totalMin=Math.round(sec/60);
+  const h=Math.floor(totalMin/60);
+  const m=totalMin%60;
+  return h>0 ? `${h} h ${String(m).padStart(2,"0")}` : `${m} min`;
+}
+
+function formatElapsedElimination(totalSec){
+  const sec=Math.max(0,Number(totalSec)||0);
+  if(!sec)return "";
+  const totalMin=Math.floor(sec/60);
+  const h=Math.floor(totalMin/60);
+  const m=totalMin%60;
+  return h>0 ? `${h} h ${String(m).padStart(2,"0")}` : `${m} min`;
+}
+
+function legacyElapsedFromOutTime(outTime){
+  const raw=String(outTime||"").trim();
+  if(!raw)return 0;
+
+  const m=raw.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  if(!m)return 0;
+
+  const h=Number(m[1]);
+  const min=Number(m[2]);
+  const sec=Number(m[3]||0);
+  if(h<0||h>23||min<0||min>59||sec<0||sec>59)return 0;
+
+  // Anciennes parties BPT : heure de départ conventionnelle 21 h 15.
+  const startSec=21*3600+15*60;
+  let outSec=h*3600+min*60+sec;
+
+  // Si l'élimination est après minuit, on bascule au jour suivant.
+  if(outSec<startSec)outSec+=24*3600;
+
+  const elapsed=outSec-startSec;
+
+  // Garde-fou : on n'affiche que des durées plausibles de tournoi.
+  if(elapsed<=0 || elapsed>12*3600)return 0;
+  return elapsed;
+}
+
+function estimatedLegacyElapsedWithoutClock(row, gameRows){
+  const place=Number(row?.place||0);
+  const participants=Math.max(0, Array.isArray(gameRows)?gameRows.length:0);
+  const elimCount=Math.max(0, participants-1);
+
+  if(place<=1 || !participants || place>participants || elimCount<1)return 0;
+
+  const gameNo=Number(row?.game||0);
+
+  // Hypothèses historiques BPT.
+  // Partie 1 :
+  // - début 21 h 15
+  // - 1re élimination 23 h 15 => 2 h de jeu
+  // - fin 2 h 15 => 5 h de jeu
+  //
+  // Autres anciennes parties sans heure enregistrée :
+  // - début 21 h 15
+  // - 1re élimination 23 h 00 => 1 h 45
+  // - fin 1 h 45 => 4 h 30
+  const firstBustSec = gameNo===1
+    ? 2*3600
+    : (1*3600)+(45*60);
+
+  const finalBustSec = gameNo===1
+    ? 5*3600
+    : (4*3600)+(30*60);
+
+  if(elimCount===1)return finalBustSec;
+
+  // Ordre d'élimination : dernier = 1er sorti, 2e = dernier sorti
+  const order = participants - place + 1; // 1..elimCount
+
+  if(order<=1)return firstBustSec;
+  if(order>=elimCount)return finalBustSec;
+
+  // Écarts géométriquement décroissants : les éliminations s'accélèrent.
+  const ratio=0.82;
+  const gapCount=elimCount-1;
+  const weights=Array.from({length:gapCount},(_,i)=>Math.pow(ratio,i));
+  const totalWeight=weights.reduce((s,v)=>s+v,0);
+  const totalWindow=finalBustSec-firstBustSec;
+
+  let elapsed=firstBustSec;
+  for(let i=0;i<order-1;i++){
+    elapsed += totalWindow * (weights[i]/totalWeight);
+  }
+
+  return Math.max(firstBustSec, Math.min(finalBustSec, Math.round(elapsed)));
+}
+
+function bestElapsedForRow(row, gameRows){
+  const direct=Number(row?.outElapsedSec)||0;
+  if(direct>0)return direct;
+
+  const legacy=legacyElapsedFromOutTime(row?.outTime);
+  if(legacy>0)return legacy;
+
+  return estimatedLegacyElapsedWithoutClock(row, gameRows);
+}
+
+function playTimeDisplay(row, gameRows){
+  if(Number(row?.place)===1)return "—";
+
+  const elapsed=bestElapsedForRow(row, gameRows);
+  return elapsed>0 ? formatElapsedElimination(elapsed) : "Non disponible";
+}
+
+function gameUnlockedAchievements(gameNo){
+  const history=Array.isArray(db.history)?db.history:[];
+  const g=Number(gameNo);
+  if(!Number.isFinite(g) || g<=0)return [];
+
+  const gameRows=history.filter(r=>Number(r.game)===g);
+  if(!gameRows.length)return [];
+
+  const beforeRows=history.filter(r=>Number(r.game)<g);
+  const throughRows=history.filter(r=>Number(r.game)<=g);
+  const before=achievementPlayers(beforeRows);
+  const after=achievementPlayers(throughRows);
+  const beforeMap=new Map(before.map(a=>[a.name,new Set(a.players||[])]));
+  const gamePlayers=new Set(gameRows.map(r=>String(r.player||"")).filter(Boolean));
+  const unlocked=[];
+
+  for(const a of after){
+    if(a.dynamic)continue;
+    const previous=beforeMap.get(a.name)||new Set();
+    const players=(a.players||[]).filter(p=>gamePlayers.has(p) && !previous.has(p));
+    if(players.length)unlocked.push({...a,players});
+  }
+  return unlocked;
+}
+
 function playerNameHtml(name,{button=false,buttonClass="",onclick=""}={}){
   const real=String(name||"").trim();
   const nick=playerNicknameInfo(real).primary;
@@ -18996,14 +20117,14 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.41 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 3.82 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
   if(!window.bptFirebaseEnsure)return false;
   try{ await window.bptFirebaseEnsure(); return true; }catch(e){ console.warn("BPT photo Firebase:",e); return false; }
 }
-function firebasePhotoErrorMessage(error){ return String(error?.message||error||"Erreur Firebase photo."); }
+function firebasePhotoErrorMessage(error){ return String(error?.message||error||"Erreur Photo."); }
 async function fileToCompressedBlob(file){
   return new Promise((resolve,reject)=>{
     if(!file){resolve(null);return;} if(!String(file.type||"").startsWith("image/")){reject(new Error("Le fichier sélectionné n’est pas une image."));return;}
@@ -19019,34 +20140,109 @@ function dataUrlToBlob(dataUrl){
   try{const [head,body]=String(dataUrl||"").split(",",2);const mime=(head.match(/^data:([^;]+)/)||[])[1]||"image/jpeg";const bytes=atob(body||"");const arr=new Uint8Array(bytes.length);for(let i=0;i<bytes.length;i++)arr[i]=bytes.charCodeAt(i);return new Blob([arr],{type:mime});}catch(_e){return null;}
 }
 function blobToDataUrl(blob){ return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||""));r.onerror=()=>reject(new Error("Impossible de préparer l’image."));r.readAsDataURL(blob);}); }
+
+async function migrateLegacyGamePhotoToUrl(gameNo,seasonKey,legacyValue){
+  const raw=String(legacyValue||"");
+  if(!raw.startsWith("data:image/"))return raw;
+
+  const blob=dataUrlToBlob(raw);
+  if(!blob)return raw;
+
+  try{
+    return await uploadGamePhotoBlob(gameNo,seasonKey,blob,{silent:true});
+  }catch(e){
+    console.warn("Migration photo partie vers URL :",e);
+    return raw;
+  }
+}
+
+async function migrateLegacyPhotoMapsToUrls(){
+  const gameMap=ensureGamePhotos();
+
+  for(const [key,value] of Object.entries(gameMap)){
+    const raw=String(value||"");
+    if(!raw.startsWith("data:image/"))continue;
+
+    const parts=String(key).split("|");
+    const gameNo=Number(parts[parts.length-1])||0;
+    const seasonKey=parts.length>1?parts.slice(0,-1).join("|"):null;
+    if(!gameNo)continue;
+
+    const url=await migrateLegacyGamePhotoToUrl(gameNo,seasonKey,raw);
+    if(/^https?:\/\//i.test(url)){
+      gameMap[key]=url;
+      firebasePhotoCache[key]=url;
+    }
+  }
+
+  saveLocalOnly();
+}
+
 async function fetchFirebaseGamePhoto(gameNo,seasonKey=null){
   const key=gamePhotoKey(gameNo,seasonKey); if(firebasePhotoRequested.has(key))return firebasePhotoCache[key]||""; firebasePhotoRequested.add(key);
   try{
     if(!await ensureGamePhotoStorageClient())return "";
     const dbx=window.bptFirebaseDb?.(); if(!dbx)return "";
     const snap=await dbx.ref(gamePhotoFirebasePath(gameNo,seasonKey)).once("value");
-    const val=snap.val(); const data=typeof val==="string"?val:String(val?.data||"");
-    if(data.startsWith("data:image/")){ firebasePhotoCache[key]=data; if(typeof renderLatestGame==="function")setTimeout(renderLatestGame,0); return data; }
+    const val=snap.val();
+    const data=typeof val==="string"?val:String(val?.url||val?.data||"");
+    if(data.startsWith("data:image/")){
+      firebasePhotoCache[key]=data;
+
+      setTimeout(async()=>{
+        const migrated=await migrateLegacyGamePhotoToUrl(gameNo,seasonKey,data);
+        if(/^https?:\/\//i.test(migrated)){
+          firebasePhotoCache[key]=migrated;
+          ensureGamePhotos()[key]=migrated;
+          saveLocalOnly();
+          if(typeof renderLatestGame==="function")renderLatestGame();
+        }
+      },0);
+
+      if(typeof renderLatestGame==="function")setTimeout(renderLatestGame,0);
+      return data;
+    }
+
+    if(/^https?:\/\//i.test(data)){
+      firebasePhotoCache[key]=data;
+      if(typeof renderLatestGame==="function")setTimeout(renderLatestGame,0);
+      return data;
+    }
   }catch(e){ console.warn("Lecture photo Firebase:",e); }
   return "";
 }
 function getGamePhoto(gameNo,seasonKey=null){
   const key=gamePhotoKey(gameNo,seasonKey); const local=String(ensureGamePhotos()[key]||"");
-  if(local.startsWith("data:image/")){ firebasePhotoCache[key]=local; return local; }
+  if(local.startsWith("data:image/") || /^https?:\/\//i.test(local)){ firebasePhotoCache[key]=local; return local; }
   if(firebasePhotoCache[key])return firebasePhotoCache[key];
   fetchFirebaseGamePhoto(gameNo,seasonKey); return "";
 }
 async function uploadGamePhotoBlob(gameNo,seasonKey,blob,{silent=false}={}){
-  if(!blob)throw new Error("Image vide."); if(!await ensureGamePhotoStorageClient())throw new Error("Firebase indisponible.");
-  const dataUrl=await blobToDataUrl(blob);
-  // Garde-fou : les photos restent très petites et vivent hors de l'état Live.
-  if(dataUrl.length>700000)throw new Error("La photo compressée reste trop volumineuse. Choisissez une image plus légère.");
-  const dbx=window.bptFirebaseDb?.(); if(!dbx)throw new Error("Firebase Realtime Database indisponible.");
-  await dbx.ref(gamePhotoFirebasePath(gameNo,seasonKey)).set({data:dataUrl,updatedAt:Date.now()});
-  const key=gamePhotoKey(gameNo,seasonKey); firebasePhotoCache[key]=dataUrl; firebasePhotoRequested.add(key);
-  // Ne pas conserver le Base64 dans db/localStorage : uniquement un marqueur léger.
-  ensureGamePhotos()[key]="firebase"; saveLocalOnly();
-  if(!silent)setCloudStatus("ok","Photo sauvegardée","Firebase · chargée séparément du Live"); return true;
+  if(!blob)throw new Error("Image vide.");
+
+  const key=gamePhotoKey(gameNo,seasonKey);
+  const safeSeason=bptSafeFilePart(seasonKey||"season");
+  const path=`games/${safeSeason}/game-${Number(gameNo)||0}.jpg`;
+  const url=await bptUploadPhotoBlobToUrl(path,blob);
+
+  // Firebase ne conserve plus que l'URL publique.
+  if(await ensureGamePhotoStorageClient()){
+    const dbx=window.bptFirebaseDb?.();
+    if(dbx){
+      await dbx.ref(gamePhotoFirebasePath(gameNo,seasonKey)).set({
+        url,
+        updatedAt:Date.now()
+      });
+    }
+  }
+
+  ensureGamePhotos()[key]=url;
+  firebasePhotoCache[key]=url;
+  saveLocalOnly();
+
+  if(typeof renderLatestGame==="function")renderLatestGame();
+  if(!silent)alert("Photo enregistrée.");
+  return url;
 }
 async function migrateLegacyLocalGamePhotosToStorage(){
   if(!await ensureGamePhotoStorageClient())return false;
@@ -19066,7 +20262,7 @@ async function saveGamePhoto(gameNo,file,seasonKey=null){
 }
 async function deleteGamePhoto(gameNo,seasonKey=null){
   const key=gamePhotoKey(gameNo,seasonKey); if(!confirm("Retirer la photo de cette partie ?"))return;
-  try{if(!await ensureGamePhotoStorageClient())throw new Error("Firebase indisponible.");const dbx=window.bptFirebaseDb?.();await dbx.ref(gamePhotoFirebasePath(gameNo,seasonKey)).remove();delete firebasePhotoCache[key];firebasePhotoRequested.delete(key);delete ensureGamePhotos()[key];saveLocalOnly();setCloudStatus("ok","Photo supprimée","Photo retirée de Firebase.");renderLatestGame();}
+  try{if(!await ensureGamePhotoStorageClient())throw new Error("Firebase indisponible.");const dbx=window.bptFirebaseDb?.();await dbx.ref(gamePhotoFirebasePath(gameNo,seasonKey)).remove();delete firebasePhotoCache[key];firebasePhotoRequested.delete(key);delete ensureGamePhotos()[key];saveLocalOnly();setCloudStatus("ok","Photo retirée","La photo n’est plus affichée dans BPT.");renderLatestGame();}
   catch(e){setCloudStatus("offline","Suppression impossible",firebasePhotoErrorMessage(e));alert(firebasePhotoErrorMessage(e));}
 }
 
@@ -19699,7 +20895,7 @@ function renderDashboard(){
 
   if($("dashDynamicsText")){
     if(!rank.length){
-      $("dashDynamicsText").textContent="Le championnat n’a pas encore suffisamment de données pour dégager une dynamique.";
+      $("dashDynamicsText").textContent="Le championnat chauffe à peine. Encore quelques parties et on saura déjà qui va chambrer tout le monde.";
     }else{
       const leader=rank[0];
       const second=rank[1];
@@ -19708,12 +20904,37 @@ function renderDashboard(){
       const bestMover=movers.slice().sort((a,b)=>Number(b.progress)-Number(a.progress))[0];
       const worstMover=movers.slice().sort((a,b)=>Number(a.progress)-Number(b.progress))[0];
       const sentences=[];
-      sentences.push(`${leader.name} mène avec ${num(leader.points,0)} points${second?`, soit ${num(gap,0)} point${Math.abs(gap)>1?"s":""} d’avance sur ${second.name}`:""}.`);
-      if(bestMover && Number(bestMover.progress)>0)sentences.push(`${bestMover.name} signe la plus forte progression : +${bestMover.progress} place${Number(bestMover.progress)>1?"s":""}.`);
-      if(worstMover && Number(worstMover.progress)<0)sentences.push(`${worstMover.name} recule de ${Math.abs(worstMover.progress)} place${Math.abs(worstMover.progress)>1?"s":""}.`);
-      if(lastWinner)sentences.push(`La dernière partie a été remportée par ${lastWinner.player}.`);
-      if(onFire?.players?.length)sentences.push(`La meilleure forme récente : ${onFire.players.join(", ")}.`);
-      $("dashDynamicsText").textContent=sentences.join(" ");
+
+      const L=n=>funPlayerLabel(n);
+
+      if(second){
+        if(Math.abs(gap)<=5){
+          sentences.push(`${L(leader.name)} garde le fauteuil de patron. ${L(second.name)} n’est qu’à ${num(gap,0)} point${Math.abs(gap)>1?"s":""}.`);
+        }else{
+          sentences.push(`${L(leader.name)} squatte la première place. ${L(second.name)} pointe à ${num(gap,0)} point${Math.abs(gap)>1?"s":""}.`);
+        }
+      }else{
+        sentences.push(`${L(leader.name)} est seul en haut. Pour combien de temps ?`);
+      }
+
+      if(bestMover && Number(bestMover.progress)>0){
+        sentences.push(`${L(bestMover.name)} prend l’ascenseur : +${bestMover.progress} place${Number(bestMover.progress)>1?"s":""}.`);
+      }
+
+      if(worstMover && Number(worstMover.progress)<0 && worstMover.name!==bestMover?.name){
+        sentences.push(`${L(worstMover.name)} prend l’escalier à l’envers : -${Math.abs(worstMover.progress)} place${Math.abs(worstMover.progress)>1?"s":""}.`);
+      }
+
+      if(lastWinner){
+        sentences.push(`${L(lastWinner.player)} est officiellement autorisé à être insupportable jusqu’à la prochaine partie.`);
+      }
+
+      if(onFire?.players?.length){
+        const hot=onFire.players.map(L).join(", ");
+        sentences.push(`En ce moment, ça chauffe chez ${hot}.`);
+      }
+
+      $("dashDynamicsText").textContent=sentences.slice(0,4).join(" ");
     }
   }
 
@@ -19863,7 +21084,7 @@ function renderLatestGame(){
   if(thumbBtn)thumbBtn.style.display="none";
   if(placeholder)placeholder.style.display="flex";
   if(deleteBtn)deleteBtn.style.display="none";
-  if(uploadLabel)uploadLabel.textContent="Ajouter une photo";
+  if(uploadLabel)uploadLabel.textContent="Ajouter";
   if(thumb){
     thumb.dataset.photoKey=photoRenderKey;
     thumb.onload=()=>{
@@ -19871,14 +21092,14 @@ function renderLatestGame(){
       if(thumbBtn)thumbBtn.style.display="block";
       if(placeholder)placeholder.style.display="none";
       if(deleteBtn)deleteBtn.style.display="inline-flex";
-      if(uploadLabel)uploadLabel.textContent="Changer la photo";
+      if(uploadLabel)uploadLabel.textContent="Changer";
     };
     thumb.onerror=()=>{
       if(thumb.dataset.photoKey!==photoRenderKey)return;
       if(thumbBtn)thumbBtn.style.display="none";
       if(placeholder)placeholder.style.display="flex";
       if(deleteBtn)deleteBtn.style.display="none";
-      if(uploadLabel)uploadLabel.textContent="Ajouter une photo";
+      if(uploadLabel)uploadLabel.textContent="Ajouter";
     };
     thumb.src=photo||"";
   }
@@ -19896,22 +21117,52 @@ function renderLatestGame(){
     $("latestGamePhotoDeleteBtn").onclick=()=>deleteGamePhoto(gameNo,seasonKey);
   }
 
+  const gameDurationSec=Math.max(
+    0,
+    Number(first.gameDurationSec)||(
+      Number(first.gameFinishedAt)>0 && Number(first.gameStartedAt)>0
+        ? Math.floor((Number(first.gameFinishedAt)-Number(first.gameStartedAt))/1000)
+        : 0
+    )
+  );
+
   $("latestGameSummary").innerHTML=[
     ["Date",shortDate(first.date||"")],
     ["Lieu",first.location||"—"],
     ["Participants",`${rows.length}`],
+    ["Durée",formatGameDuration(gameDurationSec)],
     ["Cagnotte",euro(pot)]
   ].map(([label,value])=>`<div class="latestgame-summary-item"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join("");
 
   const killerRanking=rows.slice().sort((a,b)=>Number(b.kills||0)-Number(a.kills||0));
   const killerTop=killerRanking[0]||null;
-  const totalKills=rows.reduce((sum,r)=>sum+Number(r.kills||0),0);
-  const biggestNet=rows.slice().sort((a,b)=>Number(b.net||0)-Number(a.net||0))[0]||null;
+
+  // Informations plus utiles que "total des éliminations" ou "meilleur net",
+  // qui sont mécaniquement liés au nombre de participants et au vainqueur.
+  const bubble=rows.find(r=>Number(r.place)===4)||null;
+  const finalLevel=Math.max(
+    0,
+    ...rows.map(r=>Number(r.outLevel)||0)
+  );
+
   if($("latestGameHighlights")){
     $("latestGameHighlights").innerHTML=[
-      ["🔥 Killer de la partie",killerTop&&Number(killerTop.kills||0)>0?`${killerTop.player} · ${killerTop.kills} kill${Number(killerTop.kills)>1?"s":""}`:"—"],
-      ["♠ Éliminations",`${totalKills}`],
-      ["€ Meilleur net",biggestNet?`${biggestNet.player} · ${euro(biggestNet.net||0)}`:"—"]
+      ["🔥 Killer de la partie",killerTop&&Number(killerTop.kills||0)>0
+        ? `${killerTop.player} · ${killerTop.kills} kill${Number(killerTop.kills)>1?"s":""}`
+        : "—"],
+      ["🫧 La bulle",bubble
+        ? `${bubble.player} · 4e`
+        : "Pas de bulle sur cette partie"],
+      ["⏱ Niveau final",finalLevel>0
+        ? `Niveau ${finalLevel}`
+        : "Non renseigné"],
+      ["🏅 Accomplissements",(()=>{
+        const unlocked=gameUnlockedAchievements(gameNo);
+        if(!unlocked.length)return "Aucun nouveau";
+        return unlocked.slice(0,3)
+          .map(a=>`${a.icon} ${a.name} — ${(a.players||[]).map(funPlayerLabel).join(", ")}`)
+          .join(" · ")+(unlocked.length>3?` · +${unlocked.length-3}`:"");
+      })()]
     ].map(([label,value])=>`<div class="latestgame-highlight"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join("");
   }
   if($("latestGameCorrectionBtn")){
@@ -19934,26 +21185,25 @@ function renderLatestGame(){
     </div>`).join("");
 
   $("latestGameResults").innerHTML=`<table>
-    <thead><tr><th>Place</th><th>Joueur</th><th>Points</th><th>Kills</th><th>Éliminé par</th><th>Gain</th><th>Net</th></tr></thead>
+    <thead><tr><th>Place</th><th>Joueur</th><th>Points</th><th>Kills</th><th>Éliminé par</th><th>Niveau</th><th>Temps de jeu</th><th>Gain</th><th>Net</th></tr></thead>
     <tbody>${rows.map(r=>`<tr>
       <td>${r.place}</td>
       <td>${playerNameHtml(r.player,{button:true,onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))`})}</td>
       <td>${num(r.points||0,0)}</td>
       <td>${num(r.kills||0,0)}</td>
-      <td>${r.killer?playerNameHtml(r.killer):"—"}</td>
+      <td>${Number(r.place)===1?"🏆":(r.killer?playerNameHtml(r.killer):"—")}</td>
+      <td>${r.outLevel?`N${Number(r.outLevel)}`:"—"}</td>
+      <td>${esc(playTimeDisplay(r, rows))}</td>
       <td>${euro(r.gross||0)}</td>
       <td>${euro(r.net||0)}</td>
     </tr>`).join("")}</tbody>
   </table>`;
 
-  // Accomplissements liés à la partie affichée et non obligatoirement la dernière.
-  // On utilise les définitions existantes et on retient les joueurs de cette partie.
-  const allAchievements=achievementPlayers();
-  const playerSet=new Set(rows.map(r=>r.player));
+  // Accomplissements réellement débloqués lors de la partie affichée.
+  const unlockedThisGame=gameUnlockedAchievements(gameNo);
   const byPlayer=new Map();
-  for(const a of allAchievements){
+  for(const a of unlockedThisGame){
     for(const player of (a.players||[])){
-      if(!playerSet.has(player))continue;
       if(!byPlayer.has(player))byPlayer.set(player,[]);
       byPlayer.get(player).push(a);
     }
@@ -19963,12 +21213,12 @@ function renderLatestGame(){
     ? [...byPlayer.entries()]
         .sort((a,b)=>a[0].localeCompare(b[0],"fr"))
         .map(([player,items])=>`<div class="latest-achievement-player">
-          ${playerNameHtml(player,{button:true,buttonClass:"latest-achievement-player-name",onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(player)}'))`})}
+          <button class="latest-achievement-player-name" type="button" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(player)}'))">${esc(funPlayerLabel(player))}</button>
           <div class="latest-achievement-list">
             ${items.map(a=>`<span class="latest-achievement-pill" title="${esc(a.desc)}">${a.icon} ${esc(a.name)}</span>`).join("")}
           </div>
         </div>`).join("")
-    : '<span class="muted">Aucun accomplissement à afficher pour les joueurs de cette partie.</span>';
+    : '<span class="muted">Aucun nouvel accomplissement débloqué sur cette partie.</span>';
 }
 
 let rankingSortKey="points";
@@ -21809,7 +23059,7 @@ async function liveLaunch(){
     levels:st.levels,levelIndex:0,levelSeconds:Number(st.levels[0]?.durationMin||st.levelMin)*60,remainingSeconds:Number(st.levels[0]?.durationMin||st.levelMin)*60,
     endAt:null,elapsedBeforeMs:0,runStartedAt:null,startedAt:null,
     chatSessionId:String(Date.now())+"-"+Math.random().toString(36).slice(2,8),
-    players:names.map(name=>({name,status:"En jeu",place:null,killer:"",outLevel:null,outTime:""}))
+    players:names.map(name=>({name,status:"En jeu",place:null,killer:"",outLevel:null,outTime:"",outElapsedSec:null}))
   };
   bptChatResetForNewLive(previousChatKey);
   saveLocalOnly();
@@ -23253,7 +24503,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 2.7.41 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 3.82 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -23916,7 +25166,7 @@ liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 (async()=>{
   await initCloudSync();
-  // BPT 2.7.41 : l'ouverture par défaut est toujours Accueil.
+  // BPT 3.82 : l'ouverture par défaut est toujours Accueil.
   spectatorAutoOpenSuppressed=true;
   document.body.classList.remove("spectator-live-open");
   await showView("dashboard");
@@ -24416,6 +25666,9 @@ document.addEventListener("visibilitychange",()=>{
 
   const PATH="bpt/live_v3/current";
   const DEVICE_KEY="bpt_live3_device_id";
+  const LIVE_IDENTITY_KEY="bpt_live3_identity_name";
+  const LEGACY_SPECTATOR_NAME_KEY="bpt_live3_spectator_name";
+  const VIEWER_STALE_MS=300000;
   const $3=(id)=>document.getElementById(id);
 
   let current=null;
@@ -24423,6 +25676,20 @@ document.addEventListener("visibilitychange",()=>{
   let ticker=null;
   let listenerInstalled=false;
   let advancing=false;
+  let spectatorHeartbeat=null;
+  let viewerRenderSignature="";
+  let liveIdentityConfirmed=false;
+  const LIVE_IDENTITY_SESSION_KEY="bpt_live3_identity_confirmed_session";
+
+  function identityConfirmedThisSession(){
+    return liveIdentityConfirmed===true;
+  }
+
+  function markIdentityConfirmedThisSession(){
+    liveIdentityConfirmed=true;
+    try{sessionStorage.setItem(LIVE_IDENTITY_SESSION_KEY,"1");}catch(_e){}
+  }
+  let spectatorSelectSignature="";
   let lastChatMessageId=null;
   let chatSoundPrimed=false;
   let unreadChatCount=0;
@@ -24477,6 +25744,14 @@ document.addEventListener("visibilitychange",()=>{
     }
     return Math.max(0,Number(current.remainingSec)||0);
   }
+  function elapsedHoursMinutes(totalSec){
+    const sec=Math.max(0,Number(totalSec)||0);
+    const totalMin=Math.floor(sec/60);
+    const h=Math.floor(totalMin/60);
+    const m=totalMin%60;
+    return h>0 ? `${h} h ${String(m).padStart(2,"0")} min` : `${m} min`;
+  }
+
   function elapsedSeconds(){
     if(!current)return 0;
     const base=Number(current.elapsedSec)||0;
@@ -24489,6 +25764,11 @@ document.addEventListener("visibilitychange",()=>{
   function nextLevel(){
     return current?.levels?.[(Number(current.levelIndex)||0)+1]||null;
   }
+
+  function currentBlindDurationMinutes(){
+    const lv=level();
+    return Math.max(1,Math.round(Number(lv?.durationSec||0)/60)||0);
+  }
   const BPT_SB_STRUCTURE=[25,50,75,100,150,200,300,400,500,600,800,1000,1200,1500,2000,3000,4000,5000];
 
   function selectedPlayerCount(){
@@ -24499,11 +25779,20 @@ document.addEventListener("visibilitychange",()=>{
     const n=Math.max(2,Number(playerCount)||2);
     const stack=Math.max(100,Number(startStack)||20000);
 
-    // Repère BPT : en fin de tournoi, heads-up à ~10 BB de tapis moyen par joueur.
-    // Avec 2 joueurs restants, chacun possède en moyenne la moitié des jetons :
-    //   tapis moyen = (n * stack) / 2
-    // donc BB cible = tapis moyen / 10 = (n * stack) / 20.
-    const targetEndBB=(n*stack)/20;
+    // Calibration empirique BPT :
+    // 10 à 12 joueurs, stack 20 000, départ vers 21 h 15,
+    // fin généralement vers 1 h 30, soit environ 4 h 15 de jeu ; la durée cible proposée par défaut reste 4 h 00.
+    // Avec des niveaux proches de 18 min, cela correspond à une fin
+    // autour du niveau 14 (BB 3 000) dans la structure actuelle.
+    //
+    // On fait donc évoluer le niveau de fin estimé avec la masse totale
+    // de jetons, au lieu d'imposer un nombre de minutes fixe.
+    const referencePlayers=11;
+    const referenceStack=20000;
+    const referenceEndBB=3000;
+
+    const chipMassRatio=(n*stack)/(referencePlayers*referenceStack);
+    const targetEndBB=referenceEndBB*chipMassRatio;
 
     let endIndex=0;
     let bestDistance=Infinity;
@@ -24516,12 +25805,14 @@ document.addEventListener("visibilitychange",()=>{
       }
     });
 
-    // Ne jamais dépasser la structure disponible.
     endIndex=Math.max(0,Math.min(BPT_SB_STRUCTURE.length-1,endIndex));
     const usedSB=BPT_SB_STRUCTURE.slice(0,endIndex+1);
 
+    // La durée de niveau est calculée à partir de la durée cible.
+    // Elle n'est pas fixe : dans votre configuration habituelle
+    // (11 joueurs / 20k / environ 4 h à 4 h 15), on retrouve une durée proche des habitudes BPT.
     const totalSeconds=Math.max(3600,Number(targetHours||4)*3600);
-    const levelSeconds=Math.max(180,Math.round(totalSeconds/usedSB.length));
+    const levelSeconds=Math.max(8*60,Math.round((totalSeconds/usedSB.length)/60)*60);
 
     const levels=usedSB.map((sb,i)=>({
       level:i+1,
@@ -24546,6 +25837,519 @@ document.addEventListener("visibilitychange",()=>{
   function renderStructurePreview(){ return; }
   function initials(name){
     return String(name||"?").trim().split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toUpperCase()||"?";
+  }
+
+  function liveIdentityName(){
+    const currentName=String(localStorage.getItem(LIVE_IDENTITY_KEY)||"").trim();
+    if(currentName)return currentName;
+
+    const legacy=String(localStorage.getItem(LEGACY_SPECTATOR_NAME_KEY)||"").trim();
+    if(legacy){
+      localStorage.setItem(LIVE_IDENTITY_KEY,legacy);
+      return legacy;
+    }
+    return "";
+  }
+
+  function spectatorName(){
+    return liveIdentityName();
+  }
+
+  const APP_PRESENCE_PATH="bpt/app_presence";
+  const APP_CONNECTION_HISTORY_PATH="bpt/connection_history";
+  const APP_CONNECTION_HISTORY_RETENTION_MS=7*24*60*60*1000;
+  const APP_CONNECTION_HISTORY_DEDUP_MS=5*60*1000;
+  const APP_CONNECTION_SESSION_LOGGED_KEY="bpt_connection_logged_session_v1";
+
+  function connectionDeviceLabel(){
+    const mobile=window.matchMedia&&window.matchMedia("(max-width:700px)").matches;
+    return mobile?"Téléphone":"PC";
+  }
+
+  function formatConnectionDate(ts){
+    const d=new Date(Number(ts)||0);
+    if(!Number.isFinite(d.getTime()))return {day:"—",time:"—"};
+    return {
+      day:d.toLocaleDateString("fr-FR",{weekday:"short",day:"2-digit",month:"2-digit",year:"numeric"}),
+      time:d.toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})
+    };
+  }
+
+  async function pruneOldConnectionHistory(){
+    try{
+      if(!window.bptFirebaseEnsure)return;
+      await window.bptFirebaseEnsure();
+      const dbx=window.bptFirebaseDb?.();
+      if(!dbx)return;
+
+      const cutoff=Date.now()-APP_CONNECTION_HISTORY_RETENTION_MS;
+      const ref=dbx.ref(APP_CONNECTION_HISTORY_PATH);
+      const snap=await ref.once("value");
+      const data=snap.val()||{};
+      const updates={};
+
+      Object.entries(data).forEach(([key,val])=>{
+        if(!val || Number(val.at||0)<cutoff)updates[key]=null;
+      });
+
+      if(Object.keys(updates).length){
+        await ref.update(updates);
+      }
+    }catch(e){
+      console.warn("Purge historique connexions :",e);
+    }
+  }
+
+  async function logConnectionSession(){
+    const name=String(liveIdentityName()||"").trim();
+    if(!name || !identityConfirmedThisSession())return;
+
+    try{
+      if(!window.bptFirebaseEnsure)return;
+      await window.bptFirebaseEnsure();
+      const dbx=window.bptFirebaseDb?.();
+      if(!dbx)return;
+
+      const now=Date.now();
+      const deviceId=uid();
+      const base=dbx.ref(APP_CONNECTION_HISTORY_PATH);
+
+      // Evite les doublons lors de F5 successifs :
+      // même personne + même appareil dans les 5 dernières minutes = même connexion.
+      const snap=await base.once("value");
+      const data=snap.val()||{};
+      const duplicate=Object.values(data).some(v=>
+        v &&
+        String(v.name||"").trim()===name &&
+        String(v.deviceId||"")===String(deviceId) &&
+        now-Number(v.at||0)>=0 &&
+        now-Number(v.at||0)<APP_CONNECTION_HISTORY_DEDUP_MS
+      );
+
+      if(!duplicate){
+        await base.push().set({
+          name,
+          at:now,
+          device:connectionDeviceLabel(),
+          deviceId
+        });
+      }
+
+      await pruneOldConnectionHistory();
+      if(document.getElementById("connectionHistoryBody"))loadConnectionHistory();
+    }catch(e){
+      console.warn("Historique connexion :",e);
+    }
+  }
+
+  async function loadConnectionHistory(){
+    const body=document.getElementById("connectionHistoryBody");
+    const summary=document.getElementById("connectionHistorySummary");
+    if(!body||!summary)return;
+
+    try{
+      if(!window.bptFirebaseEnsure){
+        body.innerHTML='<tr><td colspan="3" class="muted">Firebase indisponible.</td></tr>';
+        summary.textContent="";
+        return;
+      }
+
+      await window.bptFirebaseEnsure();
+      const dbx=window.bptFirebaseDb?.();
+      if(!dbx)return;
+
+      const cutoff=Date.now()-APP_CONNECTION_HISTORY_RETENTION_MS;
+      const snap=await dbx.ref(APP_CONNECTION_HISTORY_PATH).once("value");
+
+      const rawRows=Object.values(snap.val()||{})
+        .filter(v=>v && Number(v.at||0)>=cutoff && String(v.name||"").trim());
+
+      const byPlayer=new Map();
+
+      rawRows.forEach(v=>{
+        const name=String(v.name||"").trim();
+        const at=Number(v.at||0);
+        if(!byPlayer.has(name)){
+          byPlayer.set(name,{
+            name,
+            lastAt:at,
+            count:1
+          });
+        }else{
+          const row=byPlayer.get(name);
+          row.count++;
+          if(at>row.lastAt)row.lastAt=at;
+        }
+      });
+
+      const rows=[...byPlayer.values()]
+        .sort((a,b)=>Number(b.lastAt||0)-Number(a.lastAt||0));
+
+      summary.textContent=`${rows.length} joueur${rows.length>1?"s":""} · ${rawRows.length} connexion${rawRows.length>1?"s":""} sur 7 jours`;
+
+      body.innerHTML=rows.length
+        ? rows.map(v=>{
+            const f=formatConnectionDate(v.lastAt);
+            return `<tr>
+              <td>${escapeHtml(v.name)}</td>
+              <td>${escapeHtml(`${f.day} · ${f.time}`)}</td>
+              <td>${Number(v.count)||0}</td>
+            </tr>`;
+          }).join("")
+        : '<tr><td colspan="3" class="muted">Aucune connexion enregistrée sur les 7 derniers jours.</td></tr>';
+    }catch(e){
+      console.warn("Lecture historique connexions :",e);
+      body.innerHTML='<tr><td colspan="3" class="muted">Impossible de charger l’historique.</td></tr>';
+      summary.textContent="";
+    }
+  }
+
+  const APP_PRESENCE_HEARTBEAT_MS=15000;
+  const APP_PRESENCE_STALE_MS=300000;
+  let appPresenceTimer=null;
+  let appPresenceListenerInstalled=false;
+
+  function appPresenceNameParts(name){
+    const clean=String(name||"").trim().replace(/\s+/g," ");
+    if(!clean)return {first:"",last:""};
+    const parts=clean.split(" ");
+    return {
+      first:parts[0]||"",
+      last:parts.length>1?parts[parts.length-1]:""
+    };
+  }
+
+  function appPresenceBaseInitials(name){
+    const {first,last}=appPresenceNameParts(name);
+    const f=first.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase();
+    const l=last.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase();
+    if(!f)return "?";
+    if(!l)return f.slice(0,2);
+    return `${f.slice(0,2)}.${l.slice(0,2)}`;
+  }
+
+  function appPresenceUniqueInitials(active){
+    const used=new Set();
+
+    return (active||[]).map(v=>{
+      const {first,last}=appPresenceNameParts(v?.name);
+      const f=first.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase();
+      const l=last.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase();
+
+      if(!f)return "?";
+      if(!l){
+        let code=f.slice(0,2);
+        if(!used.has(code)){used.add(code);return code;}
+        code=f.slice(0,3);
+        used.add(code);
+        return code;
+      }
+
+      for(let lastLen=2; lastLen<=Math.max(2,l.length); lastLen++){
+        const code=`${f.slice(0,2)}.${l.slice(0,lastLen)}`;
+        if(!used.has(code)){
+          used.add(code);
+          return code;
+        }
+      }
+
+      let n=2;
+      let code=`${f.slice(0,2)}.${l.slice(0,2)}${n}`;
+      while(used.has(code)){
+        n++;
+        code=`${f.slice(0,2)}.${l.slice(0,2)}${n}`;
+      }
+      used.add(code);
+      return code;
+    });
+  }
+
+  function renderAppPresence(viewers){
+    const countEl=document.getElementById("bptOnlineCount");
+    const tipEl=document.getElementById("bptOnlineTooltip");
+    if(!countEl||!tipEl)return;
+
+    const now=Date.now();
+    const active=Object.values(viewers||{})
+      .filter(v=>v && String(v.name||"").trim() && now-Number(v.lastSeen||0)<APP_PRESENCE_STALE_MS)
+      .sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""),"fr",{sensitivity:"base"}));
+
+    const initials=appPresenceUniqueInitials(active);
+
+    countEl.textContent=String(active.length);
+    tipEl.textContent=active.length
+      ? initials.join(" · ")
+      : "Personne";
+  }
+
+  async function updateAppPresence(){
+    if(!liveIdentityName() || !identityConfirmedThisSession())return;
+
+    try{
+      if(!window.bptFirebaseEnsure)return;
+      await window.bptFirebaseEnsure();
+
+      const dbx=window.bptFirebaseDb?.();
+      if(!dbx)return;
+
+      const ref=dbx.ref(`${APP_PRESENCE_PATH}/${uid()}`);
+      await ref.set({
+        name:liveIdentityName(),
+        initials:appPresenceBaseInitials(liveIdentityName()),
+        lastSeen:Date.now()
+      });
+
+      try{ref.onDisconnect().remove();}catch(_e){}
+    }catch(e){
+      console.warn("Présence application :",e);
+    }
+  }
+
+  async function installAppPresenceListener(){
+    if(appPresenceListenerInstalled)return;
+
+    try{
+      if(!window.bptFirebaseEnsure)return;
+      await window.bptFirebaseEnsure();
+
+      const dbx=window.bptFirebaseDb?.();
+      if(!dbx)return;
+
+      const base=dbx.ref(APP_PRESENCE_PATH);
+      base.on("value",snap=>renderAppPresence(snap.val()||{}));
+      appPresenceListenerInstalled=true;
+    }catch(e){
+      console.warn("Lecture présence application :",e);
+    }
+  }
+
+  function startAppPresence(){
+    installAppPresenceListener();
+    updateAppPresence();
+
+    clearInterval(appPresenceTimer);
+    appPresenceTimer=setInterval(updateAppPresence,APP_PRESENCE_HEARTBEAT_MS);
+  }
+
+  window.addEventListener("beforeunload",()=>{
+    try{
+      const dbx=window.bptFirebaseDb?.();
+      if(dbx)dbx.ref(`${APP_PRESENCE_PATH}/${uid()}`).remove();
+    }catch(_e){}
+  });
+
+
+
+  function requireIdentityOnSiteEntry(){
+    // Chaque chargement de page repart non confirmé.
+    // Le nom mémorisé sert uniquement de présélection dans la liste.
+    liveIdentityConfirmed=false;
+    try{sessionStorage.removeItem(LIVE_IDENTITY_SESSION_KEY);}catch(_e){}
+
+    setTimeout(()=>{
+      try{ openSpectatorIdentity(true); }catch(e){ console.warn("Identification BPT :",e); }
+    },120);
+  }
+
+  function populateSpectatorNameList(){
+    const select=$3("live3SpectatorNameInput");
+    if(!select)return;
+
+    const currentValue=String(select.value||liveIdentityName()||"").trim();
+    const names=(db?.players||[])
+      .filter(p=>p && p.active===true && String(p.name||"").trim())
+      .map(p=>String(p.name).trim())
+      .sort((a,b)=>a.localeCompare(b,"fr",{sensitivity:"base"}));
+
+    const unique=[...new Set(names)];
+    const signature=unique.join("|");
+
+    // Ne reconstruire les options que si la liste des joueurs actifs change.
+    if(signature!==spectatorSelectSignature){
+      select.innerHTML=
+        '<option value="">— Choisir votre nom —</option>'+
+        unique.map(name=>`<option value="${escapeAttr(name)}">${escapeHtml(funPlayerLabel(name))}</option>`).join("");
+      spectatorSelectSignature=signature;
+    }
+
+    if(currentValue && unique.includes(currentValue)){
+      select.value=currentValue;
+    }else if(!select.value || !unique.includes(select.value)){
+      select.value="";
+    }
+  }
+
+  function openSpectatorIdentity(force=false){
+    if(!force){
+      if(isOwner())return;
+      if(!isActive())return;
+      if(liveIdentityConfirmed)return;
+    }
+
+    const existing=liveIdentityName();
+    if(existing && !force && liveIdentityConfirmed)return;
+
+    const modal=$3("live3SpectatorIdentityModal");
+    if(!modal)return;
+
+    // Sur mobile, render() peut être appelé plusieurs fois par seconde.
+    // Ne surtout pas reconstruire le <select> pendant que l'utilisateur
+    // est en train de choisir son nom : cela provoquait le clignotement.
+    if(modal.classList.contains("open") && !force)return;
+
+    populateSpectatorNameList();
+    const input=$3("live3SpectatorNameInput");
+
+    const btn=$3("live3SpectatorIdentityConfirmBtn");
+    if(btn)btn.disabled=!String(input?.value||"").trim();
+
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden","false");
+
+    // Pas de focus forcé sur un select mobile : certains navigateurs
+    // redessinent le contrôle natif et donnent une impression de flash.
+    if(!window.matchMedia("(max-width:700px)").matches){
+      setTimeout(()=>{
+        try{input?.focus({preventScroll:true});}catch(_e){}
+      },50);
+    }
+  }
+
+  function closeSpectatorIdentity(){
+    const modal=$3("live3SpectatorIdentityModal");
+    if(!modal)return;
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden","true");
+  }
+
+  async function setSpectatorIdentity(){
+    const input=$3("live3SpectatorNameInput");
+    const clean=String(input?.value||"").trim();
+
+    if(!clean){
+      alert("Choisissez votre nom dans la liste des joueurs actifs.");
+      input?.focus();
+      return;
+    }
+
+    const activeNames=(db?.players||[])
+      .filter(p=>p && p.active===true)
+      .map(p=>String(p.name||"").trim());
+
+    if(!activeNames.includes(clean)){
+      alert("Ce joueur n’est plus actif. Choisissez un autre nom.");
+      populateSpectatorNameList();
+      input?.focus();
+      return;
+    }
+
+    localStorage.setItem(LIVE_IDENTITY_KEY,clean);
+    markIdentityConfirmedThisSession();
+    startAppPresence();
+    logConnectionSession();
+    logConnectionSession();
+    logConnectionSession();
+
+    // Si aucun Live n'est actif, ce joueur est le futur maître :
+    // préremplir le lieu avec son nom.
+    if(!isActive()){
+      const loc=$3("live3Location");
+      if(loc)loc.value=clean;
+    }
+
+    closeSpectatorIdentity();
+    await updateViewerPresence();
+    render();
+  }
+
+  async function updateViewerPresence(){
+    if(!isActive() || isOwner() || !liveIdentityConfirmed)return;
+    const name=liveIdentityName();
+    if(!name)return;
+
+    try{
+      const r=await ensureRef();
+      const sessionId=String(current?.sessionId||"");
+      await r.transaction(server=>{
+        if(!server?.active)return server;
+        if(String(server.sessionId||"")!==sessionId)return server;
+
+        const next=clone(server);
+        if(!next.viewers || typeof next.viewers!=="object")next.viewers={};
+
+        next.viewers[uid()]={
+          name,
+          deviceLabel:deviceLabel(),
+          lastSeen:Date.now()
+        };
+        return next;
+      });
+    }catch(e){
+      console.warn("Présence spectateur :",e);
+    }
+  }
+
+  function activeViewers(){
+    const now=Date.now();
+    const viewers=current?.viewers && typeof current.viewers==="object"
+      ? Object.entries(current.viewers)
+      : [];
+
+    return viewers
+      .filter(([id,v])=>
+        id!==String(current?.ownerId||"") &&
+        v &&
+        String(v.name||"").trim() &&
+        now-Number(v.lastSeen||0) < VIEWER_STALE_MS
+      )
+      .map(([id,v])=>({id,...v}))
+      .sort((a,b)=>String(a.name).localeCompare(String(b.name),"fr",{sensitivity:"base"}));
+  }
+
+  function renderViewerInfo(){
+    const host=$3("live3ViewerInfo");
+    if(!host)return;
+
+    if(!isOwner()){
+      host.style.display="none";
+      if(viewerRenderSignature!=="hidden"){
+        host.innerHTML="";
+        viewerRenderSignature="hidden";
+      }
+      return;
+    }
+
+    const viewers=activeViewers();
+    const signature=viewers.map(v=>`${v.id}:${v.name}`).join("|");
+
+    host.style.display="flex";
+
+    if(!viewers.length){
+      const emptySig="owner:empty";
+      if(viewerRenderSignature!==emptySig){
+        host.innerHTML='<span class="muted">Aucun spectateur connecté</span>';
+        viewerRenderSignature=emptySig;
+      }
+      return;
+    }
+
+    const fullSig=`owner:${signature}`;
+    if(viewerRenderSignature===fullSig)return;
+
+    host.innerHTML=
+      `<span class="bpt-live3-viewer-count">${viewers.length} spectateur${viewers.length>1?"s":""}</span>`+
+      viewers.map(v=>`<span class="bpt-live3-viewer-chip">${escapeHtml(v.name)}</span>`).join("");
+
+    viewerRenderSignature=fullSig;
+  }
+
+  function startSpectatorHeartbeat(){
+    if(spectatorHeartbeat)return;
+    spectatorHeartbeat=setInterval(()=>{
+      if(isActive() && !isOwner() && liveIdentityConfirmed && liveIdentityName()){
+        updateViewerPresence();
+      }
+    },15000);
   }
 
   async function ensureRef(){
@@ -24593,7 +26397,12 @@ document.addEventListener("visibilitychange",()=>{
   }
 
   async function createLive(){
-    const location=String($3("live3Location")?.value||"").trim();
+    if(!liveIdentityConfirmed || !liveIdentityName()){
+      openSpectatorIdentity(true);
+      return;
+    }
+
+    const location=String($3("live3Location")?.value||liveIdentityName()||"").trim();
     const selected=[...document.querySelectorAll('#live3PlayerPicker input[type="checkbox"]:checked')].map(x=>x.value);
     if(!location){alert("Indiquez le nom / lieu de la partie.");return;}
     if(selected.length<2){alert("Sélectionnez au moins 2 joueurs.");return;}
@@ -24607,7 +26416,7 @@ document.addEventListener("visibilitychange",()=>{
       const now=Date.now();
       const state={
         version:3,active:true,sessionId:"L3_"+now.toString(36)+"_"+Math.random().toString(36).slice(2,7),
-        ownerId:uid(),ownerLabel:deviceLabel(),createdAt:now,updatedAt:now,
+        ownerId:uid(),ownerLabel:liveIdentityName()||deviceLabel(),createdAt:now,updatedAt:now,
         location,date:$3("live3Date").value||new Date().toISOString().slice(0,10),
         startStack:Math.max(100,Number($3("live3Stack").value)||20000),
         buyIn:Math.max(0,Number($3("live3BuyIn").value)||0),
@@ -24624,8 +26433,8 @@ document.addEventListener("visibilitychange",()=>{
           selected.length,
           Math.max(100,Number($3("live3Stack").value)||20000)
         )[0].durationSec,
-        players:selected.map(name=>({name,status:"in",place:null,killer:"",outAt:null})),
-        takeoverRequest:null,chat:[]
+        players:selected.map(name=>({name,status:"in",place:null,killer:"",outAt:null,outLevel:null,outTime:"",outElapsedSec:null})),
+        viewers:{},takeoverRequest:null,chat:[]
       };
       await r.transaction(server=>{
         if(server?.active)return server;
@@ -24663,6 +26472,58 @@ document.addEventListener("visibilitychange",()=>{
         s.runStartedAt=now;
         s.deadline=now+rem*1000;
       }
+      return s;
+    });
+  }
+
+  async function applyBlindDuration(){
+    if(!isOwner())return;
+
+    const input=$3("live3BlindDurationInput");
+    const minutes=Math.round(Number(input?.value)||0);
+
+    if(minutes<5 || minutes>60){
+      alert("Choisissez une durée comprise entre 5 et 60 minutes.");
+      input?.focus();
+      return;
+    }
+
+    await ownerTransaction(s=>{
+      const idx=Math.max(0,Number(s.levelIndex)||0);
+      const levels=Array.isArray(s.levels)?s.levels:[];
+      if(!levels.length)return s;
+
+      const now=Date.now();
+      const oldDuration=Math.max(60,Number(levels[idx]?.durationSec)||60);
+      const newDuration=minutes*60;
+
+      let currentRemaining=Number(s.remainingSec||oldDuration);
+      if(s.running){
+        currentRemaining=Math.max(
+          0,
+          Math.ceil((Number(s.deadline||now)-now)/1000)
+        );
+      }
+
+      const elapsedInCurrent=Math.max(0,oldDuration-currentRemaining);
+      const progress=Math.max(0,Math.min(1,elapsedInCurrent/oldDuration));
+      const newRemaining=Math.max(0,Math.round(newDuration*(1-progress)));
+
+      for(let i=idx;i<levels.length;i++){
+        levels[i].durationSec=newDuration;
+      }
+
+      s.levels=levels;
+      s.remainingSec=newRemaining;
+
+      if(s.running){
+        s.runStartedAt=now;
+        s.deadline=now+newRemaining*1000;
+      }else{
+        s.runStartedAt=null;
+        s.deadline=null;
+      }
+
       return s;
     });
   }
@@ -24786,9 +26647,19 @@ document.addEventListener("visibilitychange",()=>{
       victimPlayer.status="out";
       victimPlayer.place=alive.length;
       victimPlayer.killer=killerPlayer.name;
-      victimPlayer.outAt=Date.now();
+      const elimNow=Date.now();
+      victimPlayer.outAt=elimNow;
       victimPlayer.outLevel=(Number(s.levelIndex)||0)+1;
-      victimPlayer.outTime=new Date().toLocaleTimeString("fr-FR");
+      victimPlayer.outTime=new Date(elimNow).toLocaleTimeString("fr-FR");
+      victimPlayer.outElapsedSec=Math.max(
+        1,
+        Math.round(
+          Number(s.elapsedSec||0) +
+          (s.running && s.runStartedAt
+            ? Math.max(0,(elimNow-Number(s.runStartedAt||elimNow))/1000)
+            : 0)
+        )
+      );
 
       const survivors=(s.players||[]).filter(x=>x.status==="in");
       if(survivors.length===1){
@@ -24807,6 +26678,17 @@ document.addEventListener("visibilitychange",()=>{
         survivors[0].outAt=null;
         survivors[0].outLevel=null;
         survivors[0].outTime="";
+
+        // Figer la durée réelle complète avant d'arrêter le chrono.
+        if(s.running && s.runStartedAt){
+          s.elapsedSec=Math.max(
+            0,
+            Number(s.elapsedSec||0) +
+            Math.floor((now-Number(s.runStartedAt||now))/1000)
+          );
+        }else{
+          s.elapsedSec=Math.max(0,Number(s.elapsedSec)||0);
+        }
 
         s.running=false;
         s.runStartedAt=null;
@@ -24951,6 +26833,17 @@ document.addEventListener("visibilitychange",()=>{
           killer:place===1?"":String(p.killer||""),
           outLevel:p.outLevel||null,
           outTime:p.outTime||"",
+          outElapsedSec:Number(p.outElapsedSec)||null,
+          gameStartedAt:Number(state.startedAt)||null,
+          gameFinishedAt:Number(state.finishedAt)||null,
+          gameDurationSec:Math.max(
+            0,
+            Number(state.elapsedSec)||(
+              Number(state.finishedAt)>0 && Number(state.startedAt)>0
+                ? Math.floor((Number(state.finishedAt)-Number(state.startedAt))/1000)
+                : 0
+            )
+          ),
           tablier:n>=Number(db?.settings?.tablierMinPlayers||10)&&place===1,
           n,
           points:pointsFor(place,n),
@@ -25089,7 +26982,7 @@ document.addEventListener("visibilitychange",()=>{
     await r.transaction(s=>{
       if(!s?.active||String(s.ownerId||"")===uid())return s;
       s=clone(s);
-      s.takeoverRequest={requesterId:uid(),requesterLabel:deviceLabel(),requestedAt:Date.now()};
+      s.takeoverRequest={requesterId:uid(),requesterLabel:liveIdentityName()||deviceLabel(),requestedAt:Date.now()};
       s.updatedAt=Date.now();sent=true;return s;
     });
     if(sent)$3("live3TakeoverStatus").textContent="Demande envoyée.";
@@ -25121,7 +27014,7 @@ document.addEventListener("visibilitychange",()=>{
       if(!s?.active||String(s.sessionId||"")!==session)return s;
       s=clone(s);
       const list=Array.isArray(s.chat)?s.chat:[];
-      list.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),from:deviceLabel(),deviceId:uid(),text:message,at:Date.now()});
+      list.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),from:isOwner()?deviceLabel():(spectatorName()||deviceLabel()),deviceId:uid(),text:message,at:Date.now()});
       s.chat=list.slice(-20);s.updatedAt=Date.now();return s;
     });
     input.value="";
@@ -25189,6 +27082,91 @@ document.addEventListener("visibilitychange",()=>{
     document.body.style.overflow="";
   }
 
+  function updateMobilePlayerSelectionCount(){
+    const count=selectedPlayerCount();
+    const top=$3("live3MobileSelectedCount");
+    const modal=$3("live3MobileModalCount");
+    if(top)top.textContent=String(count);
+    if(modal)modal.textContent=String(
+      document.querySelectorAll('#live3MobilePlayerGrid input[type="checkbox"]:checked').length
+    );
+  }
+
+  function renderMobilePlayerSelector(){
+    const grid=$3("live3MobilePlayerGrid");
+    if(!grid)return;
+
+    const selected=new Set(
+      [...document.querySelectorAll('#live3PlayerPicker input[type="checkbox"]:checked')]
+        .map(cb=>cb.value)
+    );
+
+    const pickerOptions=[
+      ...document.querySelectorAll('#live3PlayerPicker input[type="checkbox"]')
+    ].map(cb=>({
+      name:cb.value,
+      isNew:!!cb.closest(".bpt-live3-player-check")?.classList.contains("is-new-player")
+    }));
+
+    const q=String($3("live3MobilePlayerSearch")?.value||"")
+      .trim()
+      .toLocaleLowerCase("fr");
+
+    const filtered=pickerOptions.filter(p=>
+      !q || p.name.toLocaleLowerCase("fr").includes(q)
+    );
+
+    grid.innerHTML=filtered.length
+      ? filtered.map(p=>{
+          const checked=selected.has(p.name);
+          return `<label class="bpt-live3-mobile-player-option${checked?" is-selected":""}${p.isNew?" is-new-player":""}">
+            <input type="checkbox" value="${escapeAttr(p.name)}" ${checked?"checked":""}>
+            <span class="bpt-live3-mobile-player-name" title="${escapeAttr(p.name)}">${escapeHtml(p.name)}</span>
+          </label>`;
+        }).join("")
+      : '<div class="muted" style="grid-column:1/-1;padding:16px 4px">Aucun joueur trouvé.</div>';
+
+    updateMobilePlayerSelectionCount();
+  }
+
+  function openMobilePlayerSelector(){
+    renderMobilePlayerSelector();
+    const modal=$3("live3MobilePlayerModal");
+    if(!modal)return;
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden","false");
+    setTimeout(()=>{try{$3("live3MobilePlayerSearch")?.focus({preventScroll:true});}catch(_e){}},40);
+  }
+
+  function closeMobilePlayerSelector(){
+    const modal=$3("live3MobilePlayerModal");
+    if(!modal)return;
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden","true");
+  }
+
+  function validateMobilePlayerSelector(){
+    const selected=new Set(
+      [...document.querySelectorAll('#live3MobilePlayerGrid input[type="checkbox"]:checked')]
+        .map(cb=>cb.value)
+    );
+
+    document.querySelectorAll('#live3PlayerPicker input[type="checkbox"]').forEach(cb=>{
+      cb.checked=selected.has(cb.value);
+    });
+
+    updateMobilePlayerSelectionCount();
+    renderStructurePreview();
+    closeMobilePlayerSelector();
+  }
+
+  function prefillLiveLocationFromIdentity(){
+    const loc=$3("live3Location");
+    if(!loc || isActive())return;
+    const name=liveIdentityName();
+    if(name && !String(loc.value||"").trim())loc.value=name;
+  }
+
   function renderPrepPlayers(){
     const host=$3("live3PlayerPicker");
     if(!host)return;
@@ -25231,6 +27209,11 @@ document.addEventListener("visibilitychange",()=>{
         }).join("")
       : '<div class="muted">Aucun joueur actif. Ajoutez un nouveau joueur ci-dessous.</div>';
 
+    updateMobilePlayerSelectionCount();
+    prefillLiveLocationFromIdentity();
+    if($3("live3MobilePlayerModal")?.classList.contains("open")){
+      renderMobilePlayerSelector();
+    }
     setTimeout(renderStructurePreview,0);
   }
 
@@ -25262,6 +27245,7 @@ document.addEventListener("visibilitychange",()=>{
       const existing=[...document.querySelectorAll('#live3PlayerPicker input[type="checkbox"]')]
         .find(cb=>String(cb.value).localeCompare(canonical,"fr",{sensitivity:"base"})===0);
       if(existing)existing.checked=true;
+      updateMobilePlayerSelectionCount();
       input.value="";
       if(hint)hint.textContent=`${canonical} est déjà un joueur actif et a été sélectionné.`;
       renderStructurePreview();
@@ -25306,18 +27290,39 @@ document.addEventListener("visibilitychange",()=>{
     if(!active){
       if(prep)prep.style.display="";
       if(game)game.style.display="none";
-      if(role){role.textContent="AUCUN LIVE";role.className="bpt-live3-role-badge";}
+      if(role){
+        role.textContent=liveIdentityConfirmed && liveIdentityName()
+          ? `PRÊT · ${liveIdentityName()}`
+          : "IDENTIFICATION";
+        role.className="bpt-live3-role-badge";
+      }
       renderPrepPlayers();
       updateUndoEliminationButton();
+      if($3("live3ViewerInfo")){
+        $3("live3ViewerInfo").style.display="none";
+        if(viewerRenderSignature!=="inactive"){
+          $3("live3ViewerInfo").innerHTML="";
+          viewerRenderSignature="inactive";
+        }
+      }
+      if(!identityConfirmedThisSession())openSpectatorIdentity(true);
       return;
     }
 
     if(prep)prep.style.display="none";
     if(game)game.style.display="";
     if(role){
-      role.textContent=owner?"MAÎTRE":"SPECTATEUR";
+      role.textContent=owner?`MAÎTRE · ${current?.ownerLabel||liveIdentityName()||deviceLabel()}`:`SPECTATEUR · ${liveIdentityName()||"—"}`;
       role.className="bpt-live3-role-badge "+(owner?"master":"spectator");
     }
+
+    if(!identityConfirmedThisSession()){
+      openSpectatorIdentity(true);
+    }
+
+    // La présence est maintenue par le heartbeat (15 s) et par
+    // visibilitychange. Ne pas écrire dans Firebase à chaque render().
+    renderViewerInfo();
 
     const liveRoot=$3("live3");
     const fsRoot=$3("live3Fullscreen");
@@ -25338,10 +27343,15 @@ document.addEventListener("visibilitychange",()=>{
     const next=nx?`${fmt(nx.sb)} / ${fmt(nx.bb)}${nx.ante?` · ante ${fmt(nx.ante)}`:""}`:"Dernier niveau";
 
     $3("live3GameLocation").textContent=current.location||"Live BPT";
-    $3("live3GameMeta").textContent=`${current.date||""} · ${current.players?.length||0} joueurs · maître : ${current.ownerLabel||"appareil"}`;
+    $3("live3GameMeta").textContent=`${current.date||""} · ${current.players?.length||0} joueurs · maître : ${current.ownerLabel||"—"}`;
     $3("live3Blinds").textContent=blinds;$3("live3Ante").textContent=ante;
+    const blindDurationMin=currentBlindDurationMinutes();
+    if($3("live3BlindDurationLabel"))$3("live3BlindDurationLabel").textContent=`Durée : ${blindDurationMin} min`;
+    if($3("live3BlindDurationInput") && document.activeElement!==$3("live3BlindDurationInput")){
+      $3("live3BlindDurationInput").value=String(blindDurationMin);
+    }
     $3("live3Timer").textContent=time(rem);$3("live3Remaining").textContent=String(count);
-    $3("live3AvgStack").textContent=fmt(avg);$3("live3Elapsed").textContent=time(elapsedSeconds());$3("live3Next").textContent=next;
+    $3("live3AvgStack").textContent=fmt(avg);$3("live3Elapsed").textContent=elapsedHoursMinutes(elapsedSeconds());$3("live3Next").textContent=next;
     $3("live3StartPauseBtn").textContent=current.running?"Pause":(current.startedAt?"Reprendre":"Démarrer");
 
     // Visibilité stricte selon le rôle :
@@ -25352,6 +27362,9 @@ document.addEventListener("visibilitychange",()=>{
     }
     if($3("live3UndoElimBox")){
       $3("live3UndoElimBox").style.setProperty("display",owner?"flex":"none","important");
+    }
+    if($3("live3BlindDurationEditor")){
+      $3("live3BlindDurationEditor").style.setProperty("display",owner?"flex":"none","important");
     }
     if($3("live3SpectatorControls")){
       $3("live3SpectatorControls").style.setProperty("display",owner?"none":"grid","important");
@@ -25374,8 +27387,9 @@ document.addEventListener("visibilitychange",()=>{
     updateUndoEliminationButton();
 
     $3("live3FsBlinds").textContent=blinds;$3("live3FsAnte").textContent=ante;
+    if($3("live3FsBlindDurationLabel"))$3("live3FsBlindDurationLabel").textContent=`Durée : ${blindDurationMin} min`;
     $3("live3FsTimer").textContent=time(rem);$3("live3FsRemaining").textContent=String(count);
-    $3("live3FsAvg").textContent=fmt(avg);$3("live3FsElapsed").textContent=time(elapsedSeconds());$3("live3FsNext").textContent=next;
+    $3("live3FsAvg").textContent=fmt(avg);$3("live3FsElapsed").textContent=elapsedHoursMinutes(elapsedSeconds());$3("live3FsNext").textContent=next;
     $3("live3FsStartPauseBtn").textContent=current.running?"Pause":(current.startedAt?"Reprendre":"Démarrer");
 
     const fsMaster=$3("live3FsMasterActions");
@@ -25406,41 +27420,48 @@ document.addEventListener("visibilitychange",()=>{
 
       const ctx=new AudioCtx();
       const now=ctx.currentTime;
-      const osc=ctx.createOscillator();
+
       const gain=ctx.createGain();
+      gain.connect(ctx.destination);
 
-      osc.type="sine";
+      function tone(freq,start,duration,volume,type="square"){
+        const osc=ctx.createOscillator();
+        osc.type=type;
+        osc.frequency.setValueAtTime(freq,start);
+        const localGain=ctx.createGain();
 
-      if(kind==="level"){
-        // Bip de changement : plus grave, plus long et plus présent.
-        osc.frequency.setValueAtTime(560,now);
-        osc.frequency.exponentialRampToValueAtTime(880,now+0.18);
-        gain.gain.setValueAtTime(0.0001,now);
-        gain.gain.exponentialRampToValueAtTime(0.13,now+0.015);
-        gain.gain.exponentialRampToValueAtTime(0.0001,now+0.42);
-        osc.start(now);
-        osc.stop(now+0.44);
-      }else if(kind==="thirty"){
-        // Alerte 30 secondes : bip court distinct.
-        osc.frequency.setValueAtTime(620,now);
-        gain.gain.setValueAtTime(0.0001,now);
-        gain.gain.exponentialRampToValueAtTime(0.055,now+0.01);
-        gain.gain.exponentialRampToValueAtTime(0.0001,now+0.17);
-        osc.start(now);
-        osc.stop(now+0.18);
-      }else{
-        // Décompte 5 -> 1 : bip bref et net.
-        osc.frequency.setValueAtTime(820,now);
-        gain.gain.setValueAtTime(0.0001,now);
-        gain.gain.exponentialRampToValueAtTime(0.07,now+0.008);
-        gain.gain.exponentialRampToValueAtTime(0.0001,now+0.11);
-        osc.start(now);
-        osc.stop(now+0.12);
+        localGain.gain.setValueAtTime(0.0001,start);
+        localGain.gain.exponentialRampToValueAtTime(volume,start+0.012);
+        localGain.gain.exponentialRampToValueAtTime(0.0001,start+duration);
+
+        osc.connect(localGain);
+        localGain.connect(gain);
+        osc.start(start);
+        osc.stop(start+duration+0.02);
       }
 
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.onended=()=>{try{ctx.close();}catch(_e){}};
+      if(kind==="level"){
+        // Changement de blind : double signal fort et distinct.
+        tone(520,now,0.26,0.24,"square");
+        tone(760,now+0.30,0.34,0.30,"square");
+        gain.gain.setValueAtTime(1,now);
+        setTimeout(()=>{try{ctx.close();}catch(_e){}},800);
+        return;
+      }
+
+      if(kind==="thirty"){
+        // 30 secondes : bip franc, plus long.
+        tone(650,now,0.24,0.18,"square");
+        gain.gain.setValueAtTime(1,now);
+        setTimeout(()=>{try{ctx.close();}catch(_e){}},400);
+        return;
+      }
+
+      // 5 -> 1 secondes : bip court mais bien audible.
+      tone(900,now,0.16,0.22,"square");
+      gain.gain.setValueAtTime(1,now);
+      setTimeout(()=>{try{ctx.close();}catch(_e){}},300);
+
     }catch(_e){}
   }
 
@@ -25510,15 +27531,15 @@ document.addEventListener("visibilitychange",()=>{
       const ctx=new AudioCtx();
       const osc=ctx.createOscillator();
       const gain=ctx.createGain();
-      osc.type="sine";
-      osc.frequency.setValueAtTime(720,ctx.currentTime);
+      osc.type="square";
+      osc.frequency.setValueAtTime(740,ctx.currentTime);
       gain.gain.setValueAtTime(0.0001,ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.04,ctx.currentTime+0.01);
-      gain.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+0.13);
+      gain.gain.exponentialRampToValueAtTime(0.09,ctx.currentTime+0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+0.18);
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start();
-      osc.stop(ctx.currentTime+0.14);
+      osc.stop(ctx.currentTime+0.19);
       osc.onended=()=>{try{ctx.close();}catch(_e){}};
     }catch(_e){}
   }
@@ -25582,7 +27603,35 @@ document.addEventListener("visibilitychange",()=>{
     $3("live3TargetHours")?.addEventListener("input",renderStructurePreview);
     $3("live3Stack")?.addEventListener("input",renderStructurePreview);
     $3("live3PlayerPicker")?.addEventListener("change",e=>{
-      if(e.target?.matches('input[type="checkbox"]'))renderStructurePreview();
+      if(e.target?.matches('input[type="checkbox"]')){
+        updateMobilePlayerSelectionCount();
+        renderStructurePreview();
+      }
+    });
+
+    $3("live3MobilePlayerSelectBtn")?.addEventListener("click",openMobilePlayerSelector);
+    $3("live3MobilePlayerCloseBtn")?.addEventListener("click",closeMobilePlayerSelector);
+    $3("live3MobilePlayerCancelBtn")?.addEventListener("click",closeMobilePlayerSelector);
+    $3("live3MobilePlayerValidateBtn")?.addEventListener("click",validateMobilePlayerSelector);
+    $3("live3MobilePlayerSearch")?.addEventListener("input",renderMobilePlayerSelector);
+    $3("live3MobileClearPlayersBtn")?.addEventListener("click",()=>{
+      document.querySelectorAll('#live3MobilePlayerGrid input[type="checkbox"]').forEach(cb=>cb.checked=false);
+      document.querySelectorAll('#live3MobilePlayerGrid .bpt-live3-mobile-player-option').forEach(el=>el.classList.remove("is-selected"));
+      updateMobilePlayerSelectionCount();
+    });
+    $3("live3MobilePlayerGrid")?.addEventListener("change",e=>{
+      if(e.target?.matches('input[type="checkbox"]')){
+        e.target.closest(".bpt-live3-mobile-player-option")?.classList.toggle("is-selected",e.target.checked);
+        const modalCount=$3("live3MobileModalCount");
+        if(modalCount){
+          modalCount.textContent=String(
+            document.querySelectorAll('#live3MobilePlayerGrid input[type="checkbox"]:checked').length
+          );
+        }
+      }
+    });
+    $3("live3MobilePlayerModal")?.addEventListener("click",e=>{
+      if(e.target===$3("live3MobilePlayerModal"))closeMobilePlayerSelector();
     });
 
     $3("live3AddNewPlayerBtn")?.addEventListener("click",addTemporaryLivePlayer);
@@ -25599,11 +27648,24 @@ document.addEventListener("visibilitychange",()=>{
     $3("live3NextLevelBtn")?.addEventListener("click",()=>changeLevel(1));
     $3("live3MinusBtn")?.addEventListener("click",()=>adjustMinute(-60));
     $3("live3PlusBtn")?.addEventListener("click",()=>adjustMinute(60));
+    $3("live3ApplyBlindDurationBtn")?.addEventListener("click",applyBlindDuration);
+    $3("live3BlindDurationInput")?.addEventListener("keydown",e=>{
+      if(e.key==="Enter"){
+        e.preventDefault();
+        applyBlindDuration();
+      }
+    });
 
     $3("live3EliminateBtn")?.addEventListener("click",openElim);
     $3("live3UndoElimBtn")?.addEventListener("click",undoLastElimination);
     $3("live3EndBtn")?.addEventListener("click",endLive);
     $3("live3TakeoverBtn")?.addEventListener("click",requestTakeover);
+    $3("live3ChangeSpectatorNameBtn")?.addEventListener("click",()=>openSpectatorIdentity(true));
+    $3("live3SpectatorIdentityConfirmBtn")?.addEventListener("click",setSpectatorIdentity);
+    $3("live3SpectatorNameInput")?.addEventListener("change",()=>{
+      const btn=$3("live3SpectatorIdentityConfirmBtn");
+      if(btn)btn.disabled=!String($3("live3SpectatorNameInput")?.value||"").trim();
+    });
     $3("live3ApproveTakeoverBtn")?.addEventListener("click",approveTakeover);
     $3("live3RejectTakeoverBtn")?.addEventListener("click",rejectTakeover);
 
@@ -25632,6 +27694,16 @@ document.addEventListener("visibilitychange",()=>{
 
     $3("live3QuitViewBtn")?.addEventListener("click",()=>showView("dashboard"));
 
+    document.addEventListener("visibilitychange",()=>{
+      if(!document.hidden){
+        if(!liveIdentityConfirmed){
+          openSpectatorIdentity(true);
+        }else if(isActive() && !isOwner()){
+          updateViewerPresence();
+        }
+      }
+    });
+
     document.addEventListener("keydown",e=>{
       if(e.key==="Escape"){
         if($3("live3ChatModal")?.classList.contains("open"))closeChat();
@@ -25645,6 +27717,7 @@ document.addEventListener("visibilitychange",()=>{
 
     renderPrepPlayers();
     installListener();
+    startSpectatorHeartbeat();
 
     ticker=setInterval(()=>{
       if(isActive()){
@@ -25663,5 +27736,107 @@ document.addEventListener("visibilitychange",()=>{
   else bind();
 })();
 </script>
+
+
+<script id="bpt-identity-entry-gate">
+(function(){
+  function launch(){
+    setTimeout(()=>{
+      try{
+        if(typeof requireIdentityOnSiteEntry==="function"){
+          requireIdentityOnSiteEntry();
+        }else if(typeof openSpectatorIdentity==="function"){
+          openSpectatorIdentity(true);
+        }
+      }catch(e){
+        console.warn("Ouverture identification BPT :",e);
+      }
+    },250);
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",launch,{once:true});
+  }else{
+    launch();
+  }
+
+  window.addEventListener("pageshow",()=>{
+    setTimeout(()=>{
+      try{
+        if(typeof requireIdentityOnSiteEntry==="function")requireIdentityOnSiteEntry();
+      }catch(_e){}
+    },100);
+  });
+})();
+</script>
+
+<script id="bpt-photo-url-migration-launcher">
+setTimeout(()=>{
+  if(typeof migrateLegacyPhotoMapsToUrls==="function"){
+    migrateLegacyPhotoMapsToUrls().catch(e=>console.warn("Migration photos existantes :",e));
+  }
+},3000);
+</script>
+
+
+<script id="bpt-app-presence-launcher">
+(function(){
+  function launchPresence(){
+    setTimeout(()=>{
+      try{
+        if(typeof installAppPresenceListener==="function")installAppPresenceListener();
+        if(typeof loadConnectionHistory==="function")loadConnectionHistory();
+        if(typeof identityConfirmedThisSession==="function" &&
+           identityConfirmedThisSession() &&
+           typeof logConnectionSession==="function"){
+          logConnectionSession();
+        }
+        if(typeof identityConfirmedThisSession==="function" &&
+           identityConfirmedThisSession() &&
+           typeof startAppPresence==="function"){
+          startAppPresence();
+        }
+      }catch(e){
+        console.warn("Démarrage présence BPT :",e);
+      }
+    },700);
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",launchPresence,{once:true});
+  }else{
+    launchPresence();
+  }
+
+  document.addEventListener("visibilitychange",()=>{
+    if(!document.hidden){
+      try{
+        if(typeof identityConfirmedThisSession==="function" &&
+           identityConfirmedThisSession() &&
+           typeof startAppPresence==="function"){
+          startAppPresence();
+        }
+      }catch(_e){}
+    }
+  });
+})();
+</script>
+
+
+<script id="bpt-shared-photo-config-bootstrap">
+(function(){
+  try{
+    const key="bpt_photo_host_config_v1";
+    const existing=JSON.parse(localStorage.getItem(key)||"{}");
+    if(!existing.cloudName || !existing.uploadPreset){
+      localStorage.setItem(key,JSON.stringify({
+        cloudName:"peesjsvk",
+        uploadPreset:"BPTchampionship"
+      }));
+    }
+  }catch(_e){}
+})();
+</script>
+
 </body>
 </html>
