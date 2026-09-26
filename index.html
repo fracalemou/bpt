@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V3.41 SHORT NICKNAME DYNAMICS
+BPT LIVE V3.43 GAME DURATION FIX
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -14196,7 +14196,7 @@ body:has(#live3Fullscreen.open){
   margin:4px 0 6px;
 }
 
-#live3SpectatorIdentityModal input{
+#live3SpectatorIdentityModal .bpt-live3-spectator-select{
   width:100%;
   min-height:48px;
   margin-top:12px;
@@ -14720,12 +14720,12 @@ function simplifyRecordTextForMobile(text){
     <h2>Qui regarde ?</h2>
     <p class="muted">Indiquez votre nom pour accéder au Live.</p>
 
-    <input id="live3SpectatorNameInput" list="live3SpectatorNameList" maxlength="60"
-           placeholder="Votre prénom ou nom">
-    <datalist id="live3SpectatorNameList"></datalist>
+    <select id="live3SpectatorNameInput" class="bpt-live3-spectator-select">
+      <option value="">— Choisir votre nom —</option>
+    </select>
 
     <div class="bpt-live3-modal-actions">
-      <button id="live3SpectatorIdentityConfirmBtn" class="btn primary" type="button">
+      <button id="live3SpectatorIdentityConfirmBtn" class="btn primary" type="button" disabled>
         Accéder au Live
       </button>
     </div>
@@ -18601,7 +18601,12 @@ function showEndGameSummary(rows){
   const first=sorted[0];
 
   content.innerHTML=`
-    <div class="muted" style="margin-top:6px">Partie #${first.game} · ${esc(shortDate(first.date))}${first.location?" · "+esc(first.location):""} · ${sorted.length} joueurs${Number(first.gameDurationSec)>0?" · "+esc(formatGameDuration(first.gameDurationSec)):""}</div>
+    <div class="muted" style="margin-top:6px">Partie #${first.game} · ${esc(shortDate(first.date))}${first.location?" · "+esc(first.location):""} · ${sorted.length} joueurs${(
+  Number(first.gameDurationSec)>0 ||
+  (Number(first.gameFinishedAt)>0 && Number(first.gameStartedAt)>0)
+)?" · "+esc(formatGameDuration(
+  Number(first.gameDurationSec)||Math.floor((Number(first.gameFinishedAt)-Number(first.gameStartedAt))/1000)
+)):""}</div>
 
     <div class="summary-podium">
       ${sorted.slice(0,3).map((r,i)=>`<div class="summary-place">
@@ -18664,7 +18669,12 @@ function renderHistoryCards(){
     return `<details class="history-game">
       <summary>
         <div class="history-game-title">${esc(gameDisplayTitle(f,g))}</div>
-        <div><div>${esc(shortDate(f.date||""))}${f.location?" · "+esc(f.location):""} · ${rows.length} joueurs</div><div class="history-game-meta">Cagnotte ${euro(rows.length*Number(f.stake||0))}${Number(f.gameDurationSec)>0?" · "+esc(formatGameDuration(f.gameDurationSec)):""}</div></div>
+        <div><div>${esc(shortDate(f.date||""))}${f.location?" · "+esc(f.location):""} · ${rows.length} joueurs</div><div class="history-game-meta">Cagnotte ${euro(rows.length*Number(f.stake||0))}${(
+  Number(f.gameDurationSec)>0 ||
+  (Number(f.gameFinishedAt)>0 && Number(f.gameStartedAt)>0)
+)?" · "+esc(formatGameDuration(
+  Number(f.gameDurationSec)||Math.floor((Number(f.gameFinishedAt)-Number(f.gameStartedAt))/1000)
+)):""}</div></div>
         <div class="history-winner">🏆 ${win?playerNameHtml(win.player):"—"} <span>· ${num(win?.points||0,0)} pts</span></div>
       </summary>
       <div class="history-game-body"><div class="tablewrap"><table><thead><tr><th>Place</th><th>Joueur</th><th>Pts</th><th>Kills</th><th>Éliminé par</th><th>Heure élim.</th><th>Après</th><th>Gain</th><th>Net</th></tr></thead><tbody>
@@ -20446,7 +20456,14 @@ function renderLatestGame(){
     $("latestGamePhotoDeleteBtn").onclick=()=>deleteGamePhoto(gameNo,seasonKey);
   }
 
-  const gameDurationSec=Math.max(0,Number(first.gameDurationSec)||0);
+  const gameDurationSec=Math.max(
+    0,
+    Number(first.gameDurationSec)||(
+      Number(first.gameFinishedAt)>0 && Number(first.gameStartedAt)>0
+        ? Math.floor((Number(first.gameFinishedAt)-Number(first.gameStartedAt))/1000)
+        : 0
+    )
+  );
 
   $("latestGameSummary").innerHTML=[
     ["Date",shortDate(first.date||"")],
@@ -25153,15 +25170,26 @@ document.addEventListener("visibilitychange",()=>{
   }
 
   function populateSpectatorNameList(){
-    const list=$3("live3SpectatorNameList");
-    if(!list)return;
+    const select=$3("live3SpectatorNameInput");
+    if(!select)return;
+
+    const currentValue=String(select.value||spectatorName()||"").trim();
     const names=(db?.players||[])
-      .filter(p=>p && String(p.name||"").trim())
+      .filter(p=>p && p.active===true && String(p.name||"").trim())
       .map(p=>String(p.name).trim())
       .sort((a,b)=>a.localeCompare(b,"fr",{sensitivity:"base"}));
-    list.innerHTML=[...new Set(names)]
-      .map(name=>`<option value="${escapeAttr(name)}"></option>`)
-      .join("");
+
+    const unique=[...new Set(names)];
+
+    select.innerHTML=
+      '<option value="">— Choisir votre nom —</option>'+
+      unique.map(name=>`<option value="${escapeAttr(name)}">${escapeHtml(funPlayerLabel(name))}</option>`).join("");
+
+    if(currentValue && unique.includes(currentValue)){
+      select.value=currentValue;
+    }else{
+      select.value="";
+    }
   }
 
   function openSpectatorIdentity(force=false){
@@ -25173,7 +25201,9 @@ document.addEventListener("visibilitychange",()=>{
 
     populateSpectatorNameList();
     const input=$3("live3SpectatorNameInput");
-    if(input)input.value=existing||"";
+
+    const btn=$3("live3SpectatorIdentityConfirmBtn");
+    if(btn)btn.disabled=!String(input?.value||"").trim();
 
     const modal=$3("live3SpectatorIdentityModal");
     if(!modal)return;
@@ -25194,9 +25224,21 @@ document.addEventListener("visibilitychange",()=>{
 
   async function setSpectatorIdentity(){
     const input=$3("live3SpectatorNameInput");
-    const clean=String(input?.value||"").trim().replace(/\s+/g," ");
+    const clean=String(input?.value||"").trim();
+
     if(!clean){
-      alert("Indiquez votre nom pour accéder au Live.");
+      alert("Choisissez votre nom dans la liste des joueurs actifs.");
+      input?.focus();
+      return;
+    }
+
+    const activeNames=(db?.players||[])
+      .filter(p=>p && p.active===true)
+      .map(p=>String(p.name||"").trim());
+
+    if(!activeNames.includes(clean)){
+      alert("Ce joueur n’est plus actif. Choisissez un autre nom.");
+      populateSpectatorNameList();
       input?.focus();
       return;
     }
@@ -25605,6 +25647,17 @@ document.addEventListener("visibilitychange",()=>{
         survivors[0].outLevel=null;
         survivors[0].outTime="";
 
+        // Figer la durée réelle complète avant d'arrêter le chrono.
+        if(s.running && s.runStartedAt){
+          s.elapsedSec=Math.max(
+            0,
+            Number(s.elapsedSec||0) +
+            Math.floor((now-Number(s.runStartedAt||now))/1000)
+          );
+        }else{
+          s.elapsedSec=Math.max(0,Number(s.elapsedSec)||0);
+        }
+
         s.running=false;
         s.runStartedAt=null;
         s.deadline=null;
@@ -25751,7 +25804,14 @@ document.addEventListener("visibilitychange",()=>{
           outElapsedSec:Number(p.outElapsedSec)||null,
           gameStartedAt:Number(state.startedAt)||null,
           gameFinishedAt:Number(state.finishedAt)||null,
-          gameDurationSec:Math.max(0,Number(state.elapsedSec)||0),
+          gameDurationSec:Math.max(
+            0,
+            Number(state.elapsedSec)||(
+              Number(state.finishedAt)>0 && Number(state.startedAt)>0
+                ? Math.floor((Number(state.finishedAt)-Number(state.startedAt))/1000)
+                : 0
+            )
+          ),
           tablier:n>=Number(db?.settings?.tablierMinPlayers||10)&&place===1,
           n,
           points:pointsFor(place,n),
@@ -26556,11 +26616,9 @@ document.addEventListener("visibilitychange",()=>{
     $3("live3TakeoverBtn")?.addEventListener("click",requestTakeover);
     $3("live3ChangeSpectatorNameBtn")?.addEventListener("click",()=>openSpectatorIdentity(true));
     $3("live3SpectatorIdentityConfirmBtn")?.addEventListener("click",setSpectatorIdentity);
-    $3("live3SpectatorNameInput")?.addEventListener("keydown",e=>{
-      if(e.key==="Enter"){
-        e.preventDefault();
-        setSpectatorIdentity();
-      }
+    $3("live3SpectatorNameInput")?.addEventListener("change",()=>{
+      const btn=$3("live3SpectatorIdentityConfirmBtn");
+      if(btn)btn.disabled=!String($3("live3SpectatorNameInput")?.value||"").trim();
     });
     $3("live3ApproveTakeoverBtn")?.addEventListener("click",approveTakeover);
     $3("live3RejectTakeoverBtn")?.addEventListener("click",rejectTakeover);
