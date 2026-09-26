@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V3.46 STABLE VIEWER LIST
+BPT LIVE V3.48 HIDE ELIM CLOCK KEEP PLAYTIME
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -8054,7 +8054,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 2.7.41 — Classement / Parties / Profils / Dashboard */
+/* BPT 3.48 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8117,7 +8117,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.41 — Records / Impact / Courbes */
+/* BPT 3.48 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8143,7 +8143,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 2.7.41 — blocs repliables */
+/* BPT 3.48 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -11557,7 +11557,7 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs
 
 <style id="bpt-v2300-clean-fullscreen-refactor">
 /* ================================
-   BPT 2.7.41 — CLEAN FULLSCREEN REFACTOR
+   BPT 3.48 — CLEAN FULLSCREEN REFACTOR
    One final authoritative layout for fullscreen / mobile live.
    ================================ */
 
@@ -11937,7 +11937,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 
 
 <style id="bpt-v231-fullscreen-component">
-/* BPT 2.7.41 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
+/* BPT 3.48 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
 #liveFullscreenDisplay,
 #liveFullscreenDisplay:fullscreen,
 #liveFullscreenDisplay:-webkit-full-screen,
@@ -12078,7 +12078,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-actions{width:100% !important;grid-template-columns:1fr 1fr !important;gap:8px !important}
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-action{min-height:46px !important;font-size:12px !important;letter-spacing:.02em !important}
 
-/* BPT 2.7.41 — direct mobile fullscreen classes on the target itself */
+/* BPT 3.48 — direct mobile fullscreen classes on the target itself */
 #liveFullscreenDisplay.bptfs-mobile{height:100dvh !important;}
 #liveFullscreenDisplay.bptfs-mobile::before,
 #liveFullscreenDisplay.bptfs-mobile::after{display:none !important;}
@@ -14369,7 +14369,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="2.7.41";
+const BPT_APP_VERSION="3.48";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -15639,7 +15639,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 2.7.41</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 3.48</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -15855,7 +15855,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 2.7.41 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 3.48 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -16121,7 +16121,7 @@ const STORE="BPT_Championship_Manager_v1";
 const SUPABASE_URL="https://ushomwpnizhpzrupashl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY="sb_publishable_mxqwy6NpvJY17Vr7qtIcRA_aekIsjTl";
 const CLOUD_ROW_ID="main";
-const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 2.7.41 dans Firebase Realtime Database
+const GAME_PHOTO_BUCKET="bpt-photos"; // compatibilité historique; photos BPT 3.48 dans Firebase Realtime Database
 
 let sbClient=null;
 let cloudReady=false;
@@ -17181,7 +17181,7 @@ async function cloudPoll(){
 
 let liveAutoOpenDone=false;
 async function autoOpenActiveLiveOnStartup(){
-  // BPT 2.7.41 : plus d'ouverture automatique du Live au démarrage.
+  // BPT 3.48 : plus d'ouverture automatique du Live au démarrage.
   // L'application s'ouvre toujours sur Accueil ; le Live actif est indiqué sur l'onglet Live.
   liveAutoOpenDone=true;
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -18643,8 +18643,7 @@ function showEndGameSummary(rows){
             <th>Kills</th>
             <th>Éliminé par</th>
             <th>Niveau</th>
-            <th>Heure</th>
-            <th>Après</th>
+            <th>Temps de jeu</th>
             <th>Gain</th>
             <th>Net</th>
           </tr>
@@ -18657,7 +18656,6 @@ function showEndGameSummary(rows){
             <td>${r.kills||0}</td>
             <td>${Number(r.place)===1?"🏆 Vainqueur":(r.killer?playerNameHtml(r.killer):"—")}</td>
             <td>${r.outLevel?`N${Number(r.outLevel)}`:"—"}</td>
-            <td>${Number(r.place)===1?"—":esc(r.outTime||"—")}</td>
             <td>${Number(r.place)===1?"—":esc(formatElapsedElimination(r.outElapsedSec)||"—")}</td>
             <td>${euro(r.gross)}</td>
             <td>${euro(r.net)}</td>
@@ -18691,8 +18689,8 @@ function renderHistoryCards(){
 )):""}</div></div>
         <div class="history-winner">🏆 ${win?playerNameHtml(win.player):"—"} <span>· ${num(win?.points||0,0)} pts</span></div>
       </summary>
-      <div class="history-game-body"><div class="tablewrap"><table><thead><tr><th>Place</th><th>Joueur</th><th>Pts</th><th>Kills</th><th>Éliminé par</th><th>Heure élim.</th><th>Après</th><th>Gain</th><th>Net</th></tr></thead><tbody>
-        ${sorted.map(r=>`<tr><td>${r.place}</td><td>${playerNameHtml(r.player,{button:true,onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))`})}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${Number(r.place)===1?"🏆":(r.killer?playerNameHtml(r.killer):"—")}</td><td>${Number(r.place)===1?"—":esc(r.outTime||"—")}</td><td>${Number(r.place)===1?"—":esc(formatElapsedElimination(r.outElapsedSec)||"—")}</td><td>${euro(r.gross)}</td><td>${euro(r.net)}</td></tr>`).join("")}
+      <div class="history-game-body"><div class="tablewrap"><table><thead><tr><th>Place</th><th>Joueur</th><th>Pts</th><th>Kills</th><th>Éliminé par</th><th>Temps de jeu</th><th>Gain</th><th>Net</th></tr></thead><tbody>
+        ${sorted.map(r=>`<tr><td>${r.place}</td><td>${playerNameHtml(r.player,{button:true,onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))`})}</td><td>${num(r.points,0)}</td><td>${r.kills||0}</td><td>${Number(r.place)===1?"🏆":(r.killer?playerNameHtml(r.killer):"—")}</td><td>${Number(r.place)===1?"—":esc(formatElapsedElimination(r.outElapsedSec)||"—")}</td><td>${euro(r.gross)}</td><td>${euro(r.net)}</td></tr>`).join("")}
       </tbody></table></div></div>
     </details>`;
   }).join("");
@@ -19545,7 +19543,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 2.7.41 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 3.48 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -20538,7 +20536,7 @@ function renderLatestGame(){
     </div>`).join("");
 
   $("latestGameResults").innerHTML=`<table>
-    <thead><tr><th>Place</th><th>Joueur</th><th>Points</th><th>Kills</th><th>Éliminé par</th><th>Niveau</th><th>Heure élim.</th><th>Après</th><th>Gain</th><th>Net</th></tr></thead>
+    <thead><tr><th>Place</th><th>Joueur</th><th>Points</th><th>Kills</th><th>Éliminé par</th><th>Niveau</th><th>Temps de jeu</th><th>Gain</th><th>Net</th></tr></thead>
     <tbody>${rows.map(r=>`<tr>
       <td>${r.place}</td>
       <td>${playerNameHtml(r.player,{button:true,onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))`})}</td>
@@ -20546,7 +20544,6 @@ function renderLatestGame(){
       <td>${num(r.kills||0,0)}</td>
       <td>${Number(r.place)===1?"🏆":(r.killer?playerNameHtml(r.killer):"—")}</td>
       <td>${r.outLevel?`N${Number(r.outLevel)}`:"—"}</td>
-      <td>${Number(r.place)===1?"—":esc(r.outTime||"—")}</td>
       <td>${Number(r.place)===1?"—":esc(formatElapsedElimination(r.outElapsedSec)||"—")}</td>
       <td>${euro(r.gross||0)}</td>
       <td>${euro(r.net||0)}</td>
@@ -23857,7 +23854,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 2.7.41 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 3.48 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -24520,7 +24517,7 @@ liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 (async()=>{
   await initCloudSync();
-  // BPT 2.7.41 : l'ouverture par défaut est toujours Accueil.
+  // BPT 3.48 : l'ouverture par défaut est toujours Accueil.
   spectatorAutoOpenSuppressed=true;
   document.body.classList.remove("spectator-live-open");
   await showView("dashboard");
@@ -25031,6 +25028,7 @@ document.addEventListener("visibilitychange",()=>{
   let advancing=false;
   let spectatorHeartbeat=null;
   let viewerRenderSignature="";
+  let spectatorSelectSignature="";
   let lastChatMessageId=null;
   let chatSoundPrimed=false;
   let unreadChatCount=0;
@@ -25195,14 +25193,19 @@ document.addEventListener("visibilitychange",()=>{
       .sort((a,b)=>a.localeCompare(b,"fr",{sensitivity:"base"}));
 
     const unique=[...new Set(names)];
+    const signature=unique.join("|");
 
-    select.innerHTML=
-      '<option value="">— Choisir votre nom —</option>'+
-      unique.map(name=>`<option value="${escapeAttr(name)}">${escapeHtml(funPlayerLabel(name))}</option>`).join("");
+    // Ne reconstruire les options que si la liste des joueurs actifs change.
+    if(signature!==spectatorSelectSignature){
+      select.innerHTML=
+        '<option value="">— Choisir votre nom —</option>'+
+        unique.map(name=>`<option value="${escapeAttr(name)}">${escapeHtml(funPlayerLabel(name))}</option>`).join("");
+      spectatorSelectSignature=signature;
+    }
 
     if(currentValue && unique.includes(currentValue)){
       select.value=currentValue;
-    }else{
+    }else if(!select.value || !unique.includes(select.value)){
       select.value="";
     }
   }
@@ -25214,20 +25217,30 @@ document.addEventListener("visibilitychange",()=>{
     const existing=spectatorName();
     if(existing && !force)return;
 
+    const modal=$3("live3SpectatorIdentityModal");
+    if(!modal)return;
+
+    // Sur mobile, render() peut être appelé plusieurs fois par seconde.
+    // Ne surtout pas reconstruire le <select> pendant que l'utilisateur
+    // est en train de choisir son nom : cela provoquait le clignotement.
+    if(modal.classList.contains("open") && !force)return;
+
     populateSpectatorNameList();
     const input=$3("live3SpectatorNameInput");
 
     const btn=$3("live3SpectatorIdentityConfirmBtn");
     if(btn)btn.disabled=!String(input?.value||"").trim();
 
-    const modal=$3("live3SpectatorIdentityModal");
-    if(!modal)return;
     modal.classList.add("open");
     modal.setAttribute("aria-hidden","false");
 
-    setTimeout(()=>{
-      try{input?.focus({preventScroll:true});}catch(_e){}
-    },50);
+    // Pas de focus forcé sur un select mobile : certains navigateurs
+    // redessinent le contrôle natif et donnent une impression de flash.
+    if(!window.matchMedia("(max-width:700px)").matches){
+      setTimeout(()=>{
+        try{input?.focus({preventScroll:true});}catch(_e){}
+      },50);
+    }
   }
 
   function closeSpectatorIdentity(){
@@ -26300,14 +26313,12 @@ document.addEventListener("visibilitychange",()=>{
       role.className="bpt-live3-role-badge "+(owner?"master":"spectator");
     }
 
-    if(!owner){
-      if(!spectatorName()){
-        openSpectatorIdentity(false);
-      }else{
-        updateViewerPresence();
-      }
+    if(!owner && !spectatorName()){
+      openSpectatorIdentity(false);
     }
 
+    // La présence est maintenue par le heartbeat (15 s) et par
+    // visibilitychange. Ne pas écrire dans Firebase à chaque render().
     renderViewerInfo();
 
     const liveRoot=$3("live3");
