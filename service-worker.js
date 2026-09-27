@@ -1,4 +1,4 @@
-const BPT_CACHE="bpt-pwa-4.07";
+const BPT_CACHE="bpt-pwa-4.08";
 const APP_SHELL=[
   "./",
   "./index.html",
