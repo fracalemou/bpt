@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V4.18 ADAPTIVE NAV
+BPT LIVE V4.20 SINGLE LINE NAV
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -8052,7 +8052,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 4.18 — Classement / Parties / Profils / Dashboard */
+/* BPT 4.20 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8115,7 +8115,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 4.18 — Records / Impact / Courbes */
+/* BPT 4.20 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8141,7 +8141,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 4.18 — blocs repliables */
+/* BPT 4.20 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -8185,7 +8185,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 4.18 — sélecteur joueurs mobile : noms toujours visibles ===== */
+/* ===== BPT 4.20 — sélecteur joueurs mobile : noms toujours visibles ===== */
 @media (max-width:700px){
   #live3MobilePlayerModal .bpt-live3-mobile-player-grid{
     grid-template-columns:1fr 1fr !important;
@@ -8248,14 +8248,10 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-@media (max-width:430px){
-  #live3MobilePlayerModal .bpt-live3-mobile-player-grid{
-    grid-template-columns:1fr !important;
-  }
-}
+/* BPT 4.20 : petit écran conservé en 2 colonnes */
 
 
-/* ===== BPT 4.18 — présence globale application ===== */
+/* ===== BPT 4.20 — présence globale application ===== */
 .bpt-header{position:relative}
 .bpt-online-presence{
   position:absolute;
@@ -8313,7 +8309,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 4.18 — sélecteur mobile joueurs lisible en 2 colonnes ===== */
+/* ===== BPT 4.20 — sélecteur mobile joueurs lisible en 2 colonnes ===== */
 #live3MobilePlayerGrid{
   display:grid !important;
   grid-template-columns:repeat(2, minmax(0,1fr)) !important;
@@ -8382,7 +8378,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 
 
 
-/* ===== BPT 4.18 — photo mobile simple ===== */
+/* ===== BPT 4.20 — photo mobile simple ===== */
 @media(max-width:700px){
   #latestgame .game-photo-actions{
     display:flex;
@@ -8405,7 +8401,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 4.18 — commandes photo discrètes ===== */
+/* ===== BPT 4.20 — commandes photo discrètes ===== */
 
 
 #latestgame .game-photo-actions{
@@ -8454,7 +8450,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 4.18 — commandes photo discrètes PC + mobile ===== */
+/* ===== BPT 4.20 — commandes photo discrètes PC + mobile ===== */
 
 
 #latestgame .game-photo-actions{
@@ -8498,7 +8494,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 4.18 — bouton Installer dans l'application ===== */
+/* ===== BPT 4.20 — bouton Installer dans l'application ===== */
 .bpt-install-inline{
   display:flex;
   align-items:center;
@@ -8523,7 +8519,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 4.18 — bouton Installer en haut de l’écran ===== */
+/* ===== BPT 4.20 — bouton Installer en haut de l’écran ===== */
 .bpt-install-inline{
   display:none !important;
 }
@@ -8540,7 +8536,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 4.18 — photo Head-Up mobile ===== */
+/* ===== BPT 4.20 — photo Head-Up mobile ===== */
 .game-photo-headup-camera-btn{
   display:none;
 }
@@ -8561,7 +8557,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 4.18 — tableaux points / structure ===== */
+/* ===== BPT 4.20 — tableaux points / structure ===== */
 .bpt-config-table-wrap{
   overflow:auto;
   border:1px solid var(--line);
@@ -8669,7 +8665,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 4.18 — barème et blinds intégrés aux paramètres championnat ===== */
+/* ===== BPT 4.20 — barème et blinds intégrés aux paramètres championnat ===== */
 .bpt-settings-config-group{
   margin-top:16px;
   display:grid;
@@ -8688,7 +8684,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 4.18 — détail partie : accomplissements pleine largeur ===== */
+/* ===== BPT 4.20 — détail partie : accomplissements pleine largeur ===== */
 #latestgame .grid > .card:has(h2:nth-child(1)),
 #latestgame .grid > .card:has(h3:nth-child(1)){
   min-width:0;
@@ -8704,7 +8700,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 4.18 — structure blinds reconstruite proprement ===== */
+/* ===== BPT 4.20 — structure blinds reconstruite proprement ===== */
 #bptBlindStructureTable{
   width:100%;
   border-collapse:collapse;
@@ -8763,7 +8759,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 4.18 — barème de points modifiable ===== */
+/* ===== BPT 4.20 — barème de points modifiable ===== */
 .bpt-points-sticky{
   position:sticky !important;
   left:0;
@@ -8801,7 +8797,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 4.18 — action PWA unique en haut ===== */
+/* ===== BPT 4.20 — action PWA unique en haut ===== */
 .bpt-app-action{
   position:fixed;
   top:12px;
@@ -8847,7 +8843,7 @@ body.bpt-mobile-device #bptBlindStructureSection{
 }
 
 
-/* ===== BPT 4.18 — navigation mobile native, propre ===== */
+/* ===== BPT 4.20 — navigation mobile native, propre ===== */
 .bpt-nav-mobile-only,
 .bpt-mobile-top-menu{
   display:none;
@@ -8984,7 +8980,7 @@ body.bpt-mobile-device #bptBlindStructureSection{
 }
 
 
-/* ===== BPT 4.18 — navigation adaptative PC + téléphone ===== */
+/* ===== BPT 4.20 — navigation adaptative PC + téléphone ===== */
 
 /* PC : tous les onglets visibles se partagent automatiquement 100 % de la largeur */
 #nav{
@@ -9077,6 +9073,129 @@ body.bpt-mobile-device #nav > button{
   #nav > button{
     font-size:11px !important;
     padding:7px 3px !important;
+  }
+}
+
+
+/* ===== BPT 4.20 — sélection joueurs téléphone ===== */
+@media(max-width:700px){
+  #live3MobilePlayerGrid,
+  #live3MobilePlayerModal .bpt-live3-mobile-player-grid{
+    display:grid !important;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:7px !important;
+    width:100% !important;
+  }
+
+  #live3MobilePlayerGrid .bpt-live3-mobile-player-option{
+    min-width:0 !important;
+    width:100% !important;
+    box-sizing:border-box !important;
+  }
+}
+
+
+/* ===== BPT 4.20 — navigation sur UNE SEULE LIGNE, largeur 100 % ===== */
+
+/* Base commune PC + mobile */
+#nav{
+  width:100% !important;
+  max-width:100% !important;
+  box-sizing:border-box !important;
+
+  display:flex !important;
+  flex-direction:row !important;
+  flex-wrap:nowrap !important;
+  align-items:stretch !important;
+
+  gap:4px !important;
+  padding:6px !important;
+  margin:0 !important;
+
+  overflow:hidden !important;
+}
+
+#nav > button{
+  flex:1 1 0 !important;
+  width:0 !important;
+  min-width:0 !important;
+  max-width:none !important;
+
+  box-sizing:border-box !important;
+  margin:0 !important;
+
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+}
+
+/* Mobile : mêmes règles, seuls les 5 onglets prévus restent visibles */
+html.bpt-mobile-device #nav,
+body.bpt-mobile-device #nav{
+  display:flex !important;
+  flex-direction:row !important;
+  flex-wrap:nowrap !important;
+  width:100% !important;
+  max-width:100% !important;
+  gap:0 !important;
+  padding:0 !important;
+  overflow:hidden !important;
+}
+
+html.bpt-mobile-device #nav > button,
+body.bpt-mobile-device #nav > button{
+  flex:1 1 0 !important;
+  width:0 !important;
+  min-width:0 !important;
+  max-width:none !important;
+
+  white-space:nowrap !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+
+  border-radius:0 !important;
+  padding:7px 2px !important;
+  font-size:10px !important;
+  line-height:1.05 !important;
+}
+
+/* Portrait : plus compact, toujours sur une seule ligne */
+@media (max-width:900px) and (pointer:coarse) and (orientation:portrait){
+  #nav{
+    display:flex !important;
+    flex-wrap:nowrap !important;
+    width:100% !important;
+    gap:0 !important;
+    padding:0 !important;
+  }
+
+  #nav > button{
+    flex:1 1 0 !important;
+    width:0 !important;
+    min-width:0 !important;
+    white-space:nowrap !important;
+    font-size:9px !important;
+    padding:7px 1px !important;
+  }
+}
+
+/* Paysage : même ligne, texte légèrement plus grand */
+@media (max-width:900px) and (pointer:coarse) and (orientation:landscape){
+  #nav{
+    display:flex !important;
+    flex-wrap:nowrap !important;
+    width:100% !important;
+    gap:0 !important;
+    padding:0 !important;
+  }
+
+  #nav > button{
+    flex:1 1 0 !important;
+    width:0 !important;
+    min-width:0 !important;
+    white-space:nowrap !important;
+    font-size:11px !important;
+    padding:7px 2px !important;
   }
 }
 
@@ -12451,7 +12570,7 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs
 
 <style id="bpt-v2300-clean-fullscreen-refactor">
 /* ================================
-   BPT 4.18 — CLEAN FULLSCREEN REFACTOR
+   BPT 4.20 — CLEAN FULLSCREEN REFACTOR
    One final authoritative layout for fullscreen / mobile live.
    ================================ */
 
@@ -12831,7 +12950,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 
 
 <style id="bpt-v231-fullscreen-component">
-/* BPT 4.18 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
+/* BPT 4.20 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
 #liveFullscreenDisplay,
 #liveFullscreenDisplay:fullscreen,
 #liveFullscreenDisplay:-webkit-full-screen,
@@ -12972,7 +13091,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-actions{width:100% !important;grid-template-columns:1fr 1fr !important;gap:8px !important}
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-action{min-height:46px !important;font-size:12px !important;letter-spacing:.02em !important}
 
-/* BPT 4.18 — direct mobile fullscreen classes on the target itself */
+/* BPT 4.20 — direct mobile fullscreen classes on the target itself */
 #liveFullscreenDisplay.bptfs-mobile{height:100dvh !important;}
 #liveFullscreenDisplay.bptfs-mobile::before,
 #liveFullscreenDisplay.bptfs-mobile::after{display:none !important;}
@@ -15310,7 +15429,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.18";
+const BPT_APP_VERSION="4.20";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -16624,7 +16743,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 4.18</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 4.20</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -16971,7 +17090,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 4.18 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 4.20 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -18397,7 +18516,7 @@ async function cloudPoll(){
 
 let liveAutoOpenDone=false;
 async function autoOpenActiveLiveOnStartup(){
-  // BPT 4.18 : plus d'ouverture automatique du Live au démarrage.
+  // BPT 4.20 : plus d'ouverture automatique du Live au démarrage.
   // L'application s'ouvre toujours sur Accueil ; le Live actif est indiqué sur l'onglet Live.
   liveAutoOpenDone=true;
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -20889,7 +21008,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 4.18 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 4.20 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -22975,6 +23094,32 @@ async function deletePlayerByName(name){
   }
 }
 
+
+function bptPlayerParticipationCount(name){
+  const target=String(name||"").trim();
+  if(!target)return 0;
+
+  const rows=Array.isArray(currentSeasonHistoryCache) && currentSeasonHistoryCache.length
+    ? currentSeasonHistoryCache
+    : (Array.isArray(db?.history)?db.history:[]);
+
+  return rows.reduce((count,row)=>
+    String(row?.player||"").trim().localeCompare(target,"fr",{sensitivity:"base"})===0
+      ? count+1
+      : count
+  ,0);
+}
+
+function bptSortPlayersByParticipation(a,b){
+  const nameA=String(typeof a==="string"?a:a?.name||"").trim();
+  const nameB=String(typeof b==="string"?b:b?.name||"").trim();
+
+  const diff=bptPlayerParticipationCount(nameB)-bptPlayerParticipationCount(nameA);
+  if(diff!==0)return diff;
+
+  return nameA.localeCompare(nameB,"fr",{sensitivity:"base"});
+}
+
 function renderGamePlayers(){
   const selected=new Set(
     [...document.querySelectorAll(".gp:checked")].map(x=>x.value)
@@ -22989,7 +23134,7 @@ function renderGamePlayers(){
 
   gamePlayerChecks.innerHTML=db.players
     .filter(p=>p.active)
-    .sort((a,b)=>a.name.localeCompare(b.name,"fr"))
+    .sort(bptSortPlayersByParticipation)
     .map(p=>`<label style="display:block;padding:5px 0">
       <input class="gp" type="checkbox" value="${esc(p.name)}" style="width:auto" ${selected.has(p.name)?"checked":""}> ${esc(p.name)}
     </label>`).join("");
@@ -23752,7 +23897,7 @@ function ensureLiveState(){
 }
 
 function liveActiveNames(){
-  return db.players.filter(p=>p.active).map(p=>p.name).sort((a,b)=>a.localeCompare(b,"fr"));
+  return db.players.filter(p=>p.active).map(p=>p.name).sort(bptSortPlayersByParticipation);
 }
 function liveAlive(){
   const s=ensureLiveState();
@@ -25387,7 +25532,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 4.18 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 4.20 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -26050,7 +26195,7 @@ liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 (async()=>{
   await initCloudSync();
-  // BPT 4.18 : l'ouverture par défaut est toujours Accueil.
+  // BPT 4.20 : l'ouverture par défaut est toujours Accueil.
   spectatorAutoOpenSuppressed=true;
   document.body.classList.remove("spectator-live-open");
   await showView("dashboard");
@@ -28425,7 +28570,7 @@ async function requestTakeover(){
       .filter(Boolean);
 
     const allNames=[...new Set([...activePlayers,...tempPlayers])]
-      .sort((a,b)=>a.localeCompare(b,"fr",{sensitivity:"base"}));
+      .sort(bptSortPlayersByParticipation);
 
     host.innerHTML=allNames.length
       ? allNames.map(name=>{
