@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V3.92 FORCE BPT HEADUP FIX
+BPT LIVE V3.94 HEADUP IN FINAL SUMMARY
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -8052,7 +8052,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   }
 }
 
-/* BPT 3.92 — Classement / Parties / Profils / Dashboard */
+/* BPT 3.94 — Classement / Parties / Profils / Dashboard */
 .ranking-filter-toolbar{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 14px
 }
@@ -8115,7 +8115,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 3.92 — Records / Impact / Courbes */
+/* BPT 3.94 — Records / Impact / Courbes */
 .records-grid{
   display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px
 }
@@ -8141,7 +8141,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* BPT 3.92 — blocs repliables */
+/* BPT 3.94 — blocs repliables */
 .collapsible-block{
   margin-top:12px;
   border:1px solid rgba(255,255,255,.08);
@@ -8185,7 +8185,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.92 — sélecteur joueurs mobile : noms toujours visibles ===== */
+/* ===== BPT 3.94 — sélecteur joueurs mobile : noms toujours visibles ===== */
 @media (max-width:700px){
   #live3MobilePlayerModal .bpt-live3-mobile-player-grid{
     grid-template-columns:1fr 1fr !important;
@@ -8255,7 +8255,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.92 — présence globale application ===== */
+/* ===== BPT 3.94 — présence globale application ===== */
 .bpt-header{position:relative}
 .bpt-online-presence{
   position:absolute;
@@ -8313,7 +8313,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.92 — sélecteur mobile joueurs lisible en 2 colonnes ===== */
+/* ===== BPT 3.94 — sélecteur mobile joueurs lisible en 2 colonnes ===== */
 #live3MobilePlayerGrid{
   display:grid !important;
   grid-template-columns:repeat(2, minmax(0,1fr)) !important;
@@ -8382,7 +8382,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 
 
 
-/* ===== BPT 3.92 — photo mobile simple ===== */
+/* ===== BPT 3.94 — photo mobile simple ===== */
 @media(max-width:700px){
   #latestgame .game-photo-actions{
     display:flex;
@@ -8405,7 +8405,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.92 — commandes photo discrètes ===== */
+/* ===== BPT 3.94 — commandes photo discrètes ===== */
 
 
 #latestgame .game-photo-actions{
@@ -8454,7 +8454,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.92 — commandes photo discrètes PC + mobile ===== */
+/* ===== BPT 3.94 — commandes photo discrètes PC + mobile ===== */
 
 
 #latestgame .game-photo-actions{
@@ -8498,7 +8498,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.92 — bouton Installer dans l'application ===== */
+/* ===== BPT 3.94 — bouton Installer dans l'application ===== */
 .bpt-install-inline{
   display:flex;
   align-items:center;
@@ -8523,7 +8523,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.92 — bouton Installer en haut de l’écran ===== */
+/* ===== BPT 3.94 — bouton Installer en haut de l’écran ===== */
 .bpt-install-inline{
   display:none !important;
 }
@@ -8540,7 +8540,7 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 
-/* ===== BPT 3.92 — photo Head-Up mobile ===== */
+/* ===== BPT 3.94 — photo Head-Up mobile ===== */
 .game-photo-headup-camera-btn{
   display:none;
 }
@@ -8558,6 +8558,36 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
     font-weight:700;
     opacity:.82;
   }
+}
+
+
+/* ===== BPT 3.94 — photo Head-Up dans le résumé final ===== */
+.summary-headup-photo-cta{
+  display:none;
+  margin:16px 0 18px;
+  padding:16px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;
+  background:rgba(255,255,255,.045);
+  text-align:center;
+}
+.summary-headup-photo-cta .summary-headup-title{
+  font-size:18px;
+  font-weight:900;
+  margin-bottom:6px;
+}
+.summary-headup-photo-cta .summary-headup-copy{
+  color:var(--muted);
+  font-size:12px;
+  margin-bottom:12px;
+}
+.summary-headup-photo-cta .btn{
+  width:100%;
+  min-height:50px;
+  font-size:16px;
+}
+@media(max-width:700px){
+  .summary-headup-photo-cta{display:block;}
 }
 
 </style>
@@ -11931,7 +11961,7 @@ html:not(.bpt-mobile-device) #liveFullscreenDisplay:-webkit-full-screen .live-fs
 
 <style id="bpt-v2300-clean-fullscreen-refactor">
 /* ================================
-   BPT 3.92 — CLEAN FULLSCREEN REFACTOR
+   BPT 3.94 — CLEAN FULLSCREEN REFACTOR
    One final authoritative layout for fullscreen / mobile live.
    ================================ */
 
@@ -12311,7 +12341,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 
 
 <style id="bpt-v231-fullscreen-component">
-/* BPT 3.92 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
+/* BPT 3.94 — authoritative fullscreen component. Uses unique class names so legacy rules cannot move it. */
 #liveFullscreenDisplay,
 #liveFullscreenDisplay:fullscreen,
 #liveFullscreenDisplay:-webkit-full-screen,
@@ -12452,7 +12482,7 @@ body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFull
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-actions{width:100% !important;grid-template-columns:1fr 1fr !important;gap:8px !important}
 body.bpt-mobile-device.bpt-mobile-landscape.bpt-mobile-live-fullscreen #liveFullscreenDisplay .bptfs-action{min-height:46px !important;font-size:12px !important;letter-spacing:.02em !important}
 
-/* BPT 3.92 — direct mobile fullscreen classes on the target itself */
+/* BPT 3.94 — direct mobile fullscreen classes on the target itself */
 #liveFullscreenDisplay.bptfs-mobile{height:100dvh !important;}
 #liveFullscreenDisplay.bptfs-mobile::before,
 #liveFullscreenDisplay.bptfs-mobile::after{display:none !important;}
@@ -14799,7 +14829,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="3.92";
+const BPT_APP_VERSION="3.94";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -16105,7 +16135,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 3.92</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 3.94</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
@@ -16128,6 +16158,50 @@ function simplifyRecordTextForMobile(text){
   </div>
 
   <div id="settingsProtectedContent" style="display:none">
+
+  <details class="settings-block" open>
+    <summary>Barème de points BPT</summary>
+    <div class="settings-block-content" style="padding:14px 18px 18px">
+      <div class="muted" style="font-size:12px;margin-bottom:10px">
+        Le barème dépend du nombre de joueurs présents et de la place finale.
+      </div>
+
+      <div class="row" style="gap:8px;align-items:end;flex-wrap:wrap;margin-bottom:10px">
+        <label>
+          <span class="muted" style="display:block;font-size:11px;margin-bottom:4px">Nombre de joueurs</span>
+          <select id="bptPointsPlayerCount"></select>
+        </label>
+        <button id="saveBptPointsTableBtn" class="btn secondary" type="button">Enregistrer le barème</button>
+        <button id="resetBptPointsTableBtn" class="btn ghost" type="button">Barème BPT par défaut</button>
+      </div>
+
+      <div id="bptPointsTableEditor"
+           style="display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:8px"></div>
+
+      <div id="bptPointsTableInfo" class="muted" style="font-size:11px;margin-top:9px"></div>
+    </div>
+  </details>
+
+  <details class="settings-block" open>
+    <summary>Structure des blinds BPT</summary>
+    <div class="settings-block-content" style="padding:14px 18px 18px">
+      <div class="muted" style="font-size:12px;margin-bottom:10px">
+        Modifiez les niveaux au format <strong>SB / BB</strong>, une ligne par niveau.
+      </div>
+
+      <textarea id="bptBlindStructureInput"
+                spellcheck="false"
+                style="width:100%;min-height:300px;resize:vertical;font-family:ui-monospace,Consolas,monospace"></textarea>
+
+      <div class="row" style="gap:8px;margin-top:12px;flex-wrap:wrap">
+        <button id="saveBptBlindStructureBtn" class="btn secondary" type="button">Enregistrer les blinds</button>
+        <button id="resetBptBlindStructureBtn" class="btn ghost" type="button">Structure BPT par défaut</button>
+      </div>
+
+      <div id="bptBlindStructureInfo" class="muted" style="font-size:11px;margin-top:9px"></div>
+    </div>
+  </details>
+
 
   <details class="settings-block" open>
     <summary>Sauvegardes</summary>
@@ -16395,7 +16469,7 @@ function simplifyRecordTextForMobile(text){
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
-/* BPT 3.92 — Firebase Spark / Realtime Database compatibility layer.
+/* BPT 3.94 — Firebase Spark / Realtime Database compatibility layer.
    Fill BPT_FIREBASE_CONFIG with the Firebase Web App config before publication. */
 window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   apiKey: "AIzaSyCU0tFa8jYpnCxe7aC23G4GOnDMl8-LfCs",
@@ -17821,7 +17895,7 @@ async function cloudPoll(){
 
 let liveAutoOpenDone=false;
 async function autoOpenActiveLiveOnStartup(){
-  // BPT 3.92 : plus d'ouverture automatique du Live au démarrage.
+  // BPT 3.94 : plus d'ouverture automatique du Live au démarrage.
   // L'application s'ouvre toujours sur Accueil ; le Live actif est indiqué sur l'onglet Live.
   liveAutoOpenDone=true;
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -18319,16 +18393,18 @@ const HISTORICAL_POINTS_2026={"6":{"1":16,"2":12,"3":8,"4":5,"5":3,"6":1},"7":{"
 
 function applyHistoricalPointScale(){
   if(!db.points)db.points={};
-  for(const [n,row] of Object.entries(HISTORICAL_POINTS_2026)){
+  const table=bptGetPointsTable();
+  for(const [n,row] of Object.entries(table)){
     db.points[n]={...db.points[n],...row};
   }
 }
 
 function recalcCurrentSeasonPoints(rows){
+  const pointsTable=bptGetPointsTable();
   return (rows||[]).map(r=>{
     const n=Number(r.n)||0;
     const place=Number(r.place)||0;
-    const table=HISTORICAL_POINTS_2026[String(n)];
+    const table=pointsTable[String(n)];
     if(!table)return {...r};
     return {...r,points:Number(table[String(place)]||0)};
   });
@@ -18337,8 +18413,8 @@ function recalcCurrentSeasonPoints(rows){
 function pointsFor(place,n){
   n=Number(n)||0;
   if(n<6)return 0;
-  const historical=HISTORICAL_POINTS_2026[String(n)]?.[String(place)];
-  if(historical!==undefined)return Number(historical||0);
+  const configured=bptGetPointsTable()?.[String(n)]?.[String(place)];
+  if(configured!==undefined)return Number(configured||0);
   return Number(db.points[String(n)]?.[String(place)]||0);
 }
 
@@ -19271,6 +19347,12 @@ function showEndGameSummary(rows){
         <div class="muted">${r.kills||0} kill${Number(r.kills||0)>1?"s":""}</div>
       </div>`).join("")}
     </div>
+      <div class="summary-headup-photo-cta" id="summaryHeadUpPhotoCta">
+        <div class="summary-headup-title">📸 Photo du Head-Up</div>
+        <div class="summary-headup-copy">Le vainqueur est désigné. Prenez maintenant la photo des deux finalistes.</div>
+        <button id="summaryHeadUpPhotoBtn" class="btn secondary" type="button">Prendre la photo du Head-Up</button>
+      </div>
+
 
     <h3 style="margin-top:18px">Classement complet</h3>
     <div class="tablewrap">
@@ -20285,7 +20367,7 @@ function mergePhotoMaps(a,b){
 }
 function mergeSharedPhotosIntoLocal(remoteState){
   if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 3.92 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
+  // BPT 3.94 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
   db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
 }
 async function ensureGamePhotoStorageClient(){
@@ -21256,7 +21338,7 @@ function showHeadUpPhotoPromptForLatestGame(){
   bptHeadUpPromptShownForGame=gameNo;
 
   const promptEl=document.getElementById("headUpPhotoPrompt");
-  if(promptEl)promptEl.style.display="flex";
+  if(promptEl)promptEl.style.display="none";
 }
 
 function hideHeadUpPhotoPrompt(){
@@ -24783,7 +24865,7 @@ async function showView(id){
   const enteringRanking=(id==="ranking" && currentViewId!=="ranking");
   if(enteringRanking){rankingSortKey="points";rankingFilterKey="all";}
   if(id==="dashboard")dashboardRecordSelection=null;
-  // BPT 3.92 : l'onglet Parties s'ouvre toujours sur la dernière partie.
+  // BPT 3.94 : l'onglet Parties s'ouvre toujours sur la dernière partie.
   // La navigation précédent/suivant reste disponible tant que l'utilisateur reste dans l'onglet.
   if(id==="latestgame" && currentViewId!=="latestgame")latestGameSelectedKey="";
   currentViewId=id;
@@ -25446,7 +25528,7 @@ liveInit();
 if(document.getElementById("cloudStatus")) document.getElementById("cloudStatus").onclick=forceCloudSync;
 (async()=>{
   await initCloudSync();
-  // BPT 3.92 : l'ouverture par défaut est toujours Accueil.
+  // BPT 3.94 : l'ouverture par défaut est toujours Accueil.
   spectatorAutoOpenSuppressed=true;
   document.body.classList.remove("spectator-live-open");
   await showView("dashboard");
@@ -26049,7 +26131,7 @@ document.addEventListener("visibilitychange",()=>{
     const lv=level();
     return Math.max(1,Math.round(Number(lv?.durationSec||0)/60)||0);
   }
-  const BPT_SB_STRUCTURE=[25,50,75,100,150,200,300,400,500,600,800,1000,1200,1500,2000,3000,4000,5000];
+  let BPT_SB_STRUCTURE=[...BPT_DEFAULT_SB_STRUCTURE];
 
   function selectedPlayerCount(){
     return document.querySelectorAll('#live3PlayerPicker input[type="checkbox"]:checked').length;
@@ -26076,28 +26158,28 @@ document.addEventListener("visibilitychange",()=>{
 
     let endIndex=0;
     let bestDistance=Infinity;
-    BPT_SB_STRUCTURE.forEach((sb,i)=>{
-      const bb=sb*2;
-      const d=Math.abs(bb-targetEndBB);
+    const configuredLevels=bptGetBlindLevels();
+    configuredLevels.forEach((blind,i)=>{
+      const d=Math.abs(Number(blind.bb)-targetEndBB);
       if(d<bestDistance){
         bestDistance=d;
         endIndex=i;
       }
     });
 
-    endIndex=Math.max(0,Math.min(BPT_SB_STRUCTURE.length-1,endIndex));
-    const usedSB=BPT_SB_STRUCTURE.slice(0,endIndex+1);
+    endIndex=Math.max(0,Math.min(configuredLevels.length-1,endIndex));
+    const usedLevels=configuredLevels.slice(0,endIndex+1);
 
     // La durée de niveau est calculée à partir de la durée cible.
     // Elle n'est pas fixe : dans votre configuration habituelle
     // (11 joueurs / 20k / environ 4 h à 4 h 15), on retrouve une durée proche des habitudes BPT.
     const totalSeconds=Math.max(3600,Number(targetHours||4)*3600);
-    const levelSeconds=Math.max(8*60,Math.round((totalSeconds/usedSB.length)/60)*60);
+    const levelSeconds=Math.max(8*60,Math.round((totalSeconds/usedLevels.length)/60)*60);
 
-    const levels=usedSB.map((sb,i)=>({
+    const levels=usedLevels.map((blind,i)=>({
       level:i+1,
-      sb,
-      bb:sb*2,
+      sb:Number(blind.sb),
+      bb:Number(blind.bb),
       ante:0,
       durationSec:levelSeconds
     }));
@@ -26138,7 +26220,13 @@ document.addEventListener("visibilitychange",()=>{
   const LIVE3_TAKEOVER_TIMEOUT_MS=30000;
 const LIVE3_FORCE_CODE="bpt";
 const APP_PRESENCE_PATH="bpt/app_presence";
-  const BPT_BACKUP_PATH="bpt/backups";
+  const BPT_POINTS_CONFIG_PATH="bpt/config/points_table";
+const BPT_BLINDS_CONFIG_PATH="bpt/config/blind_structure";
+const BPT_POINTS_LOCAL_KEY="bpt_points_table_v1";
+const BPT_BLINDS_LOCAL_KEY="bpt_blind_structure_v1";
+const BPT_DEFAULT_SB_STRUCTURE=[25,50,75,100,150,200,300,400,500,600,800,1000,1200,1500,2000,3000,4000,5000];
+
+const BPT_BACKUP_PATH="bpt/backups";
 const BPT_BACKUP_META_PATH="bpt/backup_meta";
 const BPT_BACKUP_RETENTION_DAYS=14;
 const BPT_BACKUP_DAILY_MS=24*60*60*1000;
@@ -26149,6 +26237,266 @@ const APP_CONNECTION_HISTORY_PATH="bpt/connection_history";
   const APP_CONNECTION_SESSION_LOGGED_KEY="bpt_connection_logged_session_v1";
 
   
+
+function cloneJson(x){
+  return JSON.parse(JSON.stringify(x));
+}
+
+function bptDefaultPointsTable(){
+  return cloneJson(HISTORICAL_POINTS_2026);
+}
+
+function bptNormalizePointsTable(table){
+  const src=table && typeof table==="object" ? table : {};
+  const out=bptDefaultPointsTable();
+
+  for(let n=6;n<=22;n++){
+    const key=String(n);
+    if(!src[key] || typeof src[key]!=="object")continue;
+    for(let place=1;place<=n;place++){
+      const v=Number(src[key][String(place)]);
+      if(Number.isFinite(v) && v>=0)out[key][String(place)]=v;
+    }
+  }
+  return out;
+}
+
+function bptLoadPointsLocal(){
+  try{
+    const raw=localStorage.getItem(BPT_POINTS_LOCAL_KEY);
+    if(raw)return bptNormalizePointsTable(JSON.parse(raw));
+  }catch(_e){}
+  return bptDefaultPointsTable();
+}
+
+function bptSavePointsLocal(table){
+  const clean=bptNormalizePointsTable(table);
+  window.BPT_POINTS_TABLE=clean;
+  try{localStorage.setItem(BPT_POINTS_LOCAL_KEY,JSON.stringify(clean));}catch(_e){}
+  return clean;
+}
+
+function bptGetPointsTable(){
+  return window.BPT_POINTS_TABLE || bptLoadPointsLocal();
+}
+
+function bptNormalizeBlindLevels(levels){
+  const out=[];
+  for(const row of Array.isArray(levels)?levels:[]){
+    const sb=Number(row?.sb);
+    const bb=Number(row?.bb);
+    if(Number.isFinite(sb)&&Number.isFinite(bb)&&sb>0&&bb>sb){
+      out.push({sb:Math.round(sb),bb:Math.round(bb)});
+    }
+  }
+  return out.length ? out : BPT_DEFAULT_SB_STRUCTURE.map(sb=>({sb,bb:sb*2}));
+}
+
+function bptLoadBlindsLocal(){
+  try{
+    const raw=localStorage.getItem(BPT_BLINDS_LOCAL_KEY);
+    if(raw)return bptNormalizeBlindLevels(JSON.parse(raw));
+  }catch(_e){}
+  return BPT_DEFAULT_SB_STRUCTURE.map(sb=>({sb,bb:sb*2}));
+}
+
+function bptSaveBlindsLocal(levels){
+  const clean=bptNormalizeBlindLevels(levels);
+  window.BPT_BLIND_LEVELS=clean;
+  BPT_SB_STRUCTURE=clean.map(v=>v.sb);
+  try{localStorage.setItem(BPT_BLINDS_LOCAL_KEY,JSON.stringify(clean));}catch(_e){}
+  return clean;
+}
+
+function bptGetBlindLevels(){
+  return window.BPT_BLIND_LEVELS || bptLoadBlindsLocal();
+}
+
+async function bptLoadSharedCompetitionConfig(){
+  window.BPT_POINTS_TABLE=bptLoadPointsLocal();
+  bptSaveBlindsLocal(bptLoadBlindsLocal());
+
+  try{
+    if(!window.bptFirebaseEnsure)return;
+    await window.bptFirebaseEnsure();
+    const dbx=window.bptFirebaseDb?.();
+    if(!dbx)return;
+
+    const [ps,bs]=await Promise.all([
+      dbx.ref(BPT_POINTS_CONFIG_PATH).once("value"),
+      dbx.ref(BPT_BLINDS_CONFIG_PATH).once("value")
+    ]);
+
+    if(ps.exists())bptSavePointsLocal(ps.val());
+    if(bs.exists())bptSaveBlindsLocal(bs.val());
+  }catch(e){
+    console.warn("Chargement configuration BPT :",e);
+  }
+
+  renderBptPointsTableEditor();
+  renderBptBlindStructureEditor();
+}
+
+async function bptSaveSharedPointsTable(table){
+  const clean=bptSavePointsLocal(table);
+  if(window.bptFirebaseEnsure){
+    await window.bptFirebaseEnsure();
+    const dbx=window.bptFirebaseDb?.();
+    if(dbx)await dbx.ref(BPT_POINTS_CONFIG_PATH).set(clean);
+  }
+  return clean;
+}
+
+async function bptSaveSharedBlindLevels(levels){
+  const clean=bptSaveBlindsLocal(levels);
+  if(window.bptFirebaseEnsure){
+    await window.bptFirebaseEnsure();
+    const dbx=window.bptFirebaseDb?.();
+    if(dbx)await dbx.ref(BPT_BLINDS_CONFIG_PATH).set(clean);
+  }
+  return clean;
+}
+
+function renderBptPointsPlayerCountOptions(){
+  const select=document.getElementById("bptPointsPlayerCount");
+  if(!select)return;
+  if(!select.options.length){
+    for(let n=6;n<=22;n++){
+      const op=document.createElement("option");
+      op.value=String(n);
+      op.textContent=`${n} joueurs`;
+      select.appendChild(op);
+    }
+    select.value="11";
+  }
+}
+
+function renderBptPointsTableEditor(){
+  renderBptPointsPlayerCountOptions();
+  const select=document.getElementById("bptPointsPlayerCount");
+  const editor=document.getElementById("bptPointsTableEditor");
+  const info=document.getElementById("bptPointsTableInfo");
+  if(!select||!editor)return;
+
+  const n=Math.max(6,Math.min(22,Number(select.value)||11));
+  const table=bptGetPointsTable();
+  const row=table[String(n)]||{};
+  editor.innerHTML="";
+
+  for(let place=1;place<=n;place++){
+    const label=document.createElement("label");
+    label.style.display="flex";
+    label.style.flexDirection="column";
+    label.style.gap="4px";
+    label.innerHTML=`<span class="muted" style="font-size:11px">${place}e place</span>
+      <input class="bpt-point-value" data-place="${place}" type="number" min="0" step="1"
+             value="${Number(row[String(place)]||0)}">`;
+    editor.appendChild(label);
+  }
+
+  if(info)info.textContent=`Barème utilisé pour une partie à ${n} joueurs.`;
+}
+
+function collectBptPointsEditor(){
+  const select=document.getElementById("bptPointsPlayerCount");
+  const n=Math.max(6,Math.min(22,Number(select?.value)||11));
+  const table=bptNormalizePointsTable(bptGetPointsTable());
+  const row={...table[String(n)]};
+
+  document.querySelectorAll(".bpt-point-value").forEach(el=>{
+    const place=String(Number(el.dataset.place)||0);
+    row[place]=Math.max(0,Number(el.value)||0);
+  });
+
+  table[String(n)]=row;
+  return table;
+}
+
+function renderBptBlindStructureEditor(){
+  const input=document.getElementById("bptBlindStructureInput");
+  const info=document.getElementById("bptBlindStructureInfo");
+  if(!input)return;
+
+  const levels=bptGetBlindLevels();
+  input.value=levels.map(v=>`${v.sb} / ${v.bb}`).join("\n");
+  if(info)info.textContent=`${levels.length} niveaux configurés · configuration partagée entre les appareils.`;
+}
+
+function parseBptBlindStructureEditor(text){
+  const rows=String(text||"").split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  const levels=[];
+
+  rows.forEach((row,i)=>{
+    const nums=(row.match(/\d+/g)||[]).map(Number);
+    if(nums.length<2)throw new Error(`Ligne ${i+1} invalide : ${row}`);
+    const sb=nums[0],bb=nums[1];
+    if(!(sb>0&&bb>sb))throw new Error(`Ligne ${i+1} invalide : ${row}`);
+    levels.push({sb,bb});
+  });
+
+  if(!levels.length)throw new Error("La structure des blinds est vide.");
+  return levels;
+}
+
+document.addEventListener("change",e=>{
+  if(e.target?.id==="bptPointsPlayerCount")renderBptPointsTableEditor();
+});
+
+document.addEventListener("click",async e=>{
+  if(e.target?.closest?.("#saveBptPointsTableBtn")){
+    try{
+      const table=collectBptPointsEditor();
+      await bptSaveSharedPointsTable(table);
+      renderBptPointsTableEditor();
+      alert("Barème de points enregistré.");
+    }catch(err){
+      alert("Impossible d’enregistrer le barème.\\n\\n"+(err?.message||String(err)));
+    }
+  }
+
+  if(e.target?.closest?.("#resetBptPointsTableBtn")){
+    try{
+      const defaults=bptDefaultPointsTable();
+      await bptSaveSharedPointsTable(defaults);
+      renderBptPointsTableEditor();
+      alert("Barème BPT par défaut restauré.");
+    }catch(err){
+      alert(err?.message||String(err));
+    }
+  }
+
+  if(e.target?.closest?.("#saveBptBlindStructureBtn")){
+    try{
+      const levels=parseBptBlindStructureEditor(document.getElementById("bptBlindStructureInput")?.value||"");
+      await bptSaveSharedBlindLevels(levels);
+      renderBptBlindStructureEditor();
+      alert("Structure des blinds enregistrée.");
+    }catch(err){
+      alert("Impossible d’enregistrer les blinds.\\n\\n"+(err?.message||String(err)));
+    }
+  }
+
+  if(e.target?.closest?.("#resetBptBlindStructureBtn")){
+    try{
+      const defaults=BPT_DEFAULT_SB_STRUCTURE.map(sb=>({sb,bb:sb*2}));
+      await bptSaveSharedBlindLevels(defaults);
+      renderBptBlindStructureEditor();
+      alert("Structure BPT par défaut restaurée.");
+    }catch(err){
+      alert(err?.message||String(err));
+    }
+  }
+});
+
+document.addEventListener("DOMContentLoaded",()=>{
+  window.BPT_POINTS_TABLE=bptLoadPointsLocal();
+  bptSaveBlindsLocal(bptLoadBlindsLocal());
+  renderBptPointsTableEditor();
+  renderBptBlindStructureEditor();
+  setTimeout(()=>{ bptLoadSharedCompetitionConfig(); },800);
+});
+
+
 function buildBptBackupPayload(){
   const payload={
     createdAt:Date.now(),
@@ -28678,5 +29026,17 @@ document.addEventListener("DOMContentLoaded",()=>{
 });
 </script>
 
+<script id="bpt-summary-headup-photo">
+document.addEventListener("click",e=>{
+  if(e.target?.closest?.("#summaryHeadUpPhotoBtn")){
+    const input=document.getElementById("latestGameHeadUpCameraInput");
+    if(input){
+      input.click();
+    }else{
+      alert("La caméra n’est pas disponible sur cet appareil.");
+    }
+  }
+});
+</script>
 </body>
 </html>
