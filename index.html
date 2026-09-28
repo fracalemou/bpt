@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V4.35 FIX ENREGISTREMENT LIVE
+BPT LIVE V4.43 SECURITE SYNCHRO DIAGNOSTIC
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -806,6 +806,24 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
 #ranking table td:nth-child(n+4){
   text-align:center;
   vertical-align:middle;
+}
+
+/* V4.43 — Classement : surnom, bourreau et victime centrés */
+#ranking td:nth-child(2) .player-secondary-nickname{
+  display:block;
+  width:100%;
+  text-align:center !important;
+}
+#ranking table th:nth-child(14),
+#ranking table td:nth-child(14),
+#ranking table th:nth-child(15),
+#ranking table td:nth-child(15){
+  text-align:center !important;
+  vertical-align:middle !important;
+}
+#ranking table td:nth-child(14) .player-secondary-nickname,
+#ranking table td:nth-child(15) .player-secondary-nickname{
+  text-align:center !important;
 }
 
 #ranking .progress-indicator{
@@ -15340,11 +15358,12 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.42";
+const BPT_APP_VERSION="4.43";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
-  if(!el)return;
-  el.textContent=`Version BPT ${BPT_APP_VERSION}`;
+  if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
+  const headerEl=document.getElementById("headerAppVersion");
+  if(headerEl)headerEl.textContent=`BPT v${BPT_APP_VERSION}`;
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -15355,22 +15374,57 @@ function updateFirebaseDiagnostic(){
   const stateEl=document.getElementById("firebaseDiagnosticState");
   const projectEl=document.getElementById("firebaseDiagnosticProject");
   if(!stateEl||!projectEl)return;
+
   const cfg=window.BPT_FIREBASE_CONFIG||{};
   projectEl.textContent=cfg.projectId||"—";
+
   if(!navigator.onLine){
     stateEl.textContent="Hors connexion";
-    return;
-  }
-  if(typeof cloudReady!=="undefined" && cloudReady){
+  }else if(typeof cloudReady!=="undefined" && cloudReady){
     stateEl.textContent="Connecté";
-    return;
-  }
-  if(typeof cloudLastError!=="undefined" && cloudLastError){
+  }else if(typeof cloudLastError!=="undefined" && cloudLastError){
     stateEl.textContent="Erreur";
     stateEl.title=String(cloudLastError);
-    return;
+  }else{
+    stateEl.textContent="Connexion…";
   }
-  stateEl.textContent="Connexion…";
+
+  const modeEl=document.getElementById("firebaseDiagnosticMode");
+  const liveEl=document.getElementById("firebaseDiagnosticLive");
+  const syncEl=document.getElementById("firebaseDiagnosticLastSync");
+  const gameEl=document.getElementById("firebaseDiagnosticLastGame");
+  const versionEl=document.getElementById("firebaseDiagnosticVersion");
+
+  if(modeEl){
+    let mode="Maître";
+    try{
+      if(typeof liveIsSpectator==="function" && liveIsSpectator())mode="Spectateur";
+    }catch(_e){}
+    modeEl.textContent=mode;
+  }
+
+  if(liveEl){
+    const live=db?.liveState;
+    liveEl.textContent=live && live.active!==false
+      ? `Partie #${live.gameNo||"—"} · actif`
+      : "Aucun Live actif";
+  }
+
+  if(syncEl){
+    const ts=window.BPT_LAST_SYNC_AT;
+    syncEl.textContent=ts
+      ? new Date(ts).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"})
+      : "Pas encore confirmée";
+  }
+
+  if(gameEl){
+    const nums=(Array.isArray(db?.history)?db.history:[])
+      .map(r=>Number(r?.game))
+      .filter(Number.isFinite);
+    gameEl.textContent=nums.length ? `#${Math.max(...nums)}` : "Aucune";
+  }
+
+  if(versionEl)versionEl.textContent=`BPT ${BPT_APP_VERSION}`;
 }
 document.addEventListener("DOMContentLoaded",()=>{updateFirebaseDiagnostic();setInterval(updateFirebaseDiagnostic,1500);});
 window.addEventListener("online",updateFirebaseDiagnostic);
@@ -15459,6 +15513,8 @@ function simplifyRecordTextForMobile(text){
       <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
     </div>
   </div>
+
+  <div class="app-version" id="headerAppVersion">BPT v4.43</div>
 
   <div id="bptOnlinePresence" class="bpt-online-presence" tabindex="0" aria-label="Personnes connectées">
     <span class="bpt-online-dot">●</span>
@@ -16659,12 +16715,18 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 4.40</div>
-    <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
-      <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 4.43</div>
+    <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:680px">
+      <div style="font-weight:900;margin-bottom:9px">État BPT</div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
         <strong>État</strong><span id="firebaseDiagnosticState">Connexion…</span>
         <strong>Projet</strong><span id="firebaseDiagnosticProject">bpt-championship</span>
+        <strong>Mode</strong><span id="firebaseDiagnosticMode">—</span>
+        <strong>Live</strong><span id="firebaseDiagnosticLive">—</span>
+        <strong>Dernière synchro</strong><span id="firebaseDiagnosticLastSync">—</span>
+        <strong>Dernière partie</strong><span id="firebaseDiagnosticLastGame">—</span>
+        <strong>Version</strong><span id="firebaseDiagnosticVersion">—</span>
       </div>
     </div>
   </div>
@@ -17206,8 +17268,27 @@ window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
   <span id="cloudStatusDot">●</span>
   <span id="cloudStatusText">Connexion…</span>
 </div>
+<div id="bptToast" role="status" aria-live="polite" style="
+  position:fixed;left:50%;bottom:66px;transform:translateX(-50%);
+  z-index:12000;display:none;max-width:min(560px,90vw);
+  padding:11px 16px;border-radius:12px;background:#193326;
+  border:1px solid #4f7e63;color:#fff;font-weight:800;
+  box-shadow:0 12px 34px rgba(0,0,0,.35);text-align:center">
+</div>
 <script>
 const $ = id => document.getElementById(id);
+
+let bptToastTimer=null;
+function showBptToast(message,kind="ok"){
+  const el=document.getElementById("bptToast");
+  if(!el)return;
+  clearTimeout(bptToastTimer);
+  el.textContent=String(message||"");
+  el.style.display="block";
+  el.style.background=kind==="error" ? "#532727" : kind==="busy" ? "#493b1f" : "#193326";
+  el.style.borderColor=kind==="error" ? "#a95555" : kind==="busy" ? "#9d7a32" : "#4f7e63";
+  bptToastTimer=setTimeout(()=>{el.style.display="none";},4200);
+}
 
 
 document.addEventListener("click",e=>{
@@ -17635,6 +17716,11 @@ function setCloudStatus(state,label,details=""){
   if(state)el.classList.add(state);
   txt.textContent=label;
   el.title=details||label;
+
+  if(state==="ok"){
+    window.BPT_LAST_SYNC_AT=Date.now();
+  }
+
   if(typeof updateFirebaseDiagnostic==="function")updateFirebaseDiagnostic();
 }
 
@@ -23246,11 +23332,23 @@ async function persistCompletedGame(rows){
     const sig=historyGameSignature(rows);
     const canonicalGroups=historyGroups(db.history||[]);
     const present=canonicalGroups.some(([,gameRows])=>historyGameSignature(gameRows)===sig);
+    const gameNo=Number(rows?.[0]?.game)||"—";
+
+    if(present){
+      setCloudStatus("ok",`Partie #${gameNo} synchronisée ✓`,"Écriture Firebase relue et vérifiée.");
+      showBptToast(`Partie #${gameNo} enregistrée et synchronisée ✓`,"ok");
+    }else{
+      setCloudStatus("offline",`Partie #${gameNo} à vérifier`,"L'écriture a été envoyée mais la relecture Firebase ne confirme pas encore la partie.");
+      showBptToast(`Partie #${gameNo} enregistrée localement · vérification Firebase en attente`,"busy");
+    }
+
     setTimeout(()=>showEndGameSummary(rows),80);
     return {synced:present};
   }
 
-  setCloudStatus("offline","Partie en attente","La partie sera envoyée automatiquement dès que Firebase sera disponible.");
+  const gameNo=Number(rows?.[0]?.game)||"—";
+  setCloudStatus("offline",`Partie #${gameNo} en attente`,"Enregistrée localement. Elle sera envoyée automatiquement dès que Firebase sera disponible.");
+  showBptToast(`Partie #${gameNo} enregistrée localement · synchronisation en attente`,"busy");
   setTimeout(()=>showEndGameSummary(rows),80);
   return {synced:false};
 }
@@ -25349,10 +25447,16 @@ async function resetFullHistory(){
   );
   if(!confirm1)return;
 
-  const confirm2=confirm(
-    "CONFIRMATION DÉFINITIVE\n\nCette action supprimera l'historique partagé pour tous les utilisateurs.\n\nContinuer ?"
+  const typed=prompt(
+    "CONFIRMATION DÉFINITIVE\n\n"+
+    "Cette action supprimera l'historique partagé pour tous les utilisateurs.\n\n"+
+    "Pour confirmer, tapez exactement : SUPPRIMER"
   );
-  if(!confirm2)return;
+  if(typed===null)return;
+  if(String(typed).trim()!=="SUPPRIMER"){
+    alert("RAZ annulée : le mot SUPPRIMER n'a pas été saisi exactement.");
+    return;
+  }
 
   db.history=[];
   db.liveState=null;
