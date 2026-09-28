@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V4.43 SECURITE SYNCHRO DIAGNOSTIC
+BPT LIVE V4.44 FIX CENTRAGE CLASSEMENT
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -808,12 +808,9 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
   vertical-align:middle;
 }
 
-/* V4.43 — Classement : surnom, bourreau et victime centrés */
-#ranking td:nth-child(2) .player-secondary-nickname{
-  display:block;
-  width:100%;
-  text-align:center !important;
-}
+/* V4.44 — Classement : surnom, bourreau et victime vraiment centrés */
+#ranking table th:nth-child(2),
+#ranking table td:nth-child(2),
 #ranking table th:nth-child(14),
 #ranking table td:nth-child(14),
 #ranking table th:nth-child(15),
@@ -821,8 +818,29 @@ nav{position:sticky;top:0;z-index:40;box-shadow:0 5px 18px rgba(0,0,0,.18)}
   text-align:center !important;
   vertical-align:middle !important;
 }
+#ranking table td:nth-child(2) .player-name-stack,
+#ranking table td:nth-child(14) .player-name-stack,
+#ranking table td:nth-child(15) .player-name-stack{
+  display:inline-flex;
+  width:100%;
+  align-items:center !important;
+  justify-content:center;
+  text-align:center !important;
+}
+#ranking table td:nth-child(2) button.player-name-stack,
+#ranking table td:nth-child(14) button.player-name-stack,
+#ranking table td:nth-child(15) button.player-name-stack{
+  margin:0 auto;
+  text-align:center !important;
+}
+#ranking table td:nth-child(2) .player-primary-name,
+#ranking table td:nth-child(14) .player-primary-name,
+#ranking table td:nth-child(15) .player-primary-name,
+#ranking table td:nth-child(2) .player-secondary-nickname,
 #ranking table td:nth-child(14) .player-secondary-nickname,
 #ranking table td:nth-child(15) .player-secondary-nickname{
+  display:block;
+  width:100%;
   text-align:center !important;
 }
 
@@ -15358,7 +15376,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.43";
+const BPT_APP_VERSION="4.44";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -15514,7 +15532,7 @@ function simplifyRecordTextForMobile(text){
     </div>
   </div>
 
-  <div class="app-version" id="headerAppVersion">BPT v4.43</div>
+  <div class="app-version" id="headerAppVersion">BPT v4.44</div>
 
   <div id="bptOnlinePresence" class="bpt-online-presence" tabindex="0" aria-label="Personnes connectées">
     <span class="bpt-online-dot">●</span>
