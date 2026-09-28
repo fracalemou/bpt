@@ -15122,6 +15122,157 @@ body:not(.bpt-mobile-device) #bptMobileMoreTopBtn{display:none !important;}
 }
 </style>
 
+
+<style id="bpt-v441-landscape-fullscreen-only">
+/* V4.41 — téléphone paysage uniquement. Portrait inchangé. */
+@media (max-width:900px) and (orientation:landscape){
+  #live3Fullscreen.bpt-live3-fullscreen{
+    overflow:hidden !important;
+  }
+
+  #live3Fullscreen .bpt-live3-fs-shell{
+    grid-template-areas:
+      "head"
+      "blinds"
+      "timer"
+      "kpis"
+      "actions"
+      "players" !important;
+    grid-template-columns:1fr !important;
+    grid-template-rows:
+      36px
+      68px
+      minmax(78px,1fr)
+      58px
+      48px
+      34px !important;
+    gap:4px !important;
+    height:100% !important;
+    max-height:100% !important;
+    overflow:hidden !important;
+  }
+
+  #live3Fullscreen .bpt-live3-fs-head{
+    min-height:0 !important;
+    overflow:hidden !important;
+  }
+
+  #live3Fullscreen .bpt-live3-fs-blinds{
+    min-height:0 !important;
+    align-self:stretch !important;
+    justify-content:center !important;
+    padding:8px 0 0 !important;
+    overflow:hidden !important;
+  }
+  #live3Fullscreen .bpt-live3-fs-blinds span{
+    font-size:8px !important;
+    margin:0 0 1px !important;
+    line-height:1 !important;
+  }
+  #live3Fullscreen .bpt-live3-fs-blinds strong{
+    font-size:38px !important;
+    line-height:.9 !important;
+  }
+  #live3Fullscreen .bpt-live3-fs-duration-label{
+    font-size:8px !important;
+    line-height:1 !important;
+    margin-top:3px !important;
+  }
+
+  #live3Fullscreen .bpt-live3-fs-timer{
+    min-height:0 !important;
+    height:100% !important;
+    overflow:hidden !important;
+    align-items:center !important;
+  }
+  #live3Fullscreen .bpt-live3-fs-timer>div{
+    font-size:clamp(54px,9.5vw,78px) !important;
+    line-height:.78 !important;
+    max-height:100% !important;
+  }
+
+  #live3Fullscreen .bpt-live3-fs-kpis{
+    min-height:0 !important;
+    height:58px !important;
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    gap:5px !important;
+    overflow:hidden !important;
+  }
+  #live3Fullscreen .bpt-live3-fs-kpis>div{
+    min-height:0 !important;
+    padding:4px 5px !important;
+  }
+  #live3Fullscreen .bpt-live3-fs-kpis span{
+    font-size:7px !important;
+    line-height:1 !important;
+  }
+  #live3Fullscreen .bpt-live3-fs-kpis strong{
+    font-size:12px !important;
+    line-height:1 !important;
+    margin-top:3px !important;
+  }
+
+  #live3Fullscreen .bpt-live3-fs-actions{
+    height:48px !important;
+    min-height:48px !important;
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    gap:6px !important;
+    overflow:hidden !important;
+  }
+  #live3Fullscreen .bpt-live3-fs-actions button{
+    height:48px !important;
+    min-height:48px !important;
+    font-size:9px !important;
+    padding:4px 5px !important;
+    line-height:1.05 !important;
+  }
+
+  #live3Fullscreen .bpt-live3-fs-players{
+    display:block !important;
+    height:34px !important;
+    min-height:34px !important;
+    padding:0 4px !important;
+    overflow:hidden !important;
+  }
+  #live3Fullscreen .bpt-live3-fs-players-title{
+    display:none !important;
+  }
+  #live3Fullscreen .bpt-live3-fs-player-list{
+    height:100% !important;
+    min-height:0 !important;
+    display:flex !important;
+    flex-wrap:wrap !important;
+    justify-content:center !important;
+    align-items:center !important;
+    align-content:center !important;
+    gap:4px !important;
+    overflow:hidden !important;
+  }
+  #live3Fullscreen .bpt-live3-fs-player{
+    flex:1 1 110px !important;
+    min-width:90px !important;
+    max-width:190px !important;
+    padding:3px 5px !important;
+    font-size:8.5px !important;
+    line-height:1 !important;
+  }
+}
+
+@media (max-width:900px) and (orientation:landscape) and (max-height:380px){
+  #live3Fullscreen .bpt-live3-fs-shell{
+    grid-template-rows:34px 62px minmax(68px,1fr) 52px 44px 30px !important;
+    gap:3px !important;
+  }
+  #live3Fullscreen .bpt-live3-fs-blinds{padding-top:5px !important;}
+  #live3Fullscreen .bpt-live3-fs-blinds strong{font-size:34px !important;}
+  #live3Fullscreen .bpt-live3-fs-timer>div{font-size:clamp(48px,8.6vw,68px) !important;}
+  #live3Fullscreen .bpt-live3-fs-kpis{height:52px !important;}
+  #live3Fullscreen .bpt-live3-fs-actions{height:44px !important;min-height:44px !important;}
+  #live3Fullscreen .bpt-live3-fs-actions button{height:44px !important;min-height:44px !important;font-size:8.5px !important;}
+  #live3Fullscreen .bpt-live3-fs-players{height:30px !important;min-height:30px !important;}
+}
+</style>
+
 </head>
 <body>
 
@@ -15189,7 +15340,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.40";
+const BPT_APP_VERSION="4.41";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
