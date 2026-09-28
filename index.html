@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V4.34 NAV HOVER FIX
+BPT LIVE V4.35 FIX ENREGISTREMENT LIVE
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -14791,7 +14791,7 @@ body.bpt-mobile-device .bpt-mobile-top-menu button{
 </style>
 
 <style id="bpt-v434-nav-hover-fix">
-/* V4.34 — navigation mobile étroite : aucun libellé ne déborde. */
+/* V4.35 — navigation mobile étroite : aucun libellé ne déborde. */
 @media (max-width:430px) and (orientation:portrait){
   #nav > button{
     min-width:0 !important;
@@ -14811,7 +14811,7 @@ body.bpt-mobile-device .bpt-mobile-top-menu button{
   }
 }
 
-/* V4.34 — préserver le contraste des boutons Live V3 au survol et au focus.
+/* V4.35 — préserver le contraste des boutons Live V3 au survol et au focus.
    Un ancien button:hover global force color:#fff ; on rétablit ici la couleur
    prévue pour chaque variante. */
 #live3 .btn.ghost:hover,
@@ -15340,7 +15340,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.41";
+const BPT_APP_VERSION="4.42";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -17845,6 +17845,8 @@ async function refreshCanonicalHistoryUI(showBusy=true){
       return true;
     }
     db.history=applyPlayerAliasesToRows(recalcCurrentSeasonPoints(serverHistory));
+    // Tant qu'une partie est encore en file d'attente locale, la conserver visible.
+    pendingGamesMergeIntoLocalHistory();
     applyHistoricalPointScale();
     normalizeHistoryGameNumbers();
     saveLocalOnly();
@@ -17914,6 +17916,67 @@ function pendingGamesLoad(){
 
 function pendingGamesSave(list){
   try{localStorage.setItem(PENDING_GAMES_STORE,JSON.stringify(list||[]));}catch(e){}
+}
+
+
+function pendingGamesMergeIntoLocalHistory(){
+  const pending=pendingGamesLoad();
+  if(!pending.length)return 0;
+
+  const groups=historyGroups(Array.isArray(db.history)?db.history:[]).map(([,rows])=>rows);
+  const signatures=new Set(groups.map(rows=>historyGameSignature(rows)));
+  let added=0;
+
+  for(const rows of pending){
+    if(!Array.isArray(rows)||!rows.length)continue;
+    const sig=historyGameSignature(rows);
+    if(signatures.has(sig))continue;
+    signatures.add(sig);
+    groups.push(rows);
+    added++;
+  }
+
+  if(added){
+    db.history=groups.flatMap((rows,i)=>rows.map(r=>({...r,game:i+1})));
+    db.history=applyPlayerAliasesToRows(recalcCurrentSeasonPoints(db.history||[]));
+    applyHistoricalPointScale();
+    normalizeHistoryGameNumbers();
+    saveLocalOnly();
+  }
+  return added;
+}
+
+let bptPendingRecoveryRunning=false;
+async function recoverPendingGamesSafely(){
+  if(bptPendingRecoveryRunning)return false;
+  const pending=pendingGamesLoad();
+  if(!pending.length)return true;
+
+  bptPendingRecoveryRunning=true;
+  try{
+    const restored=pendingGamesMergeIntoLocalHistory();
+    if(restored){
+      try{renderAll();renderHistory();}catch(uiError){console.warn("BPT affichage récupération locale :",uiError);}
+      setCloudStatus(
+        "busy",
+        `${pending.length} partie${pending.length>1?"s":""} à récupérer`,
+        "Récupération des parties enregistrées localement…"
+      );
+    }
+
+    if(!sbClient || !cloudReady)return false;
+    const ok=await flushPendingGames();
+    if(ok){
+      try{await refreshCanonicalHistoryUI(false);}catch(_e){}
+      return true;
+    }
+    return false;
+  }catch(e){
+    console.error("BPT récupération parties en attente :",e);
+    return false;
+  }finally{
+    bptPendingRecoveryRunning=false;
+  }
 }
 
 function queuePendingGame(rows){
@@ -18727,6 +18790,9 @@ async function initCloudSync(){
     // tente de les migrer une fois vers Firebase sans bloquer le démarrage.
     setTimeout(()=>migrateLegacyLocalGamePhotosToStorage().catch(e=>console.warn("Migration photos :",e)),500);
 
+    // V4.42 : republie automatiquement les parties restées locales après une erreur ou une coupure.
+    setTimeout(()=>recoverPendingGamesSafely().catch(e=>console.warn("Récupération parties en attente :",e)),900);
+
   }catch(e){
     cloudApplying=false;
     cloudLastError=e?.message||String(e);
@@ -18751,6 +18817,7 @@ document.addEventListener("visibilitychange",()=>{
   if(!document.hidden && sbClient && cloudReady){
     // Un seul contrôle léger au retour au premier plan.
     cloudPoll();
+    recoverPendingGamesSafely().catch(e=>console.warn("Récupération parties en attente :",e));
   }
 });
 
@@ -18760,6 +18827,7 @@ window.addEventListener("online",async()=>{
   }else{
     cloudReady=true;
     await forceCloudSync();
+    await recoverPendingGamesSafely();
   }
 });
 window.addEventListener("offline",()=>setCloudStatus("offline","Hors connexion"));
@@ -21404,7 +21472,37 @@ if(selectedSeasonKey===CURRENT_SEASON_KEY){
 
 function renderAll(){
   normalizeHistoryGameNumbers();
-  updateSeasonContextTitles();renderDashboard();renderLatestGame();renderRanking();renderVersus();renderRecords();renderAchievements();renderProfile();renderHistory();renderPlayers();renderGamePlayers();renderSettings();renderPoints();if(correctionUnlocked)renderCorrectionGameList(null,false);if(document.getElementById("livePlayerList"))liveRenderPlayerList();
+
+  // V4.35 : un composant d'interface absent ou défectueux ne doit jamais
+  // interrompre les autres rendus ni, surtout, empêcher une sauvegarde.
+  const safeRender=(name,fn)=>{
+    try{
+      if(typeof fn==="function")fn();
+    }catch(e){
+      console.error(`BPT rendu ${name} :`,e);
+    }
+  };
+
+  safeRender("titres saison",updateSeasonContextTitles);
+  safeRender("tableau de bord",renderDashboard);
+  safeRender("dernière partie",renderLatestGame);
+  safeRender("classement",renderRanking);
+  safeRender("versus",renderVersus);
+  safeRender("records",renderRecords);
+  safeRender("succès",renderAchievements);
+  safeRender("profil",renderProfile);
+  safeRender("historique",renderHistory);
+  safeRender("joueurs",renderPlayers);
+  safeRender("joueurs partie",renderGamePlayers);
+  safeRender("paramètres",renderSettings);
+  safeRender("barème points",renderPoints);
+
+  if(correctionUnlocked){
+    safeRender("correction",()=>renderCorrectionGameList(null,false));
+  }
+  if(document.getElementById("livePlayerList")){
+    safeRender("liste joueurs live",liveRenderPlayerList);
+  }
 }
 
 
@@ -23129,8 +23227,14 @@ async function persistCompletedGame(rows){
   db.history=db.history.concat(rows);
   queuePendingGame(rows);
   saveLocalOnly();
-  renderAll();
-  renderHistory();
+
+  // Le rendu de l'interface ne doit JAMAIS empêcher la sauvegarde/synchronisation.
+  try{
+    renderAll();
+    renderHistory();
+  }catch(uiError){
+    console.error("BPT rafraîchissement après enregistrement :",uiError);
+  }
 
   // Même circuit de synchronisation pour Nouvelle partie ET Live.
   if(cloudReady && sbClient){
@@ -23366,10 +23470,18 @@ function renderSettings(){
   $("sP1").value=db.settings.payouts[0]||0;$("sP2").value=db.settings.payouts[1]||0;$("sP3").value=db.settings.payouts[2]||0;$("sTablier").value=db.settings.tablierMinPlayers;
 }
 function renderPoints(){
-  const nums=Object.keys(db.points).map(Number).sort((a,b)=>a-b);
+  const target=$("pointsPreview");
+
+  // V4.35 : pointsPreview a été retiré de certaines vues.
+  // Ne jamais écrire innerHTML sur un élément inexistant.
+  if(!target){
+    return;
+  }
+
+  const nums=Object.keys(db.points||{}).map(Number).sort((a,b)=>a-b);
   let h='<table><thead><tr><th>Place</th>'+nums.map(n=>`<th>${n} j.</th>`).join("")+'</tr></thead><tbody>';
-  for(let p=1;p<=30;p++)h+=`<tr><th>${p}</th>`+nums.map(n=>`<td>${db.points[n]?.[p]||""}</td>`).join("")+'</tr>';
-  $("pointsPreview").innerHTML=h+"</tbody></table>";
+  for(let p=1;p<=30;p++)h+=`<tr><th>${p}</th>`+nums.map(n=>`<td>${db.points?.[n]?.[p]||""}</td>`).join("")+'</tr>';
+  target.innerHTML=h+"</tbody></table>";
 }
 
 
