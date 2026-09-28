@@ -14477,7 +14477,7 @@ nav button[data-view="live"],#live,#liveFullscreenDisplay,#spectatorServerOverla
 
 
 <style id="bpt-live3-v439-fullscreen-canonical">
-/* ===== BPT 4.39 — Live V3 fullscreen rebuilt from stable 4.34 ===== */
+/* ===== BPT 4.40 — Live V3 fullscreen rebuilt from stable 4.34 ===== */
 html:has(#live3Fullscreen.open),
 body:has(#live3Fullscreen.open){
   margin:0 !important;
@@ -14847,7 +14847,7 @@ body.bpt-mobile-device .bpt-mobile-top-menu button{
 
 
 <style id="bpt-live3-v439-reduced-layout">
-/* ===== BPT 4.39 — normal/reduced Live mirrors fullscreen hierarchy ===== */
+/* ===== BPT 4.40 — normal/reduced Live mirrors fullscreen hierarchy ===== */
 .bpt-nav-mobile-only{display:none !important;}
 html.bpt-mobile-device .bpt-nav-mobile-only,
 body.bpt-mobile-device .bpt-nav-mobile-only{display:block !important;}
@@ -14951,6 +14951,177 @@ html.bpt-mobile-device body #live3 .bpt-live3-game-card{padding-left:10px !impor
   body.bpt-mobile-device #live3 .bpt-live3-duration-compact .btn{width:100px !important;}
 }
 </style>
+
+<style id="bpt-v440-targeted-fixes">
+/* ===== V4.40 targeted fixes ===== */
+
+/* 1. PLUS must never be visible on desktop, including touch PCs. */
+html:not(.bpt-mobile-device) #bptMobileMoreTopBtn,
+body:not(.bpt-mobile-device) #bptMobileMoreTopBtn{display:none !important;}
+
+/* Strong desktop guard independent from touch capability. */
+@media (min-width:901px){
+  #nav .bpt-nav-mobile-only{display:none !important;}
+  #nav .bpt-nav-desktop-only{display:flex !important;}
+}
+
+/* 2. Reduced Live on phone: keep supplementary controls fully inside viewport. */
+@media (max-width:700px){
+  #live3 #live3MasterControls,
+  #live3 .bpt-live3-controls-row,
+  #live3 .bpt-live3-controls-row--adjust,
+  #live3 .bpt-live3-controls-row--actions{
+    width:100% !important;
+    max-width:100% !important;
+    box-sizing:border-box !important;
+    margin-left:auto !important;
+    margin-right:auto !important;
+  }
+
+  #live3 .bpt-live3-controls-row--adjust{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+    gap:10px !important;
+    padding:0 !important;
+  }
+
+  #live3 .bpt-live3-controls-row--adjust > .btn{
+    width:100% !important;
+    max-width:none !important;
+    min-width:0 !important;
+    margin:0 !important;
+    padding:10px 8px !important;
+    box-sizing:border-box !important;
+    white-space:normal !important;
+    overflow-wrap:anywhere !important;
+    font-size:14px !important;
+    line-height:1.15 !important;
+  }
+
+  #live3 .bpt-live3-controls-row--actions{
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    gap:10px !important;
+  }
+
+  #live3 .bpt-live3-controls-row--actions > .btn{
+    width:100% !important;
+    max-width:none !important;
+    min-width:0 !important;
+    margin:0 !important;
+    box-sizing:border-box !important;
+  }
+
+  /* 3. Blind duration editor becomes two clean rows. */
+  #live3 .bpt-live3-duration-inline{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    grid-template-rows:auto auto !important;
+    gap:10px !important;
+    padding:12px !important;
+    box-sizing:border-box !important;
+    margin:0 auto !important;
+  }
+
+  #live3 .bpt-live3-duration-inline .bpt-live3-duration-editor-copy{
+    display:block !important;
+    width:100% !important;
+    min-width:0 !important;
+    text-align:center !important;
+  }
+
+  #live3 .bpt-live3-duration-inline .bpt-live3-duration-editor-copy strong{
+    display:block !important;
+    white-space:normal !important;
+    font-size:14px !important;
+    line-height:1.15 !important;
+  }
+
+  #live3 .bpt-live3-duration-inline .bpt-live3-duration-editor-copy span{
+    display:block !important;
+    margin-top:3px !important;
+    white-space:normal !important;
+    font-size:11px !important;
+    line-height:1.2 !important;
+  }
+
+  #live3 .bpt-live3-duration-inline .bpt-live3-duration-editor-controls{
+    display:grid !important;
+    grid-template-columns:72px auto minmax(110px,1fr) !important;
+    gap:8px !important;
+    align-items:center !important;
+    width:100% !important;
+    min-width:0 !important;
+  }
+
+  #live3 .bpt-live3-duration-inline input{
+    width:72px !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+  }
+
+  #live3 .bpt-live3-duration-inline .btn{
+    width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+  }
+}
+
+/* 4. Fullscreen phone: move blinds block down from the top header. */
+@media (max-width:900px) and (orientation:portrait){
+  #live3Fullscreen .bpt-live3-fs-shell{
+    grid-template-rows:
+      56px
+      118px
+      minmax(0,1fr)
+      64px
+      106px
+      minmax(52px,auto) !important;
+    gap:8px !important;
+  }
+
+  #live3Fullscreen .bpt-live3-fs-blinds{
+    align-self:end !important;
+    padding-top:18px !important;
+    padding-bottom:4px !important;
+  }
+
+  #live3Fullscreen .bpt-live3-fs-blinds span{
+    margin-top:8px !important;
+  }
+
+  #live3Fullscreen .bpt-live3-fs-duration-label{
+    margin-top:8px !important;
+  }
+}
+
+@media (max-width:900px) and (orientation:landscape){
+  #live3Fullscreen .bpt-live3-fs-shell{
+    grid-template-rows:
+      42px
+      78px
+      minmax(0,1fr)
+      58px
+      48px
+      minmax(42px,auto) !important;
+    gap:5px !important;
+  }
+
+  #live3Fullscreen .bpt-live3-fs-blinds{
+    align-self:end !important;
+    padding-top:12px !important;
+    padding-bottom:2px !important;
+  }
+
+  #live3Fullscreen .bpt-live3-fs-duration-label{
+    margin-top:5px !important;
+  }
+}
+</style>
+
 </head>
 <body>
 
@@ -15018,7 +15189,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.39";
+const BPT_APP_VERSION="4.40";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(!el)return;
@@ -16337,7 +16508,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 4.39</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 4.40</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:560px">
       <div style="display:grid;grid-template-columns:auto 1fr;gap:5px 12px;align-items:center">
         <strong>Backend</strong><span>Firebase</span>
