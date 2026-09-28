@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V4.45 NAV MOBILE PROPRE
+BPT LIVE V4.47 LIVE MOBILE 2 COLONNES
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -8352,22 +8352,25 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 /* ===== BPT 4.34 — sélecteur mobile joueurs lisible en 2 colonnes ===== */
 #live3MobilePlayerGrid{
   display:grid !important;
-  grid-template-columns:repeat(2, minmax(0,1fr)) !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
   gap:8px !important;
+  align-items:stretch !important;
 }
 
 #live3MobilePlayerGrid .bpt-live3-mobile-player-option{
-  display:flex !important;
-  align-items:flex-start !important;
-  gap:8px !important;
-  min-height:56px !important;
-  padding:10px 9px !important;
+  display:grid !important;
+  grid-template-columns:20px minmax(0,1fr) !important;
+  align-items:center !important;
+  column-gap:8px !important;
+  min-height:54px !important;
+  padding:8px 8px !important;
   border:1px solid #41584a !important;
   border-radius:12px !important;
   background:#1d2b23 !important;
   color:#ffffff !important;
   cursor:pointer !important;
   overflow:hidden !important;
+  box-sizing:border-box !important;
 }
 
 #live3MobilePlayerGrid .bpt-live3-mobile-player-option.is-selected{
@@ -8377,23 +8380,24 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 #live3MobilePlayerGrid .bpt-live3-mobile-player-option input[type="checkbox"]{
-  flex:0 0 auto !important;
   width:18px !important;
   height:18px !important;
-  margin:1px 0 0 0 !important;
+  margin:0 !important;
+  justify-self:center !important;
+  align-self:center !important;
 }
 
 #live3MobilePlayerGrid .bpt-live3-mobile-player-name{
   display:block !important;
-  flex:1 1 auto !important;
   min-width:0 !important;
   color:#ffffff !important;
   -webkit-text-fill-color:#ffffff !important;
-  font-size:13px !important;
+  font-size:12.5px !important;
   font-weight:800 !important;
-  line-height:1.22 !important;
+  line-height:1.18 !important;
   white-space:normal !important;
-  word-break:break-word !important;
+  overflow-wrap:anywhere !important;
+  word-break:normal !important;
   overflow:visible !important;
   text-overflow:clip !important;
 }
@@ -8410,8 +8414,15 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
 }
 
 @media (max-width:380px){
+  #live3MobilePlayerGrid{
+    gap:6px !important;
+  }
+  #live3MobilePlayerGrid .bpt-live3-mobile-player-option{
+    padding:7px 6px !important;
+    column-gap:6px !important;
+  }
   #live3MobilePlayerGrid .bpt-live3-mobile-player-name{
-    font-size:12px !important;
+    font-size:11.5px !important;
   }
 }
 
@@ -14380,9 +14391,10 @@ nav button[data-view="live"],#live,#liveFullscreenDisplay,#spectatorServerOverla
 }
 
 .bpt-live3-mobile-player-option{
-  display:flex;
+  display:grid;
+  grid-template-columns:20px minmax(0,1fr);
   align-items:center;
-  gap:9px;
+  column-gap:10px;
   min-height:48px;
   padding:9px 10px;
   border:1px solid #405548;
@@ -14396,15 +14408,16 @@ nav button[data-view="live"],#live,#liveFullscreenDisplay,#spectatorServerOverla
 .bpt-live3-mobile-player-option input{
   width:19px;
   height:19px;
-  flex:0 0 19px;
+  margin:0;
+  justify-self:center;
+  align-self:center;
   accent-color:#c8952e;
 }
 
 .bpt-live3-mobile-player-option span{
+  display:flex;
+  align-items:center;
   min-width:0;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
   color:#fff !important;
   -webkit-text-fill-color:#fff !important;
 }
@@ -15400,7 +15413,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.45";
+const BPT_APP_VERSION="4.47";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -15556,7 +15569,7 @@ function simplifyRecordTextForMobile(text){
     </div>
   </div>
 
-  <div class="app-version" id="headerAppVersion">BPT v4.45</div>
+  <div class="app-version" id="headerAppVersion">BPT v4.47</div>
 
   <div id="bptOnlinePresence" class="bpt-online-presence" tabindex="0" aria-label="Personnes connectées">
     <span class="bpt-online-dot">●</span>
