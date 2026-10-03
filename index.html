@@ -13309,6 +13309,27 @@ nav button[data-view="live"],#live,#liveFullscreenDisplay,#spectatorServerOverla
 .live-fullscreen-display{display:none!important}
 </style>
 
+
+<style id="bpt-live3-players-popover-style">
+#live3 .bpt-live3-players-summary{cursor:pointer;user-select:none;transition:.15s ease;position:relative}
+#live3 .bpt-live3-players-summary:hover,#live3 .bpt-live3-players-summary:focus{outline:none;border-color:#4d8b77;box-shadow:0 0 0 2px rgba(77,139,119,.18)}
+#live3 .bpt-live3-players-summary strong{display:flex;align-items:center;justify-content:center;gap:6px}
+#live3 .bpt-live3-players-icon{font-size:17px;line-height:1}
+.bpt-live3-players-popover{position:fixed;z-index:1000500;width:min(420px,calc(100vw - 24px));max-height:min(70vh,560px);overflow:hidden;background:#102019;color:#f7f4ec;border:1px solid #355a49;border-radius:16px;box-shadow:0 18px 60px rgba(0,0,0,.48);padding:12px}
+.bpt-live3-players-popover[hidden]{display:none!important}
+.bpt-live3-players-popover-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 2px 10px;border-bottom:1px solid #2b4539}
+.bpt-live3-players-popover-head>div{display:flex;flex-direction:column;gap:2px}
+.bpt-live3-players-popover-head strong{font-size:18px}.bpt-live3-players-popover-head span{font-size:12px;color:#afc1b8}
+#live3PlayersPopoverClose{border:0;background:#20382d;color:#fff;border-radius:10px;width:34px;height:34px;font-size:24px;cursor:pointer}
+.bpt-live3-players-popover-list{display:grid;gap:7px;overflow:auto;max-height:calc(min(70vh,560px) - 64px);padding-top:10px}
+.bpt-live3-players-popover-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:9px;padding:8px 10px;border:1px solid #294437;border-radius:12px;background:#172b22}
+.bpt-live3-players-popover-row.is-out{opacity:.82;background:#211f1c}.bpt-live3-players-popover-row.is-in{border-color:#35664f}
+.bpt-live3-players-popover-avatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:#315c49;color:#fff;font-size:11px;font-weight:900}
+.bpt-live3-players-popover-row.is-out .bpt-live3-players-popover-avatar{background:#57453f}
+.bpt-live3-players-popover-name{min-width:0}.bpt-live3-players-popover-name strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}.bpt-live3-players-popover-name span{display:block;margin-top:2px;font-size:11px;color:#9db2a8}
+.bpt-live3-players-popover-status{font-size:12px;font-weight:900;white-space:nowrap;text-align:right;color:#d5e6dd}.bpt-live3-players-popover-row.is-out .bpt-live3-players-popover-status{color:#d8b9ae}
+@media(max-width:700px){.bpt-live3-players-popover{width:calc(100vw - 16px);left:8px!important;right:8px!important;max-height:66vh}.bpt-live3-players-popover-row{grid-template-columns:30px minmax(0,1fr) auto;padding:7px 8px}.bpt-live3-players-popover-status{font-size:11px}}
+</style>
 <style id="bpt-live3-styles">
 #live3NavBtn{position:relative}
 #live3NavBtn.live3-active::before{
@@ -15526,6 +15547,263 @@ body:not(.bpt-mobile-device) #bptMobileMoreTopBtn{display:none !important;}
   #live3Fullscreen #live3FsEstimatedFinish{font-size:16px !important;}
 }
 </style>
+
+<style id="bpt461-desktop-fullscreen-repair">
+/* BPT 4.63 — détail joueurs sur écran réduit */
+@media (min-width:901px){
+  #live3Fullscreen .bpt-live3-fs-shell{
+    grid-template-areas:
+      "head head"
+      "blinds timer"
+      "kpis kpis"
+      "actions actions" !important;
+    grid-template-columns:minmax(300px,34%) minmax(0,66%) !important;
+    grid-template-rows:58px minmax(300px,1fr) 112px 126px !important;
+    gap:10px !important;
+    align-content:stretch !important;
+  }
+  #live3Fullscreen .bpt-live3-fs-head{
+    grid-template-columns:1fr auto 1fr !important;
+    overflow:visible !important;
+  }
+  #live3Fullscreen .bpt-live3-fs-brand{justify-self:start !important;}
+  #live3Fullscreen .bpt-live3-fs-owner{
+    justify-self:center !important;
+    align-self:center !important;
+    font-size:15px !important;
+    font-weight:900 !important;
+    color:#dce5df !important;
+    white-space:nowrap !important;
+  }
+  #live3Fullscreen .bpt-live3-fs-rem{justify-self:end !important;}
+  #live3Fullscreen .bpt-live3-fs-blinds{
+    padding:12px 18px !important;
+    justify-content:center !important;
+  }
+  #live3Fullscreen .bpt-live3-fs-blinds strong{font-size:clamp(72px,7vw,118px) !important;}
+  #live3Fullscreen .bpt-live3-fs-timer>div{font-size:clamp(150px,16vw,260px) !important;line-height:.82 !important;}
+  #live3Fullscreen .bpt-live3-fs-kpis{height:112px !important;align-self:stretch !important;}
+  #live3Fullscreen .bpt-live3-fs-kpis>div{padding:8px 12px !important;}
+  #live3Fullscreen .bpt-live3-fs-kpis span{font-size:12px !important;}
+  #live3Fullscreen .bpt-live3-fs-kpis strong{font-size:24px !important;}
+  #live3Fullscreen .bpt-live3-fs-time-kpi{min-height:0 !important;}
+  #live3Fullscreen #live3FsProjection{margin-top:6px !important;padding:5px 10px !important;}
+  #live3Fullscreen #live3FsEstimatedFinish{font-size:22px !important;}
+  #live3Fullscreen #live3FsFinishDelta{font-size:12px !important;}
+  #live3Fullscreen.bpt-live3-role-owner #live3FsMasterActions{
+    display:grid !important;
+    grid-template-columns:repeat(6,minmax(0,1fr)) !important;
+    grid-template-rows:56px 56px !important;
+    gap:8px !important;
+    height:120px !important;
+    min-height:120px !important;
+  }
+  #live3Fullscreen #live3FsStartPauseBtn{grid-column:1/4 !important;grid-row:1 !important;}
+  #live3Fullscreen #live3FsEliminateBtn{grid-column:4/7 !important;grid-row:1 !important;}
+  #live3Fullscreen #live3FsChatActionBtn{grid-column:1/3 !important;grid-row:2 !important;}
+  #live3Fullscreen #live3FsOddsActionBtn{grid-column:3/5 !important;grid-row:2 !important;}
+  #live3Fullscreen #live3FsExitActionBtn{grid-column:5/7 !important;grid-row:2 !important;}
+  #live3Fullscreen .bpt-live3-fs-actions button{height:56px !important;min-height:56px !important;font-size:13px !important;}
+  #live3Fullscreen #live3FsSpectatorActions{
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    grid-template-rows:56px !important;
+    height:56px !important;
+    align-self:end !important;
+  }
+}
+/* Libellé du rôle toujours métier, jamais l'ancien terme technique. */
+#live3Fullscreen .bpt-live3-fs-owner::first-letter{text-transform:uppercase;}
+</style>
+
+
+<style id="bpt-v463-responsive-consolidated">
+/* BPT 4.63 — layouts consolidés: PC 16/9, mobile paysage et portrait */
+#live3 .bpt-live3-game-card{position:relative;overflow:visible!important;}
+#live3 .bpt-live3-game-head{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:14px!important;align-items:start!important;}
+#live3 .bpt-live3-game-head-actions{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important;min-width:min(520px,48vw)!important;}
+#live3 .bpt-live3-game-head-actions .btn{min-width:0!important;width:100%!important;white-space:nowrap!important;padding:8px 9px!important;font-size:11px!important;}
+#live3 .bpt-live3-main{display:grid!important;grid-template-columns:minmax(170px,.82fr) minmax(250px,1.22fr) minmax(310px,1fr)!important;align-items:stretch!important;justify-items:stretch!important;gap:12px!important;padding:14px 0 10px!important;}
+#live3 .bpt-live3-blinds,#live3 .bpt-live3-timer,#live3 .bpt-live3-kpis{min-width:0!important;}
+#live3 .bpt-live3-blinds{display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;padding:14px 12px!important;border-radius:16px!important;background:linear-gradient(180deg,#153326,#0f241b)!important;border:1px solid #315842!important;color:#fff!important;}
+#live3 .bpt-live3-blinds>strong{font-size:clamp(34px,4vw,58px)!important;line-height:1!important;color:#f0c96f!important;}
+#live3 .bpt-live3-timer{display:grid!important;place-items:center!important;border-radius:16px!important;background:#0c2018!important;border:1px solid #2d4f3c!important;font-size:clamp(56px,7vw,92px)!important;font-weight:950!important;color:#f4d77f!important;line-height:1!important;padding:12px!important;}
+#live3 .bpt-live3-kpis{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;width:100%!important;margin:0!important;}
+#live3 .bpt-live3-kpis>div{display:flex!important;flex-direction:column!important;justify-content:center!important;min-height:70px!important;padding:9px!important;background:#13271e!important;border:1px solid #35503f!important;color:#fff!important;}
+#live3 .bpt-live3-kpis span{font-size:10px!important;color:#aabbb0!important;}
+#live3 .bpt-live3-kpis strong{font-size:18px!important;color:#fff!important;}
+#live3 .bpt-live3-time-kpi{background:linear-gradient(180deg,#173f41,#113133)!important;border-color:#2f7177!important;}
+#live3Projection{margin:4px 0 0!important;padding:4px 6px!important;width:100%!important;gap:4px!important;background:transparent!important;border:0!important;font-size:9px!important;}
+#live3Projection strong{font-size:13px!important;}
+#live3 .bpt-live3-controls{margin-top:8px!important;gap:8px!important;}
+#live3 .bpt-live3-control-row--extra{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important;width:100%!important;}
+#live3 .bpt-live3-control-row--extra .btn{width:100%!important;min-width:0!important;padding:8px 6px!important;font-size:11px!important;}
+#live3 .bpt-live3-control-row--essential{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;width:100%!important;}
+#live3 .bpt-live3-control-row--essential .btn{width:100%!important;min-height:43px!important;}
+.bpt-live3-settings-modal{display:none;position:fixed;inset:0;z-index:2100000;background:rgba(4,10,7,.76);padding:18px;align-items:center;justify-content:center;}
+.bpt-live3-settings-modal.open{display:flex;}
+.bpt-live3-settings-card{width:min(720px,96vw);max-height:92vh;overflow:auto;background:#10231a;border:1px solid #42634e;border-radius:20px;padding:18px;box-shadow:0 24px 90px rgba(0,0,0,.55);color:#fff;}
+.bpt-live3-settings-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
+.bpt-live3-settings-head h2{margin:0;color:#fff;}
+.bpt-live3-settings-section{padding:14px 0;border-top:1px solid #31483a;}
+.bpt-live3-settings-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px;}
+#live3SettingsPanel .bpt-live3-duration-editor{display:flex!important;margin:0 0 14px!important;background:#142c21!important;border-color:#3d5a48!important;color:#fff!important;}
+#live3SettingsPanel .bpt-live3-undo-box{display:flex!important;margin:14px 0 0!important;background:#14261e!important;border-color:#3b5344!important;color:#fff!important;}
+#live3SettingsPanel .bpt-live3-undo-copy span,#live3SettingsPanel .bpt-live3-duration-editor-copy span{color:#aebbb2!important;}
+
+/* Fullscreen desktop: proposition 1, grille 3 zones */
+@media (min-width:901px){
+ #live3Fullscreen .bpt-live3-fs-shell{grid-template-areas:"head head head" "blinds timer kpis" "actions actions actions"!important;grid-template-columns:minmax(220px,.86fr) minmax(360px,1.35fr) minmax(260px,.92fr)!important;grid-template-rows:56px minmax(0,1fr) 112px!important;gap:12px!important;}
+ #live3Fullscreen .bpt-live3-fs-head{grid-area:head!important;grid-template-columns:1fr auto 1fr!important;}
+ #live3Fullscreen .bpt-live3-fs-owner{display:block!important;justify-self:center!important;font-weight:800!important;color:#d9e5dd!important;}
+ #live3Fullscreen .bpt-live3-fs-rem{justify-self:end!important;}
+ #live3Fullscreen .bpt-live3-fs-blinds{grid-area:blinds!important;align-self:stretch!important;justify-content:center!important;border-radius:18px!important;background:#10251b!important;border:1px solid #31513e!important;}
+ #live3Fullscreen .bpt-live3-fs-blinds strong{font-size:clamp(52px,6vw,96px)!important;}
+ #live3Fullscreen .bpt-live3-fs-timer{grid-area:timer!important;display:grid!important;place-items:center!important;border-radius:18px!important;background:#091912!important;border:1px solid #284737!important;}
+ #live3Fullscreen .bpt-live3-fs-timer>div{font-size:clamp(94px,13vw,190px)!important;line-height:.88!important;}
+ #live3Fullscreen .bpt-live3-fs-kpis{grid-area:kpis!important;display:grid!important;grid-template-columns:1fr!important;grid-template-rows:repeat(3,1fr)!important;gap:8px!important;align-self:stretch!important;}
+ #live3Fullscreen .bpt-live3-fs-kpis>div{display:flex!important;flex-direction:column!important;justify-content:center!important;min-height:0!important;border-radius:14px!important;background:#12241b!important;border:1px solid #334e3d!important;}
+ #live3Fullscreen .bpt-live3-fs-actions{grid-area:actions!important;display:grid!important;grid-template-columns:1.15fr 1.15fr 1fr 1.15fr 1.2fr!important;grid-template-rows:1fr!important;gap:8px!important;align-self:stretch!important;}
+ #live3Fullscreen .bpt-live3-fs-actions button{min-height:48px!important;font-size:12px!important;}
+ #live3Fullscreen .bpt-live3-fs-players{display:none!important;}
+}
+
+/* Mobile réduit paysage: même logique compacte que proposition 2 */
+@media (max-width:900px) and (orientation:landscape){
+ #live3 .bpt-live3-game-card{padding:8px!important;}
+ #live3 .bpt-live3-game-head{grid-template-columns:1fr auto!important;gap:6px!important;}
+ #live3 .bpt-live3-game-location{font-size:13px!important;}
+ #live3 .bpt-live3-game-head-actions{grid-template-columns:repeat(4,minmax(0,1fr))!important;min-width:min(500px,64vw)!important;gap:4px!important;}
+ #live3 .bpt-live3-game-head-actions .btn{font-size:9px!important;padding:5px 4px!important;min-height:30px!important;}
+ #live3 .bpt-live3-main{grid-template-columns:minmax(130px,.8fr) minmax(220px,1.25fr) minmax(250px,1fr)!important;gap:6px!important;padding:6px 0!important;}
+ #live3 .bpt-live3-blinds{padding:7px!important;border-radius:12px!important;}
+ #live3 .bpt-live3-blinds>strong{font-size:32px!important;}
+ #live3 .bpt-live3-timer{font-size:54px!important;padding:5px!important;border-radius:12px!important;}
+ #live3 .bpt-live3-kpis{gap:4px!important;}
+ #live3 .bpt-live3-kpis>div{min-height:46px!important;padding:4px!important;border-radius:10px!important;}
+ #live3 .bpt-live3-kpis span{font-size:7px!important;}
+ #live3 .bpt-live3-kpis strong{font-size:13px!important;}
+ #live3Projection{margin-top:1px!important;padding:1px!important;font-size:7px!important;}
+ #live3Projection strong{font-size:9px!important;}
+ #live3 .bpt-live3-controls{margin-top:4px!important;gap:4px!important;}
+ #live3 .bpt-live3-control-row--extra{gap:4px!important;}
+ #live3 .bpt-live3-control-row--extra .btn{font-size:8px!important;padding:4px 3px!important;min-height:30px!important;}
+ #live3 .bpt-live3-control-row--essential{gap:4px!important;}
+ #live3 .bpt-live3-control-row--essential .btn{min-height:34px!important;font-size:9px!important;padding:5px!important;}
+ #live3Fullscreen .bpt-live3-fs-shell{grid-template-areas:"head head head" "blinds timer kpis" "actions actions actions"!important;grid-template-columns:minmax(130px,.8fr) minmax(230px,1.35fr) minmax(210px,1fr)!important;grid-template-rows:34px minmax(0,1fr) 48px!important;gap:5px!important;}
+ #live3Fullscreen .bpt-live3-fs-head{grid-template-columns:1fr auto 1fr!important;}
+ #live3Fullscreen .bpt-live3-fs-owner{display:block!important;justify-self:center!important;font-size:10px!important;}
+ #live3Fullscreen .bpt-live3-fs-blinds{grid-area:blinds!important;align-self:stretch!important;justify-content:center!important;}
+ #live3Fullscreen .bpt-live3-fs-blinds strong{font-size:34px!important;}
+ #live3Fullscreen .bpt-live3-fs-timer{grid-area:timer!important;display:grid!important;place-items:center!important;}
+ #live3Fullscreen .bpt-live3-fs-timer>div{font-size:clamp(56px,12vw,92px)!important;}
+ #live3Fullscreen .bpt-live3-fs-kpis{grid-area:kpis!important;display:grid!important;grid-template-columns:1fr 1fr!important;grid-template-rows:1fr 1fr!important;gap:4px!important;}
+ #live3Fullscreen .bpt-live3-fs-kpis>div{padding:3px!important;min-height:0!important;}
+ #live3Fullscreen .bpt-live3-fs-kpis>div:nth-child(2){grid-row:1 / span 2!important;grid-column:2!important;}
+ #live3Fullscreen .bpt-live3-fs-actions{grid-area:actions!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;grid-template-rows:1fr!important;gap:4px!important;}
+ #live3Fullscreen .bpt-live3-fs-actions button{height:auto!important;min-height:38px!important;font-size:8px!important;padding:3px!important;}
+ #live3Fullscreen .bpt-live3-fs-players{display:none!important;}
+}
+
+/* Mobile réduit + fullscreen portrait */
+@media (max-width:700px) and (orientation:portrait){
+ #live3 .bpt-live3-game-card{padding:10px!important;}
+ #live3 .bpt-live3-game-head{grid-template-columns:1fr!important;gap:7px!important;}
+ #live3 .bpt-live3-game-head-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important;min-width:0!important;width:100%!important;gap:5px!important;}
+ #live3 .bpt-live3-main{grid-template-columns:1fr!important;gap:7px!important;padding:7px 0!important;}
+ #live3 .bpt-live3-blinds{padding:9px!important;}
+ #live3 .bpt-live3-blinds>strong{font-size:42px!important;}
+ #live3 .bpt-live3-timer{font-size:64px!important;min-height:92px!important;padding:6px!important;}
+ #live3 .bpt-live3-kpis{grid-template-columns:1fr 1fr!important;gap:6px!important;}
+ #live3 .bpt-live3-kpis>div{min-height:62px!important;padding:6px!important;}
+ #live3 .bpt-live3-control-row--extra{grid-template-columns:1fr 1fr!important;}
+ #live3 .bpt-live3-control-row--extra .btn{min-height:38px!important;font-size:10px!important;}
+ #live3 .bpt-live3-control-row--essential .btn{min-height:44px!important;}
+ .bpt-live3-settings-modal{padding:8px!important;align-items:flex-end!important;}
+ .bpt-live3-settings-card{width:100%!important;max-height:88vh!important;border-radius:18px 18px 0 0!important;}
+ #live3Fullscreen .bpt-live3-fs-shell{grid-template-areas:"head" "blinds" "timer" "kpis" "actions"!important;grid-template-columns:1fr!important;grid-template-rows:40px 82px minmax(118px,1fr) 112px 108px!important;gap:5px!important;}
+ #live3Fullscreen .bpt-live3-fs-head{grid-template-columns:1fr auto 1fr!important;}
+ #live3Fullscreen .bpt-live3-fs-owner{display:block!important;justify-self:center!important;font-size:9px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;max-width:150px!important;}
+ #live3Fullscreen .bpt-live3-fs-blinds{grid-area:blinds!important;padding:5px!important;}
+ #live3Fullscreen .bpt-live3-fs-blinds strong{font-size:46px!important;}
+ #live3Fullscreen .bpt-live3-fs-timer{grid-area:timer!important;display:grid!important;place-items:center!important;}
+ #live3Fullscreen .bpt-live3-fs-timer>div{font-size:clamp(76px,24vw,108px)!important;}
+ #live3Fullscreen .bpt-live3-fs-kpis{grid-area:kpis!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(2,1fr)!important;gap:5px!important;}
+ #live3Fullscreen .bpt-live3-fs-kpis>div{padding:4px!important;min-height:0!important;}
+ #live3Fullscreen .bpt-live3-fs-kpis>div:nth-child(2){grid-column:1 / -1!important;grid-row:1!important;}
+ #live3Fullscreen .bpt-live3-fs-kpis>div:nth-child(1){grid-column:1!important;grid-row:2!important;}
+ #live3Fullscreen .bpt-live3-fs-kpis>div:nth-child(3){grid-column:2!important;grid-row:2!important;}
+ #live3Fullscreen .bpt-live3-fs-actions{grid-area:actions!important;grid-template-columns:1fr 1fr!important;grid-template-rows:repeat(3,1fr)!important;gap:5px!important;}
+ #live3Fullscreen .bpt-live3-fs-actions button{min-height:30px!important;height:auto!important;font-size:9px!important;padding:4px!important;}
+ #live3Fullscreen #live3FsExitActionBtn{grid-column:1 / -1!important;}
+ #live3Fullscreen .bpt-live3-fs-players{display:none!important;}
+}
+
+/* 4.63.1 — neutralisation des anciens spans/hauteurs fullscreen */
+#live3Fullscreen .bpt-live3-fs-kpis{height:auto!important;min-height:0!important;}
+#live3Fullscreen .bpt-live3-fs-actions{height:auto!important;min-height:0!important;}
+#live3Fullscreen #live3FsStartPauseBtn,
+#live3Fullscreen #live3FsEliminateBtn,
+#live3Fullscreen #live3FsChatActionBtn,
+#live3Fullscreen #live3FsOddsActionBtn,
+#live3Fullscreen #live3FsExitActionBtn{grid-column:auto!important;grid-row:auto!important;}
+@media (min-width:901px){
+ #live3Fullscreen .bpt-live3-fs-kpis{height:100%!important;}
+ #live3Fullscreen .bpt-live3-fs-actions{height:100%!important;}
+ #live3Fullscreen .bpt-live3-fs-kpis>div{height:auto!important;}
+}
+@media (max-width:900px) and (orientation:landscape){
+ #live3Fullscreen .bpt-live3-fs-kpis{height:100%!important;align-self:stretch!important;}
+ #live3Fullscreen .bpt-live3-fs-actions{height:100%!important;align-self:stretch!important;}
+ #live3Fullscreen #live3FsStartPauseBtn,
+ #live3Fullscreen #live3FsEliminateBtn,
+ #live3Fullscreen #live3FsChatActionBtn,
+ #live3Fullscreen #live3FsOddsActionBtn,
+ #live3Fullscreen #live3FsExitActionBtn{grid-column:auto!important;grid-row:auto!important;}
+}
+@media (max-width:700px) and (orientation:portrait){
+ #live3Fullscreen .bpt-live3-fs-kpis{height:100%!important;}
+ #live3Fullscreen .bpt-live3-fs-actions{height:100%!important;}
+ #live3Fullscreen #live3FsStartPauseBtn,
+ #live3Fullscreen #live3FsEliminateBtn,
+ #live3Fullscreen #live3FsChatActionBtn,
+ #live3Fullscreen #live3FsOddsActionBtn{grid-column:auto!important;grid-row:auto!important;}
+ #live3Fullscreen #live3FsExitActionBtn{grid-column:1 / -1!important;grid-row:auto!important;}
+}
+
+</style>
+
+
+<style id="bpt-v4632-fullscreen-polish">
+/* PC fullscreen: 2 rangées d'actions, projection plus visible */
+@media (min-width:901px){
+  #live3Fullscreen .bpt-live3-fs-shell{grid-template-rows:56px minmax(0,1fr) 118px!important;}
+  #live3Fullscreen .bpt-live3-fs-actions{grid-template-columns:repeat(6,minmax(0,1fr))!important;grid-template-rows:1fr 1fr!important;gap:8px!important;}
+  #live3Fullscreen #live3FsStartPauseBtn{grid-column:1/4!important;grid-row:1!important;}
+  #live3Fullscreen #live3FsEliminateBtn{grid-column:4/7!important;grid-row:1!important;}
+  #live3Fullscreen #live3FsChatActionBtn{grid-column:1/3!important;grid-row:2!important;}
+  #live3Fullscreen #live3FsOddsActionBtn{grid-column:3/5!important;grid-row:2!important;}
+  #live3Fullscreen #live3FsExitActionBtn{grid-column:5/7!important;grid-row:2!important;}
+  #live3Fullscreen .bpt-live3-fs-actions button{font-size:12px!important;}
+  #live3Fullscreen .bpt-live3-fs-time-kpi{background:linear-gradient(180deg,#16434a,#0f3035)!important;border-color:#307782!important;}
+  #live3Fullscreen #live3FsProjection{margin-top:7px!important;padding:8px 10px!important;background:#0d5962!important;border-radius:10px!important;}
+  #live3Fullscreen #live3FsProjection span{font-size:11px!important;}
+  #live3Fullscreen #live3FsProjection #live3FsEstimatedFinish{font-size:22px!important;}
+  #live3Fullscreen #live3FsProjection #live3FsFinishDelta{font-size:12px!important;}
+}
+@media (max-width:900px) and (orientation:landscape){
+  #live3Fullscreen .bpt-live3-fs-shell{grid-template-rows:34px minmax(0,1fr) 76px!important;}
+  #live3Fullscreen .bpt-live3-fs-actions{grid-template-columns:repeat(6,minmax(0,1fr))!important;grid-template-rows:1fr 1fr!important;gap:4px!important;}
+  #live3Fullscreen #live3FsStartPauseBtn{grid-column:1/4!important;grid-row:1!important;}
+  #live3Fullscreen #live3FsEliminateBtn{grid-column:4/7!important;grid-row:1!important;}
+  #live3Fullscreen #live3FsChatActionBtn{grid-column:1/3!important;grid-row:2!important;}
+  #live3Fullscreen #live3FsOddsActionBtn{grid-column:3/5!important;grid-row:2!important;}
+  #live3Fullscreen #live3FsExitActionBtn{grid-column:5/7!important;grid-row:2!important;}
+  #live3Fullscreen .bpt-live3-fs-actions button{min-height:32px!important;font-size:8px!important;}
+  #live3Fullscreen #live3FsProjection{padding:3px 4px!important;margin-top:2px!important;background:#0d5962!important;border-radius:7px!important;}
+  #live3Fullscreen #live3FsProjection #live3FsEstimatedFinish{font-size:13px!important;}
+}
+</style>
+
 </head>
 <body>
 
@@ -15593,7 +15871,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.60";
+const BPT_APP_VERSION="4.63";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -15749,7 +16027,7 @@ function simplifyRecordTextForMobile(text){
     </div>
   </div>
 
-  <div class="app-version" id="headerAppVersion">BPT v4.60</div>
+  <div class="app-version" id="headerAppVersion">BPT v4.63</div>
 
   <div id="bptOnlinePresence" class="bpt-online-presence" tabindex="0" aria-label="Personnes connectées">
     <span class="bpt-online-dot">●</span>
@@ -15872,8 +16150,8 @@ function simplifyRecordTextForMobile(text){
         <div class="bpt-live3-game-head-actions">
           <button id="live3ChatBtn" class="btn ghost bpt-live3-chat-button" type="button">💬 Chat <span id="live3ChatUnread" class="bpt-live3-chat-unread" hidden>0</span></button>
           <button id="live3OddsBtn" class="btn ghost bpt-live3-odds-btn" type="button">Calcul de côtes</button>
-          <button id="live3QuitViewBtn" class="btn ghost" type="button">Quitter le Live</button>
           <button id="live3FullscreenBtn" class="btn ghost" type="button">Plein écran</button>
+          <button id="live3SettingsBtn" class="btn ghost" type="button">⚙ Réglages</button>
         </div>
       </div>
 
@@ -15886,7 +16164,7 @@ function simplifyRecordTextForMobile(text){
         </div>
         <div id="live3Timer" class="bpt-live3-timer">00:00</div>
         <div class="bpt-live3-kpis">
-          <div><span>Joueurs</span><strong id="live3Remaining">0</strong></div>
+          <div id="live3PlayersSummaryBtn" class="bpt-live3-players-summary" role="button" tabindex="0" aria-expanded="false" aria-controls="live3PlayersPopover" title="Voir les joueurs et les niveaux d’élimination"><span>Joueurs</span><strong><span class="bpt-live3-players-icon">👥</span> <span id="live3Remaining">0</span></strong></div>
           <div><span>Tapis moyen</span><strong id="live3AvgStack">0</strong></div>
           <div class="bpt-live3-time-kpi"><span>Temps écoulé</span><strong id="live3Elapsed">0 min</strong><div id="live3Projection" class="bpt-live3-projection-inline" aria-live="polite"><span>Fin estimée <strong id="live3EstimatedFinish">—</strong></span><span><strong id="live3FinishDelta" class="bpt-pace-on-time">—</strong></span></div></div>
           <div><span>Prochain niveau</span><strong id="live3Next">—</strong></div>
@@ -15901,33 +16179,10 @@ function simplifyRecordTextForMobile(text){
           <button id="live3NextLevelBtn" class="btn ghost" type="button">Niveau suivant</button>
         </div>
 
-        <div id="live3BlindDurationEditor" class="bpt-live3-duration-editor bpt-live3-owner-only bpt-live3-duration-compact">
-          <div class="bpt-live3-duration-editor-copy">
-            <strong>Durée des blinds</strong>
-            <span>Niveau actuel et suivants</span>
-          </div>
-          <div class="bpt-live3-duration-editor-controls">
-            <input id="live3BlindDurationInput" type="number" min="5" max="60" step="1" value="18" inputmode="numeric" aria-label="Durée des blinds en minutes">
-            <span>min</span>
-            <button id="live3ApplyBlindDurationBtn" class="btn ghost" type="button">Appliquer</button>
-          </div>
-        </div>
-
         <div class="bpt-live3-control-row bpt-live3-control-row--essential" aria-label="Actions principales">
           <button id="live3StartPauseBtn" class="btn primary" type="button">Démarrer</button>
           <button id="live3EliminateBtn" class="btn danger" type="button">Sortir un joueur</button>
-          <button id="live3EndBtn" class="btn danger bpt-live3-end-control" type="button">Terminer le Live</button>
         </div>
-      </div>
-
-      <div id="live3UndoElimBox" class="bpt-live3-undo-box bpt-live3-owner-only">
-        <div class="bpt-live3-undo-copy">
-          <strong>Correction d’une élimination</strong>
-          <span id="live3UndoElimHint">Aucune élimination à annuler.</span>
-        </div>
-        <button id="live3UndoElimBtn" class="btn ghost" type="button" disabled>
-          ↶ Annuler la dernière élimination
-        </button>
       </div>
 
       <div id="live3SpectatorControls" class="bpt-live3-controls bpt-live3-spectator-only" style="display:none">
@@ -15954,17 +16209,64 @@ function simplifyRecordTextForMobile(text){
         </div>
       </div>
 
-      <div class="bpt-live3-section-title">Joueurs à la table</div>
-      <div id="live3Players" class="bpt-live3-players"></div>
+      <div class="bpt-live3-legacy-players-list" hidden>
+        <div class="bpt-live3-section-title">Joueurs à la table</div>
+        <div id="live3Players" class="bpt-live3-players"></div>
+      </div>
 </div>
   </div>
 </section>
+
+<div id="live3SettingsPanel" class="bpt-live3-settings-modal" aria-hidden="true">
+  <div class="bpt-live3-settings-card" role="dialog" aria-modal="true" aria-labelledby="live3SettingsTitle">
+    <div class="bpt-live3-settings-head"><div><div class="home-kicker">BPT · Live</div><h2 id="live3SettingsTitle">Réglages</h2></div><button id="live3SettingsCloseBtn" class="btn ghost" type="button">×</button></div>
+            <div id="live3BlindDurationEditor" class="bpt-live3-duration-editor bpt-live3-owner-only bpt-live3-duration-compact">
+          <div class="bpt-live3-duration-editor-copy">
+            <strong>Durée des blinds</strong>
+            <span>Niveau actuel et suivants</span>
+          </div>
+          <div class="bpt-live3-duration-editor-controls">
+            <input id="live3BlindDurationInput" type="number" min="2" max="60" step="1" value="18" inputmode="numeric" aria-label="Durée des blinds en minutes">
+            <span>min</span>
+            <button id="live3ApplyBlindDurationBtn" class="btn ghost" type="button">Appliquer</button>
+          </div>
+        </div>
+
+
+    <div class="bpt-live3-settings-section">
+      <strong>Session</strong>
+      <div class="bpt-live3-settings-actions">
+        <button id="live3QuitViewBtn" class="btn ghost" type="button">Quitter le Live</button>
+        <button id="live3EndBtn" class="btn danger bpt-live3-end-control" type="button">Terminer le Live</button>
+      </div>
+    </div>
+          <div id="live3UndoElimBox" class="bpt-live3-undo-box bpt-live3-owner-only">
+        <div class="bpt-live3-undo-copy">
+          <strong>Correction d’une élimination</strong>
+          <span id="live3UndoElimHint">Aucune élimination à annuler.</span>
+        </div>
+        <button id="live3UndoElimBtn" class="btn ghost" type="button" disabled>
+          ↶ Annuler la dernière élimination
+        </button>
+      </div>
+
+
+  </div>
+</div>
+
+<div id="live3PlayersPopover" class="bpt-live3-players-popover" hidden role="dialog" aria-modal="false" aria-label="Joueurs de la partie">
+  <div class="bpt-live3-players-popover-head">
+    <div><strong>Joueurs</strong><span id="live3PlayersPopoverCount">—</span></div>
+    <button id="live3PlayersPopoverClose" type="button" aria-label="Fermer">×</button>
+  </div>
+  <div id="live3PlayersPopoverList" class="bpt-live3-players-popover-list"></div>
+</div>
 
 <div id="live3Fullscreen" class="bpt-live3-fullscreen" aria-hidden="true">
   <div class="bpt-live3-fs-shell">
     <header class="bpt-live3-fs-head">
       <div class="bpt-live3-fs-brand">BPT</div>
-      
+      <div id="live3FsOwner" class="bpt-live3-fs-owner">Organisateur · —</div>
       <div class="bpt-live3-fs-rem"><strong id="live3FsRemaining">0</strong><span>restants</span></div>
     </header>
     <section class="bpt-live3-fs-blinds">
@@ -16991,7 +17293,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 4.60</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 4.63</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:680px">
       <div style="font-weight:900;margin-bottom:9px">État BPT</div>
       <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -24430,7 +24732,7 @@ function liveNice(v){
 function liveBuildStructure(n,stack,targetMin,useAnte,minSB){
   n=Math.max(2,Number(n)||2);
   stack=Math.max(100,Number(stack)||20000);
-  targetMin=Math.max(60,Number(targetMin)||240);
+  targetMin=Math.max(30,Number(targetMin)||240);
 
   // Structure BPT de référence : les blindes ne changent jamais.
   // Seule la durée de chaque niveau est adaptée à la durée totale souhaitée.
@@ -24438,11 +24740,12 @@ function liveBuildStructure(n,stack,targetMin,useAnte,minSB){
     [25,50],[50,100],[75,150],[100,200],
     [150,300],[200,400],[300,600],[400,800],
     [500,1000],[600,1200],[800,1600],[1000,2000],
-    [1200,2400],[1500,3000],[2000,4000],[3000,6000],
-    [4000,8000],[5000,10000],[7000,14000],[9000,18000]
+    [1200,2400],[1500,3000],[2000,4000],[2500,5000],
+    [3000,6000],[4000,8000],[5000,10000],[6000,12000],
+    [8000,16000],[10000,20000],[12000,24000],[15000,30000],[20000,40000]
   ];
 
-  const levelMin=Math.max(5,Math.round(targetMin/fixedBlinds.length));
+  const levelMin=Math.max(2,Math.round(targetMin/fixedBlinds.length));
 
   const levels=fixedBlinds.map(([sb,bb],i)=>({
     level:i+1,
@@ -27456,7 +27759,7 @@ document.addEventListener("visibilitychange",()=>{
     else if(delta<=-0.15){type="slow";change=2;}
     else return null;
 
-    const proposedMin=Math.max(8,Math.min(40,currentMin+change));
+    const proposedMin=Math.max(2,Math.min(40,currentMin+change));
     if(proposedMin===currentMin)return null;
     const targetRemaining=Math.max(0,targetSec-elapsed);
     return {type,delta,currentMin,proposedMin,totalPlayers,remaining,elapsed,targetRemaining,timeProgress,eliminationProgress};
@@ -27673,8 +27976,8 @@ document.addEventListener("visibilitychange",()=>{
     // La durée cible sert à calibrer le moment où le tournoi devrait arriver
     // dans sa zone de fin probable, mais la structure NE S'ARRÊTE PLUS à ce niveau.
     // Les niveaux suivants restent disponibles si la partie dépasse la cible.
-    const totalSeconds=Math.max(3600,Number(targetHours||4)*3600);
-    const levelSeconds=Math.max(8*60,Math.round((totalSeconds/expectedLevelCount)/60)*60);
+    const totalSeconds=Math.max(1800,Number(targetHours||4)*3600);
+    const levelSeconds=Math.max(2*60,Math.round((totalSeconds/expectedLevelCount)/60)*60);
 
     const levels=configuredLevels.map((blind,i)=>({
       level:i+1,
@@ -29632,6 +29935,43 @@ async function requestTakeover(){
     }).join("");
   }
 
+  function live3RenderPlayersPopover(){
+    const list=$3("live3PlayersPopoverList");
+    const count=$3("live3PlayersPopoverCount");
+    if(!list)return;
+    const players=[...(current?.players||[])];
+    const alive=players.filter(p=>p.status!=="out");
+    const out=players.filter(p=>p.status==="out").sort((a,b)=>(Number(b.place)||0)-(Number(a.place)||0));
+    const ordered=[...alive,...out];
+    if(count)count.textContent=`${alive.length} en jeu · ${out.length} éliminé${out.length>1?"s":""}`;
+    list.innerHTML=ordered.map(p=>{
+      const isOut=p.status==="out";
+      const level=Number(p.outLevel)||0;
+      const status=isOut?(level?`Éliminé · niveau ${level}`:"Éliminé"):`En jeu`;
+      const detail=isOut && p.killer?`par ${escapeHtml(p.killer)}${p.place?` · ${p.place}e`:""}`:(p.place?`${p.place}e`:"");
+      return `<div class="bpt-live3-players-popover-row ${isOut?"is-out":"is-in"}"><div class="bpt-live3-players-popover-avatar">${initials(p.name)}</div><div class="bpt-live3-players-popover-name"><strong>${escapeHtml(p.name)}</strong><span>${detail||" "}</span></div><div class="bpt-live3-players-popover-status">${status}</div></div>`;
+    }).join("") || `<div class="muted" style="padding:10px">Aucun joueur.</div>`;
+  }
+
+  function live3PositionPlayersPopover(){
+    const pop=$3("live3PlayersPopover"),anchor=$3("live3PlayersSummaryBtn");
+    if(!pop||!anchor||pop.hidden)return;
+    const r=anchor.getBoundingClientRect();
+    const width=Math.min(420,window.innerWidth-24);
+    let left=Math.min(Math.max(12,r.left+r.width/2-width/2),window.innerWidth-width-12);
+    pop.style.width=`${width}px`;
+    pop.style.left=`${left}px`;
+    pop.style.top=`${r.bottom+8}px`;
+    requestAnimationFrame(()=>{const pr=pop.getBoundingClientRect();if(pr.bottom>window.innerHeight-10)pop.style.top=`${Math.max(10,r.top-pr.height-8)}px`;});
+  }
+
+  function live3OpenPlayersPopover(){
+    const pop=$3("live3PlayersPopover"),btn=$3("live3PlayersSummaryBtn");
+    if(!pop)return; live3RenderPlayersPopover(); pop.hidden=false; btn?.setAttribute("aria-expanded","true"); live3PositionPlayersPopover();
+  }
+  function live3ClosePlayersPopover(){const pop=$3("live3PlayersPopover"),btn=$3("live3PlayersSummaryBtn");if(pop)pop.hidden=true;btn?.setAttribute("aria-expanded","false");}
+  function live3TogglePlayersPopover(){const pop=$3("live3PlayersPopover");if(!pop)return;if(pop.hidden)live3OpenPlayersPopover();else live3ClosePlayersPopover();}
+
   function render(){
     live3RefreshUnreadCount();
     const active=isActive();
@@ -29705,6 +30045,7 @@ async function requestTakeover(){
       $3("live3BlindDurationInput").value=String(blindDurationMin);
     }
     $3("live3Timer").textContent=time(rem);$3("live3Remaining").textContent=String(count);
+    if($3("live3PlayersPopover") && !$3("live3PlayersPopover").hidden)live3RenderPlayersPopover();
     live3RenderProjection();
     $3("live3AvgStack").textContent=fmt(avg);$3("live3Elapsed").textContent=elapsedHoursMinutes(elapsedSeconds());$3("live3Next").textContent=next;
     $3("live3StartPauseBtn").textContent=current.running?"Pause":(current.startedAt?"Reprendre":"Démarrer");
@@ -29772,6 +30113,7 @@ async function requestTakeover(){
     renderPlayers($3("live3Players"),false);
     updateUndoEliminationButton();
 
+    if($3("live3FsOwner"))$3("live3FsOwner").textContent=`Organisateur · ${current?.ownerLabel||live3OwnerDisplayName()}`;
     $3("live3FsBlinds").textContent=blinds;$3("live3FsAnte").textContent=ante;
     if($3("live3FsBlindDurationLabel"))$3("live3FsBlindDurationLabel").textContent=`Durée : ${blindDurationMin} min`;
     $3("live3FsTimer").textContent=time(rem);$3("live3FsRemaining").textContent=String(count);
@@ -30109,6 +30451,12 @@ async function requestTakeover(){
       e.stopPropagation();
       hideChatToast();
     });
+    $3("live3PlayersSummaryBtn")?.addEventListener("click",e=>{e.stopPropagation();live3TogglePlayersPopover();});
+    $3("live3PlayersSummaryBtn")?.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();live3TogglePlayersPopover();}});
+    $3("live3PlayersPopoverClose")?.addEventListener("click",live3ClosePlayersPopover);
+    document.addEventListener("click",e=>{const pop=$3("live3PlayersPopover"),btn=$3("live3PlayersSummaryBtn");if(!pop||pop.hidden)return;if(pop.contains(e.target)||btn?.contains(e.target))return;live3ClosePlayersPopover();});
+    window.addEventListener("resize",live3PositionPlayersPopover);
+    window.addEventListener("scroll",live3PositionPlayersPopover,true);
     $3("live3ChatBtn")?.addEventListener("click",openChat);
     $3("live3ChatCloseBtn")?.addEventListener("click",closeChat);
     $3("live3ChatSendBtn")?.addEventListener("click",sendChat);
@@ -30935,6 +31283,22 @@ document.addEventListener("DOMContentLoaded",()=>{
     document.getElementById("bptOddsResults").hidden=false;
   }
   document.getElementById("bptOddsCalc")?.addEventListener("click",run);update();
+})();
+</script>
+
+
+<script id="bpt-v463-settings-script">
+(function(){
+  const modal=document.getElementById('live3SettingsPanel');
+  const openBtn=document.getElementById('live3SettingsBtn');
+  const closeBtn=document.getElementById('live3SettingsCloseBtn');
+  if(!modal||!openBtn)return;
+  const open=()=>{modal.classList.add('open');modal.setAttribute('aria-hidden','false');};
+  const close=()=>{modal.classList.remove('open');modal.setAttribute('aria-hidden','true');};
+  openBtn.addEventListener('click',open);
+  closeBtn?.addEventListener('click',close);
+  modal.addEventListener('click',e=>{if(e.target===modal)close();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))close();});
 })();
 </script>
 
