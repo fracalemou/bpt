@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V4.47 LIVE MOBILE 2 COLONNES
+BPT LIVE V4.48 CALCUL COTES MOBILE
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -15346,6 +15346,56 @@ body:not(.bpt-mobile-device) #bptMobileMoreTopBtn{display:none !important;}
 }
 </style>
 
+
+<style id="bpt-v448-odds-calculator">
+/* V4.48 — calculateur de côtes intégré au Live mobile */
+#live3FsOddsActionBtn,#live3FsSpectatorOddsBtn{
+  background:#1f4b3a !important;color:#fff !important;border:1px solid #39705a !important;
+}
+/* Les trois actions d'usage courant restent strictement alignées. */
+#live3Fullscreen.bpt-live3-role-owner #live3FsMasterActions{
+  grid-template-columns:repeat(6,minmax(0,1fr)) !important;
+  grid-template-rows:1fr 1fr !important;
+}
+#live3FsStartPauseBtn{grid-column:1/4 !important;}
+#live3FsEliminateBtn{grid-column:4/7 !important;}
+#live3FsChatActionBtn{grid-column:1/3 !important;}
+#live3FsOddsActionBtn{grid-column:3/5 !important;}
+#live3FsExitActionBtn{grid-column:5/7 !important;}
+#live3Fullscreen.bpt-live3-role-spectator #live3FsSpectatorActions{
+  grid-template-columns:repeat(6,minmax(0,1fr)) !important;
+  grid-template-rows:1fr 1fr !important;
+}
+#live3FsTakeoverActionBtn{grid-column:1/7 !important;}
+#live3FsSpectatorChatBtn{grid-column:1/3 !important;}
+#live3FsSpectatorOddsBtn{grid-column:3/5 !important;}
+#live3FsSpectatorExitBtn{grid-column:5/7 !important;}
+
+.bpt-odds-modal{position:fixed;inset:0;z-index:1300000;display:none;align-items:center;justify-content:center;padding:12px;background:rgba(3,7,10,.88);backdrop-filter:blur(6px)}
+.bpt-odds-modal.open{display:flex}
+.bpt-odds-card{width:min(760px,96vw);max-height:min(92vh,860px);overflow:auto;border:1px solid #3a5548;border-radius:18px;background:#101a15;color:#f6f7f6;box-shadow:0 24px 70px rgba(0,0,0,.55);padding:16px}
+.bpt-odds-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.bpt-odds-head h2{margin:0;font-size:20px;color:#e8c39e}.bpt-odds-close{width:38px;height:38px;border-radius:10px;border:1px solid #455b50;background:#18241e;color:#fff;font-size:22px;font-weight:900}
+.bpt-odds-help{font-size:11px;line-height:1.35;color:#aebcb4;margin-bottom:12px}
+.bpt-odds-zone{border:1px solid #2e4338;border-radius:14px;background:#142019;padding:10px;margin-bottom:10px}.bpt-odds-zone-title{font-size:11px;font-weight:900;color:#d6dfda;text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px}
+.bpt-odds-slots{display:flex;gap:6px;flex-wrap:wrap}.bpt-card-slot{width:54px;height:68px;border:1px dashed #557164;border-radius:9px;background:#0d1511;color:#aebcb4;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;text-align:center;padding:3px}.bpt-card-slot.filled{background:#f7f4ec;color:#131715;border-style:solid;font-size:20px}.bpt-card-slot.active{outline:3px solid #c99a43;outline-offset:1px}.bpt-card-slot.red{color:#c53d43}
+.bpt-odds-deck{display:grid;grid-template-columns:repeat(13,minmax(28px,1fr));gap:4px;margin-top:9px}.bpt-deck-card{height:38px;border:1px solid #465d52;border-radius:7px;background:#f7f4ec;color:#161b18;font-weight:950;font-size:13px;padding:0}.bpt-deck-card.red{color:#c53d43}.bpt-deck-card:disabled{opacity:.18;filter:grayscale(1)}
+.bpt-odds-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.bpt-odds-actions button{min-height:44px;border-radius:10px;border:1px solid #40584a;font-weight:900}.bpt-odds-calc{background:#c99a43;color:#16120a}.bpt-odds-reset{background:#1d2a23;color:#fff}
+.bpt-odds-results{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.bpt-odds-result{border:1px solid #344a3d;border-radius:12px;background:#17231d;padding:10px;text-align:center}.bpt-odds-result span{display:block;font-size:10px;color:#aeb9b1}.bpt-odds-result strong{display:block;font-size:27px;color:#fff;margin-top:3px}.bpt-odds-result small{display:block;color:#b9c4be;margin-top:3px}.bpt-odds-note{grid-column:1/-1;font-size:10px;color:#91a299;text-align:center;padding-top:2px}
+@media(max-width:700px){
+  .bpt-odds-modal{padding:6px}.bpt-odds-card{width:100%;max-height:96vh;border-radius:14px;padding:10px}.bpt-odds-head{margin-bottom:7px}.bpt-odds-head h2{font-size:17px}.bpt-odds-help{font-size:10px;margin-bottom:8px}.bpt-odds-zone{padding:7px;margin-bottom:7px}.bpt-card-slot{width:45px;height:56px;font-size:9px}.bpt-card-slot.filled{font-size:17px}.bpt-odds-deck{gap:3px}.bpt-deck-card{height:34px;font-size:11px}.bpt-odds-actions{margin-top:8px}.bpt-odds-results{margin-top:8px}.bpt-odds-result strong{font-size:23px}
+  #live3Fullscreen .bpt-live3-fs-actions{min-height:102px !important;height:102px !important;gap:6px !important;}
+  #live3Fullscreen .bpt-live3-fs-actions button{min-height:46px !important;height:auto !important;}
+  #live3Fullscreen .bpt-live3-fs-shell{grid-template-rows:56px 118px minmax(0,1fr) 64px 102px minmax(52px,auto) !important;}
+}
+@media(max-width:900px) and (orientation:landscape){
+  #live3Fullscreen .bpt-live3-fs-shell{grid-template-rows:34px 58px minmax(58px,1fr) 48px 78px 28px !important;gap:3px !important;}
+  #live3Fullscreen .bpt-live3-fs-actions{height:78px !important;min-height:78px !important;gap:4px !important;}
+  #live3Fullscreen .bpt-live3-fs-actions button{min-height:36px !important;height:36px !important;font-size:8.5px !important;padding:3px 4px !important;}
+  .bpt-odds-card{width:min(92vw,760px);max-height:96vh;padding:9px}.bpt-odds-help{display:none}.bpt-odds-zone{padding:6px;margin-bottom:5px}.bpt-card-slot{width:44px;height:46px}.bpt-odds-deck{margin-top:5px}.bpt-deck-card{height:27px}.bpt-odds-results{margin-top:6px}.bpt-odds-result{padding:6px}.bpt-odds-result strong{font-size:20px}
+}
+</style>
+
 </head>
 <body>
 
@@ -15413,7 +15463,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.47";
+const BPT_APP_VERSION="4.48";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -15569,7 +15619,7 @@ function simplifyRecordTextForMobile(text){
     </div>
   </div>
 
-  <div class="app-version" id="headerAppVersion">BPT v4.47</div>
+  <div class="app-version" id="headerAppVersion">BPT v4.48</div>
 
   <div id="bptOnlinePresence" class="bpt-online-presence" tabindex="0" aria-label="Personnes connectées">
     <span class="bpt-online-dot">●</span>
@@ -15801,12 +15851,14 @@ function simplifyRecordTextForMobile(text){
       <button id="live3FsStartPauseBtn" type="button">Démarrer</button>
       <button id="live3FsEliminateBtn" type="button">Sortir un joueur</button>
       <button id="live3FsChatActionBtn" type="button">Chat <span id="live3FsChatUnread" class="bpt-live3-chat-unread" hidden>0</span></button>
-      <button id="live3FsExitActionBtn" type="button">Quitter le plein écran</button>
+      <button id="live3FsOddsActionBtn" class="bpt-live3-odds-btn" type="button">Calcul de côtes</button>
+      <button id="live3FsExitActionBtn" type="button">Quitter le Live</button>
     </section>
     <section id="live3FsSpectatorActions" class="bpt-live3-fs-actions bpt-live3-spectator-only" style="display:none">
       <button id="live3FsTakeoverActionBtn" type="button">Demander la gestion</button>
       <button id="live3FsSpectatorChatBtn" type="button">Chat <span id="live3FsSpectatorChatUnread" class="bpt-live3-chat-unread" hidden>0</span></button>
-      <button id="live3FsSpectatorExitBtn" type="button">Quitter le plein écran</button>
+      <button id="live3FsSpectatorOddsBtn" class="bpt-live3-odds-btn" type="button">Calcul de côtes</button>
+      <button id="live3FsSpectatorExitBtn" type="button">Quitter le Live</button>
     </section>
     <section class="bpt-live3-fs-players">
       <div class="bpt-live3-fs-players-title">Joueurs à la table</div>
@@ -30131,6 +30183,84 @@ document.addEventListener("DOMContentLoaded",()=>{
   window.addEventListener("resize",()=>{
     if(!mobileMode())closeMenu();
   });
+})();
+</script>
+
+
+<div id="bptOddsModal" class="bpt-odds-modal" aria-hidden="true">
+  <div class="bpt-odds-card" role="dialog" aria-modal="true" aria-labelledby="bptOddsTitle">
+    <div class="bpt-odds-head"><h2 id="bptOddsTitle">Calcul de côtes · Texas Hold'em</h2><button id="bptOddsClose" class="bpt-odds-close" type="button">×</button></div>
+    <div class="bpt-odds-help">Touchez un emplacement, puis une carte. Renseignez les deux mains et, si besoin, le flop / turn / river. Le calcul donne l'équité de chaque main.</div>
+    <div class="bpt-odds-zone"><div class="bpt-odds-zone-title">Joueur 1</div><div class="bpt-odds-slots"><button class="bpt-card-slot active" data-slot="p1a">Carte 1</button><button class="bpt-card-slot" data-slot="p1b">Carte 2</button></div></div>
+    <div class="bpt-odds-zone"><div class="bpt-odds-zone-title">Joueur 2</div><div class="bpt-odds-slots"><button class="bpt-card-slot" data-slot="p2a">Carte 1</button><button class="bpt-card-slot" data-slot="p2b">Carte 2</button></div></div>
+    <div class="bpt-odds-zone"><div class="bpt-odds-zone-title">Board</div><div class="bpt-odds-slots"><button class="bpt-card-slot" data-slot="b1">Flop 1</button><button class="bpt-card-slot" data-slot="b2">Flop 2</button><button class="bpt-card-slot" data-slot="b3">Flop 3</button><button class="bpt-card-slot" data-slot="b4">Turn</button><button class="bpt-card-slot" data-slot="b5">River</button></div><div id="bptOddsDeck" class="bpt-odds-deck"></div></div>
+    <div class="bpt-odds-actions"><button id="bptOddsReset" class="bpt-odds-reset" type="button">Réinitialiser</button><button id="bptOddsCalc" class="bpt-odds-calc" type="button">Calculer</button></div>
+    <div id="bptOddsResults" class="bpt-odds-results" hidden><div class="bpt-odds-result"><span>Joueur 1</span><strong id="bptOddsP1">—</strong><small id="bptOddsP1Detail"></small></div><div class="bpt-odds-result"><span>Joueur 2</span><strong id="bptOddsP2">—</strong><small id="bptOddsP2Detail"></small></div><div id="bptOddsNote" class="bpt-odds-note"></div></div>
+  </div>
+</div>
+
+
+<script id="bpt-v448-odds-script">
+(function(){
+  "use strict";
+  const modal=document.getElementById("bptOddsModal"); if(!modal)return;
+  const slots=[...modal.querySelectorAll(".bpt-card-slot")];
+  const deck=document.getElementById("bptOddsDeck");
+  const ranks=["A","K","Q","J","10","9","8","7","6","5","4","3","2"];
+  const suits=[{k:"s",s:"♠",red:false},{k:"h",s:"♥",red:true},{k:"d",s:"♦",red:true},{k:"c",s:"♣",red:false}];
+  const values={"2":2,"3":3,"4":4,"5":5,"6":6,"7":7,"8":8,"9":9,"10":10,"J":11,"Q":12,"K":13,"A":14};
+  const chosen={}; let active="p1a";
+  function cardLabel(c){if(!c)return ""; const su=suits.find(x=>x.k===c.s);return c.r+(su?.s||"");}
+  function update(){
+    slots.forEach(btn=>{const c=chosen[btn.dataset.slot];btn.classList.toggle("active",btn.dataset.slot===active);btn.classList.toggle("filled",!!c);btn.classList.toggle("red",!!c&&(c.s==="h"||c.s==="d"));btn.textContent=c?cardLabel(c):({p1a:"Carte 1",p1b:"Carte 2",p2a:"Carte 1",p2b:"Carte 2",b1:"Flop 1",b2:"Flop 2",b3:"Flop 3",b4:"Turn",b5:"River"}[btn.dataset.slot]||"Carte");});
+    const used=new Set(Object.values(chosen).filter(Boolean).map(c=>c.r+c.s));
+    deck.querySelectorAll("button[data-card]").forEach(b=>b.disabled=used.has(b.dataset.card));
+  }
+  function nextSlot(){const order=slots.map(x=>x.dataset.slot),i=order.indexOf(active);for(let n=1;n<=order.length;n++){const k=order[(i+n)%order.length];if(!chosen[k]){active=k;return;}}}
+  suits.forEach(su=>ranks.forEach(r=>{const b=document.createElement("button");b.type="button";b.className="bpt-deck-card"+(su.red?" red":"");b.dataset.card=r+su.k;b.textContent=r+su.s;b.addEventListener("click",()=>{chosen[active]={r,s:su.k,v:values[r]};nextSlot();update();});deck.appendChild(b);}));
+  slots.forEach(btn=>btn.addEventListener("click",()=>{active=btn.dataset.slot;if(chosen[active])delete chosen[active];update();}));
+  function open(){modal.classList.add("open");modal.setAttribute("aria-hidden","false");update();}
+  function close(){modal.classList.remove("open");modal.setAttribute("aria-hidden","true");}
+  ["live3FsOddsActionBtn","live3FsSpectatorOddsBtn"].forEach(id=>document.getElementById(id)?.addEventListener("click",open));
+  document.getElementById("bptOddsClose")?.addEventListener("click",close);modal.addEventListener("click",e=>{if(e.target===modal)close();});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&modal.classList.contains("open"))close();});
+  document.getElementById("bptOddsReset")?.addEventListener("click",()=>{Object.keys(chosen).forEach(k=>delete chosen[k]);active="p1a";document.getElementById("bptOddsResults").hidden=true;update();});
+  function cmp(a,b){for(let i=0;i<Math.max(a.length,b.length);i++){const d=(a[i]||0)-(b[i]||0);if(d)return d>0?1:-1;}return 0;}
+  function five(cs){
+    const vs=cs.map(c=>c.v).sort((a,b)=>b-a), counts={};vs.forEach(v=>counts[v]=(counts[v]||0)+1);
+    const unique=[...new Set(vs)];if(unique[0]===14)unique.push(1);
+    let straight=0;for(let i=0;i<=unique.length-5;i++)if(unique[i]-unique[i+4]===4){straight=unique[i];break;}
+    const flush=cs.every(c=>c.s===cs[0].s);if(flush&&straight)return [8,straight];
+    const groups=Object.entries(counts).map(([v,n])=>({v:+v,n})).sort((a,b)=>b.n-a.n||b.v-a.v);
+    if(groups[0].n===4)return [7,groups[0].v,groups[1].v];
+    if(groups[0].n===3&&groups[1].n===2)return [6,groups[0].v,groups[1].v];
+    if(flush)return [5,...vs];if(straight)return [4,straight];
+    if(groups[0].n===3)return [3,groups[0].v,...groups.filter(g=>g.n===1).map(g=>g.v).sort((a,b)=>b-a)];
+    const pairs=groups.filter(g=>g.n===2).sort((a,b)=>b.v-a.v);if(pairs.length>=2){const kick=groups.filter(g=>g.n===1).map(g=>g.v).sort((a,b)=>b-a)[0];return [2,pairs[0].v,pairs[1].v,kick];}
+    if(pairs.length===1)return [1,pairs[0].v,...groups.filter(g=>g.n===1).map(g=>g.v).sort((a,b)=>b-a)];
+    return [0,...vs];
+  }
+  function seven(cs){let best=null;for(let a=0;a<3;a++)for(let b=a+1;b<4;b++)for(let c=b+1;c<5;c++)for(let d=c+1;d<6;d++)for(let e=d+1;e<7;e++){const sc=five([cs[a],cs[b],cs[c],cs[d],cs[e]]);if(!best||cmp(sc,best)>0)best=sc;}return best;}
+  function fullDeck(){const out=[];suits.forEach(su=>ranks.forEach(r=>out.push({r,s:su.k,v:values[r]})));return out;}
+  function run(){
+    const p1=[chosen.p1a,chosen.p1b],p2=[chosen.p2a,chosen.p2b];if(p1.some(x=>!x)||p2.some(x=>!x)){alert("Renseignez les deux cartes des deux joueurs.");return;}
+    const board=[chosen.b1,chosen.b2,chosen.b3,chosen.b4,chosen.b5].filter(Boolean); if(board.length===1||board.length===2){alert("Pour le board, renseignez au minimum les 3 cartes du flop.");return;}
+    const used=new Set([...p1,...p2,...board].map(c=>c.r+c.s)); const remain=fullDeck().filter(c=>!used.has(c.r+c.s)); const missing=5-board.length;
+    let w1=0,w2=0,t=0,total=0; const maxSamples=missing===0?1:25000;
+    if(missing===0){const c=cmp(seven([...p1,...board]),seven([...p2,...board])); if(c>0)w1++;else if(c<0)w2++;else t++;total=1;}
+    else{
+      for(let n=0;n<maxSamples;n++){
+        const pool=remain.slice(); const drawn=[];for(let k=0;k<missing;k++){const j=Math.floor(Math.random()*pool.length);drawn.push(pool[j]);pool[j]=pool[pool.length-1];pool.pop();}
+        const b=[...board,...drawn],c=cmp(seven([...p1,...b]),seven([...p2,...b]));if(c>0)w1++;else if(c<0)w2++;else t++;total++;
+      }
+    }
+    const eq1=(w1+t/2)/total*100,eq2=(w2+t/2)/total*100, tie=t/total*100;
+    document.getElementById("bptOddsP1").textContent=eq1.toFixed(1)+" %";document.getElementById("bptOddsP2").textContent=eq2.toFixed(1)+" %";
+    document.getElementById("bptOddsP1Detail").textContent=`Gain ${(w1/total*100).toFixed(1)} %`;document.getElementById("bptOddsP2Detail").textContent=`Gain ${(w2/total*100).toFixed(1)} %`;
+    document.getElementById("bptOddsNote").textContent=(missing?`Simulation ${total.toLocaleString("fr-FR")} tirages · `:"Calcul exact · ")+`Égalité ${tie.toFixed(1)} %`;
+    document.getElementById("bptOddsResults").hidden=false;
+  }
+  document.getElementById("bptOddsCalc")?.addEventListener("click",run);update();
 })();
 </script>
 
