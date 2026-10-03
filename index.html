@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V4.48 CALCUL COTES MOBILE
+BPT LIVE V4.50 REGULATION DYNAMIQUE + HUMOUR
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -14675,11 +14675,23 @@ body:has(#live3Fullscreen.open){
 }
 
 /* Modals stay above fullscreen */
-#live3ChatModal,#live3ElimModal{position:fixed !important;inset:0 !important;z-index:2000000 !important;isolation:isolate !important;}
-#live3ChatModal.open,#live3ElimModal.open{display:flex !important;visibility:visible !important;opacity:1 !important;pointer-events:auto !important;}
-#live3ChatModal .bpt-live3-modal-card,#live3ElimModal .bpt-live3-modal-card{position:relative !important;z-index:2000001 !important;pointer-events:auto !important;}
+#live3ChatModal,#live3ElimModal,#live3PaceModal{position:fixed !important;inset:0 !important;z-index:2000000 !important;isolation:isolate !important;}
+#live3ChatModal.open,#live3ElimModal.open,#live3PaceModal.open{display:flex !important;visibility:visible !important;opacity:1 !important;pointer-events:auto !important;}
+#live3ChatModal .bpt-live3-modal-card,#live3ElimModal .bpt-live3-modal-card,#live3PaceModal .bpt-live3-modal-card{position:relative !important;z-index:2000001 !important;pointer-events:auto !important;}
 </style>
-
+<style id="bpt-v450-pace-advisor">
+#live3PaceModal{background:rgba(7,11,9,.82) !important;align-items:center !important;justify-content:center !important;padding:18px !important;}
+#live3PaceModal .bpt-live3-pace-card{width:min(560px,96vw) !important;background:#17231d !important;border:1px solid #44594b !important;border-radius:18px !important;padding:22px !important;box-shadow:0 22px 70px rgba(0,0,0,.5) !important;}
+#live3PaceModal .bpt-live3-pace-kicker{font-size:11px !important;text-transform:uppercase !important;letter-spacing:.12em !important;color:#cdbb7b !important;font-weight:900 !important;margin-bottom:5px !important;}
+#live3PaceModal h2{margin:0 0 10px !important;color:#fff !important;}
+#live3PaceModal .bpt-live3-pace-message{color:#e4e9e5 !important;line-height:1.45 !important;margin:0 0 14px !important;}
+#live3PaceModal .bpt-live3-pace-grid{display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:8px !important;margin:12px 0 !important;}
+#live3PaceModal .bpt-live3-pace-grid>div{padding:10px !important;border-radius:11px !important;background:#111a15 !important;border:1px solid #35463a !important;display:flex !important;flex-direction:column !important;gap:3px !important;}
+#live3PaceModal .bpt-live3-pace-grid span{font-size:10px !important;color:#aeb9b1 !important;}
+#live3PaceModal .bpt-live3-pace-grid strong{font-size:15px !important;color:#fff !important;}
+#live3PaceModal .bpt-live3-pace-note{font-size:11px !important;color:#aeb9b1 !important;line-height:1.4 !important;margin:10px 0 16px !important;}
+@media(max-width:700px){#live3PaceModal{padding:10px !important;}#live3PaceModal .bpt-live3-pace-card{padding:16px !important;}#live3PaceModal .bpt-live3-pace-grid{grid-template-columns:1fr 1fr !important;}}
+</style>
 
 <style id="bpt-v430-chat-badge-exit">
 .bpt-live3-chat-button,
@@ -15352,6 +15364,18 @@ body:not(.bpt-mobile-device) #bptMobileMoreTopBtn{display:none !important;}
 #live3FsOddsActionBtn,#live3FsSpectatorOddsBtn{
   background:#1f4b3a !important;color:#fff !important;border:1px solid #39705a !important;
 }
+#live3OddsBtn{background:#1f4b3a !important;color:#fff !important;border:1px solid #39705a !important;}
+/* Live réduit : les actions principales sont alignées sur une ligne sur PC. */
+#live3 .bpt-live3-game-head-actions{
+  display:grid !important;
+  grid-template-columns:repeat(4,minmax(120px,1fr)) !important;
+  gap:8px !important;
+  width:min(720px,100%) !important;
+}
+#live3 .bpt-live3-game-head-actions .btn{width:100% !important;min-width:0 !important;}
+@media(max-width:700px){
+  #live3 .bpt-live3-game-head-actions{grid-template-columns:repeat(2,minmax(0,1fr)) !important;width:100% !important;}
+}
 /* Les trois actions d'usage courant restent strictement alignées. */
 #live3Fullscreen.bpt-live3-role-owner #live3FsMasterActions{
   grid-template-columns:repeat(6,minmax(0,1fr)) !important;
@@ -15463,7 +15487,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.48";
+const BPT_APP_VERSION="4.50";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -15738,8 +15762,9 @@ function simplifyRecordTextForMobile(text){
         </div>
         <div class="bpt-live3-game-head-actions">
           <button id="live3ChatBtn" class="btn ghost bpt-live3-chat-button" type="button">💬 Chat <span id="live3ChatUnread" class="bpt-live3-chat-unread" hidden>0</span></button>
-          <button id="live3FullscreenBtn" class="btn ghost" type="button">Plein écran</button>
+          <button id="live3OddsBtn" class="btn ghost bpt-live3-odds-btn" type="button">Calcul de côtes</button>
           <button id="live3QuitViewBtn" class="btn ghost" type="button">Quitter le Live</button>
+          <button id="live3FullscreenBtn" class="btn ghost" type="button">Plein écran</button>
         </div>
       </div>
 
@@ -15929,6 +15954,25 @@ function simplifyRecordTextForMobile(text){
     <div class="bpt-live3-modal-actions">
       <button id="live3ElimConfirmBtn" class="btn danger" type="button">Confirmer</button>
       <button id="live3ElimCancelBtn" class="btn ghost" type="button">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<div id="live3PaceModal" class="bpt-live3-modal bpt-live3-pace-modal" aria-hidden="true">
+  <div class="bpt-live3-modal-card bpt-live3-pace-card">
+    <div class="bpt-live3-pace-kicker">Analyse du rythme</div>
+    <h2 id="live3PaceTitle">Rythme du tournoi</h2>
+    <p id="live3PaceMessage" class="bpt-live3-pace-message"></p>
+    <div class="bpt-live3-pace-grid">
+      <div><span>Temps écoulé</span><strong id="live3PaceElapsed">—</strong></div>
+      <div><span>Temps restant cible</span><strong id="live3PaceRemaining">—</strong></div>
+      <div><span>Joueurs restants</span><strong id="live3PacePlayers">—</strong></div>
+      <div><span>Niveaux proposés</span><strong id="live3PaceDuration">—</strong></div>
+    </div>
+    <div class="bpt-live3-pace-note">La modification concerne uniquement les prochains niveaux. Le niveau en cours n'est pas modifié.</div>
+    <div class="bpt-live3-modal-actions">
+      <button id="live3PaceApplyBtn" class="btn primary" type="button">Appliquer</button>
+      <button id="live3PaceKeepBtn" class="btn ghost" type="button">Conserver le rythme</button>
     </div>
   </div>
 </div>
@@ -21946,6 +21990,29 @@ function randomDashboardRecords(pool,count=9,forcedRecords=[]){
   return dashboardRecordSelection.map(id=>byId.get(id)).filter(Boolean);
 }
 
+function bptDashboardFunnyVariant(category,gameKey,variants){
+  if(!Array.isArray(variants)||!variants.length)return "";
+  const storageKey="bpt_dashboard_humor_v2";
+  let state={};
+  try{state=JSON.parse(localStorage.getItem(storageKey)||"{}")||{};}catch(_e){state={};}
+  state.current=state.current||{};
+  state.last=state.last||{};
+  const mapKey=`${gameKey}:${category}`;
+  if(Number.isInteger(state.current[mapKey]) && variants[state.current[mapKey]])return variants[state.current[mapKey]];
+  let hash=0;
+  const seed=String(mapKey);
+  for(let i=0;i<seed.length;i++)hash=((hash<<5)-hash+seed.charCodeAt(i))|0;
+  let idx=Math.abs(hash)%variants.length;
+  if(variants.length>1 && state.last[category]===idx)idx=(idx+1+Math.abs(hash)%Math.max(1,variants.length-1))%variants.length;
+  state.current[mapKey]=idx;
+  state.last[category]=idx;
+  // garder le stockage compact
+  const keys=Object.keys(state.current);
+  if(keys.length>80)keys.slice(0,keys.length-80).forEach(k=>delete state.current[k]);
+  try{localStorage.setItem(storageKey,JSON.stringify(state));}catch(_e){}
+  return variants[idx];
+}
+
 function renderDashboard(){
   const games=groupedGames();
   const rank=ranking();
@@ -22005,34 +22072,85 @@ function renderDashboard(){
       const bestMover=movers.slice().sort((a,b)=>Number(b.progress)-Number(a.progress))[0];
       const worstMover=movers.slice().sort((a,b)=>Number(a.progress)-Number(b.progress))[0];
       const sentences=[];
-
       const L=n=>funPlayerLabel(n);
+      const lastGameNo=Math.max(0,...(lastGroupedGame.map(r=>Number(r.game)||0)));
+      const gameKey=`${selectedSeasonKey||"season"}-${lastGameNo}-${lastWinner?.player||"none"}`;
+      const V=(cat,arr)=>bptDashboardFunnyVariant(cat,gameKey,arr);
 
       if(second){
         if(Math.abs(gap)<=5){
-          sentences.push(`${L(leader.name)} garde le fauteuil de patron. ${L(second.name)} n’est qu’à ${num(gap,0)} point${Math.abs(gap)>1?"s":""}.`);
+          sentences.push(V("leaderClose",[
+            `${L(leader.name)} garde le fauteuil, mais ${L(second.name)} a déjà posé la main sur l’accoudoir : ${num(gap,0)} point${Math.abs(gap)>1?"s":""} d’écart.`,
+            `${L(leader.name)} est devant. ${L(second.name)} respire juste derrière à ${num(gap,0)} point${Math.abs(gap)>1?"s":""} : ambiance rétroviseur.`,
+            `${L(leader.name)} mène encore, mais avec ${num(gap,0)} point${Math.abs(gap)>1?"s":""} d’avance sur ${L(second.name)}, mieux vaut éviter de commander le champagne.`,
+            `${L(second.name)} colle aux basques de ${L(leader.name)} : ${num(gap,0)} point${Math.abs(gap)>1?"s":""} seulement. Le sommet manque d’air.`,
+            `${L(leader.name)} tient la première place au scotch : ${L(second.name)} est à ${num(gap,0)} point${Math.abs(gap)>1?"s":""}.`,
+            `${L(leader.name)} a la couronne, ${L(second.name)} a la facture du bijoutier : ${num(gap,0)} point${Math.abs(gap)>1?"s":""} les séparent.`
+          ]));
         }else{
-          sentences.push(`${L(leader.name)} squatte la première place. ${L(second.name)} pointe à ${num(gap,0)} point${Math.abs(gap)>1?"s":""}.`);
+          sentences.push(V("leaderWide",[
+            `${L(leader.name)} squatte la première place. ${L(second.name)} cherche encore le code de l’ascenseur à ${num(gap,0)} points.`,
+            `${L(leader.name)} a creusé ${num(gap,0)} points sur ${L(second.name)}. Pour l’instant, la vue d’en haut est dégagée.`,
+            `${L(leader.name)} mène avec ${num(gap,0)} points d’avance. ${L(second.name)} garde le leader dans le GPS.`,
+            `${L(leader.name)} a pris le large : ${num(gap,0)} points sur ${L(second.name)}. Rien d’irréversible, mais il faut ramer.`,
+            `${L(leader.name)} a mis ${num(gap,0)} points dans la boîte à gants entre lui et ${L(second.name)}.`,
+            `${L(second.name)} voit encore ${L(leader.name)}, mais surtout son dos : ${num(gap,0)} points d’écart.`
+          ]));
         }
       }else{
-        sentences.push(`${L(leader.name)} est seul en haut. Pour combien de temps ?`);
+        sentences.push(V("soloLeader",[
+          `${L(leader.name)} est seul en haut. Pour combien de temps ?`,
+          `${L(leader.name)} occupe le sommet en solitaire. Pas de voisin pour emprunter du sel.`,
+          `${L(leader.name)} a la première place pour lui tout seul. Profitez de la photo.`,
+          `${L(leader.name)} règne sans dauphin pour l’instant. Le service après-vente reste ouvert.`
+        ]));
       }
 
       if(bestMover && Number(bestMover.progress)>0){
-        sentences.push(`${L(bestMover.name)} prend l’ascenseur : +${bestMover.progress} place${Number(bestMover.progress)>1?"s":""}.`);
+        const up=Number(bestMover.progress);
+        sentences.push(V("mover",[
+          `${L(bestMover.name)} prend l’ascenseur : +${up} place${up>1?"s":""}.`,
+          `${L(bestMover.name)} remonte de ${up} place${up>1?"s":""}. Visiblement, les escaliers étaient en option.`,
+          `+${up} place${up>1?"s":""} pour ${L(bestMover.name)} : quelqu’un a trouvé le bouton turbo.`,
+          `${L(bestMover.name)} gagne ${up} place${up>1?"s":""}. Le classement vient de sentir un courant d’air.`,
+          `${L(bestMover.name)} grimpe de ${up} place${up>1?"s":""}. La gravité proteste, sans succès.`,
+          `${L(bestMover.name)} signe une remontée de ${up} place${up>1?"s":""}. Contrôle antidopage du classement en cours.`
+        ]));
       }
 
       if(worstMover && Number(worstMover.progress)<0 && worstMover.name!==bestMover?.name){
-        sentences.push(`${L(worstMover.name)} prend l’escalier à l’envers : -${Math.abs(worstMover.progress)} place${Math.abs(worstMover.progress)>1?"s":""}.`);
+        const down=Math.abs(Number(worstMover.progress));
+        sentences.push(V("dropper",[
+          `${L(worstMover.name)} prend l’escalier à l’envers : -${down} place${down>1?"s":""}.`,
+          `${L(worstMover.name)} perd ${down} place${down>1?"s":""}. Petite visite imprévue des étages inférieurs.`,
+          `Le classement a retiré ${down} place${down>1?"s":""} à ${L(worstMover.name)}. Sans préavis, évidemment.`,
+          `${L(worstMover.name)} recule de ${down} place${down>1?"s":""}. Le GPS disait pourtant “continuez tout droit”.`,
+          `${L(worstMover.name)} laisse filer ${down} place${down>1?"s":""}. Journée portes ouvertes dans le rétroviseur.`,
+          `${L(worstMover.name)} descend de ${down} place${down>1?"s":""}. Rien de grave : le classement est fourni avec marche arrière.`
+        ]));
       }
 
       if(lastWinner){
-        sentences.push(`${L(lastWinner.player)} est officiellement autorisé à être insupportable jusqu’à la prochaine partie.`);
+        sentences.push(V("winner",[
+          `${L(lastWinner.player)} est officiellement autorisé à être insupportable jusqu’à la prochaine partie.`,
+          `${L(lastWinner.player)} a gagné la dernière. Le droit de raconter les coups à sa façon est donc temporairement accordé.`,
+          `${L(lastWinner.player)} repart avec la victoire et, malheureusement pour les autres, avec le droit de s’en souvenir à voix haute.`,
+          `${L(lastWinner.player)} a pris la dernière partie. Toute ressemblance avec de la chance sera vigoureusement contestée par l’intéressé.`,
+          `${L(lastWinner.player)} signe la dernière victoire. Les autres parlent déjà de variance, ce qui est généralement bon signe.`,
+          `${L(lastWinner.player)} a fini devant tout le monde. Le comité des excuses adverses est déjà en réunion.`,
+          `${L(lastWinner.player)} remporte la dernière partie. Son ego demande un siège supplémentaire pour la prochaine.`
+        ]));
       }
 
       if(onFire?.players?.length){
         const hot=onFire.players.map(L).join(", ");
-        sentences.push(`En ce moment, ça chauffe chez ${hot}.`);
+        sentences.push(V("onfire",[
+          `En ce moment, ça chauffe chez ${hot}.`,
+          `${hot} traverse une zone de chaleur statistiquement suspecte.`,
+          `${hot} est “On Fire”. Merci de tenir les jetons éloignés des matières inflammables.`,
+          `${hot} enchaîne les points. Le reste de la table demande un contrôle technique.`,
+          `La forme du moment appartient à ${hot}. Le bouton “refroidir” n’a pas été trouvé.`
+        ]));
       }
 
       $("dashDynamicsText").textContent=sentences.slice(0,4).join(" ");
@@ -27104,6 +27222,111 @@ document.addEventListener("visibilitychange",()=>{
     const lv=level();
     return Math.max(1,Math.round(Number(lv?.durationSec||0)/60)||0);
   }
+
+  let live3PendingPaceAdvice=null;
+  let live3PaceLastCheckAt=0;
+  const LIVE3_PACE_MIN_INTERVAL_MS=30*60*1000;
+
+  function live3PaceStorageKey(){
+    return `bpt_pace_advice_${String(current?.sessionId||"none")}`;
+  }
+
+  function live3ReadPaceMemo(){
+    try{return JSON.parse(localStorage.getItem(live3PaceStorageKey())||"null")||{};}catch(_e){return {};}
+  }
+
+  function live3WritePaceMemo(data){
+    try{localStorage.setItem(live3PaceStorageKey(),JSON.stringify(data||{}));}catch(_e){}
+  }
+
+  function live3PaceAnalysis(){
+    if(!isOwner() || !isActive() || !current?.startedAt)return null;
+    const totalPlayers=Math.max(2,(current.players||[]).length);
+    const remaining=Math.max(1,remainingCount());
+    const targetSec=Math.max(3600,Number(current.targetHours||4)*3600);
+    const elapsed=Math.max(0,elapsedSeconds());
+    const timeProgress=elapsed/targetSec;
+    if(timeProgress<0.50)return null;
+
+    const eliminationProgress=(totalPlayers-remaining)/(totalPlayers-1);
+    const delta=timeProgress-eliminationProgress; // positif = tournoi en retard
+    const upcoming=nextLevel();
+    if(!upcoming)return null;
+    const currentMin=Math.max(1,Math.round(Number(upcoming.durationSec||0)/60)||currentBlindDurationMinutes());
+    let type="",change=0;
+    if(delta>=0.30){type="accelerate";change=-4;}
+    else if(delta>=0.15){type="accelerate";change=-2;}
+    else if(delta<=-0.30){type="slow";change=4;}
+    else if(delta<=-0.15){type="slow";change=2;}
+    else return null;
+
+    const proposedMin=Math.max(8,Math.min(40,currentMin+change));
+    if(proposedMin===currentMin)return null;
+    const targetRemaining=Math.max(0,targetSec-elapsed);
+    return {type,delta,currentMin,proposedMin,totalPlayers,remaining,elapsed,targetRemaining,timeProgress,eliminationProgress};
+  }
+
+  function live3ClosePaceModal(){
+    const modal=$3("live3PaceModal");
+    modal?.classList.remove("open");
+    modal?.setAttribute("aria-hidden","true");
+    live3PendingPaceAdvice=null;
+  }
+
+  function live3ShowPaceAdvice(advice){
+    if(!advice || $3("live3PaceModal")?.classList.contains("open"))return;
+    live3PendingPaceAdvice=advice;
+    const accel=advice.type==="accelerate";
+    $3("live3PaceTitle").textContent=accel?"Accélération conseillée":"Ralentissement conseillé";
+    $3("live3PaceMessage").textContent=accel
+      ? `Il reste ${advice.remaining} joueur${advice.remaining>1?"s":""} alors que ${Math.round(advice.timeProgress*100)} % du temps cible est déjà écoulé. Pour se rapprocher de l'heure de fin prévue, BPT propose de raccourcir les prochains niveaux.`
+      : `Le tournoi est en avance sur sa trajectoire : il ne reste que ${advice.remaining} joueur${advice.remaining>1?"s":""} après ${Math.round(advice.timeProgress*100)} % du temps cible. BPT propose de rallonger légèrement les prochains niveaux.`;
+    $3("live3PaceElapsed").textContent=elapsedHoursMinutes(advice.elapsed);
+    $3("live3PaceRemaining").textContent=elapsedHoursMinutes(advice.targetRemaining);
+    $3("live3PacePlayers").textContent=`${advice.remaining} / ${advice.totalPlayers}`;
+    $3("live3PaceDuration").textContent=`${advice.currentMin} → ${advice.proposedMin} min`;
+    $3("live3PaceApplyBtn").textContent=accel?`Accélérer à ${advice.proposedMin} min`:`Ralentir à ${advice.proposedMin} min`;
+    const modal=$3("live3PaceModal");
+    modal?.classList.add("open");
+    modal?.setAttribute("aria-hidden","false");
+  }
+
+  function live3MaybeCheckPace({afterElimination=false}={}){
+    if(!isOwner() || !isActive() || !current?.startedAt)return;
+    const now=Date.now();
+    if(!afterElimination && now-live3PaceLastCheckAt<60*1000)return;
+    live3PaceLastCheckAt=now;
+    const advice=live3PaceAnalysis();
+    if(!advice)return;
+
+    const memo=live3ReadPaceMemo();
+    const eliminationCount=advice.totalPlayers-advice.remaining;
+    const bucket=Math.floor(advice.elapsed/(30*60));
+    const signature=`${advice.type}:${eliminationCount}:${bucket}:${advice.proposedMin}`;
+    if(memo.signature===signature)return;
+    const sinceLast=Number(memo.at||0)>0 ? now-Number(memo.at) : Infinity;
+    // Une élimination déclenche bien une nouvelle analyse, mais pas une nouvelle alerte
+    // toutes les quelques minutes : 15 min mini après une alerte, 30 min sinon.
+    if(afterElimination && sinceLast<15*60*1000)return;
+    if(!afterElimination && sinceLast<LIVE3_PACE_MIN_INTERVAL_MS)return;
+
+    live3WritePaceMemo({signature,at:now});
+    live3ShowPaceAdvice(advice);
+  }
+
+  async function live3ApplyPaceAdvice(){
+    const advice=live3PendingPaceAdvice;
+    if(!advice || !isOwner())return live3ClosePaceModal();
+    await ownerTransaction(s=>{
+      const levels=Array.isArray(s.levels)?s.levels:[];
+      const start=Math.max(0,(Number(s.levelIndex)||0)+1); // uniquement les niveaux suivants
+      for(let i=start;i<levels.length;i++)levels[i].durationSec=advice.proposedMin*60;
+      s.levels=levels;
+      s.lastPaceAdjustment={at:Date.now(),type:advice.type,minutes:advice.proposedMin,remainingPlayers:advice.remaining};
+      return s;
+    });
+    live3ClosePaceModal();
+  }
   const BPT_SB_STRUCTURE=[25,50,75,100,150,200,300,400,500,600,800,1000,1200,1500,2000,3000,4000,5000];
   function bptGetBlindLevels(){
     const src=Array.isArray(window.BPT_BLIND_LEVELS)?window.BPT_BLIND_LEVELS:null;
@@ -27146,15 +27369,15 @@ document.addEventListener("visibilitychange",()=>{
     });
 
     endIndex=Math.max(0,Math.min(configuredLevels.length-1,endIndex));
-    const usedLevels=configuredLevels.slice(0,endIndex+1);
+    const expectedLevelCount=endIndex+1;
 
-    // La durée de niveau est calculée à partir de la durée cible.
-    // Elle n'est pas fixe : dans votre configuration habituelle
-    // (11 joueurs / 20k / environ 4 h à 4 h 15), on retrouve une durée proche des habitudes BPT.
+    // La durée cible sert à calibrer le moment où le tournoi devrait arriver
+    // dans sa zone de fin probable, mais la structure NE S'ARRÊTE PLUS à ce niveau.
+    // Les niveaux suivants restent disponibles si la partie dépasse la cible.
     const totalSeconds=Math.max(3600,Number(targetHours||4)*3600);
-    const levelSeconds=Math.max(8*60,Math.round((totalSeconds/usedLevels.length)/60)*60);
+    const levelSeconds=Math.max(8*60,Math.round((totalSeconds/expectedLevelCount)/60)*60);
 
-    const levels=usedLevels.map((blind,i)=>({
+    const levels=configuredLevels.map((blind,i)=>({
       level:i+1,
       sb:Number(blind.sb),
       bb:Number(blind.bb),
@@ -27166,7 +27389,8 @@ document.addEventListener("visibilitychange",()=>{
       levels,
       targetEndBB,
       levelSeconds,
-      expectedEndBB:levels[levels.length-1]?.bb||0
+      expectedEndBB:configuredLevels[endIndex]?.bb||0,
+      expectedEndLevel:endIndex+1
     };
   }
 
@@ -28219,6 +28443,11 @@ function connectionDeviceLabel(){
     });
 
     closeElim();
+
+    if(updated && (updated.players||[]).filter(p=>p.status==="in").length>1){
+      // Réévaluation immédiate après chaque élimination, une fois la mi-parcours atteinte.
+      setTimeout(()=>live3MaybeCheckPace({afterElimination:true}),250);
+    }
 
     // Dès qu'un vainqueur unique existe, le Live est terminé,
     // résumé puis publication dans l'historique du championnat.
@@ -29484,6 +29713,9 @@ async function requestTakeover(){
     $3("live3ElimPlayer")?.addEventListener("change",refreshEliminationLists);
     $3("live3ElimCancelBtn")?.addEventListener("click",closeElim);
     $3("live3ElimModal")?.addEventListener("click",e=>{if(e.target===$3("live3ElimModal"))closeElim();});
+    $3("live3PaceApplyBtn")?.addEventListener("click",live3ApplyPaceAdvice);
+    $3("live3PaceKeepBtn")?.addEventListener("click",live3ClosePaceModal);
+    $3("live3PaceModal")?.addEventListener("click",e=>{if(e.target===$3("live3PaceModal"))live3ClosePaceModal();});
 
     $3("live3ChatBtn")?.addEventListener("click",openChat);
     $3("live3ChatCloseBtn")?.addEventListener("click",closeChat);
@@ -29507,6 +29739,7 @@ async function requestTakeover(){
       if(e.key==="Escape"){
         if($3("live3ChatModal")?.classList.contains("open"))closeChat();
         else if($3("live3ElimModal")?.classList.contains("open"))closeElim();
+        else if($3("live3PaceModal")?.classList.contains("open"))live3ClosePaceModal();
         else if($3("live3Fullscreen")?.classList.contains("open"))closeFullscreen();
       }
     });
@@ -29523,6 +29756,7 @@ async function requestTakeover(){
         render();
         handleBlindSoundAlerts();
         autoAdvanceIfNeeded();
+        live3MaybeCheckPace();
       }
     },250);
 
@@ -30221,7 +30455,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   slots.forEach(btn=>btn.addEventListener("click",()=>{active=btn.dataset.slot;if(chosen[active])delete chosen[active];update();}));
   function open(){modal.classList.add("open");modal.setAttribute("aria-hidden","false");update();}
   function close(){modal.classList.remove("open");modal.setAttribute("aria-hidden","true");}
-  ["live3FsOddsActionBtn","live3FsSpectatorOddsBtn"].forEach(id=>document.getElementById(id)?.addEventListener("click",open));
+  ["live3OddsBtn","live3FsOddsActionBtn","live3FsSpectatorOddsBtn"].forEach(id=>document.getElementById(id)?.addEventListener("click",open));
   document.getElementById("bptOddsClose")?.addEventListener("click",close);modal.addEventListener("click",e=>{if(e.target===modal)close();});
   document.addEventListener("keydown",e=>{if(e.key==="Escape"&&modal.classList.contains("open"))close();});
   document.getElementById("bptOddsReset")?.addEventListener("click",()=>{Object.keys(chosen).forEach(k=>delete chosen[k]);active="p1a";document.getElementById("bptOddsResults").hidden=true;update();});
