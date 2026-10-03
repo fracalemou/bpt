@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V4.59 DUREE 30 MIN
+BPT LIVE V4.60 DUREE 30 MIN
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -9285,6 +9285,28 @@ body.bpt-mobile-device #nav > button{
   }
 }
 
+
+/* ===== BPT 4.60 — plein écran épuré + projection renforcée ===== */
+#live3Fullscreen .bpt-live3-fs-players{display:none !important;}
+#live3Fullscreen .bpt-live3-fs-shell{grid-template-areas:"head head" "blinds timer" "kpis kpis" "actions actions" !important;}
+#live3Fullscreen .bpt-live3-fs-actions{grid-template-columns:repeat(4,minmax(0,1fr)) !important;}
+#live3Fullscreen .bpt-live3-fs-spectator-only.bpt-live3-fs-actions,
+#live3Fullscreen #live3FsSpectatorActions{grid-template-columns:repeat(3,minmax(0,1fr)) !important;}
+#live3Projection.bpt-live3-projection-inline{margin-top:5px;padding:5px 7px;border-radius:9px;background:rgba(0,153,178,.11);display:flex;flex-direction:column;gap:1px;line-height:1.05;}
+#live3Projection.bpt-live3-projection-inline span{font-size:10px;font-weight:800;}
+#live3Projection.bpt-live3-projection-inline #live3EstimatedFinish{font-size:16px;color:#005B80;}
+#live3Projection.bpt-live3-projection-inline #live3FinishDelta{font-size:11px;}
+#live3Fullscreen .bpt-live3-fs-time-kpi{padding-top:5px !important;padding-bottom:5px !important;}
+#live3Fullscreen #live3FsProjection{margin-top:4px;padding:3px 6px;border-radius:8px;background:rgba(0,153,178,.18);display:flex;flex-direction:column;gap:0;align-items:center;line-height:1;}
+#live3Fullscreen #live3FsProjection span{font-size:9px !important;color:#cfe9ee !important;}
+#live3Fullscreen #live3FsProjection #live3FsEstimatedFinish{font-size:17px !important;color:#fff !important;line-height:1.05 !important;}
+#live3Fullscreen #live3FsProjection #live3FsFinishDelta{font-size:10px !important;line-height:1.05 !important;}
+@media(max-width:700px){
+  #live3Fullscreen .bpt-live3-fs-shell{grid-template-areas:"head" "blinds" "timer" "kpis" "actions" !important;}
+  #live3Fullscreen #live3FsProjection #live3FsEstimatedFinish{font-size:14px !important;}
+  #live3Fullscreen #live3FsMasterActions{grid-template-columns:repeat(5,minmax(0,1fr)) !important;grid-template-rows:1fr !important;}
+#live3Fullscreen #live3FsSpectatorActions{grid-template-columns:repeat(3,minmax(0,1fr)) !important;grid-template-rows:1fr !important;}
+}
 </style>
 
 <style id="bpt-records-final-hierarchy">
@@ -15480,6 +15502,30 @@ body:not(.bpt-mobile-device) #bptMobileMoreTopBtn{display:none !important;}
 }
 </style>
 
+
+<style id="bpt460-final-overrides">
+/* BPT 4.60 — règles finales plein écran */
+#live3Fullscreen .bpt-live3-fs-players,
+#liveFullscreenDisplay .bptfs-players,
+#liveSpectatorPanel .spectator-player-list-wrap{display:none !important;}
+#live3Fullscreen #live3FsTakeoverActionBtn{display:none !important;visibility:hidden !important;}
+#live3Fullscreen #live3FsSpectatorActions{grid-template-columns:repeat(3,minmax(0,1fr)) !important;grid-template-rows:1fr !important;}
+#live3Fullscreen .bpt-live3-fs-shell{grid-template-areas:"head head" "blinds timer" "kpis kpis" "actions actions" !important;}
+#live3Fullscreen .bpt-live3-fs-time-kpi{min-height:78px !important;}
+#live3Fullscreen #live3FsProjection{display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:center !important;gap:1px !important;margin-top:5px !important;padding:5px 8px !important;border-radius:9px !important;background:rgba(0,153,178,.22) !important;}
+#live3Fullscreen #live3FsProjection span{font-size:10px !important;font-weight:800 !important;color:#cfe9ee !important;line-height:1.05 !important;}
+#live3Fullscreen #live3FsEstimatedFinish{font-size:19px !important;color:#fff !important;line-height:1 !important;}
+#live3Fullscreen #live3FsFinishDelta{font-size:11px !important;line-height:1 !important;}
+#live3 .bpt-live3-time-kpi{min-height:86px !important;}
+#live3 #live3Projection.bpt-live3-projection-inline{display:flex !important;flex-direction:column !important;align-items:center !important;gap:1px !important;margin-top:6px !important;padding:5px 8px !important;border-radius:9px !important;background:rgba(0,153,178,.12) !important;}
+#live3 #live3Projection #live3EstimatedFinish{font-size:17px !important;color:#005B80 !important;}
+#live3 #live3Projection #live3FinishDelta{font-size:11px !important;}
+@media(max-width:700px){
+  #live3Fullscreen .bpt-live3-fs-shell{grid-template-areas:"head" "blinds" "timer" "kpis" "actions" !important;}
+  #live3Fullscreen #live3FsSpectatorActions{grid-template-columns:repeat(3,minmax(0,1fr)) !important;}
+  #live3Fullscreen #live3FsEstimatedFinish{font-size:16px !important;}
+}
+</style>
 </head>
 <body>
 
@@ -15547,7 +15593,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.59";
+const BPT_APP_VERSION="4.60";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -15703,7 +15749,7 @@ function simplifyRecordTextForMobile(text){
     </div>
   </div>
 
-  <div class="app-version" id="headerAppVersion">BPT v4.59</div>
+  <div class="app-version" id="headerAppVersion">BPT v4.60</div>
 
   <div id="bptOnlinePresence" class="bpt-online-presence" tabindex="0" aria-label="Personnes connectées">
     <span class="bpt-online-dot">●</span>
@@ -15842,12 +15888,8 @@ function simplifyRecordTextForMobile(text){
         <div class="bpt-live3-kpis">
           <div><span>Joueurs</span><strong id="live3Remaining">0</strong></div>
           <div><span>Tapis moyen</span><strong id="live3AvgStack">0</strong></div>
-          <div><span>Temps écoulé</span><strong id="live3Elapsed">0 min</strong></div>
+          <div class="bpt-live3-time-kpi"><span>Temps écoulé</span><strong id="live3Elapsed">0 min</strong><div id="live3Projection" class="bpt-live3-projection-inline" aria-live="polite"><span>Fin estimée <strong id="live3EstimatedFinish">—</strong></span><span><strong id="live3FinishDelta" class="bpt-pace-on-time">—</strong></span></div></div>
           <div><span>Prochain niveau</span><strong id="live3Next">—</strong></div>
-        </div>
-        <div id="live3Projection" aria-live="polite">
-          <span>Fin estimée : <strong id="live3EstimatedFinish">—</strong></span>
-          <span>Écart : <strong id="live3FinishDelta" class="bpt-pace-on-time">—</strong></span>
         </div>
       </div>
 
@@ -15936,29 +15978,20 @@ function simplifyRecordTextForMobile(text){
     </section>
     <section class="bpt-live3-fs-kpis">
       <div><span>Tapis moyen</span><strong id="live3FsAvg">0</strong></div>
-      <div><span>Temps écoulé</span><strong id="live3FsElapsed">0 min</strong></div>
+      <div class="bpt-live3-fs-time-kpi"><span>Temps écoulé</span><strong id="live3FsElapsed">0 min</strong><div id="live3FsProjection" aria-live="polite"><span>Fin estimée <strong id="live3FsEstimatedFinish">—</strong></span><span><strong id="live3FsFinishDelta">—</strong></span></div></div>
       <div><span>Prochain</span><strong id="live3FsNext">—</strong></div>
-    </section>
-    <section id="live3FsProjection">
-      <span>Fin estimée <strong id="live3FsEstimatedFinish">—</strong></span>
-      <span>Écart <strong id="live3FsFinishDelta">—</strong></span>
     </section>
     <section id="live3FsMasterActions" class="bpt-live3-fs-actions bpt-live3-owner-only">
       <button id="live3FsStartPauseBtn" type="button">Démarrer</button>
       <button id="live3FsEliminateBtn" type="button">Sortir un joueur</button>
       <button id="live3FsChatActionBtn" type="button">Chat <span id="live3FsChatUnread" class="bpt-live3-chat-unread" hidden>0</span></button>
       <button id="live3FsOddsActionBtn" class="bpt-live3-odds-btn" type="button">Calcul de côtes</button>
-      <button id="live3FsExitActionBtn" type="button">Quitter le Live</button>
+      <button id="live3FsExitActionBtn" type="button">Quitter le plein écran</button>
     </section>
     <section id="live3FsSpectatorActions" class="bpt-live3-fs-actions bpt-live3-spectator-only" style="display:none">
-      <button id="live3FsTakeoverActionBtn" type="button">Demander la gestion</button>
       <button id="live3FsSpectatorChatBtn" type="button">Chat <span id="live3FsSpectatorChatUnread" class="bpt-live3-chat-unread" hidden>0</span></button>
       <button id="live3FsSpectatorOddsBtn" class="bpt-live3-odds-btn" type="button">Calcul de côtes</button>
-      <button id="live3FsSpectatorExitBtn" type="button">Quitter le Live</button>
-    </section>
-    <section class="bpt-live3-fs-players">
-      <div class="bpt-live3-fs-players-title">Joueurs à la table</div>
-      <div id="live3FsPlayers" class="bpt-live3-fs-player-list"></div>
+      <button id="live3FsSpectatorExitBtn" type="button">Quitter le plein écran</button>
     </section>
     <button id="live3FsExitBtn" class="bpt-live3-fs-exit" type="button" aria-label="Quitter le plein écran" style="display:none">×</button>
   </div>
@@ -16958,7 +16991,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 4.59</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 4.60</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:680px">
       <div style="font-weight:900;margin-bottom:9px">État BPT</div>
       <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -17942,7 +17975,7 @@ function bptChatHandleBroadcast(eventPayload){
   const open=document.getElementById("liveChatBackdrop")?.classList.contains("open");
   if(!open)bptChatSetUnread(bptChatUnread+1);
   bptChatAlertSound();
-  // 4.59 : tout nouveau message reçu doit apparaître au-dessus de l'écran consulté.
+  // 4.60 : tout nouveau message reçu doit apparaître au-dessus de l'écran consulté.
   if(!open)bptShowIncomingChatToast(cleanMsg,"legacy");
 }
 
@@ -26490,7 +26523,7 @@ function mobileLiveCanControlDirect(){
   if(!s?.prepared || s.synced)return false;
   const creator=String(s.creatorDeviceId||"");
   if(creator && creator!==liveDeviceId()){
-    alert("Ce téléphone n'est pas le organisateur du Live.");
+    alert("Ce téléphone n'est pas l’organisateur du Live.");
     return false;
   }
   return true;
@@ -29046,7 +29079,7 @@ function connectionDeviceLabel(){
 function live3OwnerDisplayName(){
   const raw=String(current?.ownerLabel||current?.ownerName||"").trim();
   if(raw)return raw;
-  return "le organisateur actuel";
+  return "l’organisateur actuel";
 }
 
 function updateLive3TakeoverRequestButtonLabel(){
@@ -29086,7 +29119,7 @@ async function forceLive3Takeover(){
   }
 
   if(!live3TakeoverExpired()){
-    alert(`Le organisateur dispose encore de ${live3TakeoverRemainingSec()} s pour répondre.`);
+    alert(`L’organisateur dispose encore de ${live3TakeoverRemainingSec()} s pour répondre.`);
     return;
   }
 
@@ -29119,7 +29152,7 @@ async function forceLive3Takeover(){
   });
 
   if(!taken){
-    alert("La reprise n'est plus disponible. Le organisateur a peut-être répondu.");
+    alert("La reprise n'est plus disponible. L’organisateur a peut-être répondu.");
   }
 }
 
@@ -29149,7 +29182,7 @@ function updateLive3TakeoverTimeoutUI(){
 
   if(live3TakeoverExpired()){
     btn.style.display="inline-flex";
-    if(status)status.textContent="Aucune réponse du organisateur depuis 30 s";
+    if(status)status.textContent="Aucune réponse de l’organisateur depuis 30 s";
     if(countdown){
       countdown.style.display="block";
       countdown.textContent="Délai expiré · reprise forcée disponible";
@@ -29633,7 +29666,7 @@ async function requestTakeover(){
     if(prep)prep.style.display="none";
     if(game)game.style.display="";
     if(role){
-      role.textContent=owner?`MAÎTRE · ${current?.ownerLabel||liveIdentityName()||deviceLabel()}`:`SPECTATEUR · ${liveIdentityName()||"—"}`;
+      role.textContent=owner?`ORGANISATEUR · ${current?.ownerLabel||liveIdentityName()||deviceLabel()}`:`SPECTATEUR · ${liveIdentityName()||"—"}`;
       role.className="bpt-live3-role-badge "+(owner?"master":"spectator");
     }
 
