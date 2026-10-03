@@ -15439,7 +15439,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.66</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.67</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -29370,7 +29370,9 @@ document.addEventListener("DOMContentLoaded",()=>{
 <style id="bpt-v466-live-rebuilt">
 :root{--b466-bg:#071710;--b466-panel:#0e281d;--b466-panel2:#133325;--b466-line:#2b5b47;--b466-gold:#d39a28;--b466-gold2:#f0b73a;--b466-teal:#0f7e78;--b466-teal2:#15a19a;--b466-red:#a64d4d;--b466-white:#f6f8f6;--b466-muted:#a9bbb2}
 
-body.b466-live-active:not(.spectator-live-open)>header.bpt-header,body.b466-live-active:not(.spectator-live-open)>nav#nav,body.b466-live-active>#bptMobileMoreTopMenu,body.b466-live-active>footer,body.b466-live-active>#cloudStatus{display:none!important}
+body.b466-live-active:not(.spectator-live-open)>header.bpt-header,body.b466-live-active>footer,body.b466-live-active>#cloudStatus{display:none!important}
+body.b466-live-active:not(.spectator-live-open)>nav#nav{display:flex!important}
+body.b466-live-active:not(.spectator-live-open)>#bptMobileMoreTopMenu:not([hidden]){display:grid!important}
 body.b466-live-active>main{max-width:none!important;padding:0!important;margin:0!important}
 body.b466-live-active #live3{padding:0!important;margin:0!important}
 body.b466-live-active #live3>.hero{display:none!important}
