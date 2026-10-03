@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V4.50 REGULATION DYNAMIQUE + HUMOUR
+BPT LIVE V4.52 25 NIVEAUX + COTES 4 JOUEURS + REGULATION + HUMOUR
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -15405,8 +15405,9 @@ body:not(.bpt-mobile-device) #bptMobileMoreTopBtn{display:none !important;}
 .bpt-odds-slots{display:flex;gap:6px;flex-wrap:wrap}.bpt-card-slot{width:54px;height:68px;border:1px dashed #557164;border-radius:9px;background:#0d1511;color:#aebcb4;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;text-align:center;padding:3px}.bpt-card-slot.filled{background:#f7f4ec;color:#131715;border-style:solid;font-size:20px}.bpt-card-slot.active{outline:3px solid #c99a43;outline-offset:1px}.bpt-card-slot.red{color:#c53d43}
 .bpt-odds-deck{display:grid;grid-template-columns:repeat(13,minmax(28px,1fr));gap:4px;margin-top:9px}.bpt-deck-card{height:38px;border:1px solid #465d52;border-radius:7px;background:#f7f4ec;color:#161b18;font-weight:950;font-size:13px;padding:0}.bpt-deck-card.red{color:#c53d43}.bpt-deck-card:disabled{opacity:.18;filter:grayscale(1)}
 .bpt-odds-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.bpt-odds-actions button{min-height:44px;border-radius:10px;border:1px solid #40584a;font-weight:900}.bpt-odds-calc{background:#c99a43;color:#16120a}.bpt-odds-reset{background:#1d2a23;color:#fff}
-.bpt-odds-results{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.bpt-odds-result{border:1px solid #344a3d;border-radius:12px;background:#17231d;padding:10px;text-align:center}.bpt-odds-result span{display:block;font-size:10px;color:#aeb9b1}.bpt-odds-result strong{display:block;font-size:27px;color:#fff;margin-top:3px}.bpt-odds-result small{display:block;color:#b9c4be;margin-top:3px}.bpt-odds-note{grid-column:1/-1;font-size:10px;color:#91a299;text-align:center;padding-top:2px}
+.bpt-odds-results{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}.bpt-odds-result{border:1px solid #344a3d;border-radius:12px;background:#17231d;padding:10px;text-align:center}.bpt-odds-result span{display:block;font-size:10px;color:#aeb9b1}.bpt-odds-result strong{display:block;font-size:27px;color:#fff;margin-top:3px}.bpt-odds-result small{display:block;color:#b9c4be;margin-top:3px}.bpt-odds-note{grid-column:1/-1;font-size:10px;color:#91a299;text-align:center;padding-top:2px}
 @media(max-width:700px){
+  .bpt-odds-results{grid-template-columns:1fr 1fr}
   .bpt-odds-modal{padding:6px}.bpt-odds-card{width:100%;max-height:96vh;border-radius:14px;padding:10px}.bpt-odds-head{margin-bottom:7px}.bpt-odds-head h2{font-size:17px}.bpt-odds-help{font-size:10px;margin-bottom:8px}.bpt-odds-zone{padding:7px;margin-bottom:7px}.bpt-card-slot{width:45px;height:56px;font-size:9px}.bpt-card-slot.filled{font-size:17px}.bpt-odds-deck{gap:3px}.bpt-deck-card{height:34px;font-size:11px}.bpt-odds-actions{margin-top:8px}.bpt-odds-results{margin-top:8px}.bpt-odds-result strong{font-size:23px}
   #live3Fullscreen .bpt-live3-fs-actions{min-height:102px !important;height:102px !important;gap:6px !important;}
   #live3Fullscreen .bpt-live3-fs-actions button{min-height:46px !important;height:auto !important;}
@@ -15487,7 +15488,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.50";
+const BPT_APP_VERSION="4.52";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -15643,7 +15644,7 @@ function simplifyRecordTextForMobile(text){
     </div>
   </div>
 
-  <div class="app-version" id="headerAppVersion">BPT v4.48</div>
+  <div class="app-version" id="headerAppVersion">BPT v4.52</div>
 
   <div id="bptOnlinePresence" class="bpt-online-presence" tabindex="0" aria-label="Personnes connectées">
     <span class="bpt-online-dot">●</span>
@@ -16869,7 +16870,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 4.43</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 4.52</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:680px">
       <div style="font-weight:900;margin-bottom:9px">État BPT</div>
       <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -20572,7 +20573,7 @@ function liveRenderFullscreen(){
   if(!s.prepared)return;
 
   const level=s.levels?.[s.levelIndex];
-  const next=s.levels?.[s.levelIndex+1];
+  const next=bptGetNextLevel(s.levels, s.levelIndex);
   if(!level)return;
 
   const alive=liveAlive();
@@ -20592,7 +20593,7 @@ function liveRenderFullscreen(){
   if($("liveFsRemaining"))$("liveFsRemaining").textContent=String(remainingCount);
   if($("liveFsRemainingDisplay"))$("liveFsRemainingDisplay").innerHTML=`${remainingCount} <span class="live-fs-remaining-total">/ ${s.players.length}</span>`;
   if($("liveFsElapsed"))$("liveFsElapsed").textContent=liveTime(liveElapsedSeconds(s));
-  if($("liveFsNext"))$("liveFsNext").textContent=next ? `${liveFmt(next.sb)} / ${liveFmt(next.bb)}` : "Dernier niveau";
+  if($("liveFsNext"))$("liveFsNext").textContent=`${liveFmt(next.sb)} / ${liveFmt(next.bb)}`;
   if($("liveFsProgressFill"))$("liveFsProgressFill").style.width=`${progress}%`;
 
   if($("liveFsPlayers")){
@@ -24972,9 +24973,7 @@ function renderSpectatorLive(){
     $("spectatorTimer").textContent=liveTime(s.remainingSeconds);
   }
   if($("spectatorNextBlinds")){
-    $("spectatorNextBlinds").textContent=next
-      ? `${liveFmt(next.sb)} / ${liveFmt(next.bb)}${next.ante?" · ante "+liveFmt(next.ante):""}`
-      : "Dernier niveau";
+    $("spectatorNextBlinds").textContent=`${liveFmt(next.sb)} / ${liveFmt(next.bb)}${next.ante?" · ante "+liveFmt(next.ante):""}`;
   }
   if($("spectatorRemaining")){
     $("spectatorRemaining").textContent=String(remainingCount);
@@ -27215,7 +27214,7 @@ document.addEventListener("visibilitychange",()=>{
     return current?.levels?.[Number(current.levelIndex)||0]||null;
   }
   function nextLevel(){
-    return current?.levels?.[(Number(current.levelIndex)||0)+1]||null;
+    return bptGetNextLevel(current?.levels, Number(current?.levelIndex)||0);
   }
 
   function currentBlindDurationMinutes(){
@@ -27327,11 +27326,94 @@ document.addEventListener("visibilitychange",()=>{
     });
     live3ClosePaceModal();
   }
-  const BPT_SB_STRUCTURE=[25,50,75,100,150,200,300,400,500,600,800,1000,1200,1500,2000,3000,4000,5000];
+  const BPT_SB_STRUCTURE=[25,50,75,100,150,200,300,400,500,600,800,1000,1200,1500,2000,2500,3000,4000,5000,6000,8000,10000,12000,15000,20000];
   function bptGetBlindLevels(){
     const src=Array.isArray(window.BPT_BLIND_LEVELS)?window.BPT_BLIND_LEVELS:null;
-    const valid=src?.map(v=>({sb:Number(v?.sb),bb:Number(v?.bb)})).filter(v=>Number.isFinite(v.sb)&&Number.isFinite(v.bb)&&v.sb>0&&v.bb>v.sb);
-    return valid&&valid.length ? valid : BPT_SB_STRUCTURE.map(sb=>({sb,bb:sb*2}));
+    const valid=(src||[]).map(v=>({sb:Number(v?.sb),bb:Number(v?.bb)})).filter(v=>Number.isFinite(v.sb)&&Number.isFinite(v.bb)&&v.sb>0&&v.bb>v.sb);
+    const out=valid.length ? valid.slice() : [];
+    // BPT 4.52 : la structure standard comporte toujours au moins 25 niveaux.
+    // Les anciennes configurations plus courtes sont prolongées sans écraser les niveaux personnalisés existants.
+    for(const sb of BPT_SB_STRUCTURE){
+      if(out.length>=25)break;
+      if(!out.some(v=>Number(v.sb)===sb)) out.push({sb,bb:sb*2});
+    }
+    out.sort((a,b)=>a.sb-b.sb);
+    while(out.length<25){
+      const prev=out[out.length-1]||{sb:25,bb:50};
+      const grown=bptRoundBlindValue(Number(prev.sb)*1.25);
+      const nextSb=Math.max(Number(prev.sb)+bptBlindRoundStep(Number(prev.sb)),grown);
+      out.push({sb:nextSb,bb:nextSb*2});
+    }
+    return out.slice(0,25);
+  }
+
+  function bptBlindRoundStep(value){
+    const n=Math.max(1,Number(value)||1);
+    if(n<200)return 25;
+    if(n<1000)return 50;
+    if(n<5000)return 100;
+    if(n<10000)return 500;
+    if(n<50000)return 1000;
+    return 5000;
+  }
+
+  function bptRoundBlindValue(value){
+    const step=bptBlindRoundStep(value);
+    return Math.max(step, Math.round((Number(value)||0)/step)*step);
+  }
+
+  function bptComputedNextBlindLevel(level){
+    const currentSb=Math.max(1,Number(level?.sb)||25);
+    const currentBb=Math.max(currentSb*2,Number(level?.bb)||currentSb*2);
+    const configuredLevels=bptGetBlindLevels();
+    const exactIndex=configuredLevels.findIndex(v=>Number(v.sb)===currentSb && Number(v.bb)===currentBb);
+    if(exactIndex>=0 && exactIndex<configuredLevels.length-1){
+      const next=configuredLevels[exactIndex+1];
+      return {sb:Number(next.sb),bb:Number(next.bb)};
+    }
+    const configuredNext=configuredLevels.find(v=>Number(v.sb)>currentSb && Number(v.bb)>currentBb);
+    if(configuredNext){
+      return {sb:Number(configuredNext.sb),bb:Number(configuredNext.bb)};
+    }
+
+    const grownSb=bptRoundBlindValue(currentSb*1.25);
+    const nextSb=Math.max(currentSb+bptBlindRoundStep(currentSb), grownSb);
+    return {sb:nextSb,bb:nextSb*2};
+  }
+
+  function bptSyntheticLevelAfter(level){
+    const nextBlind=bptComputedNextBlindLevel(level||{});
+    const durationSec=Math.max(60,
+      Number(level?.durationSec)
+      || Math.round((Number(level?.durationMin)||15)*60)
+      || 15*60
+    );
+    return {
+      level:Math.max(1,(Number(level?.level)||0)+1),
+      sb:Number(nextBlind.sb),
+      bb:Number(nextBlind.bb),
+      ante:Number(level?.ante)||0,
+      durationSec,
+      durationMin:Math.max(1,Math.round(durationSec/60))
+    };
+  }
+
+  function bptGetNextLevel(levels,index){
+    const list=Array.isArray(levels)?levels:[];
+    const idx=Math.max(0,Number(index)||0);
+    if(list[idx+1])return list[idx+1];
+    const base=list[idx] || list[list.length-1] || {level:idx+1,sb:25,bb:50,ante:0,durationSec:15*60,durationMin:15};
+    return bptSyntheticLevelAfter(base);
+  }
+
+  function bptEnsureLevelExists(state,targetIndex){
+    if(!state)return state;
+    if(!Array.isArray(state.levels))state.levels=[];
+    while(state.levels.length<=targetIndex){
+      const prev=state.levels[state.levels.length-1] || {level:0,sb:25,bb:50,ante:0,durationSec:15*60,durationMin:15};
+      state.levels.push(bptSyntheticLevelAfter(prev));
+    }
+    return state;
   }
 
   function selectedPlayerCount(){
@@ -28286,15 +28368,17 @@ function connectionDeviceLabel(){
   async function changeLevel(delta,auto=false){
     if(!isOwner())return;
     await ownerTransaction(s=>{
-      const oldIdx=Number(s.levelIndex)||0;
-      const idx=Math.max(0,Math.min((s.levels?.length||1)-1,oldIdx+delta));
+      const oldIdx=Math.max(0,Number(s.levelIndex)||0);
+      const requestedIdx=Math.max(0,oldIdx+delta);
+      bptEnsureLevelExists(s, requestedIdx);
+      const idx=Math.max(0,requestedIdx);
       if(idx===oldIdx&&!auto)return s;
       const now=Date.now();
       if(s.running&&s.runStartedAt){
         s.elapsedSec=Number(s.elapsedSec||0)+Math.max(0,Math.floor((now-Number(s.runStartedAt))/1000));
       }
       s.levelIndex=idx;
-      s.remainingSec=Number(s.levels[idx]?.durationSec||900);
+      s.remainingSec=Math.max(1,Number(s.levels[idx]?.durationSec||900));
       if(s.running){
         s.runStartedAt=now;
         s.deadline=now+s.remainingSec*1000;
@@ -28307,7 +28391,6 @@ function connectionDeviceLabel(){
 
   async function autoAdvanceIfNeeded(){
     if(advancing||!isOwner()||!current?.running||remainingSeconds()>0)return;
-    if((Number(current.levelIndex)||0)>=(current.levels?.length||1)-1)return;
     advancing=true;
     try{await changeLevel(1,true);}finally{advancing=false;}
   }
@@ -29319,7 +29402,7 @@ async function requestTakeover(){
     const avg=count?total/count:0;
     const blinds=lv?`${fmt(lv.sb)} / ${fmt(lv.bb)}`:"—";
     const ante=lv?.ante?`ANTE ${fmt(lv.ante)}`:"";
-    const next=nx?`${fmt(nx.sb)} / ${fmt(nx.bb)}${nx.ante?` · ante ${fmt(nx.ante)}`:""}`:"Dernier niveau";
+    const next=`${fmt(nx.sb)} / ${fmt(nx.bb)}${nx.ante?` · ante ${fmt(nx.ante)}`:""}`;
 
     $3("live3GameLocation").textContent=current.location||"Live BPT";
     $3("live3GameMeta").textContent=`${current.date||""} · ${current.players?.length||0} joueurs · maître : ${current.ownerLabel||"—"}`;
@@ -30077,7 +30160,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   const POINTS_PATH="bpt/config/points_table";
   const BLINDS_PATH="bpt/config/blind_structure";
   const BLINDS_KEY="bpt_blind_structure_v2";
-  const DEFAULT_SB=[25,50,75,100,150,200,300,400,500,600,800,1000,1200,1500,2000,3000,4000,5000];
+  const DEFAULT_SB=[25,50,75,100,150,200,300,400,500,600,800,1000,1200,1500,2000,2500,3000,4000,5000,6000,8000,10000,12000,15000,20000];
 
   function defaultBlinds(){
     return DEFAULT_SB.map(sb=>({sb,bb:sb*2}));
@@ -30089,7 +30172,13 @@ document.addEventListener("DOMContentLoaded",()=>{
       .map(v=>Number(v?.sb))
       .filter(sb=>Number.isFinite(sb)&&sb>0)
       .map(sb=>({sb:Math.round(sb),bb:Math.round(sb)*2}));
-    return out.length?out:defaultBlinds();
+    const merged=out.length?out:defaultBlinds();
+    for(const sb of DEFAULT_SB){
+      if(merged.length>=25)break;
+      if(!merged.some(v=>v.sb===sb))merged.push({sb,bb:sb*2});
+    }
+    merged.sort((a,b)=>a.sb-b.sb);
+    return merged.slice(0,25);
   }
 
   function setBlinds(rows){
@@ -30424,17 +30513,25 @@ document.addEventListener("DOMContentLoaded",()=>{
 <div id="bptOddsModal" class="bpt-odds-modal" aria-hidden="true">
   <div class="bpt-odds-card" role="dialog" aria-modal="true" aria-labelledby="bptOddsTitle">
     <div class="bpt-odds-head"><h2 id="bptOddsTitle">Calcul de côtes · Texas Hold'em</h2><button id="bptOddsClose" class="bpt-odds-close" type="button">×</button></div>
-    <div class="bpt-odds-help">Touchez un emplacement, puis une carte. Renseignez les deux mains et, si besoin, le flop / turn / river. Le calcul donne l'équité de chaque main.</div>
+    <div class="bpt-odds-help">Touchez un emplacement, puis une carte. Joueurs 1 et 2 obligatoires ; joueurs 3 et 4 optionnels. Renseignez ensuite le flop / turn / river si connus.</div>
     <div class="bpt-odds-zone"><div class="bpt-odds-zone-title">Joueur 1</div><div class="bpt-odds-slots"><button class="bpt-card-slot active" data-slot="p1a">Carte 1</button><button class="bpt-card-slot" data-slot="p1b">Carte 2</button></div></div>
     <div class="bpt-odds-zone"><div class="bpt-odds-zone-title">Joueur 2</div><div class="bpt-odds-slots"><button class="bpt-card-slot" data-slot="p2a">Carte 1</button><button class="bpt-card-slot" data-slot="p2b">Carte 2</button></div></div>
+    <div class="bpt-odds-zone"><div class="bpt-odds-zone-title">Joueur 3 · optionnel</div><div class="bpt-odds-slots"><button class="bpt-card-slot" data-slot="p3a">Carte 1</button><button class="bpt-card-slot" data-slot="p3b">Carte 2</button></div></div>
+    <div class="bpt-odds-zone"><div class="bpt-odds-zone-title">Joueur 4 · optionnel</div><div class="bpt-odds-slots"><button class="bpt-card-slot" data-slot="p4a">Carte 1</button><button class="bpt-card-slot" data-slot="p4b">Carte 2</button></div></div>
     <div class="bpt-odds-zone"><div class="bpt-odds-zone-title">Board</div><div class="bpt-odds-slots"><button class="bpt-card-slot" data-slot="b1">Flop 1</button><button class="bpt-card-slot" data-slot="b2">Flop 2</button><button class="bpt-card-slot" data-slot="b3">Flop 3</button><button class="bpt-card-slot" data-slot="b4">Turn</button><button class="bpt-card-slot" data-slot="b5">River</button></div><div id="bptOddsDeck" class="bpt-odds-deck"></div></div>
     <div class="bpt-odds-actions"><button id="bptOddsReset" class="bpt-odds-reset" type="button">Réinitialiser</button><button id="bptOddsCalc" class="bpt-odds-calc" type="button">Calculer</button></div>
-    <div id="bptOddsResults" class="bpt-odds-results" hidden><div class="bpt-odds-result"><span>Joueur 1</span><strong id="bptOddsP1">—</strong><small id="bptOddsP1Detail"></small></div><div class="bpt-odds-result"><span>Joueur 2</span><strong id="bptOddsP2">—</strong><small id="bptOddsP2Detail"></small></div><div id="bptOddsNote" class="bpt-odds-note"></div></div>
+    <div id="bptOddsResults" class="bpt-odds-results" hidden>
+      <div class="bpt-odds-result" data-result-player="1"><span>Joueur 1</span><strong id="bptOddsP1">—</strong><small id="bptOddsP1Detail"></small></div>
+      <div class="bpt-odds-result" data-result-player="2"><span>Joueur 2</span><strong id="bptOddsP2">—</strong><small id="bptOddsP2Detail"></small></div>
+      <div class="bpt-odds-result" data-result-player="3"><span>Joueur 3</span><strong id="bptOddsP3">—</strong><small id="bptOddsP3Detail"></small></div>
+      <div class="bpt-odds-result" data-result-player="4"><span>Joueur 4</span><strong id="bptOddsP4">—</strong><small id="bptOddsP4Detail"></small></div>
+      <div id="bptOddsNote" class="bpt-odds-note"></div>
+    </div>
   </div>
 </div>
 
 
-<script id="bpt-v448-odds-script">
+<script id="bpt-v452-odds-script">
 (function(){
   "use strict";
   const modal=document.getElementById("bptOddsModal"); if(!modal)return;
@@ -30444,9 +30541,10 @@ document.addEventListener("DOMContentLoaded",()=>{
   const suits=[{k:"s",s:"♠",red:false},{k:"h",s:"♥",red:true},{k:"d",s:"♦",red:true},{k:"c",s:"♣",red:false}];
   const values={"2":2,"3":3,"4":4,"5":5,"6":6,"7":7,"8":8,"9":9,"10":10,"J":11,"Q":12,"K":13,"A":14};
   const chosen={}; let active="p1a";
+  const labelMap={p1a:"Carte 1",p1b:"Carte 2",p2a:"Carte 1",p2b:"Carte 2",p3a:"Carte 1",p3b:"Carte 2",p4a:"Carte 1",p4b:"Carte 2",b1:"Flop 1",b2:"Flop 2",b3:"Flop 3",b4:"Turn",b5:"River"};
   function cardLabel(c){if(!c)return ""; const su=suits.find(x=>x.k===c.s);return c.r+(su?.s||"");}
   function update(){
-    slots.forEach(btn=>{const c=chosen[btn.dataset.slot];btn.classList.toggle("active",btn.dataset.slot===active);btn.classList.toggle("filled",!!c);btn.classList.toggle("red",!!c&&(c.s==="h"||c.s==="d"));btn.textContent=c?cardLabel(c):({p1a:"Carte 1",p1b:"Carte 2",p2a:"Carte 1",p2b:"Carte 2",b1:"Flop 1",b2:"Flop 2",b3:"Flop 3",b4:"Turn",b5:"River"}[btn.dataset.slot]||"Carte");});
+    slots.forEach(btn=>{const c=chosen[btn.dataset.slot];btn.classList.toggle("active",btn.dataset.slot===active);btn.classList.toggle("filled",!!c);btn.classList.toggle("red",!!c&&(c.s==="h"||c.s==="d"));btn.textContent=c?cardLabel(c):(labelMap[btn.dataset.slot]||"Carte");});
     const used=new Set(Object.values(chosen).filter(Boolean).map(c=>c.r+c.s));
     deck.querySelectorAll("button[data-card]").forEach(b=>b.disabled=used.has(b.dataset.card));
   }
@@ -30476,22 +30574,53 @@ document.addEventListener("DOMContentLoaded",()=>{
   }
   function seven(cs){let best=null;for(let a=0;a<3;a++)for(let b=a+1;b<4;b++)for(let c=b+1;c<5;c++)for(let d=c+1;d<6;d++)for(let e=d+1;e<7;e++){const sc=five([cs[a],cs[b],cs[c],cs[d],cs[e]]);if(!best||cmp(sc,best)>0)best=sc;}return best;}
   function fullDeck(){const out=[];suits.forEach(su=>ranks.forEach(r=>out.push({r,s:su.k,v:values[r]})));return out;}
+  function playerHand(i){return [chosen[`p${i}a`],chosen[`p${i}b`]];}
   function run(){
-    const p1=[chosen.p1a,chosen.p1b],p2=[chosen.p2a,chosen.p2b];if(p1.some(x=>!x)||p2.some(x=>!x)){alert("Renseignez les deux cartes des deux joueurs.");return;}
-    const board=[chosen.b1,chosen.b2,chosen.b3,chosen.b4,chosen.b5].filter(Boolean); if(board.length===1||board.length===2){alert("Pour le board, renseignez au minimum les 3 cartes du flop.");return;}
-    const used=new Set([...p1,...p2,...board].map(c=>c.r+c.s)); const remain=fullDeck().filter(c=>!used.has(c.r+c.s)); const missing=5-board.length;
-    let w1=0,w2=0,t=0,total=0; const maxSamples=missing===0?1:25000;
-    if(missing===0){const c=cmp(seven([...p1,...board]),seven([...p2,...board])); if(c>0)w1++;else if(c<0)w2++;else t++;total=1;}
+    const hands=[];
+    for(let i=1;i<=4;i++){
+      const h=playerHand(i),filled=h.filter(Boolean).length;
+      if(i<=2 && filled<2){alert("Renseignez les deux cartes des joueurs 1 et 2.");return;}
+      if(i>2 && filled===1){alert(`Le joueur ${i} a une main incomplète : renseignez ses deux cartes ou aucune.`);return;}
+      if(filled===2)hands.push({i,cards:h});
+    }
+    if(hands.length<2){alert("Il faut au moins deux joueurs avec deux cartes chacun.");return;}
+    const board=[chosen.b1,chosen.b2,chosen.b3,chosen.b4,chosen.b5].filter(Boolean);
+    if(board.length===1||board.length===2){alert("Pour le board, renseignez au minimum les 3 cartes du flop.");return;}
+    const allKnown=[...hands.flatMap(h=>h.cards),...board];
+    const used=new Set(allKnown.map(c=>c.r+c.s));
+    const remain=fullDeck().filter(c=>!used.has(c.r+c.s));
+    const missing=5-board.length;
+    const stats={};hands.forEach(h=>stats[h.i]={equity:0,wins:0,ties:0});
+    let total=0;
+    const maxSamples=missing===0?1:25000;
+    function scoreOne(finalBoard){
+      const scored=hands.map(h=>({i:h.i,score:seven([...h.cards,...finalBoard])}));
+      let best=scored[0].score;
+      for(let k=1;k<scored.length;k++)if(cmp(scored[k].score,best)>0)best=scored[k].score;
+      const winners=scored.filter(x=>cmp(x.score,best)===0);
+      const share=1/winners.length;
+      winners.forEach(w=>{stats[w.i].equity+=share;if(winners.length===1)stats[w.i].wins++;else stats[w.i].ties++;});
+      total++;
+    }
+    if(missing===0)scoreOne(board);
     else{
       for(let n=0;n<maxSamples;n++){
-        const pool=remain.slice(); const drawn=[];for(let k=0;k<missing;k++){const j=Math.floor(Math.random()*pool.length);drawn.push(pool[j]);pool[j]=pool[pool.length-1];pool.pop();}
-        const b=[...board,...drawn],c=cmp(seven([...p1,...b]),seven([...p2,...b]));if(c>0)w1++;else if(c<0)w2++;else t++;total++;
+        const pool=remain.slice(),drawn=[];
+        for(let k=0;k<missing;k++){const j=Math.floor(Math.random()*pool.length);drawn.push(pool[j]);pool[j]=pool[pool.length-1];pool.pop();}
+        scoreOne([...board,...drawn]);
       }
     }
-    const eq1=(w1+t/2)/total*100,eq2=(w2+t/2)/total*100, tie=t/total*100;
-    document.getElementById("bptOddsP1").textContent=eq1.toFixed(1)+" %";document.getElementById("bptOddsP2").textContent=eq2.toFixed(1)+" %";
-    document.getElementById("bptOddsP1Detail").textContent=`Gain ${(w1/total*100).toFixed(1)} %`;document.getElementById("bptOddsP2Detail").textContent=`Gain ${(w2/total*100).toFixed(1)} %`;
-    document.getElementById("bptOddsNote").textContent=(missing?`Simulation ${total.toLocaleString("fr-FR")} tirages · `:"Calcul exact · ")+`Égalité ${tie.toFixed(1)} %`;
+    for(let i=1;i<=4;i++){
+      const box=modal.querySelector(`[data-result-player="${i}"]`),st=stats[i];
+      if(!box)continue;
+      box.hidden=!st;
+      if(st){
+        document.getElementById(`bptOddsP${i}`).textContent=(st.equity/total*100).toFixed(1)+" %";
+        const winPct=st.wins/total*100, tiePct=st.ties/total*100;
+        document.getElementById(`bptOddsP${i}Detail`).textContent=`Gain ${winPct.toFixed(1)} % · partage ${tiePct.toFixed(1)} %`;
+      }
+    }
+    document.getElementById("bptOddsNote").textContent=(missing?`Simulation ${total.toLocaleString("fr-FR")} tirages`:`Calcul exact`)+` · ${hands.length} joueurs`;
     document.getElementById("bptOddsResults").hidden=false;
   }
   document.getElementById("bptOddsCalc")?.addEventListener("click",run);update();
