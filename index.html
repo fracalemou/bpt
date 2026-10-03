@@ -14605,138 +14605,6 @@ nav button[data-view="live"],#live,#liveFullscreenDisplay,#spectatorServerOverla
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="BPT">
 <link rel="apple-touch-icon" href="./icon-192.png">
-
-
-<style id="bpt-live3-v439-fullscreen-canonical">
-/* ===== BPT 4.40 — Live V3 fullscreen rebuilt from stable 4.34 ===== */
-html:has(#live3Fullscreen.open),
-body:has(#live3Fullscreen.open){
-  margin:0 !important;
-  padding:0 !important;
-  width:100% !important;
-  height:100% !important;
-  overflow:hidden !important;
-  overscroll-behavior:none !important;
-}
-
-#live3Fullscreen.bpt-live3-fullscreen{
-  display:none !important;
-  position:fixed !important;
-  inset:0 !important;
-  width:auto !important;
-  height:auto !important;
-  margin:0 !important;
-  box-sizing:border-box !important;
-  overflow:hidden !important;
-  z-index:1000000 !important;
-  background:radial-gradient(circle at 50% -18%,rgba(47,109,80,.22),transparent 46%),#0b120e !important;
-  color:#fff !important;
-  padding:max(6px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(6px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left)) !important;
-}
-#live3Fullscreen.bpt-live3-fullscreen.open{display:block !important;}
-
-#live3Fullscreen .bpt-live3-fs-shell{
-  width:100% !important;
-  height:100% !important;
-  min-width:0 !important;
-  min-height:0 !important;
-  display:grid !important;
-  grid-template-areas:"head" "blinds" "timer" "kpis" "actions" "players" !important;
-  grid-template-columns:1fr !important;
-  grid-template-rows:52px 108px minmax(120px,1fr) 74px 56px 92px !important;
-  gap:7px !important;
-  overflow:hidden !important;
-}
-#live3Fullscreen .bpt-live3-fs-head{grid-area:head !important;display:grid !important;grid-template-columns:1fr auto !important;align-items:center !important;gap:10px !important;min-width:0 !important;overflow:hidden !important;}
-#live3Fullscreen .bpt-live3-fs-brand{justify-self:start !important;color:var(--gold) !important;font-size:36px !important;font-weight:950 !important;line-height:1 !important;}
-#live3Fullscreen .bpt-live3-fs-rem{justify-self:end !important;display:flex !important;flex-direction:column !important;align-items:flex-end !important;justify-content:center !important;line-height:1 !important;}
-#live3Fullscreen .bpt-live3-fs-rem strong{font-size:34px !important;line-height:.9 !important;color:#fff !important;}
-#live3Fullscreen .bpt-live3-fs-rem span{font-size:12px !important;color:#c2cbc5 !important;}
-#live3Fullscreen .bpt-live3-fs-chat{display:none !important;}
-
-#live3Fullscreen .bpt-live3-fs-blinds{grid-area:blinds !important;display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:center !important;text-align:center !important;overflow:visible !important;padding:4px 0 !important;}
-#live3Fullscreen .bpt-live3-fs-blinds span{display:block !important;color:#c5cec8 !important;font-size:13px !important;font-weight:850 !important;line-height:1.15 !important;margin-bottom:3px !important;}
-#live3Fullscreen .bpt-live3-fs-blinds strong{display:block !important;color:var(--gold) !important;font-size:70px !important;font-weight:950 !important;line-height:.92 !important;white-space:nowrap !important;}
-#live3Fullscreen .bpt-live3-fs-duration-label{display:block !important;color:#f0f2f0 !important;font-size:12px !important;font-weight:850 !important;line-height:1.15 !important;margin-top:5px !important;white-space:nowrap !important;overflow:visible !important;}
-
-#live3Fullscreen .bpt-live3-fs-timer{grid-area:timer !important;display:flex !important;align-items:center !important;justify-content:center !important;text-align:center !important;overflow:hidden !important;}
-#live3Fullscreen .bpt-live3-fs-timer>div{font-size:clamp(118px,18vw,250px) !important;font-weight:1000 !important;letter-spacing:-.06em !important;line-height:.80 !important;white-space:nowrap !important;color:#fff !important;}
-
-#live3Fullscreen .bpt-live3-fs-kpis{grid-area:kpis !important;display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:8px !important;width:100% !important;min-width:0 !important;}
-#live3Fullscreen .bpt-live3-fs-kpis>div{display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:center !important;min-width:0 !important;padding:6px 8px !important;border:1px solid #344a3d !important;border-radius:12px !important;background:#17231d !important;overflow:hidden !important;}
-#live3Fullscreen .bpt-live3-fs-kpis span{font-size:11px !important;color:#aeb9b1 !important;line-height:1 !important;white-space:nowrap !important;}
-#live3Fullscreen .bpt-live3-fs-kpis strong{font-size:20px !important;color:#fff !important;line-height:1.05 !important;white-space:nowrap !important;margin-top:3px !important;}
-
-#live3Fullscreen .bpt-live3-fs-actions{grid-area:actions !important;display:grid !important;grid-template-columns:repeat(4,minmax(0,1fr)) !important;gap:8px !important;width:100% !important;min-width:0 !important;}
-#live3Fullscreen .bpt-live3-fs-actions button{min-width:0 !important;width:100% !important;height:56px !important;padding:6px 8px !important;border-radius:10px !important;font-size:13px !important;font-weight:900 !important;line-height:1.1 !important;white-space:normal !important;overflow-wrap:normal !important;word-break:normal !important;}
-#live3FsStartPauseBtn{background:var(--gold) !important;color:#17120b !important;}
-#live3FsEliminateBtn{background:#8f4545 !important;color:#fff !important;}
-#live3FsChatActionBtn,#live3FsSpectatorChatBtn{background:#26372e !important;color:#fff !important;border:1px solid #40584a !important;}
-#live3FsExitActionBtn,#live3FsSpectatorExitBtn{background:#202923 !important;color:#fff !important;border:1px solid #47554d !important;}
-#live3FsTakeoverActionBtn{background:#0c79c8 !important;color:#fff !important;border:1px solid #3aa2eb !important;}
-#live3Fullscreen.bpt-live3-role-owner #live3FsMasterActions{display:grid !important;}
-#live3Fullscreen.bpt-live3-role-owner #live3FsSpectatorActions{display:none !important;}
-#live3Fullscreen.bpt-live3-role-spectator #live3FsMasterActions{display:none !important;}
-#live3Fullscreen.bpt-live3-role-spectator #live3FsSpectatorActions{display:grid !important;grid-template-columns:1.4fr 1fr 1.4fr !important;}
-
-#live3Fullscreen .bpt-live3-fs-players{grid-area:players !important;display:block !important;min-width:0 !important;overflow:hidden !important;padding:5px 6px !important;}
-#live3Fullscreen .bpt-live3-fs-players-title{text-align:center !important;font-size:10px !important;color:#c3ccc6 !important;margin-bottom:5px !important;}
-#live3Fullscreen .bpt-live3-fs-player-list{display:flex !important;flex-wrap:wrap !important;justify-content:center !important;align-content:flex-start !important;gap:6px !important;width:100% !important;max-height:100% !important;overflow:hidden !important;}
-#live3Fullscreen .bpt-live3-fs-player{flex:1 1 150px !important;max-width:230px !important;min-width:120px !important;text-align:center !important;padding:4px 7px !important;border-radius:999px !important;background:#1c2a22 !important;border:1px solid #405548 !important;color:#fff !important;font-size:10px !important;line-height:1.15 !important;white-space:normal !important;}
-
-/* Phone portrait: dedicated composition, never PC squeezed into a narrow column. */
-@media (max-width:700px) and (orientation:portrait){
-  #live3Fullscreen.bpt-live3-fullscreen{padding:max(5px,env(safe-area-inset-top)) max(6px,env(safe-area-inset-right)) max(5px,env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left)) !important;}
-  #live3Fullscreen .bpt-live3-fs-shell{grid-template-rows:38px 78px minmax(120px,1fr) 72px 104px minmax(76px,110px) !important;gap:5px !important;}
-  #live3Fullscreen .bpt-live3-fs-brand{font-size:24px !important;}
-  #live3Fullscreen .bpt-live3-fs-rem strong{font-size:23px !important;}
-  #live3Fullscreen .bpt-live3-fs-rem span{font-size:9px !important;}
-  #live3Fullscreen .bpt-live3-fs-blinds span{font-size:9px !important;margin-bottom:2px !important;}
-  #live3Fullscreen .bpt-live3-fs-blinds strong{font-size:46px !important;}
-  #live3Fullscreen .bpt-live3-fs-duration-label{font-size:9px !important;margin-top:3px !important;}
-  #live3Fullscreen .bpt-live3-fs-timer>div{font-size:clamp(74px,25vw,112px) !important;line-height:.84 !important;}
-  #live3Fullscreen .bpt-live3-fs-kpis{grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:5px !important;}
-  #live3Fullscreen .bpt-live3-fs-kpis>div{padding:5px 3px !important;}
-  #live3Fullscreen .bpt-live3-fs-kpis span{font-size:7px !important;white-space:normal !important;text-align:center !important;}
-  #live3Fullscreen .bpt-live3-fs-kpis strong{font-size:13px !important;}
-  #live3Fullscreen .bpt-live3-fs-actions{grid-template-columns:1fr 1fr !important;grid-template-rows:1fr 1fr !important;gap:6px !important;}
-  #live3Fullscreen .bpt-live3-fs-actions button{height:auto !important;min-height:47px !important;font-size:10px !important;padding:5px 7px !important;}
-  #live3Fullscreen.bpt-live3-role-spectator #live3FsSpectatorActions{grid-template-columns:1fr !important;grid-template-rows:repeat(3,1fr) !important;}
-  #live3Fullscreen .bpt-live3-fs-player{flex:1 1 calc(50% - 6px) !important;min-width:0 !important;max-width:none !important;font-size:9px !important;padding:4px 5px !important;}
-  #live3Fullscreen .bpt-live3-fs-player-list{overflow:auto !important;overscroll-behavior:contain !important;}
-}
-
-/* Phone landscape: everything fits on one screen, all labels readable. */
-@media (max-width:900px) and (orientation:landscape){
-  #live3Fullscreen.bpt-live3-fullscreen{padding:max(4px,env(safe-area-inset-top)) max(6px,env(safe-area-inset-right)) max(4px,env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left)) !important;}
-  #live3Fullscreen .bpt-live3-fs-shell{grid-template-rows:32px 54px minmax(64px,1fr) 50px 44px 42px !important;gap:4px !important;}
-  #live3Fullscreen .bpt-live3-fs-brand{font-size:22px !important;}
-  #live3Fullscreen .bpt-live3-fs-rem{flex-direction:row !important;align-items:center !important;gap:5px !important;}
-  #live3Fullscreen .bpt-live3-fs-rem strong{font-size:20px !important;}
-  #live3Fullscreen .bpt-live3-fs-rem span{font-size:8px !important;}
-  #live3Fullscreen .bpt-live3-fs-blinds{padding:2px 0 !important;}
-  #live3Fullscreen .bpt-live3-fs-blinds span{font-size:8px !important;margin-bottom:1px !important;}
-  #live3Fullscreen .bpt-live3-fs-blinds strong{font-size:38px !important;line-height:.9 !important;}
-  #live3Fullscreen .bpt-live3-fs-duration-label{font-size:8px !important;margin-top:2px !important;}
-  #live3Fullscreen .bpt-live3-fs-timer>div{font-size:clamp(58px,11vw,92px) !important;line-height:.82 !important;}
-  #live3Fullscreen .bpt-live3-fs-kpis{grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:5px !important;}
-  #live3Fullscreen .bpt-live3-fs-kpis>div{padding:3px 5px !important;}
-  #live3Fullscreen .bpt-live3-fs-kpis span{font-size:7px !important;}
-  #live3Fullscreen .bpt-live3-fs-kpis strong{font-size:12px !important;}
-  #live3Fullscreen .bpt-live3-fs-actions{grid-template-columns:repeat(4,minmax(0,1fr)) !important;gap:6px !important;}
-  #live3Fullscreen .bpt-live3-fs-actions button{height:44px !important;font-size:9px !important;padding:4px 5px !important;}
-  #live3Fullscreen.bpt-live3-role-spectator #live3FsSpectatorActions{grid-template-columns:1.35fr 1fr 1.35fr !important;grid-template-rows:1fr !important;}
-  #live3Fullscreen .bpt-live3-fs-players{padding:2px 4px !important;}
-  #live3Fullscreen .bpt-live3-fs-players-title{display:none !important;}
-  #live3Fullscreen .bpt-live3-fs-player-list{gap:4px !important;overflow:hidden !important;}
-  #live3Fullscreen .bpt-live3-fs-player{flex:1 1 115px !important;min-width:95px !important;max-width:190px !important;font-size:8.5px !important;padding:3px 5px !important;}
-}
-
-/* Modals stay above fullscreen */
-#live3ChatModal,#live3ElimModal,#live3PaceModal{position:fixed !important;inset:0 !important;z-index:2000000 !important;isolation:isolate !important;}
-#live3ChatModal.open,#live3ElimModal.open,#live3PaceModal.open{display:flex !important;visibility:visible !important;opacity:1 !important;pointer-events:auto !important;}
-#live3ChatModal .bpt-live3-modal-card,#live3ElimModal .bpt-live3-modal-card,#live3PaceModal .bpt-live3-modal-card{position:relative !important;z-index:2000001 !important;pointer-events:auto !important;}
-</style>
 <style id="bpt-v450-pace-advisor">
 #live3Projection{margin:10px auto 0;width:min(900px,100%);display:flex;justify-content:center;gap:18px;align-items:center;padding:10px 14px;border-radius:12px;background:#f7f4ee;border:1px solid #ddd4c5;font-size:13px;flex-wrap:wrap}
 #live3Projection strong{font-size:15px}.bpt-pace-on-time{color:#355c45}.bpt-pace-late{color:#9a3f32}.bpt-pace-early{color:#2b6480}
@@ -15031,436 +14899,6 @@ body.bpt-mobile-device .bpt-mobile-top-menu button{
   -webkit-text-fill-color:#fff !important;
 }
 </style>
-
-
-<style id="bpt-live3-v439-reduced-layout">
-/* ===== BPT 4.40 — normal/reduced Live mirrors fullscreen hierarchy ===== */
-.bpt-nav-mobile-only{display:none !important;}
-html.bpt-mobile-device .bpt-nav-mobile-only,
-body.bpt-mobile-device .bpt-nav-mobile-only{display:block !important;}
-html.bpt-mobile-device .bpt-nav-desktop-only,
-body.bpt-mobile-device .bpt-nav-desktop-only{display:none !important;}
-html:not(.bpt-mobile-device) .bpt-nav-desktop-only{display:block !important;}
-
-#live3 .bpt-live3-game-card{overflow:hidden !important;}
-#live3 .bpt-live3-main{display:grid !important;justify-items:center !important;gap:14px !important;padding:18px 0 12px !important;width:100% !important;}
-#live3 .bpt-live3-blinds{text-align:center !important;}
-#live3 .bpt-live3-blinds .muted{display:block !important;}
-#live3 .bpt-live3-timer{text-align:center !important;}
-#live3 .bpt-live3-kpis{width:min(1240px,100%) !important;margin:0 auto !important;grid-template-columns:repeat(4,minmax(0,1fr)) !important;gap:12px !important;}
-
-#live3 #live3MasterControls{display:grid !important;grid-template-columns:1fr !important;gap:12px !important;width:100% !important;margin-top:18px !important;justify-items:center !important;}
-#live3 .bpt-live3-control-row{display:grid !important;width:min(1240px,100%) !important;margin:0 auto !important;gap:12px !important;align-items:stretch !important;justify-content:center !important;}
-#live3 .bpt-live3-control-row--extra{grid-template-columns:repeat(4,minmax(150px,1fr)) !important;}
-#live3 .bpt-live3-control-row--essential{grid-template-columns:repeat(3,minmax(180px,260px)) !important;justify-content:center !important;}
-#live3 .bpt-live3-control-row .btn{width:100% !important;min-width:0 !important;min-height:54px !important;margin:0 !important;white-space:normal !important;word-break:normal !important;overflow-wrap:normal !important;}
-
-#live3 .bpt-live3-duration-compact{display:grid !important;grid-template-columns:auto auto !important;align-items:center !important;justify-content:center !important;gap:16px !important;width:min(620px,100%) !important;margin:0 auto !important;padding:10px 14px !important;background:#17231d !important;border:1px solid #405548 !important;border-radius:12px !important;box-sizing:border-box !important;}
-#live3 .bpt-live3-duration-compact .bpt-live3-duration-editor-copy{display:grid !important;gap:2px !important;min-width:0 !important;}
-#live3 .bpt-live3-duration-compact .bpt-live3-duration-editor-copy strong{color:#fff !important;font-size:13px !important;white-space:nowrap !important;}
-#live3 .bpt-live3-duration-compact .bpt-live3-duration-editor-copy span{color:#bdc9c1 !important;font-size:10px !important;line-height:1.15 !important;white-space:nowrap !important;}
-#live3 .bpt-live3-duration-compact .bpt-live3-duration-editor-controls{display:grid !important;grid-template-columns:72px auto 110px !important;align-items:center !important;gap:8px !important;width:auto !important;}
-#live3 .bpt-live3-duration-compact input{width:72px !important;min-width:0 !important;min-height:42px !important;text-align:center !important;}
-#live3 .bpt-live3-duration-compact .btn{min-height:42px !important;width:110px !important;}
-#live3 .bpt-live3-duration-compact .bpt-live3-duration-editor-controls>span{color:#fff !important;font-weight:850 !important;}
-
-#live3 .bpt-live3-players{display:flex !important;flex-wrap:wrap !important;justify-content:center !important;gap:8px !important;width:100% !important;}
-#live3 .bpt-live3-player{flex:1 1 180px !important;max-width:260px !important;min-width:150px !important;text-align:center !important;}
-
-/* Real phone portrait */
-html.bpt-mobile-device body #live3 .bpt-live3-game-card{padding-left:10px !important;padding-right:10px !important;}
-@media (max-width:700px) and (orientation:portrait){
-  html.bpt-mobile-device #live3 .bpt-live3-game-head-actions,
-  body.bpt-mobile-device #live3 .bpt-live3-game-head-actions{display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr)) !important;gap:6px !important;width:100% !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-game-head-actions .btn,
-  body.bpt-mobile-device #live3 .bpt-live3-game-head-actions .btn{min-width:0 !important;width:100% !important;padding:7px 5px !important;font-size:10px !important;white-space:normal !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-main,
-  body.bpt-mobile-device #live3 .bpt-live3-main{gap:10px !important;padding:12px 0 !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-blinds strong,
-  body.bpt-mobile-device #live3 .bpt-live3-blinds strong{font-size:44px !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-timer,
-  body.bpt-mobile-device #live3 .bpt-live3-timer{font-size:clamp(66px,22vw,94px) !important;line-height:.9 !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-kpis,
-  body.bpt-mobile-device #live3 .bpt-live3-kpis{grid-template-columns:1fr 1fr !important;gap:8px !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-kpis>div,
-  body.bpt-mobile-device #live3 .bpt-live3-kpis>div{padding:10px 6px !important;min-width:0 !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-kpis span,
-  body.bpt-mobile-device #live3 .bpt-live3-kpis span{font-size:10px !important;white-space:normal !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-kpis strong,
-  body.bpt-mobile-device #live3 .bpt-live3-kpis strong{font-size:18px !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-control-row--extra,
-  body.bpt-mobile-device #live3 .bpt-live3-control-row--extra{grid-template-columns:1fr 1fr !important;gap:8px !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-control-row--essential,
-  body.bpt-mobile-device #live3 .bpt-live3-control-row--essential{grid-template-columns:1fr !important;gap:8px !important;width:100% !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-control-row .btn,
-  body.bpt-mobile-device #live3 .bpt-live3-control-row .btn{min-height:48px !important;font-size:13px !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-duration-compact,
-  body.bpt-mobile-device #live3 .bpt-live3-duration-compact{grid-template-columns:1fr !important;width:100% !important;gap:8px !important;padding:10px !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-duration-compact .bpt-live3-duration-editor-copy,
-  body.bpt-mobile-device #live3 .bpt-live3-duration-compact .bpt-live3-duration-editor-copy{text-align:center !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-duration-compact .bpt-live3-duration-editor-copy span,
-  body.bpt-mobile-device #live3 .bpt-live3-duration-compact .bpt-live3-duration-editor-copy span{white-space:normal !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-duration-compact .bpt-live3-duration-editor-controls,
-  body.bpt-mobile-device #live3 .bpt-live3-duration-compact .bpt-live3-duration-editor-controls{grid-template-columns:72px auto minmax(110px,1fr) !important;width:100% !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-duration-compact .btn,
-  body.bpt-mobile-device #live3 .bpt-live3-duration-compact .btn{width:100% !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-player,
-  body.bpt-mobile-device #live3 .bpt-live3-player{flex:1 1 calc(50% - 8px) !important;min-width:0 !important;max-width:none !important;font-size:11px !important;}
-}
-
-/* Real phone landscape: compact but readable, no vertical words. */
-@media (max-width:900px) and (orientation:landscape){
-  html.bpt-mobile-device #live3 .bpt-live3-main,
-  body.bpt-mobile-device #live3 .bpt-live3-main{gap:8px !important;padding:8px 0 !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-blinds strong,
-  body.bpt-mobile-device #live3 .bpt-live3-blinds strong{font-size:40px !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-timer,
-  body.bpt-mobile-device #live3 .bpt-live3-timer{font-size:72px !important;line-height:.9 !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-kpis,
-  body.bpt-mobile-device #live3 .bpt-live3-kpis{grid-template-columns:repeat(4,minmax(0,1fr)) !important;gap:6px !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-kpis>div,
-  body.bpt-mobile-device #live3 .bpt-live3-kpis>div{padding:7px 5px !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-control-row--extra,
-  body.bpt-mobile-device #live3 .bpt-live3-control-row--extra{grid-template-columns:repeat(4,minmax(0,1fr)) !important;gap:7px !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-control-row--essential,
-  body.bpt-mobile-device #live3 .bpt-live3-control-row--essential{grid-template-columns:repeat(3,minmax(0,1fr)) !important;width:100% !important;gap:7px !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-control-row .btn,
-  body.bpt-mobile-device #live3 .bpt-live3-control-row .btn{min-height:44px !important;font-size:11px !important;padding:5px 6px !important;white-space:normal !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-duration-compact,
-  body.bpt-mobile-device #live3 .bpt-live3-duration-compact{grid-template-columns:auto auto !important;width:min(600px,100%) !important;padding:7px 10px !important;gap:10px !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-duration-compact .bpt-live3-duration-editor-copy span,
-  body.bpt-mobile-device #live3 .bpt-live3-duration-compact .bpt-live3-duration-editor-copy span{white-space:normal !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-duration-compact .bpt-live3-duration-editor-controls,
-  body.bpt-mobile-device #live3 .bpt-live3-duration-compact .bpt-live3-duration-editor-controls{grid-template-columns:64px auto 100px !important;gap:6px !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-duration-compact input,
-  body.bpt-mobile-device #live3 .bpt-live3-duration-compact input{width:64px !important;}
-  html.bpt-mobile-device #live3 .bpt-live3-duration-compact .btn,
-  body.bpt-mobile-device #live3 .bpt-live3-duration-compact .btn{width:100px !important;}
-}
-</style>
-
-<style id="bpt-v440-targeted-fixes">
-/* ===== V4.40 targeted fixes ===== */
-
-/* 1. PLUS must never be visible on desktop, including touch PCs. */
-html:not(.bpt-mobile-device) #bptMobileMoreTopBtn,
-body:not(.bpt-mobile-device) #bptMobileMoreTopBtn{display:none !important;}
-
-/* Strong desktop guard independent from touch capability. */
-@media (min-width:901px){
-  #nav .bpt-nav-mobile-only{display:none !important;}
-  #nav .bpt-nav-desktop-only{display:flex !important;}
-}
-
-/* 2. Reduced Live on phone: keep supplementary controls fully inside viewport. */
-@media (max-width:700px){
-  #live3 #live3MasterControls,
-  #live3 .bpt-live3-controls-row,
-  #live3 .bpt-live3-controls-row--adjust,
-  #live3 .bpt-live3-controls-row--actions{
-    width:100% !important;
-    max-width:100% !important;
-    box-sizing:border-box !important;
-    margin-left:auto !important;
-    margin-right:auto !important;
-  }
-
-  #live3 .bpt-live3-controls-row--adjust{
-    display:grid !important;
-    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
-    gap:10px !important;
-    padding:0 !important;
-  }
-
-  #live3 .bpt-live3-controls-row--adjust > .btn{
-    width:100% !important;
-    max-width:none !important;
-    min-width:0 !important;
-    margin:0 !important;
-    padding:10px 8px !important;
-    box-sizing:border-box !important;
-    white-space:normal !important;
-    overflow-wrap:anywhere !important;
-    font-size:14px !important;
-    line-height:1.15 !important;
-  }
-
-  #live3 .bpt-live3-controls-row--actions{
-    display:grid !important;
-    grid-template-columns:1fr !important;
-    gap:10px !important;
-  }
-
-  #live3 .bpt-live3-controls-row--actions > .btn{
-    width:100% !important;
-    max-width:none !important;
-    min-width:0 !important;
-    margin:0 !important;
-    box-sizing:border-box !important;
-  }
-
-  /* 3. Blind duration editor becomes two clean rows. */
-  #live3 .bpt-live3-duration-inline{
-    width:100% !important;
-    max-width:100% !important;
-    min-width:0 !important;
-    display:grid !important;
-    grid-template-columns:1fr !important;
-    grid-template-rows:auto auto !important;
-    gap:10px !important;
-    padding:12px !important;
-    box-sizing:border-box !important;
-    margin:0 auto !important;
-  }
-
-  #live3 .bpt-live3-duration-inline .bpt-live3-duration-editor-copy{
-    display:block !important;
-    width:100% !important;
-    min-width:0 !important;
-    text-align:center !important;
-  }
-
-  #live3 .bpt-live3-duration-inline .bpt-live3-duration-editor-copy strong{
-    display:block !important;
-    white-space:normal !important;
-    font-size:14px !important;
-    line-height:1.15 !important;
-  }
-
-  #live3 .bpt-live3-duration-inline .bpt-live3-duration-editor-copy span{
-    display:block !important;
-    margin-top:3px !important;
-    white-space:normal !important;
-    font-size:11px !important;
-    line-height:1.2 !important;
-  }
-
-  #live3 .bpt-live3-duration-inline .bpt-live3-duration-editor-controls{
-    display:grid !important;
-    grid-template-columns:72px auto minmax(110px,1fr) !important;
-    gap:8px !important;
-    align-items:center !important;
-    width:100% !important;
-    min-width:0 !important;
-  }
-
-  #live3 .bpt-live3-duration-inline input{
-    width:72px !important;
-    min-width:0 !important;
-    box-sizing:border-box !important;
-  }
-
-  #live3 .bpt-live3-duration-inline .btn{
-    width:100% !important;
-    min-width:0 !important;
-    box-sizing:border-box !important;
-  }
-}
-
-/* 4. Fullscreen phone: move blinds block down from the top header. */
-@media (max-width:900px) and (orientation:portrait){
-  #live3Fullscreen .bpt-live3-fs-shell{
-    grid-template-rows:
-      56px
-      118px
-      minmax(0,1fr)
-      64px
-      106px
-      minmax(52px,auto) !important;
-    gap:8px !important;
-  }
-
-  #live3Fullscreen .bpt-live3-fs-blinds{
-    align-self:end !important;
-    padding-top:18px !important;
-    padding-bottom:4px !important;
-  }
-
-  #live3Fullscreen .bpt-live3-fs-blinds span{
-    margin-top:8px !important;
-  }
-
-  #live3Fullscreen .bpt-live3-fs-duration-label{
-    margin-top:8px !important;
-  }
-}
-
-@media (max-width:900px) and (orientation:landscape){
-  #live3Fullscreen .bpt-live3-fs-shell{
-    grid-template-rows:
-      42px
-      78px
-      minmax(0,1fr)
-      58px
-      48px
-      minmax(42px,auto) !important;
-    gap:5px !important;
-  }
-
-  #live3Fullscreen .bpt-live3-fs-blinds{
-    align-self:end !important;
-    padding-top:12px !important;
-    padding-bottom:2px !important;
-  }
-
-  #live3Fullscreen .bpt-live3-fs-duration-label{
-    margin-top:5px !important;
-  }
-}
-</style>
-
-
-<style id="bpt-v441-landscape-fullscreen-only">
-/* V4.41 — téléphone paysage uniquement. Portrait inchangé. */
-@media (max-width:900px) and (orientation:landscape){
-  #live3Fullscreen.bpt-live3-fullscreen{
-    overflow:hidden !important;
-  }
-
-  #live3Fullscreen .bpt-live3-fs-shell{
-    grid-template-areas:
-      "head"
-      "blinds"
-      "timer"
-      "kpis"
-      "actions"
-      "players" !important;
-    grid-template-columns:1fr !important;
-    grid-template-rows:
-      36px
-      68px
-      minmax(78px,1fr)
-      58px
-      48px
-      34px !important;
-    gap:4px !important;
-    height:100% !important;
-    max-height:100% !important;
-    overflow:hidden !important;
-  }
-
-  #live3Fullscreen .bpt-live3-fs-head{
-    min-height:0 !important;
-    overflow:hidden !important;
-  }
-
-  #live3Fullscreen .bpt-live3-fs-blinds{
-    min-height:0 !important;
-    align-self:stretch !important;
-    justify-content:center !important;
-    padding:8px 0 0 !important;
-    overflow:hidden !important;
-  }
-  #live3Fullscreen .bpt-live3-fs-blinds span{
-    font-size:8px !important;
-    margin:0 0 1px !important;
-    line-height:1 !important;
-  }
-  #live3Fullscreen .bpt-live3-fs-blinds strong{
-    font-size:38px !important;
-    line-height:.9 !important;
-  }
-  #live3Fullscreen .bpt-live3-fs-duration-label{
-    font-size:8px !important;
-    line-height:1 !important;
-    margin-top:3px !important;
-  }
-
-  #live3Fullscreen .bpt-live3-fs-timer{
-    min-height:0 !important;
-    height:100% !important;
-    overflow:hidden !important;
-    align-items:center !important;
-  }
-  #live3Fullscreen .bpt-live3-fs-timer>div{
-    font-size:clamp(54px,9.5vw,78px) !important;
-    line-height:.78 !important;
-    max-height:100% !important;
-  }
-
-  #live3Fullscreen .bpt-live3-fs-kpis{
-    min-height:0 !important;
-    height:58px !important;
-    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
-    gap:5px !important;
-    overflow:hidden !important;
-  }
-  #live3Fullscreen .bpt-live3-fs-kpis>div{
-    min-height:0 !important;
-    padding:4px 5px !important;
-  }
-  #live3Fullscreen .bpt-live3-fs-kpis span{
-    font-size:7px !important;
-    line-height:1 !important;
-  }
-  #live3Fullscreen .bpt-live3-fs-kpis strong{
-    font-size:12px !important;
-    line-height:1 !important;
-    margin-top:3px !important;
-  }
-
-  #live3Fullscreen .bpt-live3-fs-actions{
-    height:48px !important;
-    min-height:48px !important;
-    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
-    gap:6px !important;
-    overflow:hidden !important;
-  }
-  #live3Fullscreen .bpt-live3-fs-actions button{
-    height:48px !important;
-    min-height:48px !important;
-    font-size:9px !important;
-    padding:4px 5px !important;
-    line-height:1.05 !important;
-  }
-
-  #live3Fullscreen .bpt-live3-fs-players{
-    display:block !important;
-    height:34px !important;
-    min-height:34px !important;
-    padding:0 4px !important;
-    overflow:hidden !important;
-  }
-  #live3Fullscreen .bpt-live3-fs-players-title{
-    display:none !important;
-  }
-  #live3Fullscreen .bpt-live3-fs-player-list{
-    height:100% !important;
-    min-height:0 !important;
-    display:flex !important;
-    flex-wrap:wrap !important;
-    justify-content:center !important;
-    align-items:center !important;
-    align-content:center !important;
-    gap:4px !important;
-    overflow:hidden !important;
-  }
-  #live3Fullscreen .bpt-live3-fs-player{
-    flex:1 1 110px !important;
-    min-width:90px !important;
-    max-width:190px !important;
-    padding:3px 5px !important;
-    font-size:8.5px !important;
-    line-height:1 !important;
-  }
-}
-
-@media (max-width:900px) and (orientation:landscape) and (max-height:380px){
-  #live3Fullscreen .bpt-live3-fs-shell{
-    grid-template-rows:34px 62px minmax(68px,1fr) 52px 44px 30px !important;
-    gap:3px !important;
-  }
-  #live3Fullscreen .bpt-live3-fs-blinds{padding-top:5px !important;}
-  #live3Fullscreen .bpt-live3-fs-blinds strong{font-size:34px !important;}
-  #live3Fullscreen .bpt-live3-fs-timer>div{font-size:clamp(48px,8.6vw,68px) !important;}
-  #live3Fullscreen .bpt-live3-fs-kpis{height:52px !important;}
-  #live3Fullscreen .bpt-live3-fs-actions{height:44px !important;min-height:44px !important;}
-  #live3Fullscreen .bpt-live3-fs-actions button{height:44px !important;min-height:44px !important;font-size:8.5px !important;}
-  #live3Fullscreen .bpt-live3-fs-players{height:30px !important;min-height:30px !important;}
-}
-</style>
-
-
 <style id="bpt-v448-odds-calculator">
 /* V4.48 — calculateur de côtes intégré au Live mobile */
 #live3FsOddsActionBtn,#live3FsSpectatorOddsBtn{
@@ -15523,284 +14961,276 @@ body:not(.bpt-mobile-device) #bptMobileMoreTopBtn{display:none !important;}
 }
 </style>
 
-
-<style id="bpt460-final-overrides">
-/* BPT 4.60 — règles finales plein écran */
-#live3Fullscreen .bpt-live3-fs-players,
-#liveFullscreenDisplay .bptfs-players,
-#liveSpectatorPanel .spectator-player-list-wrap{display:none !important;}
-#live3Fullscreen #live3FsTakeoverActionBtn{display:none !important;visibility:hidden !important;}
-#live3Fullscreen #live3FsSpectatorActions{grid-template-columns:repeat(3,minmax(0,1fr)) !important;grid-template-rows:1fr !important;}
-#live3Fullscreen .bpt-live3-fs-shell{grid-template-areas:"head head" "blinds timer" "kpis kpis" "actions actions" !important;}
-#live3Fullscreen .bpt-live3-fs-time-kpi{min-height:78px !important;}
-#live3Fullscreen #live3FsProjection{display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:center !important;gap:1px !important;margin-top:5px !important;padding:5px 8px !important;border-radius:9px !important;background:rgba(0,153,178,.22) !important;}
-#live3Fullscreen #live3FsProjection span{font-size:10px !important;font-weight:800 !important;color:#cfe9ee !important;line-height:1.05 !important;}
-#live3Fullscreen #live3FsEstimatedFinish{font-size:19px !important;color:#fff !important;line-height:1 !important;}
-#live3Fullscreen #live3FsFinishDelta{font-size:11px !important;line-height:1 !important;}
-#live3 .bpt-live3-time-kpi{min-height:86px !important;}
-#live3 #live3Projection.bpt-live3-projection-inline{display:flex !important;flex-direction:column !important;align-items:center !important;gap:1px !important;margin-top:6px !important;padding:5px 8px !important;border-radius:9px !important;background:rgba(0,153,178,.12) !important;}
-#live3 #live3Projection #live3EstimatedFinish{font-size:17px !important;color:#005B80 !important;}
-#live3 #live3Projection #live3FinishDelta{font-size:11px !important;}
-@media(max-width:700px){
-  #live3Fullscreen .bpt-live3-fs-shell{grid-template-areas:"head" "blinds" "timer" "kpis" "actions" !important;}
-  #live3Fullscreen #live3FsSpectatorActions{grid-template-columns:repeat(3,minmax(0,1fr)) !important;}
-  #live3Fullscreen #live3FsEstimatedFinish{font-size:16px !important;}
-}
-</style>
-
-<style id="bpt461-desktop-fullscreen-repair">
-/* BPT 4.63 — détail joueurs sur écran réduit */
-@media (min-width:901px){
-  #live3Fullscreen .bpt-live3-fs-shell{
-    grid-template-areas:
-      "head head"
-      "blinds timer"
-      "kpis kpis"
-      "actions actions" !important;
-    grid-template-columns:minmax(300px,34%) minmax(0,66%) !important;
-    grid-template-rows:58px minmax(300px,1fr) 112px 126px !important;
-    gap:10px !important;
-    align-content:stretch !important;
-  }
-  #live3Fullscreen .bpt-live3-fs-head{
-    grid-template-columns:1fr auto 1fr !important;
-    overflow:visible !important;
-  }
-  #live3Fullscreen .bpt-live3-fs-brand{justify-self:start !important;}
-  #live3Fullscreen .bpt-live3-fs-owner{
-    justify-self:center !important;
-    align-self:center !important;
-    font-size:15px !important;
-    font-weight:900 !important;
-    color:#dce5df !important;
-    white-space:nowrap !important;
-  }
-  #live3Fullscreen .bpt-live3-fs-rem{justify-self:end !important;}
-  #live3Fullscreen .bpt-live3-fs-blinds{
-    padding:12px 18px !important;
-    justify-content:center !important;
-  }
-  #live3Fullscreen .bpt-live3-fs-blinds strong{font-size:clamp(72px,7vw,118px) !important;}
-  #live3Fullscreen .bpt-live3-fs-timer>div{font-size:clamp(150px,16vw,260px) !important;line-height:.82 !important;}
-  #live3Fullscreen .bpt-live3-fs-kpis{height:112px !important;align-self:stretch !important;}
-  #live3Fullscreen .bpt-live3-fs-kpis>div{padding:8px 12px !important;}
-  #live3Fullscreen .bpt-live3-fs-kpis span{font-size:12px !important;}
-  #live3Fullscreen .bpt-live3-fs-kpis strong{font-size:24px !important;}
-  #live3Fullscreen .bpt-live3-fs-time-kpi{min-height:0 !important;}
-  #live3Fullscreen #live3FsProjection{margin-top:6px !important;padding:5px 10px !important;}
-  #live3Fullscreen #live3FsEstimatedFinish{font-size:22px !important;}
-  #live3Fullscreen #live3FsFinishDelta{font-size:12px !important;}
-  #live3Fullscreen.bpt-live3-role-owner #live3FsMasterActions{
-    display:grid !important;
-    grid-template-columns:repeat(6,minmax(0,1fr)) !important;
-    grid-template-rows:56px 56px !important;
-    gap:8px !important;
-    height:120px !important;
-    min-height:120px !important;
-  }
-  #live3Fullscreen #live3FsStartPauseBtn{grid-column:1/4 !important;grid-row:1 !important;}
-  #live3Fullscreen #live3FsEliminateBtn{grid-column:4/7 !important;grid-row:1 !important;}
-  #live3Fullscreen #live3FsChatActionBtn{grid-column:1/3 !important;grid-row:2 !important;}
-  #live3Fullscreen #live3FsOddsActionBtn{grid-column:3/5 !important;grid-row:2 !important;}
-  #live3Fullscreen #live3FsExitActionBtn{grid-column:5/7 !important;grid-row:2 !important;}
-  #live3Fullscreen .bpt-live3-fs-actions button{height:56px !important;min-height:56px !important;font-size:13px !important;}
-  #live3Fullscreen #live3FsSpectatorActions{
-    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
-    grid-template-rows:56px !important;
-    height:56px !important;
-    align-self:end !important;
-  }
-}
-/* Libellé du rôle toujours métier, jamais l'ancien terme technique. */
-#live3Fullscreen .bpt-live3-fs-owner::first-letter{text-transform:uppercase;}
-</style>
-
-
-<style id="bpt-v463-responsive-consolidated">
-/* BPT 4.63 — layouts consolidés: PC 16/9, mobile paysage et portrait */
-#live3 .bpt-live3-game-card{position:relative;overflow:visible!important;}
-#live3 .bpt-live3-game-head{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:14px!important;align-items:start!important;}
-#live3 .bpt-live3-game-head-actions{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important;min-width:min(520px,48vw)!important;}
-#live3 .bpt-live3-game-head-actions .btn{min-width:0!important;width:100%!important;white-space:nowrap!important;padding:8px 9px!important;font-size:11px!important;}
-#live3 .bpt-live3-main{display:grid!important;grid-template-columns:minmax(170px,.82fr) minmax(250px,1.22fr) minmax(310px,1fr)!important;align-items:stretch!important;justify-items:stretch!important;gap:12px!important;padding:14px 0 10px!important;}
-#live3 .bpt-live3-blinds,#live3 .bpt-live3-timer,#live3 .bpt-live3-kpis{min-width:0!important;}
-#live3 .bpt-live3-blinds{display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;padding:14px 12px!important;border-radius:16px!important;background:linear-gradient(180deg,#153326,#0f241b)!important;border:1px solid #315842!important;color:#fff!important;}
-#live3 .bpt-live3-blinds>strong{font-size:clamp(34px,4vw,58px)!important;line-height:1!important;color:#f0c96f!important;}
-#live3 .bpt-live3-timer{display:grid!important;place-items:center!important;border-radius:16px!important;background:#0c2018!important;border:1px solid #2d4f3c!important;font-size:clamp(56px,7vw,92px)!important;font-weight:950!important;color:#f4d77f!important;line-height:1!important;padding:12px!important;}
-#live3 .bpt-live3-kpis{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;width:100%!important;margin:0!important;}
-#live3 .bpt-live3-kpis>div{display:flex!important;flex-direction:column!important;justify-content:center!important;min-height:70px!important;padding:9px!important;background:#13271e!important;border:1px solid #35503f!important;color:#fff!important;}
-#live3 .bpt-live3-kpis span{font-size:10px!important;color:#aabbb0!important;}
-#live3 .bpt-live3-kpis strong{font-size:18px!important;color:#fff!important;}
-#live3 .bpt-live3-time-kpi{background:linear-gradient(180deg,#173f41,#113133)!important;border-color:#2f7177!important;}
-#live3Projection{margin:4px 0 0!important;padding:4px 6px!important;width:100%!important;gap:4px!important;background:transparent!important;border:0!important;font-size:9px!important;}
-#live3Projection strong{font-size:13px!important;}
-#live3 .bpt-live3-controls{margin-top:8px!important;gap:8px!important;}
-#live3 .bpt-live3-control-row--extra{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important;width:100%!important;}
-#live3 .bpt-live3-control-row--extra .btn{width:100%!important;min-width:0!important;padding:8px 6px!important;font-size:11px!important;}
-#live3 .bpt-live3-control-row--essential{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;width:100%!important;}
-#live3 .bpt-live3-control-row--essential .btn{width:100%!important;min-height:43px!important;}
-.bpt-live3-settings-modal{display:none;position:fixed;inset:0;z-index:2100000;background:rgba(4,10,7,.76);padding:18px;align-items:center;justify-content:center;}
-.bpt-live3-settings-modal.open{display:flex;}
-.bpt-live3-settings-card{width:min(720px,96vw);max-height:92vh;overflow:auto;background:#10231a;border:1px solid #42634e;border-radius:20px;padding:18px;box-shadow:0 24px 90px rgba(0,0,0,.55);color:#fff;}
-.bpt-live3-settings-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
-.bpt-live3-settings-head h2{margin:0;color:#fff;}
-.bpt-live3-settings-section{padding:14px 0;border-top:1px solid #31483a;}
-.bpt-live3-settings-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px;}
-#live3SettingsPanel .bpt-live3-duration-editor{display:flex!important;margin:0 0 14px!important;background:#142c21!important;border-color:#3d5a48!important;color:#fff!important;}
-#live3SettingsPanel .bpt-live3-undo-box{display:flex!important;margin:14px 0 0!important;background:#14261e!important;border-color:#3b5344!important;color:#fff!important;}
-#live3SettingsPanel .bpt-live3-undo-copy span,#live3SettingsPanel .bpt-live3-duration-editor-copy span{color:#aebbb2!important;}
-
-/* Fullscreen desktop: proposition 1, grille 3 zones */
-@media (min-width:901px){
- #live3Fullscreen .bpt-live3-fs-shell{grid-template-areas:"head head head" "blinds timer kpis" "actions actions actions"!important;grid-template-columns:minmax(220px,.86fr) minmax(360px,1.35fr) minmax(260px,.92fr)!important;grid-template-rows:56px minmax(0,1fr) 112px!important;gap:12px!important;}
- #live3Fullscreen .bpt-live3-fs-head{grid-area:head!important;grid-template-columns:1fr auto 1fr!important;}
- #live3Fullscreen .bpt-live3-fs-owner{display:block!important;justify-self:center!important;font-weight:800!important;color:#d9e5dd!important;}
- #live3Fullscreen .bpt-live3-fs-rem{justify-self:end!important;}
- #live3Fullscreen .bpt-live3-fs-blinds{grid-area:blinds!important;align-self:stretch!important;justify-content:center!important;border-radius:18px!important;background:#10251b!important;border:1px solid #31513e!important;}
- #live3Fullscreen .bpt-live3-fs-blinds strong{font-size:clamp(52px,6vw,96px)!important;}
- #live3Fullscreen .bpt-live3-fs-timer{grid-area:timer!important;display:grid!important;place-items:center!important;border-radius:18px!important;background:#091912!important;border:1px solid #284737!important;}
- #live3Fullscreen .bpt-live3-fs-timer>div{font-size:clamp(94px,13vw,190px)!important;line-height:.88!important;}
- #live3Fullscreen .bpt-live3-fs-kpis{grid-area:kpis!important;display:grid!important;grid-template-columns:1fr!important;grid-template-rows:repeat(3,1fr)!important;gap:8px!important;align-self:stretch!important;}
- #live3Fullscreen .bpt-live3-fs-kpis>div{display:flex!important;flex-direction:column!important;justify-content:center!important;min-height:0!important;border-radius:14px!important;background:#12241b!important;border:1px solid #334e3d!important;}
- #live3Fullscreen .bpt-live3-fs-actions{grid-area:actions!important;display:grid!important;grid-template-columns:1.15fr 1.15fr 1fr 1.15fr 1.2fr!important;grid-template-rows:1fr!important;gap:8px!important;align-self:stretch!important;}
- #live3Fullscreen .bpt-live3-fs-actions button{min-height:48px!important;font-size:12px!important;}
- #live3Fullscreen .bpt-live3-fs-players{display:none!important;}
+<style id="bpt-v465-live-layout">
+/* BPT 4.65 — couche Live unique. Les anciennes surcharges v439-v463 ont été supprimées. */
+:root{
+  --bpt-live-bg:#071711;
+  --bpt-live-panel:#10241b;
+  --bpt-live-panel-2:#153126;
+  --bpt-live-panel-3:#18382b;
+  --bpt-live-border:#355847;
+  --bpt-live-text:#f4f7f5;
+  --bpt-live-muted:#a8b8ae;
+  --bpt-live-gold:#e6bf63;
+  --bpt-live-teal:#18a6ad;
+  --bpt-live-teal-dark:#0d4f54;
+  --bpt-live-red:#a64242;
 }
 
-/* Mobile réduit paysage: même logique compacte que proposition 2 */
+/* ---------- écran réduit, base commune ---------- */
+#live3 .bpt-live3-game-card{
+  background:linear-gradient(180deg,#0d2118 0%,#091912 100%)!important;
+  border:1px solid var(--bpt-live-border)!important;
+  border-radius:18px!important;
+  padding:16px!important;
+  color:var(--bpt-live-text)!important;
+  overflow:visible!important;
+}
+#live3 .bpt-live3-game-head{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:start!important;
+  gap:12px!important;
+}
+#live3 .bpt-live3-game-location{color:#fff!important;font-size:20px!important;font-weight:900!important;line-height:1.1!important;}
+#live3 .bpt-live3-meta-row{display:flex!important;align-items:center!important;gap:8px!important;flex-wrap:wrap!important;margin-top:4px!important;}
+#live3 .bpt-live3-meta-row #live3GameMeta{font-size:11px!important;color:var(--bpt-live-muted)!important;}
+.bpt-live3-structure-badge{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  min-height:24px!important;padding:3px 9px!important;border-radius:999px!important;
+  border:1px solid #2d7174!important;background:#0d383a!important;color:#bceef0!important;
+  font-size:10px!important;font-weight:850!important;white-space:nowrap!important;letter-spacing:.01em!important;
+}
+#live3 .bpt-live3-game-head-actions{
+  display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important;
+  min-width:min(500px,48vw)!important;
+}
+#live3 .bpt-live3-game-head-actions .btn{
+  min-width:0!important;width:100%!important;min-height:36px!important;padding:7px 8px!important;
+  border-radius:9px!important;font-size:10px!important;white-space:nowrap!important;
+  background:#1b3a2e!important;border:1px solid #416752!important;color:#fff!important;
+}
+#live3 .bpt-live3-game-head-actions .bpt-live3-odds-btn{background:#16464a!important;border-color:#2e7378!important;}
+#live3 .bpt-live3-main{
+  display:grid!important;
+  grid-template-columns:minmax(185px,.82fr) minmax(300px,1.25fr) minmax(330px,1.08fr)!important;
+  gap:10px!important;align-items:stretch!important;justify-items:stretch!important;padding:12px 0 8px!important;
+}
+#live3 .bpt-live3-blinds{
+  min-width:0!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
+  text-align:center!important;padding:12px 10px!important;border-radius:14px!important;
+  background:linear-gradient(180deg,#153628,#10271d)!important;border:1px solid #38634c!important;
+}
+#live3 .bpt-live3-blinds .muted{font-size:10px!important;color:var(--bpt-live-muted)!important;font-weight:850!important;letter-spacing:.08em!important;}
+#live3 .bpt-live3-blinds>strong{
+  display:block!important;max-width:100%!important;color:var(--bpt-live-gold)!important;
+  font-size:clamp(34px,4.4vw,62px)!important;font-weight:950!important;line-height:.98!important;
+  letter-spacing:-.035em!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:clip!important;
+}
+#live3 .bpt-live3-duration-label{font-size:10px!important;margin-top:5px!important;color:#e6ece8!important;}
+#live3 .bpt-live3-timer{
+  min-width:0!important;display:grid!important;place-items:center!important;text-align:center!important;
+  background:#0b1d15!important;border:1px solid #2c4c3b!important;border-radius:14px!important;
+  color:#fff!important;font-size:clamp(64px,7.6vw,112px)!important;font-weight:950!important;line-height:1!important;
+  letter-spacing:-.055em!important;font-variant-numeric:tabular-nums!important;padding:8px!important;
+}
+#live3 .bpt-live3-kpis{
+  min-width:0!important;width:100%!important;display:grid!important;grid-template-columns:1fr 1fr!important;grid-template-rows:1fr 1fr!important;gap:7px!important;margin:0!important;
+}
+#live3 .bpt-live3-kpis>div{
+  min-width:0!important;min-height:58px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
+  text-align:center!important;padding:7px!important;border-radius:11px!important;background:#13291f!important;border:1px solid #355241!important;
+}
+#live3 .bpt-live3-kpis>div.bpt-live3-time-kpi{background:linear-gradient(180deg,#124247,#0d3336)!important;border-color:#2f7277!important;}
+#live3 .bpt-live3-kpis span{font-size:9px!important;color:var(--bpt-live-muted)!important;text-transform:uppercase!important;letter-spacing:.035em!important;}
+#live3 .bpt-live3-kpis strong{font-size:17px!important;color:#fff!important;line-height:1.05!important;white-space:nowrap!important;}
+#live3Projection{margin:3px 0 0!important;padding:0!important;background:transparent!important;border:0!important;display:flex!important;gap:5px!important;align-items:baseline!important;justify-content:center!important;flex-wrap:wrap!important;}
+#live3Projection span{font-size:8px!important;color:#c6e7e8!important;text-transform:none!important;letter-spacing:0!important;}
+#live3Projection strong{font-size:12px!important;color:#fff!important;}
+#live3 .bpt-live3-controls{display:grid!important;gap:7px!important;margin-top:7px!important;}
+#live3 .bpt-live3-control-row{margin:0!important;width:100%!important;}
+#live3 .bpt-live3-control-row--extra{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important;}
+#live3 .bpt-live3-control-row--extra .btn{min-width:0!important;width:100%!important;min-height:36px!important;padding:7px 6px!important;font-size:10px!important;background:#1c3b2f!important;border:1px solid #456a56!important;color:#fff!important;}
+#live3 .bpt-live3-control-row--essential{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;}
+#live3 .bpt-live3-control-row--essential .btn{width:100%!important;min-height:42px!important;font-size:12px!important;}
+#live3 #live3StartPauseBtn{background:var(--bpt-live-gold)!important;color:#1a1409!important;border-color:#d5a947!important;}
+#live3 #live3EliminateBtn{background:var(--bpt-live-red)!important;color:#fff!important;border-color:#c45c5c!important;}
+#live3 .bpt-live3-legacy-players-list{display:none!important;}
+
+/* ---------- plein écran, base commune : proposition 1 validée ---------- */
+html:has(#live3Fullscreen.open),body:has(#live3Fullscreen.open){overflow:hidden!important;}
+#live3Fullscreen.bpt-live3-fullscreen{
+  display:none;position:fixed;inset:0;z-index:2000000;background:
+  radial-gradient(circle at 50% 35%,rgba(18,76,50,.25),transparent 48%),
+  linear-gradient(180deg,#06150f,#071a12 58%,#04100b);
+  color:var(--bpt-live-text);padding:14px;box-sizing:border-box;
+}
+#live3Fullscreen.bpt-live3-fullscreen.open{display:block!important;}
+#live3Fullscreen .bpt-live3-fs-shell{
+  width:100%!important;height:100%!important;display:grid!important;box-sizing:border-box!important;
+  grid-template-areas:"head head" "blinds timer" "kpis kpis" "actions actions"!important;
+  grid-template-columns:minmax(300px,.82fr) minmax(520px,1.18fr)!important;
+  grid-template-rows:58px minmax(245px,1fr) 118px 126px!important;gap:10px!important;
+}
+#live3Fullscreen .bpt-live3-fs-head{
+  grid-area:head!important;display:grid!important;grid-template-columns:1fr auto 1fr!important;align-items:center!important;gap:10px!important;min-width:0!important;
+  background:#151f2c!important;border-bottom:1px solid #263a36!important;padding:0 18px!important;
+}
+#live3Fullscreen .bpt-live3-fs-brand{justify-self:start!important;color:var(--bpt-live-gold)!important;font-size:30px!important;font-weight:950!important;line-height:1!important;}
+#live3Fullscreen .bpt-live3-fs-center{justify-self:center!important;display:flex!important;flex-direction:column!important;align-items:center!important;gap:4px!important;min-width:0!important;}
+#live3Fullscreen .bpt-live3-fs-owner{color:#edf4ef!important;font-size:13px!important;font-weight:850!important;white-space:nowrap!important;}
+#live3Fullscreen .bpt-live3-fs-rem{justify-self:end!important;display:flex!important;flex-direction:column!important;align-items:flex-end!important;line-height:1!important;}
+#live3Fullscreen .bpt-live3-fs-rem strong{font-size:28px!important;color:#fff!important;}
+#live3Fullscreen .bpt-live3-fs-rem span{font-size:10px!important;color:var(--bpt-live-muted)!important;}
+#live3Fullscreen .bpt-live3-fs-blinds{
+  grid-area:blinds!important;min-width:0!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;text-align:center!important;
+  padding:14px!important;border-radius:18px!important;background:linear-gradient(180deg,#143629,#0f261d)!important;border:1px solid #38634c!important;overflow:hidden!important;
+}
+#live3Fullscreen .bpt-live3-fs-blinds>span{font-size:13px!important;color:var(--bpt-live-muted)!important;font-weight:850!important;letter-spacing:.08em!important;}
+#live3Fullscreen .bpt-live3-fs-blinds>strong{
+  width:100%!important;max-width:100%!important;color:var(--bpt-live-gold)!important;font-size:clamp(58px,7vw,112px)!important;font-weight:950!important;line-height:.96!important;letter-spacing:-.035em!important;white-space:nowrap!important;overflow:hidden!important;text-align:center!important;
+}
+#live3Fullscreen .bpt-live3-fs-duration-label{font-size:12px!important;color:#e5ece7!important;margin-top:7px!important;}
+#live3Fullscreen .bpt-live3-fs-timer{
+  grid-area:timer!important;min-width:0!important;display:grid!important;place-items:center!important;border-radius:18px!important;background:#071b13!important;border:1px solid #2c503d!important;overflow:hidden!important;padding:10px!important;
+}
+#live3Fullscreen .bpt-live3-fs-timer>div{max-width:100%!important;color:#fff!important;font-size:clamp(112px,15.3vw,228px)!important;font-weight:950!important;line-height:.84!important;letter-spacing:-.065em!important;white-space:nowrap!important;font-variant-numeric:tabular-nums!important;}
+#live3Fullscreen .bpt-live3-fs-kpis{
+  grid-area:kpis!important;min-width:0!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-template-rows:1fr!important;gap:8px!important;width:100%!important;
+}
+#live3Fullscreen .bpt-live3-fs-kpis>div{min-width:0!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;text-align:center!important;padding:8px!important;border-radius:14px!important;background:#13291f!important;border:1px solid #355241!important;overflow:hidden!important;}
+#live3Fullscreen .bpt-live3-fs-kpis>div.bpt-live3-fs-time-kpi{background:linear-gradient(180deg,#124247,#0d3336)!important;border-color:#2f7277!important;}
+#live3Fullscreen .bpt-live3-fs-kpis span{font-size:10px!important;color:var(--bpt-live-muted)!important;}
+#live3Fullscreen .bpt-live3-fs-kpis strong{font-size:24px!important;color:#fff!important;white-space:nowrap!important;}
+#live3Fullscreen #live3FsProjection{margin-top:5px!important;padding:4px 10px!important;border-radius:9px!important;background:rgba(24,166,173,.15)!important;display:flex!important;flex-direction:column!important;gap:1px!important;align-items:center!important;line-height:1.05!important;}
+#live3Fullscreen #live3FsProjection span{font-size:9px!important;color:#c8e8e9!important;}
+#live3Fullscreen #live3FsProjection #live3FsEstimatedFinish{font-size:20px!important;color:#fff!important;}
+#live3Fullscreen #live3FsProjection #live3FsFinishDelta{font-size:10px!important;}
+#live3Fullscreen .bpt-live3-fs-actions{
+  grid-area:actions!important;display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;grid-template-rows:1fr 1fr!important;gap:8px!important;width:100%!important;min-height:0!important;
+}
+#live3Fullscreen .bpt-live3-fs-actions button{min-width:0!important;width:100%!important;height:100%!important;min-height:48px!important;border-radius:11px!important;font-size:12px!important;font-weight:900!important;padding:7px 8px!important;white-space:normal!important;}
+#live3Fullscreen #live3FsStartPauseBtn{grid-column:1/4!important;grid-row:1!important;background:var(--bpt-live-gold)!important;color:#1a1409!important;border:1px solid #d5a947!important;}
+#live3Fullscreen #live3FsEliminateBtn{grid-column:4/7!important;grid-row:1!important;background:var(--bpt-live-red)!important;color:#fff!important;border:1px solid #c45c5c!important;}
+#live3Fullscreen #live3FsChatActionBtn{grid-column:1/3!important;grid-row:2!important;background:#153a2d!important;color:#fff!important;border:1px solid #3f6651!important;}
+#live3Fullscreen #live3FsOddsActionBtn{grid-column:3/5!important;grid-row:2!important;background:#16464a!important;color:#fff!important;border:1px solid #2e7378!important;}
+#live3Fullscreen #live3FsExitActionBtn{grid-column:5/7!important;grid-row:2!important;background:#223a31!important;color:#fff!important;border:1px solid #4b6659!important;}
+#live3Fullscreen .bpt-live3-fs-players{display:none!important;}
+#live3Fullscreen.bpt-live3-role-owner #live3FsMasterActions{display:grid!important;}
+#live3Fullscreen.bpt-live3-role-owner #live3FsSpectatorActions{display:none!important;}
+#live3Fullscreen.bpt-live3-role-spectator #live3FsMasterActions{display:none!important;}
+#live3Fullscreen.bpt-live3-role-spectator #live3FsSpectatorActions{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;grid-template-rows:1fr!important;}
+#live3Fullscreen #live3FsSpectatorChatBtn{grid-column:1/3!important;background:#153a2d!important;color:#fff!important;border:1px solid #3f6651!important;}
+#live3Fullscreen #live3FsSpectatorOddsBtn{grid-column:3/5!important;background:#16464a!important;color:#fff!important;border:1px solid #2e7378!important;}
+#live3Fullscreen #live3FsSpectatorExitBtn{grid-column:5/7!important;background:#223a31!important;color:#fff!important;border:1px solid #4b6659!important;}
+
+/* ---------- téléphone paysage ---------- */
 @media (max-width:900px) and (orientation:landscape){
- #live3 .bpt-live3-game-card{padding:8px!important;}
- #live3 .bpt-live3-game-head{grid-template-columns:1fr auto!important;gap:6px!important;}
- #live3 .bpt-live3-game-location{font-size:13px!important;}
- #live3 .bpt-live3-game-head-actions{grid-template-columns:repeat(4,minmax(0,1fr))!important;min-width:min(500px,64vw)!important;gap:4px!important;}
- #live3 .bpt-live3-game-head-actions .btn{font-size:9px!important;padding:5px 4px!important;min-height:30px!important;}
- #live3 .bpt-live3-main{grid-template-columns:minmax(130px,.8fr) minmax(220px,1.25fr) minmax(250px,1fr)!important;gap:6px!important;padding:6px 0!important;}
- #live3 .bpt-live3-blinds{padding:7px!important;border-radius:12px!important;}
- #live3 .bpt-live3-blinds>strong{font-size:32px!important;}
- #live3 .bpt-live3-timer{font-size:54px!important;padding:5px!important;border-radius:12px!important;}
- #live3 .bpt-live3-kpis{gap:4px!important;}
- #live3 .bpt-live3-kpis>div{min-height:46px!important;padding:4px!important;border-radius:10px!important;}
- #live3 .bpt-live3-kpis span{font-size:7px!important;}
- #live3 .bpt-live3-kpis strong{font-size:13px!important;}
- #live3Projection{margin-top:1px!important;padding:1px!important;font-size:7px!important;}
- #live3Projection strong{font-size:9px!important;}
- #live3 .bpt-live3-controls{margin-top:4px!important;gap:4px!important;}
- #live3 .bpt-live3-control-row--extra{gap:4px!important;}
- #live3 .bpt-live3-control-row--extra .btn{font-size:8px!important;padding:4px 3px!important;min-height:30px!important;}
- #live3 .bpt-live3-control-row--essential{gap:4px!important;}
- #live3 .bpt-live3-control-row--essential .btn{min-height:34px!important;font-size:9px!important;padding:5px!important;}
- #live3Fullscreen .bpt-live3-fs-shell{grid-template-areas:"head head head" "blinds timer kpis" "actions actions actions"!important;grid-template-columns:minmax(130px,.8fr) minmax(230px,1.35fr) minmax(210px,1fr)!important;grid-template-rows:34px minmax(0,1fr) 48px!important;gap:5px!important;}
- #live3Fullscreen .bpt-live3-fs-head{grid-template-columns:1fr auto 1fr!important;}
- #live3Fullscreen .bpt-live3-fs-owner{display:block!important;justify-self:center!important;font-size:10px!important;}
- #live3Fullscreen .bpt-live3-fs-blinds{grid-area:blinds!important;align-self:stretch!important;justify-content:center!important;}
- #live3Fullscreen .bpt-live3-fs-blinds strong{font-size:34px!important;}
- #live3Fullscreen .bpt-live3-fs-timer{grid-area:timer!important;display:grid!important;place-items:center!important;}
- #live3Fullscreen .bpt-live3-fs-timer>div{font-size:clamp(56px,12vw,92px)!important;}
- #live3Fullscreen .bpt-live3-fs-kpis{grid-area:kpis!important;display:grid!important;grid-template-columns:1fr 1fr!important;grid-template-rows:1fr 1fr!important;gap:4px!important;}
- #live3Fullscreen .bpt-live3-fs-kpis>div{padding:3px!important;min-height:0!important;}
- #live3Fullscreen .bpt-live3-fs-kpis>div:nth-child(2){grid-row:1 / span 2!important;grid-column:2!important;}
- #live3Fullscreen .bpt-live3-fs-actions{grid-area:actions!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;grid-template-rows:1fr!important;gap:4px!important;}
- #live3Fullscreen .bpt-live3-fs-actions button{height:auto!important;min-height:38px!important;font-size:8px!important;padding:3px!important;}
- #live3Fullscreen .bpt-live3-fs-players{display:none!important;}
-}
+  #live3 .bpt-live3-game-card{padding:8px!important;border-radius:12px!important;}
+  #live3 .bpt-live3-game-head{grid-template-columns:minmax(0,1fr) auto!important;gap:6px!important;}
+  #live3 .bpt-live3-game-location{font-size:13px!important;}
+  #live3 .bpt-live3-meta-row{gap:4px!important;margin-top:2px!important;}
+  #live3 .bpt-live3-meta-row #live3GameMeta{font-size:7px!important;}
+  #live3 .bpt-live3-structure-badge{font-size:7px!important;min-height:18px!important;padding:2px 6px!important;}
+  #live3 .bpt-live3-game-head-actions{min-width:min(450px,61vw)!important;gap:4px!important;}
+  #live3 .bpt-live3-game-head-actions .btn{min-height:28px!important;padding:4px 5px!important;font-size:8px!important;}
+  #live3 .bpt-live3-main{grid-template-columns:minmax(125px,.78fr) minmax(210px,1.28fr) minmax(245px,1.05fr)!important;gap:6px!important;padding:6px 0!important;}
+  #live3 .bpt-live3-blinds{padding:6px!important;border-radius:10px!important;}
+  #live3 .bpt-live3-blinds>strong{font-size:clamp(28px,5vw,40px)!important;}
+  #live3 .bpt-live3-duration-label{font-size:7px!important;margin-top:2px!important;}
+  #live3 .bpt-live3-timer{font-size:clamp(48px,8.5vw,70px)!important;padding:4px!important;border-radius:10px!important;}
+  #live3 .bpt-live3-kpis{gap:4px!important;}
+  #live3 .bpt-live3-kpis>div{min-height:42px!important;padding:3px!important;border-radius:9px!important;}
+  #live3 .bpt-live3-kpis span{font-size:6.5px!important;}
+  #live3 .bpt-live3-kpis strong{font-size:11px!important;}
+  #live3Projection{margin-top:1px!important;gap:2px!important;}
+  #live3Projection span{font-size:6px!important;}
+  #live3Projection strong{font-size:8.5px!important;}
+  #live3 .bpt-live3-controls{gap:4px!important;margin-top:4px!important;}
+  #live3 .bpt-live3-control-row--extra,#live3 .bpt-live3-control-row--essential{gap:4px!important;}
+  #live3 .bpt-live3-control-row--extra .btn{min-height:28px!important;padding:4px!important;font-size:8px!important;}
+  #live3 .bpt-live3-control-row--essential .btn{min-height:30px!important;font-size:8.5px!important;padding:4px!important;}
 
-/* Mobile réduit + fullscreen portrait */
-@media (max-width:700px) and (orientation:portrait){
- #live3 .bpt-live3-game-card{padding:10px!important;}
- #live3 .bpt-live3-game-head{grid-template-columns:1fr!important;gap:7px!important;}
- #live3 .bpt-live3-game-head-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important;min-width:0!important;width:100%!important;gap:5px!important;}
- #live3 .bpt-live3-main{grid-template-columns:1fr!important;gap:7px!important;padding:7px 0!important;}
- #live3 .bpt-live3-blinds{padding:9px!important;}
- #live3 .bpt-live3-blinds>strong{font-size:42px!important;}
- #live3 .bpt-live3-timer{font-size:64px!important;min-height:92px!important;padding:6px!important;}
- #live3 .bpt-live3-kpis{grid-template-columns:1fr 1fr!important;gap:6px!important;}
- #live3 .bpt-live3-kpis>div{min-height:62px!important;padding:6px!important;}
- #live3 .bpt-live3-control-row--extra{grid-template-columns:1fr 1fr!important;}
- #live3 .bpt-live3-control-row--extra .btn{min-height:38px!important;font-size:10px!important;}
- #live3 .bpt-live3-control-row--essential .btn{min-height:44px!important;}
- .bpt-live3-settings-modal{padding:8px!important;align-items:flex-end!important;}
- .bpt-live3-settings-card{width:100%!important;max-height:88vh!important;border-radius:18px 18px 0 0!important;}
- #live3Fullscreen .bpt-live3-fs-shell{grid-template-areas:"head" "blinds" "timer" "kpis" "actions"!important;grid-template-columns:1fr!important;grid-template-rows:40px 82px minmax(118px,1fr) 112px 108px!important;gap:5px!important;}
- #live3Fullscreen .bpt-live3-fs-head{grid-template-columns:1fr auto 1fr!important;}
- #live3Fullscreen .bpt-live3-fs-owner{display:block!important;justify-self:center!important;font-size:9px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;max-width:150px!important;}
- #live3Fullscreen .bpt-live3-fs-blinds{grid-area:blinds!important;padding:5px!important;}
- #live3Fullscreen .bpt-live3-fs-blinds strong{font-size:46px!important;}
- #live3Fullscreen .bpt-live3-fs-timer{grid-area:timer!important;display:grid!important;place-items:center!important;}
- #live3Fullscreen .bpt-live3-fs-timer>div{font-size:clamp(76px,24vw,108px)!important;}
- #live3Fullscreen .bpt-live3-fs-kpis{grid-area:kpis!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:repeat(2,1fr)!important;gap:5px!important;}
- #live3Fullscreen .bpt-live3-fs-kpis>div{padding:4px!important;min-height:0!important;}
- #live3Fullscreen .bpt-live3-fs-kpis>div:nth-child(2){grid-column:1 / -1!important;grid-row:1!important;}
- #live3Fullscreen .bpt-live3-fs-kpis>div:nth-child(1){grid-column:1!important;grid-row:2!important;}
- #live3Fullscreen .bpt-live3-fs-kpis>div:nth-child(3){grid-column:2!important;grid-row:2!important;}
- #live3Fullscreen .bpt-live3-fs-actions{grid-area:actions!important;grid-template-columns:1fr 1fr!important;grid-template-rows:repeat(3,1fr)!important;gap:5px!important;}
- #live3Fullscreen .bpt-live3-fs-actions button{min-height:30px!important;height:auto!important;font-size:9px!important;padding:4px!important;}
- #live3Fullscreen #live3FsExitActionBtn{grid-column:1 / -1!important;}
- #live3Fullscreen .bpt-live3-fs-players{display:none!important;}
-}
-
-/* 4.63.1 — neutralisation des anciens spans/hauteurs fullscreen */
-#live3Fullscreen .bpt-live3-fs-kpis{height:auto!important;min-height:0!important;}
-#live3Fullscreen .bpt-live3-fs-actions{height:auto!important;min-height:0!important;}
-#live3Fullscreen #live3FsStartPauseBtn,
-#live3Fullscreen #live3FsEliminateBtn,
-#live3Fullscreen #live3FsChatActionBtn,
-#live3Fullscreen #live3FsOddsActionBtn,
-#live3Fullscreen #live3FsExitActionBtn{grid-column:auto!important;grid-row:auto!important;}
-@media (min-width:901px){
- #live3Fullscreen .bpt-live3-fs-kpis{height:100%!important;}
- #live3Fullscreen .bpt-live3-fs-actions{height:100%!important;}
- #live3Fullscreen .bpt-live3-fs-kpis>div{height:auto!important;}
-}
-@media (max-width:900px) and (orientation:landscape){
- #live3Fullscreen .bpt-live3-fs-kpis{height:100%!important;align-self:stretch!important;}
- #live3Fullscreen .bpt-live3-fs-actions{height:100%!important;align-self:stretch!important;}
- #live3Fullscreen #live3FsStartPauseBtn,
- #live3Fullscreen #live3FsEliminateBtn,
- #live3Fullscreen #live3FsChatActionBtn,
- #live3Fullscreen #live3FsOddsActionBtn,
- #live3Fullscreen #live3FsExitActionBtn{grid-column:auto!important;grid-row:auto!important;}
-}
-@media (max-width:700px) and (orientation:portrait){
- #live3Fullscreen .bpt-live3-fs-kpis{height:100%!important;}
- #live3Fullscreen .bpt-live3-fs-actions{height:100%!important;}
- #live3Fullscreen #live3FsStartPauseBtn,
- #live3Fullscreen #live3FsEliminateBtn,
- #live3Fullscreen #live3FsChatActionBtn,
- #live3Fullscreen #live3FsOddsActionBtn{grid-column:auto!important;grid-row:auto!important;}
- #live3Fullscreen #live3FsExitActionBtn{grid-column:1 / -1!important;grid-row:auto!important;}
-}
-
-</style>
-
-
-<style id="bpt-v4632-fullscreen-polish">
-/* PC fullscreen: 2 rangées d'actions, projection plus visible */
-@media (min-width:901px){
-  #live3Fullscreen .bpt-live3-fs-shell{grid-template-rows:56px minmax(0,1fr) 118px!important;}
-  #live3Fullscreen .bpt-live3-fs-actions{grid-template-columns:repeat(6,minmax(0,1fr))!important;grid-template-rows:1fr 1fr!important;gap:8px!important;}
-  #live3Fullscreen #live3FsStartPauseBtn{grid-column:1/4!important;grid-row:1!important;}
-  #live3Fullscreen #live3FsEliminateBtn{grid-column:4/7!important;grid-row:1!important;}
-  #live3Fullscreen #live3FsChatActionBtn{grid-column:1/3!important;grid-row:2!important;}
-  #live3Fullscreen #live3FsOddsActionBtn{grid-column:3/5!important;grid-row:2!important;}
-  #live3Fullscreen #live3FsExitActionBtn{grid-column:5/7!important;grid-row:2!important;}
-  #live3Fullscreen .bpt-live3-fs-actions button{font-size:12px!important;}
-  #live3Fullscreen .bpt-live3-fs-time-kpi{background:linear-gradient(180deg,#16434a,#0f3035)!important;border-color:#307782!important;}
-  #live3Fullscreen #live3FsProjection{margin-top:7px!important;padding:8px 10px!important;background:#0d5962!important;border-radius:10px!important;}
-  #live3Fullscreen #live3FsProjection span{font-size:11px!important;}
-  #live3Fullscreen #live3FsProjection #live3FsEstimatedFinish{font-size:22px!important;}
-  #live3Fullscreen #live3FsProjection #live3FsFinishDelta{font-size:12px!important;}
-}
-@media (max-width:900px) and (orientation:landscape){
-  #live3Fullscreen .bpt-live3-fs-shell{grid-template-rows:34px minmax(0,1fr) 76px!important;}
+  #live3Fullscreen.bpt-live3-fullscreen{padding:max(4px,env(safe-area-inset-top)) max(5px,env(safe-area-inset-right)) max(4px,env(safe-area-inset-bottom)) max(5px,env(safe-area-inset-left))!important;}
+  #live3Fullscreen .bpt-live3-fs-shell{grid-template-areas:"head head" "blinds timer" "kpis kpis" "actions actions"!important;grid-template-columns:minmax(150px,.72fr) minmax(360px,1.28fr)!important;grid-template-rows:32px minmax(118px,1fr) 62px 92px!important;gap:4px!important;}
+  #live3Fullscreen .bpt-live3-fs-head{padding:0 10px!important;}
+  #live3Fullscreen .bpt-live3-fs-brand{font-size:19px!important;}
+  #live3Fullscreen .bpt-live3-fs-owner{font-size:7px!important;}
+  #live3Fullscreen .bpt-live3-fs-center{gap:1px!important;}
+  #live3Fullscreen .bpt-live3-structure-badge{font-size:6px!important;min-height:14px!important;padding:1px 4px!important;}
+  #live3Fullscreen .bpt-live3-fs-rem strong{font-size:17px!important;}
+  #live3Fullscreen .bpt-live3-fs-rem span{font-size:6px!important;}
+  #live3Fullscreen .bpt-live3-fs-blinds{padding:5px!important;border-radius:10px!important;}
+  #live3Fullscreen .bpt-live3-fs-blinds>span{font-size:7px!important;}
+  #live3Fullscreen .bpt-live3-fs-blinds>strong{font-size:clamp(28px,6.4vw,46px)!important;}
+  #live3Fullscreen .bpt-live3-fs-duration-label{font-size:7px!important;margin-top:2px!important;}
+  #live3Fullscreen .bpt-live3-fs-timer{padding:4px!important;border-radius:10px!important;}
+  #live3Fullscreen .bpt-live3-fs-timer>div{font-size:clamp(62px,13vw,102px)!important;}
+  #live3Fullscreen .bpt-live3-fs-kpis{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:4px!important;}
+  #live3Fullscreen .bpt-live3-fs-kpis>div{padding:3px!important;border-radius:8px!important;}
+  #live3Fullscreen .bpt-live3-fs-kpis span{font-size:6px!important;}
+  #live3Fullscreen .bpt-live3-fs-kpis strong{font-size:11px!important;}
+  #live3Fullscreen #live3FsProjection{margin-top:1px!important;padding:1px 3px!important;}
+  #live3Fullscreen #live3FsProjection span{font-size:5.5px!important;}
+  #live3Fullscreen #live3FsProjection #live3FsEstimatedFinish{font-size:10px!important;}
+  #live3Fullscreen #live3FsProjection #live3FsFinishDelta{font-size:6px!important;}
   #live3Fullscreen .bpt-live3-fs-actions{grid-template-columns:repeat(6,minmax(0,1fr))!important;grid-template-rows:1fr 1fr!important;gap:4px!important;}
-  #live3Fullscreen #live3FsStartPauseBtn{grid-column:1/4!important;grid-row:1!important;}
-  #live3Fullscreen #live3FsEliminateBtn{grid-column:4/7!important;grid-row:1!important;}
-  #live3Fullscreen #live3FsChatActionBtn{grid-column:1/3!important;grid-row:2!important;}
-  #live3Fullscreen #live3FsOddsActionBtn{grid-column:3/5!important;grid-row:2!important;}
-  #live3Fullscreen #live3FsExitActionBtn{grid-column:5/7!important;grid-row:2!important;}
-  #live3Fullscreen .bpt-live3-fs-actions button{min-height:32px!important;font-size:8px!important;}
-  #live3Fullscreen #live3FsProjection{padding:3px 4px!important;margin-top:2px!important;background:#0d5962!important;border-radius:7px!important;}
-  #live3Fullscreen #live3FsProjection #live3FsEstimatedFinish{font-size:13px!important;}
+  #live3Fullscreen .bpt-live3-fs-actions button{min-height:38px!important;font-size:7.5px!important;padding:3px!important;border-radius:7px!important;}
+}
+
+/* ---------- téléphone portrait ---------- */
+@media (max-width:700px) and (orientation:portrait){
+  #live3 .bpt-live3-game-card{padding:10px!important;border-radius:13px!important;}
+  #live3 .bpt-live3-game-head{grid-template-columns:1fr!important;gap:7px!important;}
+  #live3 .bpt-live3-game-head-actions{min-width:0!important;width:100%!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;}
+  #live3 .bpt-live3-game-head-actions .btn{font-size:8px!important;padding:5px 3px!important;min-height:32px!important;}
+  #live3 .bpt-live3-main{grid-template-columns:1fr!important;grid-template-rows:auto auto auto!important;gap:7px!important;padding:7px 0!important;}
+  #live3 .bpt-live3-blinds{padding:8px 6px!important;border-radius:11px!important;}
+  #live3 .bpt-live3-blinds>strong{font-size:clamp(32px,11vw,48px)!important;}
+  #live3 .bpt-live3-duration-label{font-size:8px!important;margin-top:3px!important;}
+  #live3 .bpt-live3-timer{font-size:clamp(58px,20vw,82px)!important;min-height:92px!important;padding:6px!important;border-radius:11px!important;}
+  #live3 .bpt-live3-kpis{grid-template-columns:1fr 1fr!important;gap:5px!important;}
+  #live3 .bpt-live3-kpis>div{min-height:52px!important;padding:5px!important;}
+  #live3 .bpt-live3-kpis span{font-size:7px!important;}
+  #live3 .bpt-live3-kpis strong{font-size:13px!important;}
+  #live3Projection span{font-size:6.5px!important;}
+  #live3Projection strong{font-size:9px!important;}
+  #live3 .bpt-live3-control-row--extra .btn{font-size:8px!important;padding:5px 2px!important;min-height:31px!important;}
+  #live3 .bpt-live3-control-row--essential .btn{min-height:36px!important;font-size:9px!important;}
+
+  #live3Fullscreen.bpt-live3-fullscreen{padding:max(6px,env(safe-area-inset-top)) max(6px,env(safe-area-inset-right)) max(6px,env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left))!important;overflow:auto!important;}
+  #live3Fullscreen .bpt-live3-fs-shell{height:auto!important;min-height:100%!important;grid-template-areas:"head" "blinds" "timer" "kpis" "actions"!important;grid-template-columns:1fr!important;grid-template-rows:44px 104px minmax(190px,1fr) 92px 150px!important;gap:6px!important;}
+  #live3Fullscreen .bpt-live3-fs-head{grid-template-columns:1fr auto 1fr!important;min-height:44px!important;padding:0 8px!important;}
+  #live3Fullscreen .bpt-live3-fs-brand{font-size:22px!important;}
+  #live3Fullscreen .bpt-live3-fs-owner{font-size:7px!important;}
+  #live3Fullscreen .bpt-live3-structure-badge{font-size:6px!important;min-height:14px!important;padding:1px 4px!important;}
+  #live3Fullscreen .bpt-live3-fs-rem strong{font-size:19px!important;}
+  #live3Fullscreen .bpt-live3-fs-rem span{font-size:7px!important;}
+  #live3Fullscreen .bpt-live3-fs-blinds{padding:8px!important;border-radius:11px!important;min-height:0!important;}
+  #live3Fullscreen .bpt-live3-fs-blinds>span{font-size:8px!important;}
+  #live3Fullscreen .bpt-live3-fs-blinds>strong{font-size:clamp(38px,13vw,56px)!important;}
+  #live3Fullscreen .bpt-live3-fs-duration-label{font-size:8px!important;margin-top:3px!important;}
+  #live3Fullscreen .bpt-live3-fs-timer{min-height:0!important;border-radius:11px!important;padding:6px!important;}
+  #live3Fullscreen .bpt-live3-fs-timer>div{font-size:clamp(82px,27vw,118px)!important;}
+  #live3Fullscreen .bpt-live3-fs-kpis{grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-template-rows:1fr!important;gap:5px!important;}
+  #live3Fullscreen .bpt-live3-fs-kpis>div{min-height:0!important;padding:5px 3px!important;border-radius:9px!important;}
+  #live3Fullscreen .bpt-live3-fs-kpis span{font-size:6px!important;white-space:normal!important;}
+  #live3Fullscreen .bpt-live3-fs-kpis strong{font-size:11px!important;}
+  #live3Fullscreen #live3FsProjection{margin-top:1px!important;padding:1px 2px!important;}
+  #live3Fullscreen #live3FsProjection span{font-size:5.5px!important;}
+  #live3Fullscreen #live3FsProjection #live3FsEstimatedFinish{font-size:9px!important;}
+  #live3Fullscreen #live3FsProjection #live3FsFinishDelta{font-size:6px!important;}
+  #live3Fullscreen .bpt-live3-fs-actions{grid-template-columns:1fr 1fr!important;grid-template-rows:1fr 1fr 1fr!important;gap:5px!important;}
+  #live3Fullscreen .bpt-live3-fs-actions button{min-height:0!important;font-size:8px!important;padding:4px!important;}
+  #live3Fullscreen #live3FsStartPauseBtn{grid-column:1!important;grid-row:1!important;}
+  #live3Fullscreen #live3FsEliminateBtn{grid-column:2!important;grid-row:1!important;}
+  #live3Fullscreen #live3FsChatActionBtn{grid-column:1!important;grid-row:2!important;}
+  #live3Fullscreen #live3FsOddsActionBtn{grid-column:2!important;grid-row:2!important;}
+  #live3Fullscreen #live3FsExitActionBtn{grid-column:1/-1!important;grid-row:3!important;}
+  #live3Fullscreen.bpt-live3-role-spectator #live3FsSpectatorActions{grid-template-columns:1fr 1fr!important;grid-template-rows:1fr 1fr!important;}
+  #live3Fullscreen #live3FsSpectatorChatBtn{grid-column:1!important;grid-row:1!important;}
+  #live3Fullscreen #live3FsSpectatorOddsBtn{grid-column:2!important;grid-row:1!important;}
+  #live3Fullscreen #live3FsSpectatorExitBtn{grid-column:1/-1!important;grid-row:2!important;}
 }
 </style>
 
@@ -15871,7 +15301,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.63";
+const BPT_APP_VERSION="4.65";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -16027,7 +15457,7 @@ function simplifyRecordTextForMobile(text){
     </div>
   </div>
 
-  <div class="app-version" id="headerAppVersion">BPT v4.63</div>
+  <div class="app-version" id="headerAppVersion">BPT v4.65</div>
 
   <div id="bptOnlinePresence" class="bpt-online-presence" tabindex="0" aria-label="Personnes connectées">
     <span class="bpt-online-dot">●</span>
@@ -16144,7 +15574,7 @@ function simplifyRecordTextForMobile(text){
       <div class="bpt-live3-game-head">
         <div>
           <div id="live3GameLocation" class="bpt-live3-game-location">—</div>
-          <div id="live3GameMeta" class="muted">—</div>
+          <div class="bpt-live3-meta-row"><div id="live3GameMeta" class="muted">—</div><span id="live3StructureBadge" class="bpt-live3-structure-badge">Structure · Classique</span></div>
           <div id="live3ViewerInfo" class="bpt-live3-viewer-info" style="display:none"></div>
         </div>
         <div class="bpt-live3-game-head-actions">
@@ -16266,7 +15696,7 @@ function simplifyRecordTextForMobile(text){
   <div class="bpt-live3-fs-shell">
     <header class="bpt-live3-fs-head">
       <div class="bpt-live3-fs-brand">BPT</div>
-      <div id="live3FsOwner" class="bpt-live3-fs-owner">Organisateur · —</div>
+      <div class="bpt-live3-fs-center"><div id="live3FsOwner" class="bpt-live3-fs-owner">Organisateur · —</div><div id="live3FsStructureBadge" class="bpt-live3-structure-badge">Structure · Classique</div></div>
       <div class="bpt-live3-fs-rem"><strong id="live3FsRemaining">0</strong><span>restants</span></div>
     </header>
     <section class="bpt-live3-fs-blinds">
@@ -17293,7 +16723,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 4.63</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 4.65</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:680px">
       <div style="font-weight:900;margin-bottom:9px">État BPT</div>
       <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -27778,13 +27208,13 @@ document.addEventListener("visibilitychange",()=>{
     const accel=advice.type==="accelerate";
     $3("live3PaceTitle").textContent=accel?"Retard significatif détecté":"Avance significative détectée";
     $3("live3PaceMessage").textContent=accel
-      ? `Il reste ${advice.remaining} joueur${advice.remaining>1?"s":""} alors que ${Math.round(advice.timeProgress*100)} % du temps cible est déjà écoulé. BPT vous propose de passer en mode adaptatif afin de raccourcir automatiquement les prochains niveaux.`
-      : `Le tournoi est sensiblement en avance : il ne reste que ${advice.remaining} joueur${advice.remaining>1?"s":""} après ${Math.round(advice.timeProgress*100)} % du temps cible. BPT vous propose de passer en mode adaptatif afin de rallonger automatiquement les prochains niveaux.`;
+      ? `La partie prend trop de retard. Voulez-vous passer en mode adaptatif pour essayer de respecter l’heure de fin prévue ?`
+      : `La partie prend trop d’avance. Voulez-vous passer en mode adaptatif pour essayer de respecter l’heure de fin prévue ?`;
     $3("live3PaceElapsed").textContent=elapsedHoursMinutes(advice.elapsed);
     $3("live3PaceRemaining").textContent=elapsedHoursMinutes(advice.targetRemaining);
     $3("live3PacePlayers").textContent=`${advice.remaining} / ${advice.totalPlayers}`;
     $3("live3PaceDuration").textContent=`${advice.currentMin} → ${advice.proposedMin} min`;
-    $3("live3PaceApplyBtn").textContent=`Passer en adaptatif · ${advice.proposedMin} min`;
+    $3("live3PaceApplyBtn").textContent="Passer en adaptatif";
     const modal=$3("live3PaceModal");
     modal?.classList.add("open");
     modal?.setAttribute("aria-hidden","false");
@@ -30038,6 +29468,9 @@ async function requestTakeover(){
 
     $3("live3GameLocation").textContent=current.location||"Live BPT";
     $3("live3GameMeta").textContent=`${current.date||""} · ${current.players?.length||0} joueurs · organisateur : ${current.ownerLabel||"—"}`;
+    const structureText=current?.paceAdaptive===true?"Structure · Adaptatif":"Structure · Classique";
+    if($3("live3StructureBadge"))$3("live3StructureBadge").textContent=structureText;
+    if($3("live3FsStructureBadge"))$3("live3FsStructureBadge").textContent=structureText;
     $3("live3Blinds").textContent=blinds;$3("live3Ante").textContent=ante;
     const blindDurationMin=currentBlindDurationMinutes();
     if($3("live3BlindDurationLabel"))$3("live3BlindDurationLabel").textContent=`Durée : ${blindDurationMin} min`;
