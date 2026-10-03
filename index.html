@@ -1,10 +1,10 @@
 <!doctype html>
 <!--
-BPT LIVE V4.54 PRESENCE MOBILE SANS CHEVAUCHEMENT
+BPT LIVE V4.59 DUREE 30 MIN
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
-<!-- BPT: Live spectateur auto + durée écoulée + rôle maître/spectateur stabilisé -->
+<!-- BPT: Live spectateur auto + durée écoulée + rôle organisateur/spectateur stabilisé -->
 <html lang="fr">
 <head>
 <meta charset="utf-8">
@@ -4071,7 +4071,7 @@ body.spectator-live-open .spectator-global-exit{
 }
 
 
-/* ===== V145 — vérification écriture Live maître ===== */
+/* ===== V145 — vérification écriture Live organisateur ===== */
 .live-master-sync-diag{
   margin-top:4px;
   font-size:10px;
@@ -4753,7 +4753,7 @@ body.spectator-live-open .spectator-global-exit{
     flex:1 1 auto;
   }
 
-  /* Live maître sur téléphone : empilé et commandes accessibles */
+  /* Live organisateur sur téléphone : empilé et commandes accessibles */
   #live:not(.live-spectator-mode) .live-stage{
     grid-template-columns:1fr !important;
   }
@@ -4970,7 +4970,7 @@ body.spectator-live-open .spectator-global-exit{
     font-size:13px !important;
   }
 
-  /* Live maître mobile */
+  /* Live organisateur mobile */
   #live:not(.live-spectator-mode) .live-timer{
     font-size:70px !important;
   }
@@ -14695,6 +14695,11 @@ body:has(#live3Fullscreen.open){
 #live3ChatModal .bpt-live3-modal-card,#live3ElimModal .bpt-live3-modal-card,#live3PaceModal .bpt-live3-modal-card{position:relative !important;z-index:2000001 !important;pointer-events:auto !important;}
 </style>
 <style id="bpt-v450-pace-advisor">
+#live3Projection{margin:10px auto 0;width:min(900px,100%);display:flex;justify-content:center;gap:18px;align-items:center;padding:10px 14px;border-radius:12px;background:#f7f4ee;border:1px solid #ddd4c5;font-size:13px;flex-wrap:wrap}
+#live3Projection strong{font-size:15px}.bpt-pace-on-time{color:#355c45}.bpt-pace-late{color:#9a3f32}.bpt-pace-early{color:#2b6480}
+#live3FsProjection{display:flex;justify-content:center;gap:12px;align-items:center;flex-wrap:wrap;font-size:12px;color:#dce5df;padding:4px 8px}
+#live3FsProjection strong{color:#fff;font-size:14px}
+@media(max-width:700px){#live3Projection{gap:8px;padding:8px;font-size:11px}#live3Projection strong{font-size:13px}#live3FsProjection{font-size:9px;gap:7px}#live3FsProjection strong{font-size:11px}}
 #live3PaceModal{background:rgba(7,11,9,.82) !important;align-items:center !important;justify-content:center !important;padding:18px !important;}
 #live3PaceModal .bpt-live3-pace-card{width:min(560px,96vw) !important;background:#17231d !important;border:1px solid #44594b !important;border-radius:18px !important;padding:22px !important;box-shadow:0 22px 70px rgba(0,0,0,.5) !important;}
 #live3PaceModal .bpt-live3-pace-kicker{font-size:11px !important;text-transform:uppercase !important;letter-spacing:.12em !important;color:#cdbb7b !important;font-weight:900 !important;margin-bottom:5px !important;}
@@ -14775,6 +14780,45 @@ body:has(#live3Fullscreen.open){
 }
 </style>
 
+
+
+<style id="bpt-v455-chat-popup">
+/* BPT 4.56 — notification de nouveau chat au-dessus de l'écran consulté */
+#live3ChatToast{
+  position:fixed;
+  top:max(14px, env(safe-area-inset-top));
+  right:16px;
+  z-index:1900000;
+  width:min(390px,calc(100vw - 24px));
+  display:none;
+  align-items:flex-start;
+  gap:10px;
+  padding:12px 12px 12px 14px;
+  border-radius:14px;
+  border:1px solid rgba(200,149,46,.72);
+  background:rgba(13,26,20,.97);
+  color:#fff;
+  box-shadow:0 16px 42px rgba(0,0,0,.42);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  cursor:pointer;
+}
+#live3ChatToast.open{display:flex;}
+#live3ChatToast .bpt-chat-toast-icon{font-size:22px;line-height:1.1;flex:0 0 auto;margin-top:1px;}
+#live3ChatToast .bpt-chat-toast-body{min-width:0;flex:1;}
+#live3ChatToast .bpt-chat-toast-head{display:flex;align-items:center;gap:8px;margin-bottom:3px;}
+#live3ChatToast .bpt-chat-toast-title{font-size:13px;font-weight:950;color:#d9ab49;white-space:nowrap;}
+#live3ChatToast .bpt-chat-toast-from{font-size:13px;font-weight:850;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#live3ChatToast .bpt-chat-toast-text{font-size:13px;line-height:1.35;color:#eef3ef;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;}
+#live3ChatToast .bpt-chat-toast-close{
+  flex:0 0 auto;border:0;background:transparent;color:#d5ddd8;font-size:20px;line-height:1;
+  width:28px;height:28px;border-radius:8px;cursor:pointer;padding:0;
+}
+#live3ChatToast .bpt-chat-toast-close:hover{background:rgba(255,255,255,.08);}
+@media(max-width:700px){
+  #live3ChatToast{left:10px;right:10px;top:max(10px, env(safe-area-inset-top));width:auto;padding:11px 10px 11px 12px;border-radius:13px;}
+}
+</style>
 
 <style id="bpt-v432-full-chat-history">
 #live3ChatModal .bpt-live3-chat-card{
@@ -15503,7 +15547,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.54";
+const BPT_APP_VERSION="4.59";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -15541,7 +15585,7 @@ function updateFirebaseDiagnostic(){
   const versionEl=document.getElementById("firebaseDiagnosticVersion");
 
   if(modeEl){
-    let mode="Maître";
+    let mode="Organisateur";
     try{
       if(typeof liveIsSpectator==="function" && liveIsSpectator())mode="Spectateur";
     }catch(_e){}
@@ -15659,7 +15703,7 @@ function simplifyRecordTextForMobile(text){
     </div>
   </div>
 
-  <div class="app-version" id="headerAppVersion">BPT v4.54</div>
+  <div class="app-version" id="headerAppVersion">BPT v4.59</div>
 
   <div id="bptOnlinePresence" class="bpt-online-presence" tabindex="0" aria-label="Personnes connectées">
     <span class="bpt-online-dot">●</span>
@@ -15726,6 +15770,9 @@ function simplifyRecordTextForMobile(text){
         </label>
         <label>Durée souhaitée de la partie
           <select id="live3TargetHours">
+            <option value="0.5">30 min</option>
+            <option value="1">1 h 00</option>
+            <option value="1.5">1 h 30</option>
             <option value="2">2 h 00</option>
             <option value="2.5">2 h 30</option>
             <option value="3">3 h 00</option>
@@ -15742,7 +15789,7 @@ function simplifyRecordTextForMobile(text){
           </select>
         </label>
         <label>Structure
-          <input type="text" value="BPT fixe · 18 niveaux · sans ante" disabled>
+          <input type="text" value="BPT fixe · 25 niveaux · sans ante" disabled>
         </label>
       </div>
 <div class="bpt-live3-section-title">Joueurs</div>
@@ -15797,6 +15844,10 @@ function simplifyRecordTextForMobile(text){
           <div><span>Tapis moyen</span><strong id="live3AvgStack">0</strong></div>
           <div><span>Temps écoulé</span><strong id="live3Elapsed">0 min</strong></div>
           <div><span>Prochain niveau</span><strong id="live3Next">—</strong></div>
+        </div>
+        <div id="live3Projection" aria-live="polite">
+          <span>Fin estimée : <strong id="live3EstimatedFinish">—</strong></span>
+          <span>Écart : <strong id="live3FinishDelta" class="bpt-pace-on-time">—</strong></span>
         </div>
       </div>
 
@@ -15888,6 +15939,10 @@ function simplifyRecordTextForMobile(text){
       <div><span>Temps écoulé</span><strong id="live3FsElapsed">0 min</strong></div>
       <div><span>Prochain</span><strong id="live3FsNext">—</strong></div>
     </section>
+    <section id="live3FsProjection">
+      <span>Fin estimée <strong id="live3FsEstimatedFinish">—</strong></span>
+      <span>Écart <strong id="live3FsFinishDelta">—</strong></span>
+    </section>
     <section id="live3FsMasterActions" class="bpt-live3-fs-actions bpt-live3-owner-only">
       <button id="live3FsStartPauseBtn" type="button">Démarrer</button>
       <button id="live3FsEliminateBtn" type="button">Sortir un joueur</button>
@@ -15976,23 +16031,36 @@ function simplifyRecordTextForMobile(text){
 
 <div id="live3PaceModal" class="bpt-live3-modal bpt-live3-pace-modal" aria-hidden="true">
   <div class="bpt-live3-modal-card bpt-live3-pace-card">
-    <div class="bpt-live3-pace-kicker">Analyse du rythme</div>
+    <div class="bpt-live3-pace-kicker">BPT · Analyse du rythme</div>
     <h2 id="live3PaceTitle">Rythme du tournoi</h2>
     <p id="live3PaceMessage" class="bpt-live3-pace-message"></p>
     <div class="bpt-live3-pace-grid">
       <div><span>Temps écoulé</span><strong id="live3PaceElapsed">—</strong></div>
       <div><span>Temps restant cible</span><strong id="live3PaceRemaining">—</strong></div>
       <div><span>Joueurs restants</span><strong id="live3PacePlayers">—</strong></div>
-      <div><span>Niveaux proposés</span><strong id="live3PaceDuration">—</strong></div>
+      <div><span>Durée adaptative proposée</span><strong id="live3PaceDuration">—</strong></div>
     </div>
     <div class="bpt-live3-pace-note">La modification concerne uniquement les prochains niveaux. Le niveau en cours n'est pas modifié.</div>
     <div class="bpt-live3-modal-actions">
-      <button id="live3PaceApplyBtn" class="btn primary" type="button">Appliquer</button>
-      <button id="live3PaceKeepBtn" class="btn ghost" type="button">Conserver le rythme</button>
+      <button id="live3PaceApplyBtn" class="btn primary" type="button">Passer en adaptatif</button>
+      <button id="live3PaceKeepBtn" class="btn ghost" type="button">Rester en classique</button>
     </div>
   </div>
 </div>
 
+
+
+<div id="live3ChatToast" role="status" aria-live="polite" aria-hidden="true">
+  <div class="bpt-chat-toast-icon">💬</div>
+  <div class="bpt-chat-toast-body">
+    <div class="bpt-chat-toast-head">
+      <span class="bpt-chat-toast-title">Nouveau message</span>
+      <span id="live3ChatToastFrom" class="bpt-chat-toast-from"></span>
+    </div>
+    <div id="live3ChatToastText" class="bpt-chat-toast-text"></div>
+  </div>
+  <button id="live3ChatToastClose" class="bpt-chat-toast-close" type="button" aria-label="Fermer">×</button>
+</div>
 
 <div id="live3ChatModal" class="bpt-live3-modal" aria-hidden="true">
   <div class="bpt-live3-modal-card bpt-live3-chat-card">
@@ -16049,6 +16117,11 @@ function simplifyRecordTextForMobile(text){
             <div class="field live-prep-essential-field">
               <label for="liveDuration">Durée cible</label>
               <select id="liveDuration">
+                <option value="30">30 min</option>
+                <option value="60">1h00</option>
+                <option value="90">1h30</option>
+                <option value="120">2h00</option>
+                <option value="150">2h30</option>
                 <option value="180">3h00</option>
                 <option value="210">3h30</option>
                 <option value="240">4h00</option>
@@ -16885,7 +16958,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 4.54</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 4.59</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:680px">
       <div style="font-weight:900;margin-bottom:9px">État BPT</div>
       <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -17671,7 +17744,7 @@ function bptChatResetForNewLive(previousKey=""){
   bptChatRender();
 }
 function bptChatRoleLabel(){
-  try{return (typeof liveIsCreator==="function" && liveIsCreator())?"Maître":"Spectateur";}catch(_e){return "Participant";}
+  try{return (typeof liveIsCreator==="function" && liveIsCreator())?"Organisateur":"Spectateur";}catch(_e){return "Participant";}
 }
 function bptChatStorageKey(){
   const key=bptChatLiveKey();
@@ -17821,6 +17894,33 @@ async function bptChatSend(){
     console.error("BPT chat send:",e);bptChatSetStatus("Échec de l’envoi.",2500);
   }finally{if(button)button.disabled=false;}
 }
+let bptIncomingChatToastTimer=null;
+function bptShowIncomingChatToast(msg,mode="legacy"){
+  if(!msg)return;
+  const live3Modal=document.getElementById("live3ChatModal");
+  const legacyModal=document.getElementById("liveChatBackdrop");
+  const anyChatOpen=!!(live3Modal?.classList.contains("open") || legacyModal?.classList.contains("open"));
+  if(anyChatOpen)return;
+  const toast=document.getElementById("live3ChatToast");
+  if(!toast)return;
+  const from=document.getElementById("live3ChatToastFrom");
+  const text=document.getElementById("live3ChatToastText");
+  const sender=String(msg.from||msg.senderLabel||msg.senderName||"Utilisateur").trim()||"Utilisateur";
+  const body=String(msg.text||"").trim();
+  if(from)from.textContent=sender;
+  if(text)text.textContent=body;
+  toast.dataset.chatMode=mode;
+  toast.classList.add("open");
+  toast.setAttribute("aria-hidden","false");
+  if(bptIncomingChatToastTimer)clearTimeout(bptIncomingChatToastTimer);
+  bptIncomingChatToastTimer=setTimeout(()=>{
+    toast.classList.remove("open");
+    toast.setAttribute("aria-hidden","true");
+    delete toast.dataset.chatMode;
+    bptIncomingChatToastTimer=null;
+  },6500);
+}
+
 function bptChatHandleBroadcast(eventPayload){
   const msg=eventPayload?.payload||eventPayload||{};
   const text=bptChatClean(msg.text);
@@ -17842,9 +17942,8 @@ function bptChatHandleBroadcast(eventPayload){
   const open=document.getElementById("liveChatBackdrop")?.classList.contains("open");
   if(!open)bptChatSetUnread(bptChatUnread+1);
   bptChatAlertSound();
-  // 2.6.3 : ne jamais ouvrir automatiquement la popup à la réception.
-  // Certains téléphones annoncent vocalement le nouveau contenu lorsqu'un panneau apparaît.
-  // Le bip + le badge signalent le message ; l'utilisateur ouvre ensuite le chat manuellement.
+  // 4.59 : tout nouveau message reçu doit apparaître au-dessus de l'écran consulté.
+  if(!open)bptShowIncomingChatToast(cleanMsg,"legacy");
 }
 
 // Amorçage audio discret à la première interaction utilisateur.
@@ -18358,7 +18457,7 @@ async function cloudPushNow(){
     return false;
   }
 
-  // Pendant un Live maître, seul livePushStateNow() publie l'état Live.
+  // Pendant un Live organisateur, seul livePushStateNow() publie l'état Live.
   // Cela évite qu'une synchro générale réécrive bpt_state avec un snapshot plus ancien.
   if(
     db?.liveState?.prepared &&
@@ -18943,7 +19042,7 @@ async function initCloudSync(){
     }else{
       // Firebase répond, mais un premier essai de migration a pu laisser un état
       // partiel/incompatible. Comme ce backend vient d'être créé pour BPT, on
-      // réinitialise alors l'état partagé à partir de l'état local du PC maître.
+      // réinitialise alors l'état partagé à partir de l'état local du PC organisateur.
       console.warn("BPT Firebase : état distant incomplet, réinitialisation depuis les données locales.");
       const initialHistory=Array.isArray(db.history)?clone(db.history):[];
       const payload=cloudBuildLeanPayload();
@@ -23989,7 +24088,7 @@ function liveIsCreator(){
 }
 
 function liveIsSpectator(){
-  // Sur téléphone, le poste créateur reste maître même si un poll distant
+  // Sur téléphone, le poste créateur reste organisateur même si un poll distant
   // conserve brièvement une copie spectateur plus ancienne du même Live.
   if(isBptMobileDevice()){
     const local=db?.liveState;
@@ -25845,7 +25944,7 @@ async function resolveLiveEntryMode(){
 
     // Aucun live confirmé sur le serveur : mais si un live distant est encore
     // connu localement, on reste bloqué en mode spectateur tant qu'un appareil
-    // maître n'a pas réellement libéré la partie.
+    // organisateur n'a pas réellement libéré la partie.
     const cached=bptCachedSpectatorRow();
     if(cached){
       if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -26391,7 +26490,7 @@ function mobileLiveCanControlDirect(){
   if(!s?.prepared || s.synced)return false;
   const creator=String(s.creatorDeviceId||"");
   if(creator && creator!==liveDeviceId()){
-    alert("Ce téléphone n'est pas le maître du Live.");
+    alert("Ce téléphone n'est pas le organisateur du Live.");
     return false;
   }
   return true;
@@ -27096,6 +27195,7 @@ document.addEventListener("visibilitychange",()=>{
   let lastChatMessageId=null;
   let chatSoundPrimed=false;
   let unreadChatCount=0;
+  let chatToastTimer=null;
 
   const LIVE3_CHAT_READ_KEY="bpt_live3_chat_last_read";
 
@@ -27253,11 +27353,60 @@ document.addEventListener("visibilitychange",()=>{
     try{localStorage.setItem(live3PaceStorageKey(),JSON.stringify(data||{}));}catch(_e){}
   }
 
+  function live3FinishProjection(){
+    if(!current?.startedAt)return null;
+    const totalPlayers=Math.max(2,(current.players||[]).length);
+    const remaining=Math.max(1,remainingCount());
+    const targetSec=Math.max(1800,Number(current.targetHours||4)*3600);
+    const elapsed=Math.max(0,elapsedSeconds());
+    const eliminationProgress=(totalPlayers-remaining)/(totalPlayers-1);
+    const timeProgress=elapsed/targetSec;
+    // Projection volontairement amortie : elle réagit au rythme des éliminations
+    // sans extrapoler de façon excessive après une seule sortie.
+    let projectedTotal=targetSec;
+    if(elapsed>0 && eliminationProgress>0){
+      const delta=timeProgress-eliminationProgress;
+      projectedTotal=targetSec*(1+delta*0.80);
+      projectedTotal=Math.max(targetSec*0.65,Math.min(targetSec*1.75,projectedTotal));
+    }
+    const projectedFinish=Number(current.startedAt)+projectedTotal*1000;
+    const targetFinish=Number(current.startedAt)+targetSec*1000;
+    const deltaSec=Math.round((projectedFinish-targetFinish)/1000);
+    return {projectedFinish,targetFinish,deltaSec,projectedTotal,targetSec,timeProgress,eliminationProgress,totalPlayers,remaining};
+  }
+
+  function live3FormatClock(ts){
+    const d=new Date(Number(ts)||Date.now());
+    return d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+  }
+
+  function live3FormatProjectionDelta(sec){
+    const m=Math.round(Math.abs(Number(sec)||0)/60);
+    if(m<3)return {text:'À l’heure',cls:'bpt-pace-on-time'};
+    return Number(sec)>0
+      ? {text:`+${m} min de retard`,cls:'bpt-pace-late'}
+      : {text:`-${m} min d’avance`,cls:'bpt-pace-early'};
+  }
+
+  function live3RenderProjection(){
+    const p=live3FinishProjection();
+    const normalFinish=$3('live3EstimatedFinish'), normalDelta=$3('live3FinishDelta');
+    const fsFinish=$3('live3FsEstimatedFinish'), fsDelta=$3('live3FsFinishDelta');
+    if(!p){
+      if(normalFinish)normalFinish.textContent='—'; if(normalDelta)normalDelta.textContent='—';
+      if(fsFinish)fsFinish.textContent='—'; if(fsDelta)fsDelta.textContent='—';
+      return;
+    }
+    const d=live3FormatProjectionDelta(p.deltaSec);
+    [normalFinish,fsFinish].forEach(el=>{if(el)el.textContent=live3FormatClock(p.projectedFinish);});
+    [normalDelta,fsDelta].forEach(el=>{if(el){el.textContent=d.text;el.className=d.cls;}});
+  }
+
   function live3PaceAnalysis(){
     if(!isOwner() || !isActive() || !current?.startedAt)return null;
     const totalPlayers=Math.max(2,(current.players||[]).length);
     const remaining=Math.max(1,remainingCount());
-    const targetSec=Math.max(3600,Number(current.targetHours||4)*3600);
+    const targetSec=Math.max(1800,Number(current.targetHours||4)*3600);
     const elapsed=Math.max(0,elapsedSeconds());
     const timeProgress=elapsed/targetSec;
     if(timeProgress<0.50)return null;
@@ -27291,15 +27440,15 @@ document.addEventListener("visibilitychange",()=>{
     if(!advice || $3("live3PaceModal")?.classList.contains("open"))return;
     live3PendingPaceAdvice=advice;
     const accel=advice.type==="accelerate";
-    $3("live3PaceTitle").textContent=accel?"Accélération conseillée":"Ralentissement conseillé";
+    $3("live3PaceTitle").textContent=accel?"Retard significatif détecté":"Avance significative détectée";
     $3("live3PaceMessage").textContent=accel
-      ? `Il reste ${advice.remaining} joueur${advice.remaining>1?"s":""} alors que ${Math.round(advice.timeProgress*100)} % du temps cible est déjà écoulé. Pour se rapprocher de l'heure de fin prévue, BPT propose de raccourcir les prochains niveaux.`
-      : `Le tournoi est en avance sur sa trajectoire : il ne reste que ${advice.remaining} joueur${advice.remaining>1?"s":""} après ${Math.round(advice.timeProgress*100)} % du temps cible. BPT propose de rallonger légèrement les prochains niveaux.`;
+      ? `Il reste ${advice.remaining} joueur${advice.remaining>1?"s":""} alors que ${Math.round(advice.timeProgress*100)} % du temps cible est déjà écoulé. BPT vous propose de passer en mode adaptatif afin de raccourcir automatiquement les prochains niveaux.`
+      : `Le tournoi est sensiblement en avance : il ne reste que ${advice.remaining} joueur${advice.remaining>1?"s":""} après ${Math.round(advice.timeProgress*100)} % du temps cible. BPT vous propose de passer en mode adaptatif afin de rallonger automatiquement les prochains niveaux.`;
     $3("live3PaceElapsed").textContent=elapsedHoursMinutes(advice.elapsed);
     $3("live3PaceRemaining").textContent=elapsedHoursMinutes(advice.targetRemaining);
     $3("live3PacePlayers").textContent=`${advice.remaining} / ${advice.totalPlayers}`;
     $3("live3PaceDuration").textContent=`${advice.currentMin} → ${advice.proposedMin} min`;
-    $3("live3PaceApplyBtn").textContent=accel?`Accélérer à ${advice.proposedMin} min`:`Ralentir à ${advice.proposedMin} min`;
+    $3("live3PaceApplyBtn").textContent=`Passer en adaptatif · ${advice.proposedMin} min`;
     const modal=$3("live3PaceModal");
     modal?.classList.add("open");
     modal?.setAttribute("aria-hidden","false");
@@ -27325,7 +27474,25 @@ document.addEventListener("visibilitychange",()=>{
     if(!afterElimination && sinceLast<LIVE3_PACE_MIN_INTERVAL_MS)return;
 
     live3WritePaceMemo({signature,at:now});
-    live3ShowPaceAdvice(advice);
+    if(current?.paceAdaptive===true){
+      live3AutoApplyPaceAdvice(advice);
+    }else{
+      live3ShowPaceAdvice(advice);
+    }
+  }
+
+  async function live3AutoApplyPaceAdvice(advice){
+    if(!advice || !isOwner())return;
+    await ownerTransaction(s=>{
+      const levels=Array.isArray(s.levels)?s.levels:[];
+      const start=Math.max(0,(Number(s.levelIndex)||0)+1);
+      for(let i=start;i<levels.length;i++)levels[i].durationSec=advice.proposedMin*60;
+      s.levels=levels;
+      s.paceAdaptive=true;
+      s.lastPaceAdjustment={at:Date.now(),type:advice.type,minutes:advice.proposedMin,remainingPlayers:advice.remaining,automatic:true};
+      return s;
+    });
+    try{showBptToast(`BPT adaptatif : prochains niveaux à ${advice.proposedMin} min`,'ok');}catch(_e){}
   }
 
   async function live3ApplyPaceAdvice(){
@@ -27336,10 +27503,12 @@ document.addEventListener("visibilitychange",()=>{
       const start=Math.max(0,(Number(s.levelIndex)||0)+1); // uniquement les niveaux suivants
       for(let i=start;i<levels.length;i++)levels[i].durationSec=advice.proposedMin*60;
       s.levels=levels;
-      s.lastPaceAdjustment={at:Date.now(),type:advice.type,minutes:advice.proposedMin,remainingPlayers:advice.remaining};
+      s.paceAdaptive=true;
+      s.lastPaceAdjustment={at:Date.now(),type:advice.type,minutes:advice.proposedMin,remainingPlayers:advice.remaining,automatic:false};
       return s;
     });
     live3ClosePaceModal();
+    try{showBptToast(`Mode adaptatif activé · prochains niveaux à ${advice.proposedMin} min`,'ok');}catch(_e){}
   }
   const BPT_SB_STRUCTURE=[25,50,75,100,150,200,300,400,500,600,800,1000,1200,1500,2000,2500,3000,4000,5000,6000,8000,10000,12000,15000,20000];
   function bptGetBlindLevels(){
@@ -28137,7 +28306,7 @@ function connectionDeviceLabel(){
     logConnectionSession();
     logConnectionSession();
 
-    // Si aucun Live n'est actif, ce joueur est le futur maître :
+    // Si aucun Live n'est actif, ce joueur est le futur organisateur :
     // préremplir le lieu avec son nom.
     if(!isActive()){
       const loc=$3("live3Location");
@@ -28309,19 +28478,19 @@ function connectionDeviceLabel(){
         buyIn:Math.max(0,Number($3("live3BuyIn").value)||0),
         running:false,startedAt:null,runStartedAt:null,deadline:null,elapsedSec:0,
         levelIndex:0,
-        targetHours:Math.max(1,Number($3("live3TargetHours").value)||4),
+        targetHours:Math.max(0.5,Number($3("live3TargetHours").value)||4),
         levels:buildLevels(
-          Math.max(1,Number($3("live3TargetHours").value)||4),
+          Math.max(0.5,Number($3("live3TargetHours").value)||4),
           selected.length,
           Math.max(100,Number($3("live3Stack").value)||20000)
         ),
         remainingSec:buildLevels(
-          Math.max(1,Number($3("live3TargetHours").value)||4),
+          Math.max(0.5,Number($3("live3TargetHours").value)||4),
           selected.length,
           Math.max(100,Number($3("live3Stack").value)||20000)
         )[0].durationSec,
         players:selected.map(name=>({name,status:"in",place:null,killer:"",outAt:null,outLevel:null,outTime:"",outElapsedSec:null})),
-        viewers:{},takeoverRequest:null,chat:[]
+        viewers:{},takeoverRequest:null,chat:[],paceAdaptive:false
       };
       await r.transaction(server=>{
         if(server?.active)return server;
@@ -28877,7 +29046,7 @@ function connectionDeviceLabel(){
 function live3OwnerDisplayName(){
   const raw=String(current?.ownerLabel||current?.ownerName||"").trim();
   if(raw)return raw;
-  return "le maître actuel";
+  return "le organisateur actuel";
 }
 
 function updateLive3TakeoverRequestButtonLabel(){
@@ -28917,7 +29086,7 @@ async function forceLive3Takeover(){
   }
 
   if(!live3TakeoverExpired()){
-    alert(`Le maître dispose encore de ${live3TakeoverRemainingSec()} s pour répondre.`);
+    alert(`Le organisateur dispose encore de ${live3TakeoverRemainingSec()} s pour répondre.`);
     return;
   }
 
@@ -28950,7 +29119,7 @@ async function forceLive3Takeover(){
   });
 
   if(!taken){
-    alert("La reprise n'est plus disponible. Le maître a peut-être répondu.");
+    alert("La reprise n'est plus disponible. Le organisateur a peut-être répondu.");
   }
 }
 
@@ -28980,7 +29149,7 @@ function updateLive3TakeoverTimeoutUI(){
 
   if(live3TakeoverExpired()){
     btn.style.display="inline-flex";
-    if(status)status.textContent="Aucune réponse du maître depuis 30 s";
+    if(status)status.textContent="Aucune réponse du organisateur depuis 30 s";
     if(countdown){
       countdown.style.display="block";
       countdown.textContent="Délai expiré · reprise forcée disponible";
@@ -29080,6 +29249,30 @@ async function requestTakeover(){
     input.value="";
   }
 
+
+  function hideChatToast(){
+    if(chatToastTimer){clearTimeout(chatToastTimer);chatToastTimer=null;}
+    const toast=$3("live3ChatToast");
+    if(!toast)return;
+    toast.classList.remove("open");
+    toast.setAttribute("aria-hidden","true");
+  }
+
+  function showChatToast(message){
+    if(!message || $3("live3ChatModal")?.classList.contains("open"))return;
+    const toast=$3("live3ChatToast");
+    if(!toast)return;
+    toast.dataset.chatMode="live3";
+    const from=$3("live3ChatToastFrom");
+    const text=$3("live3ChatToastText");
+    if(from)from.textContent=String(message.from||"Utilisateur").trim()||"Utilisateur";
+    if(text)text.textContent=String(message.text||"");
+    toast.classList.add("open");
+    toast.setAttribute("aria-hidden","false");
+    if(chatToastTimer)clearTimeout(chatToastTimer);
+    chatToastTimer=setTimeout(hideChatToast,6500);
+  }
+
   function updateUnreadBadges(){
     const count=Math.max(0,Number(unreadChatCount)||0);
     [
@@ -29109,6 +29302,7 @@ async function requestTakeover(){
   }
 
   function openChat(){
+    hideChatToast();
     live3MarkChatRead();
     renderChat();
 
@@ -29470,7 +29664,7 @@ async function requestTakeover(){
     const next=`${fmt(nx.sb)} / ${fmt(nx.bb)}${nx.ante?` · ante ${fmt(nx.ante)}`:""}`;
 
     $3("live3GameLocation").textContent=current.location||"Live BPT";
-    $3("live3GameMeta").textContent=`${current.date||""} · ${current.players?.length||0} joueurs · maître : ${current.ownerLabel||"—"}`;
+    $3("live3GameMeta").textContent=`${current.date||""} · ${current.players?.length||0} joueurs · organisateur : ${current.ownerLabel||"—"}`;
     $3("live3Blinds").textContent=blinds;$3("live3Ante").textContent=ante;
     const blindDurationMin=currentBlindDurationMinutes();
     if($3("live3BlindDurationLabel"))$3("live3BlindDurationLabel").textContent=`Durée : ${blindDurationMin} min`;
@@ -29478,11 +29672,12 @@ async function requestTakeover(){
       $3("live3BlindDurationInput").value=String(blindDurationMin);
     }
     $3("live3Timer").textContent=time(rem);$3("live3Remaining").textContent=String(count);
+    live3RenderProjection();
     $3("live3AvgStack").textContent=fmt(avg);$3("live3Elapsed").textContent=elapsedHoursMinutes(elapsedSeconds());$3("live3Next").textContent=next;
     $3("live3StartPauseBtn").textContent=current.running?"Pause":(current.startedAt?"Reprendre":"Démarrer");
 
     // Visibilité stricte selon le rôle :
-    // maître = aucun bouton de demande de gestion
+    // organisateur = aucun bouton de demande de gestion
     // spectateur = bouton de demande de gestion visible
     if($3("live3MasterControls")){
       $3("live3MasterControls").style.setProperty("display",owner?"grid":"none","important");
@@ -29547,6 +29742,7 @@ async function requestTakeover(){
     $3("live3FsBlinds").textContent=blinds;$3("live3FsAnte").textContent=ante;
     if($3("live3FsBlindDurationLabel"))$3("live3FsBlindDurationLabel").textContent=`Durée : ${blindDurationMin} min`;
     $3("live3FsTimer").textContent=time(rem);$3("live3FsRemaining").textContent=String(count);
+    live3RenderProjection();
     $3("live3FsAvg").textContent=fmt(avg);$3("live3FsElapsed").textContent=elapsedHoursMinutes(elapsedSeconds());$3("live3FsNext").textContent=next;
     $3("live3FsStartPauseBtn").textContent=current.running?"Pause":(current.startedAt?"Reprendre":"Démarrer");
 
@@ -29741,7 +29937,10 @@ async function requestTakeover(){
         live3RefreshUnreadCount();
       }
 
-      if(latestFromOther)playChatReceiveSound();
+      if(latestFromOther){
+        playChatReceiveSound();
+        if(!chatOpen)showChatToast(latest);
+      }
       return;
     }
 
@@ -29865,6 +30064,18 @@ async function requestTakeover(){
     $3("live3PaceKeepBtn")?.addEventListener("click",live3ClosePaceModal);
     $3("live3PaceModal")?.addEventListener("click",e=>{if(e.target===$3("live3PaceModal"))live3ClosePaceModal();});
 
+    $3("live3ChatToast")?.addEventListener("click",e=>{
+      if(e.target?.closest?.("#live3ChatToastClose"))return;
+      const toast=$3("live3ChatToast");
+      const mode=toast?.dataset?.chatMode||"live3";
+      if(mode==="legacy" && typeof bptChatOpen==="function")bptChatOpen();
+      else openChat();
+      if(toast)delete toast.dataset.chatMode;
+    });
+    $3("live3ChatToastClose")?.addEventListener("click",e=>{
+      e.stopPropagation();
+      hideChatToast();
+    });
     $3("live3ChatBtn")?.addEventListener("click",openChat);
     $3("live3ChatCloseBtn")?.addEventListener("click",closeChat);
     $3("live3ChatSendBtn")?.addEventListener("click",sendChat);
