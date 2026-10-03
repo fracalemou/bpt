@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-BPT LIVE V4.52 25 NIVEAUX + COTES 4 JOUEURS + REGULATION + HUMOUR
+BPT LIVE V4.54 PRESENCE MOBILE SANS CHEVAUCHEMENT
 Base stable figée à partir de la V3.29.
 Conserver cette version comme point de retour avant toute évolution ultérieure.
 -->
@@ -8348,6 +8348,21 @@ body.bpt-mobile-device.bpt-mobile-portrait #liveFullscreenDisplay .live-fullscre
   .bpt-header .brand{padding-right:64px}
 }
 
+/* ===== BPT 4.54 — présence mobile : réserve l'espace sous le détail ===== */
+@media(max-width:700px){
+  #nav{
+    transition:margin-top .16s ease !important;
+  }
+  body.bpt-presence-detail-open #nav,
+  html.bpt-presence-detail-open #nav{
+    margin-top:var(--bpt-presence-detail-space, 0px) !important;
+  }
+  .bpt-online-tooltip{
+    max-width:min(260px,calc(100vw - 20px)) !important;
+    z-index:140 !important;
+  }
+}
+
 
 /* ===== BPT 4.34 — sélecteur mobile joueurs lisible en 2 colonnes ===== */
 #live3MobilePlayerGrid{
@@ -15401,7 +15416,7 @@ body:not(.bpt-mobile-device) #bptMobileMoreTopBtn{display:none !important;}
 .bpt-odds-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
 .bpt-odds-head h2{margin:0;font-size:20px;color:#e8c39e}.bpt-odds-close{width:38px;height:38px;border-radius:10px;border:1px solid #455b50;background:#18241e;color:#fff;font-size:22px;font-weight:900}
 .bpt-odds-help{font-size:11px;line-height:1.35;color:#aebcb4;margin-bottom:12px}
-.bpt-odds-zone{border:1px solid #2e4338;border-radius:14px;background:#142019;padding:10px;margin-bottom:10px}.bpt-odds-zone-title{font-size:11px;font-weight:900;color:#d6dfda;text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px}
+.bpt-odds-zone{border:1px solid #2e4338;border-radius:14px;background:#142019;padding:10px;margin-bottom:10px}.bpt-odds-zone-title{font-size:11px;font-weight:900;color:#d6dfda;text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px}.bpt-odds-players-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px}.bpt-odds-players-grid .bpt-odds-zone{margin-bottom:0;min-width:0}
 .bpt-odds-slots{display:flex;gap:6px;flex-wrap:wrap}.bpt-card-slot{width:54px;height:68px;border:1px dashed #557164;border-radius:9px;background:#0d1511;color:#aebcb4;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;text-align:center;padding:3px}.bpt-card-slot.filled{background:#f7f4ec;color:#131715;border-style:solid;font-size:20px}.bpt-card-slot.active{outline:3px solid #c99a43;outline-offset:1px}.bpt-card-slot.red{color:#c53d43}
 .bpt-odds-deck{display:grid;grid-template-columns:repeat(13,minmax(28px,1fr));gap:4px;margin-top:9px}.bpt-deck-card{height:38px;border:1px solid #465d52;border-radius:7px;background:#f7f4ec;color:#161b18;font-weight:950;font-size:13px;padding:0}.bpt-deck-card.red{color:#c53d43}.bpt-deck-card:disabled{opacity:.18;filter:grayscale(1)}
 .bpt-odds-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.bpt-odds-actions button{min-height:44px;border-radius:10px;border:1px solid #40584a;font-weight:900}.bpt-odds-calc{background:#c99a43;color:#16120a}.bpt-odds-reset{background:#1d2a23;color:#fff}
@@ -15488,7 +15503,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.52";
+const BPT_APP_VERSION="4.54";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -15644,7 +15659,7 @@ function simplifyRecordTextForMobile(text){
     </div>
   </div>
 
-  <div class="app-version" id="headerAppVersion">BPT v4.52</div>
+  <div class="app-version" id="headerAppVersion">BPT v4.54</div>
 
   <div id="bptOnlinePresence" class="bpt-online-presence" tabindex="0" aria-label="Personnes connectées">
     <span class="bpt-online-dot">●</span>
@@ -16870,7 +16885,7 @@ function simplifyRecordTextForMobile(text){
     <div class="home-kicker">BPT · Administration</div>
     <h1>Paramètres du championnat</h1>
     <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 4.52</div>
+    <div id="settingsVersionInfo" class="settings-version-info">Version BPT 4.54</div>
     <div id="firebaseDiagnostic" class="card" style="margin-top:14px;padding:12px 14px;max-width:680px">
       <div style="font-weight:900;margin-bottom:9px">État BPT</div>
       <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -27902,7 +27917,57 @@ function connectionDeviceLabel(){
     tipEl.textContent=active.length
       ? initials.join(" · ")
       : "Personne";
+
+    if(document.body.classList.contains("bpt-presence-detail-open")){
+      requestAnimationFrame(updateMobilePresenceNavOffset);
+    }
   }
+
+  function mobilePresenceLayout(){
+    return window.matchMedia("(max-width:700px)").matches;
+  }
+
+  function updateMobilePresenceNavOffset(){
+    const presence=document.getElementById("bptOnlinePresence");
+    const tip=document.getElementById("bptOnlineTooltip");
+    if(!presence||!tip||!mobilePresenceLayout()){
+      document.documentElement.style.removeProperty("--bpt-presence-detail-space");
+      return;
+    }
+    const h=Math.ceil(tip.getBoundingClientRect().height||0);
+    document.documentElement.style.setProperty("--bpt-presence-detail-space",`${Math.max(0,h+12)}px`);
+  }
+
+  function openMobilePresenceDetail(){
+    if(!mobilePresenceLayout())return;
+    document.body.classList.add("bpt-presence-detail-open");
+    document.documentElement.classList.add("bpt-presence-detail-open");
+    requestAnimationFrame(updateMobilePresenceNavOffset);
+  }
+
+  function closeMobilePresenceDetail(){
+    document.body.classList.remove("bpt-presence-detail-open");
+    document.documentElement.classList.remove("bpt-presence-detail-open");
+    document.documentElement.style.removeProperty("--bpt-presence-detail-space");
+  }
+
+  document.addEventListener("click",e=>{
+    const presence=document.getElementById("bptOnlinePresence");
+    if(!presence)return;
+    if(presence.contains(e.target)){
+      if(mobilePresenceLayout()){
+        if(document.body.classList.contains("bpt-presence-detail-open")) closeMobilePresenceDetail();
+        else openMobilePresenceDetail();
+      }
+      return;
+    }
+    if(document.body.classList.contains("bpt-presence-detail-open"))closeMobilePresenceDetail();
+  });
+
+  window.addEventListener("resize",()=>{
+    if(!mobilePresenceLayout())closeMobilePresenceDetail();
+    else if(document.body.classList.contains("bpt-presence-detail-open"))requestAnimationFrame(updateMobilePresenceNavOffset);
+  });
 
   async function updateAppPresence(){
     if(!liveIdentityName() || !identityConfirmedThisSession())return;
@@ -30514,10 +30579,12 @@ document.addEventListener("DOMContentLoaded",()=>{
   <div class="bpt-odds-card" role="dialog" aria-modal="true" aria-labelledby="bptOddsTitle">
     <div class="bpt-odds-head"><h2 id="bptOddsTitle">Calcul de côtes · Texas Hold'em</h2><button id="bptOddsClose" class="bpt-odds-close" type="button">×</button></div>
     <div class="bpt-odds-help">Touchez un emplacement, puis une carte. Joueurs 1 et 2 obligatoires ; joueurs 3 et 4 optionnels. Renseignez ensuite le flop / turn / river si connus.</div>
-    <div class="bpt-odds-zone"><div class="bpt-odds-zone-title">Joueur 1</div><div class="bpt-odds-slots"><button class="bpt-card-slot active" data-slot="p1a">Carte 1</button><button class="bpt-card-slot" data-slot="p1b">Carte 2</button></div></div>
-    <div class="bpt-odds-zone"><div class="bpt-odds-zone-title">Joueur 2</div><div class="bpt-odds-slots"><button class="bpt-card-slot" data-slot="p2a">Carte 1</button><button class="bpt-card-slot" data-slot="p2b">Carte 2</button></div></div>
-    <div class="bpt-odds-zone"><div class="bpt-odds-zone-title">Joueur 3 · optionnel</div><div class="bpt-odds-slots"><button class="bpt-card-slot" data-slot="p3a">Carte 1</button><button class="bpt-card-slot" data-slot="p3b">Carte 2</button></div></div>
-    <div class="bpt-odds-zone"><div class="bpt-odds-zone-title">Joueur 4 · optionnel</div><div class="bpt-odds-slots"><button class="bpt-card-slot" data-slot="p4a">Carte 1</button><button class="bpt-card-slot" data-slot="p4b">Carte 2</button></div></div>
+    <div class="bpt-odds-players-grid">
+      <div class="bpt-odds-zone"><div class="bpt-odds-zone-title">Joueur 1</div><div class="bpt-odds-slots"><button class="bpt-card-slot active" data-slot="p1a">Carte 1</button><button class="bpt-card-slot" data-slot="p1b">Carte 2</button></div></div>
+      <div class="bpt-odds-zone"><div class="bpt-odds-zone-title">Joueur 2</div><div class="bpt-odds-slots"><button class="bpt-card-slot" data-slot="p2a">Carte 1</button><button class="bpt-card-slot" data-slot="p2b">Carte 2</button></div></div>
+      <div class="bpt-odds-zone"><div class="bpt-odds-zone-title">Joueur 3 · optionnel</div><div class="bpt-odds-slots"><button class="bpt-card-slot" data-slot="p3a">Carte 1</button><button class="bpt-card-slot" data-slot="p3b">Carte 2</button></div></div>
+      <div class="bpt-odds-zone"><div class="bpt-odds-zone-title">Joueur 4 · optionnel</div><div class="bpt-odds-slots"><button class="bpt-card-slot" data-slot="p4a">Carte 1</button><button class="bpt-card-slot" data-slot="p4b">Carte 2</button></div></div>
+    </div>
     <div class="bpt-odds-zone"><div class="bpt-odds-zone-title">Board</div><div class="bpt-odds-slots"><button class="bpt-card-slot" data-slot="b1">Flop 1</button><button class="bpt-card-slot" data-slot="b2">Flop 2</button><button class="bpt-card-slot" data-slot="b3">Flop 3</button><button class="bpt-card-slot" data-slot="b4">Turn</button><button class="bpt-card-slot" data-slot="b5">River</button></div><div id="bptOddsDeck" class="bpt-odds-deck"></div></div>
     <div class="bpt-odds-actions"><button id="bptOddsReset" class="bpt-odds-reset" type="button">Réinitialiser</button><button id="bptOddsCalc" class="bpt-odds-calc" type="button">Calculer</button></div>
     <div id="bptOddsResults" class="bpt-odds-results" hidden>
@@ -30531,7 +30598,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 </div>
 
 
-<script id="bpt-v452-odds-script">
+<script id="bpt-v453-odds-script">
 (function(){
   "use strict";
   const modal=document.getElementById("bptOddsModal"); if(!modal)return;
