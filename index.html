@@ -15439,7 +15439,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.73</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.74</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -20703,6 +20703,42 @@ function renderDashboard(){
       const lastGameNo=Math.max(0,...(lastGroupedGame.map(r=>Number(r.game)||0)));
       const gameKey=`${selectedSeasonKey||"season"}-${lastGameNo}-${lastWinner?.player||"none"}`;
       const V=(cat,arr)=>bptDashboardFunnyVariant(cat,gameKey,arr);
+
+      // Les nouveautés de la dernière partie passent en priorité dans le billet :
+      // records battus puis accomplissements débloqués.
+      const newRecords=latestBrokenDashboardRecords();
+      const newAchievements=latestGameUnlockedAchievements();
+      for(const rec of newRecords.slice(0,2)){
+        const who=rec.player && rec.player!=="—" ? L(rec.player) : "Le championnat";
+        sentences.push(V(`newRecord-${rec.id||rec.label}`,[
+          `🚨 Nouveau record : ${who} signe « ${rec.label} » avec ${rec.value}. Le livre des records vient de demander une nouvelle page.`,
+          `📚 Record battu ! ${who} prend « ${rec.label} » (${rec.value}). L’ancien record peut rendre son badge à l’accueil.`,
+          `🏁 ${who} vient de poser un nouveau record sur « ${rec.label} » : ${rec.value}. Merci de ne pas marcher sur l’histoire en train de s’écrire.`,
+          `📣 Nouveau sommet pour ${who} : ${rec.label}, ${rec.value}. Les archives BPT viennent de cligner des yeux.`
+        ]));
+      }
+      for(const ach of newAchievements.slice(0,2)){
+        const names=(ach.players||[]).map(L).join(", ");
+        if(!names)continue;
+        sentences.push(V(`newAchievement-${ach.name}`,[
+          `🏅 Nouvel accomplissement : ${names} débloque « ${ach.name} ». Le trophée virtuel est déjà beaucoup trop brillant.`,
+          `✨ ${names} vient de décrocher « ${ach.name} ». C’est officiel : la soirée produit maintenant ses propres légendes.`,
+          `🎖️ « ${ach.name} » débloqué par ${names}. Le CV poker vient de prendre une ligne inutile mais indispensable.`,
+          `🔓 ${names} débloque « ${ach.name} ». Quelqu’un avait manifestement lu la liste des défis avant de jouer.`
+        ]));
+      }
+      // S'il n'y a aucune nouveauté, glisser malgré tout un clin d'œil à un record/accomplissement existant.
+      if(!newRecords.length && !newAchievements.length){
+        const recordPool=buildDashboardRecordPool(games,rank,db.history||[]).filter(r=>Number(r.metric)>0 && r.player && r.player!=="—");
+        if(recordPool.length){
+          const idx=Math.abs(lastGameNo||0)%recordPool.length, rec=recordPool[idx];
+          sentences.push(V(`recordSpotlight-${rec.id||idx}`,[
+            `📌 Petit rappel du musée BPT : ${L(rec.player)} détient « ${rec.label} » avec ${rec.value}. Pour les autographes, voir directement l’intéressé.`,
+            `🏛️ Dans les archives : ${L(rec.player)} garde la main sur « ${rec.label} » (${rec.value}). Le record refuse toujours de déménager.`,
+            `📊 Le record « ${rec.label} » appartient toujours à ${L(rec.player)} avec ${rec.value}. La concurrence est cordialement invitée à faire mieux.`
+          ]));
+        }
+      }
 
       if(second){
         if(Math.abs(gap)<=5){
@@ -29484,7 +29520,7 @@ body.b466-live-active #live3>.hero{display:none!important}
 </style>
 
 <style id="bpt-v470-layout-editor-style">
-/* ==== BPT 4.73 · éditeur Live texte libre ==== */
+/* ==== BPT 4.74 · éditeur Live texte libre ==== */
 .bpt-live-layout-settings>summary{font-weight:950;color:#f0b73a}
 .bpt-layout-editor{--ed-bg:#071710;--ed-panel:#0e281d;--ed-line:#2b5b47;--ed-gold:#f0b73a;--ed-teal:#10918a;color:#eef6f1}
 .bpt-layout-toolbar,.bpt-layout-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
@@ -29592,14 +29628,14 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
   function tileInner(id,live,t){return `<div class="bpt-tile-content" style="transform:translate(${t.textX||0}%,${t.textY||0}%);">${tileContent(id,live)}</div>`}
   function applyGeom(el,t){el.style.left=t.x+'%';el.style.top=t.y+'%';el.style.width=t.w+'%';el.style.height=t.h+'%';el.style.zIndex=t.z;el.style.fontSize=t.fontSize+'px';el.dataset.halign=t.halign;el.dataset.valign=t.valign;el.style.setProperty('--tile-user-text',t.textColor||'var(--tile-text)');}
   function resizeHandles(){return ['nw','n','ne','e','se','s','sw','w'].map(dir=>`<span class="bpt-resize-handle" data-dir="${dir}" aria-hidden="true"></span>`).join('')}
-  function renderEditor(){const stage=$('bptLayoutStage');if(!stage)return;stage.dataset.profile=profile;stage.dataset.theme=layout.theme||'bpt';stage.innerHTML='';$('bptLayoutProfileLabel').textContent=profileLabel(profile)+' · même configuration';if($('bptLayoutTheme'))$('bptLayoutTheme').value=layout.theme||'bpt';for(const [id,d] of Object.entries(TILES)){const t=norm(layout.tiles[id]||deep(DEFAULT.tiles[id]));layout.tiles[id]=t;const el=document.createElement('div');el.className='bpt-layout-edit-tile'+(id===selected?' is-selected':'')+(t.visible?'':' is-hidden');el.dataset.tile=id;el.dataset.kind=d.kind;applyGeom(el,t);el.innerHTML=tileInner(id,false,t)+resizeHandles();el.addEventListener('pointerdown',startDrag);el.addEventListener('click',()=>selectTile(id));el.querySelector('.bpt-tile-content')?.addEventListener('pointerdown',startTextDrag);el.querySelectorAll('.bpt-resize-handle').forEach(h=>h.addEventListener('pointerdown',startResize));stage.appendChild(el)}renderList();renderInspector()}
+  function renderEditor(){const stage=$('bptLayoutStage');if(!stage)return;stage.dataset.profile=profile;stage.dataset.theme=layout.theme||'bpt';stage.innerHTML='';$('bptLayoutProfileLabel').textContent=profileLabel(profile)+' · même configuration';if($('bptLayoutTheme'))$('bptLayoutTheme').value=layout.theme||'bpt';for(const [id,d] of Object.entries(TILES)){const t=norm(layout.tiles[id]||deep(DEFAULT.tiles[id]));layout.tiles[id]=t;const el=document.createElement('div');el.className='bpt-layout-edit-tile'+(id===selected?' is-selected':'')+(t.visible?'':' is-hidden');el.dataset.tile=id;el.dataset.kind=d.kind;applyGeom(el,t);el.innerHTML=tileInner(id,false,t);el.addEventListener('click',()=>selectTile(id));el.querySelector('.bpt-tile-content')?.addEventListener('pointerdown',startTextDrag);stage.appendChild(el)}renderList();renderInspector()}
   function selectTile(id){selected=id;renderEditor()}
   function startDrag(e){if(e.button!==0||e.target.closest('.bpt-resize-handle')||e.target.closest('.bpt-tile-content'))return;const id=e.currentTarget.dataset.tile;selected=id;const r=$('bptLayoutStage').getBoundingClientRect(),t=layout.tiles[id];drag={id,el:e.currentTarget,dx:e.clientX-(r.left+r.width*t.x/100),dy:e.clientY-(r.top+r.height*t.y/100)};e.currentTarget.setPointerCapture?.(e.pointerId);e.currentTarget.addEventListener('pointermove',dragMove);e.currentTarget.addEventListener('pointerup',dragEnd,{once:true});renderInspector();e.preventDefault()}
   function dragMove(e){if(!drag)return;const r=$('bptLayoutStage').getBoundingClientRect(),t=layout.tiles[drag.id];t.x=Math.max(0,Math.min(100-t.w,(e.clientX-r.left-drag.dx)/r.width*100));t.y=Math.max(0,Math.min(100-t.h,(e.clientY-r.top-drag.dy)/r.height*100));applyGeom(drag.el,t);updateDimensionReadout(t)}
   function dragEnd(){if(!drag)return;drag.el.removeEventListener('pointermove',dragMove);drag=null;save();renderEditor();applyLayouts()}
-  function startTextDrag(e){if(e.button!==0)return;e.stopPropagation();const el=e.currentTarget.closest('.bpt-layout-edit-tile'),id=el.dataset.tile,t=layout.tiles[id],r=el.getBoundingClientRect();selected=id;textDrag={id,el:e.currentTarget,startX:e.clientX,startY:e.clientY,startTX:t.textX||0,startTY:t.textY||0,w:r.width,h:r.height};e.currentTarget.setPointerCapture?.(e.pointerId);e.currentTarget.addEventListener('pointermove',textDragMove);e.currentTarget.addEventListener('pointerup',textDragEnd,{once:true});renderInspector();e.preventDefault()}
-  function textDragMove(e){if(!textDrag)return;const t=layout.tiles[textDrag.id];t.textX=Math.max(-80,Math.min(80,textDrag.startTX+(e.clientX-textDrag.startX)/textDrag.w*100));t.textY=Math.max(-80,Math.min(80,textDrag.startTY+(e.clientY-textDrag.startY)/textDrag.h*100));textDrag.el.style.transform=`translate(${t.textX}%,${t.textY}%)`;updateDimensionReadout(t)}
-  function textDragEnd(){if(!textDrag)return;textDrag.el.removeEventListener('pointermove',textDragMove);textDrag=null;save();applyLayouts();renderInspector()}
+  function startTextDrag(e){if(e.button!==0)return;e.stopPropagation();const el=e.currentTarget.closest('.bpt-layout-edit-tile'),id=el.dataset.tile,t=layout.tiles[id],stage=$('bptLayoutStage').getBoundingClientRect();selected=id;textDrag={id,el,content:e.currentTarget,startX:e.clientX,startY:e.clientY,startXPos:t.x,startYPos:t.y,stageW:stage.width,stageH:stage.height};e.currentTarget.setPointerCapture?.(e.pointerId);e.currentTarget.addEventListener('pointermove',textDragMove);e.currentTarget.addEventListener('pointerup',textDragEnd,{once:true});renderInspector();e.preventDefault()}
+  function textDragMove(e){if(!textDrag)return;const t=layout.tiles[textDrag.id];t.x=Math.max(0,Math.min(100-t.w,textDrag.startXPos+(e.clientX-textDrag.startX)/textDrag.stageW*100));t.y=Math.max(0,Math.min(100-t.h,textDrag.startYPos+(e.clientY-textDrag.startY)/textDrag.stageH*100));t.textX=0;t.textY=0;applyGeom(textDrag.el,t);updateDimensionReadout(t)}
+  function textDragEnd(){if(!textDrag)return;textDrag.content?.removeEventListener('pointermove',textDragMove);textDrag=null;save();renderEditor();applyLayouts()}
   function startResize(e){if(e.button!==0)return;e.stopPropagation();e.preventDefault();const el=e.currentTarget.closest('.bpt-layout-edit-tile'),id=el.dataset.tile,dir=e.currentTarget.dataset.dir,r=$('bptLayoutStage').getBoundingClientRect(),t=layout.tiles[id];selected=id;resize={id,el,dir,startX:e.clientX,startY:e.clientY,start:{x:t.x,y:t.y,w:t.w,h:t.h},stage:r};e.currentTarget.setPointerCapture?.(e.pointerId);e.currentTarget.addEventListener('pointermove',resizeMove);e.currentTarget.addEventListener('pointerup',resizeEnd,{once:true});renderInspector()}
   function resizeMove(e){if(!resize)return;const {id,el,dir,start,stage}=resize,t=layout.tiles[id],dx=(e.clientX-resize.startX)/stage.width*100,dy=(e.clientY-resize.startY)/stage.height*100,minW=5,minH=5;let x=start.x,y=start.y,w=start.w,h=start.h;if(dir.includes('e'))w=Math.max(minW,Math.min(100-x,start.w+dx));if(dir.includes('s'))h=Math.max(minH,Math.min(100-y,start.h+dy));if(dir.includes('w')){const nx=Math.max(0,Math.min(start.x+start.w-minW,start.x+dx));w=start.w+(start.x-nx);x=nx}if(dir.includes('n')){const ny=Math.max(0,Math.min(start.y+start.h-minH,start.y+dy));h=start.h+(start.y-ny);y=ny}Object.assign(t,{x,y,w,h});norm(t);applyGeom(el,t);updateDimensionReadout(t)}
   function resizeEnd(e){if(!resize)return;e.currentTarget.removeEventListener('pointermove',resizeMove);resize=null;save();renderEditor();applyLayouts()}
@@ -29621,7 +29657,7 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
 </script>
 
 <style id="bpt-v473-text-only-live-style">
-/* BPT 4.73 — le Live est composé d'éléments texte libres, sans tuiles visuelles. */
+/* BPT 4.74 — le Live est composé d'éléments texte libres, sans tuiles visuelles. */
 .bpt-layout-edit-tile{
   background:transparent!important;
   border-color:transparent!important;
@@ -29675,11 +29711,24 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
 .bpt-layout-inspector h3:first-child{font-size:0}
 .bpt-layout-inspector h3:first-child::after{content:"Propriétés de l’élément";font-size:16px}
 </style>
+
+<style id="bpt-v474-text-elements-only">
+/* BPT 4.74 — éditeur sans cadres : seuls les textes/actions sont manipulables. */
+.bpt-layout-edit-tile,.bpt-layout-edit-tile.is-selected,.bpt-layout-edit-tile:hover,.bpt-layout-edit-tile:not(.is-selected):hover{
+  background:transparent!important;border:0!important;outline:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important;
+}
+.bpt-layout-edit-tile .bpt-resize-handle{display:none!important}
+.bpt-layout-edit-tile .bpt-tile-content{cursor:grab!important;background:transparent!important;outline:0!important;border:0!important;padding:0!important}
+.bpt-layout-edit-tile .bpt-tile-content:active{cursor:grabbing!important}
+.bpt-layout-edit-tile.is-selected .bpt-tile-content{filter:drop-shadow(0 0 5px rgba(33,199,190,.65))}
+.bpt-layout-edit-tile.is-hidden{opacity:.22!important}
+.bpt-modular-live-tile,.bpt-modular-live-tile:hover,.bpt-modular-live-tile:focus{background:transparent!important;border:0!important;outline:0!important;box-shadow:none!important;padding:0!important}
+</style>
 </body>
 </html>
 
 <style id="bpt-v471-desktop-hide-more">
-/* BPT 4.73 — Plus est strictement réservé aux navigations compactes */
+/* BPT 4.74 — Plus est strictement réservé aux navigations compactes */
 @media (min-width: 901px) {
   #bptMobileMoreTopBtn,
   .bpt-nav-mobile-only,
