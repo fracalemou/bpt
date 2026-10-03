@@ -14172,7 +14172,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.72";
+const BPT_APP_VERSION="4.73";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14324,7 +14324,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v4.72</div>
+<div class="app-version" id="headerAppVersion">BPT v4.73</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15439,7 +15439,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.72</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.73</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -15496,15 +15496,15 @@ function simplifyRecordTextForMobile(text){
       <div class="bpt-layout-stage-wrap">
         <div class="bpt-layout-stage-label"><strong>Simulation</strong><span id="bptLayoutProfileLabel">PC 16/9</span></div>
         <div class="bpt-layout-stage" id="bptLayoutStage" data-profile="pc"></div>
-        <div class="muted bpt-layout-help">Configuration unique pour tous les appareils. Changez seulement l’aperçu pour vérifier le rendu. Glissez une tuile pour la déplacer, ses poignées pour la redimensionner et son texte pour le repositionner dans la tuile.</div>
+        <div class="muted bpt-layout-help">Configuration unique pour tous les appareils. Changez seulement l’aperçu pour vérifier le rendu. Glissez un élément pour le déplacer, ses poignées pour définir sa zone et son texte pour le repositionner librement.</div>
       </div>
       <aside class="bpt-layout-inspector">
-        <h3>Propriétés de la tuile</h3>
-        <div id="bptLayoutNoSelection" class="muted">Sélectionnez une tuile dans la simulation.</div>
+        <h3>Propriétés de l’élément</h3>
+        <div id="bptLayoutNoSelection" class="muted">Sélectionnez un élément dans la simulation.</div>
         <div id="bptLayoutInspectorFields" hidden>
           <strong id="bptLayoutTileName">—</strong>
-          <div class="bpt-layout-resize-help">Redimensionnez la tuile directement avec ses <strong>coins et bords</strong>.</div>
-          <div class="bpt-layout-dimensions" id="bptLayoutTileDimensions">—</div><div class="bpt-layout-text-help">↔ Faites glisser le texte directement dans la tuile pour le positionner.</div>
+          <div class="bpt-layout-resize-help">Redimensionnez la zone de l’élément avec ses <strong>coins et bords</strong>.</div>
+          <div class="bpt-layout-dimensions" id="bptLayoutTileDimensions">—</div><div class="bpt-layout-text-help">↔ Faites glisser le texte directement dans sa zone pour le positionner.</div>
           <label>Taille du texte
             <div class="bpt-font-size-control"><span class="bpt-font-a small">A</span><input id="bptLayoutTileFont" type="range" min="9" max="44" step="1" value="16"><span class="bpt-font-a large">A</span><output id="bptLayoutTileFontValue">16 px</output></div>
           </label>
@@ -15521,10 +15521,10 @@ function simplifyRecordTextForMobile(text){
             <button type="button" class="btn ghost" id="bptLayoutSendBack">Arrière</button>
             <button type="button" class="btn ghost" id="bptLayoutBringFront">Avant</button>
           </div>
-          <label class="bpt-layout-check"><input type="checkbox" id="bptLayoutTileVisible" checked> Afficher cette tuile</label>
+          <label class="bpt-layout-check"><input type="checkbox" id="bptLayoutTileVisible" checked> Afficher cet élément</label>
         </div>
         <hr>
-        <h3>Tuiles disponibles</h3>
+        <h3>Éléments disponibles</h3>
         <div id="bptLayoutTileList" class="bpt-layout-tile-list"></div>
       </aside>
     </div>
@@ -29484,7 +29484,7 @@ body.b466-live-active #live3>.hero{display:none!important}
 </style>
 
 <style id="bpt-v470-layout-editor-style">
-/* ==== BPT 4.72 · éditeur Live universel ==== */
+/* ==== BPT 4.73 · éditeur Live texte libre ==== */
 .bpt-live-layout-settings>summary{font-weight:950;color:#f0b73a}
 .bpt-layout-editor{--ed-bg:#071710;--ed-panel:#0e281d;--ed-line:#2b5b47;--ed-gold:#f0b73a;--ed-teal:#10918a;color:#eef6f1}
 .bpt-layout-toolbar,.bpt-layout-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
@@ -29619,11 +29619,67 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script>
+
+<style id="bpt-v473-text-only-live-style">
+/* BPT 4.73 — le Live est composé d'éléments texte libres, sans tuiles visuelles. */
+.bpt-layout-edit-tile{
+  background:transparent!important;
+  border-color:transparent!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  padding:0!important;
+}
+.bpt-layout-edit-tile[data-kind="action"],
+.bpt-layout-edit-tile[data-tile="finish"],
+.bpt-layout-edit-tile[data-tile="pause"],
+.bpt-layout-edit-tile[data-tile="eliminate"]{
+  background:transparent!important;
+  border-color:transparent!important;
+  color:inherit!important;
+}
+.bpt-layout-edit-tile.is-selected{
+  outline:1px dashed #21c7be!important;
+  outline-offset:3px!important;
+}
+.bpt-layout-edit-tile:not(.is-selected):hover{outline:1px dashed rgba(33,199,190,.35);outline-offset:2px}
+.bpt-layout-edit-tile .bpt-tile-content{padding:0!important;background:transparent!important}
+.bpt-layout-edit-tile .bpt-ed-label,
+.bpt-layout-edit-tile .bpt-ed-sub{opacity:.72}
+
+.bpt-modular-live-tile{
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  padding:0!important;
+  overflow:visible!important;
+  appearance:none!important;
+  -webkit-appearance:none!important;
+}
+.bpt-modular-live-tile:hover{filter:none!important;border:0!important}
+.bpt-modular-live-tile[data-kind="action"],
+.bpt-modular-live-tile[data-tile="finish"],
+.bpt-modular-live-tile[data-tile="pause"],
+.bpt-modular-live-tile[data-tile="eliminate"]{
+  background:transparent!important;
+  border:0!important;
+  color:inherit!important;
+}
+.bpt-modular-live-tile[data-kind="action"] .bpt-tile-content{cursor:pointer}
+.bpt-modular-live-tile[data-kind="action"] .bpt-live-tile-value{transition:transform .12s ease,text-shadow .12s ease}
+.bpt-modular-live-tile[data-kind="action"]:hover .bpt-live-tile-value{transform:scale(1.03);text-shadow:0 0 12px currentColor}
+.bpt-modular-live-tile[data-tile="pause"] .bpt-tile-content{color:var(--tile-user-text,#f0b73a)!important}
+.bpt-modular-live-tile[data-tile="eliminate"] .bpt-tile-content{color:var(--tile-user-text,#ef6b70)!important}
+.bpt-layout-edit-tile[data-tile="pause"] .bpt-tile-content{color:var(--tile-user-text,#f0b73a)!important}
+.bpt-layout-edit-tile[data-tile="eliminate"] .bpt-tile-content{color:var(--tile-user-text,#ef6b70)!important}
+.bpt-layout-inspector h3:first-child{font-size:0}
+.bpt-layout-inspector h3:first-child::after{content:"Propriétés de l’élément";font-size:16px}
+</style>
 </body>
 </html>
 
 <style id="bpt-v471-desktop-hide-more">
-/* BPT 4.72 — Plus est strictement réservé aux navigations compactes */
+/* BPT 4.73 — Plus est strictement réservé aux navigations compactes */
 @media (min-width: 901px) {
   #bptMobileMoreTopBtn,
   .bpt-nav-mobile-only,
