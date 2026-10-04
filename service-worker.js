@@ -1,4 +1,4 @@
-const CACHE='bpt-pwa-4.94';
+const CACHE='bpt-pwa-4.96';
 const ASSETS=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));

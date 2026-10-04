@@ -14172,7 +14172,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.88";
+const BPT_APP_VERSION="4.96";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14324,7 +14324,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v4.88</div>
+<div class="app-version" id="headerAppVersion">BPT v4.96</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15438,7 +15438,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.88</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.96</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -29895,6 +29895,10 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 .bpt484-side{display:grid;grid-template-rows:1fr 1fr;gap:10px;min-height:0}.bpt484-mini{background:linear-gradient(180deg,#0d2925,#091f1c);border:1px solid #1e5148;border-radius:16px;padding:14px;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
 .bpt484-actions{display:grid;grid-template-columns:1.05fr 1.35fr 1fr 1.15fr;gap:10px}.bpt484-actions button{border:0;border-radius:14px;font-size:16px;font-weight:900;cursor:pointer;min-width:0}.bpt484-pause{background:var(--gold);color:#171007}.bpt484-out{background:var(--red);color:#fff}.bpt484-odds{background:var(--teal);color:#06201d}.bpt484-full{background:#dce9e6;color:#10231f}
 .bpt484-modal{position:fixed;inset:0;z-index:1600000;background:rgba(0,0,0,.66);display:none;align-items:center;justify-content:center;padding:16px}.bpt484-modal.open{display:flex}.bpt484-dialog{width:min(560px,94vw);max-height:88vh;overflow:auto;background:#0b211e;border:1px solid #28584f;border-radius:18px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.48)}.bpt484-dialog h2{margin:0 0 14px}.bpt484-row{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid #173c36}.bpt484-btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.bpt484-btnrow button{padding:10px 12px;border:0;border-radius:10px;background:#163f38;color:#fff;font-weight:850}.bpt484-close{float:right;background:transparent!important;color:#bbb!important;font-size:22px!important;padding:0!important}
+.bpt484-card,.bpt484-actions button,.bpt484-quickbar button{container-type:size}
+.bpt484-value,.bpt484-actions button,.bpt484-quickbar button{max-width:100%}
+.bpt484-blinds .bpt484-value,.bpt484-actions button,.bpt484-quickbar button{overflow:hidden}
+.bpt484-actions button,.bpt484-quickbar button{white-space:nowrap;text-overflow:ellipsis}
 @media(max-width:760px){
   .bpt484-live{padding:8px;gap:7px;grid-template-rows:54px minmax(0,1fr) 116px;min-height:calc(100vh - 116px);max-height:none;border-radius:12px}
   #live3Fullscreen .bpt484-live{padding:8px;grid-template-rows:54px minmax(0,1fr) 116px}
@@ -30123,19 +30127,57 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
       const bbVal=n=>bb?Math.round((Number(n)||0)/bb*10)/10:0;
       const chip=n=>fmt(Math.max(0,Math.round(n)));
       const display=n=>`${chip(n)} <small>(${bbVal(n)} BB)</small>`;
-      const crit=Math.min(bb*10,total);
-      const critical=bb?`&lt; ${chip(crit)} <small>(&lt; ${bbVal(crit)} BB)</small>`:'—';
-      const range=(minBB,maxBB)=>{
+      const zoneRange=(minBB,maxBB)=>{
         if(!bb||total<=0)return '—';
-        const lo=minBB*bb;if(total<=lo)return 'Non atteignable';
-        const hi=Math.min(maxBB*bb,total);
-        return `${chip(lo)} – ${chip(hi)} <small>(${bbVal(lo)}–${bbVal(hi)} BB)</small>`;
+        const rawLo=Math.max(0,minBB*bb), rawHi=maxBB==null?total:maxBB*bb;
+        if(total<=rawLo)return 'Non atteignable';
+        const lo=Math.min(rawLo,total), hi=Math.min(rawHi,total);
+        const loBB=bbVal(lo), hiBB=bbVal(hi);
+        if(maxBB==null){
+          if(total<=rawLo)return 'Non atteignable';
+          return `${chip(lo)} – ${chip(total)} <small>(${loBB}–${bbVal(total)} BB)</small>`;
+        }
+        return `${chip(lo)} – ${chip(hi)} <small>(${loBB}–${hiBB} BB)</small>`;
       };
-      const short=range(10,20),medium=range(20,40);
-      const deep=(bb&&total>bb*40)?`&gt; ${chip(bb*40)} <small>(&gt; ${bbVal(bb*40)} BB)</small>`:'Non atteignable';
+      const critical=zoneRange(0,10);
+      const short=zoneRange(10,20);
+      const medium=zoneRange(20,40);
+      const deep=zoneRange(40,null);
       open('Tapis moyen',`<div class="bpt484-row"><span>Jetons en circulation</span><b>${fmt(total)}</b></div><div class="bpt484-row"><span>Joueurs restants</span><b>${alive}</b></div><div class="bpt484-row"><span>Tapis moyen</span><b>${display(avg)}</b></div><div class="bpt484-row"><span>Zone critique</span><b>${critical}</b></div><div class="bpt484-row"><span>Zone short</span><b>${short}</b></div><div class="bpt484-row"><span>Zone moyenne</span><b>${medium}</b></div><div class="bpt484-row"><span>Zone deep</span><b>${deep}</b></div><div style="margin-top:12px;color:#9fb4af;font-size:.9rem">Maximum théorique pour un joueur : ${display(total)}</div>`);return;
     }
 
+  }
+  function fitText(el,opts={}){
+    if(!el || !el.isConnected)return;
+    const parent=opts.parent||el.parentElement;
+    if(!parent)return;
+    const pw=parent.clientWidth, ph=parent.clientHeight;
+    if(!pw || !ph)return;
+    const min=Number(opts.min||10), max=Number(opts.max||parseFloat(el.dataset.fitBase||getComputedStyle(el).fontSize)||16), step=Number(opts.step||1);
+    if(!el.dataset.fitBase)el.dataset.fitBase=String(max);
+    el.style.fontSize=max+'px';
+    let size=max;
+    const canWrap=!!opts.wrap;
+    el.style.whiteSpace=canWrap?'normal':'nowrap';
+    while(size>min && ((el.scrollWidth > el.clientWidth + 1) || (el.scrollHeight > el.clientHeight + 1))){
+      size -= step;
+      el.style.fontSize=size+'px';
+    }
+  }
+  function fitLiveTexts(){
+    document.querySelectorAll('.bpt484-live').forEach(root=>{
+      fitText(root.querySelector('.bpt484-blinds .bpt484-value'),{max:58,min:18});
+      fitText(root.querySelector('.bpt484-clock .bpt484-value'),{max:112,min:34});
+      fitText(root.querySelector('.bpt484-players .bpt484-value'),{max:72,min:24});
+      fitText(root.querySelector('.bpt484-stack .bpt484-value'),{max:38,min:16});
+      fitText(root.querySelector('.bpt484-timing .bpt484-value'),{max:38,min:16});
+      root.querySelectorAll('.bpt484-actions button').forEach(btn=>fitText(btn,{max:16,min:10}));
+      root.querySelectorAll('.bpt484-quickbar button').forEach(btn=>fitText(btn,{max:14,min:9}));
+    });
+  }
+  function scheduleFitLiveTexts(){
+    clearTimeout(window.__bpt484FitTimer);
+    window.__bpt484FitTimer=setTimeout(fitLiveTexts,20);
   }
   function sync(){
     const st=state();if(!st?.active)return;
@@ -30144,6 +30186,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     const total=players.length*Number(st.startStack||0),avg=alive?total/alive:0,avgBB=cur.bb?Math.round(avg/cur.bb*10)/10:0;
     const owner=`Organisateur · ${st.ownerLabel||'—'}`,structure=st.paceAdaptive===true?'Structure · Adaptatif':'Structure · Classique';
     document.querySelectorAll('.bpt484-live').forEach(r=>{const set=(role,val)=>{const e=r.querySelector(`[data-role="${role}"]`);if(e)e.textContent=val};set('owner',owner);set('structure',structure);set('part',`Partie n°${gameNo(st)}`);set('blinds',`${fmt(cur.sb)} / ${fmt(cur.bb)}`);const curDur=Math.max(1,Math.round(Number(st.levels?.[idx]?.durationSec||0)/60)||Math.round(Number(st.levels?.[idx]?.durationMin||0))||15);set('blinddur',`· ${curDur} min`);set('timer',$('live3Timer')?.textContent||'00:00');set('players',String(alive));set('avg',`${fmt(avg)} · ${avgBB} BB`);set('next',`${fmt(nx.sb)} / ${fmt(nx.bb)}`);set('elapsed',$('live3Elapsed')?.textContent||'0 min');set('finish',$('live3EstimatedFinish')?.textContent||'—');set('delta',$('live3FinishDelta')?.textContent||'—');const de=r.querySelector('[data-role="delta"]');const dt=de?.textContent||'';const dm=Math.abs(Number((dt.match(/[-+]?\d+/)||['0'])[0])||0);de?.classList.toggle('is-alert',dm>=15);de?.classList.toggle('is-delay',/retard/i.test(dt));de?.classList.toggle('is-ahead',/avance/i.test(dt));set('mode',st.paceAdaptive===true?'Adaptatif':'Classique');set('level',`${idx+1} / 25`);const pb=r.querySelector('[data-do="pause"]');if(pb)pb.textContent=st.running?'Pause':(st.startedAt?'Reprendre':'Démarrer')});
+    scheduleFitLiveTexts();
     if(!repairTried){const bad=(st.levels||[]).slice(0,Math.min(25,(st.levels||[]).length)).some((lv,i)=>{const b=blindAt(i);return Number(lv?.sb)!==b.sb||Number(lv?.bb)!==b.bb});if(bad&&api()?.isOwner?.()){repairTried=true;api()?.repairStandardBlinds?.().catch(console.warn)}}
   }
   function enforceNav(){
@@ -30152,7 +30195,8 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
   }
   const obs=new MutationObserver(()=>sync());
   function observe(){['live3Timer','live3Elapsed','live3EstimatedFinish','live3FinishDelta'].forEach(id=>{const n=$(id);if(n)obs.observe(n,{childList:true,subtree:true,characterData:true})})}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{install();observe();setInterval(sync,500)});else{install();observe();setInterval(sync,500)}
+  window.addEventListener('resize',scheduleFitLiveTexts);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{install();observe();setInterval(sync,500);setTimeout(scheduleFitLiveTexts,120)});else{install();observe();setInterval(sync,500);setTimeout(scheduleFitLiveTexts,120)}
 })();
 </script>
 
@@ -30178,6 +30222,18 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 .bpt484-danger-action{background:#7e3030!important;color:#fff!important}
 .bpt484-field{display:grid;gap:6px;margin:14px 0}.bpt484-field label{font-size:12px;color:#9fb4af;font-weight:850;text-transform:uppercase;letter-spacing:.06em}
 .bpt484-field select,.bpt484-field input{width:100%;box-sizing:border-box;background:#102d28;color:#fff;border:1px solid #315a52;border-radius:10px;padding:10px;font:inherit}
+</style>
+
+<style id="bpt-v496-final-fixes">
+/* V4.96 — PC : une seule barre rapide */
+@media(min-width:761px){
+  #live3Game .bpt484-live[data-fs="0"] ~ .b466-owner-controls,
+  #live3Game .bpt484-live[data-fs="0"] ~ .b466-primary-row,
+  #live3Game .bpt484-live[data-fs="0"] ~ .b466-secondary-row,
+  #live3Game .bpt484-live[data-fs="0"] ~ .b466-level-row,
+  #live3Game .bpt484-live[data-fs="0"] ~ .b466-admin-row{display:none!important}
+  #live3Game .bpt484-live[data-fs="0"] .bpt484-quickbar{display:grid!important}
+}
 </style>
 </body>
 </html>
