@@ -9308,6 +9308,12 @@ body.bpt-mobile-device #nav > button{
   #live3Fullscreen #live3FsMasterActions{grid-template-columns:repeat(5,minmax(0,1fr)) !important;grid-template-rows:1fr !important;}
 #live3Fullscreen #live3FsSpectatorActions{grid-template-columns:repeat(3,minmax(0,1fr)) !important;grid-template-rows:1fr !important;}
 }
+
+/* BPT 4.77 — zones Info redimensionnables mais totalement transparentes */
+.bpt-layout-edit-tile[data-kind="info"]{background:transparent!important;border-color:transparent!important;box-shadow:none!important;}
+.bpt-layout-edit-tile[data-kind="info"] .bpt-tile-content{background:transparent!important;}
+.bpt-live-free-item[data-kind="info"]{background:transparent!important;border:0!important;box-shadow:none!important;}
+
 </style>
 <style id="bpt-records-final-hierarchy">
 /* Records : hiérarchie finale — joueur prioritaire */
@@ -15439,7 +15445,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.76</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.77</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -15506,7 +15512,7 @@ function simplifyRecordTextForMobile(text){
           <div class="bpt-layout-resize-help">Redimensionnez la zone de l’élément avec ses <strong>coins et bords</strong>.</div>
           <div class="bpt-layout-dimensions" id="bptLayoutTileDimensions">—</div><div class="bpt-layout-text-help">↔ Faites glisser le texte directement dans sa zone pour le positionner.</div>
           <label>Taille du texte
-            <div class="bpt-font-size-control"><span class="bpt-font-a small">A</span><input id="bptLayoutTileFont" type="range" min="9" max="44" step="1" value="16"><span class="bpt-font-a large">A</span><output id="bptLayoutTileFontValue">16 px</output></div>
+            <div class="bpt-font-size-control"><span class="bpt-font-a small">A</span><input id="bptLayoutTileFont" type="range" min="6" max="96" step="1" value="16"><span class="bpt-font-a large">A</span><output id="bptLayoutTileFontValue">16 px</output></div>
           </label>
           <label>Couleur du texte
             <div class="bpt-text-color-control"><input id="bptLayoutTileTextColor" type="color" value="#ffffff"><button type="button" class="btn ghost" id="bptLayoutTileTextColorReset">Couleur du thème</button></div>
@@ -29495,7 +29501,7 @@ body.b466-live-active #live3>.hero{display:none!important}
 </style>
 
 <style id="bpt-v470-layout-editor-style">
-/* ==== BPT 4.76 · éditeur Live texte libre ==== */
+/* ==== BPT 4.77 · éditeur Live texte libre ==== */
 .bpt-live-layout-settings>summary{font-weight:950;color:#f0b73a}
 .bpt-layout-editor{--ed-bg:#071710;--ed-panel:#0e281d;--ed-line:#2b5b47;--ed-gold:#f0b73a;--ed-teal:#10918a;color:#eef6f1}
 .bpt-layout-toolbar,.bpt-layout-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
@@ -29610,14 +29616,14 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
   function saveRemote(){if(!remoteRef)return;clearTimeout(remoteTimer);remoteTimer=setTimeout(()=>remoteRef.set(layout).catch(()=>{}),180)}
   function save(){saveLocal();saveRemote()}
   async function connectRemote(){try{const fb=await window.bptFirebaseEnsure?.();if(!fb?.rtdb)return;remoteRef=fb.rtdb.ref(DB_PATH);remoteRef.on('value',snap=>{const v=snap.val();if(v){layout=migrate(v);saveLocal();renderEditor();applyLayouts()}else if(!remoteReady){remoteRef.set(layout).catch(()=>{})}remoteReady=true})}catch(e){}}
-  function norm(t){t.w=Math.max(5,Math.min(100,+t.w||20));t.h=Math.max(5,Math.min(100,+t.h||15));t.x=Math.max(0,Math.min(100-t.w,+t.x||0));t.y=Math.max(0,Math.min(100-t.h,+t.y||0));t.z=Math.max(1,Math.min(99,+t.z||1));t.fontSize=Math.max(9,Math.min(44,+t.fontSize||16));t.halign=t.halign||'center';t.valign=t.valign||'center';t.textX=Math.max(-80,Math.min(80,+t.textX||0));t.textY=Math.max(-80,Math.min(80,+t.textY||0));if(t.visible===undefined)t.visible=true;return t}
+  function norm(t){t.w=Math.max(5,Math.min(100,+t.w||20));t.h=Math.max(5,Math.min(100,+t.h||15));t.x=Math.max(0,Math.min(100-t.w,+t.x||0));t.y=Math.max(0,Math.min(100-t.h,+t.y||0));t.z=Math.max(1,Math.min(99,+t.z||1));t.fontSize=Math.max(6,Math.min(96,+t.fontSize||16));t.halign=t.halign||'center';t.valign=t.valign||'center';t.textX=Math.max(-80,Math.min(80,+t.textX||0));t.textY=Math.max(-80,Math.min(80,+t.textY||0));if(t.visible===undefined)t.visible=true;return t}
   function profileLabel(p){return p==='pc'?'PC 16/9':p==='landscape'?'Téléphone paysage':'Téléphone portrait'}
   function liveValue(id){if(id==='blinds')return[$('live3Blinds')?.textContent||'—',$('live3BlindDurationLabel')?.textContent||''];if(id==='timer')return[$('live3Timer')?.textContent||'00:00',''];if(id==='players')return[(($('live3Remaining')?.textContent||'0')+' restants'),'Liste & éliminations'];if(id==='finish')return[$('live3EstimatedFinish')?.textContent||'—',$('live3FinishDelta')?.textContent||'—'];if(id==='avg')return[$('live3AvgStack')?.textContent||'0',''];if(id==='next')return[$('live3Next')?.textContent||'—',''];if(id==='pause'){const fs=$('live3Fullscreen'),inFs=!!(fs&&getComputedStyle(fs).display!=='none');return[((inFs?$('live3FsStartPauseBtn'):$('live3StartPauseBtn'))?.textContent?.trim()||'Pause'),'']}if(id==='fullscreen'){const fs=$('live3Fullscreen');return[fs&&getComputedStyle(fs).display!=='none'?'Quitter plein écran':'Plein écran','']}return[TILES[id].sample,TILES[id].sub||'']}
   function tileContent(id,live){const d=TILES[id],vs=live?liveValue(id):[d.sample,d.sub||''],cls=live?'bpt-live-tile':'bpt-ed';return `${d.kind==='action'?'':`<span class="${cls}-label">${d.label}</span>`}<strong class="${cls}-value">${vs[0]}</strong>${vs[1]?`<span class="${cls}-sub">${vs[1]}</span>`:''}`}
   function tileInner(id,live,t){return `<div class="bpt-tile-content" style="transform:translate(${t.textX||0}%,${t.textY||0}%);">${tileContent(id,live)}</div>`}
   function applyGeom(el,t){el.style.left=t.x+'%';el.style.top=t.y+'%';el.style.width=t.w+'%';el.style.height=t.h+'%';el.style.zIndex=t.z;el.style.fontSize=t.fontSize+'px';el.dataset.halign=t.halign;el.dataset.valign=t.valign;el.style.setProperty('--tile-user-text',t.textColor||'var(--tile-text)');}
   function resizeHandles(){return ['nw','n','ne','e','se','s','sw','w'].map(dir=>`<span class="bpt-resize-handle" data-dir="${dir}" aria-hidden="true"></span>`).join('')}
-  function renderEditor(){const stage=$('bptLayoutStage');if(!stage)return;stage.dataset.profile=profile;stage.dataset.theme=layout.theme||'bpt';stage.innerHTML='';$('bptLayoutProfileLabel').textContent=profileLabel(profile)+' · même configuration';if($('bptLayoutTheme'))$('bptLayoutTheme').value=layout.theme||'bpt';for(const [id,d] of Object.entries(TILES)){const t=norm(layout.tiles[id]||deep(DEFAULT.tiles[id]));layout.tiles[id]=t;const el=document.createElement('div');el.className='bpt-layout-edit-tile'+(id===selected?' is-selected':'')+(t.visible?'':' is-hidden');el.dataset.tile=id;el.dataset.kind=d.kind;applyGeom(el,t);el.innerHTML=tileInner(id,false,t)+(d.kind==='action'?resizeHandles():'');el.addEventListener('click',()=>selectTile(id));el.querySelector('.bpt-tile-content')?.addEventListener('pointerdown',startTextDrag);if(d.kind==='action'){el.querySelectorAll('.bpt-resize-handle').forEach(h=>h.addEventListener('pointerdown',startResize));}stage.appendChild(el)}renderList();renderInspector()}
+  function renderEditor(){const stage=$('bptLayoutStage');if(!stage)return;stage.dataset.profile=profile;stage.dataset.theme=layout.theme||'bpt';stage.innerHTML='';$('bptLayoutProfileLabel').textContent=profileLabel(profile)+' · même configuration';if($('bptLayoutTheme'))$('bptLayoutTheme').value=layout.theme||'bpt';for(const [id,d] of Object.entries(TILES)){const t=norm(layout.tiles[id]||deep(DEFAULT.tiles[id]));layout.tiles[id]=t;const el=document.createElement('div');el.className='bpt-layout-edit-tile'+(id===selected?' is-selected':'')+(t.visible?'':' is-hidden');el.dataset.tile=id;el.dataset.kind=d.kind;applyGeom(el,t);el.innerHTML=tileInner(id,false,t)+resizeHandles();el.addEventListener('click',()=>selectTile(id));el.querySelector('.bpt-tile-content')?.addEventListener('pointerdown',startTextDrag);el.querySelectorAll('.bpt-resize-handle').forEach(h=>h.addEventListener('pointerdown',startResize));stage.appendChild(el)}renderList();renderInspector()}
   function selectTile(id){selected=id;renderEditor()}
   function startDrag(e){if(e.button!==0||e.target.closest('.bpt-resize-handle')||e.target.closest('.bpt-tile-content'))return;const id=e.currentTarget.dataset.tile;selected=id;const r=$('bptLayoutStage').getBoundingClientRect(),t=layout.tiles[id];drag={id,el:e.currentTarget,dx:e.clientX-(r.left+r.width*t.x/100),dy:e.clientY-(r.top+r.height*t.y/100)};e.currentTarget.setPointerCapture?.(e.pointerId);e.currentTarget.addEventListener('pointermove',dragMove);e.currentTarget.addEventListener('pointerup',dragEnd,{once:true});renderInspector();e.preventDefault()}
   function dragMove(e){if(!drag)return;const r=$('bptLayoutStage').getBoundingClientRect(),t=layout.tiles[drag.id];t.x=Math.max(0,Math.min(100-t.w,(e.clientX-r.left-drag.dx)/r.width*100));t.y=Math.max(0,Math.min(100-t.h,(e.clientY-r.top-drag.dy)/r.height*100));applyGeom(drag.el,t);updateDimensionReadout(t)}
@@ -29646,7 +29652,7 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
 </script>
 
 <style id="bpt-v473-text-only-live-style">
-/* BPT 4.76 — le Live est composé d'éléments texte libres, sans tuiles visuelles. */
+/* BPT 4.77 — le Live est composé d'éléments texte libres, sans tuiles visuelles. */
 .bpt-layout-edit-tile{
   background:transparent!important;
   border-color:transparent!important;
@@ -29702,7 +29708,7 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
 </style>
 
 <style id="bpt-v474-text-elements-only">
-/* BPT 4.76 — éditeur sans cadres : seuls les textes/actions sont manipulables. */
+/* BPT 4.77 — éditeur sans cadres : seuls les textes/actions sont manipulables. */
 .bpt-layout-edit-tile,.bpt-layout-edit-tile.is-selected,.bpt-layout-edit-tile:hover,.bpt-layout-edit-tile:not(.is-selected):hover{
   background:transparent!important;border:0!important;outline:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important;
 }
@@ -29715,7 +29721,7 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
 </style>
 
 <style id="bpt-v476-info-action-separation">
-/* BPT 4.76 — deux familles : infos texte libre / actions en tuiles */
+/* BPT 4.77 — deux familles : infos texte libre / actions en tuiles */
 /* INFO : aucun fond, aucun contour, aucune poignée. */
 .bpt-layout-edit-tile[data-kind="info"],
 .bpt-layout-edit-tile[data-kind="info"].is-selected,
@@ -29780,7 +29786,7 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
 </html>
 
 <style id="bpt-v471-desktop-hide-more">
-/* BPT 4.76 — Plus est strictement réservé aux navigations compactes */
+/* BPT 4.77 — Plus est strictement réservé aux navigations compactes */
 @media (min-width: 901px) {
   #bptMobileMoreTopBtn,
   .bpt-nav-mobile-only,
