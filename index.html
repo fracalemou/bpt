@@ -14172,7 +14172,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.98";
+const BPT_APP_VERSION="4.99";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14324,7 +14324,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v4.98</div>
+<div class="app-version" id="headerAppVersion">BPT v4.99</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15434,7 +15434,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.98</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.99</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -29884,7 +29884,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 @keyframes bpt484FeedbackPulse{0%{border-color:#2a6b5f;box-shadow:0 0 0 rgba(45,224,190,0)}18%{border-color:#54e0c5;box-shadow:0 0 0 4px rgba(45,224,190,.16),0 0 28px rgba(45,224,190,.28)}100%{border-color:#1e5148;box-shadow:none}}
 @keyframes bpt484LevelPulse{0%,100%{transform:scale(1)}25%{transform:scale(1.055);border-color:#54e0c5;box-shadow:0 0 22px rgba(45,224,190,.22)}}
 @keyframes bpt484FeedbackBadge{0%{opacity:0;transform:translate(-50%,-50%) scale(.88)}16%{opacity:1;transform:translate(-50%,-50%) scale(1.04)}70%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-58%) scale(.98)}}
-.bpt484-label{font-size:12px;letter-spacing:.10em;text-transform:uppercase;color:var(--muted);font-weight:900;margin-bottom:6px}.bpt484-value{font-weight:950;line-height:1;white-space:nowrap}.bpt484-blinds .bpt484-value{font-size:clamp(28px,3.7vw,58px);color:var(--gold)}.bpt484-next{margin-top:10px;color:var(--muted);font-size:13px}.bpt484-next strong{color:var(--text)}
+.bpt484-label{font-size:12px;letter-spacing:.10em;text-transform:uppercase;color:var(--muted);font-weight:900;margin-bottom:6px}.bpt484-value{font-weight:950;line-height:1;white-space:nowrap}.bpt484-blinds .bpt484-value{font-size:clamp(36px,5.2vw,86px);color:var(--gold);letter-spacing:-.035em}.bpt484-next{margin-top:10px;color:var(--muted);font-size:13px}.bpt484-next strong{color:var(--text)}
 .bpt484-clock{align-items:center;text-align:center}.bpt484-clock .bpt484-value{font-size:clamp(56px,8vw,112px)}
 .bpt484-players .bpt484-value{font-size:clamp(42px,5vw,72px)}.bpt484-stack .bpt484-value,.bpt484-timing .bpt484-value{font-size:clamp(22px,2.4vw,38px)}
 .bpt484-sub{font-size:14px;color:var(--muted);margin-top:8px}.bpt484-teal{color:var(--teal)!important}
@@ -29901,7 +29901,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
   .bpt484-head{grid-template-columns:.7fr 1.6fr .8fr;padding:0 10px;border-radius:12px}.bpt484-brand{font-size:22px}.bpt484-owner{font-size:11px}.bpt484-part{font-size:11px}
   .bpt484-main{grid-template-columns:1fr 1.25fr;grid-template-rows:auto auto auto;gap:7px}
   .bpt484-blinds{grid-column:1}.bpt484-clock{grid-column:2}.bpt484-players{grid-column:1}.bpt484-stack{grid-column:2}.bpt484-timing{grid-column:1 / -1}.bpt484-side{display:none}
-  .bpt484-card{padding:10px;border-radius:12px}.bpt484-label{font-size:9px}.bpt484-blinds .bpt484-value{font-size:clamp(22px,7vw,34px)}.bpt484-clock .bpt484-value{font-size:clamp(44px,14vw,68px)}.bpt484-players .bpt484-value{font-size:36px}.bpt484-stack .bpt484-value,.bpt484-timing .bpt484-value{font-size:20px}.bpt484-sub,.bpt484-next{font-size:10px;margin-top:5px}
+  .bpt484-card{padding:10px;border-radius:12px}.bpt484-label{font-size:9px}.bpt484-blinds .bpt484-value{font-size:clamp(26px,8vw,42px)}.bpt484-clock .bpt484-value{font-size:clamp(44px,14vw,68px)}.bpt484-players .bpt484-value{font-size:36px}.bpt484-stack .bpt484-value,.bpt484-timing .bpt484-value{font-size:20px}.bpt484-sub,.bpt484-next{font-size:10px;margin-top:5px}
   .bpt484-actions{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:7px}.bpt484-actions button{font-size:13px;border-radius:11px}
 }
 @media(min-width:761px) and (max-height:700px){.bpt484-live{min-height:480px}.bpt484-head{height:54px}.bpt484-actions{height:64px}.bpt484-card{padding:12px}}
@@ -29914,7 +29914,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
   #live3Fullscreen .bpt484-live{padding:6px;grid-template-rows:44px minmax(0,1fr) 58px}
   .bpt484-head{padding:0 10px;border-radius:10px}.bpt484-brand{font-size:20px}.bpt484-owner{font-size:10px}.bpt484-part{font-size:10px}
   .bpt484-main{gap:5px}.bpt484-card,.bpt484-mini{padding:8px;border-radius:10px}.bpt484-label{font-size:8px;margin-bottom:3px}
-  .bpt484-blinds .bpt484-value{font-size:clamp(18px,4.1vw,32px);max-width:100%;overflow:hidden;text-overflow:clip}
+  .bpt484-blinds .bpt484-value{font-size:clamp(24px,5.5vw,44px);max-width:100%;overflow:hidden;text-overflow:clip;letter-spacing:-.03em}
   .bpt484-clock .bpt484-value{font-size:clamp(38px,13vh,66px)}
   .bpt484-players .bpt484-value{font-size:clamp(24px,7vh,40px)}
   .bpt484-stack .bpt484-value,.bpt484-timing .bpt484-value{font-size:clamp(15px,4.5vh,24px)}
