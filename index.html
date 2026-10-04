@@ -14172,7 +14172,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.73";
+const BPT_APP_VERSION="4.85";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14340,7 +14340,6 @@ function simplifyRecordTextForMobile(text){
 <span class="bpt-nav-ranking-compact">♛ Clt</span>
 </button>
 <button class="bpt-nav-desktop-only" data-view="records">★ Records &amp; accomplissements</button>
-<button class="bpt-nav-desktop-only" data-view="profile">♤ Profil joueur</button>
 <button class="bpt-nav-desktop-only" data-view="settings">⚙ Paramètres</button>
 <button class="bpt-nav-mobile-only" id="bptMobileMoreTopBtn" type="button">☰ Plus</button>
 </nav>
@@ -15439,7 +15438,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.84</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.85</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -26017,23 +26016,9 @@ document.addEventListener("visibilitychange",()=>{
   }
   const BPT_SB_STRUCTURE=[25,50,75,100,150,200,300,400,500,600,800,1000,1200,1500,2000,2500,3000,4000,5000,6000,8000,10000,12000,15000,20000];
   function bptGetBlindLevels(){
-    const src=Array.isArray(window.BPT_BLIND_LEVELS)?window.BPT_BLIND_LEVELS:null;
-    const valid=(src||[]).map(v=>({sb:Number(v?.sb),bb:Number(v?.bb)})).filter(v=>Number.isFinite(v.sb)&&Number.isFinite(v.bb)&&v.sb>0&&v.bb>v.sb);
-    const out=valid.length ? valid.slice() : [];
-    // BPT 4.52 : la structure standard comporte toujours au moins 25 niveaux.
-    // Les anciennes configurations plus courtes sont prolongées sans écraser les niveaux personnalisés existants.
-    for(const sb of BPT_SB_STRUCTURE){
-      if(out.length>=25)break;
-      if(!out.some(v=>Number(v.sb)===sb)) out.push({sb,bb:sb*2});
-    }
-    out.sort((a,b)=>a.sb-b.sb);
-    while(out.length<25){
-      const prev=out[out.length-1]||{sb:25,bb:50};
-      const grown=bptRoundBlindValue(Number(prev.sb)*1.25);
-      const nextSb=Math.max(Number(prev.sb)+bptBlindRoundStep(Number(prev.sb)),grown);
-      out.push({sb:nextSb,bb:nextSb*2});
-    }
-    return out.slice(0,25);
+    // V4.85 : le Live utilise une structure BPT standard et bornée.
+    // Les anciens réglages de blinds éventuellement corrompus ne doivent plus contaminer un Live.
+    return BPT_SB_STRUCTURE.map(sb=>({sb:Number(sb),bb:Number(sb)*2}));
   }
 
   function bptBlindRoundStep(value){
@@ -26167,6 +26152,44 @@ document.addEventListener("visibilitychange",()=>{
 
   function buildLevels(targetHours,playerCount,startStack){
     return computeStructure(targetHours,playerCount,startStack).levels;
+  }
+
+  function bptNormalizeLive3Levels(state){
+    if(!state || !state.active)return state;
+    const currentLevels=Array.isArray(state.levels)?state.levels:[];
+    const base=bptGetBlindLevels();
+    const fallbackDuration=Math.max(120,Number(currentLevels[Math.max(0,Number(state.levelIndex)||0)]?.durationSec)||Number(currentLevels[0]?.durationSec)||900);
+    const targetLen=Math.max(25,(Number(state.levelIndex)||0)+2);
+    const normalized=[];
+    for(let i=0;i<targetLen;i++){
+      let blind=base[i];
+      if(!blind){
+        const prev=normalized[i-1]||{sb:20000,bb:40000};
+        blind=bptComputedNextBlindLevel(prev);
+      }
+      normalized.push({
+        level:i+1,
+        sb:Number(blind.sb),
+        bb:Number(blind.bb),
+        ante:0,
+        durationSec:Math.max(120,Number(currentLevels[i]?.durationSec)||fallbackDuration)
+      });
+    }
+    const bad=currentLevels.length<25 || currentLevels.slice(0,Math.min(25,currentLevels.length)).some((lv,i)=>{
+      const std=base[i]; return !std || Number(lv?.sb)!==Number(std.sb) || Number(lv?.bb)!==Number(std.bb);
+    });
+    if(!bad)return state;
+    const out={...state,levels:normalized};
+    const idx=Math.max(0,Math.min(normalized.length-1,Number(out.levelIndex)||0));
+    out.levelIndex=idx;
+    const maxDur=Math.max(120,Number(normalized[idx]?.durationSec)||fallbackDuration);
+    out.remainingSec=Math.min(Math.max(0,Number(out.remainingSec)||maxDur),maxDur);
+    if(out.running && out.deadline){
+      const now=Date.now();
+      out.deadline=now+out.remainingSec*1000;
+      out.runStartedAt=now;
+    }
+    return out;
   }
 
   function renderStructurePreview(){ return; }
@@ -26925,7 +26948,17 @@ function connectionDeviceLabel(){
     try{
       const r=await ensureRef();
       r.on("value",snap=>{
-        current=snap.val()||null;
+        const raw=snap.val()||null;
+        current=bptNormalizeLive3Levels(raw);
+        if(raw?.active && current && JSON.stringify(raw.levels||[])!==JSON.stringify(current.levels||[]) && String(raw.ownerId||"")===uid()){
+          r.child("levels").set(current.levels).catch(()=>{});
+          r.child("remainingSec").set(current.remainingSec).catch(()=>{});
+          r.child("levelIndex").set(current.levelIndex).catch(()=>{});
+          if(current.running&&current.deadline){
+            r.child("deadline").set(current.deadline).catch(()=>{});
+            r.child("runStartedAt").set(current.runStartedAt).catch(()=>{});
+          }
+        }
         onState();
       },err=>{
         console.warn("Live V3 listener:",err);
@@ -26948,7 +26981,7 @@ function connectionDeviceLabel(){
       if(!server?.active)return server;
       if(String(server.sessionId||"")!==session)return server;
       if(String(server.ownerId||"")!==uid())return server;
-      const next=mutator(clone(server));
+      const next=mutator(bptNormalizeLive3Levels(clone(server)));
       if(!next)return server;
       next.updatedAt=Date.now();
       changed=true;
@@ -29495,7 +29528,7 @@ body.b466-live-active #live3>.hero{display:none!important}
 </style>
 
 <style id="bpt-v470-layout-editor-style">
-/* ==== BPT 4.84 · éditeur Live texte libre ==== */
+/* ==== BPT 4.85 · Live fixe simple ==== */
 .bpt-live-layout-settings>summary{font-weight:950;color:#f0b73a}
 .bpt-layout-editor{--ed-bg:#071710;--ed-panel:#0e281d;--ed-line:#2b5b47;--ed-gold:#f0b73a;--ed-teal:#10918a;color:#eef6f1}
 .bpt-layout-toolbar,.bpt-layout-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
@@ -29632,7 +29665,7 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
 </script>
 
 <style id="bpt-v473-text-only-live-style">
-/* BPT 4.84 — le Live est composé d'éléments texte libres, sans tuiles visuelles. */
+/* BPT 4.85 — anciennes règles neutralisées au profit du Live fixe. */
 .bpt-layout-edit-tile{
   background:transparent!important;
   border-color:transparent!important;
@@ -29688,7 +29721,7 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
 </style>
 
 <style id="bpt-v474-text-elements-only">
-/* BPT 4.84 — éditeur sans cadres : seuls les textes/actions sont manipulables. */
+/* BPT 4.85 — éditeur sans cadres : seuls les textes/actions sont manipulables. */
 .bpt-layout-edit-tile,.bpt-layout-edit-tile.is-selected,.bpt-layout-edit-tile:hover,.bpt-layout-edit-tile:not(.is-selected):hover{
   background:transparent!important;border:0!important;outline:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important;
 }
@@ -29701,7 +29734,7 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
 </style>
 
 <style id="bpt-v484-fixed-live-style">
-/* V4.84 — Live fixe simple, sans éditeur */
+/* V4.85 — Live fixe simple, sans éditeur */
 #bptLayoutEditorPanel,.bpt-layout-editor,.bpt-modular-live-grid,#bptLiveModularGrid,#bptFsModularGrid,#bptFsModularHolder{display:none!important}
 body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on #live3Game .b466-remaining,
 body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layout-on #live3Fullscreen .b466-fs-kpis{display:none!important}
@@ -29731,6 +29764,14 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
   .bpt484-actions{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:7px}.bpt484-actions button{font-size:13px;border-radius:11px}
 }
 @media(min-width:761px) and (max-height:700px){.bpt484-live{min-height:480px}.bpt484-head{height:54px}.bpt484-actions{height:64px}.bpt484-card{padding:12px}}
+/* V4.85 — fenêtres d’action au-dessus du plein écran fixe */
+#live3ElimModal,#live3PaceModal,#live3ChatModal,#bptOddsModal,#live3SettingsPanel{z-index:1800000!important}
+/* Aucun ancien contrôle ne doit réapparaître sous le Live fixe */
+#live3Game .b466-owner-controls,#live3Game .b466-tools,#live3Game .b466-context,#live3Game .b466-dashboard,#live3Game .b466-request,#live3Game .b466-spectator,#live3Game #live3ForceTakeoverBtn{display:none!important}
+/* Terminaison visible uniquement hors plein écran */
+.bpt484-actions .bpt484-end{background:#7e3030;color:#fff}
+.bpt484-live[data-fs="1"] .bpt484-end{display:none!important}
+@media(min-width:761px){.bpt484-live[data-fs="0"] .bpt484-actions{grid-template-columns:1fr 1.15fr 1fr 1fr .9fr}}
 </style>
 <script id="bpt-v484-fixed-live-script">
 (function(){
@@ -29748,7 +29789,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
       <section class="bpt484-card bpt484-timing" data-action="timing"><div class="bpt484-label">Temps écoulé</div><div class="bpt484-value" data-role="elapsed">0 min</div><div class="bpt484-sub">Fin estimée · <strong class="bpt484-teal" data-role="finish">—</strong> · <strong data-role="delta">—</strong></div></section>
       <section class="bpt484-side"><div class="bpt484-mini"><div class="bpt484-label">Structure</div><div class="bpt484-value bpt484-teal" data-role="mode">Classique</div></div><div class="bpt484-mini"><div class="bpt484-label">Niveau</div><div class="bpt484-value" data-role="level">— / 25</div></div></section>
     </div>
-    <div class="bpt484-actions"><button class="bpt484-pause" data-do="pause">Pause</button><button class="bpt484-out" data-do="out">Sortir un joueur</button><button class="bpt484-odds" data-do="odds">Calcul de côtes</button><button class="bpt484-full" data-do="full">${fs?'Quitter le plein écran':'Plein écran'}</button></div>
+    <div class="bpt484-actions"><button class="bpt484-pause" data-do="pause">Pause</button><button class="bpt484-out" data-do="out">Sortir un joueur</button><button class="bpt484-odds" data-do="odds">Calcul de côtes</button><button class="bpt484-full" data-do="full">${fs?'Quitter le plein écran':'Plein écran'}</button><button class="bpt484-end" data-do="end">Terminer le Live</button></div>
   </div>`}
   function install(){
     const shell=document.querySelector('#live3Game .b466-shell');if(shell&&!shell.querySelector('.bpt484-live'))shell.insertAdjacentHTML('afterbegin',makeMarkup(false));
@@ -29760,7 +29801,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
   function closeModal(){$('bpt484Modal')?.classList.remove('open')}
   function open(title,body){ensureModal();$('bpt484Dialog').innerHTML=`<button class="bpt484-close" onclick="document.getElementById('bpt484Modal').classList.remove('open')">×</button><h2>${title}</h2>${body}`;$('bpt484Modal').classList.add('open')}
   function legacy(id){$(id)?.click()}
-  function doit(a,fs){if(a==='pause')legacy(fs?'live3FsStartPauseBtn':'live3StartPauseBtn');if(a==='out')legacy(fs?'live3FsEliminateBtn':'live3EliminateBtn');if(a==='odds')legacy(fs?'live3FsOddsActionBtn':'live3OddsBtn');if(a==='full')legacy(fs?'live3FsExitActionBtn':'live3FullscreenBtn');setTimeout(sync,50)}
+  function doit(a,fs){if(a==='pause')legacy(fs?'live3FsStartPauseBtn':'live3StartPauseBtn');if(a==='out')legacy(fs?'live3FsEliminateBtn':'live3EliminateBtn');if(a==='odds')legacy(fs?'live3FsOddsActionBtn':'live3OddsBtn');if(a==='full')legacy(fs?'live3FsExitActionBtn':'live3FullscreenBtn');if(a==='end'&&!fs)legacy('live3EndBtn');setTimeout(sync,50)}
   function info(type){
     if(type==='players'){let rows='';try{const ps=[...(current?.players||[])];rows=ps.map(p=>{const out=p.status==='out',lv=Number(p.outLevel)||0,detail=out?(lv?`Éliminé · niveau ${lv}`:'Éliminé'):'En jeu';return `<div class="bpt484-row"><span>${esc(p.name)}</span><b>${detail}${out&&p.killer?` · par ${esc(p.killer)}`:''}</b></div>`}).join('')}catch(e){}open('Joueurs',rows||'<p>Aucun joueur.</p>');return}
     if(type==='chrono'){open('Chrono',`<div class="bpt484-btnrow"><button onclick="document.getElementById('live3MinusBtn')?.click()">−1 min</button><button onclick="document.getElementById('live3StartPauseBtn')?.click()">Pause / Reprendre</button><button onclick="document.getElementById('live3PlusBtn')?.click()">+1 min</button></div>`);return}
@@ -29777,11 +29818,16 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 })();
 </script>
 
+
+<style id="bpt-v485-nav-clean">
+#nav button[data-view="profile"]{display:none!important}
+@media(min-width:901px){#bptMobileMoreTopBtn,#bptMobileMoreTopMenu,.bpt-nav-mobile-only{display:none!important}}
+</style>
 </body>
 </html>
 
 <style id="bpt-v471-desktop-hide-more">
-/* BPT 4.84 — Plus est strictement réservé aux navigations compactes */
+/* BPT 4.85 — Plus est strictement réservé aux navigations compactes */
 @media (min-width: 901px) {
   #bptMobileMoreTopBtn,
   .bpt-nav-mobile-only,
