@@ -14200,7 +14200,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.81";
+const BPT_APP_VERSION="4.82";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14352,7 +14352,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v4.81</div>
+<div class="app-version" id="headerAppVersion">BPT v4.82</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15467,7 +15467,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.81</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.82</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -29842,7 +29842,7 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
 </style>
 
 <style id="bpt-v481-editor-simplified-final">
-/* V4.81 — tous les éléments restent visibles dans l’aperçu. */
+/* V4.82 — tous les éléments restent visibles dans l’aperçu. */
 #bptLayoutStage .bpt-layout-edit-tile{visibility:visible!important;opacity:1!important;pointer-events:auto!important;}
 #bptLayoutStage .bpt-layout-edit-tile.is-hidden{opacity:.22!important;}
 /* Pas de presets ni de gestion manuelle de profondeur. */
@@ -29888,3 +29888,73 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only {
 /* Les tailles sont désormais pilotées en pixels par le curseur A↔A. */
 .bpt-layout-edit-tile[data-font],.bpt-modular-live-tile[data-font]{font-size:inherit}
 </style>
+
+<style id="bpt-v482-live-layout-authoritative">
+/* V4.82 — le layout de l'éditeur devient l'unique rendu du Live. */
+body.bpt-modular-layout-on #live3Game .b466-dashboard,
+body.bpt-modular-layout-on #live3Game .b466-remaining,
+body.bpt-modular-layout-on #live3Game .b466-owner-controls,
+body.bpt-modular-layout-on #live3Game .b466-tools,
+body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,
+body.bpt-modular-layout-on #live3Fullscreen .b466-fs-kpis,
+body.bpt-modular-layout-on #live3Fullscreen .b466-fs-actions {
+  display:none!important;
+}
+
+/* Le canevas Live garde exactement le ratio simulé dans l'éditeur. */
+#bptLiveModularGrid,
+#bptFsModularGrid {
+  position:relative!important;
+  min-height:0!important;
+  height:auto!important;
+  width:auto!important;
+  max-width:100%!important;
+  max-height:100%!important;
+  margin:10px auto 12px!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+#bptLiveModularGrid[data-profile="pc"],#bptFsModularGrid[data-profile="pc"]{aspect-ratio:16/9;width:min(100%,calc((100vh - 210px) * 16 / 9));}
+#bptLiveModularGrid[data-profile="landscape"],#bptFsModularGrid[data-profile="landscape"]{aspect-ratio:844/390;width:min(100%,calc((100vh - 110px) * 844 / 390));}
+#bptLiveModularGrid[data-profile="portrait"],#bptFsModularGrid[data-profile="portrait"]{aspect-ratio:390/844;width:min(100%,430px);}
+
+#bptFsModularHolder{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  min-width:0!important;
+  width:100%!important;
+  height:100%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow:hidden!important;
+}
+#bptFsModularGrid{margin:0!important;}
+#bptFsModularGrid[data-profile="pc"]{height:min(100%,calc(100vw * 9 / 16))!important;width:auto!important;max-width:100%!important;}
+#bptFsModularGrid[data-profile="landscape"]{height:min(100%,calc(100vw * 390 / 844))!important;width:auto!important;max-width:100%!important;}
+#bptFsModularGrid[data-profile="portrait"]{height:min(100%,calc(100vw * 844 / 390))!important;width:auto!important;max-width:100%!important;}
+
+@media (max-width:900px){
+  #bptLiveModularGrid[data-profile="portrait"]{width:min(100%,390px)!important;margin:8px auto 10px!important;}
+  #bptLiveModularGrid[data-profile="landscape"]{width:min(100%,calc((100vh - 125px) * 844 / 390))!important;margin:6px auto 8px!important;}
+}
+</style>
+
+<script id="bpt-v482-layout-runtime-fix">
+(function(){
+  function profile(){return innerWidth<=900?(innerHeight>innerWidth?'portrait':'landscape'):'pc'}
+  function stamp(){
+    const p=profile();
+    const a=document.getElementById('bptLiveModularGrid');
+    const b=document.getElementById('bptFsModularGrid');
+    if(a)a.dataset.profile=p;
+    if(b)b.dataset.profile=p;
+    document.body.classList.toggle('bpt-live-profile-pc',p==='pc');
+    document.body.classList.toggle('bpt-live-profile-landscape',p==='landscape');
+    document.body.classList.toggle('bpt-live-profile-portrait',p==='portrait');
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',stamp);else stamp();
+  addEventListener('resize',()=>{clearTimeout(window.__bpt482r);window.__bpt482r=setTimeout(stamp,80)});
+  new MutationObserver(stamp).observe(document.documentElement,{subtree:true,childList:true});
+})();
+</script>
