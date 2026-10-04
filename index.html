@@ -14172,7 +14172,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.85";
+const BPT_APP_VERSION="4.87";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14324,7 +14324,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v4.73</div>
+<div class="app-version" id="headerAppVersion">BPT v4.87</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15438,7 +15438,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.85</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.87</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -26016,7 +26016,7 @@ document.addEventListener("visibilitychange",()=>{
   }
   const BPT_SB_STRUCTURE=[25,50,75,100,150,200,300,400,500,600,800,1000,1200,1500,2000,2500,3000,4000,5000,6000,8000,10000,12000,15000,20000];
   function bptGetBlindLevels(){
-    // V4.85 : le Live utilise une structure BPT standard et bornée.
+    // V4.86 : le Live utilise une structure BPT standard et bornée.
     // Les anciens réglages de blinds éventuellement corrompus ne doivent plus contaminer un Live.
     return BPT_SB_STRUCTURE.map(sb=>({sb:Number(sb),bb:Number(sb)*2}));
   }
@@ -28715,7 +28715,52 @@ async function requestTakeover(){
     document.addEventListener("visibilitychange",()=>{if(!document.hidden)installListener();});
   }
 
-  window.BPTLive3={render,installListener,getState:()=>clone(current),deviceId:uid};
+  window.BPTLive3={
+    render,
+    installListener,
+    getState:()=>clone(current),
+    deviceId:uid,
+    isOwner,
+    adjustMinute,
+    changeLevel,
+    toggleStartPause,
+    openElim,
+    openChat,
+    openFullscreen,
+    closeFullscreen,
+    endLive,
+    setPaceAdaptive:async(flag)=>{
+      if(!isOwner())return false;
+      await ownerTransaction(s=>{s.paceAdaptive=!!flag;s.updatedAt=Date.now();return s;});
+      return true;
+    },
+    repairStandardBlinds:async()=>{
+      if(!isOwner())return false;
+      await ownerTransaction(s=>{
+        const base=bptGetBlindLevels();
+        const old=Array.isArray(s.levels)?s.levels:[];
+        const fallback=Math.max(120,Number(old[Math.max(0,Number(s.levelIndex)||0)]?.durationSec)||Number(old[0]?.durationSec)||900);
+        const len=Math.max(25,(Number(s.levelIndex)||0)+2);
+        const levels=[];
+        for(let i=0;i<len;i++){
+          let blind=base[i];
+          if(!blind){
+            const prev=levels[i-1]||{sb:20000,bb:40000};
+            blind=bptComputedNextBlindLevel(prev);
+          }
+          levels.push({level:i+1,sb:Number(blind.sb),bb:Number(blind.bb),ante:0,durationSec:Math.max(120,Number(old[i]?.durationSec)||fallback)});
+        }
+        s.levels=levels;
+        s.levelIndex=Math.max(0,Math.min(levels.length-1,Number(s.levelIndex)||0));
+        const dur=Math.max(120,Number(levels[s.levelIndex]?.durationSec)||fallback);
+        if(!Number.isFinite(Number(s.remainingSec)) || Number(s.remainingSec)>dur*2)s.remainingSec=dur;
+        if(s.running){const now=Date.now();s.runStartedAt=now;s.deadline=now+Math.max(0,Number(s.remainingSec)||dur)*1000;}
+        s.updatedAt=Date.now();
+        return s;
+      });
+      return true;
+    }
+  };
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",bind);
   else bind();
 
@@ -29528,7 +29573,7 @@ body.b466-live-active #live3>.hero{display:none!important}
 </style>
 
 <style id="bpt-v470-layout-editor-style">
-/* ==== BPT 4.85 · Live fixe simple ==== */
+/* ==== BPT 4.86 · Live fixe simple ==== */
 .bpt-live-layout-settings>summary{font-weight:950;color:#f0b73a}
 .bpt-layout-editor{--ed-bg:#071710;--ed-panel:#0e281d;--ed-line:#2b5b47;--ed-gold:#f0b73a;--ed-teal:#10918a;color:#eef6f1}
 .bpt-layout-toolbar,.bpt-layout-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
@@ -29665,7 +29710,7 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
 </script>
 
 <style id="bpt-v473-text-only-live-style">
-/* BPT 4.85 — anciennes règles neutralisées au profit du Live fixe. */
+/* BPT 4.86 — anciennes règles neutralisées au profit du Live fixe. */
 .bpt-layout-edit-tile{
   background:transparent!important;
   border-color:transparent!important;
@@ -29721,7 +29766,7 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
 </style>
 
 <style id="bpt-v474-text-elements-only">
-/* BPT 4.85 — éditeur sans cadres : seuls les textes/actions sont manipulables. */
+/* BPT 4.86 — éditeur sans cadres : seuls les textes/actions sont manipulables. */
 .bpt-layout-edit-tile,.bpt-layout-edit-tile.is-selected,.bpt-layout-edit-tile:hover,.bpt-layout-edit-tile:not(.is-selected):hover{
   background:transparent!important;border:0!important;outline:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important;
 }
@@ -29734,7 +29779,7 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
 </style>
 
 <style id="bpt-v484-fixed-live-style">
-/* V4.85 — Live fixe simple, sans éditeur */
+/* V4.87 — Live fixe simple, moteur corrigé */
 #bptLayoutEditorPanel,.bpt-layout-editor,.bpt-modular-live-grid,#bptLiveModularGrid,#bptFsModularGrid,#bptFsModularHolder{display:none!important}
 body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on #live3Game .b466-remaining,
 body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layout-on #live3Fullscreen .b466-fs-kpis{display:none!important}
@@ -29764,7 +29809,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
   .bpt484-actions{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:7px}.bpt484-actions button{font-size:13px;border-radius:11px}
 }
 @media(min-width:761px) and (max-height:700px){.bpt484-live{min-height:480px}.bpt484-head{height:54px}.bpt484-actions{height:64px}.bpt484-card{padding:12px}}
-/* V4.85 — fenêtres d’action au-dessus du plein écran fixe */
+/* V4.86 — fenêtres d’action au-dessus du plein écran fixe */
 #live3ElimModal,#live3PaceModal,#live3ChatModal,#bptOddsModal,#live3SettingsPanel{z-index:1800000!important}
 /* Aucun ancien contrôle ne doit réapparaître sous le Live fixe */
 #live3Game .b466-owner-controls,#live3Game .b466-tools,#live3Game .b466-context,#live3Game .b466-dashboard,#live3Game .b466-request,#live3Game .b466-spectator,#live3Game #live3ForceTakeoverBtn{display:none!important}
@@ -29777,8 +29822,26 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 (function(){
   const $=id=>document.getElementById(id);
   const esc=s=>String(s??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]||c));
-  function fmt(n){return Math.round(Number(n)||0).toLocaleString('fr-FR')}
-  function gameNo(){try{if(typeof db!=='undefined'&&db?.liveState?.gameNo)return Number(db.liveState.gameNo);if(typeof current!=='undefined'&&current?.gameNo)return Number(current.gameNo);if(typeof db!=='undefined'&&Array.isArray(db.history)){const a=db.history.map(r=>Number(r.game)||0);return (Math.max(0,...a)+1)||1}}catch(e){}return '—'}
+  const fmt=n=>Math.round(Number(n)||0).toLocaleString('fr-FR');
+  const STANDARD_SB=[25,50,75,100,150,200,300,400,500,600,800,1000,1200,1500,2000,2500,3000,4000,5000,6000,8000,10000,12000,15000,20000];
+  let repairTried=false;
+  function api(){return window.BPTLive3||null}
+  function state(){try{return api()?.getState?.()||null}catch(_e){return null}}
+  function blindAt(index){
+    let i=Math.max(0,Number(index)||0);
+    if(i<STANDARD_SB.length){const sb=STANDARD_SB[i];return{sb,bb:sb*2}}
+    let sb=STANDARD_SB[STANDARD_SB.length-1],bb=sb*2;
+    for(let k=STANDARD_SB.length;k<=i;k++){
+      const step=sb<50000?Math.max(1000,Math.round(sb*.25/1000)*1000):5000;
+      sb=Math.ceil((sb+step)/5000)*5000;bb=sb*2;
+    }
+    return{sb,bb};
+  }
+  function gameNo(st){
+    const n=Number(st?.gameNo||st?.partNo||0);if(n>0)return n;
+    try{if(typeof db!=='undefined'&&Array.isArray(db.history)){return Math.max(0,...db.history.map(r=>Number(r.game)||0))+1}}catch(_e){}
+    return '—';
+  }
   function makeMarkup(fs=false){return `<div class="bpt484-live" data-fs="${fs?'1':'0'}">
     <div class="bpt484-head"><div class="bpt484-brand">BPT</div><div class="bpt484-owner" data-role="owner">Organisateur · —<br><span class="bpt484-teal" data-role="structure">Structure · Classique</span></div><div class="bpt484-part" data-role="part">Partie n°—</div></div>
     <div class="bpt484-main">
@@ -29794,27 +29857,87 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
   function install(){
     const shell=document.querySelector('#live3Game .b466-shell');if(shell&&!shell.querySelector('.bpt484-live'))shell.insertAdjacentHTML('afterbegin',makeMarkup(false));
     const fsShell=document.querySelector('#live3Fullscreen .b466-fs-shell');if(fsShell&&!fsShell.querySelector('.bpt484-live'))fsShell.insertAdjacentHTML('afterbegin',makeMarkup(true));
-    document.querySelectorAll('.bpt484-live').forEach(root=>{root.addEventListener('click',e=>{const a=e.target.closest('[data-action]');if(a)info(a.dataset.action);const b=e.target.closest('[data-do]');if(b)doit(b.dataset.do,root.dataset.fs==='1')})});
-    ensureModal();sync();
+    document.querySelectorAll('.bpt484-live').forEach(root=>{if(root.dataset.bound)return;root.dataset.bound='1';root.addEventListener('click',e=>{const a=e.target.closest('[data-action]');if(a)info(a.dataset.action);const b=e.target.closest('[data-do]');if(b)doit(b.dataset.do,root.dataset.fs==='1')})});
+    ensureModal();enforceNav();sync();
   }
   function ensureModal(){if($('bpt484Modal'))return;document.body.insertAdjacentHTML('beforeend','<div id="bpt484Modal" class="bpt484-modal"><div id="bpt484Dialog" class="bpt484-dialog"></div></div>');$('bpt484Modal').onclick=e=>{if(e.target===$('bpt484Modal'))closeModal()}}
   function closeModal(){$('bpt484Modal')?.classList.remove('open')}
-  function open(title,body){ensureModal();$('bpt484Dialog').innerHTML=`<button class="bpt484-close" onclick="document.getElementById('bpt484Modal').classList.remove('open')">×</button><h2>${title}</h2>${body}`;$('bpt484Modal').classList.add('open')}
-  function legacy(id){$(id)?.click()}
-  function doit(a,fs){if(a==='pause')legacy(fs?'live3FsStartPauseBtn':'live3StartPauseBtn');if(a==='out')legacy(fs?'live3FsEliminateBtn':'live3EliminateBtn');if(a==='odds')legacy(fs?'live3FsOddsActionBtn':'live3OddsBtn');if(a==='full')legacy(fs?'live3FsExitActionBtn':'live3FullscreenBtn');if(a==='end'&&!fs)legacy('live3EndBtn');setTimeout(sync,50)}
+  function open(title,body){ensureModal();$('bpt484Dialog').innerHTML=`<button class="bpt484-close" data-modal-close>×</button><h2>${title}</h2>${body}`;$('bpt484Modal').classList.add('open');$('bpt484Dialog').querySelector('[data-modal-close]')?.addEventListener('click',closeModal)}
+  async function doit(a,fs){
+    const x=api();
+    try{
+      if(a==='pause')await x?.toggleStartPause?.();
+      else if(a==='out')x?.openElim?.();
+      else if(a==='odds')$('live3OddsBtn')?.click();
+      else if(a==='full'){if(fs)x?.closeFullscreen?.();else x?.openFullscreen?.()}
+      else if(a==='end'&&!fs)await x?.endLive?.();
+    }catch(e){console.error('BPT action',a,e)}
+    setTimeout(sync,80);
+  }
+  async function actionDirect(kind){
+    const x=api();if(!x)return;
+    if(kind==='minus')await x.adjustMinute?.(-60);
+    if(kind==='plus')await x.adjustMinute?.(60);
+    if(kind==='prev')await x.changeLevel?.(-1);
+    if(kind==='next')await x.changeLevel?.(1);
+    if(kind==='pause')await x.toggleStartPause?.();
+    setTimeout(sync,60);
+  }
   function info(type){
-    if(type==='players'){let rows='';try{const ps=[...(current?.players||[])];rows=ps.map(p=>{const out=p.status==='out',lv=Number(p.outLevel)||0,detail=out?(lv?`Éliminé · niveau ${lv}`:'Éliminé'):'En jeu';return `<div class="bpt484-row"><span>${esc(p.name)}</span><b>${detail}${out&&p.killer?` · par ${esc(p.killer)}`:''}</b></div>`}).join('')}catch(e){}open('Joueurs',rows||'<p>Aucun joueur.</p>');return}
-    if(type==='chrono'){open('Chrono',`<div class="bpt484-btnrow"><button onclick="document.getElementById('live3MinusBtn')?.click()">−1 min</button><button onclick="document.getElementById('live3StartPauseBtn')?.click()">Pause / Reprendre</button><button onclick="document.getElementById('live3PlusBtn')?.click()">+1 min</button></div>`);return}
-    if(type==='blinds'){open('Blinds',`<div class="bpt484-row"><span>Actuelles</span><b>${esc($('live3Blinds')?.textContent||'—')}</b></div><div class="bpt484-row"><span>Prochain niveau</span><b>${esc($('live3Next')?.textContent||'—')}</b></div><div class="bpt484-btnrow"><button onclick="document.getElementById('live3PrevLevelBtn')?.click()">◀ Niveau précédent</button><button onclick="document.getElementById('live3SettingsBtn')?.click();document.getElementById('bpt484Modal')?.classList.remove('open')">Modifier durée</button><button onclick="document.getElementById('live3NextLevelBtn')?.click()">Niveau suivant ▶</button></div>`);return}
-    if(type==='timing'){const delta=$('live3FinishDelta')?.textContent||'—';open('Rythme de la partie',`<div class="bpt484-row"><span>Temps écoulé</span><b>${esc($('live3Elapsed')?.textContent||'—')}</b></div><div class="bpt484-row"><span>Fin estimée</span><b>${esc($('live3EstimatedFinish')?.textContent||'—')}</b></div><div class="bpt484-row"><span>Écart</span><b>${esc(delta)}</b></div><div class="bpt484-btnrow"><button id="bpt484AdaptiveBtn">Passer en adaptatif</button></div>`);setTimeout(()=>{$('bpt484AdaptiveBtn')?.addEventListener('click',()=>{try{if(typeof current!=='undefined'){current.paceAdaptive=true;if(typeof save==='function')save();if(typeof render==='function')render()}}catch(e){}closeModal();sync()})},0);return}
-    if(type==='stack'){let avg=Number(String($('live3AvgStack')?.textContent||'0').replace(/[^0-9]/g,''))||0,bb=0;try{bb=Number(level()?.bb)||0}catch(e){}const nbb=bb?Math.round(avg/bb*10)/10:0;open('Tapis moyen',`<div class="bpt484-row"><span>Tapis moyen</span><b>${fmt(avg)} jetons</b></div><div class="bpt484-row"><span>Équivalent</span><b>${nbb} BB</b></div><div class="bpt484-row"><span>Zone critique</span><b>&lt; ${fmt(bb*10)}</b></div><div class="bpt484-row"><span>Zone short</span><b>${fmt(bb*10)} – ${fmt(bb*20)}</b></div><div class="bpt484-row"><span>Zone moyenne</span><b>${fmt(bb*20)} – ${fmt(bb*40)}</b></div><div class="bpt484-row"><span>Zone deep</span><b>&gt; ${fmt(bb*40)}</b></div>`);return}
+    const st=state();
+    if(type==='players'){
+      const ps=Array.isArray(st?.players)?st.players:[];
+      const alive=ps.filter(p=>p.status==='in');
+      const winner=ps.filter(p=>p.status==='winner');
+      const outs=ps.filter(p=>p.status==='out');
+      const other=ps.filter(p=>!['in','out','winner'].includes(String(p.status||'')));
+      const ordered=[...winner,...alive,...other,...outs];
+      const rows=ordered.map(p=>{const out=p.status==='out',win=p.status==='winner',lv=Number(p.outLevel)||0;const status=win?'Vainqueur':out?(lv?`Éliminé · niveau ${lv}`:'Éliminé'):'En jeu';const detail=out&&p.killer?` · par ${esc(p.killer)}`:'';return `<div class="bpt484-row"><span>${esc(p.name||'—')}</span><b>${status}${detail}</b></div>`}).join('');
+      open('Joueurs',rows||'<p>Aucun joueur disponible.</p>');return;
+    }
+    if(type==='chrono'){
+      open('Chrono',`<div class="bpt484-btnrow"><button data-cmd="minus">−1 min</button><button data-cmd="pause">Pause / Reprendre</button><button data-cmd="plus">+1 min</button></div>`);
+      $('bpt484Dialog').onclick=e=>{const c=e.target.closest('[data-cmd]')?.dataset.cmd;if(c)actionDirect(c)};return;
+    }
+    if(type==='blinds'){
+      const idx=Math.max(0,Number(st?.levelIndex)||0),cur=blindAt(idx),nx=blindAt(idx+1);
+      open('Blinds',`<div class="bpt484-row"><span>Actuelles</span><b>${fmt(cur.sb)} / ${fmt(cur.bb)}</b></div><div class="bpt484-row"><span>Prochain niveau</span><b>${fmt(nx.sb)} / ${fmt(nx.bb)}</b></div><div class="bpt484-btnrow"><button data-cmd="prev">◀ Niveau précédent</button><button data-cmd="next">Niveau suivant ▶</button></div>`);
+      $('bpt484Dialog').onclick=e=>{const c=e.target.closest('[data-cmd]')?.dataset.cmd;if(c)actionDirect(c)};return;
+    }
+    if(type==='timing'){
+      const adaptive=st?.paceAdaptive===true;
+      const elapsed=$('live3Elapsed')?.textContent||'—',finish=$('live3EstimatedFinish')?.textContent||'—',delta=$('live3FinishDelta')?.textContent||'—';
+      open('Rythme de la partie',`<div class="bpt484-row"><span>Temps écoulé</span><b>${esc(elapsed)}</b></div><div class="bpt484-row"><span>Fin estimée</span><b>${esc(finish)}</b></div><div class="bpt484-row"><span>Écart</span><b>${esc(delta)}</b></div><div class="bpt484-btnrow"><button data-mode-toggle>${adaptive?'Revenir en classique':'Passer en adaptatif'}</button></div>`);
+      $('bpt484Dialog').querySelector('[data-mode-toggle]')?.addEventListener('click',async()=>{
+        const target=!adaptive;
+        const ok=await api()?.setPaceAdaptive?.(target);
+        if(ok===false){alert('Seul l’organisateur peut modifier le mode de structure.');return;}
+        closeModal();
+        document.querySelectorAll('.bpt484-live [data-role="structure"],.bpt484-live [data-role="mode"]').forEach(el=>{el.textContent=target?(el.dataset.role==='structure'?'Structure · Adaptatif':'Adaptatif'):(el.dataset.role==='structure'?'Structure · Classique':'Classique')});
+        setTimeout(sync,250);
+      });return;
+    }
+    if(type==='stack'){
+      const ps=Array.isArray(st?.players)?st.players:[],alive=ps.filter(p=>p.status==='in').length+(ps.some(p=>p.status==='winner')?1:0),total=ps.length*Number(st?.startStack||0),avg=alive?total/alive:0,idx=Math.max(0,Number(st?.levelIndex)||0),bb=blindAt(idx).bb,nbb=bb?Math.round(avg/bb*10)/10:0;
+      open('Tapis moyen',`<div class="bpt484-row"><span>Tapis moyen</span><b>${fmt(avg)} jetons</b></div><div class="bpt484-row"><span>Équivalent</span><b>${nbb} BB</b></div><div class="bpt484-row"><span>Zone critique</span><b>&lt; ${fmt(bb*10)}</b></div><div class="bpt484-row"><span>Zone short</span><b>${fmt(bb*10)} – ${fmt(bb*20)}</b></div><div class="bpt484-row"><span>Zone moyenne</span><b>${fmt(bb*20)} – ${fmt(bb*40)}</b></div><div class="bpt484-row"><span>Zone deep</span><b>&gt; ${fmt(bb*40)}</b></div>`);return;
+    }
   }
   function sync(){
-    const owner=$('live3OwnerLabel')?.textContent||'Organisateur · —', structure=$('live3StructureBadge')?.textContent||'Structure · Classique', blinds=$('live3Blinds')?.textContent||'—',timer=$('live3Timer')?.textContent||'00:00',players=$('live3Remaining')?.textContent||'0',avgText=$('live3AvgStack')?.textContent||'0',next=$('live3Next')?.textContent||'—',elapsed=$('live3Elapsed')?.textContent||'0 min',finish=$('live3EstimatedFinish')?.textContent||'—',delta=$('live3FinishDelta')?.textContent||'—';let bb=0,avg=Number(String(avgText).replace(/[^0-9]/g,''))||0,lvIdx=1;try{bb=Number(level()?.bb)||0;lvIdx=(Number(current?.levelIndex)||0)+1}catch(e){}const avgBB=bb?Math.round(avg/bb*10)/10:0;
-    document.querySelectorAll('.bpt484-live').forEach(r=>{const set=(role,val)=>{const e=r.querySelector(`[data-role="${role}"]`);if(e)e.textContent=val};set('owner',owner);set('structure',structure);set('part',`Partie n°${gameNo()}`);set('blinds',blinds);set('timer',timer);set('players',players);set('avg',`${avgText} · ${avgBB} BB`);set('next',next);set('elapsed',elapsed);set('finish',finish);set('delta',delta);set('mode',structure.includes('Adaptatif')?'Adaptatif':'Classique');set('level',`${lvIdx} / 25`);const pb=r.querySelector('[data-do="pause"]');if(pb)pb.textContent=$('live3StartPauseBtn')?.textContent||'Pause'})
+    const st=state();if(!st?.active)return;
+    const idx=Math.max(0,Math.min(200,Number(st.levelIndex)||0)),cur=blindAt(idx),nx=blindAt(idx+1);
+    const players=Array.isArray(st.players)?st.players:[],alive=players.filter(p=>p.status==='in').length+(players.some(p=>p.status==='winner')?1:0);
+    const total=players.length*Number(st.startStack||0),avg=alive?total/alive:0,avgBB=cur.bb?Math.round(avg/cur.bb*10)/10:0;
+    const owner=`Organisateur · ${st.ownerLabel||'—'}`,structure=st.paceAdaptive===true?'Structure · Adaptatif':'Structure · Classique';
+    document.querySelectorAll('.bpt484-live').forEach(r=>{const set=(role,val)=>{const e=r.querySelector(`[data-role="${role}"]`);if(e)e.textContent=val};set('owner',owner);set('structure',structure);set('part',`Partie n°${gameNo(st)}`);set('blinds',`${fmt(cur.sb)} / ${fmt(cur.bb)}`);set('timer',$('live3Timer')?.textContent||'00:00');set('players',String(alive));set('avg',`${fmt(avg)} · ${avgBB} BB`);set('next',`${fmt(nx.sb)} / ${fmt(nx.bb)}`);set('elapsed',$('live3Elapsed')?.textContent||'0 min');set('finish',$('live3EstimatedFinish')?.textContent||'—');set('delta',$('live3FinishDelta')?.textContent||'—');set('mode',st.paceAdaptive===true?'Adaptatif':'Classique');set('level',`${idx+1} / 25`);const pb=r.querySelector('[data-do="pause"]');if(pb)pb.textContent=st.running?'Pause':(st.startedAt?'Reprendre':'Démarrer')});
+    if(!repairTried){const bad=(st.levels||[]).slice(0,Math.min(25,(st.levels||[]).length)).some((lv,i)=>{const b=blindAt(i);return Number(lv?.sb)!==b.sb||Number(lv?.bb)!==b.bb});if(bad&&api()?.isOwner?.()){repairTried=true;api()?.repairStandardBlinds?.().catch(console.warn)}}
   }
-  const obs=new MutationObserver(sync);function observe(){['live3OwnerLabel','live3StructureBadge','live3Blinds','live3Timer','live3Remaining','live3AvgStack','live3Next','live3Elapsed','live3EstimatedFinish','live3FinishDelta','live3StartPauseBtn'].forEach(id=>{const n=$(id);if(n)obs.observe(n,{childList:true,subtree:true,characterData:true})})}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{install();observe();setInterval(sync,1000)});else{install();observe();setInterval(sync,1000)}
+  function enforceNav(){
+    const apply=()=>{const desktop=window.innerWidth>900;const plus=$('bptMobileMoreTopBtn'),menu=$('bptMobileMoreTopMenu');if(desktop){plus?.style.setProperty('display','none','important');menu?.style.setProperty('display','none','important');if(menu)menu.hidden=true}else{plus?.style.removeProperty('display')}document.querySelector('[data-mobile-nav-view="profile"]')?.remove()};
+    apply();window.addEventListener('resize',apply);setInterval(apply,1500);
+  }
+  const obs=new MutationObserver(()=>sync());
+  function observe(){['live3Timer','live3Elapsed','live3EstimatedFinish','live3FinishDelta'].forEach(id=>{const n=$(id);if(n)obs.observe(n,{childList:true,subtree:true,characterData:true})})}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{install();observe();setInterval(sync,500)});else{install();observe();setInterval(sync,500)}
 })();
 </script>
 
@@ -29823,11 +29946,16 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 #nav button[data-view="profile"]{display:none!important}
 @media(min-width:901px){#bptMobileMoreTopBtn,#bptMobileMoreTopMenu,.bpt-nav-mobile-only{display:none!important}}
 </style>
+
+<style id="bpt-v486-final-nav">
+#nav button[data-view="profile"],#bptMobileMoreTopMenu [data-mobile-nav-view="profile"]{display:none!important}
+@media(min-width:901px){#bptMobileMoreTopBtn,#bptMobileMoreTopMenu,.bpt-nav-mobile-only{display:none!important;visibility:hidden!important}}
+</style>
 </body>
 </html>
 
 <style id="bpt-v471-desktop-hide-more">
-/* BPT 4.85 — Plus est strictement réservé aux navigations compactes */
+/* BPT 4.87 — Plus est strictement réservé aux navigations compactes */
 @media (min-width: 901px) {
   #bptMobileMoreTopBtn,
   .bpt-nav-mobile-only,
