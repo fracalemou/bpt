@@ -9308,12 +9308,6 @@ body.bpt-mobile-device #nav > button{
   #live3Fullscreen #live3FsMasterActions{grid-template-columns:repeat(5,minmax(0,1fr)) !important;grid-template-rows:1fr !important;}
 #live3Fullscreen #live3FsSpectatorActions{grid-template-columns:repeat(3,minmax(0,1fr)) !important;grid-template-rows:1fr !important;}
 }
-
-/* BPT 4.80 — zones Info redimensionnables mais totalement transparentes */
-.bpt-layout-edit-tile[data-kind="info"]{background:transparent!important;border-color:transparent!important;box-shadow:none!important;}
-.bpt-layout-edit-tile[data-kind="info"] .bpt-tile-content{background:transparent!important;}
-.bpt-live-free-item[data-kind="info"]{background:transparent!important;border:0!important;box-shadow:none!important;}
-
 </style>
 <style id="bpt-records-final-hierarchy">
 /* Records : hiérarchie finale — joueur prioritaire */
@@ -14116,29 +14110,7 @@ body.bpt-mobile-device .bpt-mobile-top-menu button{
 }
 </style>
 
-
-<style id="bpt-v479-info-resize-handles">
-/* V4.80 — poignées visibles pour les zones d'information, sans cadre */
-.bpt-layout-edit-tile[data-kind="info"]{overflow:visible!important;}
-.bpt-layout-edit-tile[data-kind="info"] .bpt-resize-handle{display:none!important;}
-.bpt-layout-edit-tile[data-kind="info"].is-selected .bpt-resize-handle[data-dir="nw"],
-.bpt-layout-edit-tile[data-kind="info"].is-selected .bpt-resize-handle[data-dir="ne"],
-.bpt-layout-edit-tile[data-kind="info"].is-selected .bpt-resize-handle[data-dir="se"],
-.bpt-layout-edit-tile[data-kind="info"].is-selected .bpt-resize-handle[data-dir="sw"]{
-  display:block!important;position:absolute!important;width:14px!important;height:14px!important;
-  background:#21c7be!important;border:2px solid #eafffd!important;border-radius:50%!important;
-  box-shadow:0 1px 5px rgba(0,0,0,.55)!important;z-index:50!important;opacity:1!important;
-}
-.bpt-layout-edit-tile[data-kind="info"].is-selected .bpt-resize-handle[data-dir="nw"]{left:-8px!important;top:-8px!important;cursor:nwse-resize!important;}
-.bpt-layout-edit-tile[data-kind="info"].is-selected .bpt-resize-handle[data-dir="ne"]{right:-8px!important;top:-8px!important;cursor:nesw-resize!important;}
-.bpt-layout-edit-tile[data-kind="info"].is-selected .bpt-resize-handle[data-dir="se"]{right:-8px!important;bottom:-8px!important;cursor:nwse-resize!important;}
-.bpt-layout-edit-tile[data-kind="info"].is-selected .bpt-resize-handle[data-dir="sw"]{left:-8px!important;bottom:-8px!important;cursor:nesw-resize!important;}
-/* aucun contour de tuile info, même sélectionnée */
-.bpt-layout-edit-tile[data-kind="info"].is-selected{outline:0!important;border:0!important;background:transparent!important;box-shadow:none!important;}
-</style>
-
-
-</head>
+<style id="bpt-v484-nav-fix">@media(min-width:901px){#bptMobileMoreTopBtn,#bptMobileMoreTopMenu{display:none!important}}</style></head>
 <body>
 <div id="headUpPhotoPrompt" style="
   display:none; position:fixed; inset:0; z-index:31000;
@@ -14200,7 +14172,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.82";
+const BPT_APP_VERSION="4.73";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14352,7 +14324,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v4.82</div>
+<div class="app-version" id="headerAppVersion">BPT v4.73</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15467,7 +15439,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.82</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.84</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -15506,6 +15478,9 @@ function simplifyRecordTextForMobile(text){
         <button type="button" data-layout-profile="portrait">Aperçu portrait</button>
       </div>
       <div class="bpt-layout-preset-actions">
+        <button class="btn ghost" type="button" data-layout-preset="compact">Compact</button>
+        <button class="btn ghost" type="button" data-layout-preset="standard">Standard</button>
+        <button class="btn ghost" type="button" data-layout-preset="complete">Complet</button>
         <label class="bpt-layout-theme-label">Thème
           <select id="bptLayoutTheme">
             <option value="bpt">BPT</option>
@@ -15521,7 +15496,7 @@ function simplifyRecordTextForMobile(text){
       <div class="bpt-layout-stage-wrap">
         <div class="bpt-layout-stage-label"><strong>Simulation</strong><span id="bptLayoutProfileLabel">PC 16/9</span></div>
         <div class="bpt-layout-stage" id="bptLayoutStage" data-profile="pc"></div>
-        <div class="muted bpt-layout-help">Tous les éléments sont visibles. Sélectionnez-en un pour le déplacer, le redimensionner ou modifier son apparence. Les informations peuvent se superposer librement.</div>
+        <div class="muted bpt-layout-help">Configuration unique pour tous les appareils. Changez seulement l’aperçu pour vérifier le rendu. Glissez un élément pour le déplacer, ses poignées pour définir sa zone et son texte pour le repositionner librement.</div>
       </div>
       <aside class="bpt-layout-inspector">
         <h3>Propriétés de l’élément</h3>
@@ -15531,7 +15506,7 @@ function simplifyRecordTextForMobile(text){
           <div class="bpt-layout-resize-help">Redimensionnez la zone de l’élément avec ses <strong>coins et bords</strong>.</div>
           <div class="bpt-layout-dimensions" id="bptLayoutTileDimensions">—</div><div class="bpt-layout-text-help">↔ Faites glisser le texte directement dans sa zone pour le positionner.</div>
           <label>Taille du texte
-            <div class="bpt-font-size-control"><span class="bpt-font-a small">A</span><input id="bptLayoutTileFont" type="range" min="6" max="96" step="1" value="16"><span class="bpt-font-a large">A</span><output id="bptLayoutTileFontValue">16 px</output></div>
+            <div class="bpt-font-size-control"><span class="bpt-font-a small">A</span><input id="bptLayoutTileFont" type="range" min="9" max="44" step="1" value="16"><span class="bpt-font-a large">A</span><output id="bptLayoutTileFontValue">16 px</output></div>
           </label>
           <label>Couleur du texte
             <div class="bpt-text-color-control"><input id="bptLayoutTileTextColor" type="color" value="#ffffff"><button type="button" class="btn ghost" id="bptLayoutTileTextColorReset">Couleur du thème</button></div>
@@ -15542,6 +15517,10 @@ function simplifyRecordTextForMobile(text){
           <label>Alignement vertical
             <select id="bptLayoutTileVAlign"><option value="top">Haut</option><option value="center">Centré</option><option value="bottom">Bas</option></select>
           </label>
+          <div class="bpt-layout-layer-actions">
+            <button type="button" class="btn ghost" id="bptLayoutSendBack">Arrière</button>
+            <button type="button" class="btn ghost" id="bptLayoutBringFront">Avant</button>
+          </div>
           <label class="bpt-layout-check"><input type="checkbox" id="bptLayoutTileVisible" checked> Afficher cet élément</label>
         </div>
         <hr>
@@ -15550,13 +15529,9 @@ function simplifyRecordTextForMobile(text){
       </aside>
     </div>
     <div class="bpt-layout-footer">
-      <span class="muted" id="bptLayoutSaveStatus">Éditeur simple · déplacement, taille, couleurs et visibilité.</span>
+      <span class="muted" id="bptLayoutSaveStatus">Configuration commune synchronisée sur tous les appareils.</span>
       <div>
-        <label class="bpt-layout-copy-control">Copier vers
-          <select id="bptLayoutCopyTarget"><option value="landscape">Téléphone paysage</option><option value="portrait">Téléphone portrait</option><option value="pc">PC 16/9</option></select>
-        </label>
-        <button class="btn ghost" type="button" id="bptLayoutCopyBtn">Copier la disposition</button>
-        <button class="btn ghost" type="button" id="bptLayoutResetBtn">Réinitialiser ce format</button>
+        <button class="btn ghost" type="button" id="bptLayoutResetBtn">Restaurer le défaut</button>
         <button class="btn secondary" type="button" id="bptLayoutSaveBtn">Appliquer au Live</button>
       </div>
     </div>
@@ -29520,7 +29495,7 @@ body.b466-live-active #live3>.hero{display:none!important}
 </style>
 
 <style id="bpt-v470-layout-editor-style">
-/* ==== BPT 4.80 · éditeur Live responsive ==== */
+/* ==== BPT 4.84 · éditeur Live texte libre ==== */
 .bpt-live-layout-settings>summary{font-weight:950;color:#f0b73a}
 .bpt-layout-editor{--ed-bg:#071710;--ed-panel:#0e281d;--ed-line:#2b5b47;--ed-gold:#f0b73a;--ed-teal:#10918a;color:#eef6f1}
 .bpt-layout-toolbar,.bpt-layout-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
@@ -29561,7 +29536,7 @@ body.b466-live-active #live3>.hero{display:none!important}
 .bpt-layout-edit-tile .bpt-ed-label{font-size:.72em;color:var(--tile-muted);font-weight:800}.bpt-layout-edit-tile .bpt-ed-value{font-size:1.7em;font-weight:950;line-height:1.05}.bpt-layout-edit-tile .bpt-ed-sub{font-size:.65em;color:#d7e3dd;margin-top:4px}
 .bpt-layout-edit-tile[data-font="s"],.bpt-modular-live-tile[data-font="s"]{font-size:10px}.bpt-layout-edit-tile[data-font="m"],.bpt-modular-live-tile[data-font="m"]{font-size:13px}.bpt-layout-edit-tile[data-font="l"],.bpt-modular-live-tile[data-font="l"]{font-size:16px}.bpt-layout-edit-tile[data-font="xl"],.bpt-modular-live-tile[data-font="xl"]{font-size:20px}.bpt-layout-edit-tile[data-font="xxl"],.bpt-modular-live-tile[data-font="xxl"]{font-size:25px}
 .bpt-layout-edit-tile[data-halign="left"],.bpt-modular-live-tile[data-halign="left"]{align-items:flex-start;text-align:left}.bpt-layout-edit-tile[data-halign="center"],.bpt-modular-live-tile[data-halign="center"]{align-items:center;text-align:center}.bpt-layout-edit-tile[data-halign="right"],.bpt-modular-live-tile[data-halign="right"]{align-items:flex-end;text-align:right}.bpt-layout-edit-tile[data-valign="top"],.bpt-modular-live-tile[data-valign="top"]{justify-content:flex-start}.bpt-layout-edit-tile[data-valign="center"],.bpt-modular-live-tile[data-valign="center"]{justify-content:center}.bpt-layout-edit-tile[data-valign="bottom"],.bpt-modular-live-tile[data-valign="bottom"]{justify-content:flex-end}
-.bpt-layout-inspector{background:#0d281d;border:1px solid #315b48;border-radius:14px;padding:14px;align-self:start;position:sticky;top:10px}.bpt-layout-inspector h3{margin:0 0 10px;font-size:15px}.bpt-layout-inspector label{display:grid;gap:5px;margin:10px 0;font-size:12px;color:#b9cbc2}.bpt-layout-inspector select{height:40px;background:#081d15;color:#fff;border:1px solid #355f4c;border-radius:8px;padding:0 9px}.bpt-layout-check{display:flex!important;grid-template-columns:auto 1fr;align-items:center}.bpt-layout-check input{width:auto!important}
+.bpt-layout-inspector{background:#0d281d;border:1px solid #315b48;border-radius:14px;padding:14px;align-self:start;position:sticky;top:10px}.bpt-layout-inspector h3{margin:0 0 10px;font-size:15px}.bpt-layout-inspector label{display:grid;gap:5px;margin:10px 0;font-size:12px;color:#b9cbc2}.bpt-layout-inspector select{height:40px;background:#081d15;color:#fff;border:1px solid #355f4c;border-radius:8px;padding:0 9px}.bpt-layout-check{display:flex!important;grid-template-columns:auto 1fr;align-items:center}.bpt-layout-check input{width:auto!important}.bpt-layout-layer-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.bpt-layout-layer-actions .btn{min-height:38px;padding:6px 8px}
 .bpt-layout-tile-list{display:grid;gap:6px;max-height:420px;overflow:auto}.bpt-layout-tile-toggle{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid #2b4d3d;border-radius:8px;padding:7px 8px;background:#102d21;color:#edf5f1}.bpt-layout-tile-toggle button{border:0;background:transparent;color:#d6e6de;cursor:pointer;font-weight:800;text-align:left;flex:1}.bpt-layout-tile-toggle input{width:auto!important}.bpt-layout-tile-toggle[data-kind="action"]{border-style:dashed;background:#0d251c}.bpt-layout-help{font-size:11px;margin-top:7px}.bpt-layout-footer{margin-top:14px;border-top:1px solid #2c4c3d;padding-top:12px}.bpt-layout-footer .btn{min-height:42px}
 @media(max-width:900px){.bpt-layout-workspace{grid-template-columns:1fr}.bpt-layout-inspector{position:static}.bpt-layout-stage{min-height:220px}.bpt-layout-stage[data-profile="portrait"]{min-height:560px}}
 
@@ -29576,15 +29551,13 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
 @media(max-height:500px) and (orientation:landscape){.bpt-modular-live-grid{margin:5px 10px 6px;min-height:0}.bpt-modular-live-tile{padding:6px;border-radius:10px}.bpt-modular-live-tile[data-font="xxl"]{font-size:18px}.bpt-modular-live-tile[data-font="xl"]{font-size:16px}.bpt-modular-live-tile[data-font="l"]{font-size:13px}}
 </style>
 
-<script id="bpt-v478-layout-editor-script">
+<script id="bpt-v472-layout-editor-script">
 (function(){
-  const STORAGE='bpt_live_layout_responsive_v478';
-  const LEGACY_STORAGE='bpt_live_layout_universal_v472';
-  const DB_PATH='bpt/config/liveLayoutResponsive';
-  const LEGACY_DB_PATH='bpt/config/liveLayoutUniversal';
+  const STORAGE='bpt_live_layout_universal_v472';
+  const DB_PATH='bpt/config/liveLayoutUniversal';
   const TILES={
     blinds:{name:'Blinds',label:'BLINDS',sample:'1 000 / 2 000',sub:'Durée : 15 min',kind:'info'},
-    timer:{name:'Chrono',label:'',sample:'08:42',sub:'',kind:'info'},
+    timer:{name:'Timer',label:'TIMER',sample:'08:42',sub:'',kind:'info'},
     players:{name:'Joueurs restants',label:'JOUEURS',sample:'6 / 12',sub:'Liste & éliminations',kind:'info'},
     finish:{name:'Fin estimée',label:'FIN ESTIMÉE',sample:'23:18',sub:'+12 min de retard',kind:'info'},
     avg:{name:'Tapis moyen',label:'TAPIS MOYEN',sample:'18 000',sub:'',kind:'info'},
@@ -29600,117 +29573,66 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
     fullscreen:{name:'Plein écran',label:'ACTION',sample:'Plein écran',sub:'',kind:'action',action:'fullscreen'},
     settings:{name:'Réglages',label:'ACTION',sample:'Réglages',sub:'',kind:'action',action:'settings'}
   };
-  const geom=(x,y,w,h,z=1,textX=0,textY=0)=>({x,y,w,h,z,textX,textY});
-  const shared=(fontSize=16,visible=true,ha='center',va='center',textColor='')=>({fontSize,visible,halign:ha,valign:va,textColor});
-  const DEFAULT={
-    theme:'bpt',
-    shared:{
-      blinds:shared(28,true),timer:shared(38,true),players:shared(24,true),finish:shared(22,true),avg:shared(17,true),next:shared(17,true),
-      prevLevel:shared(13,true),minus1:shared(13,true),plus1:shared(13,true),nextLevel:shared(13,true),pause:shared(18,true),eliminate:shared(16,true),chat:shared(14,true),odds:shared(14,true),fullscreen:shared(13,true),settings:shared(13,true)
-    },
-    layouts:{
-      pc:{
-        blinds:geom(2,3,28,29,2),timer:geom(34,3,32,29,2),players:geom(70,3,28,29,2),
-        avg:geom(2,36,28,17,2),finish:geom(34,36,32,17,2),next:geom(70,36,28,17,2),
-        prevLevel:geom(2,58,22,8,3),minus1:geom(25,58,14,8,3),plus1:geom(40,58,14,8,3),nextLevel:geom(55,58,22,8,3),
-        pause:geom(2,69,46,12,3),eliminate:geom(50,69,48,12,3),
-        chat:geom(2,85,20,10,3),odds:geom(24,85,30,10,3),fullscreen:geom(56,85,22,10,3),settings:geom(80,85,18,10,3)
-      },
-      landscape:{
-        blinds:geom(2,4,21,28,2),timer:geom(25,4,28,28,2),players:geom(55,4,18,28,2),next:geom(75,4,23,28,2),
-        avg:geom(2,36,21,18,2),finish:geom(25,36,28,18,2),
-        prevLevel:geom(55,36,10,18,3),minus1:geom(66,36,10,18,3),plus1:geom(77,36,10,18,3),nextLevel:geom(88,36,10,18,3),
-        pause:geom(2,59,31,15,3),eliminate:geom(35,59,31,15,3),settings:geom(68,59,30,15,3),
-        chat:geom(2,79,22,15,3),odds:geom(26,79,28,15,3),fullscreen:geom(56,79,42,15,3)
-      },
-      portrait:{
-        blinds:geom(5,2,90,13,2),timer:geom(5,16,90,18,2),
-        finish:geom(5,36,43,13,2),players:geom(52,36,43,13,2),
-        avg:geom(5,51,43,11,2),next:geom(52,51,43,11,2),
-        prevLevel:geom(5,64,21,8,3),minus1:geom(28,64,21,8,3),plus1:geom(51,64,21,8,3),nextLevel:geom(74,64,21,8,3),
-        pause:geom(5,74,43,10,3),eliminate:geom(52,74,43,10,3),
-        chat:geom(5,86,28,9,3),odds:geom(36,86,28,9,3),settings:geom(67,86,28,9,3),fullscreen:geom(5,96,90,3,3)
-      }
-    }
-  };
+  const base=(x,y,w,h,fontSize=16,visible=true,z=1,ha='center',va='center',textX=0,textY=0,textColor='')=>({x,y,w,h,fontSize,visible,z,halign:ha,valign:va,textX,textY,textColor});
+  const DEFAULT={theme:'bpt',tiles:{
+    blinds:base(1,2,27,42,24,true,2),timer:base(30,2,40,42,34,true,2),players:base(72,2,27,42,24,true,2),
+    avg:base(1,47,27,27,16,true,2),finish:base(30,47,40,27,22,true,2),next:base(72,47,27,27,16,true,2),
+    minus1:base(1,78,11,16,14,false,3),plus1:base(13,78,11,16,14,false,3),pause:base(25,78,20,16,18,true,3),eliminate:base(46,78,24,16,15,true,3),
+    prevLevel:base(1,78,15,16,14,false,3),nextLevel:base(17,78,15,16,14,false,3),chat:base(72,78,8,16,14,true,3),odds:base(81,78,11,16,14,true,3),fullscreen:base(93,78,6,16,11,true,3),settings:base(87,78,6,16,11,false,3)
+  }};
   const deep=o=>JSON.parse(JSON.stringify(o)); const $=id=>document.getElementById(id);
-  function normShared(s){s.fontSize=Math.max(6,Math.min(96,+s.fontSize||16));s.halign=s.halign||'center';s.valign=s.valign||'center';s.textColor=s.textColor||'';if(s.visible===undefined)s.visible=true;return s}
-  function normGeom(g){g.w=Math.max(3,Math.min(100,+g.w||20));g.h=Math.max(3,Math.min(100,+g.h||12));g.x=Math.max(0,Math.min(100-g.w,+g.x||0));g.y=Math.max(0,Math.min(100-g.h,+g.y||0));g.z=Math.max(1,Math.min(99,+g.z||1));g.textX=Math.max(-80,Math.min(80,+g.textX||0));g.textY=Math.max(-80,Math.min(80,+g.textY||0));return g}
   function migrate(raw){
-    const out=deep(DEFAULT); if(!raw)return out;
-    if(raw.layouts&&raw.shared){
-      out.theme=raw.theme||out.theme;
-      for(const id of Object.keys(TILES)){if(raw.shared[id])out.shared[id]=normShared({...out.shared[id],...raw.shared[id]});for(const p of ['pc','landscape','portrait'])if(raw.layouts[p]?.[id])out.layouts[p][id]=normGeom({...out.layouts[p][id],...raw.layouts[p][id]});}
-      return out;
-    }
-    const old=raw.pc?.tiles?{theme:raw.pc.theme,tiles:raw.pc.tiles}:raw;
-    out.theme=old.theme||out.theme;
-    for(const id of Object.keys(TILES))if(old.tiles?.[id]){
-      const r=old.tiles[id];
-      out.shared[id]=normShared({...out.shared[id],fontSize:+r.fontSize||({s:10,m:13,l:16,xl:20,xxl:25}[r.font]||out.shared[id].fontSize),visible:r.visible!==false,halign:r.halign||out.shared[id].halign,valign:r.valign||out.shared[id].valign,textColor:r.textColor||''});
-      out.layouts.pc[id]=normGeom({...out.layouts.pc[id],x:+r.x||0,y:+r.y||0,w:+r.w||out.layouts.pc[id].w,h:+r.h||out.layouts.pc[id].h,z:+r.z||1,textX:+r.textX||0,textY:+r.textY||0});
+    if(!raw)return deep(DEFAULT);
+    if(raw.pc?.tiles)raw={theme:raw.pc.theme,tiles:raw.pc.tiles};
+    const out=deep(DEFAULT);out.theme=raw.theme||out.theme;
+    for(const id of Object.keys(TILES))if(raw.tiles?.[id]){
+      const r=raw.tiles[id];out.tiles[id]={...out.tiles[id],...r,fontSize:+r.fontSize||({s:10,m:13,l:16,xl:20,xxl:25}[r.font]||out.tiles[id].fontSize),textX:+r.textX||0,textY:+r.textY||0,textColor:r.textColor||''};
     }
     return out;
   }
-  function load(){try{return migrate(JSON.parse(localStorage.getItem(STORAGE)||localStorage.getItem(LEGACY_STORAGE)||localStorage.getItem('bpt_live_layouts_v469')||'null'))}catch(e){return deep(DEFAULT)}}
-  let state=load(),profile='pc',selected='blinds',drag=null,resize=null,pop=null,remoteRef=null,remoteTimer=null,remoteReady=false;
-  function sh(id){return state.shared[id]||(state.shared[id]=deep(DEFAULT.shared[id]))}
-  function geo(id,p=profile){return state.layouts[p][id]||(state.layouts[p][id]=deep(DEFAULT.layouts[p][id]))}
-  function saveLocal(){localStorage.setItem(STORAGE,JSON.stringify(state))}
-  function saveRemote(){if(!remoteRef)return;clearTimeout(remoteTimer);remoteTimer=setTimeout(()=>remoteRef.set(state).catch(()=>{}),180)}
+  function load(){try{return migrate(JSON.parse(localStorage.getItem(STORAGE)||localStorage.getItem('bpt_live_layouts_v469')||'null'))}catch(e){return deep(DEFAULT)}}
+  let layout=load(),profile='pc',selected='blinds',drag=null,resize=null,textDrag=null,pop=null,remoteRef=null,remoteTimer=null,remoteReady=false;
+  function saveLocal(){localStorage.setItem(STORAGE,JSON.stringify(layout))}
+  function saveRemote(){if(!remoteRef)return;clearTimeout(remoteTimer);remoteTimer=setTimeout(()=>remoteRef.set(layout).catch(()=>{}),180)}
   function save(){saveLocal();saveRemote()}
-  async function connectRemote(){
-    try{const fb=await window.bptFirebaseEnsure?.();if(!fb?.rtdb)return;remoteRef=fb.rtdb.ref(DB_PATH);remoteRef.on('value',snap=>{const v=snap.val();if(v){state=migrate(v);saveLocal();renderEditor();applyLayouts()}else if(!remoteReady){
-      fb.rtdb.ref(LEGACY_DB_PATH).once('value').then(old=>{const legacy=old.val();if(legacy)state=migrate(legacy);remoteRef.set(state).catch(()=>{});saveLocal();renderEditor();applyLayouts()}).catch(()=>remoteRef.set(state).catch(()=>{}));
-    }remoteReady=true})}catch(e){}
-  }
+  async function connectRemote(){try{const fb=await window.bptFirebaseEnsure?.();if(!fb?.rtdb)return;remoteRef=fb.rtdb.ref(DB_PATH);remoteRef.on('value',snap=>{const v=snap.val();if(v){layout=migrate(v);saveLocal();renderEditor();applyLayouts()}else if(!remoteReady){remoteRef.set(layout).catch(()=>{})}remoteReady=true})}catch(e){}}
+  function norm(t){t.w=Math.max(5,Math.min(100,+t.w||20));t.h=Math.max(5,Math.min(100,+t.h||15));t.x=Math.max(0,Math.min(100-t.w,+t.x||0));t.y=Math.max(0,Math.min(100-t.h,+t.y||0));t.z=Math.max(1,Math.min(99,+t.z||1));t.fontSize=Math.max(9,Math.min(44,+t.fontSize||16));t.halign=t.halign||'center';t.valign=t.valign||'center';t.textX=Math.max(-80,Math.min(80,+t.textX||0));t.textY=Math.max(-80,Math.min(80,+t.textY||0));if(t.visible===undefined)t.visible=true;return t}
   function profileLabel(p){return p==='pc'?'PC 16/9':p==='landscape'?'Téléphone paysage':'Téléphone portrait'}
-  function runtimeProfile(){if(innerWidth<=900){return innerHeight>innerWidth?'portrait':'landscape'}return'pc'}
   function liveValue(id){if(id==='blinds')return[$('live3Blinds')?.textContent||'—',$('live3BlindDurationLabel')?.textContent||''];if(id==='timer')return[$('live3Timer')?.textContent||'00:00',''];if(id==='players')return[(($('live3Remaining')?.textContent||'0')+' restants'),'Liste & éliminations'];if(id==='finish')return[$('live3EstimatedFinish')?.textContent||'—',$('live3FinishDelta')?.textContent||'—'];if(id==='avg')return[$('live3AvgStack')?.textContent||'0',''];if(id==='next')return[$('live3Next')?.textContent||'—',''];if(id==='pause'){const fs=$('live3Fullscreen'),inFs=!!(fs&&getComputedStyle(fs).display!=='none');return[((inFs?$('live3FsStartPauseBtn'):$('live3StartPauseBtn'))?.textContent?.trim()||'Pause'),'']}if(id==='fullscreen'){const fs=$('live3Fullscreen');return[fs&&getComputedStyle(fs).display!=='none'?'Quitter plein écran':'Plein écran','']}return[TILES[id].sample,TILES[id].sub||'']}
   function tileContent(id,live){const d=TILES[id],vs=live?liveValue(id):[d.sample,d.sub||''],cls=live?'bpt-live-tile':'bpt-ed';return `${d.kind==='action'?'':`<span class="${cls}-label">${d.label}</span>`}<strong class="${cls}-value">${vs[0]}</strong>${vs[1]?`<span class="${cls}-sub">${vs[1]}</span>`:''}`}
-  function tileInner(id,live,g){return `<div class="bpt-tile-content" style="transform:translate(${g.textX||0}%,${g.textY||0}%);">${tileContent(id,live)}</div>`}
-  function applyGeom(el,g,s){el.style.left=g.x+'%';el.style.top=g.y+'%';el.style.width=g.w+'%';el.style.height=g.h+'%';el.style.zIndex=g.z;el.style.fontSize=s.fontSize+'px';el.dataset.halign=s.halign;el.dataset.valign=s.valign;el.style.setProperty('--tile-user-text',s.textColor||'var(--tile-text)')}
+  function tileInner(id,live,t){return `<div class="bpt-tile-content" style="transform:translate(${t.textX||0}%,${t.textY||0}%);">${tileContent(id,live)}</div>`}
+  function applyGeom(el,t){el.style.left=t.x+'%';el.style.top=t.y+'%';el.style.width=t.w+'%';el.style.height=t.h+'%';el.style.zIndex=t.z;el.style.fontSize=t.fontSize+'px';el.dataset.halign=t.halign;el.dataset.valign=t.valign;el.style.setProperty('--tile-user-text',t.textColor||'var(--tile-text)');}
   function resizeHandles(){return ['nw','n','ne','e','se','s','sw','w'].map(dir=>`<span class="bpt-resize-handle" data-dir="${dir}" aria-hidden="true"></span>`).join('')}
-  function renderEditor(){const stage=$('bptLayoutStage');if(!stage)return;stage.dataset.profile=profile;stage.dataset.theme=state.theme||'bpt';stage.innerHTML='';$('bptLayoutProfileLabel').textContent=profileLabel(profile)+' · disposition propre à ce format';if($('bptLayoutTheme'))$('bptLayoutTheme').value=state.theme||'bpt';for(const [id,d] of Object.entries(TILES)){const g=normGeom(geo(id)),s=normShared(sh(id));const el=document.createElement('div');el.className='bpt-layout-edit-tile'+(id===selected?' is-selected':'')+(s.visible?'':' is-hidden');el.dataset.tile=id;el.dataset.kind=d.kind;applyGeom(el,g,s);el.innerHTML=tileInner(id,false,g)+resizeHandles();el.addEventListener('click',()=>selectTile(id));el.querySelector('.bpt-tile-content')?.addEventListener('pointerdown',startDrag);el.querySelectorAll('.bpt-resize-handle').forEach(h=>h.addEventListener('pointerdown',startResize));stage.appendChild(el)}renderList();renderInspector()}
-  function selectTile(id){selected=id;const g=geo(id);if(g){const maxZ=Math.max(1,...Object.values(state.layouts[profile]||{}).map(v=>+v.z||1));g.z=maxZ+1;}save();renderEditor();}
-  function startDrag(e){if(e.button!==0||e.target.closest('.bpt-resize-handle'))return;e.stopPropagation();const el=e.currentTarget.closest('.bpt-layout-edit-tile'),id=el.dataset.tile,g=geo(id),r=$('bptLayoutStage').getBoundingClientRect();selected=id;drag={id,el,startX:e.clientX,startY:e.clientY,x:g.x,y:g.y,stageW:r.width,stageH:r.height};e.currentTarget.setPointerCapture?.(e.pointerId);e.currentTarget.addEventListener('pointermove',dragMove);e.currentTarget.addEventListener('pointerup',dragEnd,{once:true});renderInspector();e.preventDefault()}
-  function dragMove(e){if(!drag)return;const g=geo(drag.id);g.x=drag.x+(e.clientX-drag.startX)/drag.stageW*100;g.y=drag.y+(e.clientY-drag.startY)/drag.stageH*100;normGeom(g);applyGeom(drag.el,g,sh(drag.id));updateDimensionReadout(g)}
-  function dragEnd(){if(!drag)return;drag.el.querySelector('.bpt-tile-content')?.removeEventListener('pointermove',dragMove);drag=null;save();renderEditor();applyLayouts()}
-  function startResize(e){if(e.button!==0)return;e.stopPropagation();const el=e.currentTarget.closest('.bpt-layout-edit-tile'),id=el.dataset.tile,g=geo(id),r=$('bptLayoutStage').getBoundingClientRect();selected=id;resize={id,el,dir:e.currentTarget.dataset.dir,start:deep(g),startX:e.clientX,startY:e.clientY,stage:r};e.currentTarget.setPointerCapture?.(e.pointerId);e.currentTarget.addEventListener('pointermove',resizeMove);e.currentTarget.addEventListener('pointerup',resizeEnd,{once:true});renderInspector();e.preventDefault()}
-  function resizeMove(e){if(!resize)return;const {id,el,dir,start,stage}=resize,g=geo(id),dx=(e.clientX-resize.startX)/stage.width*100,dy=(e.clientY-resize.startY)/stage.height*100,minW=3,minH=3;let x=start.x,y=start.y,w=start.w,h=start.h;if(dir.includes('e'))w=Math.max(minW,Math.min(100-x,start.w+dx));if(dir.includes('s'))h=Math.max(minH,Math.min(100-y,start.h+dy));if(dir.includes('w')){const nx=Math.max(0,Math.min(start.x+start.w-minW,start.x+dx));w=start.w+(start.x-nx);x=nx}if(dir.includes('n')){const ny=Math.max(0,Math.min(start.y+start.h-minH,start.y+dy));h=start.h+(start.y-ny);y=ny}Object.assign(g,{x,y,w,h});normGeom(g);applyGeom(el,g,sh(id));updateDimensionReadout(g)}
+  function renderEditor(){const stage=$('bptLayoutStage');if(!stage)return;stage.dataset.profile=profile;stage.dataset.theme=layout.theme||'bpt';stage.innerHTML='';$('bptLayoutProfileLabel').textContent=profileLabel(profile)+' · même configuration';if($('bptLayoutTheme'))$('bptLayoutTheme').value=layout.theme||'bpt';for(const [id,d] of Object.entries(TILES)){const t=norm(layout.tiles[id]||deep(DEFAULT.tiles[id]));layout.tiles[id]=t;const el=document.createElement('div');el.className='bpt-layout-edit-tile'+(id===selected?' is-selected':'')+(t.visible?'':' is-hidden');el.dataset.tile=id;el.dataset.kind=d.kind;applyGeom(el,t);el.innerHTML=tileInner(id,false,t);el.addEventListener('click',()=>selectTile(id));el.querySelector('.bpt-tile-content')?.addEventListener('pointerdown',startTextDrag);stage.appendChild(el)}renderList();renderInspector()}
+  function selectTile(id){selected=id;renderEditor()}
+  function startDrag(e){if(e.button!==0||e.target.closest('.bpt-resize-handle')||e.target.closest('.bpt-tile-content'))return;const id=e.currentTarget.dataset.tile;selected=id;const r=$('bptLayoutStage').getBoundingClientRect(),t=layout.tiles[id];drag={id,el:e.currentTarget,dx:e.clientX-(r.left+r.width*t.x/100),dy:e.clientY-(r.top+r.height*t.y/100)};e.currentTarget.setPointerCapture?.(e.pointerId);e.currentTarget.addEventListener('pointermove',dragMove);e.currentTarget.addEventListener('pointerup',dragEnd,{once:true});renderInspector();e.preventDefault()}
+  function dragMove(e){if(!drag)return;const r=$('bptLayoutStage').getBoundingClientRect(),t=layout.tiles[drag.id];t.x=Math.max(0,Math.min(100-t.w,(e.clientX-r.left-drag.dx)/r.width*100));t.y=Math.max(0,Math.min(100-t.h,(e.clientY-r.top-drag.dy)/r.height*100));applyGeom(drag.el,t);updateDimensionReadout(t)}
+  function dragEnd(){if(!drag)return;drag.el.removeEventListener('pointermove',dragMove);drag=null;save();renderEditor();applyLayouts()}
+  function startTextDrag(e){if(e.button!==0)return;e.stopPropagation();const el=e.currentTarget.closest('.bpt-layout-edit-tile'),id=el.dataset.tile,t=layout.tiles[id],stage=$('bptLayoutStage').getBoundingClientRect();selected=id;textDrag={id,el,content:e.currentTarget,startX:e.clientX,startY:e.clientY,startXPos:t.x,startYPos:t.y,stageW:stage.width,stageH:stage.height};e.currentTarget.setPointerCapture?.(e.pointerId);e.currentTarget.addEventListener('pointermove',textDragMove);e.currentTarget.addEventListener('pointerup',textDragEnd,{once:true});renderInspector();e.preventDefault()}
+  function textDragMove(e){if(!textDrag)return;const t=layout.tiles[textDrag.id];t.x=Math.max(0,Math.min(100-t.w,textDrag.startXPos+(e.clientX-textDrag.startX)/textDrag.stageW*100));t.y=Math.max(0,Math.min(100-t.h,textDrag.startYPos+(e.clientY-textDrag.startY)/textDrag.stageH*100));t.textX=0;t.textY=0;applyGeom(textDrag.el,t);updateDimensionReadout(t)}
+  function textDragEnd(){if(!textDrag)return;textDrag.content?.removeEventListener('pointermove',textDragMove);textDrag=null;save();renderEditor();applyLayouts()}
+  function startResize(e){if(e.button!==0)return;e.stopPropagation();e.preventDefault();const el=e.currentTarget.closest('.bpt-layout-edit-tile'),id=el.dataset.tile,dir=e.currentTarget.dataset.dir,r=$('bptLayoutStage').getBoundingClientRect(),t=layout.tiles[id];selected=id;resize={id,el,dir,startX:e.clientX,startY:e.clientY,start:{x:t.x,y:t.y,w:t.w,h:t.h},stage:r};e.currentTarget.setPointerCapture?.(e.pointerId);e.currentTarget.addEventListener('pointermove',resizeMove);e.currentTarget.addEventListener('pointerup',resizeEnd,{once:true});renderInspector()}
+  function resizeMove(e){if(!resize)return;const {id,el,dir,start,stage}=resize,t=layout.tiles[id],dx=(e.clientX-resize.startX)/stage.width*100,dy=(e.clientY-resize.startY)/stage.height*100,minW=5,minH=5;let x=start.x,y=start.y,w=start.w,h=start.h;if(dir.includes('e'))w=Math.max(minW,Math.min(100-x,start.w+dx));if(dir.includes('s'))h=Math.max(minH,Math.min(100-y,start.h+dy));if(dir.includes('w')){const nx=Math.max(0,Math.min(start.x+start.w-minW,start.x+dx));w=start.w+(start.x-nx);x=nx}if(dir.includes('n')){const ny=Math.max(0,Math.min(start.y+start.h-minH,start.y+dy));h=start.h+(start.y-ny);y=ny}Object.assign(t,{x,y,w,h});norm(t);applyGeom(el,t);updateDimensionReadout(t)}
   function resizeEnd(e){if(!resize)return;e.currentTarget.removeEventListener('pointermove',resizeMove);resize=null;save();renderEditor();applyLayouts()}
-  function renderList(){const host=$('bptLayoutTileList');if(!host)return;host.innerHTML='';for(const [id,d] of Object.entries(TILES)){const s=sh(id),row=document.createElement('div');row.className='bpt-layout-tile-toggle';row.dataset.kind=d.kind;row.innerHTML=`<button type="button">${d.name}</button><input aria-label="Afficher ${d.name}" type="checkbox" ${s.visible!==false?'checked':''}>`;row.querySelector('button').onclick=()=>selectTile(id);row.querySelector('input').onchange=e=>{s.visible=e.target.checked;save();renderEditor();applyLayouts()};host.appendChild(row)}}
-  function updateDimensionReadout(g){const el=$('bptLayoutTileDimensions');if(el&&g)el.textContent=`${profileLabel(profile)} · X ${g.x.toFixed(1)}% · Y ${g.y.toFixed(1)}% · ${g.w.toFixed(1)}% × ${g.h.toFixed(1)}%`}
-  function renderInspector(){const s=sh(selected),g=geo(selected),has=!!s&&!!g;$('bptLayoutNoSelection').hidden=has;$('bptLayoutInspectorFields').hidden=!has;if(!has)return;$('bptLayoutTileName').textContent=TILES[selected].name;updateDimensionReadout(g);$('bptLayoutTileFont').value=s.fontSize;$('bptLayoutTileFontValue').value=s.fontSize+' px';$('bptLayoutTileTextColor').value=s.textColor||'#ffffff';$('bptLayoutTileHAlign').value=s.halign;$('bptLayoutTileVAlign').value=s.valign;$('bptLayoutTileVisible').checked=s.visible!==false}
-  function updateShared(field,val){const s=sh(selected);if(!s)return;s[field]=field==='fontSize'?parseFloat(val):val;normShared(s);save();renderEditor();applyLayouts()}
-  function updateGeom(field,val){const g=geo(selected);if(!g)return;g[field]=parseFloat(val);normGeom(g);save();renderEditor();applyLayouts()}
-  function makeGrid(id,container,p){if(!container)return;let grid=$(id);if(!grid){grid=document.createElement('div');grid.id=id;grid.className='bpt-modular-live-grid';container.appendChild(grid)}grid.dataset.theme=state.theme||'bpt';grid.dataset.profile=p;grid.innerHTML='';for(const [tileId,d] of Object.entries(TILES)){const s=sh(tileId),g=state.layouts[p][tileId];if(!g||s.visible===false)continue;const el=document.createElement('button');el.type='button';el.className='bpt-modular-live-tile';el.dataset.tile=tileId;el.dataset.kind=d.kind;applyGeom(el,normGeom(g),normShared(s));el.innerHTML=tileInner(tileId,true,g);el.addEventListener('click',ev=>tileAction(tileId,ev.currentTarget));grid.appendChild(el)}return grid}
-  function applyLayouts(){document.body.classList.add('bpt-modular-layout-on');const p=runtimeProfile(),shell=document.querySelector('#live3Game .b466-shell');if(shell){let g=$('bptLiveModularGrid');if(!g){g=document.createElement('div');g.id='bptLiveModularGrid';shell.insertBefore(g,document.querySelector('#live3Game .b466-owner-controls')||document.querySelector('#live3Game .b466-tools'))}g.className='bpt-modular-live-grid';makeGrid('bptLiveModularGrid',shell,p)}const fsShell=document.querySelector('#live3Fullscreen .b466-fs-shell');if(fsShell){let holder=$('bptFsModularHolder');if(!holder){holder=document.createElement('div');holder.id='bptFsModularHolder';fsShell.insertBefore(holder,document.querySelector('#live3Fullscreen .b466-fs-actions'))}makeGrid('bptFsModularGrid',holder,p)}}
+  function renderList(){const host=$('bptLayoutTileList');if(!host)return;host.innerHTML='';for(const [id,d] of Object.entries(TILES)){const row=document.createElement('div');row.className='bpt-layout-tile-toggle';row.dataset.kind=d.kind;row.innerHTML=`<button type="button">${d.name}</button><input aria-label="Afficher ${d.name}" type="checkbox" ${layout.tiles[id]?.visible!==false?'checked':''}>`;row.querySelector('button').onclick=()=>selectTile(id);row.querySelector('input').onchange=e=>{layout.tiles[id].visible=e.target.checked;save();renderEditor();applyLayouts()};host.appendChild(row)}}
+  function updateDimensionReadout(t){const el=$('bptLayoutTileDimensions');if(el&&t)el.textContent=`Tuile ${t.x.toFixed(1)}% / ${t.y.toFixed(1)}% · ${t.w.toFixed(1)}% × ${t.h.toFixed(1)}% · Texte ${t.textX.toFixed(0)}% / ${t.textY.toFixed(0)}%`}
+  function renderInspector(){const t=layout.tiles[selected],has=!!t;$('bptLayoutNoSelection').hidden=has;$('bptLayoutInspectorFields').hidden=!has;if(!has)return;$('bptLayoutTileName').textContent=TILES[selected].name;updateDimensionReadout(t);$('bptLayoutTileFont').value=t.fontSize;$('bptLayoutTileFontValue').value=t.fontSize+' px';$('bptLayoutTileTextColor').value=t.textColor||'#ffffff';$('bptLayoutTileHAlign').value=t.halign;$('bptLayoutTileVAlign').value=t.valign;$('bptLayoutTileVisible').checked=t.visible!==false}
+  function updateSelected(field,val){const t=layout.tiles[selected];if(!t)return;t[field]=['z','fontSize'].includes(field)?parseFloat(val):val;norm(t);save();renderEditor();applyLayouts()}
+  function makeGrid(id,container){if(!container)return;let grid=$(id);if(!grid){grid=document.createElement('div');grid.id=id;grid.className='bpt-modular-live-grid';container.appendChild(grid)}grid.dataset.theme=layout.theme||'bpt';grid.innerHTML='';for(const [tileId,d] of Object.entries(TILES)){const t=layout.tiles[tileId];if(!t||t.visible===false)continue;const el=document.createElement('button');el.type='button';el.className='bpt-modular-live-tile';el.dataset.tile=tileId;el.dataset.kind=d.kind;applyGeom(el,t);el.innerHTML=tileInner(tileId,true,t);el.addEventListener('click',ev=>tileAction(tileId,ev.currentTarget));grid.appendChild(el)}return grid}
+  function applyLayouts(){document.body.classList.add('bpt-modular-layout-on');const shell=document.querySelector('#live3Game .b466-shell');if(shell){let g=$('bptLiveModularGrid');if(!g){g=document.createElement('div');g.id='bptLiveModularGrid';shell.insertBefore(g,document.querySelector('#live3Game .b466-owner-controls')||document.querySelector('#live3Game .b466-tools'))}g.className='bpt-modular-live-grid';makeGrid('bptLiveModularGrid',shell)}const fsShell=document.querySelector('#live3Fullscreen .b466-fs-shell');if(fsShell){let holder=$('bptFsModularHolder');if(!holder){holder=document.createElement('div');holder.id='bptFsModularHolder';fsShell.insertBefore(holder,document.querySelector('#live3Fullscreen .b466-fs-actions'))}makeGrid('bptFsModularGrid',holder)}}
   function ensurePop(){if(pop)return pop;pop=document.createElement('div');pop.className='bpt-tile-action-popover';pop.id='bptTileActionPopover';document.body.appendChild(pop);document.addEventListener('pointerdown',e=>{if(pop.classList.contains('open')&&!pop.contains(e.target)&&!e.target.closest('.bpt-modular-live-tile'))pop.classList.remove('open')});return pop}
   function positionPop(anchor){const p=ensurePop(),r=anchor.getBoundingClientRect(),w=Math.min(420,innerWidth-24);p.style.left=Math.max(12,Math.min(innerWidth-w-12,r.left+r.width/2-w/2))+'px';let top=r.bottom+8;if(top+260>innerHeight)top=Math.max(12,r.top-260);p.style.top=top+'px'}
   function doAction(a){const fs=$('live3Fullscreen'),inFs=!!(fs&&getComputedStyle(fs).display!=='none');const map={prev:'live3PrevLevelBtn',next:'live3NextLevelBtn',minus:'live3MinusBtn',plus:'live3PlusBtn',pause:inFs?'live3FsStartPauseBtn':'live3StartPauseBtn',eliminate:inFs?'live3FsEliminateBtn':'live3EliminateBtn',chat:inFs?'live3FsChatActionBtn':'live3ChatBtn',odds:inFs?'live3FsOddsActionBtn':'live3OddsBtn',settings:'live3SettingsBtn'};if(map[a])$(map[a])?.click();if(a==='fullscreen'){if(inFs)$('live3FsExitActionBtn')?.click();else $('live3FullscreenBtn')?.click()}}
-  function tileAction(id,anchor){const d=TILES[id];if(d.kind==='action'){doAction(d.action);setTimeout(refresh,80);return}if(id==='players'){$('live3PlayersSummaryBtn')?.click();return}const p=ensurePop();positionPop(anchor);let html='';if(id==='blinds')html=`<h3>Blinds</h3><div class="muted">${$('live3Blinds')?.textContent||'—'} · ${$('live3BlindDurationLabel')?.textContent||''}</div><div class="bpt-tile-action-row"><button data-act="prev">◀ Niveau précédent</button><button data-act="next">Niveau suivant ▶</button><button data-act="durminus">− 1 min de niveau</button><button data-act="durplus">+ 1 min de niveau</button></div>`;else if(id==='timer')html=`<h3>Chrono</h3><div class="bpt-tile-action-row"><button data-act="minus">− 1 min</button><button data-act="plus">+ 1 min</button><button class="gold" data-act="pause">${$('live3StartPauseBtn')?.textContent||'Pause / Reprendre'}</button><button data-act="close">Fermer</button></div>`;else if(id==='finish')html=`<h3>Fin estimée</h3><div class="muted">${$('live3EstimatedFinish')?.textContent||'—'} · ${$('live3FinishDelta')?.textContent||'—'}</div><div class="bpt-tile-action-row"><button data-act="close">Fermer</button><button class="teal" data-act="settings">Réglages</button></div>`;else html=`<h3>${d.name}</h3><div class="muted">${anchor.querySelector('.bpt-live-tile-value')?.textContent||''}</div><div class="bpt-tile-action-row"><button data-act="close">Fermer</button></div>`;p.innerHTML=html;p.classList.add('open');p.onclick=e=>{const a=e.target.closest('[data-act]')?.dataset.act;if(!a)return;if(['prev','next','minus','plus','pause','settings'].includes(a))doAction(a);if(a==='durminus'||a==='durplus'){const inp=$('live3BlindDurationInput');if(inp){inp.value=Math.max(2,(parseInt(inp.value||'2',10)+(a==='durplus'?1:-1)));$('live3ApplyBlindDurationBtn')?.click()}}if(a==='close'||a==='settings')p.classList.remove('open');setTimeout(refresh,80)}}
-  function refresh(){const p=runtimeProfile();document.querySelectorAll('.bpt-modular-live-tile').forEach(el=>{const id=el.dataset.tile,g=state.layouts[p]?.[id],s=sh(id);if(!g)return;el.innerHTML=tileInner(id,true,g);applyGeom(el,g,s)})}
-  function copyLayout(from,to){state.layouts[to]=deep(state.layouts[from]);save();renderEditor();applyLayouts();const st=$('bptLayoutSaveStatus');if(st){st.textContent=`Disposition ${profileLabel(from)} copiée vers ${profileLabel(to)}.`;setTimeout(()=>st.textContent='Éditeur simple · déplacement, taille, couleurs et visibilité.',1800)}}
-  function resetCurrent(){state.layouts[profile]=deep(DEFAULT.layouts[profile]);save();renderEditor();applyLayouts()}
-  function init(){
-    document.querySelectorAll('[data-layout-profile]').forEach(b=>b.onclick=()=>{profile=b.dataset.layoutProfile;document.querySelectorAll('[data-layout-profile]').forEach(x=>x.classList.toggle('is-active',x===b));renderEditor()});
-    $('bptLayoutTheme')?.addEventListener('change',e=>{state.theme=e.target.value;save();renderEditor();applyLayouts()});
-    $('bptLayoutTileFont')?.addEventListener('input',e=>{const v=+e.target.value;$('bptLayoutTileFontValue').value=v+' px';updateShared('fontSize',v)});
-    $('bptLayoutTileTextColor')?.addEventListener('input',e=>updateShared('textColor',e.target.value));$('bptLayoutTileTextColorReset')?.addEventListener('click',()=>updateShared('textColor',''));
-    $('bptLayoutTileHAlign')?.addEventListener('change',e=>updateShared('halign',e.target.value));$('bptLayoutTileVAlign')?.addEventListener('change',e=>updateShared('valign',e.target.value));$('bptLayoutTileVisible')?.addEventListener('change',e=>updateShared('visible',e.target.checked));
-    $('bptLayoutResetBtn')?.addEventListener('click',resetCurrent);
-    $('bptLayoutCopyBtn')?.addEventListener('click',()=>{const target=$('bptLayoutCopyTarget')?.value;if(target&&target!==profile)copyLayout(profile,target)});
-    $('bptLayoutSaveBtn')?.addEventListener('click',()=>{save();applyLayouts();const st=$('bptLayoutSaveStatus');if(st){st.textContent='Configuration appliquée et synchronisée.';setTimeout(()=>st.textContent='Éditeur simple · déplacement, taille, couleurs et visibilité.',1800)}});
-    renderEditor();applyLayouts();connectRemote();const obs=new MutationObserver(()=>refresh());['live3Blinds','live3BlindDurationLabel','live3Timer','live3Remaining','live3EstimatedFinish','live3FinishDelta','live3AvgStack','live3Next'].forEach(id=>{const n=$(id);if(n)obs.observe(n,{childList:true,subtree:true,characterData:true})});addEventListener('resize',()=>{clearTimeout(window.__bptLayResize);window.__bptLayResize=setTimeout(applyLayouts,120)})
-  }
+  function tileAction(id,anchor){const d=TILES[id];if(d.kind==='action'){doAction(d.action);setTimeout(refresh,80);return}if(id==='players'){$('live3PlayersSummaryBtn')?.click();return}const p=ensurePop();positionPop(anchor);let html='';if(id==='blinds')html=`<h3>Blinds</h3><div class="muted">${$('live3Blinds')?.textContent||'—'} · ${$('live3BlindDurationLabel')?.textContent||''}</div><div class="bpt-tile-action-row"><button data-act="prev">◀ Niveau précédent</button><button data-act="next">Niveau suivant ▶</button><button data-act="durminus">− 1 min de niveau</button><button data-act="durplus">+ 1 min de niveau</button></div>`;else if(id==='timer')html=`<h3>Timer</h3><div class="muted">Ajustement du niveau en cours</div><div class="bpt-tile-action-row"><button data-act="minus">− 1 min</button><button data-act="plus">+ 1 min</button><button class="gold" data-act="pause">${$('live3StartPauseBtn')?.textContent||'Pause / Reprendre'}</button><button data-act="close">Fermer</button></div>`;else if(id==='finish')html=`<h3>Fin estimée</h3><div class="muted">${$('live3EstimatedFinish')?.textContent||'—'} · ${$('live3FinishDelta')?.textContent||'—'}</div><div class="bpt-tile-action-row"><button data-act="close">Fermer</button><button class="teal" data-act="settings">Réglages</button></div>`;else html=`<h3>${d.name}</h3><div class="muted">${anchor.querySelector('.bpt-live-tile-value')?.textContent||''}</div><div class="bpt-tile-action-row"><button data-act="close">Fermer</button></div>`;p.innerHTML=html;p.classList.add('open');p.onclick=e=>{const a=e.target.closest('[data-act]')?.dataset.act;if(!a)return;if(['prev','next','minus','plus','pause','settings'].includes(a))doAction(a);if(a==='durminus'||a==='durplus'){const inp=$('live3BlindDurationInput');if(inp){inp.value=Math.max(2,(parseInt(inp.value||'2',10)+(a==='durplus'?1:-1)));$('live3ApplyBlindDurationBtn')?.click()}}if(a==='close'||a==='settings')p.classList.remove('open');setTimeout(refresh,80)}}
+  function refresh(){document.querySelectorAll('.bpt-modular-live-tile').forEach(el=>{const t=layout.tiles[el.dataset.tile];el.innerHTML=tileInner(el.dataset.tile,true,t);applyGeom(el,t)})}
+  function applyPreset(name){const base=deep(DEFAULT);if(name==='compact'){base.tiles.avg.visible=false;base.tiles.eliminate.visible=false;base.tiles.minus1.visible=false;base.tiles.plus1.visible=false}if(name==='complete'){Object.values(base.tiles).forEach(t=>t.visible=true)}layout=base;save();renderEditor();applyLayouts()}
+  function init(){document.querySelectorAll('[data-layout-profile]').forEach(b=>b.onclick=()=>{profile=b.dataset.layoutProfile;document.querySelectorAll('[data-layout-profile]').forEach(x=>x.classList.toggle('is-active',x===b));renderEditor()});document.querySelectorAll('[data-layout-preset]').forEach(b=>b.onclick=()=>applyPreset(b.dataset.layoutPreset));$('bptLayoutTheme')?.addEventListener('change',e=>{layout.theme=e.target.value;save();renderEditor();applyLayouts()});$('bptLayoutTileFont')?.addEventListener('input',e=>{const v=+e.target.value;$('bptLayoutTileFontValue').value=v+' px';updateSelected('fontSize',v)});$('bptLayoutTileTextColor')?.addEventListener('input',e=>updateSelected('textColor',e.target.value));$('bptLayoutTileTextColorReset')?.addEventListener('click',()=>updateSelected('textColor',''));$('bptLayoutTileHAlign')?.addEventListener('change',e=>updateSelected('halign',e.target.value));$('bptLayoutTileVAlign')?.addEventListener('change',e=>updateSelected('valign',e.target.value));$('bptLayoutTileVisible')?.addEventListener('change',e=>updateSelected('visible',e.target.checked));$('bptLayoutBringFront')?.addEventListener('click',()=>{const max=Math.max(...Object.values(layout.tiles).map(x=>+x.z||1));updateSelected('z',max+1)});$('bptLayoutSendBack')?.addEventListener('click',()=>{const min=Math.min(...Object.values(layout.tiles).map(x=>+x.z||1));updateSelected('z',Math.max(1,min-1))});$('bptLayoutResetBtn')?.addEventListener('click',()=>{layout=deep(DEFAULT);save();renderEditor();applyLayouts()});$('bptLayoutSaveBtn')?.addEventListener('click',()=>{save();applyLayouts();const st=$('bptLayoutSaveStatus');if(st){st.textContent='Configuration appliquée et synchronisée.';setTimeout(()=>st.textContent='Configuration commune synchronisée sur tous les appareils.',1800)}});renderEditor();applyLayouts();connectRemote();const obs=new MutationObserver(()=>refresh());['live3Blinds','live3BlindDurationLabel','live3Timer','live3Remaining','live3EstimatedFinish','live3FinishDelta','live3AvgStack','live3Next'].forEach(id=>{const n=$(id);if(n)obs.observe(n,{childList:true,subtree:true,characterData:true})});addEventListener('resize',()=>{clearTimeout(window.__bptLayResize);window.__bptLayResize=setTimeout(applyLayouts,120)})}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script>
 
-
 <style id="bpt-v473-text-only-live-style">
-/* BPT 4.80 — le Live est composé d'éléments texte libres, sans tuiles visuelles. */
+/* BPT 4.84 — le Live est composé d'éléments texte libres, sans tuiles visuelles. */
 .bpt-layout-edit-tile{
   background:transparent!important;
   border-color:transparent!important;
@@ -29766,7 +29688,7 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
 </style>
 
 <style id="bpt-v474-text-elements-only">
-/* BPT 4.80 — éditeur sans cadres : seuls les textes/actions sont manipulables. */
+/* BPT 4.84 — éditeur sans cadres : seuls les textes/actions sont manipulables. */
 .bpt-layout-edit-tile,.bpt-layout-edit-tile.is-selected,.bpt-layout-edit-tile:hover,.bpt-layout-edit-tile:not(.is-selected):hover{
   background:transparent!important;border:0!important;outline:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important;
 }
@@ -29778,88 +29700,88 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
 .bpt-modular-live-tile,.bpt-modular-live-tile:hover,.bpt-modular-live-tile:focus{background:transparent!important;border:0!important;outline:0!important;box-shadow:none!important;padding:0!important}
 </style>
 
-<style id="bpt-v476-info-action-separation">
-/* BPT 4.80 — deux familles : infos texte libre / actions en tuiles */
-/* INFO : aucun fond, aucun contour, aucune poignée. */
-.bpt-layout-edit-tile[data-kind="info"],
-.bpt-layout-edit-tile[data-kind="info"].is-selected,
-.bpt-layout-edit-tile[data-kind="info"]:hover,
-.bpt-modular-live-tile[data-kind="info"],
-.bpt-modular-live-tile[data-kind="info"]:hover,
-.bpt-modular-live-tile[data-kind="info"]:focus{
-  background:transparent!important;border:0!important;outline:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important;
+<style id="bpt-v484-fixed-live-style">
+/* V4.84 — Live fixe simple, sans éditeur */
+#bptLayoutEditorPanel,.bpt-layout-editor,.bpt-modular-live-grid,#bptLiveModularGrid,#bptFsModularGrid,#bptFsModularHolder{display:none!important}
+body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on #live3Game .b466-remaining,
+body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layout-on #live3Fullscreen .b466-fs-kpis{display:none!important}
+#live3Game .b466-shell>*:not(.bpt484-live){display:none!important}
+#live3Fullscreen .b466-fs-shell>*:not(.bpt484-live){display:none!important}
+#live3Game .b466-shell,#live3Fullscreen .b466-fs-shell{display:block!important;padding:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+.bpt484-live{--bg:#061513;--panel:#0b2420;--panel2:#0f302b;--gold:#d7a83f;--teal:#27c6c0;--red:#d95b57;--text:#f4f7f6;--muted:#9fb4af;background:var(--bg);color:var(--text);border-radius:18px;padding:14px;display:grid;grid-template-rows:62px minmax(0,1fr) 74px;gap:10px;min-height:560px;max-height:calc(100vh - 150px);overflow:hidden;font-family:Arial,Helvetica,sans-serif}
+#live3Fullscreen .bpt484-live{position:fixed;inset:0;z-index:1500000;border-radius:0;max-height:none;height:100vh;width:100vw;padding:16px;grid-template-rows:66px minmax(0,1fr) 84px}
+.bpt484-head{background:linear-gradient(180deg,#0c2924,#081c19);border:1px solid #1d4640;border-radius:16px;display:grid;grid-template-columns:1fr 1.4fr 1fr;align-items:center;padding:0 20px}
+.bpt484-brand{font-size:28px;font-weight:950;color:var(--gold)}.bpt484-owner{text-align:center;font-size:16px;font-weight:800}.bpt484-part{text-align:right;color:var(--muted);font-weight:850}
+.bpt484-main{display:grid;grid-template-columns:1.15fr 1.75fr 1fr;grid-template-rows:1.25fr .9fr;gap:10px;min-height:0}
+.bpt484-card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid #1e5148;border-radius:16px;padding:15px;min-width:0;min-height:0;display:flex;flex-direction:column;justify-content:center;cursor:pointer;overflow:hidden}
+.bpt484-card:hover{border-color:#2a6b5f}.bpt484-label{font-size:12px;letter-spacing:.10em;text-transform:uppercase;color:var(--muted);font-weight:900;margin-bottom:6px}.bpt484-value{font-weight:950;line-height:1;white-space:nowrap}.bpt484-blinds .bpt484-value{font-size:clamp(28px,3.7vw,58px);color:var(--gold)}.bpt484-next{margin-top:10px;color:var(--muted);font-size:13px}.bpt484-next strong{color:var(--text)}
+.bpt484-clock{align-items:center;text-align:center}.bpt484-clock .bpt484-value{font-size:clamp(56px,8vw,112px)}
+.bpt484-players .bpt484-value{font-size:clamp(42px,5vw,72px)}.bpt484-stack .bpt484-value,.bpt484-timing .bpt484-value{font-size:clamp(22px,2.4vw,38px)}
+.bpt484-sub{font-size:14px;color:var(--muted);margin-top:8px}.bpt484-teal{color:var(--teal)!important}
+.bpt484-side{display:grid;grid-template-rows:1fr 1fr;gap:10px;min-height:0}.bpt484-mini{background:linear-gradient(180deg,#0d2925,#091f1c);border:1px solid #1e5148;border-radius:16px;padding:14px;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+.bpt484-actions{display:grid;grid-template-columns:1.05fr 1.35fr 1fr 1.15fr;gap:10px}.bpt484-actions button{border:0;border-radius:14px;font-size:16px;font-weight:900;cursor:pointer;min-width:0}.bpt484-pause{background:var(--gold);color:#171007}.bpt484-out{background:var(--red);color:#fff}.bpt484-odds{background:var(--teal);color:#06201d}.bpt484-full{background:#dce9e6;color:#10231f}
+.bpt484-modal{position:fixed;inset:0;z-index:1600000;background:rgba(0,0,0,.66);display:none;align-items:center;justify-content:center;padding:16px}.bpt484-modal.open{display:flex}.bpt484-dialog{width:min(560px,94vw);max-height:88vh;overflow:auto;background:#0b211e;border:1px solid #28584f;border-radius:18px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.48)}.bpt484-dialog h2{margin:0 0 14px}.bpt484-row{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid #173c36}.bpt484-btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.bpt484-btnrow button{padding:10px 12px;border:0;border-radius:10px;background:#163f38;color:#fff;font-weight:850}.bpt484-close{float:right;background:transparent!important;color:#bbb!important;font-size:22px!important;padding:0!important}
+@media(max-width:760px){
+  .bpt484-live{padding:8px;gap:7px;grid-template-rows:54px minmax(0,1fr) 116px;min-height:calc(100vh - 116px);max-height:none;border-radius:12px}
+  #live3Fullscreen .bpt484-live{padding:8px;grid-template-rows:54px minmax(0,1fr) 116px}
+  .bpt484-head{grid-template-columns:.7fr 1.6fr .8fr;padding:0 10px;border-radius:12px}.bpt484-brand{font-size:22px}.bpt484-owner{font-size:11px}.bpt484-part{font-size:11px}
+  .bpt484-main{grid-template-columns:1fr 1.25fr;grid-template-rows:auto auto auto;gap:7px}
+  .bpt484-blinds{grid-column:1}.bpt484-clock{grid-column:2}.bpt484-players{grid-column:1}.bpt484-stack{grid-column:2}.bpt484-timing{grid-column:1 / -1}.bpt484-side{display:none}
+  .bpt484-card{padding:10px;border-radius:12px}.bpt484-label{font-size:9px}.bpt484-blinds .bpt484-value{font-size:clamp(22px,7vw,34px)}.bpt484-clock .bpt484-value{font-size:clamp(44px,14vw,68px)}.bpt484-players .bpt484-value{font-size:36px}.bpt484-stack .bpt484-value,.bpt484-timing .bpt484-value{font-size:20px}.bpt484-sub,.bpt484-next{font-size:10px;margin-top:5px}
+  .bpt484-actions{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:7px}.bpt484-actions button{font-size:13px;border-radius:11px}
 }
-.bpt-layout-edit-tile[data-kind="info"] .bpt-resize-handle{display:none!important}.bpt-layout-edit-tile[data-kind="info"].is-selected .bpt-resize-handle{display:block!important;opacity:.55!important}
-.bpt-layout-edit-tile[data-kind="info"] .bpt-tile-content{cursor:grab!important}
-.bpt-layout-edit-tile[data-kind="info"] .bpt-tile-content:active{cursor:grabbing!important}
-.bpt-layout-edit-tile[data-kind="info"].is-selected .bpt-tile-content{filter:drop-shadow(0 0 5px rgba(33,199,190,.55))}
-
-/* ACTION : vraie tuile/bouton avec fond et poignées en édition. */
-.bpt-layout-edit-tile[data-kind="action"],
-.bpt-modular-live-tile[data-kind="action"]{
-  background:linear-gradient(180deg,#173a2c,#10291f)!important;
-  border:1px solid #35654f!important;
-  border-radius:12px!important;
-  box-shadow:0 5px 16px rgba(0,0,0,.20)!important;
-  padding:6px 10px!important;
-  color:var(--tile-user-text,#fff)!important;
-  overflow:visible!important;
-}
-.bpt-layout-edit-tile[data-kind="action"] .bpt-tile-content,
-.bpt-modular-live-tile[data-kind="action"] .bpt-tile-content{
-  cursor:pointer!important;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;
-  color:var(--tile-user-text,#fff)!important;
-}
-.bpt-layout-edit-tile[data-kind="action"].is-selected{outline:2px solid #21c7be!important;outline-offset:2px!important}
-.bpt-layout-edit-tile[data-kind="action"] .bpt-resize-handle{display:block!important;position:absolute!important;width:12px!important;height:12px!important;background:#21c7be!important;border:2px solid #07251c!important;border-radius:50%!important;z-index:20!important}
-.bpt-layout-edit-tile[data-kind="action"] .bpt-resize-handle[data-dir="nw"]{left:-7px;top:-7px;cursor:nwse-resize}
-.bpt-layout-edit-tile[data-kind="action"] .bpt-resize-handle[data-dir="n"]{left:50%;top:-7px;transform:translateX(-50%);cursor:ns-resize}
-.bpt-layout-edit-tile[data-kind="action"] .bpt-resize-handle[data-dir="ne"]{right:-7px;top:-7px;cursor:nesw-resize}
-.bpt-layout-edit-tile[data-kind="action"] .bpt-resize-handle[data-dir="e"]{right:-7px;top:50%;transform:translateY(-50%);cursor:ew-resize}
-.bpt-layout-edit-tile[data-kind="action"] .bpt-resize-handle[data-dir="se"]{right:-7px;bottom:-7px;cursor:nwse-resize}
-.bpt-layout-edit-tile[data-kind="action"] .bpt-resize-handle[data-dir="s"]{left:50%;bottom:-7px;transform:translateX(-50%);cursor:ns-resize}
-.bpt-layout-edit-tile[data-kind="action"] .bpt-resize-handle[data-dir="sw"]{left:-7px;bottom:-7px;cursor:nesw-resize}
-.bpt-layout-edit-tile[data-kind="action"] .bpt-resize-handle[data-dir="w"]{left:-7px;top:50%;transform:translateY(-50%);cursor:ew-resize}
-.bpt-layout-edit-tile[data-kind="action"]:not(.is-selected) .bpt-resize-handle{display:none!important}
-
-/* Couleurs d'action proches des visuels sélectionnés. */
-.bpt-layout-edit-tile[data-tile="pause"],.bpt-modular-live-tile[data-tile="pause"]{background:linear-gradient(180deg,#e8ad32,#c98e1c)!important;border-color:#f2c451!important;color:#171007!important}
-.bpt-layout-edit-tile[data-tile="eliminate"],.bpt-modular-live-tile[data-tile="eliminate"]{background:linear-gradient(180deg,#ad5257,#8e3f44)!important;border-color:#c66a6f!important;color:#fff!important}
-.bpt-layout-edit-tile[data-tile="chat"],.bpt-modular-live-tile[data-tile="chat"],
-.bpt-layout-edit-tile[data-tile="odds"],.bpt-modular-live-tile[data-tile="odds"]{background:linear-gradient(180deg,#0f7e78,#0a625e)!important;border-color:#18a19a!important}
-.bpt-layout-edit-tile[data-tile="fullscreen"],.bpt-modular-live-tile[data-tile="fullscreen"],
-.bpt-layout-edit-tile[data-tile="settings"],.bpt-modular-live-tile[data-tile="settings"]{background:linear-gradient(180deg,#15372a,#10291f)!important;border-color:#35654f!important}
-.bpt-layout-edit-tile[data-tile="minus1"],.bpt-modular-live-tile[data-tile="minus1"],
-.bpt-layout-edit-tile[data-tile="plus1"],.bpt-modular-live-tile[data-tile="plus1"],
-.bpt-layout-edit-tile[data-tile="prevLevel"],.bpt-modular-live-tile[data-tile="prevLevel"],
-.bpt-layout-edit-tile[data-tile="nextLevel"],.bpt-modular-live-tile[data-tile="nextLevel"]{background:linear-gradient(180deg,#143126,#0d241b)!important;border-color:#315a48!important}
-
-/* Hiérarchie des infos proche des maquettes validées. */
-.bpt-modular-live-tile[data-kind="info"] .bpt-live-tile-label,.bpt-layout-edit-tile[data-kind="info"] .bpt-ed-label{font-size:.52em!important;letter-spacing:.06em!important;color:#a9bbb2!important}
-.bpt-modular-live-tile[data-tile="timer"] .bpt-live-tile-value,.bpt-layout-edit-tile[data-tile="timer"] .bpt-ed-value{font-size:2.15em!important;color:#fff!important}
-.bpt-modular-live-tile[data-tile="blinds"] .bpt-live-tile-value,.bpt-layout-edit-tile[data-tile="blinds"] .bpt-ed-value{font-size:1.85em!important;color:#f0b73a!important}
-.bpt-modular-live-tile[data-tile="finish"] .bpt-live-tile-value,.bpt-layout-edit-tile[data-tile="finish"] .bpt-ed-value{color:#54d8cf!important}
+@media(min-width:761px) and (max-height:700px){.bpt484-live{min-height:480px}.bpt484-head{height:54px}.bpt484-actions{height:64px}.bpt484-card{padding:12px}}
 </style>
+<script id="bpt-v484-fixed-live-script">
+(function(){
+  const $=id=>document.getElementById(id);
+  const esc=s=>String(s??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]||c));
+  function fmt(n){return Math.round(Number(n)||0).toLocaleString('fr-FR')}
+  function gameNo(){try{if(typeof db!=='undefined'&&db?.liveState?.gameNo)return Number(db.liveState.gameNo);if(typeof current!=='undefined'&&current?.gameNo)return Number(current.gameNo);if(typeof db!=='undefined'&&Array.isArray(db.history)){const a=db.history.map(r=>Number(r.game)||0);return (Math.max(0,...a)+1)||1}}catch(e){}return '—'}
+  function makeMarkup(fs=false){return `<div class="bpt484-live" data-fs="${fs?'1':'0'}">
+    <div class="bpt484-head"><div class="bpt484-brand">BPT</div><div class="bpt484-owner" data-role="owner">Organisateur · —<br><span class="bpt484-teal" data-role="structure">Structure · Classique</span></div><div class="bpt484-part" data-role="part">Partie n°—</div></div>
+    <div class="bpt484-main">
+      <section class="bpt484-card bpt484-blinds" data-action="blinds"><div class="bpt484-label">Blinds</div><div class="bpt484-value" data-role="blinds">—</div><div class="bpt484-next">Prochain · <strong data-role="next">—</strong></div></section>
+      <section class="bpt484-card bpt484-clock" data-action="chrono"><div class="bpt484-value" data-role="timer">00:00</div></section>
+      <section class="bpt484-card bpt484-players" data-action="players"><div class="bpt484-label">Joueurs</div><div class="bpt484-value" data-role="players">0</div><div class="bpt484-sub">restants</div></section>
+      <section class="bpt484-card bpt484-stack" data-action="stack"><div class="bpt484-label">Tapis moyen</div><div class="bpt484-value" data-role="avg">0</div></section>
+      <section class="bpt484-card bpt484-timing" data-action="timing"><div class="bpt484-label">Temps écoulé</div><div class="bpt484-value" data-role="elapsed">0 min</div><div class="bpt484-sub">Fin estimée · <strong class="bpt484-teal" data-role="finish">—</strong> · <strong data-role="delta">—</strong></div></section>
+      <section class="bpt484-side"><div class="bpt484-mini"><div class="bpt484-label">Structure</div><div class="bpt484-value bpt484-teal" data-role="mode">Classique</div></div><div class="bpt484-mini"><div class="bpt484-label">Niveau</div><div class="bpt484-value" data-role="level">— / 25</div></div></section>
+    </div>
+    <div class="bpt484-actions"><button class="bpt484-pause" data-do="pause">Pause</button><button class="bpt484-out" data-do="out">Sortir un joueur</button><button class="bpt484-odds" data-do="odds">Calcul de côtes</button><button class="bpt484-full" data-do="full">${fs?'Quitter le plein écran':'Plein écran'}</button></div>
+  </div>`}
+  function install(){
+    const shell=document.querySelector('#live3Game .b466-shell');if(shell&&!shell.querySelector('.bpt484-live'))shell.insertAdjacentHTML('afterbegin',makeMarkup(false));
+    const fsShell=document.querySelector('#live3Fullscreen .b466-fs-shell');if(fsShell&&!fsShell.querySelector('.bpt484-live'))fsShell.insertAdjacentHTML('afterbegin',makeMarkup(true));
+    document.querySelectorAll('.bpt484-live').forEach(root=>{root.addEventListener('click',e=>{const a=e.target.closest('[data-action]');if(a)info(a.dataset.action);const b=e.target.closest('[data-do]');if(b)doit(b.dataset.do,root.dataset.fs==='1')})});
+    ensureModal();sync();
+  }
+  function ensureModal(){if($('bpt484Modal'))return;document.body.insertAdjacentHTML('beforeend','<div id="bpt484Modal" class="bpt484-modal"><div id="bpt484Dialog" class="bpt484-dialog"></div></div>');$('bpt484Modal').onclick=e=>{if(e.target===$('bpt484Modal'))closeModal()}}
+  function closeModal(){$('bpt484Modal')?.classList.remove('open')}
+  function open(title,body){ensureModal();$('bpt484Dialog').innerHTML=`<button class="bpt484-close" onclick="document.getElementById('bpt484Modal').classList.remove('open')">×</button><h2>${title}</h2>${body}`;$('bpt484Modal').classList.add('open')}
+  function legacy(id){$(id)?.click()}
+  function doit(a,fs){if(a==='pause')legacy(fs?'live3FsStartPauseBtn':'live3StartPauseBtn');if(a==='out')legacy(fs?'live3FsEliminateBtn':'live3EliminateBtn');if(a==='odds')legacy(fs?'live3FsOddsActionBtn':'live3OddsBtn');if(a==='full')legacy(fs?'live3FsExitActionBtn':'live3FullscreenBtn');setTimeout(sync,50)}
+  function info(type){
+    if(type==='players'){let rows='';try{const ps=[...(current?.players||[])];rows=ps.map(p=>{const out=p.status==='out',lv=Number(p.outLevel)||0,detail=out?(lv?`Éliminé · niveau ${lv}`:'Éliminé'):'En jeu';return `<div class="bpt484-row"><span>${esc(p.name)}</span><b>${detail}${out&&p.killer?` · par ${esc(p.killer)}`:''}</b></div>`}).join('')}catch(e){}open('Joueurs',rows||'<p>Aucun joueur.</p>');return}
+    if(type==='chrono'){open('Chrono',`<div class="bpt484-btnrow"><button onclick="document.getElementById('live3MinusBtn')?.click()">−1 min</button><button onclick="document.getElementById('live3StartPauseBtn')?.click()">Pause / Reprendre</button><button onclick="document.getElementById('live3PlusBtn')?.click()">+1 min</button></div>`);return}
+    if(type==='blinds'){open('Blinds',`<div class="bpt484-row"><span>Actuelles</span><b>${esc($('live3Blinds')?.textContent||'—')}</b></div><div class="bpt484-row"><span>Prochain niveau</span><b>${esc($('live3Next')?.textContent||'—')}</b></div><div class="bpt484-btnrow"><button onclick="document.getElementById('live3PrevLevelBtn')?.click()">◀ Niveau précédent</button><button onclick="document.getElementById('live3SettingsBtn')?.click();document.getElementById('bpt484Modal')?.classList.remove('open')">Modifier durée</button><button onclick="document.getElementById('live3NextLevelBtn')?.click()">Niveau suivant ▶</button></div>`);return}
+    if(type==='timing'){const delta=$('live3FinishDelta')?.textContent||'—';open('Rythme de la partie',`<div class="bpt484-row"><span>Temps écoulé</span><b>${esc($('live3Elapsed')?.textContent||'—')}</b></div><div class="bpt484-row"><span>Fin estimée</span><b>${esc($('live3EstimatedFinish')?.textContent||'—')}</b></div><div class="bpt484-row"><span>Écart</span><b>${esc(delta)}</b></div><div class="bpt484-btnrow"><button id="bpt484AdaptiveBtn">Passer en adaptatif</button></div>`);setTimeout(()=>{$('bpt484AdaptiveBtn')?.addEventListener('click',()=>{try{if(typeof current!=='undefined'){current.paceAdaptive=true;if(typeof save==='function')save();if(typeof render==='function')render()}}catch(e){}closeModal();sync()})},0);return}
+    if(type==='stack'){let avg=Number(String($('live3AvgStack')?.textContent||'0').replace(/[^0-9]/g,''))||0,bb=0;try{bb=Number(level()?.bb)||0}catch(e){}const nbb=bb?Math.round(avg/bb*10)/10:0;open('Tapis moyen',`<div class="bpt484-row"><span>Tapis moyen</span><b>${fmt(avg)} jetons</b></div><div class="bpt484-row"><span>Équivalent</span><b>${nbb} BB</b></div><div class="bpt484-row"><span>Zone critique</span><b>&lt; ${fmt(bb*10)}</b></div><div class="bpt484-row"><span>Zone short</span><b>${fmt(bb*10)} – ${fmt(bb*20)}</b></div><div class="bpt484-row"><span>Zone moyenne</span><b>${fmt(bb*20)} – ${fmt(bb*40)}</b></div><div class="bpt484-row"><span>Zone deep</span><b>&gt; ${fmt(bb*40)}</b></div>`);return}
+  }
+  function sync(){
+    const owner=$('live3OwnerLabel')?.textContent||'Organisateur · —', structure=$('live3StructureBadge')?.textContent||'Structure · Classique', blinds=$('live3Blinds')?.textContent||'—',timer=$('live3Timer')?.textContent||'00:00',players=$('live3Remaining')?.textContent||'0',avgText=$('live3AvgStack')?.textContent||'0',next=$('live3Next')?.textContent||'—',elapsed=$('live3Elapsed')?.textContent||'0 min',finish=$('live3EstimatedFinish')?.textContent||'—',delta=$('live3FinishDelta')?.textContent||'—';let bb=0,avg=Number(String(avgText).replace(/[^0-9]/g,''))||0,lvIdx=1;try{bb=Number(level()?.bb)||0;lvIdx=(Number(current?.levelIndex)||0)+1}catch(e){}const avgBB=bb?Math.round(avg/bb*10)/10:0;
+    document.querySelectorAll('.bpt484-live').forEach(r=>{const set=(role,val)=>{const e=r.querySelector(`[data-role="${role}"]`);if(e)e.textContent=val};set('owner',owner);set('structure',structure);set('part',`Partie n°${gameNo()}`);set('blinds',blinds);set('timer',timer);set('players',players);set('avg',`${avgText} · ${avgBB} BB`);set('next',next);set('elapsed',elapsed);set('finish',finish);set('delta',delta);set('mode',structure.includes('Adaptatif')?'Adaptatif':'Classique');set('level',`${lvIdx} / 25`);const pb=r.querySelector('[data-do="pause"]');if(pb)pb.textContent=$('live3StartPauseBtn')?.textContent||'Pause'})
+  }
+  const obs=new MutationObserver(sync);function observe(){['live3OwnerLabel','live3StructureBadge','live3Blinds','live3Timer','live3Remaining','live3AvgStack','live3Next','live3Elapsed','live3EstimatedFinish','live3FinishDelta','live3StartPauseBtn'].forEach(id=>{const n=$(id);if(n)obs.observe(n,{childList:true,subtree:true,characterData:true})})}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{install();observe();setInterval(sync,1000)});else{install();observe();setInterval(sync,1000)}
+})();
+</script>
 
-<style id="bpt-v481-editor-simplified-final">
-/* V4.82 — tous les éléments restent visibles dans l’aperçu. */
-#bptLayoutStage .bpt-layout-edit-tile{visibility:visible!important;opacity:1!important;pointer-events:auto!important;}
-#bptLayoutStage .bpt-layout-edit-tile.is-hidden{opacity:.22!important;}
-/* Pas de presets ni de gestion manuelle de profondeur. */
-[data-layout-preset],#bptLayoutBringFront,#bptLayoutSendBack,.bpt-layout-layer-actions{display:none!important;}
-/* Plus est strictement mobile, même si une classe mobile est posée par erreur sur desktop. */
-@media (min-width:901px){
-  html #bptMobileMoreTopBtn,body #bptMobileMoreTopBtn,
-  html .bpt-nav-mobile-only,body .bpt-nav-mobile-only,
-  html #bptMobileMoreTopMenu,body #bptMobileMoreTopMenu,
-  html .bpt-mobile-top-menu,body .bpt-mobile-top-menu{display:none!important;}
-}
-</style>
 </body>
 </html>
 
 <style id="bpt-v471-desktop-hide-more">
-/* BPT 4.80 — Plus est strictement réservé aux navigations compactes */
+/* BPT 4.84 — Plus est strictement réservé aux navigations compactes */
 @media (min-width: 901px) {
   #bptMobileMoreTopBtn,
   .bpt-nav-mobile-only,
@@ -29883,78 +29805,8 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only {
 
 <style id="bpt-v472-universal-editor-style">
 .bpt-layout-device-tabs::before{content:"Aperçu :";align-self:center;color:#b9cbc2;font-size:12px;font-weight:800;margin-right:2px}
-.bpt-font-size-control{display:grid;grid-template-columns:auto minmax(80px,1fr) auto auto;align-items:center;gap:8px}.bpt-layout-copy-control{display:inline-flex;align-items:center;gap:6px;color:#b9cbc2;font-size:12px;font-weight:800}.bpt-layout-copy-control select{height:38px;background:#081d15;color:#fff;border:1px solid #355f4c;border-radius:8px;padding:0 8px}.bpt-layout-footer>div{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}.bpt-font-a{font-weight:950;color:#fff}.bpt-font-a.small{font-size:12px}.bpt-font-a.large{font-size:28px;line-height:1}.bpt-font-size-control input[type=range]{width:100%;accent-color:#16a099}.bpt-font-size-control output{font:800 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:#8edbd6;min-width:42px;text-align:right}.bpt-text-color-control{display:flex;align-items:center;gap:8px}.bpt-text-color-control input[type=color]{width:48px!important;height:38px!important;padding:2px;border:1px solid #355f4c;border-radius:8px;background:#081d15}.bpt-text-color-control .btn{min-height:38px!important;padding:6px 9px!important}.bpt-layout-text-help{font-size:11px;color:#9fc9bf;background:#0a2118;border:1px dashed #315b48;border-radius:7px;padding:7px;margin:7px 0}
+.bpt-font-size-control{display:grid;grid-template-columns:auto minmax(80px,1fr) auto auto;align-items:center;gap:8px}.bpt-font-a{font-weight:950;color:#fff}.bpt-font-a.small{font-size:12px}.bpt-font-a.large{font-size:28px;line-height:1}.bpt-font-size-control input[type=range]{width:100%;accent-color:#16a099}.bpt-font-size-control output{font:800 11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;color:#8edbd6;min-width:42px;text-align:right}.bpt-text-color-control{display:flex;align-items:center;gap:8px}.bpt-text-color-control input[type=color]{width:48px!important;height:38px!important;padding:2px;border:1px solid #355f4c;border-radius:8px;background:#081d15}.bpt-text-color-control .btn{min-height:38px!important;padding:6px 9px!important}.bpt-layout-text-help{font-size:11px;color:#9fc9bf;background:#0a2118;border:1px dashed #315b48;border-radius:7px;padding:7px;margin:7px 0}
 .bpt-tile-content{width:100%;height:100%;display:flex;flex-direction:column;align-items:inherit;justify-content:inherit;text-align:inherit;color:var(--tile-user-text,var(--tile-text));touch-action:none}.bpt-layout-edit-tile .bpt-tile-content{cursor:move}.bpt-tile-content>*{color:inherit!important}.bpt-layout-edit-tile[data-tile="blinds"] .bpt-tile-content,.bpt-modular-live-tile[data-tile="blinds"] .bpt-tile-content{color:var(--tile-user-text,var(--tile-accent))}.bpt-layout-edit-tile[data-tile="pause"] .bpt-tile-content,.bpt-modular-live-tile[data-tile="pause"] .bpt-tile-content{color:var(--tile-user-text,#171007)}
 /* Les tailles sont désormais pilotées en pixels par le curseur A↔A. */
 .bpt-layout-edit-tile[data-font],.bpt-modular-live-tile[data-font]{font-size:inherit}
 </style>
-
-<style id="bpt-v482-live-layout-authoritative">
-/* V4.82 — le layout de l'éditeur devient l'unique rendu du Live. */
-body.bpt-modular-layout-on #live3Game .b466-dashboard,
-body.bpt-modular-layout-on #live3Game .b466-remaining,
-body.bpt-modular-layout-on #live3Game .b466-owner-controls,
-body.bpt-modular-layout-on #live3Game .b466-tools,
-body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,
-body.bpt-modular-layout-on #live3Fullscreen .b466-fs-kpis,
-body.bpt-modular-layout-on #live3Fullscreen .b466-fs-actions {
-  display:none!important;
-}
-
-/* Le canevas Live garde exactement le ratio simulé dans l'éditeur. */
-#bptLiveModularGrid,
-#bptFsModularGrid {
-  position:relative!important;
-  min-height:0!important;
-  height:auto!important;
-  width:auto!important;
-  max-width:100%!important;
-  max-height:100%!important;
-  margin:10px auto 12px!important;
-  overflow:hidden!important;
-  box-sizing:border-box!important;
-}
-#bptLiveModularGrid[data-profile="pc"],#bptFsModularGrid[data-profile="pc"]{aspect-ratio:16/9;width:min(100%,calc((100vh - 210px) * 16 / 9));}
-#bptLiveModularGrid[data-profile="landscape"],#bptFsModularGrid[data-profile="landscape"]{aspect-ratio:844/390;width:min(100%,calc((100vh - 110px) * 844 / 390));}
-#bptLiveModularGrid[data-profile="portrait"],#bptFsModularGrid[data-profile="portrait"]{aspect-ratio:390/844;width:min(100%,430px);}
-
-#bptFsModularHolder{
-  flex:1 1 auto!important;
-  min-height:0!important;
-  min-width:0!important;
-  width:100%!important;
-  height:100%!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  overflow:hidden!important;
-}
-#bptFsModularGrid{margin:0!important;}
-#bptFsModularGrid[data-profile="pc"]{height:min(100%,calc(100vw * 9 / 16))!important;width:auto!important;max-width:100%!important;}
-#bptFsModularGrid[data-profile="landscape"]{height:min(100%,calc(100vw * 390 / 844))!important;width:auto!important;max-width:100%!important;}
-#bptFsModularGrid[data-profile="portrait"]{height:min(100%,calc(100vw * 844 / 390))!important;width:auto!important;max-width:100%!important;}
-
-@media (max-width:900px){
-  #bptLiveModularGrid[data-profile="portrait"]{width:min(100%,390px)!important;margin:8px auto 10px!important;}
-  #bptLiveModularGrid[data-profile="landscape"]{width:min(100%,calc((100vh - 125px) * 844 / 390))!important;margin:6px auto 8px!important;}
-}
-</style>
-
-<script id="bpt-v482-layout-runtime-fix">
-(function(){
-  function profile(){return innerWidth<=900?(innerHeight>innerWidth?'portrait':'landscape'):'pc'}
-  function stamp(){
-    const p=profile();
-    const a=document.getElementById('bptLiveModularGrid');
-    const b=document.getElementById('bptFsModularGrid');
-    if(a)a.dataset.profile=p;
-    if(b)b.dataset.profile=p;
-    document.body.classList.toggle('bpt-live-profile-pc',p==='pc');
-    document.body.classList.toggle('bpt-live-profile-landscape',p==='landscape');
-    document.body.classList.toggle('bpt-live-profile-portrait',p==='portrait');
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',stamp);else stamp();
-  addEventListener('resize',()=>{clearTimeout(window.__bpt482r);window.__bpt482r=setTimeout(stamp,80)});
-  new MutationObserver(stamp).observe(document.documentElement,{subtree:true,childList:true});
-})();
-</script>
