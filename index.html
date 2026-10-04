@@ -30090,8 +30090,28 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
       });return;
     }
     if(type==='stack'){
-      const ps=Array.isArray(st?.players)?st.players:[],alive=ps.filter(p=>p.status==='in').length+(ps.some(p=>p.status==='winner')?1:0),total=ps.length*Number(st?.startStack||0),avg=alive?total/alive:0,idx=Math.max(0,Number(st?.levelIndex)||0),bb=blindAt(idx).bb,nbb=bb?Math.round(avg/bb*10)/10:0;
-      open('Tapis moyen',`<div class="bpt484-row"><span>Tapis moyen</span><b>${fmt(avg)} jetons</b></div><div class="bpt484-row"><span>Équivalent</span><b>${nbb} BB</b></div><div class="bpt484-row"><span>Zone critique</span><b>&lt; ${fmt(bb*10)}</b></div><div class="bpt484-row"><span>Zone short</span><b>${fmt(bb*10)} – ${fmt(bb*20)}</b></div><div class="bpt484-row"><span>Zone moyenne</span><b>${fmt(bb*20)} – ${fmt(bb*40)}</b></div><div class="bpt484-row"><span>Zone deep</span><b>&gt; ${fmt(bb*40)}</b></div>`);return;
+      const ps=Array.isArray(st?.players)?st.players:[];
+      const alive=ps.filter(p=>p.status==='in').length+(ps.some(p=>p.status==='winner')?1:0);
+      const total=ps.length*Number(st?.startStack||0);
+      const avg=alive?total/alive:0;
+      const idx=Math.max(0,Number(st?.levelIndex)||0);
+      const bb=blindAt(idx).bb;
+      const nbb=bb?Math.round(avg/bb*10)/10:0;
+      const maxBB=bb?Math.round(total/bb*10)/10:0;
+      const chip=(n)=>fmt(Math.max(0,Math.round(n)));
+      const zone=(minBB,maxBBLimit,label)=>{
+        if(!bb||total<=0)return '—';
+        const min=minBB*bb, max=maxBBLimit==null?total:Math.min(maxBBLimit*bb,total);
+        if(total<=min)return 'Non atteignable';
+        if(maxBBLimit==null)return `&gt; ${chip(min)} <small>(${minBB}+ BB)</small>`;
+        const hiBB=Math.round((max/bb)*10)/10;
+        return `${chip(min)} – ${chip(max)} <small>(${minBB}–${hiBB} BB)</small>`;
+      };
+      const critical=bb?`&lt; ${chip(Math.min(bb*10,total))} <small>(&lt; ${Math.min(10,maxBB)} BB)</small>`:'—';
+      const short=zone(10,20,'short');
+      const medium=zone(20,40,'moyenne');
+      const deep=(bb&&total>bb*40)?`&gt; ${chip(bb*40)} <small>(&gt; 40 BB)</small>`:'Non atteignable';
+      open('Tapis moyen',`<div class="bpt484-row"><span>Jetons en circulation</span><b>${fmt(total)}</b></div><div class="bpt484-row"><span>Joueurs restants</span><b>${alive}</b></div><div class="bpt484-row"><span>Tapis moyen</span><b>${fmt(avg)} jetons</b></div><div class="bpt484-row"><span>Équivalent</span><b>${nbb} BB</b></div><div class="bpt484-row"><span>Zone critique</span><b>${critical}</b></div><div class="bpt484-row"><span>Zone short</span><b>${short}</b></div><div class="bpt484-row"><span>Zone moyenne</span><b>${medium}</b></div><div class="bpt484-row"><span>Zone deep</span><b>${deep}</b></div><div style="margin-top:12px;color:#9fb4af;font-size:.9rem">Maximum théorique pour un joueur : ${fmt(total)} jetons · ${maxBB} BB</div>`);return;
     }
   }
   function sync(){
