@@ -14172,7 +14172,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.87";
+const BPT_APP_VERSION="4.88";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14324,7 +14324,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v4.87</div>
+<div class="app-version" id="headerAppVersion">BPT v4.88</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15438,7 +15438,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.87</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.88</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -28734,6 +28734,16 @@ async function requestTakeover(){
       await ownerTransaction(s=>{s.paceAdaptive=!!flag;s.updatedAt=Date.now();return s;});
       return true;
     },
+    getPaceAdvice:()=>{
+      try{return live3PaceAnalysis();}catch(_e){return null;}
+    },
+    applyPaceAdvice:async()=>{
+      if(!isOwner())return false;
+      const advice=live3PaceAnalysis();
+      if(!advice)return false;
+      await live3AutoApplyPaceAdvice(advice);
+      return advice;
+    },
     repairStandardBlinds:async()=>{
       if(!isOwner())return false;
       await ownerTransaction(s=>{
@@ -29779,7 +29789,7 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
 </style>
 
 <style id="bpt-v484-fixed-live-style">
-/* V4.87 — Live fixe simple, moteur corrigé */
+/* V4.88 — Live fixe simple, moteur corrigé */
 #bptLayoutEditorPanel,.bpt-layout-editor,.bpt-modular-live-grid,#bptLiveModularGrid,#bptFsModularGrid,#bptFsModularHolder{display:none!important}
 body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on #live3Game .b466-remaining,
 body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layout-on #live3Fullscreen .b466-fs-kpis{display:none!important}
@@ -29809,6 +29819,22 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
   .bpt484-actions{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:7px}.bpt484-actions button{font-size:13px;border-radius:11px}
 }
 @media(min-width:761px) and (max-height:700px){.bpt484-live{min-height:480px}.bpt484-head{height:54px}.bpt484-actions{height:64px}.bpt484-card{padding:12px}}
+
+.bpt484-label-duration{font-size:.92em;color:#d7e0dd;font-weight:800;letter-spacing:0;text-transform:none}
+.bpt484-delta{transition:.15s ease}.bpt484-delta.is-alert{display:inline-block;padding:4px 8px;border-radius:8px;font-size:1.18em;font-weight:950}.bpt484-delta.is-alert.is-delay{background:rgba(217,91,87,.22);color:#ff8b86}.bpt484-delta.is-alert.is-ahead{background:rgba(39,198,192,.18);color:#54e1da}
+/* Téléphone paysage : typographie bornée par la hauteur réelle des blocs */
+@media (orientation:landscape) and (max-width:1000px) and (max-height:520px){
+  .bpt484-live{padding:6px;gap:5px;grid-template-rows:44px minmax(0,1fr) 58px;min-height:100vh;max-height:100vh;border-radius:0}
+  #live3Fullscreen .bpt484-live{padding:6px;grid-template-rows:44px minmax(0,1fr) 58px}
+  .bpt484-head{padding:0 10px;border-radius:10px}.bpt484-brand{font-size:20px}.bpt484-owner{font-size:10px}.bpt484-part{font-size:10px}
+  .bpt484-main{gap:5px}.bpt484-card,.bpt484-mini{padding:8px;border-radius:10px}.bpt484-label{font-size:8px;margin-bottom:3px}
+  .bpt484-blinds .bpt484-value{font-size:clamp(18px,4.1vw,32px);max-width:100%;overflow:hidden;text-overflow:clip}
+  .bpt484-clock .bpt484-value{font-size:clamp(38px,13vh,66px)}
+  .bpt484-players .bpt484-value{font-size:clamp(24px,7vh,40px)}
+  .bpt484-stack .bpt484-value,.bpt484-timing .bpt484-value{font-size:clamp(15px,4.5vh,24px)}
+  .bpt484-sub,.bpt484-next{font-size:8px;margin-top:3px}.bpt484-delta.is-alert{font-size:1.05em;padding:2px 5px}
+  .bpt484-actions{gap:5px}.bpt484-actions button{font-size:10px;border-radius:9px}
+}
 /* V4.86 — fenêtres d’action au-dessus du plein écran fixe */
 #live3ElimModal,#live3PaceModal,#live3ChatModal,#bptOddsModal,#live3SettingsPanel{z-index:1800000!important}
 /* Aucun ancien contrôle ne doit réapparaître sous le Live fixe */
@@ -29845,11 +29871,11 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
   function makeMarkup(fs=false){return `<div class="bpt484-live" data-fs="${fs?'1':'0'}">
     <div class="bpt484-head"><div class="bpt484-brand">BPT</div><div class="bpt484-owner" data-role="owner">Organisateur · —<br><span class="bpt484-teal" data-role="structure">Structure · Classique</span></div><div class="bpt484-part" data-role="part">Partie n°—</div></div>
     <div class="bpt484-main">
-      <section class="bpt484-card bpt484-blinds" data-action="blinds"><div class="bpt484-label">Blinds</div><div class="bpt484-value" data-role="blinds">—</div><div class="bpt484-next">Prochain · <strong data-role="next">—</strong></div></section>
+      <section class="bpt484-card bpt484-blinds" data-action="blinds"><div class="bpt484-label">Blinds <span class="bpt484-label-duration" data-role="blinddur">· — min</span></div><div class="bpt484-value" data-role="blinds">—</div><div class="bpt484-next">Prochain · <strong data-role="next">—</strong></div></section>
       <section class="bpt484-card bpt484-clock" data-action="chrono"><div class="bpt484-value" data-role="timer">00:00</div></section>
       <section class="bpt484-card bpt484-players" data-action="players"><div class="bpt484-label">Joueurs</div><div class="bpt484-value" data-role="players">0</div><div class="bpt484-sub">restants</div></section>
       <section class="bpt484-card bpt484-stack" data-action="stack"><div class="bpt484-label">Tapis moyen</div><div class="bpt484-value" data-role="avg">0</div></section>
-      <section class="bpt484-card bpt484-timing" data-action="timing"><div class="bpt484-label">Temps écoulé</div><div class="bpt484-value" data-role="elapsed">0 min</div><div class="bpt484-sub">Fin estimée · <strong class="bpt484-teal" data-role="finish">—</strong> · <strong data-role="delta">—</strong></div></section>
+      <section class="bpt484-card bpt484-timing" data-action="timing"><div class="bpt484-label">Temps écoulé</div><div class="bpt484-value" data-role="elapsed">0 min</div><div class="bpt484-sub bpt484-pace-line">Fin estimée · <strong class="bpt484-teal" data-role="finish">—</strong> · <strong class="bpt484-delta" data-role="delta">—</strong></div></section>
       <section class="bpt484-side"><div class="bpt484-mini"><div class="bpt484-label">Structure</div><div class="bpt484-value bpt484-teal" data-role="mode">Classique</div></div><div class="bpt484-mini"><div class="bpt484-label">Niveau</div><div class="bpt484-value" data-role="level">— / 25</div></div></section>
     </div>
     <div class="bpt484-actions"><button class="bpt484-pause" data-do="pause">Pause</button><button class="bpt484-out" data-do="out">Sortir un joueur</button><button class="bpt484-odds" data-do="odds">Calcul de côtes</button><button class="bpt484-full" data-do="full">${fs?'Quitter le plein écran':'Plein écran'}</button><button class="bpt484-end" data-do="end">Terminer le Live</button></div>
@@ -29907,14 +29933,28 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     if(type==='timing'){
       const adaptive=st?.paceAdaptive===true;
       const elapsed=$('live3Elapsed')?.textContent||'—',finish=$('live3EstimatedFinish')?.textContent||'—',delta=$('live3FinishDelta')?.textContent||'—';
-      open('Rythme de la partie',`<div class="bpt484-row"><span>Temps écoulé</span><b>${esc(elapsed)}</b></div><div class="bpt484-row"><span>Fin estimée</span><b>${esc(finish)}</b></div><div class="bpt484-row"><span>Écart</span><b>${esc(delta)}</b></div><div class="bpt484-btnrow"><button data-mode-toggle>${adaptive?'Revenir en classique':'Passer en adaptatif'}</button></div>`);
+      const advice=api()?.getPaceAdvice?.()||null;
+      if(adaptive){
+        open('Rythme de la partie',`<div class="bpt484-row"><span>Temps écoulé</span><b>${esc(elapsed)}</b></div><div class="bpt484-row"><span>Fin estimée</span><b>${esc(finish)}</b></div><div class="bpt484-row"><span>Écart</span><b>${esc(delta)}</b></div><div class="bpt484-btnrow"><button data-mode-toggle>Revenir en classique</button></div>`);
+      }else if(advice){
+        const direction=advice.type==='accelerate'?'retard':'avance';
+        const verb=advice.type==='accelerate'?'raccourcir':'allonger';
+        open('Rythme de la partie',`<div class="bpt484-row"><span>Temps écoulé</span><b>${esc(elapsed)}</b></div><div class="bpt484-row"><span>Fin estimée</span><b>${esc(finish)}</b></div><div class="bpt484-row"><span>Écart</span><b>${esc(delta)}</b></div><p style="margin:14px 0 4px;color:#f4f7f6;line-height:1.45">La partie prend trop d’${direction}. Pour essayer de respecter l’heure de fin prévue, BPT propose de <b>${verb} les prochains niveaux de ${advice.currentMin} à ${advice.proposedMin} min</b>.</p><div class="bpt484-btnrow"><button data-mode-toggle>Passer en adaptatif</button></div>`);
+      }else{
+        open('Rythme de la partie',`<div class="bpt484-row"><span>Temps écoulé</span><b>${esc(elapsed)}</b></div><div class="bpt484-row"><span>Fin estimée</span><b>${esc(finish)}</b></div><div class="bpt484-row"><span>Écart</span><b>${esc(delta)}</b></div><p style="margin:14px 0 0;color:#9fb4af">Le rythme actuel ne nécessite pas d’ajustement particulier.</p>`);
+      }
       $('bpt484Dialog').querySelector('[data-mode-toggle]')?.addEventListener('click',async()=>{
-        const target=!adaptive;
-        const ok=await api()?.setPaceAdaptive?.(target);
-        if(ok===false){alert('Seul l’organisateur peut modifier le mode de structure.');return;}
-        closeModal();
-        document.querySelectorAll('.bpt484-live [data-role="structure"],.bpt484-live [data-role="mode"]').forEach(el=>{el.textContent=target?(el.dataset.role==='structure'?'Structure · Adaptatif':'Adaptatif'):(el.dataset.role==='structure'?'Structure · Classique':'Classique')});
-        setTimeout(sync,250);
+        if(adaptive){
+          const ok=await api()?.setPaceAdaptive?.(false);
+          if(ok===false){alert('Seul l’organisateur peut modifier le mode de structure.');return;}
+        }else if(advice){
+          const ok=await api()?.applyPaceAdvice?.();
+          if(ok===false){alert('Seul l’organisateur peut modifier le mode de structure.');return;}
+        }else{
+          const ok=await api()?.setPaceAdaptive?.(true);
+          if(ok===false){alert('Seul l’organisateur peut modifier le mode de structure.');return;}
+        }
+        closeModal();setTimeout(sync,250);
       });return;
     }
     if(type==='stack'){
@@ -29928,7 +29968,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     const players=Array.isArray(st.players)?st.players:[],alive=players.filter(p=>p.status==='in').length+(players.some(p=>p.status==='winner')?1:0);
     const total=players.length*Number(st.startStack||0),avg=alive?total/alive:0,avgBB=cur.bb?Math.round(avg/cur.bb*10)/10:0;
     const owner=`Organisateur · ${st.ownerLabel||'—'}`,structure=st.paceAdaptive===true?'Structure · Adaptatif':'Structure · Classique';
-    document.querySelectorAll('.bpt484-live').forEach(r=>{const set=(role,val)=>{const e=r.querySelector(`[data-role="${role}"]`);if(e)e.textContent=val};set('owner',owner);set('structure',structure);set('part',`Partie n°${gameNo(st)}`);set('blinds',`${fmt(cur.sb)} / ${fmt(cur.bb)}`);set('timer',$('live3Timer')?.textContent||'00:00');set('players',String(alive));set('avg',`${fmt(avg)} · ${avgBB} BB`);set('next',`${fmt(nx.sb)} / ${fmt(nx.bb)}`);set('elapsed',$('live3Elapsed')?.textContent||'0 min');set('finish',$('live3EstimatedFinish')?.textContent||'—');set('delta',$('live3FinishDelta')?.textContent||'—');set('mode',st.paceAdaptive===true?'Adaptatif':'Classique');set('level',`${idx+1} / 25`);const pb=r.querySelector('[data-do="pause"]');if(pb)pb.textContent=st.running?'Pause':(st.startedAt?'Reprendre':'Démarrer')});
+    document.querySelectorAll('.bpt484-live').forEach(r=>{const set=(role,val)=>{const e=r.querySelector(`[data-role="${role}"]`);if(e)e.textContent=val};set('owner',owner);set('structure',structure);set('part',`Partie n°${gameNo(st)}`);set('blinds',`${fmt(cur.sb)} / ${fmt(cur.bb)}`);const curDur=Math.max(1,Math.round(Number(st.levels?.[idx]?.durationSec||0)/60)||Math.round(Number(st.levels?.[idx]?.durationMin||0))||15);set('blinddur',`· ${curDur} min`);set('timer',$('live3Timer')?.textContent||'00:00');set('players',String(alive));set('avg',`${fmt(avg)} · ${avgBB} BB`);set('next',`${fmt(nx.sb)} / ${fmt(nx.bb)}`);set('elapsed',$('live3Elapsed')?.textContent||'0 min');set('finish',$('live3EstimatedFinish')?.textContent||'—');set('delta',$('live3FinishDelta')?.textContent||'—');const de=r.querySelector('[data-role="delta"]');const dt=de?.textContent||'';const dm=Math.abs(Number((dt.match(/[-+]?\d+/)||['0'])[0])||0);de?.classList.toggle('is-alert',dm>=15);de?.classList.toggle('is-delay',/retard/i.test(dt));de?.classList.toggle('is-ahead',/avance/i.test(dt));set('mode',st.paceAdaptive===true?'Adaptatif':'Classique');set('level',`${idx+1} / 25`);const pb=r.querySelector('[data-do="pause"]');if(pb)pb.textContent=st.running?'Pause':(st.startedAt?'Reprendre':'Démarrer')});
     if(!repairTried){const bad=(st.levels||[]).slice(0,Math.min(25,(st.levels||[]).length)).some((lv,i)=>{const b=blindAt(i);return Number(lv?.sb)!==b.sb||Number(lv?.bb)!==b.bb});if(bad&&api()?.isOwner?.()){repairTried=true;api()?.repairStandardBlinds?.().catch(console.warn)}}
   }
   function enforceNav(){
@@ -29955,7 +29995,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 </html>
 
 <style id="bpt-v471-desktop-hide-more">
-/* BPT 4.87 — Plus est strictement réservé aux navigations compactes */
+/* BPT 4.88 — Plus est strictement réservé aux navigations compactes */
 @media (min-width: 901px) {
   #bptMobileMoreTopBtn,
   .bpt-nav-mobile-only,
