@@ -14172,7 +14172,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.96";
+const BPT_APP_VERSION="4.97";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14324,7 +14324,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v4.96</div>
+<div class="app-version" id="headerAppVersion">BPT v4.97</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -14458,18 +14458,14 @@ function simplifyRecordTextForMobile(text){
 <div class="b466-card b466-side-card"><span class="b466-label">Tapis moyen</span><strong id="live3AvgStack">0</strong></div>
 </section>
 </div>
-<section class="b466-owner-controls bpt-live3-owner-only" id="live3MasterControls">
-<div class="b466-level-row">
-<button id="live3PrevLevelBtn" type="button">◀ Niveau</button>
-<button id="live3MinusBtn" type="button">− 1 min</button>
-<button id="live3PlusBtn" type="button">+ 1 min</button>
-<button id="live3NextLevelBtn" type="button">Niveau ▶</button>
+<div id="live3LegacyActionBridge" hidden aria-hidden="true" style="display:none!important">
+<button id="live3PrevLevelBtn" type="button" tabindex="-1">◀ Niveau</button>
+<button id="live3MinusBtn" type="button" tabindex="-1">− 1 min</button>
+<button id="live3PlusBtn" type="button" tabindex="-1">+ 1 min</button>
+<button id="live3NextLevelBtn" type="button" tabindex="-1">Niveau ▶</button>
+<button id="live3StartPauseBtn" type="button" tabindex="-1">Démarrer</button>
+<button id="live3EliminateBtn" type="button" tabindex="-1">Sortir un joueur</button>
 </div>
-<div class="b466-primary-row">
-<button class="b466-pause" id="live3StartPauseBtn" type="button">Démarrer</button>
-<button class="b466-eliminate" id="live3EliminateBtn" type="button">Sortir un joueur</button>
-</div>
-</section>
 <section class="b466-spectator bpt-live3-spectator-only" id="live3SpectatorControls" style="display:none">
 <button id="live3TakeoverBtn" type="button">Demander la reprise de gestion</button>
 <button id="live3ChangeSpectatorNameBtn" type="button">Changer mon identité</button>
@@ -15438,7 +15434,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.96</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.97</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -30211,30 +30207,9 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 @media(min-width:901px){#bptMobileMoreTopBtn,#bptMobileMoreTopMenu,.bpt-nav-mobile-only{display:none!important;visibility:hidden!important}}
 </style>
 
-<style id="bpt-v491-live-fixes">
-/* V4.92 — feedback visuel niveau / ±1 min */
-/* V4.91 — PC réduit : aucun doublon des actions du Live fixe */
-#live3Game .b466-primary-row,#live3Game .b466-owner-controls .b466-primary-row{display:none!important}
-/* Dernière élimination cliquable depuis la liste Joueurs */
-.bpt484-last-out{cursor:pointer;background:rgba(217,91,87,.10);border-radius:10px;padding-left:8px;padding-right:8px}
-.bpt484-last-out:hover,.bpt484-last-out:focus{background:rgba(217,91,87,.20);outline:1px solid rgba(217,91,87,.55)}
-.bpt484-last-out small{color:#f0a19d;font-size:11px;font-weight:800}
-.bpt484-danger-action{background:#7e3030!important;color:#fff!important}
-.bpt484-field{display:grid;gap:6px;margin:14px 0}.bpt484-field label{font-size:12px;color:#9fb4af;font-weight:850;text-transform:uppercase;letter-spacing:.06em}
-.bpt484-field select,.bpt484-field input{width:100%;box-sizing:border-box;background:#102d28;color:#fff;border:1px solid #315a52;border-radius:10px;padding:10px;font:inherit}
-</style>
 
-<style id="bpt-v496-final-fixes">
-/* V4.96 — PC : une seule barre rapide */
-@media(min-width:761px){
-  #live3Game .bpt484-live[data-fs="0"] ~ .b466-owner-controls,
-  #live3Game .bpt484-live[data-fs="0"] ~ .b466-primary-row,
-  #live3Game .bpt484-live[data-fs="0"] ~ .b466-secondary-row,
-  #live3Game .bpt484-live[data-fs="0"] ~ .b466-level-row,
-  #live3Game .bpt484-live[data-fs="0"] ~ .b466-admin-row{display:none!important}
-  #live3Game .bpt484-live[data-fs="0"] .bpt484-quickbar{display:grid!important}
-}
-</style>
+
+
 </body>
 </html>
 
