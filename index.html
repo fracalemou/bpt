@@ -14172,7 +14172,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.97";
+const BPT_APP_VERSION="4.98";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14324,7 +14324,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v4.97</div>
+<div class="app-version" id="headerAppVersion">BPT v4.98</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15434,7 +15434,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.97</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.98</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -30146,29 +30146,38 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
   function fitText(el,opts={}){
     if(!el || !el.isConnected)return;
     const parent=opts.parent||el.parentElement;
-    if(!parent)return;
-    const pw=parent.clientWidth, ph=parent.clientHeight;
-    if(!pw || !ph)return;
-    const min=Number(opts.min||10), max=Number(opts.max||parseFloat(el.dataset.fitBase||getComputedStyle(el).fontSize)||16), step=Number(opts.step||1);
-    if(!el.dataset.fitBase)el.dataset.fitBase=String(max);
-    el.style.fontSize=max+'px';
-    let size=max;
-    const canWrap=!!opts.wrap;
-    el.style.whiteSpace=canWrap?'normal':'nowrap';
-    while(size>min && ((el.scrollWidth > el.clientWidth + 1) || (el.scrollHeight > el.clientHeight + 1))){
-      size -= step;
-      el.style.fontSize=size+'px';
+    if(!parent || parent.offsetParent===null)return;
+    const ps=getComputedStyle(parent);
+    const availableW=Math.max(0,parent.clientWidth-(parseFloat(ps.paddingLeft)||0)-(parseFloat(ps.paddingRight)||0));
+    const availableH=Math.max(0,parent.clientHeight-(parseFloat(ps.paddingTop)||0)-(parseFloat(ps.paddingBottom)||0));
+    if(!availableW || !availableH)return;
+    const min=Math.max(1,Number(opts.min||10));
+    const max=Math.max(min,Number(opts.max||parseFloat(getComputedStyle(el).fontSize)||16));
+    const widthRatio=Math.min(1,Math.max(.45,Number(opts.widthRatio||.96)));
+    const heightRatio=Math.min(1,Math.max(.35,Number(opts.heightRatio||.82)));
+    const targetW=availableW*widthRatio;
+    const targetH=availableH*heightRatio;
+    el.style.whiteSpace=opts.wrap?'normal':'nowrap';
+    el.style.maxWidth='100%';
+    let lo=min,hi=max,best=min;
+    for(let i=0;i<10;i++){
+      const mid=(lo+hi)/2;
+      el.style.fontSize=mid+'px';
+      const fits=el.scrollWidth<=targetW+1 && el.scrollHeight<=targetH+1;
+      if(fits){best=mid;lo=mid}else hi=mid;
     }
+    el.style.fontSize=Math.floor(best*10)/10+'px';
   }
   function fitLiveTexts(){
     document.querySelectorAll('.bpt484-live').forEach(root=>{
-      fitText(root.querySelector('.bpt484-blinds .bpt484-value'),{max:58,min:18});
-      fitText(root.querySelector('.bpt484-clock .bpt484-value'),{max:112,min:34});
-      fitText(root.querySelector('.bpt484-players .bpt484-value'),{max:72,min:24});
-      fitText(root.querySelector('.bpt484-stack .bpt484-value'),{max:38,min:16});
-      fitText(root.querySelector('.bpt484-timing .bpt484-value'),{max:38,min:16});
-      root.querySelectorAll('.bpt484-actions button').forEach(btn=>fitText(btn,{max:16,min:10}));
-      root.querySelectorAll('.bpt484-quickbar button').forEach(btn=>fitText(btn,{max:14,min:9}));
+      /* Les deux informations centrales du Live doivent utiliser au maximum la surface disponible. */
+      fitText(root.querySelector('.bpt484-blinds .bpt484-value'),{max:96,min:24,widthRatio:.96,heightRatio:.52});
+      fitText(root.querySelector('.bpt484-clock .bpt484-value'),{max:156,min:48,widthRatio:.92,heightRatio:.72});
+      fitText(root.querySelector('.bpt484-players .bpt484-value'),{max:78,min:28,widthRatio:.9,heightRatio:.7});
+      fitText(root.querySelector('.bpt484-stack .bpt484-value'),{max:46,min:18,widthRatio:.95,heightRatio:.65});
+      fitText(root.querySelector('.bpt484-timing .bpt484-value'),{max:44,min:18,widthRatio:.95,heightRatio:.55});
+      root.querySelectorAll('.bpt484-actions button').forEach(btn=>fitText(btn,{max:17,min:10,widthRatio:.9,heightRatio:.7}));
+      root.querySelectorAll('.bpt484-quickbar button').forEach(btn=>fitText(btn,{max:15,min:9,widthRatio:.9,heightRatio:.7}));
     });
   }
   function scheduleFitLiveTexts(){
