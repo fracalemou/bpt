@@ -25920,7 +25920,7 @@ document.addEventListener("visibilitychange",()=>{
     if(!upcoming)return null;
     const currentMin=Math.max(1,Math.round(Number(upcoming.durationSec||0)/60)||currentBlindDurationMinutes());
 
-    // V4.90 : l'adaptation se base directement sur l'écart de fin estimée,
+    // V4.91 : l'adaptation se base directement sur l'écart de fin estimée,
     // sans attendre 50 % de la partie. Dès 8 min, le conseil est disponible au clic.
     const deltaMin=Math.round(Number(projection.deltaSec||0)/60); // + = retard, - = avance
     const absDeltaMin=Math.abs(deltaMin);
@@ -27421,6 +27421,41 @@ function connectionDeviceLabel(){
     updateUndoEliminationButton();
   }
 
+  async function correctLastElimination(details={}){
+    if(!isOwner() || !isActive())return false;
+    if(current?.publishedToHistory){
+      alert("Cette partie est déjà publiée dans l’historique : l’élimination ne peut plus être corrigée depuis le Live.");
+      return false;
+    }
+
+    const last=lastEliminatedPlayer();
+    if(!last){
+      alert("Aucune élimination à corriger.");
+      return false;
+    }
+
+    const killer=String(details.killer||"").trim();
+    const outLevel=Math.max(1,Number(details.outLevel)||Number(last.outLevel)||((Number(current?.levelIndex)||0)+1));
+
+    const updated=await ownerTransaction(s=>{
+      if(s.publishedToHistory)return s;
+      const players=Array.isArray(s.players)?s.players:[];
+      const candidates=players
+        .filter(p=>p && p.status==="out" && Number(p.outAt)>0)
+        .sort((a,b)=>Number(b.outAt||0)-Number(a.outAt||0));
+      const target=candidates[0];
+      if(!target)return s;
+      if(killer && killer!==target.name){
+        const validKiller=players.some(p=>p.name===killer && (p.status==="in" || p.status==="winner" || Number(p.place)<Number(target.place||999)));
+        if(validKiller)target.killer=killer;
+      }
+      target.outLevel=outLevel;
+      target.outTime=target.outTime||new Date(Number(target.outAt)||Date.now()).toLocaleTimeString("fr-FR");
+      return s;
+    });
+    return !!updated;
+  }
+
   function closeElim(){
     $3("live3ElimModal").classList.remove("open");
     $3("live3ElimModal").setAttribute("aria-hidden","true");
@@ -28753,6 +28788,9 @@ async function requestTakeover(){
     openFullscreen,
     closeFullscreen,
     endLive,
+    undoLastElimination,
+    correctLastElimination,
+    getLastEliminated:()=>clone(lastEliminatedPlayer()),
     setPaceAdaptive:async(flag)=>{
       if(!isOwner())return false;
       await ownerTransaction(s=>{
@@ -29836,7 +29874,16 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 .bpt484-brand{font-size:28px;font-weight:950;color:var(--gold)}.bpt484-owner{text-align:center;font-size:16px;font-weight:800}.bpt484-part{text-align:right;color:var(--muted);font-weight:850}
 .bpt484-main{display:grid;grid-template-columns:1.15fr 1.75fr 1fr;grid-template-rows:1.25fr .9fr;gap:10px;min-height:0}
 .bpt484-card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid #1e5148;border-radius:16px;padding:15px;min-width:0;min-height:0;display:flex;flex-direction:column;justify-content:center;cursor:pointer;overflow:hidden}
-.bpt484-card:hover{border-color:#2a6b5f}.bpt484-label{font-size:12px;letter-spacing:.10em;text-transform:uppercase;color:var(--muted);font-weight:900;margin-bottom:6px}.bpt484-value{font-weight:950;line-height:1;white-space:nowrap}.bpt484-blinds .bpt484-value{font-size:clamp(28px,3.7vw,58px);color:var(--gold)}.bpt484-next{margin-top:10px;color:var(--muted);font-size:13px}.bpt484-next strong{color:var(--text)}
+.bpt484-card:hover{border-color:#2a6b5f}
+/* V4.92 — feedback visuel des actions niveau / chrono */
+.bpt484-card{position:relative}
+.bpt484-action-feedback{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.92);z-index:8;padding:9px 14px;border-radius:999px;background:rgba(3,18,16,.92);border:1px solid rgba(69,214,190,.7);box-shadow:0 0 24px rgba(41,209,178,.28);color:#eafff9;font-size:clamp(14px,1.5vw,20px);font-weight:950;letter-spacing:.02em;white-space:nowrap;pointer-events:none;opacity:0;animation:bpt484FeedbackBadge 1.05s ease-out forwards}
+.bpt484-card.bpt484-feedback-pulse{animation:bpt484FeedbackPulse 1.05s ease-out}
+.bpt484-mini.bpt484-level-pulse{animation:bpt484LevelPulse 1.05s ease-out}
+@keyframes bpt484FeedbackPulse{0%{border-color:#2a6b5f;box-shadow:0 0 0 rgba(45,224,190,0)}18%{border-color:#54e0c5;box-shadow:0 0 0 4px rgba(45,224,190,.16),0 0 28px rgba(45,224,190,.28)}100%{border-color:#1e5148;box-shadow:none}}
+@keyframes bpt484LevelPulse{0%,100%{transform:scale(1)}25%{transform:scale(1.055);border-color:#54e0c5;box-shadow:0 0 22px rgba(45,224,190,.22)}}
+@keyframes bpt484FeedbackBadge{0%{opacity:0;transform:translate(-50%,-50%) scale(.88)}16%{opacity:1;transform:translate(-50%,-50%) scale(1.04)}70%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-58%) scale(.98)}}
+.bpt484-label{font-size:12px;letter-spacing:.10em;text-transform:uppercase;color:var(--muted);font-weight:900;margin-bottom:6px}.bpt484-value{font-weight:950;line-height:1;white-space:nowrap}.bpt484-blinds .bpt484-value{font-size:clamp(28px,3.7vw,58px);color:var(--gold)}.bpt484-next{margin-top:10px;color:var(--muted);font-size:13px}.bpt484-next strong{color:var(--text)}
 .bpt484-clock{align-items:center;text-align:center}.bpt484-clock .bpt484-value{font-size:clamp(56px,8vw,112px)}
 .bpt484-players .bpt484-value{font-size:clamp(42px,5vw,72px)}.bpt484-stack .bpt484-value,.bpt484-timing .bpt484-value{font-size:clamp(22px,2.4vw,38px)}
 .bpt484-sub{font-size:14px;color:var(--muted);margin-top:8px}.bpt484-teal{color:var(--teal)!important}
@@ -29934,12 +29981,31 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     }catch(e){console.error('BPT action',a,e)}
     setTimeout(sync,80);
   }
+  function actionFeedback(kind,text){
+    const selector=(kind==='level')?'.bpt484-blinds':'.bpt484-clock';
+    document.querySelectorAll('.bpt484-live').forEach(root=>{
+      const card=root.querySelector(selector);if(!card)return;
+      card.classList.remove('bpt484-feedback-pulse');
+      card.querySelector('.bpt484-action-feedback')?.remove();
+      void card.offsetWidth;
+      card.classList.add('bpt484-feedback-pulse');
+      const badge=document.createElement('div');
+      badge.className='bpt484-action-feedback';badge.textContent=text;card.appendChild(badge);
+      if(kind==='level'){
+        const levelMini=root.querySelector('.bpt484-side .bpt484-mini:nth-child(2)');
+        if(levelMini){levelMini.classList.remove('bpt484-level-pulse');void levelMini.offsetWidth;levelMini.classList.add('bpt484-level-pulse');setTimeout(()=>levelMini.classList.remove('bpt484-level-pulse'),1100)}
+      }
+      setTimeout(()=>{badge.remove();card.classList.remove('bpt484-feedback-pulse')},1100);
+    });
+  }
   async function actionDirect(kind){
     const x=api();if(!x)return;
-    if(kind==='minus')await x.adjustMinute?.(-60);
-    if(kind==='plus')await x.adjustMinute?.(60);
-    if(kind==='prev')await x.changeLevel?.(-1);
-    if(kind==='next')await x.changeLevel?.(1);
+    const beforeLevel=Math.max(1,(Number(state()?.levelIndex)||0)+1);
+    if(['minus','plus','prev','next'].includes(kind))closeModal();
+    if(kind==='minus'){await x.adjustMinute?.(-60);sync();actionFeedback('timer','−1 min');return;}
+    if(kind==='plus'){await x.adjustMinute?.(60);sync();actionFeedback('timer','+1 min');return;}
+    if(kind==='prev'){await x.changeLevel?.(-1);sync();const after=Math.max(1,(Number(state()?.levelIndex)||0)+1);actionFeedback('level',`Niveau ${beforeLevel} → ${after}`);return;}
+    if(kind==='next'){await x.changeLevel?.(1);sync();const after=Math.max(1,(Number(state()?.levelIndex)||0)+1);actionFeedback('level',`Niveau ${beforeLevel} → ${after}`);return;}
     if(kind==='pause')await x.toggleStartPause?.();
     setTimeout(sync,60);
   }
@@ -29949,11 +30015,43 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
       const ps=Array.isArray(st?.players)?st.players:[];
       const alive=ps.filter(p=>p.status==='in');
       const winner=ps.filter(p=>p.status==='winner');
-      const outs=ps.filter(p=>p.status==='out');
+      const outs=ps.filter(p=>p.status==='out').sort((a,b)=>Number(b.outAt||0)-Number(a.outAt||0));
       const other=ps.filter(p=>!['in','out','winner'].includes(String(p.status||'')));
+      const lastOut=outs[0]||null;
       const ordered=[...winner,...alive,...other,...outs];
-      const rows=ordered.map(p=>{const out=p.status==='out',win=p.status==='winner',lv=Number(p.outLevel)||0;const status=win?'Vainqueur':out?(lv?`Éliminé · niveau ${lv}`:'Éliminé'):'En jeu';const detail=out&&p.killer?` · par ${esc(p.killer)}`:'';return `<div class="bpt484-row"><span>${esc(p.name||'—')}</span><b>${status}${detail}</b></div>`}).join('');
-      open('Joueurs',rows||'<p>Aucun joueur disponible.</p>');return;
+      const rows=ordered.map(p=>{
+        const out=p.status==='out',win=p.status==='winner',lv=Number(p.outLevel)||0;
+        const isLast=!!(lastOut&&p.name===lastOut.name&&Number(p.outAt||0)===Number(lastOut.outAt||0));
+        const status=win?'Vainqueur':out?(lv?`Éliminé · niveau ${lv}`:'Éliminé'):'En jeu';
+        const detail=out&&p.killer?` · par ${esc(p.killer)}`:'';
+        return `<div class="bpt484-row${isLast?' bpt484-last-out':''}" ${isLast?'data-last-out="1" tabindex="0" role="button" title="Corriger ou annuler cette élimination"':''}><span>${esc(p.name||'—')}${isLast?' <small>· dernière élimination</small>':''}</span><b>${status}${detail}</b></div>`;
+      }).join('');
+      open('Joueurs',rows||'<p>Aucun joueur disponible.</p>');
+      const dlg=$('bpt484Dialog');
+      const lastRow=dlg?.querySelector('[data-last-out="1"]');
+      const openCorrection=()=>{
+        if(!lastOut)return;
+        const killers=ps.filter(p=>p.name!==lastOut.name).map(p=>`<option value="${esc(p.name)}" ${p.name===lastOut.killer?'selected':''}>${esc(p.name)}</option>`).join('');
+        dlg.innerHTML=`<button class="bpt484-close" data-modal-close>×</button><h2>${esc(lastOut.name)} · dernière élimination</h2><p style="color:#9fb4af;margin-top:-4px">Choisissez l’action à effectuer sur cette élimination.</p><div class="bpt484-row"><span>Éliminé par</span><b>${esc(lastOut.killer||'—')}</b></div><div class="bpt484-row"><span>Niveau</span><b>${Number(lastOut.outLevel)||'—'}</b></div><div class="bpt484-btnrow"><button data-correct-elim>Corriger l’élimination</button><button class="bpt484-danger-action" data-undo-elim>Annuler l’élimination</button></div>`;
+        dlg.querySelector('[data-modal-close]')?.addEventListener('click',closeModal);
+        dlg.querySelector('[data-undo-elim]')?.addEventListener('click',async()=>{
+          if(!confirm(`Annuler l’élimination de ${lastOut.name} et le remettre en jeu ?`))return;
+          await api()?.undoLastElimination?.();closeModal();setTimeout(sync,180);
+        });
+        dlg.querySelector('[data-correct-elim]')?.addEventListener('click',()=>{
+          dlg.innerHTML=`<button class="bpt484-close" data-modal-close>×</button><h2>Corriger l’élimination</h2><div class="bpt484-field"><label>Joueur éliminé</label><strong>${esc(lastOut.name)}</strong></div><div class="bpt484-field"><label>Éliminé par</label><select id="bpt484CorrectKiller">${killers}</select></div><div class="bpt484-field"><label>Niveau d’élimination</label><input id="bpt484CorrectLevel" type="number" min="1" max="99" value="${Number(lastOut.outLevel)||Math.max(1,(Number(st?.levelIndex)||0)+1)}"></div><div class="bpt484-btnrow"><button data-save-correction>Enregistrer la correction</button><button data-back-correction>Retour</button></div>`;
+          dlg.querySelector('[data-modal-close]')?.addEventListener('click',closeModal);
+          dlg.querySelector('[data-back-correction]')?.addEventListener('click',()=>info('players'));
+          dlg.querySelector('[data-save-correction]')?.addEventListener('click',async()=>{
+            const killer=$('bpt484CorrectKiller')?.value||'';
+            const outLevel=Number($('bpt484CorrectLevel')?.value)||1;
+            await api()?.correctLastElimination?.({killer,outLevel});closeModal();setTimeout(sync,180);
+          });
+        });
+      };
+      lastRow?.addEventListener('click',openCorrection);
+      lastRow?.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openCorrection();}});
+      return;
     }
     if(type==='chrono'){
       open('Chrono',`<div class="bpt484-btnrow"><button data-cmd="minus">−1 min</button><button data-cmd="pause">Pause / Reprendre</button><button data-cmd="plus">+1 min</button></div>`);
@@ -30024,6 +30122,19 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 <style id="bpt-v486-final-nav">
 #nav button[data-view="profile"],#bptMobileMoreTopMenu [data-mobile-nav-view="profile"]{display:none!important}
 @media(min-width:901px){#bptMobileMoreTopBtn,#bptMobileMoreTopMenu,.bpt-nav-mobile-only{display:none!important;visibility:hidden!important}}
+</style>
+
+<style id="bpt-v491-live-fixes">
+/* V4.92 — feedback visuel niveau / ±1 min */
+/* V4.91 — PC réduit : aucun doublon des actions du Live fixe */
+#live3Game .b466-primary-row,#live3Game .b466-owner-controls .b466-primary-row{display:none!important}
+/* Dernière élimination cliquable depuis la liste Joueurs */
+.bpt484-last-out{cursor:pointer;background:rgba(217,91,87,.10);border-radius:10px;padding-left:8px;padding-right:8px}
+.bpt484-last-out:hover,.bpt484-last-out:focus{background:rgba(217,91,87,.20);outline:1px solid rgba(217,91,87,.55)}
+.bpt484-last-out small{color:#f0a19d;font-size:11px;font-weight:800}
+.bpt484-danger-action{background:#7e3030!important;color:#fff!important}
+.bpt484-field{display:grid;gap:6px;margin:14px 0}.bpt484-field label{font-size:12px;color:#9fb4af;font-weight:850;text-transform:uppercase;letter-spacing:.06em}
+.bpt484-field select,.bpt484-field input{width:100%;box-sizing:border-box;background:#102d28;color:#fff;border:1px solid #315a52;border-radius:10px;padding:10px;font:inherit}
 </style>
 </body>
 </html>
