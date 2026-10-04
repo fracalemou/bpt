@@ -15439,7 +15439,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.74</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.76</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -20690,133 +20690,108 @@ function renderDashboard(){
 
   if($("dashDynamicsText")){
     if(!rank.length){
-      $("dashDynamicsText").textContent="Le championnat chauffe à peine. Encore quelques parties et on saura déjà qui va chambrer tout le monde.";
+      $("dashDynamicsText").textContent="Le championnat chauffe à peine. Encore quelques parties et les premières tendances commenceront à se dessiner.";
     }else{
       const leader=rank[0];
       const second=rank[1];
       const gap=second?Number(leader.points||0)-Number(second.points||0):null;
-      const movers=rank.filter(r=>r.progress!==null && Number.isFinite(Number(r.progress)));
-      const bestMover=movers.slice().sort((a,b)=>Number(b.progress)-Number(a.progress))[0];
-      const worstMover=movers.slice().sort((a,b)=>Number(a.progress)-Number(b.progress))[0];
-      const sentences=[];
       const L=n=>funPlayerLabel(n);
       const lastGameNo=Math.max(0,...(lastGroupedGame.map(r=>Number(r.game)||0)));
       const gameKey=`${selectedSeasonKey||"season"}-${lastGameNo}-${lastWinner?.player||"none"}`;
       const V=(cat,arr)=>bptDashboardFunnyVariant(cat,gameKey,arr);
+      const history=Array.isArray(db.history)?db.history:[];
+      const gameNos=[...new Set(history.map(r=>Number(r.game)).filter(g=>Number.isFinite(g)&&g>0))].sort((a,b)=>a-b);
 
-      // Les nouveautés de la dernière partie passent en priorité dans le billet :
-      // records battus puis accomplissements débloqués.
+      const currentPodiumStreak=(name)=>{
+        let streak=0;
+        for(let i=gameNos.length-1;i>=0;i--){
+          const row=history.find(r=>Number(r.game)===gameNos[i] && String(r.player||'')===String(name||''));
+          if(!row)break;
+          if(Number(row.place)>=1 && Number(row.place)<=3)streak++;
+          else break;
+        }
+        return streak;
+      };
+      const latestKills=(name)=>lastGroupedGame.filter(r=>String(r.killer||'')===String(name||'')).length;
+      const latestPlace=(name)=>Number(lastGroupedGame.find(r=>String(r.player||'')===String(name||''))?.place||0);
+      const movers=rank.filter(r=>r.progress!==null && Number.isFinite(Number(r.progress)));
+      const bestMover=movers.slice().sort((a,b)=>Number(b.progress)-Number(a.progress))[0];
+      const leaderPodiums=currentPodiumStreak(leader.name);
+      const leaderKills=latestKills(leader.name);
+      const secondKills=second?latestKills(second.name):0;
+      const secondPlace=second?latestPlace(second.name):0;
+      const leaderPlace=latestPlace(leader.name);
       const newRecords=latestBrokenDashboardRecords();
       const newAchievements=latestGameUnlockedAchievements();
-      for(const rec of newRecords.slice(0,2)){
-        const who=rec.player && rec.player!=="—" ? L(rec.player) : "Le championnat";
-        sentences.push(V(`newRecord-${rec.id||rec.label}`,[
-          `🚨 Nouveau record : ${who} signe « ${rec.label} » avec ${rec.value}. Le livre des records vient de demander une nouvelle page.`,
-          `📚 Record battu ! ${who} prend « ${rec.label} » (${rec.value}). L’ancien record peut rendre son badge à l’accueil.`,
-          `🏁 ${who} vient de poser un nouveau record sur « ${rec.label} » : ${rec.value}. Merci de ne pas marcher sur l’histoire en train de s’écrire.`,
-          `📣 Nouveau sommet pour ${who} : ${rec.label}, ${rec.value}. Les archives BPT viennent de cligner des yeux.`
-        ]));
-      }
-      for(const ach of newAchievements.slice(0,2)){
-        const names=(ach.players||[]).map(L).join(", ");
-        if(!names)continue;
-        sentences.push(V(`newAchievement-${ach.name}`,[
-          `🏅 Nouvel accomplissement : ${names} débloque « ${ach.name} ». Le trophée virtuel est déjà beaucoup trop brillant.`,
-          `✨ ${names} vient de décrocher « ${ach.name} ». C’est officiel : la soirée produit maintenant ses propres légendes.`,
-          `🎖️ « ${ach.name} » débloqué par ${names}. Le CV poker vient de prendre une ligne inutile mais indispensable.`,
-          `🔓 ${names} débloque « ${ach.name} ». Quelqu’un avait manifestement lu la liste des défis avant de jouer.`
-        ]));
-      }
-      // S'il n'y a aucune nouveauté, glisser malgré tout un clin d'œil à un record/accomplissement existant.
-      if(!newRecords.length && !newAchievements.length){
-        const recordPool=buildDashboardRecordPool(games,rank,db.history||[]).filter(r=>Number(r.metric)>0 && r.player && r.player!=="—");
-        if(recordPool.length){
-          const idx=Math.abs(lastGameNo||0)%recordPool.length, rec=recordPool[idx];
-          sentences.push(V(`recordSpotlight-${rec.id||idx}`,[
-            `📌 Petit rappel du musée BPT : ${L(rec.player)} détient « ${rec.label} » avec ${rec.value}. Pour les autographes, voir directement l’intéressé.`,
-            `🏛️ Dans les archives : ${L(rec.player)} garde la main sur « ${rec.label} » (${rec.value}). Le record refuse toujours de déménager.`,
-            `📊 Le record « ${rec.label} » appartient toujours à ${L(rec.player)} avec ${rec.value}. La concurrence est cordialement invitée à faire mieux.`
-          ]));
-        }
-      }
 
+      const parts=[];
+
+      // 1) Championnat + dynamique du leader dans une seule phrase fluide.
       if(second){
-        if(Math.abs(gap)<=5){
-          sentences.push(V("leaderClose",[
-            `${L(leader.name)} garde le fauteuil, mais ${L(second.name)} a déjà posé la main sur l’accoudoir : ${num(gap,0)} point${Math.abs(gap)>1?"s":""} d’écart.`,
-            `${L(leader.name)} est devant. ${L(second.name)} respire juste derrière à ${num(gap,0)} point${Math.abs(gap)>1?"s":""} : ambiance rétroviseur.`,
-            `${L(leader.name)} mène encore, mais avec ${num(gap,0)} point${Math.abs(gap)>1?"s":""} d’avance sur ${L(second.name)}, mieux vaut éviter de commander le champagne.`,
-            `${L(second.name)} colle aux basques de ${L(leader.name)} : ${num(gap,0)} point${Math.abs(gap)>1?"s":""} seulement. Le sommet manque d’air.`,
-            `${L(leader.name)} tient la première place au scotch : ${L(second.name)} est à ${num(gap,0)} point${Math.abs(gap)>1?"s":""}.`,
-            `${L(leader.name)} a la couronne, ${L(second.name)} a la facture du bijoutier : ${num(gap,0)} point${Math.abs(gap)>1?"s":""} les séparent.`
+        const gapTxt=`${Math.abs(gap)} point${Math.abs(gap)>1?'s':''}`;
+        if(leaderPodiums>=2){
+          parts.push(V('narrativeLeaderPodium',[
+            `${L(leader.name)} signe un ${leaderPodiums}e podium de suite et conserve la tête du championnat devant ${L(second.name)}, à ${gapTxt}.`,
+            `${L(leader.name)} enchaîne un ${leaderPodiums}e podium consécutif et reste leader, avec ${gapTxt} d’avance sur ${L(second.name)}.`,
+            `Toujours régulier, ${L(leader.name)} monte sur un ${leaderPodiums}e podium de suite et garde les commandes devant ${L(second.name)} (${gapTxt} d’écart).`
+          ]));
+        }else if(Math.abs(gap)<=5){
+          parts.push(V('narrativeLeaderClose',[
+            `${L(leader.name)} conserve la tête du championnat, mais ${L(second.name)} reste au contact à seulement ${gapTxt}.`,
+            `${L(leader.name)} reste leader devant ${L(second.name)}, avec seulement ${gapTxt} entre les deux : rien n’est joué.`,
+            `Le duel reste serré : ${L(leader.name)} mène encore, ${L(second.name)} n’est qu’à ${gapTxt}.`
           ]));
         }else{
-          sentences.push(V("leaderWide",[
-            `${L(leader.name)} squatte la première place. ${L(second.name)} cherche encore le code de l’ascenseur à ${num(gap,0)} points.`,
-            `${L(leader.name)} a creusé ${num(gap,0)} points sur ${L(second.name)}. Pour l’instant, la vue d’en haut est dégagée.`,
-            `${L(leader.name)} mène avec ${num(gap,0)} points d’avance. ${L(second.name)} garde le leader dans le GPS.`,
-            `${L(leader.name)} a pris le large : ${num(gap,0)} points sur ${L(second.name)}. Rien d’irréversible, mais il faut ramer.`,
-            `${L(leader.name)} a mis ${num(gap,0)} points dans la boîte à gants entre lui et ${L(second.name)}.`,
-            `${L(second.name)} voit encore ${L(leader.name)}, mais surtout son dos : ${num(gap,0)} points d’écart.`
+          parts.push(V('narrativeLeaderWide',[
+            `${L(leader.name)} conserve la tête du championnat avec ${gapTxt} d’avance sur ${L(second.name)}.`,
+            `${L(leader.name)} reste solidement installé en tête, ${gapTxt} devant ${L(second.name)}.`,
+            `${L(leader.name)} garde les commandes du championnat, avec ${L(second.name)} à ${gapTxt}.`
           ]));
         }
       }else{
-        sentences.push(V("soloLeader",[
-          `${L(leader.name)} est seul en haut. Pour combien de temps ?`,
-          `${L(leader.name)} occupe le sommet en solitaire. Pas de voisin pour emprunter du sel.`,
-          `${L(leader.name)} a la première place pour lui tout seul. Profitez de la photo.`,
-          `${L(leader.name)} règne sans dauphin pour l’instant. Le service après-vente reste ouvert.`
-        ]));
+        parts.push(`${L(leader.name)} occupe seul la tête du championnat pour le moment.`);
       }
 
-      if(bestMover && Number(bestMover.progress)>0){
+      // 2) Dernière soirée : privilégier le rival direct, les kills, le vainqueur ou une vraie remontée.
+      if(second && secondKills>=2){
+        const placement=secondPlace===1?'en remportant la partie':secondPlace>0?`en terminant ${secondPlace}e`:'dans la soirée';
+        parts.push(V('narrativeSecondKills',[
+          `${L(second.name)} s’est pourtant bien battu lors de la dernière soirée, avec ${secondKills} kills ${placement}.`,
+          `${L(second.name)} a répondu présent hier : ${secondKills} kills ${placement}, de quoi maintenir la pression.`,
+          `Derrière, ${L(second.name)} n’a pas lâché l’affaire et signe ${secondKills} kills ${placement}.`
+        ]));
+      }else if(lastWinner && String(lastWinner.player)!==String(leader.name)){
+        const wk=latestKills(lastWinner.player);
+        parts.push(V('narrativeWinner',[
+          `${L(lastWinner.player)} a marqué la dernière soirée en s’imposant${wk>=2?` avec ${wk} kills`:''}.`,
+          `La dernière partie est revenue à ${L(lastWinner.player)}${wk>=2?`, auteur de ${wk} kills`:''}, ce qui remet un peu de mouvement dans la course.`,
+          `${L(lastWinner.player)} a pris la lumière sur la dernière partie${wk>=2?` avec ${wk} éliminations à son actif`:''}.`
+        ]));
+      }else if(leaderKills>=2){
+        parts.push(`${L(leader.name)} a aussi pesé sur la dernière soirée avec ${leaderKills} kills${leaderPlace===1?' et la victoire au bout':''}.`);
+      }else if(bestMover && Number(bestMover.progress)>0){
         const up=Number(bestMover.progress);
-        sentences.push(V("mover",[
-          `${L(bestMover.name)} prend l’ascenseur : +${up} place${up>1?"s":""}.`,
-          `${L(bestMover.name)} remonte de ${up} place${up>1?"s":""}. Visiblement, les escaliers étaient en option.`,
-          `+${up} place${up>1?"s":""} pour ${L(bestMover.name)} : quelqu’un a trouvé le bouton turbo.`,
-          `${L(bestMover.name)} gagne ${up} place${up>1?"s":""}. Le classement vient de sentir un courant d’air.`,
-          `${L(bestMover.name)} grimpe de ${up} place${up>1?"s":""}. La gravité proteste, sans succès.`,
-          `${L(bestMover.name)} signe une remontée de ${up} place${up>1?"s":""}. Contrôle antidopage du classement en cours.`
-        ]));
+        parts.push(`${L(bestMover.name)} réalise la meilleure remontée du moment avec ${up} place${up>1?'s':''} gagnée${up>1?'s':''} au classement.`);
+      }else if(lastWinner){
+        parts.push(`${L(lastWinner.player)} a remporté la dernière partie et garde donc un peu de matière pour chambrer jusqu’à la prochaine.`);
       }
 
-      if(worstMover && Number(worstMover.progress)<0 && worstMover.name!==bestMover?.name){
-        const down=Math.abs(Number(worstMover.progress));
-        sentences.push(V("dropper",[
-          `${L(worstMover.name)} prend l’escalier à l’envers : -${down} place${down>1?"s":""}.`,
-          `${L(worstMover.name)} perd ${down} place${down>1?"s":""}. Petite visite imprévue des étages inférieurs.`,
-          `Le classement a retiré ${down} place${down>1?"s":""} à ${L(worstMover.name)}. Sans préavis, évidemment.`,
-          `${L(worstMover.name)} recule de ${down} place${down>1?"s":""}. Le GPS disait pourtant “continuez tout droit”.`,
-          `${L(worstMover.name)} laisse filer ${down} place${down>1?"s":""}. Journée portes ouvertes dans le rétroviseur.`,
-          `${L(worstMover.name)} descend de ${down} place${down>1?"s":""}. Rien de grave : le classement est fourni avec marche arrière.`
+      // 3) Record/accomplissement seulement s'il enrichit le récit, jamais comme entrée obligatoire.
+      if(newRecords.length){
+        const rec=newRecords[0];
+        const who=rec.player && rec.player!=='—'?L(rec.player):'Le championnat';
+        parts.push(V(`narrativeRecord-${rec.id||rec.label}`,[
+          `Au passage, ${who} en profite pour établir un nouveau record sur « ${rec.label} » (${rec.value}).`,
+          `La soirée laisse aussi une trace dans les archives : ${who} signe un nouveau record « ${rec.label} » avec ${rec.value}.`,
+          `Et comme si cela ne suffisait pas, ${who} améliore aussi le record « ${rec.label} » (${rec.value}).`
         ]));
+      }else if(newAchievements.length){
+        const ach=newAchievements[0];
+        const names=(ach.players||[]).map(L).join(', ');
+        if(names)parts.push(`${names} débloque aussi l’accomplissement « ${ach.name} », histoire de repartir avec autre chose que des souvenirs.`);
       }
 
-      if(lastWinner){
-        sentences.push(V("winner",[
-          `${L(lastWinner.player)} est officiellement autorisé à être insupportable jusqu’à la prochaine partie.`,
-          `${L(lastWinner.player)} a gagné la dernière. Le droit de raconter les coups à sa façon est donc temporairement accordé.`,
-          `${L(lastWinner.player)} repart avec la victoire et, malheureusement pour les autres, avec le droit de s’en souvenir à voix haute.`,
-          `${L(lastWinner.player)} a pris la dernière partie. Toute ressemblance avec de la chance sera vigoureusement contestée par l’intéressé.`,
-          `${L(lastWinner.player)} signe la dernière victoire. Les autres parlent déjà de variance, ce qui est généralement bon signe.`,
-          `${L(lastWinner.player)} a fini devant tout le monde. Le comité des excuses adverses est déjà en réunion.`,
-          `${L(lastWinner.player)} remporte la dernière partie. Son ego demande un siège supplémentaire pour la prochaine.`
-        ]));
-      }
-
-      if(onFire?.players?.length){
-        const hot=onFire.players.map(L).join(", ");
-        sentences.push(V("onfire",[
-          `En ce moment, ça chauffe chez ${hot}.`,
-          `${hot} traverse une zone de chaleur statistiquement suspecte.`,
-          `${hot} est “On Fire”. Merci de tenir les jetons éloignés des matières inflammables.`,
-          `${hot} enchaîne les points. Le reste de la table demande un contrôle technique.`,
-          `La forme du moment appartient à ${hot}. Le bouton “refroidir” n’a pas été trouvé.`
-        ]));
-      }
-
-      $("dashDynamicsText").textContent=sentences.slice(0,4).join(" ");
+      $("dashDynamicsText").textContent=parts.slice(0,3).join(' ');
     }
   }
 
@@ -29520,7 +29495,7 @@ body.b466-live-active #live3>.hero{display:none!important}
 </style>
 
 <style id="bpt-v470-layout-editor-style">
-/* ==== BPT 4.74 · éditeur Live texte libre ==== */
+/* ==== BPT 4.76 · éditeur Live texte libre ==== */
 .bpt-live-layout-settings>summary{font-weight:950;color:#f0b73a}
 .bpt-layout-editor{--ed-bg:#071710;--ed-panel:#0e281d;--ed-line:#2b5b47;--ed-gold:#f0b73a;--ed-teal:#10918a;color:#eef6f1}
 .bpt-layout-toolbar,.bpt-layout-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
@@ -29582,7 +29557,7 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
   const DB_PATH='bpt/config/liveLayoutUniversal';
   const TILES={
     blinds:{name:'Blinds',label:'BLINDS',sample:'1 000 / 2 000',sub:'Durée : 15 min',kind:'info'},
-    timer:{name:'Timer',label:'TIMER',sample:'08:42',sub:'Cliquer pour ajuster',kind:'info'},
+    timer:{name:'Timer',label:'TIMER',sample:'08:42',sub:'',kind:'info'},
     players:{name:'Joueurs restants',label:'JOUEURS',sample:'6 / 12',sub:'Liste & éliminations',kind:'info'},
     finish:{name:'Fin estimée',label:'FIN ESTIMÉE',sample:'23:18',sub:'+12 min de retard',kind:'info'},
     avg:{name:'Tapis moyen',label:'TAPIS MOYEN',sample:'18 000',sub:'',kind:'info'},
@@ -29600,10 +29575,24 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
   };
   const base=(x,y,w,h,fontSize=16,visible=true,z=1,ha='center',va='center',textX=0,textY=0,textColor='')=>({x,y,w,h,fontSize,visible,z,halign:ha,valign:va,textX,textY,textColor});
   const DEFAULT={theme:'bpt',tiles:{
-    blinds:base(1,2,27,42,24,true,2),timer:base(30,2,40,42,34,true,2),players:base(72,2,27,42,24,true,2),
-    avg:base(1,47,27,27,16,true,2),finish:base(30,47,40,27,22,true,2),next:base(72,47,27,27,16,true,2),
-    minus1:base(1,78,11,16,14,false,3),plus1:base(13,78,11,16,14,false,3),pause:base(25,78,20,16,18,true,3),eliminate:base(46,78,24,16,15,true,3),
-    prevLevel:base(1,78,15,16,14,false,3),nextLevel:base(17,78,15,16,14,false,3),chat:base(72,78,8,16,14,true,3),odds:base(81,78,11,16,14,true,3),fullscreen:base(93,78,6,16,11,true,3),settings:base(87,78,6,16,11,false,3)
+    /* Informations : textes libres, sans cadre */
+    blinds:base(2,3,28,30,28,true,2,'center','center'),
+    timer:base(34,3,32,30,38,true,2,'center','center'),
+    players:base(70,3,28,30,24,true,2,'center','center'),
+    avg:base(2,37,28,18,17,true,2,'center','center'),
+    finish:base(34,37,32,18,22,true,2,'center','center'),
+    next:base(70,37,28,18,17,true,2,'center','center'),
+    /* Actions : vraies tuiles/boutons, proches des maquettes validées */
+    prevLevel:base(2,59,22,8,13,true,3),
+    minus1:base(25,59,14,8,13,true,3),
+    plus1:base(40,59,14,8,13,true,3),
+    nextLevel:base(55,59,22,8,13,true,3),
+    pause:base(2,70,46,12,18,true,3),
+    eliminate:base(50,70,48,12,16,true,3),
+    chat:base(2,85,20,10,14,true,3),
+    odds:base(24,85,30,10,14,true,3),
+    fullscreen:base(56,85,22,10,13,true,3),
+    settings:base(80,85,18,10,13,true,3)
   }};
   const deep=o=>JSON.parse(JSON.stringify(o)); const $=id=>document.getElementById(id);
   function migrate(raw){
@@ -29623,12 +29612,12 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
   async function connectRemote(){try{const fb=await window.bptFirebaseEnsure?.();if(!fb?.rtdb)return;remoteRef=fb.rtdb.ref(DB_PATH);remoteRef.on('value',snap=>{const v=snap.val();if(v){layout=migrate(v);saveLocal();renderEditor();applyLayouts()}else if(!remoteReady){remoteRef.set(layout).catch(()=>{})}remoteReady=true})}catch(e){}}
   function norm(t){t.w=Math.max(5,Math.min(100,+t.w||20));t.h=Math.max(5,Math.min(100,+t.h||15));t.x=Math.max(0,Math.min(100-t.w,+t.x||0));t.y=Math.max(0,Math.min(100-t.h,+t.y||0));t.z=Math.max(1,Math.min(99,+t.z||1));t.fontSize=Math.max(9,Math.min(44,+t.fontSize||16));t.halign=t.halign||'center';t.valign=t.valign||'center';t.textX=Math.max(-80,Math.min(80,+t.textX||0));t.textY=Math.max(-80,Math.min(80,+t.textY||0));if(t.visible===undefined)t.visible=true;return t}
   function profileLabel(p){return p==='pc'?'PC 16/9':p==='landscape'?'Téléphone paysage':'Téléphone portrait'}
-  function liveValue(id){if(id==='blinds')return[$('live3Blinds')?.textContent||'—',$('live3BlindDurationLabel')?.textContent||''];if(id==='timer')return[$('live3Timer')?.textContent||'00:00','Cliquer pour ajuster'];if(id==='players')return[(($('live3Remaining')?.textContent||'0')+' restants'),'Liste & éliminations'];if(id==='finish')return[$('live3EstimatedFinish')?.textContent||'—',$('live3FinishDelta')?.textContent||'—'];if(id==='avg')return[$('live3AvgStack')?.textContent||'0',''];if(id==='next')return[$('live3Next')?.textContent||'—',''];if(id==='pause'){const fs=$('live3Fullscreen'),inFs=!!(fs&&getComputedStyle(fs).display!=='none');return[((inFs?$('live3FsStartPauseBtn'):$('live3StartPauseBtn'))?.textContent?.trim()||'Pause'),'']}if(id==='fullscreen'){const fs=$('live3Fullscreen');return[fs&&getComputedStyle(fs).display!=='none'?'Quitter plein écran':'Plein écran','']}return[TILES[id].sample,TILES[id].sub||'']}
+  function liveValue(id){if(id==='blinds')return[$('live3Blinds')?.textContent||'—',$('live3BlindDurationLabel')?.textContent||''];if(id==='timer')return[$('live3Timer')?.textContent||'00:00',''];if(id==='players')return[(($('live3Remaining')?.textContent||'0')+' restants'),'Liste & éliminations'];if(id==='finish')return[$('live3EstimatedFinish')?.textContent||'—',$('live3FinishDelta')?.textContent||'—'];if(id==='avg')return[$('live3AvgStack')?.textContent||'0',''];if(id==='next')return[$('live3Next')?.textContent||'—',''];if(id==='pause'){const fs=$('live3Fullscreen'),inFs=!!(fs&&getComputedStyle(fs).display!=='none');return[((inFs?$('live3FsStartPauseBtn'):$('live3StartPauseBtn'))?.textContent?.trim()||'Pause'),'']}if(id==='fullscreen'){const fs=$('live3Fullscreen');return[fs&&getComputedStyle(fs).display!=='none'?'Quitter plein écran':'Plein écran','']}return[TILES[id].sample,TILES[id].sub||'']}
   function tileContent(id,live){const d=TILES[id],vs=live?liveValue(id):[d.sample,d.sub||''],cls=live?'bpt-live-tile':'bpt-ed';return `${d.kind==='action'?'':`<span class="${cls}-label">${d.label}</span>`}<strong class="${cls}-value">${vs[0]}</strong>${vs[1]?`<span class="${cls}-sub">${vs[1]}</span>`:''}`}
   function tileInner(id,live,t){return `<div class="bpt-tile-content" style="transform:translate(${t.textX||0}%,${t.textY||0}%);">${tileContent(id,live)}</div>`}
   function applyGeom(el,t){el.style.left=t.x+'%';el.style.top=t.y+'%';el.style.width=t.w+'%';el.style.height=t.h+'%';el.style.zIndex=t.z;el.style.fontSize=t.fontSize+'px';el.dataset.halign=t.halign;el.dataset.valign=t.valign;el.style.setProperty('--tile-user-text',t.textColor||'var(--tile-text)');}
   function resizeHandles(){return ['nw','n','ne','e','se','s','sw','w'].map(dir=>`<span class="bpt-resize-handle" data-dir="${dir}" aria-hidden="true"></span>`).join('')}
-  function renderEditor(){const stage=$('bptLayoutStage');if(!stage)return;stage.dataset.profile=profile;stage.dataset.theme=layout.theme||'bpt';stage.innerHTML='';$('bptLayoutProfileLabel').textContent=profileLabel(profile)+' · même configuration';if($('bptLayoutTheme'))$('bptLayoutTheme').value=layout.theme||'bpt';for(const [id,d] of Object.entries(TILES)){const t=norm(layout.tiles[id]||deep(DEFAULT.tiles[id]));layout.tiles[id]=t;const el=document.createElement('div');el.className='bpt-layout-edit-tile'+(id===selected?' is-selected':'')+(t.visible?'':' is-hidden');el.dataset.tile=id;el.dataset.kind=d.kind;applyGeom(el,t);el.innerHTML=tileInner(id,false,t);el.addEventListener('click',()=>selectTile(id));el.querySelector('.bpt-tile-content')?.addEventListener('pointerdown',startTextDrag);stage.appendChild(el)}renderList();renderInspector()}
+  function renderEditor(){const stage=$('bptLayoutStage');if(!stage)return;stage.dataset.profile=profile;stage.dataset.theme=layout.theme||'bpt';stage.innerHTML='';$('bptLayoutProfileLabel').textContent=profileLabel(profile)+' · même configuration';if($('bptLayoutTheme'))$('bptLayoutTheme').value=layout.theme||'bpt';for(const [id,d] of Object.entries(TILES)){const t=norm(layout.tiles[id]||deep(DEFAULT.tiles[id]));layout.tiles[id]=t;const el=document.createElement('div');el.className='bpt-layout-edit-tile'+(id===selected?' is-selected':'')+(t.visible?'':' is-hidden');el.dataset.tile=id;el.dataset.kind=d.kind;applyGeom(el,t);el.innerHTML=tileInner(id,false,t)+(d.kind==='action'?resizeHandles():'');el.addEventListener('click',()=>selectTile(id));el.querySelector('.bpt-tile-content')?.addEventListener('pointerdown',startTextDrag);if(d.kind==='action'){el.querySelectorAll('.bpt-resize-handle').forEach(h=>h.addEventListener('pointerdown',startResize));}stage.appendChild(el)}renderList();renderInspector()}
   function selectTile(id){selected=id;renderEditor()}
   function startDrag(e){if(e.button!==0||e.target.closest('.bpt-resize-handle')||e.target.closest('.bpt-tile-content'))return;const id=e.currentTarget.dataset.tile;selected=id;const r=$('bptLayoutStage').getBoundingClientRect(),t=layout.tiles[id];drag={id,el:e.currentTarget,dx:e.clientX-(r.left+r.width*t.x/100),dy:e.clientY-(r.top+r.height*t.y/100)};e.currentTarget.setPointerCapture?.(e.pointerId);e.currentTarget.addEventListener('pointermove',dragMove);e.currentTarget.addEventListener('pointerup',dragEnd,{once:true});renderInspector();e.preventDefault()}
   function dragMove(e){if(!drag)return;const r=$('bptLayoutStage').getBoundingClientRect(),t=layout.tiles[drag.id];t.x=Math.max(0,Math.min(100-t.w,(e.clientX-r.left-drag.dx)/r.width*100));t.y=Math.max(0,Math.min(100-t.h,(e.clientY-r.top-drag.dy)/r.height*100));applyGeom(drag.el,t);updateDimensionReadout(t)}
@@ -29648,7 +29637,7 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
   function ensurePop(){if(pop)return pop;pop=document.createElement('div');pop.className='bpt-tile-action-popover';pop.id='bptTileActionPopover';document.body.appendChild(pop);document.addEventListener('pointerdown',e=>{if(pop.classList.contains('open')&&!pop.contains(e.target)&&!e.target.closest('.bpt-modular-live-tile'))pop.classList.remove('open')});return pop}
   function positionPop(anchor){const p=ensurePop(),r=anchor.getBoundingClientRect(),w=Math.min(420,innerWidth-24);p.style.left=Math.max(12,Math.min(innerWidth-w-12,r.left+r.width/2-w/2))+'px';let top=r.bottom+8;if(top+260>innerHeight)top=Math.max(12,r.top-260);p.style.top=top+'px'}
   function doAction(a){const fs=$('live3Fullscreen'),inFs=!!(fs&&getComputedStyle(fs).display!=='none');const map={prev:'live3PrevLevelBtn',next:'live3NextLevelBtn',minus:'live3MinusBtn',plus:'live3PlusBtn',pause:inFs?'live3FsStartPauseBtn':'live3StartPauseBtn',eliminate:inFs?'live3FsEliminateBtn':'live3EliminateBtn',chat:inFs?'live3FsChatActionBtn':'live3ChatBtn',odds:inFs?'live3FsOddsActionBtn':'live3OddsBtn',settings:'live3SettingsBtn'};if(map[a])$(map[a])?.click();if(a==='fullscreen'){if(inFs)$('live3FsExitActionBtn')?.click();else $('live3FullscreenBtn')?.click()}}
-  function tileAction(id,anchor){const d=TILES[id];if(d.kind==='action'){doAction(d.action);setTimeout(refresh,80);return}if(id==='players'){$('live3PlayersSummaryBtn')?.click();return}const p=ensurePop();positionPop(anchor);let html='';if(id==='blinds')html=`<h3>Blinds</h3><div class="muted">${$('live3Blinds')?.textContent||'—'} · ${$('live3BlindDurationLabel')?.textContent||''}</div><div class="bpt-tile-action-row"><button data-act="prev">◀ Niveau précédent</button><button data-act="next">Niveau suivant ▶</button><button data-act="durminus">− 1 min de niveau</button><button data-act="durplus">+ 1 min de niveau</button></div>`;else if(id==='timer')html=`<h3>Timer</h3><div class="muted">Ajustement du niveau en cours</div><div class="bpt-tile-action-row"><button data-act="minus">− 1 min</button><button data-act="plus">+ 1 min</button><button class="gold" data-act="pause">${$('live3StartPauseBtn')?.textContent||'Pause / Reprendre'}</button><button data-act="close">Fermer</button></div>`;else if(id==='finish')html=`<h3>Fin estimée</h3><div class="muted">${$('live3EstimatedFinish')?.textContent||'—'} · ${$('live3FinishDelta')?.textContent||'—'}</div><div class="bpt-tile-action-row"><button data-act="close">Fermer</button><button class="teal" data-act="settings">Réglages</button></div>`;else html=`<h3>${d.name}</h3><div class="muted">${anchor.querySelector('.bpt-live-tile-value')?.textContent||''}</div><div class="bpt-tile-action-row"><button data-act="close">Fermer</button></div>`;p.innerHTML=html;p.classList.add('open');p.onclick=e=>{const a=e.target.closest('[data-act]')?.dataset.act;if(!a)return;if(['prev','next','minus','plus','pause','settings'].includes(a))doAction(a);if(a==='durminus'||a==='durplus'){const inp=$('live3BlindDurationInput');if(inp){inp.value=Math.max(2,(parseInt(inp.value||'2',10)+(a==='durplus'?1:-1)));$('live3ApplyBlindDurationBtn')?.click()}}if(a==='close'||a==='settings')p.classList.remove('open');setTimeout(refresh,80)}}
+  function tileAction(id,anchor){const d=TILES[id];if(d.kind==='action'){doAction(d.action);setTimeout(refresh,80);return}if(id==='players'){$('live3PlayersSummaryBtn')?.click();return}const p=ensurePop();positionPop(anchor);let html='';if(id==='blinds')html=`<h3>Blinds</h3><div class="muted">${$('live3Blinds')?.textContent||'—'} · ${$('live3BlindDurationLabel')?.textContent||''}</div><div class="bpt-tile-action-row"><button data-act="prev">◀ Niveau précédent</button><button data-act="next">Niveau suivant ▶</button><button data-act="durminus">− 1 min de niveau</button><button data-act="durplus">+ 1 min de niveau</button></div>`;else if(id==='timer')html=`<h3>Timer</h3><div class="bpt-tile-action-row"><button data-act="minus">− 1 min</button><button data-act="plus">+ 1 min</button><button class="gold" data-act="pause">${$('live3StartPauseBtn')?.textContent||'Pause / Reprendre'}</button><button data-act="close">Fermer</button></div>`;else if(id==='finish')html=`<h3>Fin estimée</h3><div class="muted">${$('live3EstimatedFinish')?.textContent||'—'} · ${$('live3FinishDelta')?.textContent||'—'}</div><div class="bpt-tile-action-row"><button data-act="close">Fermer</button><button class="teal" data-act="settings">Réglages</button></div>`;else html=`<h3>${d.name}</h3><div class="muted">${anchor.querySelector('.bpt-live-tile-value')?.textContent||''}</div><div class="bpt-tile-action-row"><button data-act="close">Fermer</button></div>`;p.innerHTML=html;p.classList.add('open');p.onclick=e=>{const a=e.target.closest('[data-act]')?.dataset.act;if(!a)return;if(['prev','next','minus','plus','pause','settings'].includes(a))doAction(a);if(a==='durminus'||a==='durplus'){const inp=$('live3BlindDurationInput');if(inp){inp.value=Math.max(2,(parseInt(inp.value||'2',10)+(a==='durplus'?1:-1)));$('live3ApplyBlindDurationBtn')?.click()}}if(a==='close'||a==='settings')p.classList.remove('open');setTimeout(refresh,80)}}
   function refresh(){document.querySelectorAll('.bpt-modular-live-tile').forEach(el=>{const t=layout.tiles[el.dataset.tile];el.innerHTML=tileInner(el.dataset.tile,true,t);applyGeom(el,t)})}
   function applyPreset(name){const base=deep(DEFAULT);if(name==='compact'){base.tiles.avg.visible=false;base.tiles.eliminate.visible=false;base.tiles.minus1.visible=false;base.tiles.plus1.visible=false}if(name==='complete'){Object.values(base.tiles).forEach(t=>t.visible=true)}layout=base;save();renderEditor();applyLayouts()}
   function init(){document.querySelectorAll('[data-layout-profile]').forEach(b=>b.onclick=()=>{profile=b.dataset.layoutProfile;document.querySelectorAll('[data-layout-profile]').forEach(x=>x.classList.toggle('is-active',x===b));renderEditor()});document.querySelectorAll('[data-layout-preset]').forEach(b=>b.onclick=()=>applyPreset(b.dataset.layoutPreset));$('bptLayoutTheme')?.addEventListener('change',e=>{layout.theme=e.target.value;save();renderEditor();applyLayouts()});$('bptLayoutTileFont')?.addEventListener('input',e=>{const v=+e.target.value;$('bptLayoutTileFontValue').value=v+' px';updateSelected('fontSize',v)});$('bptLayoutTileTextColor')?.addEventListener('input',e=>updateSelected('textColor',e.target.value));$('bptLayoutTileTextColorReset')?.addEventListener('click',()=>updateSelected('textColor',''));$('bptLayoutTileHAlign')?.addEventListener('change',e=>updateSelected('halign',e.target.value));$('bptLayoutTileVAlign')?.addEventListener('change',e=>updateSelected('valign',e.target.value));$('bptLayoutTileVisible')?.addEventListener('change',e=>updateSelected('visible',e.target.checked));$('bptLayoutBringFront')?.addEventListener('click',()=>{const max=Math.max(...Object.values(layout.tiles).map(x=>+x.z||1));updateSelected('z',max+1)});$('bptLayoutSendBack')?.addEventListener('click',()=>{const min=Math.min(...Object.values(layout.tiles).map(x=>+x.z||1));updateSelected('z',Math.max(1,min-1))});$('bptLayoutResetBtn')?.addEventListener('click',()=>{layout=deep(DEFAULT);save();renderEditor();applyLayouts()});$('bptLayoutSaveBtn')?.addEventListener('click',()=>{save();applyLayouts();const st=$('bptLayoutSaveStatus');if(st){st.textContent='Configuration appliquée et synchronisée.';setTimeout(()=>st.textContent='Configuration commune synchronisée sur tous les appareils.',1800)}});renderEditor();applyLayouts();connectRemote();const obs=new MutationObserver(()=>refresh());['live3Blinds','live3BlindDurationLabel','live3Timer','live3Remaining','live3EstimatedFinish','live3FinishDelta','live3AvgStack','live3Next'].forEach(id=>{const n=$(id);if(n)obs.observe(n,{childList:true,subtree:true,characterData:true})});addEventListener('resize',()=>{clearTimeout(window.__bptLayResize);window.__bptLayResize=setTimeout(applyLayouts,120)})}
@@ -29657,7 +29646,7 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
 </script>
 
 <style id="bpt-v473-text-only-live-style">
-/* BPT 4.74 — le Live est composé d'éléments texte libres, sans tuiles visuelles. */
+/* BPT 4.76 — le Live est composé d'éléments texte libres, sans tuiles visuelles. */
 .bpt-layout-edit-tile{
   background:transparent!important;
   border-color:transparent!important;
@@ -29713,7 +29702,7 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
 </style>
 
 <style id="bpt-v474-text-elements-only">
-/* BPT 4.74 — éditeur sans cadres : seuls les textes/actions sont manipulables. */
+/* BPT 4.76 — éditeur sans cadres : seuls les textes/actions sont manipulables. */
 .bpt-layout-edit-tile,.bpt-layout-edit-tile.is-selected,.bpt-layout-edit-tile:hover,.bpt-layout-edit-tile:not(.is-selected):hover{
   background:transparent!important;border:0!important;outline:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important;
 }
@@ -29724,11 +29713,74 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
 .bpt-layout-edit-tile.is-hidden{opacity:.22!important}
 .bpt-modular-live-tile,.bpt-modular-live-tile:hover,.bpt-modular-live-tile:focus{background:transparent!important;border:0!important;outline:0!important;box-shadow:none!important;padding:0!important}
 </style>
+
+<style id="bpt-v476-info-action-separation">
+/* BPT 4.76 — deux familles : infos texte libre / actions en tuiles */
+/* INFO : aucun fond, aucun contour, aucune poignée. */
+.bpt-layout-edit-tile[data-kind="info"],
+.bpt-layout-edit-tile[data-kind="info"].is-selected,
+.bpt-layout-edit-tile[data-kind="info"]:hover,
+.bpt-modular-live-tile[data-kind="info"],
+.bpt-modular-live-tile[data-kind="info"]:hover,
+.bpt-modular-live-tile[data-kind="info"]:focus{
+  background:transparent!important;border:0!important;outline:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important;
+}
+.bpt-layout-edit-tile[data-kind="info"] .bpt-resize-handle{display:none!important}
+.bpt-layout-edit-tile[data-kind="info"] .bpt-tile-content{cursor:grab!important}
+.bpt-layout-edit-tile[data-kind="info"] .bpt-tile-content:active{cursor:grabbing!important}
+.bpt-layout-edit-tile[data-kind="info"].is-selected .bpt-tile-content{filter:drop-shadow(0 0 5px rgba(33,199,190,.55))}
+
+/* ACTION : vraie tuile/bouton avec fond et poignées en édition. */
+.bpt-layout-edit-tile[data-kind="action"],
+.bpt-modular-live-tile[data-kind="action"]{
+  background:linear-gradient(180deg,#173a2c,#10291f)!important;
+  border:1px solid #35654f!important;
+  border-radius:12px!important;
+  box-shadow:0 5px 16px rgba(0,0,0,.20)!important;
+  padding:6px 10px!important;
+  color:var(--tile-user-text,#fff)!important;
+  overflow:visible!important;
+}
+.bpt-layout-edit-tile[data-kind="action"] .bpt-tile-content,
+.bpt-modular-live-tile[data-kind="action"] .bpt-tile-content{
+  cursor:pointer!important;display:flex!important;align-items:center!important;justify-content:center!important;text-align:center!important;
+  color:var(--tile-user-text,#fff)!important;
+}
+.bpt-layout-edit-tile[data-kind="action"].is-selected{outline:2px solid #21c7be!important;outline-offset:2px!important}
+.bpt-layout-edit-tile[data-kind="action"] .bpt-resize-handle{display:block!important;position:absolute!important;width:12px!important;height:12px!important;background:#21c7be!important;border:2px solid #07251c!important;border-radius:50%!important;z-index:20!important}
+.bpt-layout-edit-tile[data-kind="action"] .bpt-resize-handle[data-dir="nw"]{left:-7px;top:-7px;cursor:nwse-resize}
+.bpt-layout-edit-tile[data-kind="action"] .bpt-resize-handle[data-dir="n"]{left:50%;top:-7px;transform:translateX(-50%);cursor:ns-resize}
+.bpt-layout-edit-tile[data-kind="action"] .bpt-resize-handle[data-dir="ne"]{right:-7px;top:-7px;cursor:nesw-resize}
+.bpt-layout-edit-tile[data-kind="action"] .bpt-resize-handle[data-dir="e"]{right:-7px;top:50%;transform:translateY(-50%);cursor:ew-resize}
+.bpt-layout-edit-tile[data-kind="action"] .bpt-resize-handle[data-dir="se"]{right:-7px;bottom:-7px;cursor:nwse-resize}
+.bpt-layout-edit-tile[data-kind="action"] .bpt-resize-handle[data-dir="s"]{left:50%;bottom:-7px;transform:translateX(-50%);cursor:ns-resize}
+.bpt-layout-edit-tile[data-kind="action"] .bpt-resize-handle[data-dir="sw"]{left:-7px;bottom:-7px;cursor:nesw-resize}
+.bpt-layout-edit-tile[data-kind="action"] .bpt-resize-handle[data-dir="w"]{left:-7px;top:50%;transform:translateY(-50%);cursor:ew-resize}
+.bpt-layout-edit-tile[data-kind="action"]:not(.is-selected) .bpt-resize-handle{display:none!important}
+
+/* Couleurs d'action proches des visuels sélectionnés. */
+.bpt-layout-edit-tile[data-tile="pause"],.bpt-modular-live-tile[data-tile="pause"]{background:linear-gradient(180deg,#e8ad32,#c98e1c)!important;border-color:#f2c451!important;color:#171007!important}
+.bpt-layout-edit-tile[data-tile="eliminate"],.bpt-modular-live-tile[data-tile="eliminate"]{background:linear-gradient(180deg,#ad5257,#8e3f44)!important;border-color:#c66a6f!important;color:#fff!important}
+.bpt-layout-edit-tile[data-tile="chat"],.bpt-modular-live-tile[data-tile="chat"],
+.bpt-layout-edit-tile[data-tile="odds"],.bpt-modular-live-tile[data-tile="odds"]{background:linear-gradient(180deg,#0f7e78,#0a625e)!important;border-color:#18a19a!important}
+.bpt-layout-edit-tile[data-tile="fullscreen"],.bpt-modular-live-tile[data-tile="fullscreen"],
+.bpt-layout-edit-tile[data-tile="settings"],.bpt-modular-live-tile[data-tile="settings"]{background:linear-gradient(180deg,#15372a,#10291f)!important;border-color:#35654f!important}
+.bpt-layout-edit-tile[data-tile="minus1"],.bpt-modular-live-tile[data-tile="minus1"],
+.bpt-layout-edit-tile[data-tile="plus1"],.bpt-modular-live-tile[data-tile="plus1"],
+.bpt-layout-edit-tile[data-tile="prevLevel"],.bpt-modular-live-tile[data-tile="prevLevel"],
+.bpt-layout-edit-tile[data-tile="nextLevel"],.bpt-modular-live-tile[data-tile="nextLevel"]{background:linear-gradient(180deg,#143126,#0d241b)!important;border-color:#315a48!important}
+
+/* Hiérarchie des infos proche des maquettes validées. */
+.bpt-modular-live-tile[data-kind="info"] .bpt-live-tile-label,.bpt-layout-edit-tile[data-kind="info"] .bpt-ed-label{font-size:.52em!important;letter-spacing:.06em!important;color:#a9bbb2!important}
+.bpt-modular-live-tile[data-tile="timer"] .bpt-live-tile-value,.bpt-layout-edit-tile[data-tile="timer"] .bpt-ed-value{font-size:2.15em!important;color:#fff!important}
+.bpt-modular-live-tile[data-tile="blinds"] .bpt-live-tile-value,.bpt-layout-edit-tile[data-tile="blinds"] .bpt-ed-value{font-size:1.85em!important;color:#f0b73a!important}
+.bpt-modular-live-tile[data-tile="finish"] .bpt-live-tile-value,.bpt-layout-edit-tile[data-tile="finish"] .bpt-ed-value{color:#54d8cf!important}
+</style>
 </body>
 </html>
 
 <style id="bpt-v471-desktop-hide-more">
-/* BPT 4.74 — Plus est strictement réservé aux navigations compactes */
+/* BPT 4.76 — Plus est strictement réservé aux navigations compactes */
 @media (min-width: 901px) {
   #bptMobileMoreTopBtn,
   .bpt-nav-mobile-only,
