@@ -19624,7 +19624,7 @@ function mergeAllSeasonsOfficialStats(rawItems){
   });
 }
 
-const BPT_ANNALES_NICKNAMES={"Franck NAESSENS":["Francis Chatard","Chatard en Chef","Boucher en Chef","Boule à Facettes","Dogarty04","Dégolas","Raoul"],"Jérôme BINOT":["Tchobin","Panama","El Toucan","String Borat","Le Myticulteur","Livre La Moulasse","Chatard en Second"],"Jérôme BERA":["Superman","Slip Rouge","Cerf-Volant","Chip Leader","Ouvrier Plumeur"],"Olivier HENGUELLE":["Miguel","Migolivier","MigGeger","Désosseur","Jean-Michel j’aurais dû jouer !"],"Mehdi BRAHIMI":["El Español","M Le Maudit","Kabiloute","Dégraisseur","Bachybouzouk","Cobra"],"Michel SCHERPEREEL":["Scotty Nguyen","Michmuch59","Micheline59","Boyaudier","Club55"],"Alexis VOLANT":["Biogold","Petit Cœur","L’architecte","Le Neveu de Tonton","Le Jeune Loup de Wall Street"],"Jérôme RIFFE":["Le Chat","Pitch And Putt","Coupeur de Quartier","Djayrem"],"François CATTEAU":["Le Dealer","Chargé de Pesée","Jean Guile","Bpt59"],"Jérémy GRAS":["Shrek","Kersh"],"Thierry MONNIAUX":["L’antidote","Désosseur Pareur","TYMOON69"],"Stéphane LEFIN":["Phœnix","Boucher Gérant","George Luke Ass","Pevelef"],"David SAGALOWICZ":["The Shaker"],"Areski AIT GHERBI":["Kikipoker","Areskilimero","Kiki Le Magnifique"],"Anne BERA":["Maya","Nanou","PrinceLeia59"],"Gérard CANDELIER":["Le Professeur","Le Lion d’Arras","Le Templier","Eviscérateur","GG ARRAS"],"Jérémie CARPENTIER":["Le Trader","Sacrificateur","Lanseria44"],"Mélanie NAESSENS":["Francine Chatard"],"Grégoire DUFORET":["Robin Hood","Grofud"],"Florence SAGALOWICZ":["La Dame de Cœur"],"Dylan DECOTTE":["Rocky Balboa"],"Philippe DUBOIS":["Taz","Japlpel","Accrocheur en Abattoir","J’Adore Pulvériser Les Pokermen En Ligne"],"Solène BALLOIS":["SoBa","Poupée","La Chatte à la Voisine"],"Juliette PENIN":["Wild Horses"],"Jules NAESSENS":["Serial Senior Killer"],"Arnaud HEDIN":["Nono la Saumure"],"Clément MARAVAL":["Scotland Beret","Pointbreak8"],"Thomas DELVAL":["Kitemalaman"],"Hélène MORIZUR":["Psycho Girl","Tazette"],"Mélanie BINOT":["Micromachine","Bazouka"]};
+const BPT_ANNALES_NICKNAMES={"Franck NAESSENS":["Francis Chatard","Chatard en Chef","Boucher en Chef","Boule à Facettes","Dogarty04","Dégolas","Raoul"],"Jérôme BINOT":["Tchobin","Panama","El Toucan","String Borat","Le Myticulteur","Livre La Moulasse","Chatard en Second"],"Jérôme BERA":["Superman","Slip Rouge","Cerf-Volant","Chip Leader","Ouvrier Plumeur"],"Olivier HENGUELLE":["Miguel","Migolivier","MigGeger","Désosseur","Jean-Michel j’aurais dû jouer !"],"Mehdi BRAHIMI":["El Español","M Le Maudit","Kabiloute","Dégraisseur","Bachybouzouk","Cobra"],"Michel SCHERPEREEL":["Scotty Nguyen","Michmuch59","Micheline59","Boyaudier","Club55"],"Alexis VOLANT":["Biogold","Petit Cœur","L’architecte","Le Neveu de Tonton","Le Jeune Loup de Wall Street"],"Jérôme RIFFE":["Le Chat","Pitch And Putt","Coupeur de Quartier","Djayrem"],"François CATTEAU":["Le Dealer","Chargé de Pesée","Jean Guile","Bpt59"],"Jérémy COQUEL":["Shrek","Kersh"],"Thierry MONNIAUX":["L’antidote","Désosseur Pareur","TYMOON69"],"Stéphane LEFIN":["Phœnix","Boucher Gérant","George Luke Ass","Pevelef"],"David SAGALOWICZ":["The Shaker"],"Areski AIT GHERBI":["Kikipoker","Areskilimero","Kiki Le Magnifique"],"Anne BERA":["Maya","Nanou","PrinceLeia59"],"Gérard CANDELIER":["Le Lion d’Arras","Le Professeur","Le Templier","Eviscérateur","GG ARRAS"],"Jérémie CARPENTIER":["Le Trader","Sacrificateur","Lanseria44"],"Mélanie NAESSENS":["Francine Chatard"],"Grégoire DUFORET":["Robin Hood","Grofud"],"Florence SAGALOWICZ":["La Dame de Cœur"],"Dylan DECOTTE":["Rocky Balboa"],"Philippe DUBOIS":["Taz","Japlpel","Accrocheur en Abattoir","J’Adore Pulvériser Les Pokermen En Ligne"],"Solène BALLOIS":["SoBa","Poupée","La Chatte à la Voisine"],"Juliette PENIN":["Wild Horses"],"Jules NAESSENS":["Serial Senior Killer"],"Arnaud HEDIN":["Nono la Saumure"],"Clément MARAVAL":["Scotland Beret","Pointbreak8"],"Thomas DELVAL":["Kitemalaman"],"Hélène MORIZUR":["Psycho Girl","Tazette"],"Mélanie BINOT":["Micromachine","Bazouka"]};
 
 function normalizePlayerLookupName(name){
   return String(name||"")
@@ -25908,29 +25908,29 @@ document.addEventListener("visibilitychange",()=>{
 
   function live3PaceAnalysis(){
     if(!isOwner() || !isActive() || !current?.startedAt)return null;
+    const projection=live3FinishProjection();
+    if(!projection)return null;
     const totalPlayers=Math.max(2,(current.players||[]).length);
     const remaining=Math.max(1,remainingCount());
     const targetSec=Math.max(1800,Number(current.targetHours||4)*3600);
     const elapsed=Math.max(0,elapsedSeconds());
     const timeProgress=elapsed/targetSec;
-    if(timeProgress<0.50)return null;
-
     const eliminationProgress=(totalPlayers-remaining)/(totalPlayers-1);
-    const delta=timeProgress-eliminationProgress; // positif = tournoi en retard
     const upcoming=nextLevel();
     if(!upcoming)return null;
     const currentMin=Math.max(1,Math.round(Number(upcoming.durationSec||0)/60)||currentBlindDurationMinutes());
-    let type="",change=0;
-    if(delta>=0.30){type="accelerate";change=-4;}
-    else if(delta>=0.15){type="accelerate";change=-2;}
-    else if(delta<=-0.30){type="slow";change=4;}
-    else if(delta<=-0.15){type="slow";change=2;}
-    else return null;
 
+    // V4.90 : l'adaptation se base directement sur l'écart de fin estimée,
+    // sans attendre 50 % de la partie. Dès 8 min, le conseil est disponible au clic.
+    const deltaMin=Math.round(Number(projection.deltaSec||0)/60); // + = retard, - = avance
+    const absDeltaMin=Math.abs(deltaMin);
+    if(absDeltaMin<8)return null;
+    const type=deltaMin>0?"accelerate":"slow";
+    const change=(absDeltaMin>=25?4:2)*(type==="accelerate"?-1:1);
     const proposedMin=Math.max(2,Math.min(40,currentMin+change));
     if(proposedMin===currentMin)return null;
     const targetRemaining=Math.max(0,targetSec-elapsed);
-    return {type,delta,currentMin,proposedMin,totalPlayers,remaining,elapsed,targetRemaining,timeProgress,eliminationProgress};
+    return {type,deltaMin,deltaSec:projection.deltaSec,currentMin,proposedMin,totalPlayers,remaining,elapsed,targetRemaining,timeProgress,eliminationProgress,autoSuggest:absDeltaMin>=15};
   }
 
   function live3ClosePaceModal(){
@@ -25964,7 +25964,7 @@ document.addEventListener("visibilitychange",()=>{
     if(!afterElimination && now-live3PaceLastCheckAt<60*1000)return;
     live3PaceLastCheckAt=now;
     const advice=live3PaceAnalysis();
-    if(!advice)return;
+    if(!advice || advice.autoSuggest!==true)return;
 
     const memo=live3ReadPaceMemo();
     const eliminationCount=advice.totalPlayers-advice.remaining;
@@ -25985,9 +25985,32 @@ document.addEventListener("visibilitychange",()=>{
     }
   }
 
+  function live3CaptureClassicDurations(state){
+    const levels=Array.isArray(state?.levels)?state.levels:[];
+    if(!Array.isArray(state.paceClassicDurations) || state.paceClassicDurations.length!==levels.length){
+      state.paceClassicDurations=levels.map(l=>Math.max(120,Number(l?.durationSec)||900));
+    }
+    return state.paceClassicDurations;
+  }
+
+  function live3RestoreClassicDurations(state){
+    const levels=Array.isArray(state?.levels)?state.levels:[];
+    const base=Array.isArray(state?.paceClassicDurations)?state.paceClassicDurations:[];
+    const start=Math.max(0,(Number(state?.levelIndex)||0)+1);
+    for(let i=start;i<levels.length;i++){
+      const original=Math.max(120,Number(base[i])||Number(base[0])||900);
+      levels[i].durationSec=original;
+    }
+    state.levels=levels;
+    state.paceAdaptive=false;
+    state.lastPaceAdjustment={at:Date.now(),type:'classic',automatic:false};
+    return state;
+  }
+
   async function live3AutoApplyPaceAdvice(advice){
     if(!advice || !isOwner())return;
     await ownerTransaction(s=>{
+      live3CaptureClassicDurations(s);
       const levels=Array.isArray(s.levels)?s.levels:[];
       const start=Math.max(0,(Number(s.levelIndex)||0)+1);
       for(let i=start;i<levels.length;i++)levels[i].durationSec=advice.proposedMin*60;
@@ -26003,6 +26026,7 @@ document.addEventListener("visibilitychange",()=>{
     const advice=live3PendingPaceAdvice;
     if(!advice || !isOwner())return live3ClosePaceModal();
     await ownerTransaction(s=>{
+      live3CaptureClassicDurations(s);
       const levels=Array.isArray(s.levels)?s.levels:[];
       const start=Math.max(0,(Number(s.levelIndex)||0)+1); // uniquement les niveaux suivants
       for(let i=start;i<levels.length;i++)levels[i].durationSec=advice.proposedMin*60;
@@ -28731,7 +28755,17 @@ async function requestTakeover(){
     endLive,
     setPaceAdaptive:async(flag)=>{
       if(!isOwner())return false;
-      await ownerTransaction(s=>{s.paceAdaptive=!!flag;s.updatedAt=Date.now();return s;});
+      await ownerTransaction(s=>{
+        if(flag){
+          live3CaptureClassicDurations(s);
+          s.paceAdaptive=true;
+        }else{
+          live3RestoreClassicDurations(s);
+        }
+        s.updatedAt=Date.now();
+        return s;
+      });
+      if(!flag){try{showBptToast('Mode classique restauré · durées d’origine rétablies','ok');}catch(_e){}}
       return true;
     },
     getPaceAdvice:()=>{
