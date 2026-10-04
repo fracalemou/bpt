@@ -14172,7 +14172,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.01";
+const BPT_APP_VERSION="5.02";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -15434,7 +15434,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.01</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.02</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -29872,12 +29872,11 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 #live3Game .b466-owner-controls,#live3Game .b466-tools,#live3Game .b466-context,#live3Game .b466-dashboard,#live3Game .b466-request,#live3Game .b466-spectator,#live3Game #live3ForceTakeoverBtn{display:none!important}
 #live3ElimModal,#live3PaceModal,#live3ChatModal,#bptOddsModal,#live3SettingsPanel{z-index:1800000!important}
 
-.bpt484-live,.bpt484-live *{box-sizing:border-box}
 .bpt484-live{
  --bg:#061513;--panel:#0a2924;--panel2:#0d352f;--line:#19cbbd;--lineSoft:#1e6157;
  --gold:#e0ad38;--teal:#2ac9c2;--red:#dc5a57;--text:#f5f8f7;--muted:#a6bbb6;
  background:var(--bg);color:var(--text);border-radius:18px;padding:12px;display:grid;
- grid-template-rows:64px minmax(0,1fr) 58px 72px;gap:10px;height:calc(100vh - 145px);min-height:610px;max-height:calc(100vh - 145px);
+ grid-template-rows:64px minmax(0,1fr) 58px 72px;gap:10px;min-height:610px;max-height:calc(100vh - 145px);
  overflow:hidden;font-family:Arial,Helvetica,sans-serif
 }
 #live3Fullscreen .bpt484-live{position:fixed;inset:0;z-index:1500000;border-radius:0;max-height:none;height:100vh;width:100vw;padding:14px;grid-template-rows:66px minmax(0,1fr) 60px 76px}
@@ -29889,43 +29888,43 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 
 .bpt484-main{display:grid;grid-template-columns:minmax(0,1.62fr) minmax(390px,1fr);gap:10px;min-height:0}
 .bpt484-stage,.bpt484-card,.bpt484-info{background:radial-gradient(circle at 50% -30%,#0f4b41 0,#0b302a 35%,#08241f 72%,#071b18 100%);border:1px solid var(--lineSoft);border-radius:16px;min-width:0;min-height:0;overflow:hidden}
-.bpt484-stage{display:grid;grid-template-rows:minmax(0,1.5fr) minmax(90px,.72fr) auto;padding:14px 26px 18px;position:relative}
+.bpt484-stage{display:grid;grid-template-rows:minmax(0,1.45fr) auto auto;padding:14px 26px 18px;position:relative}
 .bpt484-stage:after{content:"";position:absolute;left:8%;right:8%;top:59%;height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);opacity:.75;pointer-events:none}
 .bpt484-clock{display:flex;align-items:center;justify-content:center;text-align:center;min-height:0;cursor:pointer;position:relative}
 .bpt484-clock .bpt484-value{font-weight:950;line-height:.86;white-space:nowrap;letter-spacing:-.055em}
 .bpt484-blinds{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;cursor:pointer;position:relative;padding-top:10px}
 .bpt484-blinds .bpt484-value{font-weight:950;line-height:.95;white-space:nowrap;color:var(--gold);letter-spacing:-.055em;max-width:100%}
-.bpt484-next{margin-top:8px;color:var(--muted);font-size:17px;font-weight:750;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:clip}
+.bpt484-next{margin-top:10px;color:var(--muted);font-size:18px;font-weight:750;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:clip;text-align:center;align-self:stretch}
 .bpt484-next strong{color:var(--text);font-weight:950}
 
 .bpt484-right{display:grid;grid-template-rows:minmax(0,.72fr) minmax(0,1.28fr);gap:10px;min-height:0}
 .bpt484-kpis{display:grid;grid-template-columns:1fr 1.05fr;gap:10px;min-height:0}
-.bpt484-card{padding:16px 18px;display:flex;flex-direction:column;justify-content:center;cursor:pointer;position:relative}
+.bpt484-card{padding:16px 18px;display:grid;grid-template-columns:62px minmax(0,1fr);grid-template-rows:auto auto auto;column-gap:14px;align-content:center;cursor:pointer;position:relative}
 .bpt484-card:hover,.bpt484-info:hover{border-color:#2a8174}
-.bpt484-label{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:900;margin-bottom:5px}
+.bpt484-label{font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:900;margin-bottom:5px}
 .bpt484-value{font-weight:950;line-height:1;white-space:nowrap;max-width:100%}
-.bpt484-players .bpt484-value{font-size:86px}.bpt484-stack .bpt484-value{font-size:46px}
+.bpt484-card-icon{grid-column:1;grid-row:1/4;align-self:center;justify-self:center;width:48px;height:48px;color:var(--teal);opacity:.96}.bpt484-card-icon svg{width:100%;height:100%;display:block;stroke:currentColor;fill:none;stroke-width:1.8}.bpt484-card .bpt484-label,.bpt484-card .bpt484-value,.bpt484-card .bpt484-sub{grid-column:2}.bpt484-players .bpt484-value{font-size:92px}.bpt484-stack .bpt484-value{font-size:48px}
 .bpt484-sub{font-size:16px;color:var(--muted);margin-top:6px}
 
-.bpt484-info{padding:16px 20px;display:grid;grid-template-rows:auto auto 1px minmax(0,1fr);gap:10px;cursor:pointer;position:relative}
+.bpt484-info{padding:18px 22px;display:grid;grid-template-rows:auto auto 1px auto;gap:12px;align-content:space-evenly;cursor:pointer;position:relative}
 .bpt484-info-line{display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:10px;min-width:0}
 .bpt484-info-icon{font-size:25px;line-height:1;color:var(--teal);text-align:center}
 .bpt484-info-copy{font-size:19px;color:var(--muted);font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bpt484-info-copy strong{color:var(--text);font-weight:950}
 .bpt484-teal{color:var(--teal)!important}
-.bpt484-level-inline{font-size:17px;font-weight:950;color:var(--text);white-space:nowrap;padding-left:14px;border-left:1px solid var(--line)}
+.bpt484-level-inline{font-size:18px;font-weight:950;color:var(--text);white-space:nowrap;padding-left:16px;border-left:1px solid var(--line)}
 .bpt484-sep{background:linear-gradient(90deg,transparent,var(--lineSoft),transparent)}
 .bpt484-timing{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:center;min-height:0;cursor:pointer}
 .bpt484-timing-copy{min-width:0}
 .bpt484-timing .bpt484-label{margin:0 0 4px}
-.bpt484-timing .bpt484-value{font-size:48px}
-.bpt484-pace-line{font-size:15px;color:var(--muted);margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bpt484-timing .bpt484-value{font-size:50px}
+.bpt484-pace-line{font-size:16px;color:var(--muted);margin-top:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bpt484-delta{transition:.15s ease}.bpt484-delta.is-alert{display:inline-block;padding:3px 7px;border-radius:8px;font-weight:950}.bpt484-delta.is-alert.is-delay{background:rgba(217,91,87,.22);color:#ff8b86}.bpt484-delta.is-alert.is-ahead{background:rgba(39,198,192,.18);color:#54e1da}
 
 .bpt484-quickbar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.bpt484-quickbar button{border:1px solid #2a5b52;border-radius:12px;background:#12372f;color:var(--text);font-size:14px;font-weight:900;cursor:pointer;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bpt484-quickbar button{border:1px solid #2a5b52;border-radius:12px;background:#12372f;color:var(--text);font-size:17px;font-weight:900;cursor:pointer;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bpt484-actions{display:grid;grid-template-columns:1fr 1.28fr .82fr 1.12fr 1.05fr 1.08fr;gap:10px}
-.bpt484-actions button{border:0;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bpt484-actions button{border:0;border-radius:14px;font-size:18px;font-weight:900;cursor:pointer;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bpt484-pause{background:var(--gold);color:#171007}.bpt484-out{background:var(--red);color:#fff}.bpt484-chat{background:#174c44;color:#fff}.bpt484-odds{background:var(--teal);color:#06201d}.bpt484-full{background:#dce9e6;color:#10231f}.bpt484-end{background:#7e3030;color:#fff}
 .bpt484-live[data-fs="1"] .bpt484-end{display:none!important}
 
@@ -29951,11 +29950,11 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
  #live3Fullscreen .bpt484-live{height:100dvh;min-height:100dvh;overflow:auto;padding:7px;grid-template-rows:54px auto 46px auto}
  .bpt484-head{grid-template-columns:.62fr 1.5fr .8fr;padding:0 10px;border-radius:11px}.bpt484-brand{font-size:24px}.bpt484-owner{font-size:11px}.bpt484-part{font-size:11px}
  .bpt484-main{display:flex;flex-direction:column;gap:7px;min-height:0}
- .bpt484-stage{height:min(48dvh,470px);min-height:325px;padding:10px 12px 13px;grid-template-rows:minmax(0,1.45fr) minmax(72px,.62fr) auto;border-radius:14px}
+ .bpt484-stage{height:min(48dvh,470px);min-height:325px;padding:10px 12px 13px;grid-template-rows:minmax(0,1.5fr) auto auto;border-radius:14px}
  .bpt484-stage:after{top:58%}
  .bpt484-right{display:contents}
  .bpt484-kpis{display:grid;grid-template-columns:1fr 1fr;gap:7px;order:2}
- .bpt484-card{min-height:115px;padding:12px;border-radius:13px}.bpt484-label{font-size:10px}.bpt484-sub{font-size:12px}
+ .bpt484-card{min-height:115px;padding:12px;border-radius:13px;grid-template-columns:42px minmax(0,1fr);column-gap:9px}.bpt484-card-icon{width:34px;height:34px}.bpt484-label{font-size:10px}.bpt484-sub{font-size:12px}
  .bpt484-info{order:3;min-height:210px;padding:13px;border-radius:13px;gap:8px}.bpt484-info-line{grid-template-columns:26px minmax(0,1fr) auto;gap:7px}.bpt484-info-icon{font-size:20px}.bpt484-info-copy{font-size:14px}.bpt484-level-inline{font-size:13px;padding-left:8px}.bpt484-timing{grid-template-columns:26px 1fr;gap:7px}.bpt484-timing .bpt484-value{font-size:36px}.bpt484-pace-line{font-size:12px;white-space:normal}
  .bpt484-next{font-size:13px;margin-top:6px}
  .bpt484-quickbar{gap:6px}.bpt484-quickbar button{height:46px;font-size:11px;border-radius:10px}
@@ -29969,8 +29968,8 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
  #live3Fullscreen .bpt484-live{padding:5px;grid-template-rows:42px minmax(0,1fr) 40px 52px}
  .bpt484-head{grid-template-columns:.6fr 1.4fr .75fr;padding:0 8px;border-radius:9px}.bpt484-brand{font-size:19px}.bpt484-owner,.bpt484-part{font-size:9px}
  .bpt484-main{grid-template-columns:minmax(0,1.55fr) minmax(310px,1fr);gap:5px}
- .bpt484-stage{padding:4px 12px 7px;border-radius:10px;grid-template-rows:minmax(0,1.35fr) minmax(54px,.65fr) auto}.bpt484-stage:after{top:58%}.bpt484-next{font-size:9px;margin-top:2px}
- .bpt484-right{gap:5px}.bpt484-kpis{gap:5px}.bpt484-card{padding:6px 9px;border-radius:10px}.bpt484-label{font-size:8px;margin-bottom:2px}.bpt484-sub{font-size:8px;margin-top:2px}
+ .bpt484-stage{padding:4px 12px 7px;border-radius:10px}.bpt484-stage:after{top:58%}.bpt484-next{font-size:9px;margin-top:2px}
+ .bpt484-right{gap:5px}.bpt484-kpis{gap:5px}.bpt484-card{padding:6px 9px;border-radius:10px;grid-template-columns:30px minmax(0,1fr);column-gap:5px}.bpt484-card-icon{width:24px;height:24px}.bpt484-label{font-size:8px;margin-bottom:2px}.bpt484-sub{font-size:8px;margin-top:2px}
  .bpt484-info{padding:6px 9px;border-radius:10px;gap:4px}.bpt484-info-line{grid-template-columns:18px minmax(0,1fr) auto;gap:5px}.bpt484-info-icon{font-size:14px}.bpt484-info-copy{font-size:10px}.bpt484-level-inline{font-size:10px;padding-left:6px}.bpt484-timing{grid-template-columns:18px 1fr;gap:5px}.bpt484-timing .bpt484-label{font-size:8px}.bpt484-timing .bpt484-value{font-size:22px}.bpt484-pace-line{font-size:8px;margin-top:2px}
  .bpt484-quickbar{gap:5px}.bpt484-quickbar button{font-size:8px;border-radius:8px}
  .bpt484-actions{gap:5px}.bpt484-actions button{font-size:9px;border-radius:8px}
@@ -30010,8 +30009,8 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
       </section>
       <div class="bpt484-right">
         <div class="bpt484-kpis">
-          <section class="bpt484-card bpt484-players" data-action="players"><div class="bpt484-label">Joueurs</div><div class="bpt484-value" data-role="players">0</div><div class="bpt484-sub">restants</div></section>
-          <section class="bpt484-card bpt484-stack" data-action="stack"><div class="bpt484-label">Tapis moyen</div><div class="bpt484-value" data-role="avg">0</div></section>
+          <section class="bpt484-card bpt484-players" data-action="players"><div class="bpt484-card-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="24" cy="15" r="7"/><circle cx="11" cy="19" r="5"/><circle cx="37" cy="19" r="5"/><path d="M13 38v-5c0-7 5-11 11-11s11 4 11 11v5"/><path d="M3 37v-5c0-5 3-8 8-8 2 0 4 .6 5.5 1.8"/><path d="M45 37v-5c0-5-3-8-8-8-2 0-4 .6-5.5 1.8"/></svg></div><div class="bpt484-label">Joueurs</div><div class="bpt484-value" data-role="players">0</div><div class="bpt484-sub">restants</div></section>
+          <section class="bpt484-card bpt484-stack" data-action="stack"><div class="bpt484-card-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><ellipse cx="24" cy="12" rx="14" ry="6"/><path d="M10 12v7c0 3 6 6 14 6s14-3 14-6v-7"/><path d="M10 20v7c0 3 6 6 14 6s14-3 14-6v-7"/><path d="M10 28v7c0 3 6 6 14 6s14-3 14-6v-7"/></svg></div><div class="bpt484-label">Tapis moyen</div><div class="bpt484-value" data-role="avg">0</div></section>
         </div>
         <section class="bpt484-info" data-action="timing">
           <div class="bpt484-info-line"><div class="bpt484-info-icon">⚙</div><div class="bpt484-info-copy">Structure · <strong class="bpt484-teal" data-role="mode">Classique</strong></div><div></div></div>
@@ -30219,13 +30218,13 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
       const landscapePhone=matchMedia('(max-width:1000px) and (max-height:560px) and (orientation:landscape)').matches;
       /* Hiérarchie validée : Timer > Blinds > Joueurs = Tapis moyen = Prochaines blinds = Temps écoulé. */
       fitText(root.querySelector('.bpt484-clock .bpt484-value'),{max:portrait?148:(landscapePhone?100:210),min:portrait?72:(landscapePhone?46:74),widthRatio:.92,heightRatio:.78});
-      fitText(root.querySelector('.bpt484-blinds .bpt484-value'),{max:portrait?84:(landscapePhone?72:114),min:portrait?40:(landscapePhone?34:48),widthRatio:.96,heightRatio:.95});
-      fitText(root.querySelector('.bpt484-players .bpt484-value'),{max:portrait?76:(landscapePhone?58:98),min:portrait?42:(landscapePhone?30:48),widthRatio:.88,heightRatio:.90});
-      fitText(root.querySelector('.bpt484-stack .bpt484-value'),{max:portrait?42:(landscapePhone?31:52),min:portrait?22:(landscapePhone?17:24),widthRatio:.94,heightRatio:.82});
+      fitText(root.querySelector('.bpt484-blinds .bpt484-value'),{max:portrait?78:(landscapePhone?66:104),min:portrait?34:(landscapePhone?30:42),widthRatio:.96,heightRatio:.86});
+      fitText(root.querySelector('.bpt484-players .bpt484-value'),{max:portrait?78:(landscapePhone?56:102),min:portrait?44:(landscapePhone?30:52),widthRatio:.94,heightRatio:.78});
+      fitText(root.querySelector('.bpt484-stack .bpt484-value'),{max:portrait?42:(landscapePhone?31:52),min:portrait?24:(landscapePhone?17:27),widthRatio:.94,heightRatio:.72});
       fitText(root.querySelector('.bpt484-timing .bpt484-value'),{max:portrait?42:(landscapePhone?26:50),min:portrait?24:(landscapePhone?16:24),widthRatio:.92,heightRatio:.56});
       fitText(root.querySelector('.bpt484-next strong'),{max:portrait?32:(landscapePhone?23:42),min:portrait?18:(landscapePhone?13:20),widthRatio:.90,heightRatio:.48});
-      root.querySelectorAll('.bpt484-actions button').forEach(btn=>fitText(btn,{max:portrait?15:(landscapePhone?10:17),min:9,widthRatio:.88,heightRatio:.68}));
-      root.querySelectorAll('.bpt484-quickbar button').forEach(btn=>fitText(btn,{max:portrait?13:(landscapePhone?9:15),min:8,widthRatio:.88,heightRatio:.68}));
+      root.querySelectorAll('.bpt484-actions button').forEach(btn=>fitText(btn,{max:portrait?16:(landscapePhone?11:20),min:10,widthRatio:.90,heightRatio:.72}));
+      root.querySelectorAll('.bpt484-quickbar button').forEach(btn=>fitText(btn,{max:portrait?14:(landscapePhone?10:18),min:9,widthRatio:.90,heightRatio:.72}));
     });
   }
   function scheduleFitLiveTexts(){
