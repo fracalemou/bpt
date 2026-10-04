@@ -14137,25 +14137,7 @@ body.bpt-mobile-device .bpt-mobile-top-menu button{
 .bpt-layout-edit-tile[data-kind="info"].is-selected{outline:0!important;border:0!important;background:transparent!important;box-shadow:none!important;}
 </style>
 
-<style id="bpt-v480-editor-selection-only">
-/* V4.80 — aperçu éditeur : seul l’élément sélectionné est visible.
-   La liste latérale reste le moyen de sélectionner les autres éléments. */
-#bptLayoutStage .bpt-layout-edit-tile:not(.is-selected){
-  visibility:hidden !important;
-  opacity:0 !important;
-  pointer-events:none !important;
-}
-#bptLayoutStage .bpt-layout-edit-tile.is-selected{
-  visibility:visible !important;
-  opacity:1 !important;
-}
-/* Un élément masqué reste éditable lorsqu'il est sélectionné depuis la liste. */
-#bptLayoutStage .bpt-layout-edit-tile.is-selected.is-hidden{
-  visibility:visible !important;
-  opacity:1 !important;
-  filter:none !important;
-}
-</style>
+
 </head>
 <body>
 <div id="headUpPhotoPrompt" style="
@@ -14218,7 +14200,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="4.80";
+const BPT_APP_VERSION="4.81";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14370,7 +14352,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v4.80</div>
+<div class="app-version" id="headerAppVersion">BPT v4.81</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15485,7 +15467,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.80</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 4.81</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -15524,9 +15506,6 @@ function simplifyRecordTextForMobile(text){
         <button type="button" data-layout-profile="portrait">Aperçu portrait</button>
       </div>
       <div class="bpt-layout-preset-actions">
-        <button class="btn ghost" type="button" data-layout-preset="compact">Compact</button>
-        <button class="btn ghost" type="button" data-layout-preset="standard">Standard</button>
-        <button class="btn ghost" type="button" data-layout-preset="complete">Complet</button>
         <label class="bpt-layout-theme-label">Thème
           <select id="bptLayoutTheme">
             <option value="bpt">BPT</option>
@@ -15542,7 +15521,7 @@ function simplifyRecordTextForMobile(text){
       <div class="bpt-layout-stage-wrap">
         <div class="bpt-layout-stage-label"><strong>Simulation</strong><span id="bptLayoutProfileLabel">PC 16/9</span></div>
         <div class="bpt-layout-stage" id="bptLayoutStage" data-profile="pc"></div>
-        <div class="muted bpt-layout-help">Les couleurs, la visibilité et le texte sont communs. La position et la taille sont propres à chaque format. Glissez un élément ou redimensionnez sa zone dans l’aperçu choisi.</div>
+        <div class="muted bpt-layout-help">Tous les éléments sont visibles. Sélectionnez-en un pour le déplacer, le redimensionner ou modifier son apparence. Les informations peuvent se superposer librement.</div>
       </div>
       <aside class="bpt-layout-inspector">
         <h3>Propriétés de l’élément</h3>
@@ -15563,10 +15542,6 @@ function simplifyRecordTextForMobile(text){
           <label>Alignement vertical
             <select id="bptLayoutTileVAlign"><option value="top">Haut</option><option value="center">Centré</option><option value="bottom">Bas</option></select>
           </label>
-          <div class="bpt-layout-layer-actions">
-            <button type="button" class="btn ghost" id="bptLayoutSendBack">Arrière</button>
-            <button type="button" class="btn ghost" id="bptLayoutBringFront">Avant</button>
-          </div>
           <label class="bpt-layout-check"><input type="checkbox" id="bptLayoutTileVisible" checked> Afficher cet élément</label>
         </div>
         <hr>
@@ -15575,7 +15550,7 @@ function simplifyRecordTextForMobile(text){
       </aside>
     </div>
     <div class="bpt-layout-footer">
-      <span class="muted" id="bptLayoutSaveStatus">Styles communs · positions propres à chaque format.</span>
+      <span class="muted" id="bptLayoutSaveStatus">Éditeur simple · déplacement, taille, couleurs et visibilité.</span>
       <div>
         <label class="bpt-layout-copy-control">Copier vers
           <select id="bptLayoutCopyTarget"><option value="landscape">Téléphone paysage</option><option value="portrait">Téléphone portrait</option><option value="pc">PC 16/9</option></select>
@@ -29586,7 +29561,7 @@ body.b466-live-active #live3>.hero{display:none!important}
 .bpt-layout-edit-tile .bpt-ed-label{font-size:.72em;color:var(--tile-muted);font-weight:800}.bpt-layout-edit-tile .bpt-ed-value{font-size:1.7em;font-weight:950;line-height:1.05}.bpt-layout-edit-tile .bpt-ed-sub{font-size:.65em;color:#d7e3dd;margin-top:4px}
 .bpt-layout-edit-tile[data-font="s"],.bpt-modular-live-tile[data-font="s"]{font-size:10px}.bpt-layout-edit-tile[data-font="m"],.bpt-modular-live-tile[data-font="m"]{font-size:13px}.bpt-layout-edit-tile[data-font="l"],.bpt-modular-live-tile[data-font="l"]{font-size:16px}.bpt-layout-edit-tile[data-font="xl"],.bpt-modular-live-tile[data-font="xl"]{font-size:20px}.bpt-layout-edit-tile[data-font="xxl"],.bpt-modular-live-tile[data-font="xxl"]{font-size:25px}
 .bpt-layout-edit-tile[data-halign="left"],.bpt-modular-live-tile[data-halign="left"]{align-items:flex-start;text-align:left}.bpt-layout-edit-tile[data-halign="center"],.bpt-modular-live-tile[data-halign="center"]{align-items:center;text-align:center}.bpt-layout-edit-tile[data-halign="right"],.bpt-modular-live-tile[data-halign="right"]{align-items:flex-end;text-align:right}.bpt-layout-edit-tile[data-valign="top"],.bpt-modular-live-tile[data-valign="top"]{justify-content:flex-start}.bpt-layout-edit-tile[data-valign="center"],.bpt-modular-live-tile[data-valign="center"]{justify-content:center}.bpt-layout-edit-tile[data-valign="bottom"],.bpt-modular-live-tile[data-valign="bottom"]{justify-content:flex-end}
-.bpt-layout-inspector{background:#0d281d;border:1px solid #315b48;border-radius:14px;padding:14px;align-self:start;position:sticky;top:10px}.bpt-layout-inspector h3{margin:0 0 10px;font-size:15px}.bpt-layout-inspector label{display:grid;gap:5px;margin:10px 0;font-size:12px;color:#b9cbc2}.bpt-layout-inspector select{height:40px;background:#081d15;color:#fff;border:1px solid #355f4c;border-radius:8px;padding:0 9px}.bpt-layout-check{display:flex!important;grid-template-columns:auto 1fr;align-items:center}.bpt-layout-check input{width:auto!important}.bpt-layout-layer-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.bpt-layout-layer-actions .btn{min-height:38px;padding:6px 8px}
+.bpt-layout-inspector{background:#0d281d;border:1px solid #315b48;border-radius:14px;padding:14px;align-self:start;position:sticky;top:10px}.bpt-layout-inspector h3{margin:0 0 10px;font-size:15px}.bpt-layout-inspector label{display:grid;gap:5px;margin:10px 0;font-size:12px;color:#b9cbc2}.bpt-layout-inspector select{height:40px;background:#081d15;color:#fff;border:1px solid #355f4c;border-radius:8px;padding:0 9px}.bpt-layout-check{display:flex!important;grid-template-columns:auto 1fr;align-items:center}.bpt-layout-check input{width:auto!important}
 .bpt-layout-tile-list{display:grid;gap:6px;max-height:420px;overflow:auto}.bpt-layout-tile-toggle{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid #2b4d3d;border-radius:8px;padding:7px 8px;background:#102d21;color:#edf5f1}.bpt-layout-tile-toggle button{border:0;background:transparent;color:#d6e6de;cursor:pointer;font-weight:800;text-align:left;flex:1}.bpt-layout-tile-toggle input{width:auto!important}.bpt-layout-tile-toggle[data-kind="action"]{border-style:dashed;background:#0d251c}.bpt-layout-help{font-size:11px;margin-top:7px}.bpt-layout-footer{margin-top:14px;border-top:1px solid #2c4c3d;padding-top:12px}.bpt-layout-footer .btn{min-height:42px}
 @media(max-width:900px){.bpt-layout-workspace{grid-template-columns:1fr}.bpt-layout-inspector{position:static}.bpt-layout-stage{min-height:220px}.bpt-layout-stage[data-profile="portrait"]{min-height:560px}}
 
@@ -29697,7 +29672,7 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
   function applyGeom(el,g,s){el.style.left=g.x+'%';el.style.top=g.y+'%';el.style.width=g.w+'%';el.style.height=g.h+'%';el.style.zIndex=g.z;el.style.fontSize=s.fontSize+'px';el.dataset.halign=s.halign;el.dataset.valign=s.valign;el.style.setProperty('--tile-user-text',s.textColor||'var(--tile-text)')}
   function resizeHandles(){return ['nw','n','ne','e','se','s','sw','w'].map(dir=>`<span class="bpt-resize-handle" data-dir="${dir}" aria-hidden="true"></span>`).join('')}
   function renderEditor(){const stage=$('bptLayoutStage');if(!stage)return;stage.dataset.profile=profile;stage.dataset.theme=state.theme||'bpt';stage.innerHTML='';$('bptLayoutProfileLabel').textContent=profileLabel(profile)+' · disposition propre à ce format';if($('bptLayoutTheme'))$('bptLayoutTheme').value=state.theme||'bpt';for(const [id,d] of Object.entries(TILES)){const g=normGeom(geo(id)),s=normShared(sh(id));const el=document.createElement('div');el.className='bpt-layout-edit-tile'+(id===selected?' is-selected':'')+(s.visible?'':' is-hidden');el.dataset.tile=id;el.dataset.kind=d.kind;applyGeom(el,g,s);el.innerHTML=tileInner(id,false,g)+resizeHandles();el.addEventListener('click',()=>selectTile(id));el.querySelector('.bpt-tile-content')?.addEventListener('pointerdown',startDrag);el.querySelectorAll('.bpt-resize-handle').forEach(h=>h.addEventListener('pointerdown',startResize));stage.appendChild(el)}renderList();renderInspector()}
-  function selectTile(id){selected=id;renderEditor()}
+  function selectTile(id){selected=id;const g=geo(id);if(g){const maxZ=Math.max(1,...Object.values(state.layouts[profile]||{}).map(v=>+v.z||1));g.z=maxZ+1;}save();renderEditor();}
   function startDrag(e){if(e.button!==0||e.target.closest('.bpt-resize-handle'))return;e.stopPropagation();const el=e.currentTarget.closest('.bpt-layout-edit-tile'),id=el.dataset.tile,g=geo(id),r=$('bptLayoutStage').getBoundingClientRect();selected=id;drag={id,el,startX:e.clientX,startY:e.clientY,x:g.x,y:g.y,stageW:r.width,stageH:r.height};e.currentTarget.setPointerCapture?.(e.pointerId);e.currentTarget.addEventListener('pointermove',dragMove);e.currentTarget.addEventListener('pointerup',dragEnd,{once:true});renderInspector();e.preventDefault()}
   function dragMove(e){if(!drag)return;const g=geo(drag.id);g.x=drag.x+(e.clientX-drag.startX)/drag.stageW*100;g.y=drag.y+(e.clientY-drag.startY)/drag.stageH*100;normGeom(g);applyGeom(drag.el,g,sh(drag.id));updateDimensionReadout(g)}
   function dragEnd(){if(!drag)return;drag.el.querySelector('.bpt-tile-content')?.removeEventListener('pointermove',dragMove);drag=null;save();renderEditor();applyLayouts()}
@@ -29716,20 +29691,17 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
   function doAction(a){const fs=$('live3Fullscreen'),inFs=!!(fs&&getComputedStyle(fs).display!=='none');const map={prev:'live3PrevLevelBtn',next:'live3NextLevelBtn',minus:'live3MinusBtn',plus:'live3PlusBtn',pause:inFs?'live3FsStartPauseBtn':'live3StartPauseBtn',eliminate:inFs?'live3FsEliminateBtn':'live3EliminateBtn',chat:inFs?'live3FsChatActionBtn':'live3ChatBtn',odds:inFs?'live3FsOddsActionBtn':'live3OddsBtn',settings:'live3SettingsBtn'};if(map[a])$(map[a])?.click();if(a==='fullscreen'){if(inFs)$('live3FsExitActionBtn')?.click();else $('live3FullscreenBtn')?.click()}}
   function tileAction(id,anchor){const d=TILES[id];if(d.kind==='action'){doAction(d.action);setTimeout(refresh,80);return}if(id==='players'){$('live3PlayersSummaryBtn')?.click();return}const p=ensurePop();positionPop(anchor);let html='';if(id==='blinds')html=`<h3>Blinds</h3><div class="muted">${$('live3Blinds')?.textContent||'—'} · ${$('live3BlindDurationLabel')?.textContent||''}</div><div class="bpt-tile-action-row"><button data-act="prev">◀ Niveau précédent</button><button data-act="next">Niveau suivant ▶</button><button data-act="durminus">− 1 min de niveau</button><button data-act="durplus">+ 1 min de niveau</button></div>`;else if(id==='timer')html=`<h3>Chrono</h3><div class="bpt-tile-action-row"><button data-act="minus">− 1 min</button><button data-act="plus">+ 1 min</button><button class="gold" data-act="pause">${$('live3StartPauseBtn')?.textContent||'Pause / Reprendre'}</button><button data-act="close">Fermer</button></div>`;else if(id==='finish')html=`<h3>Fin estimée</h3><div class="muted">${$('live3EstimatedFinish')?.textContent||'—'} · ${$('live3FinishDelta')?.textContent||'—'}</div><div class="bpt-tile-action-row"><button data-act="close">Fermer</button><button class="teal" data-act="settings">Réglages</button></div>`;else html=`<h3>${d.name}</h3><div class="muted">${anchor.querySelector('.bpt-live-tile-value')?.textContent||''}</div><div class="bpt-tile-action-row"><button data-act="close">Fermer</button></div>`;p.innerHTML=html;p.classList.add('open');p.onclick=e=>{const a=e.target.closest('[data-act]')?.dataset.act;if(!a)return;if(['prev','next','minus','plus','pause','settings'].includes(a))doAction(a);if(a==='durminus'||a==='durplus'){const inp=$('live3BlindDurationInput');if(inp){inp.value=Math.max(2,(parseInt(inp.value||'2',10)+(a==='durplus'?1:-1)));$('live3ApplyBlindDurationBtn')?.click()}}if(a==='close'||a==='settings')p.classList.remove('open');setTimeout(refresh,80)}}
   function refresh(){const p=runtimeProfile();document.querySelectorAll('.bpt-modular-live-tile').forEach(el=>{const id=el.dataset.tile,g=state.layouts[p]?.[id],s=sh(id);if(!g)return;el.innerHTML=tileInner(id,true,g);applyGeom(el,g,s)})}
-  function applyPreset(name){const fresh=deep(DEFAULT);if(name==='compact'){['avg','eliminate','minus1','plus1'].forEach(id=>fresh.shared[id].visible=false)}if(name==='complete')Object.values(fresh.shared).forEach(s=>s.visible=true);state=fresh;save();renderEditor();applyLayouts()}
-  function copyLayout(from,to){state.layouts[to]=deep(state.layouts[from]);save();renderEditor();applyLayouts();const st=$('bptLayoutSaveStatus');if(st){st.textContent=`Disposition ${profileLabel(from)} copiée vers ${profileLabel(to)}.`;setTimeout(()=>st.textContent='Styles communs · positions propres à chaque format.',1800)}}
+  function copyLayout(from,to){state.layouts[to]=deep(state.layouts[from]);save();renderEditor();applyLayouts();const st=$('bptLayoutSaveStatus');if(st){st.textContent=`Disposition ${profileLabel(from)} copiée vers ${profileLabel(to)}.`;setTimeout(()=>st.textContent='Éditeur simple · déplacement, taille, couleurs et visibilité.',1800)}}
   function resetCurrent(){state.layouts[profile]=deep(DEFAULT.layouts[profile]);save();renderEditor();applyLayouts()}
   function init(){
     document.querySelectorAll('[data-layout-profile]').forEach(b=>b.onclick=()=>{profile=b.dataset.layoutProfile;document.querySelectorAll('[data-layout-profile]').forEach(x=>x.classList.toggle('is-active',x===b));renderEditor()});
-    document.querySelectorAll('[data-layout-preset]').forEach(b=>b.onclick=()=>applyPreset(b.dataset.layoutPreset));
     $('bptLayoutTheme')?.addEventListener('change',e=>{state.theme=e.target.value;save();renderEditor();applyLayouts()});
     $('bptLayoutTileFont')?.addEventListener('input',e=>{const v=+e.target.value;$('bptLayoutTileFontValue').value=v+' px';updateShared('fontSize',v)});
     $('bptLayoutTileTextColor')?.addEventListener('input',e=>updateShared('textColor',e.target.value));$('bptLayoutTileTextColorReset')?.addEventListener('click',()=>updateShared('textColor',''));
     $('bptLayoutTileHAlign')?.addEventListener('change',e=>updateShared('halign',e.target.value));$('bptLayoutTileVAlign')?.addEventListener('change',e=>updateShared('valign',e.target.value));$('bptLayoutTileVisible')?.addEventListener('change',e=>updateShared('visible',e.target.checked));
-    $('bptLayoutBringFront')?.addEventListener('click',()=>{const max=Math.max(...Object.values(state.layouts[profile]).map(x=>+x.z||1));updateGeom('z',max+1)});$('bptLayoutSendBack')?.addEventListener('click',()=>{const min=Math.min(...Object.values(state.layouts[profile]).map(x=>+x.z||1));updateGeom('z',Math.max(1,min-1))});
     $('bptLayoutResetBtn')?.addEventListener('click',resetCurrent);
     $('bptLayoutCopyBtn')?.addEventListener('click',()=>{const target=$('bptLayoutCopyTarget')?.value;if(target&&target!==profile)copyLayout(profile,target)});
-    $('bptLayoutSaveBtn')?.addEventListener('click',()=>{save();applyLayouts();const st=$('bptLayoutSaveStatus');if(st){st.textContent='Configuration appliquée et synchronisée.';setTimeout(()=>st.textContent='Styles communs · positions propres à chaque format.',1800)}});
+    $('bptLayoutSaveBtn')?.addEventListener('click',()=>{save();applyLayouts();const st=$('bptLayoutSaveStatus');if(st){st.textContent='Configuration appliquée et synchronisée.';setTimeout(()=>st.textContent='Éditeur simple · déplacement, taille, couleurs et visibilité.',1800)}});
     renderEditor();applyLayouts();connectRemote();const obs=new MutationObserver(()=>refresh());['live3Blinds','live3BlindDurationLabel','live3Timer','live3Remaining','live3EstimatedFinish','live3FinishDelta','live3AvgStack','live3Next'].forEach(id=>{const n=$(id);if(n)obs.observe(n,{childList:true,subtree:true,characterData:true})});addEventListener('resize',()=>{clearTimeout(window.__bptLayResize);window.__bptLayResize=setTimeout(applyLayouts,120)})
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
@@ -29867,6 +29839,21 @@ body.bpt-modular-layout-on #live3Game .b466-dashboard,body.bpt-modular-layout-on
 .bpt-modular-live-tile[data-tile="timer"] .bpt-live-tile-value,.bpt-layout-edit-tile[data-tile="timer"] .bpt-ed-value{font-size:2.15em!important;color:#fff!important}
 .bpt-modular-live-tile[data-tile="blinds"] .bpt-live-tile-value,.bpt-layout-edit-tile[data-tile="blinds"] .bpt-ed-value{font-size:1.85em!important;color:#f0b73a!important}
 .bpt-modular-live-tile[data-tile="finish"] .bpt-live-tile-value,.bpt-layout-edit-tile[data-tile="finish"] .bpt-ed-value{color:#54d8cf!important}
+</style>
+
+<style id="bpt-v481-editor-simplified-final">
+/* V4.81 — tous les éléments restent visibles dans l’aperçu. */
+#bptLayoutStage .bpt-layout-edit-tile{visibility:visible!important;opacity:1!important;pointer-events:auto!important;}
+#bptLayoutStage .bpt-layout-edit-tile.is-hidden{opacity:.22!important;}
+/* Pas de presets ni de gestion manuelle de profondeur. */
+[data-layout-preset],#bptLayoutBringFront,#bptLayoutSendBack,.bpt-layout-layer-actions{display:none!important;}
+/* Plus est strictement mobile, même si une classe mobile est posée par erreur sur desktop. */
+@media (min-width:901px){
+  html #bptMobileMoreTopBtn,body #bptMobileMoreTopBtn,
+  html .bpt-nav-mobile-only,body .bpt-nav-mobile-only,
+  html #bptMobileMoreTopMenu,body #bptMobileMoreTopMenu,
+  html .bpt-mobile-top-menu,body .bpt-mobile-top-menu{display:none!important;}
+}
 </style>
 </body>
 </html>
