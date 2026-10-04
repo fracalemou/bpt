@@ -14172,7 +14172,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.02";
+const BPT_APP_VERSION="5.04";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14324,7 +14324,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.00</div>
+<div class="app-version" id="headerAppVersion">BPT v5.04</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15434,7 +15434,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.02</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.04</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -29880,6 +29880,10 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
  overflow:hidden;font-family:Arial,Helvetica,sans-serif
 }
 #live3Fullscreen .bpt484-live{position:fixed;inset:0;z-index:1500000;border-radius:0;max-height:none;height:100vh;width:100vw;padding:14px;grid-template-rows:66px minmax(0,1fr) 60px 76px}
+@media(min-width:1001px) and (min-height:761px){
+ #live3Game .bpt484-live[data-fs="0"]{height:calc(100dvh - 88px);min-height:680px;max-height:820px;grid-template-rows:66px minmax(0,1fr) 60px 76px}
+ #live3Game .bpt484-live[data-fs="0"] .bpt484-stage{padding-top:18px;padding-bottom:22px}
+}
 
 .bpt484-head{background:linear-gradient(180deg,#0b2a25,#071e1b);border:1px solid var(--lineSoft);border-radius:16px;display:grid;grid-template-columns:1fr 1.5fr 1fr;align-items:center;padding:0 22px;min-width:0}
 .bpt484-brand{font-size:30px;font-weight:950;color:var(--gold);letter-spacing:.02em}
@@ -29902,7 +29906,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 .bpt484-card{padding:16px 18px;display:grid;grid-template-columns:62px minmax(0,1fr);grid-template-rows:auto auto auto;column-gap:14px;align-content:center;cursor:pointer;position:relative}
 .bpt484-card:hover,.bpt484-info:hover{border-color:#2a8174}
 .bpt484-label{font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:900;margin-bottom:5px}
-.bpt484-value{font-weight:950;line-height:1;white-space:nowrap;max-width:100%}
+.bpt484-value{font-weight:950;line-height:1;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:clip}
 .bpt484-card-icon{grid-column:1;grid-row:1/4;align-self:center;justify-self:center;width:48px;height:48px;color:var(--teal);opacity:.96}.bpt484-card-icon svg{width:100%;height:100%;display:block;stroke:currentColor;fill:none;stroke-width:1.8}.bpt484-card .bpt484-label,.bpt484-card .bpt484-value,.bpt484-card .bpt484-sub{grid-column:2}.bpt484-players .bpt484-value{font-size:92px}.bpt484-stack .bpt484-value{font-size:48px}
 .bpt484-sub{font-size:16px;color:var(--muted);margin-top:6px}
 
@@ -29926,7 +29930,6 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 .bpt484-actions{display:grid;grid-template-columns:1fr 1.28fr .82fr 1.12fr 1.05fr 1.08fr;gap:10px}
 .bpt484-actions button{border:0;border-radius:14px;font-size:18px;font-weight:900;cursor:pointer;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bpt484-pause{background:var(--gold);color:#171007}.bpt484-out{background:var(--red);color:#fff}.bpt484-chat{background:#174c44;color:#fff}.bpt484-odds{background:var(--teal);color:#06201d}.bpt484-full{background:#dce9e6;color:#10231f}.bpt484-end{background:#7e3030;color:#fff}
-.bpt484-live[data-fs="1"] .bpt484-end{display:none!important}
 
 .bpt484-action-feedback{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.92);z-index:8;padding:9px 14px;border-radius:999px;background:rgba(3,18,16,.92);border:1px solid rgba(69,214,190,.7);box-shadow:0 0 24px rgba(41,209,178,.28);color:#eafff9;font-size:clamp(14px,1.5vw,20px);font-weight:950;white-space:nowrap;pointer-events:none;opacity:0;animation:bpt484FeedbackBadge 1.05s ease-out forwards}
 .bpt484-feedback-pulse{animation:bpt484FeedbackPulse 1.05s ease-out}.bpt484-level-pulse{animation:bpt484LevelPulse 1.05s ease-out}
@@ -29959,7 +29962,6 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
  .bpt484-next{font-size:13px;margin-top:6px}
  .bpt484-quickbar{gap:6px}.bpt484-quickbar button{height:46px;font-size:11px;border-radius:10px}
  .bpt484-actions{grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,58px);gap:7px}.bpt484-actions button{font-size:13px;border-radius:11px}
- .bpt484-live[data-fs="1"] .bpt484-end{display:block!important}
 }
 
 /* Téléphone paysage */
@@ -30040,7 +30042,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
       else if(a==='chat')$('live3ChatBtn')?.click();
       else if(a==='odds')$('live3OddsBtn')?.click();
       else if(a==='full'){if(fs)x?.closeFullscreen?.();else x?.openFullscreen?.()}
-      else if(a==='end'&&!fs)await x?.endLive?.();
+      else if(a==='end')await x?.endLive?.();
     }catch(e){console.error('BPT action',a,e)}
     setTimeout(sync,80);
   }
@@ -30192,8 +30194,17 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     const parent=opts.parent||el.parentElement;
     if(!parent || parent.offsetParent===null)return;
     const ps=getComputedStyle(parent);
-    const availableW=Math.max(0,parent.clientWidth-(parseFloat(ps.paddingLeft)||0)-(parseFloat(ps.paddingRight)||0));
-    const availableH=Math.max(0,parent.clientHeight-(parseFloat(ps.paddingTop)||0)-(parseFloat(ps.paddingBottom)||0));
+    let availableW=Math.max(0,parent.clientWidth-(parseFloat(ps.paddingLeft)||0)-(parseFloat(ps.paddingRight)||0));
+    let availableH=Math.max(0,parent.clientHeight-(parseFloat(ps.paddingTop)||0)-(parseFloat(ps.paddingBottom)||0));
+    const card=parent.classList?.contains('bpt484-card')?parent:null;
+    if(card && el.closest('.bpt484-card')===card){
+      const icon=card.querySelector('.bpt484-card-icon');
+      if(icon) availableW-=icon.getBoundingClientRect().width+(parseFloat(getComputedStyle(card).columnGap)||0);
+      const label=card.querySelector('.bpt484-label');
+      const sub=card.querySelector('.bpt484-sub');
+      if(label && label!==el) availableH-=label.getBoundingClientRect().height+6;
+      if(sub && sub!==el) availableH-=sub.getBoundingClientRect().height+6;
+    }
     if(!availableW || !availableH)return;
     const min=Math.max(1,Number(opts.min||10));
     const max=Math.max(min,Number(opts.max||parseFloat(getComputedStyle(el).fontSize)||16));
@@ -30219,8 +30230,8 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
       /* Hiérarchie validée : Timer > Blinds > Joueurs = Tapis moyen = Prochaines blinds = Temps écoulé. */
       fitText(root.querySelector('.bpt484-clock .bpt484-value'),{max:portrait?148:(landscapePhone?100:210),min:portrait?72:(landscapePhone?46:74),widthRatio:.92,heightRatio:.78});
       fitText(root.querySelector('.bpt484-blinds .bpt484-value'),{max:portrait?78:(landscapePhone?66:104),min:portrait?34:(landscapePhone?30:42),widthRatio:.96,heightRatio:.86});
-      fitText(root.querySelector('.bpt484-players .bpt484-value'),{max:portrait?78:(landscapePhone?56:102),min:portrait?44:(landscapePhone?30:52),widthRatio:.94,heightRatio:.78});
-      fitText(root.querySelector('.bpt484-stack .bpt484-value'),{max:portrait?42:(landscapePhone?31:52),min:portrait?24:(landscapePhone?17:27),widthRatio:.94,heightRatio:.72});
+      fitText(root.querySelector('.bpt484-players .bpt484-value'),{max:portrait?78:(landscapePhone?56:98),min:portrait?44:(landscapePhone?30:52),widthRatio:.88,heightRatio:.76});
+      fitText(root.querySelector('.bpt484-stack .bpt484-value'),{max:portrait?42:(landscapePhone?30:48),min:portrait?22:(landscapePhone?17:26),widthRatio:.84,heightRatio:.68});
       fitText(root.querySelector('.bpt484-timing .bpt484-value'),{max:portrait?42:(landscapePhone?26:50),min:portrait?24:(landscapePhone?16:24),widthRatio:.92,heightRatio:.56});
       fitText(root.querySelector('.bpt484-next strong'),{max:portrait?32:(landscapePhone?23:42),min:portrait?18:(landscapePhone?13:20),widthRatio:.90,heightRatio:.48});
       root.querySelectorAll('.bpt484-actions button').forEach(btn=>fitText(btn,{max:portrait?16:(landscapePhone?11:20),min:10,widthRatio:.90,heightRatio:.72}));
