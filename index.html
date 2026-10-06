@@ -14172,7 +14172,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.07";
+const BPT_APP_VERSION="5.08";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14324,7 +14324,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.07</div>
+<div class="app-version" id="headerAppVersion">BPT v5.08</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15434,7 +15434,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.07</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.08</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -19344,6 +19344,7 @@ function achievementPlayers(rowsOverride=null){
     const maxKills=pr.reduce((m,r)=>Math.max(m,Number(r.kills||0)),0);
     const tabliers=pr.filter(r=>r.tablier || (Number(r.place)===1 && Number(r.n)>=10)).length;
     const participationCount=new Set(pr.map(r=>Number(r.game))).size;
+    const bountyHunts=pr.filter(r=>r.bountyHunter===true).length;
 
     let winStreak=0,curWin=0;
     for(const r of pr){
@@ -19369,7 +19370,7 @@ function achievementPlayers(rowsOverride=null){
     const maxSameVictim=Math.max(0,...Object.values(sameVictim));
 
     byPlayer[name]={
-      wins,podiums,lastPlaces,net,maxKills,tabliers,participationCount,
+      wins,podiums,lastPlaces,net,maxKills,tabliers,participationCount,bountyHunts,
       winStreak,strike,maxSameVictim
     };
   }
@@ -19392,6 +19393,7 @@ function achievementPlayers(rowsOverride=null){
     {icon:"🚂",name:"Invincible",desc:"Gagner 2 participations consécutives.",test:s=>s.winStreak>=2},
     {icon:"⚡",name:"Hat-trick",desc:"Gagner 3 participations consécutives.",test:s=>s.winStreak>=3},
     {icon:"🎯",name:"Bourreau",desc:"Éliminer le même adversaire au moins 3 fois.",test:s=>s.maxSameVictim>=3},
+    {icon:"🎯",name:"Chasseur de prime",desc:"Éliminer le bounty mystère d’une partie.",test:s=>s.bountyHunts>=1},
     {icon:"🎟",name:"Fidèle",desc:"Participer à au moins 10 parties.",test:s=>s.participationCount>=10},
     {icon:"🏁",name:"Marathonien",desc:"Participer à au moins 20 parties.",test:s=>s.participationCount>=20}
   ];
@@ -27134,6 +27136,8 @@ function connectionDeviceLabel(){
           Math.max(100,Number($3("live3Stack").value)||20000)
         )[0].durationSec,
         players:selected.map(name=>({name,status:"in",place:null,killer:"",outAt:null,outLevel:null,outTime:"",outElapsedSec:null})),
+        mysteryBountyName:selected[Math.floor(Math.random()*selected.length)],
+        mysteryBountyRevealed:false,mysteryBountyHunter:"",liveAlerts:[],
         viewers:{},takeoverRequest:null,chat:[],paceAdaptive:false
       };
       await r.transaction(server=>{
@@ -27315,6 +27319,21 @@ function connectionDeviceLabel(){
     $3("live3ElimModal").setAttribute("aria-hidden","false");
   }
 
+  function bptLive3HistoricalMaxKills(){
+    return Math.max(0,...(Array.isArray(db?.history)?db.history:[]).map(r=>Number(r.kills)||0));
+  }
+  function bptLive3HistoricalPlayerMaxKills(name){
+    return Math.max(0,...(Array.isArray(db?.history)?db.history:[]).filter(r=>r.player===name).map(r=>Number(r.kills)||0));
+  }
+  function bptLive3QueueAlert(s,icon,title,text,baseAt){
+    const now=Number(baseAt)||Date.now();
+    const list=Array.isArray(s.liveAlerts)?s.liveAlerts.filter(a=>Number(a.until)>now-30000):[];
+    const lastUntil=list.reduce((m,a)=>Math.max(m,Number(a.until)||0),now);
+    const at=Math.max(now,lastUntil>now?lastUntil+500:now);
+    list.push({id:'A_'+at+'_'+Math.random().toString(36).slice(2,6),icon,title,text,at,until:at+6500});
+    s.liveAlerts=list.slice(-6);
+  }
+
   async function eliminate(){
     if(!isOwner())return;
 
@@ -27336,6 +27355,11 @@ function connectionDeviceLabel(){
       refreshEliminationLists();
       return;
     }
+
+    const previousGameKillRecord=bptLive3HistoricalMaxKills();
+    const previousPlayerMaxKills=bptLive3HistoricalPlayerMaxKills(killer);
+    const killsBefore=(current?.players||[]).filter(p=>String(p.killer||'')===killer).length;
+    const killsAfter=killsBefore+1;
 
     const updated=await ownerTransaction(s=>{
       const alive=(s.players||[]).filter(p=>p.status==="in");
@@ -27361,6 +27385,27 @@ function connectionDeviceLabel(){
             : 0)
         )
       );
+
+      // Bounty mystère : uniquement un participant de cette partie, jamais révélé avant sa sortie.
+      if(!s.mysteryBountyRevealed && String(s.mysteryBountyName||'')===victim){
+        s.mysteryBountyRevealed=true;
+        s.mysteryBountyHunter=killer;
+        victimPlayer.wasMysteryBounty=true;
+        killerPlayer.bountyHunter=true;
+        bptLive3QueueAlert(s,'🎯','BOUNTY RÉVÉLÉ !',`${victim} était le bounty mystère · éliminé par ${killer}`,elimNow);
+      }
+
+      // Accomplissements de kills réellement débloqués pendant la partie.
+      let unlocked=null;
+      if(killsAfter>=5 && previousPlayerMaxKills<5) unlocked={icon:'☠️',name:'Massacre',text:`${killer} atteint 5 kills dans la partie`};
+      else if(killsAfter>=3 && previousPlayerMaxKills<3) unlocked={icon:'🔫',name:'Serial Killer',text:`${killer} atteint 3 kills dans la partie`};
+      else if(killsAfter>=1 && previousPlayerMaxKills<1) unlocked={icon:'💥',name:'Premier sang',text:`${killer} réalise son premier kill`};
+      if(unlocked)bptLive3QueueAlert(s,unlocked.icon,'NOUVEL ACCOMPLISSEMENT · '+unlocked.name,unlocked.text,elimNow);
+
+      // Record live : meilleur nombre de kills jamais réalisé sur une partie.
+      if(killsAfter>previousGameKillRecord){
+        bptLive3QueueAlert(s,'🏆','NOUVEAU RECORD',`${killer} porte le record à ${killsAfter} kill${killsAfter>1?'s':''} sur une partie`,elimNow);
+      }
 
       const survivors=(s.players||[]).filter(x=>x.status==="in");
       if(survivors.length===1){
@@ -27398,6 +27443,11 @@ function connectionDeviceLabel(){
         s.winnerName=survivors[0].name;
         s.finishedAt=now;
         s.finishReason="winner";
+        if(!s.mysteryBountyRevealed && String(s.mysteryBountyName||'')===survivors[0].name){
+          s.mysteryBountyRevealed=true;
+          survivors[0].wasMysteryBounty=true;
+          bptLive3QueueAlert(s,'🎯','BOUNTY SURVIVANT !',`${survivors[0].name} était le bounty mystère et remporte la partie`,now);
+        }
       }
 
       return s;
@@ -27593,7 +27643,9 @@ function connectionDeviceLabel(){
           net:gross-stake,
           kills:killCounts[p.name]||0,
           win:place===1,
-          podium:place<=3
+          podium:place<=3,
+          mysteryBounty:!!p.wasMysteryBounty,
+          bountyHunter:!!p.bountyHunter
         };
       });
   }
@@ -29990,7 +30042,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 .bpt484-card:hover,.bpt484-info:hover{border-color:#2a8174}
 .bpt484-label{font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:900;margin-bottom:5px}
 .bpt484-value{font-weight:950;line-height:1;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:clip}
-.bpt484-card-icon{grid-column:1;grid-row:1/4;align-self:center;justify-self:center;width:48px;height:48px;color:var(--teal);opacity:.96}.bpt484-card-icon svg{width:100%;height:100%;display:block;stroke:currentColor;fill:none;stroke-width:1.8}.bpt484-card .bpt484-label,.bpt484-card .bpt484-value,.bpt484-card .bpt484-sub{grid-column:2}.bpt484-players .bpt484-value{font-size:92px}.bpt484-stack .bpt484-value{font-size:48px}
+.bpt484-card-icon{grid-column:1;grid-row:1/4;align-self:center;justify-self:center;width:48px;height:48px;color:var(--teal);opacity:.96}.bpt484-card-icon svg{width:100%;height:100%;display:block;stroke:currentColor;fill:none;stroke-width:1.8}.bpt484-card .bpt484-label,.bpt484-card .bpt484-value,.bpt484-card .bpt484-sub{grid-column:2}.bpt484-players .bpt484-value{font-size:92px}.bpt484-stack .bpt484-value{font-size:48px}.bpt484-stack-values{display:flex;flex-direction:column;align-items:flex-start;gap:3px;overflow:visible}.bpt484-stack-values small{display:block;font-size:.62em;line-height:1;color:var(--teal);font-weight:900;white-space:nowrap}
 .bpt484-sub{font-size:16px;color:var(--muted);margin-top:6px}
 
 .bpt484-info{padding:18px 22px;display:grid;grid-template-rows:auto auto 1px auto;gap:12px;align-content:space-evenly;cursor:pointer;position:relative}
@@ -30021,8 +30073,9 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 .bpt484-live.is-spectator .bpt484-takeover:disabled{opacity:.72;cursor:default}
 .bpt484-pause{background:var(--gold);color:#171007}.bpt484-out{background:var(--red);color:#fff}.bpt484-chat{background:#174c44;color:#fff}.bpt484-odds{background:var(--teal);color:#06201d}.bpt484-full{background:#dce9e6;color:#10231f}.bpt484-end{background:#7e3030;color:#fff}
 
-.bpt484-action-feedback{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.92);z-index:8;padding:9px 14px;border-radius:999px;background:rgba(3,18,16,.92);border:1px solid rgba(69,214,190,.7);box-shadow:0 0 24px rgba(41,209,178,.28);color:#eafff9;font-size:clamp(14px,1.5vw,20px);font-weight:950;white-space:nowrap;pointer-events:none;opacity:0;animation:bpt484FeedbackBadge 1.05s ease-out forwards}
+.bpt484-live{position:relative}.bpt484-live-alert{position:absolute;z-index:50;left:50%;top:92px;transform:translateX(-50%);width:min(760px,calc(100% - 28px));padding:14px 18px;border-radius:16px;background:rgba(5,24,21,.97);border:1px solid #d9a737;box-shadow:0 16px 45px rgba(0,0,0,.45),0 0 30px rgba(217,167,55,.16);display:none;grid-template-columns:auto 1fr;gap:12px;align-items:center;pointer-events:none}.bpt484-live-alert.show{display:grid;animation:bpt484LiveAlert .3s ease-out}.bpt484-live-alert-icon{font-size:32px}.bpt484-live-alert-title{font-size:15px;font-weight:950;color:#e6bd5a;letter-spacing:.04em}.bpt484-live-alert-text{font-size:17px;font-weight:850;color:#fff;margin-top:3px}.bpt484-action-feedback{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.92);z-index:8;padding:9px 14px;border-radius:999px;background:rgba(3,18,16,.92);border:1px solid rgba(69,214,190,.7);box-shadow:0 0 24px rgba(41,209,178,.28);color:#eafff9;font-size:clamp(14px,1.5vw,20px);font-weight:950;white-space:nowrap;pointer-events:none;opacity:0;animation:bpt484FeedbackBadge 1.05s ease-out forwards}
 .bpt484-feedback-pulse{animation:bpt484FeedbackPulse 1.05s ease-out}.bpt484-level-pulse{animation:bpt484LevelPulse 1.05s ease-out}
+@keyframes bpt484LiveAlert{from{opacity:0;transform:translate(-50%,-10px)}to{opacity:1;transform:translate(-50%,0)}}
 @keyframes bpt484FeedbackPulse{0%{border-color:#2a6b5f;box-shadow:0 0 0 rgba(45,224,190,0)}18%{border-color:#54e0c5;box-shadow:0 0 0 4px rgba(45,224,190,.16),0 0 28px rgba(45,224,190,.28)}100%{border-color:#1e5148;box-shadow:none}}
 @keyframes bpt484LevelPulse{0%,100%{transform:scale(1)}25%{transform:scale(1.055);color:#54e0c5}}
 @keyframes bpt484FeedbackBadge{0%{opacity:0;transform:translate(-50%,-50%) scale(.88)}16%{opacity:1;transform:translate(-50%,-50%) scale(1.04)}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-58%) scale(.98)}}
@@ -30094,6 +30147,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
   }
   function makeMarkup(fs=false){return `<div class="bpt484-live" data-fs="${fs?'1':'0'}">
     <div class="bpt484-head"><div class="bpt484-brand">BPT</div><div class="bpt484-owner" data-role="owner">Organisateur · —</div><div class="bpt484-part" data-role="part">Partie n°—</div></div>
+    <div class="bpt484-live-alert" data-role="livealert"><div class="bpt484-live-alert-icon" data-role="livealerticon">🏆</div><div><div class="bpt484-live-alert-title" data-role="livealerttitle"></div><div class="bpt484-live-alert-text" data-role="livealerttext"></div></div></div>
     <div class="bpt484-main">
       <section class="bpt484-stage">
         <div class="bpt484-clock" data-action="chrono"><div class="bpt484-value" data-role="timer">00:00</div></div>
@@ -30103,7 +30157,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
       <div class="bpt484-right">
         <div class="bpt484-kpis">
           <section class="bpt484-card bpt484-players" data-action="players"><div class="bpt484-card-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="24" cy="15" r="7"/><circle cx="11" cy="19" r="5"/><circle cx="37" cy="19" r="5"/><path d="M13 38v-5c0-7 5-11 11-11s11 4 11 11v5"/><path d="M3 37v-5c0-5 3-8 8-8 2 0 4 .6 5.5 1.8"/><path d="M45 37v-5c0-5-3-8-8-8-2 0-4 .6-5.5 1.8"/></svg></div><div class="bpt484-label">Joueurs</div><div class="bpt484-value" data-role="players">0</div><div class="bpt484-sub">restants</div></section>
-          <section class="bpt484-card bpt484-stack" data-action="stack"><div class="bpt484-card-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><ellipse cx="24" cy="12" rx="14" ry="6"/><path d="M10 12v7c0 3 6 6 14 6s14-3 14-6v-7"/><path d="M10 20v7c0 3 6 6 14 6s14-3 14-6v-7"/><path d="M10 28v7c0 3 6 6 14 6s14-3 14-6v-7"/></svg></div><div class="bpt484-label">Tapis moyen</div><div class="bpt484-value" data-role="avg">0</div></section>
+          <section class="bpt484-card bpt484-stack" data-action="stack"><div class="bpt484-card-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><ellipse cx="24" cy="12" rx="14" ry="6"/><path d="M10 12v7c0 3 6 6 14 6s14-3 14-6v-7"/><path d="M10 20v7c0 3 6 6 14 6s14-3 14-6v-7"/><path d="M10 28v7c0 3 6 6 14 6s14-3 14-6v-7"/></svg></div><div class="bpt484-label">Tapis moyen</div><div class="bpt484-value bpt484-stack-values"><span data-role="avgchips">0</span><small data-role="avgbb">0 BB</small></div></section>
         </div>
         <section class="bpt484-info" data-action="timing">
           <div class="bpt484-info-line"><div class="bpt484-info-icon">⚙</div><div class="bpt484-info-copy">Structure · <strong class="bpt484-teal" data-role="mode">Classique</strong></div><div></div></div>
@@ -30323,7 +30377,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
       fitText(root.querySelector('.bpt484-clock .bpt484-value'),{max:portrait?148:(landscapePhone?100:210),min:portrait?72:(landscapePhone?46:74),widthRatio:.92,heightRatio:.78});
       fitText(root.querySelector('.bpt484-blinds .bpt484-value'),{max:portrait?78:(landscapePhone?66:104),min:portrait?34:(landscapePhone?30:42),widthRatio:.96,heightRatio:.86});
       fitText(root.querySelector('.bpt484-players .bpt484-value'),{max:portrait?78:(landscapePhone?56:98),min:portrait?44:(landscapePhone?30:52),widthRatio:.88,heightRatio:.76});
-      fitText(root.querySelector('.bpt484-stack .bpt484-value'),{max:portrait?42:(landscapePhone?30:48),min:portrait?22:(landscapePhone?17:26),widthRatio:.84,heightRatio:.68});
+      fitText(root.querySelector('.bpt484-stack [data-role="avgchips"]'),{max:portrait?42:(landscapePhone?30:48),min:portrait?22:(landscapePhone?17:26),widthRatio:.88,heightRatio:.48});
       fitText(root.querySelector('.bpt484-timing .bpt484-value'),{max:portrait?42:(landscapePhone?26:50),min:portrait?24:(landscapePhone?16:24),widthRatio:.92,heightRatio:.56});
       fitText(root.querySelector('.bpt484-next strong'),{max:portrait?32:(landscapePhone?23:42),min:portrait?18:(landscapePhone?13:20),widthRatio:.90,heightRatio:.48});
       root.querySelectorAll('.bpt484-actions button').forEach(btn=>fitText(btn,{max:portrait?16:(landscapePhone?11:20),min:10,widthRatio:.90,heightRatio:.72}));
@@ -30356,7 +30410,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
         else if(takeoverRemaining>0){takeoverBtn.disabled=true;takeoverBtn.textContent=`Reprise possible dans ${takeoverRemaining} s`;}
         else{takeoverBtn.disabled=false;takeoverBtn.textContent='Forcer la reprise';}
       }
-      const set=(role,val)=>{const e=r.querySelector(`[data-role="${role}"]`);if(e)e.textContent=val};set('owner',owner);set('structure',structure);set('part',`Partie n°${gameNo(st)}`);set('blinds',`${fmt(cur.sb)} / ${fmt(cur.bb)}`);const curDur=Math.max(1,Math.round(Number(st.levels?.[idx]?.durationSec||0)/60)||Math.round(Number(st.levels?.[idx]?.durationMin||0))||15);set('blinddur',`· ${curDur} min`);set('timer',$('live3Timer')?.textContent||'00:00');set('players',String(alive));set('avg',`${fmt(avg)} · ${avgBB} BB`);set('next',`${fmt(nx.sb)} / ${fmt(nx.bb)}`);set('elapsed',$('live3Elapsed')?.textContent||'0 min');set('finish',$('live3EstimatedFinish')?.textContent||'—');set('delta',$('live3FinishDelta')?.textContent||'—');const de=r.querySelector('[data-role="delta"]');const dt=de?.textContent||'';const dm=Math.abs(Number((dt.match(/[-+]?\d+/)||['0'])[0])||0);de?.classList.toggle('is-alert',dm>=15);de?.classList.toggle('is-delay',/retard/i.test(dt));de?.classList.toggle('is-ahead',/avance/i.test(dt));set('mode',st.paceAdaptive===true?'Adaptatif':'Classique');set('level',idx<25?`${idx+1} / 25`:String(idx+1));const pb=r.querySelector('[data-do="pause"]');if(pb)pb.textContent=st.running?'Pause':(st.startedAt?'Reprendre':'Démarrer')});
+      const set=(role,val)=>{const e=r.querySelector(`[data-role="${role}"]`);if(e)e.textContent=val};set('owner',owner);set('structure',structure);set('part',`Partie n°${gameNo(st)}`);set('blinds',`${fmt(cur.sb)} / ${fmt(cur.bb)}`);const curDur=Math.max(1,Math.round(Number(st.levels?.[idx]?.durationSec||0)/60)||Math.round(Number(st.levels?.[idx]?.durationMin||0))||15);set('blinddur',`· ${curDur} min`);set('timer',$('live3Timer')?.textContent||'00:00');set('players',String(alive));set('avgchips',fmt(avg));set('avgbb',`${avgBB} BB`);set('next',`${fmt(nx.sb)} / ${fmt(nx.bb)}`);set('elapsed',$('live3Elapsed')?.textContent||'0 min');set('finish',$('live3EstimatedFinish')?.textContent||'—');set('delta',$('live3FinishDelta')?.textContent||'—');const nowAlert=Date.now();const activeAlert=(Array.isArray(st.liveAlerts)?st.liveAlerts:[]).find(a=>Number(a.at)<=nowAlert&&Number(a.until)>nowAlert);const alertBox=r.querySelector('[data-role="livealert"]');if(alertBox){alertBox.classList.toggle('show',!!activeAlert);if(activeAlert){set('livealerticon',activeAlert.icon||'🏆');set('livealerttitle',activeAlert.title||'');set('livealerttext',activeAlert.text||'')}}const de=r.querySelector('[data-role="delta"]');const dt=de?.textContent||'';const dm=Math.abs(Number((dt.match(/[-+]?\d+/)||['0'])[0])||0);de?.classList.toggle('is-alert',dm>=15);de?.classList.toggle('is-delay',/retard/i.test(dt));de?.classList.toggle('is-ahead',/avance/i.test(dt));set('mode',st.paceAdaptive===true?'Adaptatif':'Classique');set('level',idx<25?`${idx+1} / 25`:String(idx+1));const pb=r.querySelector('[data-do="pause"]');if(pb)pb.textContent=st.running?'Pause':(st.startedAt?'Reprendre':'Démarrer')});
     scheduleFitLiveTexts();
     if(!repairTried){const bad=(st.levels||[]).slice(0,Math.min(25,(st.levels||[]).length)).some((lv,i)=>{const b=blindAt(i);return Number(lv?.sb)!==b.sb||Number(lv?.bb)!==b.bb});if(bad&&api()?.isOwner?.()){repairTried=true;api()?.repairStandardBlinds?.().catch(console.warn)}}
   }
