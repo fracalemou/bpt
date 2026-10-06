@@ -14172,7 +14172,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.09";
+const BPT_APP_VERSION="5.10";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14324,7 +14324,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.09</div>
+<div class="app-version" id="headerAppVersion">BPT v5.10</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15434,7 +15434,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.09</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.10</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -30131,6 +30131,48 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
  .bpt484-quickbar{gap:6px}.bpt484-quickbar button{height:46px;font-size:11px;border-radius:10px}
  .bpt484-actions{grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,58px);gap:7px}.bpt484-actions button{font-size:13px;border-radius:11px}
  .bpt484-live.is-spectator .bpt484-actions{grid-template-columns:1fr 1fr;grid-template-rows:repeat(2,58px)}
+
+ /* Plein écran téléphone portrait : layout dédié, tout tient dans 100dvh sans scroll */
+ #live3Fullscreen .bpt484-live{
+   height:100dvh;min-height:100dvh;max-height:100dvh;overflow:hidden;
+   padding:4px;gap:4px;border-radius:0;
+   grid-template-rows:42px minmax(0,1fr) 36px 126px;
+ }
+ #live3Fullscreen .bpt484-head{height:42px;min-height:42px;padding:0 7px;border-radius:8px;grid-template-columns:.55fr 1.5fr .78fr}
+ #live3Fullscreen .bpt484-brand{font-size:20px}
+ #live3Fullscreen .bpt484-owner,#live3Fullscreen .bpt484-part{font-size:9px}
+ #live3Fullscreen .bpt484-main{display:grid;grid-template-columns:1fr;grid-template-rows:minmax(158px,1.22fr) minmax(76px,.52fr) minmax(142px,1fr);gap:4px;min-height:0;overflow:hidden}
+ #live3Fullscreen .bpt484-stage{height:auto;min-height:0;padding:5px 8px 7px;border-radius:9px;grid-template-rows:minmax(0,1.5fr) auto auto}
+ #live3Fullscreen .bpt484-stage:after{top:58%}
+ #live3Fullscreen .bpt484-right{display:contents}
+ #live3Fullscreen .bpt484-kpis{order:2;display:grid;grid-template-columns:1fr 1fr;gap:4px;min-height:0}
+ #live3Fullscreen .bpt484-card{min-height:0;height:auto;padding:6px 8px;border-radius:9px;grid-template-columns:28px minmax(0,1fr);column-gap:5px}
+ #live3Fullscreen .bpt484-card-icon{width:23px;height:23px}
+ #live3Fullscreen .bpt484-label{font-size:8px;margin-bottom:2px}
+ #live3Fullscreen .bpt484-sub{font-size:9px;margin-top:2px}
+ #live3Fullscreen .bpt484-stack-values{gap:0}
+ #live3Fullscreen .bpt484-stack-values small{font-size:.56em;line-height:1.02}
+ #live3Fullscreen .bpt484-info{order:3;min-height:0;height:auto;padding:6px 8px;border-radius:9px;gap:4px;align-content:space-evenly}
+ #live3Fullscreen .bpt484-info-line{grid-template-columns:18px minmax(0,1fr) auto;gap:4px}
+ #live3Fullscreen .bpt484-info-icon{font-size:14px}
+ #live3Fullscreen .bpt484-info-copy{font-size:10px}
+ #live3Fullscreen .bpt484-level-inline{font-size:9px;padding-left:5px}
+ #live3Fullscreen .bpt484-timing{grid-template-columns:18px 1fr;gap:4px}
+ #live3Fullscreen .bpt484-timing .bpt484-label{font-size:8px}
+ #live3Fullscreen .bpt484-timing .bpt484-value{font-size:22px}
+ #live3Fullscreen .bpt484-pace-line{font-size:8px;margin-top:1px;white-space:normal}
+ #live3Fullscreen .bpt484-next{font-size:9px;margin-top:2px}
+ #live3Fullscreen .bpt484-quickbar{height:36px;gap:4px}
+ #live3Fullscreen .bpt484-quickbar button{height:36px;min-height:0;font-size:8px;border-radius:7px;padding:2px}
+ #live3Fullscreen .bpt484-actions{height:126px;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,1fr);gap:4px}
+ #live3Fullscreen .bpt484-actions button{height:auto;min-height:0;font-size:9px;line-height:1.05;border-radius:7px;padding:3px 4px;white-space:normal}
+ #live3Fullscreen .bpt484-live.is-spectator .bpt484-actions{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,1fr)}
+ #live3Fullscreen .bpt484-live-alert{top:48px;width:calc(100% - 10px);padding:9px 34px 9px 10px;border-radius:10px;gap:7px}
+ #live3Fullscreen .bpt484-live-alert-icon{font-size:22px}
+ #live3Fullscreen .bpt484-live-alert-title{font-size:11px}
+ #live3Fullscreen .bpt484-live-alert-text{font-size:12px}
+ #live3Fullscreen .bpt484-live-alert-close{width:25px;height:25px;right:6px;top:5px;font-size:18px}
+ #live3Fullscreen .bpt484-special-hud{max-width:calc(100% - 12px)}
 }
 
 /* Téléphone paysage */
