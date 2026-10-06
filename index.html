@@ -14172,7 +14172,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.04";
+const BPT_APP_VERSION="5.07";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14324,7 +14324,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.04</div>
+<div class="app-version" id="headerAppVersion">BPT v5.07</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15434,7 +15434,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.04</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.07</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -18097,6 +18097,61 @@ function renderRecordScopeSummary(){
     ]);
 }
 
+function bptDurationRecords(){
+  const hist=Array.isArray(db.history)?db.history:[];
+  const games=new Map();
+  for(const row of hist){
+    const game=Number(row.game);
+    if(!Number.isFinite(game)||game<=0)continue;
+    if(!games.has(game))games.set(game,[]);
+    games.get(game).push(row);
+  }
+  const rows=[];
+  for(const [game,gameRows] of games){
+    if(!gameRows.length)continue;
+    const n=Math.max(...gameRows.map(r=>Number(r.n)||0));
+    const duration=Math.max(...gameRows.map(r=>Number(r.gameDurationSec)||0));
+    if(!(duration>0))continue;
+    const finalists=gameRows
+      .filter(r=>Number(r.place)===1||Number(r.place)===2)
+      .sort((a,b)=>Number(a.place)-Number(b.place))
+      .map(r=>String(r.player||'').trim())
+      .filter(Boolean);
+    let huStart=null;
+    if(n===2){
+      huStart=0;
+    }else if(n>=3){
+      const third=gameRows.find(r=>Number(r.place)===3);
+      const t=Number(third?.outElapsedSec);
+      if(Number.isFinite(t)&&t>=0)huStart=t;
+    }
+    const huDuration=huStart===null?null:Math.max(0,duration-huStart);
+    const sample=gameRows[0]||{};
+    rows.push({
+      game,n,duration,huDuration,
+      finalists,
+      seasonKey:sample.seasonKey||'',
+      seasonLabel:sample.seasonLabel||''
+    });
+  }
+  const validHu=rows.filter(x=>Number.isFinite(x.huDuration)&&x.huDuration>0&&x.finalists.length>=2);
+  const byLong=(a,b)=>b-a;
+  const byShort=(a,b)=>a-b;
+  const longestHu=validHu.slice().sort((a,b)=>byLong(a.huDuration,b.huDuration))[0]||null;
+  const shortestHu=validHu.slice().sort((a,b)=>byShort(a.huDuration,b.huDuration))[0]||null;
+  const longestGame=rows.slice().sort((a,b)=>byLong(a.duration,b.duration))[0]||null;
+  const shortestGame=rows.slice().sort((a,b)=>byShort(a.duration,b.duration))[0]||null;
+  return {longestHu,shortestHu,longestGame,shortestGame};
+}
+function bptDurationRecordRef(rec){
+  if(!rec)return '—';
+  const season=String(rec.seasonLabel||'').trim();
+  return `${season?season+' · ':''}P#${rec.game}`;
+}
+function bptHeadsUpPlayers(rec){
+  return rec?.finalists?.length>=2?`${rec.finalists[0]} / ${rec.finalists[1]}`:'—';
+}
+
 function renderRecords(){
   renderRecordScopeSummary();
   const holder=$("recordsGrid"); if(!holder)return;
@@ -18143,6 +18198,17 @@ function renderRecords(){
   }
   const topPair=Object.entries(pairs).sort((a,b)=>b[1]-a[1])[0];
   const pairData=topPair?{names:topPair[0].split("|||"),value:topPair[1]}:null;
+  const durationRecords=bptDurationRecords();
+
+  // Poulidor : joueur avec le plus grand nombre de 2e places.
+  const secondPlaceCounts={};
+  for(const r of db.history||[]){
+    const player=String(r.player||"");
+    if(player && Number(r.place)===2) secondPlaceCounts[player]=(secondPlaceCounts[player]||0)+1;
+  }
+  const bestSecond=Object.entries(secondPlaceCounts)
+    .sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],"fr"))[0];
+  const poulidor=bestSecond?{name:bestSecond[0],value:bestSecond[1]}:{name:"—",value:0};
 
 
   // Bad Beat : joueur avec le plus de 4e places.
@@ -18224,6 +18290,9 @@ function renderRecords(){
     ["🔥","On Fire",onFire.name,onFire.details?`${onFire.details} · joueur le plus performant sur les 3 dernières parties`:"—"],
     ["💔","Bad Beat",badBeat.name,badBeat.value?`${badBeat.value} quatrième${badBeat.value>1?"s":""} place${badBeat.value>1?"s":""}`:"Aucune 4e place enregistrée"],
     ["🐢","Loser",loser.name,loser.value?`${loser.value} dernière${loser.value>1?"s":""} place${loser.value>1?"s":""}`:"Aucune dernière place enregistrée"],
+    ["⏳","Heads-up le plus long","BPT",durationRecords.longestHu?`${bptHeadsUpPlayers(durationRecords.longestHu)} · ${formatGameDuration(durationRecords.longestHu.huDuration)} · ${bptDurationRecordRef(durationRecords.longestHu)}`:"Pas encore assez de données"],
+    ["⚡","Heads-up le plus court","BPT",durationRecords.shortestHu?`${bptHeadsUpPlayers(durationRecords.shortestHu)} · ${formatGameDuration(durationRecords.shortestHu.huDuration)} · ${bptDurationRecordRef(durationRecords.shortestHu)}`:"Pas encore assez de données"],
+    ["🥈","Le Poulidor",poulidor.name,poulidor.value?`${poulidor.value} deuxième${poulidor.value>1?"s":""} place${poulidor.value>1?"s":""}`:"Aucune 2e place enregistrée"],
     ["🎯","Kill le plus fréquent",pairData?`${pairData.names[0]} a éliminé ${pairData.names[1]}`:"—",pairData?`${pairData.value} fois`:"—"]
   ];
   const mobileRecords=isBptMobileDevice();
@@ -21291,6 +21360,15 @@ function championshipRecords(){
     if(max>bestStreak.value)bestStreak={name:p.name,value:max};
   }
 
+  const durationRecords=bptDurationRecords();
+  const secondPlaceCounts={};
+  for(const r of hist){
+    const player=String(r.player||"");
+    if(player && Number(r.place)===2) secondPlaceCounts[player]=(secondPlaceCounts[player]||0)+1;
+  }
+  const bestSecond=Object.entries(secondPlaceCounts)
+    .sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],"fr"))[0];
+  const poulidor=bestSecond?{name:bestSecond[0],value:bestSecond[1]}:null;
   return [
     ["Plus de victoires",wins?`${wins.name} · ${wins.wins}`:"—"],
     ["Plus de podiums",podiums?`${podiums.name} · ${podiums.podiums}`:"—"],
@@ -21298,7 +21376,10 @@ function championshipRecords(){
     ["Meilleure moyenne",avg?`${avg.name} · ${num(avg.avgPoints,1)} pts`:"—"],
     ["Plus forte progression",bestProgress?`${bestProgress.name} · +${bestProgress.progress}`:"—"],
     ["Plus gros solde net",net?`${net.name} · ${euro(net.net||0)}`:"—"],
-    ["Série de podiums",bestStreak.value?`${bestStreak.name} · ${bestStreak.value}`:"—"]
+    ["Série de podiums",bestStreak.value?`${bestStreak.name} · ${bestStreak.value}`:"—"],
+    ["Heads-up le plus long",durationRecords.longestHu?`${bptHeadsUpPlayers(durationRecords.longestHu)} · ${formatGameDuration(durationRecords.longestHu.huDuration)}`:"—"],
+    ["Heads-up le plus court",durationRecords.shortestHu?`${bptHeadsUpPlayers(durationRecords.shortestHu)} · ${formatGameDuration(durationRecords.shortestHu.huDuration)}`:"—"],
+    ["Le Poulidor",poulidor?`${poulidor.name} · ${poulidor.value} deuxième${poulidor.value>1?"s":""} place${poulidor.value>1?"s":""}`:"—"]
   ];
 }
 
@@ -28789,6 +28870,8 @@ async function requestTakeover(){
     openFullscreen,
     closeFullscreen,
     endLive,
+    requestTakeover,
+    forceLive3Takeover,
     undoLastElimination,
     correctLastElimination,
     getLastEliminated:()=>clone(lastEliminatedPlayer()),
@@ -29929,6 +30012,13 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 .bpt484-quickbar button{border:1px solid #2a5b52;border-radius:12px;background:#12372f;color:var(--text);font-size:17px;font-weight:900;cursor:pointer;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bpt484-actions{display:grid;grid-template-columns:1fr 1.28fr .82fr 1.12fr 1.05fr 1.08fr;gap:10px}
 .bpt484-actions button{border:0;border-radius:14px;font-size:18px;font-weight:900;cursor:pointer;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bpt484-takeover{display:none;background:#e0ad38;color:#171007}
+.bpt484-live.is-spectator .bpt484-quickbar{display:none!important}
+.bpt484-live.is-spectator .bpt484-pause,.bpt484-live.is-spectator .bpt484-out,.bpt484-live.is-spectator .bpt484-end{display:none!important}
+.bpt484-live.is-spectator .bpt484-takeover{display:block}
+.bpt484-live.is-spectator .bpt484-actions{grid-template-columns:2fr 1fr 1fr 1fr}
+.bpt484-live.is-spectator .bpt484-takeover.is-force{background:#dc5a57;color:#fff}
+.bpt484-live.is-spectator .bpt484-takeover:disabled{opacity:.72;cursor:default}
 .bpt484-pause{background:var(--gold);color:#171007}.bpt484-out{background:var(--red);color:#fff}.bpt484-chat{background:#174c44;color:#fff}.bpt484-odds{background:var(--teal);color:#06201d}.bpt484-full{background:#dce9e6;color:#10231f}.bpt484-end{background:#7e3030;color:#fff}
 
 .bpt484-action-feedback{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.92);z-index:8;padding:9px 14px;border-radius:999px;background:rgba(3,18,16,.92);border:1px solid rgba(69,214,190,.7);box-shadow:0 0 24px rgba(41,209,178,.28);color:#eafff9;font-size:clamp(14px,1.5vw,20px);font-weight:950;white-space:nowrap;pointer-events:none;opacity:0;animation:bpt484FeedbackBadge 1.05s ease-out forwards}
@@ -29962,6 +30052,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
  .bpt484-next{font-size:13px;margin-top:6px}
  .bpt484-quickbar{gap:6px}.bpt484-quickbar button{height:46px;font-size:11px;border-radius:10px}
  .bpt484-actions{grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,58px);gap:7px}.bpt484-actions button{font-size:13px;border-radius:11px}
+ .bpt484-live.is-spectator .bpt484-actions{grid-template-columns:1fr 1fr;grid-template-rows:repeat(2,58px)}
 }
 
 /* Téléphone paysage */
@@ -30023,7 +30114,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
       </div>
     </div>
     <div class="bpt484-quickbar"><button data-quick="prev">◀ Niveau</button><button data-quick="minus">−1 min</button><button data-quick="plus">+1 min</button><button data-quick="next">Niveau ▶</button></div>
-    <div class="bpt484-actions"><button class="bpt484-pause" data-do="pause">Pause</button><button class="bpt484-out" data-do="out">Sortir un joueur</button><button class="bpt484-chat" data-do="chat">Chat</button><button class="bpt484-odds" data-do="odds">Calcul de côtes</button><button class="bpt484-full" data-do="full">${fs?'Quitter le plein écran':'Plein écran'}</button><button class="bpt484-end" data-do="end">Terminer le Live</button></div>
+    <div class="bpt484-actions"><button class="bpt484-pause" data-do="pause">Pause</button><button class="bpt484-out" data-do="out">Sortir un joueur</button><button class="bpt484-takeover" data-do="takeover">Demander la reprise</button><button class="bpt484-chat" data-do="chat">Chat</button><button class="bpt484-odds" data-do="odds">Calcul de côtes</button><button class="bpt484-full" data-do="full">${fs?'Quitter le plein écran':'Plein écran'}</button><button class="bpt484-end" data-do="end">Terminer le Live</button></div>
   </div>`}
   function install(){
     const shell=document.querySelector('#live3Game .b466-shell');if(shell&&!shell.querySelector('.bpt484-live'))shell.insertAdjacentHTML('afterbegin',makeMarkup(false));
@@ -30042,6 +30133,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
       else if(a==='chat')$('live3ChatBtn')?.click();
       else if(a==='odds')$('live3OddsBtn')?.click();
       else if(a==='full'){if(fs)x?.closeFullscreen?.();else x?.openFullscreen?.()}
+      else if(a==='takeover')await x?.requestTakeover?.();
       else if(a==='end')await x?.endLive?.();
     }catch(e){console.error('BPT action',a,e)}
     setTimeout(sync,80);
@@ -30247,8 +30339,24 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     const idx=Math.max(0,Math.min(200,Number(st.levelIndex)||0)),cur=blindAt(idx),nx=blindAt(idx+1);
     const players=Array.isArray(st.players)?st.players:[],alive=players.filter(p=>p.status==='in').length+(players.some(p=>p.status==='winner')?1:0);
     const total=players.length*Number(st.startStack||0),avg=alive?total/alive:0,avgBB=cur.bb?Math.round(avg/cur.bb*10)/10:0;
+    const x=api();
+    const ownerRole=!!x?.isOwner?.();
+    const myId=String(x?.deviceId?.()||'');
+    const takeoverReq=st?.takeoverRequest||null;
+    const myTakeover=!!(takeoverReq?.requesterId && String(takeoverReq.requesterId)===myId);
+    const takeoverRemaining=myTakeover?Math.max(0,Math.ceil((30000-Math.max(0,Date.now()-Number(takeoverReq.requestedAt||0)))/1000)):0;
     const owner=`Organisateur · ${st.ownerLabel||'—'}`,structure=st.paceAdaptive===true?'Structure · Adaptatif':'Structure · Classique';
-    document.querySelectorAll('.bpt484-live').forEach(r=>{const set=(role,val)=>{const e=r.querySelector(`[data-role="${role}"]`);if(e)e.textContent=val};set('owner',owner);set('structure',structure);set('part',`Partie n°${gameNo(st)}`);set('blinds',`${fmt(cur.sb)} / ${fmt(cur.bb)}`);const curDur=Math.max(1,Math.round(Number(st.levels?.[idx]?.durationSec||0)/60)||Math.round(Number(st.levels?.[idx]?.durationMin||0))||15);set('blinddur',`· ${curDur} min`);set('timer',$('live3Timer')?.textContent||'00:00');set('players',String(alive));set('avg',`${fmt(avg)} · ${avgBB} BB`);set('next',`${fmt(nx.sb)} / ${fmt(nx.bb)}`);set('elapsed',$('live3Elapsed')?.textContent||'0 min');set('finish',$('live3EstimatedFinish')?.textContent||'—');set('delta',$('live3FinishDelta')?.textContent||'—');const de=r.querySelector('[data-role="delta"]');const dt=de?.textContent||'';const dm=Math.abs(Number((dt.match(/[-+]?\d+/)||['0'])[0])||0);de?.classList.toggle('is-alert',dm>=15);de?.classList.toggle('is-delay',/retard/i.test(dt));de?.classList.toggle('is-ahead',/avance/i.test(dt));set('mode',st.paceAdaptive===true?'Adaptatif':'Classique');set('level',idx<25?`${idx+1} / 25`:String(idx+1));const pb=r.querySelector('[data-do="pause"]');if(pb)pb.textContent=st.running?'Pause':(st.startedAt?'Reprendre':'Démarrer')});
+    document.querySelectorAll('.bpt484-live').forEach(r=>{
+      r.classList.toggle('is-spectator',!ownerRole);
+      const takeoverBtn=r.querySelector('.bpt484-takeover');
+      if(takeoverBtn){
+        takeoverBtn.classList.toggle('is-force',!!(myTakeover && takeoverRemaining<=0));
+        if(ownerRole){takeoverBtn.disabled=true;takeoverBtn.textContent='Demander la reprise';}
+        else if(!myTakeover){takeoverBtn.disabled=false;takeoverBtn.textContent='Demander la reprise';}
+        else if(takeoverRemaining>0){takeoverBtn.disabled=true;takeoverBtn.textContent=`Reprise possible dans ${takeoverRemaining} s`;}
+        else{takeoverBtn.disabled=false;takeoverBtn.textContent='Forcer la reprise';}
+      }
+      const set=(role,val)=>{const e=r.querySelector(`[data-role="${role}"]`);if(e)e.textContent=val};set('owner',owner);set('structure',structure);set('part',`Partie n°${gameNo(st)}`);set('blinds',`${fmt(cur.sb)} / ${fmt(cur.bb)}`);const curDur=Math.max(1,Math.round(Number(st.levels?.[idx]?.durationSec||0)/60)||Math.round(Number(st.levels?.[idx]?.durationMin||0))||15);set('blinddur',`· ${curDur} min`);set('timer',$('live3Timer')?.textContent||'00:00');set('players',String(alive));set('avg',`${fmt(avg)} · ${avgBB} BB`);set('next',`${fmt(nx.sb)} / ${fmt(nx.bb)}`);set('elapsed',$('live3Elapsed')?.textContent||'0 min');set('finish',$('live3EstimatedFinish')?.textContent||'—');set('delta',$('live3FinishDelta')?.textContent||'—');const de=r.querySelector('[data-role="delta"]');const dt=de?.textContent||'';const dm=Math.abs(Number((dt.match(/[-+]?\d+/)||['0'])[0])||0);de?.classList.toggle('is-alert',dm>=15);de?.classList.toggle('is-delay',/retard/i.test(dt));de?.classList.toggle('is-ahead',/avance/i.test(dt));set('mode',st.paceAdaptive===true?'Adaptatif':'Classique');set('level',idx<25?`${idx+1} / 25`:String(idx+1));const pb=r.querySelector('[data-do="pause"]');if(pb)pb.textContent=st.running?'Pause':(st.startedAt?'Reprendre':'Démarrer')});
     scheduleFitLiveTexts();
     if(!repairTried){const bad=(st.levels||[]).slice(0,Math.min(25,(st.levels||[]).length)).some((lv,i)=>{const b=blindAt(i);return Number(lv?.sb)!==b.sb||Number(lv?.bb)!==b.bb});if(bad&&api()?.isOwner?.()){repairTried=true;api()?.repairStandardBlinds?.().catch(console.warn)}}
   }
