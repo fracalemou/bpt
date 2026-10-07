@@ -14186,7 +14186,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.25";
+const BPT_APP_VERSION="5.28";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14338,7 +14338,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.25</div>
+<div class="app-version" id="headerAppVersion">BPT v5.28</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15448,7 +15448,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.25</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.28</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -27121,12 +27121,16 @@ function connectionDeviceLabel(){
     for(const winner of winners){run=winner&&winner===last?run+1:(winner?1:0);bestStreak=Math.max(bestStreak,run);last=winner;}
     const leader=ranked[0],n=selected.length;
     const waitingForFirst=selected.map(name=>({name,rows:rows.filter(r=>r.player===name)})).filter(p=>p.rows.length&&!p.rows.some(r=>Number(r.place)===1)).sort((a,b)=>b.rows.length-a.rows.length||Math.min(...a.rows.map(r=>Number(r.game)))-Math.min(...b.rows.map(r=>Number(r.game)))||a.name.localeCompare(b.name,'fr'))[0]?.name;
-    const used=new Map();
+    const used=new Map(),usedThemes=new Map();
     return selected.map(name=>{
       const mine=rows.filter(r=>r.player===name).sort((a,b)=>Number(a.game)-Number(b.game));
       const stat=byName.get(name)||{points:0,kills:0,wins:0,podiums:0};
       const candidates=[];
-      const offer=(icon,title,text)=>candidates.push({name,icon,title,text});
+      const offer=(icon,title,text)=>{
+        const theme=/REVANCHE|FACE-À-FACE|DÉPASSER|DUEL AU CLASSEMENT/.test(title)?'rivalry':/RECORD|SÉRIE/.test(title)?'record':/DÉBLOQUER/.test(title)?'achievement':/TÊTE|LEADER/.test(title)?'ranking':/VICTOIRE|PODIUM|RÉGULARITÉ|RÉSULTAT|CAP/.test(title)?'milestone':'other';
+        const priority=/REVANCHE/.test(title)?110:/SÉRIE/.test(title)?115:/DÉPASSER/.test(title)?100:/RECORD DE LA SAISON/.test(title)?85:/DÉBLOQUER/.test(title)?80:/TÊTE/.test(title)?70:/FACE-À-FACE/.test(title)?80:/RECORD|CAP|RÉGULARITÉ|LEADER/.test(title)?75:/PREMIÈRE VICTOIRE/.test(title)?65:/DÉFI DE LA TABLE|OUVRIR LE COMPTEUR|TENIR LA DISTANCE|VISER LE DUEL|NOUVEAU RENDEZ-VOUS/.test(title)?25:55;
+        candidates.push({name,icon,title,text,theme,priority});
+      };
       let streak=0;for(let i=winners.length-1;i>=0&&winners[i]===name;i--)streak++;
       if(streak>0)offer('🔥','LA SÉRIE À PROLONGER',`Après ${streak} victoire${streak>1?'s':''} consécutive${streak>1?'s':''}, une victoire ce soir porterait sa série à ${streak+1}${streak+1>bestStreak?' : un nouveau record cette saison.':streak+1===bestStreak?' : le record de la saison serait égalé.':'.'}`);
       if(leader&&leader.name!==name&&n>=6){
@@ -27139,6 +27143,16 @@ function connectionDeviceLabel(){
         }
         if(possibilities.length){const place=Math.max(...possibilities);offer('👑','LA TÊTE EN VUE',`${place===3?'Un podium':place===2?'Une place dans les deux premiers':'Une victoire'} peut lui permettre de prendre la tête du championnat, selon les résultats des autres joueurs.`);}
       }
+      if(n>=6){
+        const myPoints=Number(stat.points||0),winPoints=pointsFor(1,n);
+        const target=ranked.filter(p=>p.name!==name&&selected.includes(p.name)&&Number(p.points)>myPoints).sort((a,b)=>Number(a.points)-Number(b.points)).find(p=>myPoints+winPoints>Number(p.points)+pointsFor(n,n));
+        if(target){const gap=Number(target.points)-myPoints;const guaranteed=myPoints+winPoints>Number(target.points)+Math.max(...Array.from({length:n-1},(_,i)=>pointsFor(i+2,n)));offer('⚔️','DÉPASSER UN RIVAL',`À ${gap} point${gap>1?'s':''} de ${target.name}, une victoire ce soir ${guaranteed?'lui permettrait de le dépasser au classement.':`peut lui permettre de le dépasser au classement, selon la place de ${target.name}.`}`);}
+      }
+      const seasonKillRecord=Math.max(0,...rows.map(r=>Number(r.kills)||0));
+      if(seasonKillRecord>0&&seasonKillRecord+1<=n-1)offer('💥','LE RECORD DE LA SAISON',`Le record de kills sur une partie cette saison est de ${seasonKillRecord}. Avec ${seasonKillRecord+1} éliminations ce soir, il établirait un nouveau record.`);
+      const previousKillBest=Math.max(0,...mine.map(r=>Number(r.kills)||0));
+      const unlock=previousKillBest<1?{count:1,label:'Premier sang'}:previousKillBest<3?{count:3,label:'Serial Killer'}:previousKillBest<5?{count:5,label:'Massacre'}:null;
+      if(unlock&&unlock.count<=n-1)offer('🏅','UN ACCOMPLISSEMENT À DÉBLOQUER',`${unlock.count} kill${unlock.count>1?'s':''} dans cette partie lui permettrai${unlock.count>1?'ent':'t'} de débloquer « ${unlock.label} », encore inédit pour lui cette saison.`);
       const latest=mine[mine.length-1];
       if(latest?.killer&&selected.includes(latest.killer))offer('⚔️','L’HEURE DE LA REVANCHE',`${latest.killer} l’a éliminé lors de sa dernière participation. Ils sont tous les deux à la table ce soir.`);
       const kills=Number(stat.kills||0);
@@ -27159,18 +27173,19 @@ function connectionDeviceLabel(){
       if(latest&&Number(latest.game)<lastGame)offer('↩️','LE RETOUR À LA TABLE',`Absent de la dernière partie enregistrée, il retrouve la table ce soir et peut relancer sa saison.`);
       if(mine.length&&(mine.length+1)%5===0)offer('🎉','UNE PARTICIPATION SYMBOLIQUE',`Ce soir sera sa ${mine.length+1}e participation cette saison : une occasion de marquer ce cap par un beau résultat.`);
       if(!mine.length)offer('✨','UNE NOUVELLE HISTOIRE', 'Première participation enregistrée cette saison : tout reste à écrire.');
-      if(name===waitingForFirst)candidates.unshift({name,icon:'🏆',title:'LA PREMIÈRE VICTOIRE',text:`Après ${mine.length} participation${mine.length>1?'s':''} sans victoire cette saison, il est celui des joueurs présents qui attend son premier succès depuis le plus de parties jouées.`});
+      if(name===waitingForFirst)offer('🏆','LA PREMIÈRE VICTOIRE',`Après ${mine.length} participation${mine.length>1?'s':''} sans victoire cette saison, il est celui des joueurs présents qui attend son premier succès depuis le plus de parties jouées.`);
       if(leader?.name===name)offer('👑','LE LEADER À DÉFIER',`En tête du championnat avec ${Number(stat.points||0)} points, il défend sa place ce soir.`);
       offer('💪','UN NOUVEAU RENDEZ-VOUS',`${mine.filter(r=>Number(r.place)<=3&&Number(r.place)>0).length} podium${mine.filter(r=>Number(r.place)<=3&&Number(r.place)>0).length>1?'s':''} en ${mine.length} participations cette saison : un nouveau podium enrichirait son palmarès.`);
       offer('🎲','LE DÉFI DE LA TABLE',`Face à ${n-1} adversaires sélectionnés ce soir, l’objectif est de rester en jeu jusqu’au duel final.`);
       offer('💥','OUVRIR LE COMPTEUR', 'Réaliser la première élimination de la soirée : un objectif à saisir dès le début de la partie.');
       offer('🛡️','TENIR LA DISTANCE', 'Atteindre les trois derniers joueurs en jeu : le défi de ce soir.');
       offer('🏁','VISER LE DUEL FINAL', 'Se hisser parmi les deux derniers joueurs et jouer la victoire en tête-à-tête.');
-      const fresh=candidates.find(c=>!used.has(c.title));
       const allowed=candidates.filter(c=>c.title!=='LA PREMIÈRE VICTOIRE'||!used.has(c.title));
-      const chosen=fresh||allowed.reduce((a,b)=>(used.get(b.title)||0)<(used.get(a.title)||0)?b:a);
+      const score=c=>c.priority-70*(used.get(c.title)||0)-15*(usedThemes.get(c.theme)||0);
+      const chosen=allowed.reduce((a,b)=>score(b)>score(a)?b:a);
       used.set(chosen.title,(used.get(chosen.title)||0)+1);
-      return chosen;
+      usedThemes.set(chosen.theme,(usedThemes.get(chosen.theme)||0)+1);
+      const {theme,priority,...entry}=chosen;return entry;
     });
   }
 
@@ -30204,6 +30219,10 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 .bpt484-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:8px}
 .bpt484-actions button{border:0;border-radius:14px;font-size:18px;font-weight:900;cursor:pointer;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bpt-pregame-buttons{display:flex;flex-wrap:wrap;gap:12px}.bpt-pregame footer button[data-do="back-pregame"]{background:#173e35;color:#edf6f2;border:1px solid #3f7062}
+.bpt484-live.is-pregame{display:block!important;grid-template-rows:none!important;height:calc(100dvh - 140px)!important;min-height:0!important;max-height:none!important;padding:0!important;overflow:hidden!important}
+.bpt484-live.is-pregame>*:not(.bpt-pregame):not(.bpt484-takeover-request){display:none!important}
+.bpt484-live.is-pregame>.bpt-pregame{position:relative;inset:auto;height:100%;max-height:none;border-radius:inherit}
+#live3Fullscreen .bpt484-live.is-pregame{height:100%!important}
 .bpt-pregame[hidden]{display:none!important}
 .bpt-pregame{position:absolute;inset:0;z-index:65;background:#071d19;color:#edf6f2;border-radius:inherit;overflow:hidden;overscroll-behavior:contain;padding:clamp(12px,2vw,28px);height:100%;max-height:calc(100dvh - 140px);box-sizing:border-box;display:flex;flex-direction:column}
 .bpt-pregame-inner{max-width:1100px;margin:0 auto;width:100%;height:100%;min-height:0;display:flex;flex-direction:column}.bpt-pregame header,.bpt-pregame-heading,.bpt-pregame footer{flex-shrink:0}#live3Fullscreen .bpt-pregame{max-height:calc(100dvh - 24px)}.bpt-pregame header{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid #24493f;padding-bottom:16px}.bpt-pregame header b{color:#f2c14e;font-size:32px;font-weight:900}.bpt-pregame header span{color:#a7c3b9;font-size:12px;letter-spacing:1px}
@@ -30304,6 +30323,13 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 
 /* Téléphone paysage */
 @media(max-width:1000px) and (max-height:560px) and (orientation:landscape){
+ .bpt484-live.is-pregame{height:calc(100dvh - 72px)!important}
+ .bpt-pregame{padding:8px 12px}
+ .bpt-pregame header{padding-bottom:5px;min-height:28px}.bpt-pregame header b{font-size:22px}
+ .bpt-pregame-heading{padding:6px 0}.bpt-pregame-heading small,.bpt-pregame-heading p{display:none}.bpt-pregame h2{font-size:21px;margin:0}
+ .bpt-pregame-stories{gap:8px;grid-template-columns:repeat(2,minmax(0,1fr))}.bpt-pregame article{padding:10px;gap:8px}.bpt-pregame-icon{font-size:22px}.bpt-pregame h3{font-size:17px}.bpt-pregame article p{font-size:14px;margin-top:6px}
+ .bpt-pregame footer{padding:8px 0 0;flex-direction:row;justify-content:flex-end}.bpt-pregame footer>span{display:none}.bpt-pregame-buttons{flex-direction:row;gap:8px;flex-wrap:nowrap}.bpt-pregame footer button{min-height:44px;padding:8px 14px;font-size:14px}
+
  .bpt484-live{height:100dvh;min-height:100dvh;max-height:100dvh;border-radius:0;padding:5px;gap:5px;grid-template-rows:42px minmax(0,1fr) 40px 52px}
  #live3Fullscreen .bpt484-live{padding:5px;grid-template-rows:42px minmax(0,1fr) 40px 52px}
  .bpt484-head{grid-template-columns:.6fr minmax(0,1.4fr) auto;padding:0 8px;border-radius:9px}.bpt484-brand{font-size:19px}.bpt484-owner,.bpt484-part{font-size:9px}
@@ -30674,6 +30700,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     const owner=`Organisateur · ${st.ownerLabel||'—'}`,structure=st.paceAdaptive===true?'Structure · Adaptatif':'Structure · Classique';
     document.querySelectorAll('.bpt484-live').forEach(r=>{
       r.classList.toggle('is-spectator',!ownerRole);
+      r.classList.toggle('is-pregame',!!(st.preGamePending&&!st.startedAt));
       const requestPanel=r.querySelector('[data-role="takeoverrequest"]');
       if(requestPanel){
         requestPanel.hidden=!(ownerRole&&takeoverReq?.requesterId&&String(takeoverReq.requesterId)!==myId);
