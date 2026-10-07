@@ -13705,6 +13705,9 @@ nav button[data-view="live"],#live,#liveFullscreenDisplay,#spectatorServerOverla
 }
 </style>
 <style id="bpt-live3-v331-spectator-identity">
+#bptChangeProfileCodeBtn[hidden]{display:none!important}
+#bptChangeProfileCodeBtn{min-height:44px;padding:8px 12px;margin-top:8px;border:1px solid #3f7062;border-radius:10px;background:#173e35;color:#edf6f2;font-weight:800;cursor:pointer}
+#live3SpectatorIdentityModal #bptProfileCodeConfirmLabel[hidden],#live3SpectatorIdentityModal #bptProfileCodeMigration[hidden]{display:none!important}
 #live3SpectatorIdentityModal{
   z-index:2300000 !important;
 }
@@ -14186,7 +14189,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.36";
+const BPT_APP_VERSION="5.39";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14338,7 +14341,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.36</div>
+<div class="app-version" id="headerAppVersion">BPT v5.39</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -14594,6 +14597,7 @@ function simplifyRecordTextForMobile(text){
 </div>
 </div>
 </div>
+<div class="bpt-live3-modal" id="bptChangeProfileCodeModal" aria-hidden="true"><div class="bpt-live3-modal-card"><h2>Changer mon code</h2><p id="bptChangeProfileCodeName"></p><label>Code actuel<input id="bptChangeProfileCodeOld" class="bpt-personal-code-input" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password" /></label><label>Nouveau code · 4 chiffres<input id="bptChangeProfileCodeNew" class="bpt-personal-code-input" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" /></label><label>Confirmez le nouveau code<input id="bptChangeProfileCodeConfirm" class="bpt-personal-code-input" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" /></label><p id="bptChangeProfileCodeStatus" aria-live="polite"></p><div class="bpt-live3-modal-actions"><button id="bptChangeProfileCodeCancel" type="button">Fermer</button><button id="bptChangeProfileCodeSave" class="btn primary" type="button">Enregistrer</button></div></div></div>
 <div aria-hidden="true" class="bpt-live3-modal" id="live3SpectatorIdentityModal">
 <div class="bpt-live3-modal-card bpt-live3-spectator-id-card">
 <div class="home-kicker">BPT · Identification</div>
@@ -14603,8 +14607,9 @@ function simplifyRecordTextForMobile(text){
 <option value="">— Choisir votre nom —</option>
 </select>
 <p id="bptProfileCodeHint" class="muted" aria-live="polite">Choisissez votre profil.</p>
-<label>Code secret personnel · 6 chiffres<input id="bptProfileCodeInput" class="bpt-personal-code-input" type="password" inputmode="numeric" maxlength="6" autocomplete="current-password" /></label>
-<label id="bptProfileCodeConfirmLabel" hidden>Confirmez votre nouveau code<input id="bptProfileCodeConfirm" class="bpt-personal-code-input" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password" /></label>
+<label>Code secret personnel · 4 chiffres<input id="bptProfileCodeInput" class="bpt-personal-code-input" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password" /></label>
+<label id="bptProfileCodeConfirmLabel" hidden>Confirmez votre nouveau code<input id="bptProfileCodeConfirm" class="bpt-personal-code-input" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" /></label>
+<div id="bptProfileCodeMigration" hidden><label>Nouveau code à 4 chiffres<input id="bptProfileCodeNew" class="bpt-personal-code-input" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" /></label><label>Confirmez le nouveau code<input id="bptProfileCodeNewConfirm" class="bpt-personal-code-input" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" /></label></div>
 <p id="bptProfileCodeError" role="alert"></p>
 <div class="bpt-live3-modal-actions">
 <button class="btn primary" disabled="" id="live3SpectatorIdentityConfirmBtn" type="button">
@@ -15311,6 +15316,7 @@ function simplifyRecordTextForMobile(text){
 <div class="field profile-selector-field">
 <label>Joueur</label>
 <select id="profilePlayerSelect"></select>
+<button id="bptChangeProfileCodeBtn" type="button" hidden>🔑 Changer mon code</button>
 </div>
 </div>
 </div>
@@ -15452,7 +15458,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.36</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.39</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -18697,6 +18703,7 @@ function renderProfile(preferredName=null){
   else if(allNames[0])sel.value=allNames[0];
 
   const name=sel.value;
+  const codeButton=$('bptChangeProfileCodeBtn');if(codeButton)codeButton.hidden=!(name&&window.BPTLive3?.getVerifiedIdentityName?.()===name);
   const d=playerProfileData(name);
 
   if(!d){
@@ -26949,7 +26956,7 @@ function connectionDeviceLabel(){
     profileCodeLoadingName=name;profileCodeState=null;
     const button=$3('live3SpectatorIdentityConfirmBtn'),hint=$3('bptProfileCodeHint');
     if(button)button.disabled=true;
-    $3('bptProfileCodeInput').value='';$3('bptProfileCodeConfirm').value='';$3('bptProfileCodeConfirmLabel').hidden=true;$3('bptProfileCodeError').textContent='';
+    $3('bptProfileCodeInput').value='';$3('bptProfileCodeConfirm').value='';$3('bptProfileCodeConfirmLabel').hidden=true;$3('bptProfileCodeMigration').hidden=true;$3('bptProfileCodeError').textContent='';
     if(!name){hint.textContent='Choisissez votre profil.';return;}
     hint.textContent='Vérification du profil…';
     try{
@@ -26957,7 +26964,12 @@ function connectionDeviceLabel(){
       if(profileCodeLoadingName!==name)return;
       profileCodeState={name,ref,record:snap.val()};
       const exists=!!profileCodeState.record;
+      const legacy=exists&&profileCodeState.record.codeLength!==4;
+      $3('bptProfileCodeInput').maxLength=legacy?6:4;
+      $3('bptProfileCodeMigration').hidden=!legacy;
+      $3('bptProfileCodeNew').value='';$3('bptProfileCodeNewConfirm').value='';
       hint.textContent=exists?'Saisissez votre code personnel habituel.':'Créez votre code personnel. Vous conserverez ce même code pour les prochaines connexions.';
+      if(legacy)hint.textContent='Saisissez votre ancien code à 6 chiffres, puis choisissez votre nouveau code à 4 chiffres.';
       $3('bptProfileCodeConfirmLabel').hidden=exists;
       $3('bptProfileCodeInput').autocomplete=exists?'current-password':'new-password';
       button.textContent=exists?'Se connecter':'Créer mon code et me connecter';button.disabled=false;
@@ -26966,17 +26978,55 @@ function connectionDeviceLabel(){
   async function verifyProfileCode(name){
     const error=$3('bptProfileCodeError'),pin=String($3('bptProfileCodeInput')?.value||'');error.textContent='';
     if(!profileCodeState||profileCodeState.name!==name){error.textContent='Attendez la vérification du profil, puis réessayez.';await loadProfileCodeState(true);return false;}
-    if(!/^[0-9]{6}$/.test(pin)){error.textContent='Saisissez un code de 6 chiffres.';return false;}
+    const legacy=profileCodeState.record&&profileCodeState.record.codeLength!==4;
+    if(!(legacy?/^[0-9]{6}$/:/^[0-9]{4}$/).test(pin)){error.textContent=legacy?'Saisissez votre ancien code de 6 chiffres.':'Saisissez un code de 4 chiffres.';return false;}
     const {ref}=profileCodeState;let record=(await ref.once('value')).val();
     if(!record){
       if(pin!==String($3('bptProfileCodeConfirm').value||'')){error.textContent='Les deux codes ne correspondent pas.';return false;}
       const salt=Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('');
       const digest=await profileCodeDigest(salt+':'+pin);
-      const result=await ref.transaction(server=>server?undefined:{salt,digest,createdAt:Date.now()});
+      const result=await ref.transaction(server=>server?undefined:{salt,digest,codeLength:4,createdAt:Date.now()});
       record=result.snapshot.val()||(await ref.once('value')).val();
     }
     if(!record?.salt||!record?.digest||await profileCodeDigest(record.salt+':'+pin)!==record.digest){error.textContent='Code incorrect pour ce profil.';return false;}
+    if(record.codeLength!==4){
+      const nextPin=String($3('bptProfileCodeNew').value||'');
+      if(!/^[0-9]{4}$/.test(nextPin)||nextPin!==String($3('bptProfileCodeNewConfirm').value||'')){error.textContent='Choisissez et confirmez un nouveau code de 4 chiffres.';return false;}
+      const oldDigest=record.digest,newDigest=await profileCodeDigest(record.salt+':'+nextPin);
+      const changed=await ref.transaction(server=>server?.digest===oldDigest?{...server,digest:newDigest,codeLength:4}:undefined);
+      if(!changed.committed){error.textContent='Le code a changé. Réessayez la connexion.';return false;}
+      record=changed.snapshot.val();
+    }
     profileCodeState.record=record;verifiedProfileName=name;return true;
+  }
+
+  function openProfileCodeChange(){
+    if(!liveIdentityConfirmed||!verifiedProfileName)return;
+    const modal=$3('bptChangeProfileCodeModal');
+    $3('bptChangeProfileCodeName').textContent='Profil : '+verifiedProfileName;
+    for(const id of ['bptChangeProfileCodeOld','bptChangeProfileCodeNew','bptChangeProfileCodeConfirm'])$3(id).value='';
+    $3('bptChangeProfileCodeStatus').textContent='';$3('bptChangeProfileCodeSave').disabled=false;
+    modal.classList.add('open');modal.setAttribute('aria-hidden','false');
+  }
+  function closeProfileCodeChange(){const modal=$3('bptChangeProfileCodeModal');modal.classList.remove('open');modal.setAttribute('aria-hidden','true');}
+  async function changeProfileCode(){
+    if(!liveIdentityConfirmed||!verifiedProfileName)return;
+    const name=verifiedProfileName,oldPin=$3('bptChangeProfileCodeOld').value,newPin=$3('bptChangeProfileCodeNew').value,confirm=$3('bptChangeProfileCodeConfirm').value;
+    const status=$3('bptChangeProfileCodeStatus'),button=$3('bptChangeProfileCodeSave');status.textContent='';
+    if(!/^[0-9]{4}$/.test(oldPin)||!/^[0-9]{4}$/.test(newPin)){status.textContent='Chaque code doit contenir 4 chiffres.';return;}
+    if(newPin!==confirm){status.textContent='Les deux nouveaux codes ne correspondent pas.';return;}
+    button.disabled=true;
+    try{
+      const ref=await profileCodeRef(name),record=(await ref.once('value')).val();
+      if(!record||await profileCodeDigest(record.salt+':'+oldPin)!==record.digest){status.textContent='Le code actuel est incorrect.';return;}
+      const digest=await profileCodeDigest(record.salt+':'+newPin);
+      const result=await ref.transaction(server=>server?.digest===record.digest?{...server,digest,codeLength:4,updatedAt:Date.now()}:undefined);
+      if(!result.committed){status.textContent='Le code a changé entre-temps. Réessayez.';return;}
+      if(profileCodeState?.name===name)profileCodeState.record=result.snapshot.val();
+      for(const id of ['bptChangeProfileCodeOld','bptChangeProfileCodeNew','bptChangeProfileCodeConfirm'])$3(id).value='';
+      status.textContent='Votre code a été modifié. Utilisez le nouveau code lors de vos prochaines connexions.';
+    }catch(e){status.textContent='Modification impossible : '+(e.message||'réessayez');}
+    finally{button.disabled=false;}
   }
 
   async function setSpectatorIdentity(){
@@ -27019,6 +27069,7 @@ function connectionDeviceLabel(){
     }
 
     closeSpectatorIdentity();
+    if(typeof renderProfile==='function')renderProfile(clean);
     await updateViewerPresence();
     render();
   }
@@ -29074,6 +29125,9 @@ async function requestTakeover(){
     $3("live3EndBtn")?.addEventListener("click",endLive);
     $3("live3TakeoverBtn")?.addEventListener("click",requestTakeover);
     $3("live3ForceTakeoverBtn")?.addEventListener("click",forceLive3Takeover);
+    $3('bptChangeProfileCodeBtn')?.addEventListener('click',openProfileCodeChange);
+    $3('bptChangeProfileCodeCancel')?.addEventListener('click',closeProfileCodeChange);
+    $3('bptChangeProfileCodeSave')?.addEventListener('click',changeProfileCode);
     $3("live3SpectatorIdentityConfirmBtn")?.addEventListener("click",setSpectatorIdentity);
     $3("live3SpectatorNameInput")?.addEventListener("change",()=>{
       const btn=$3("live3SpectatorIdentityConfirmBtn");
