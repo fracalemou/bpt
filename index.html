@@ -14186,7 +14186,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.15";
+const BPT_APP_VERSION="5.19";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14338,7 +14338,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.15</div>
+<div class="app-version" id="headerAppVersion">BPT v5.19</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -14482,7 +14482,7 @@ function simplifyRecordTextForMobile(text){
 </div>
 <section class="b466-spectator bpt-live3-spectator-only" id="live3SpectatorControls" style="display:none">
 <button id="live3TakeoverBtn" type="button">Demander la reprise de gestion</button>
-<button id="live3ChangeSpectatorNameBtn" type="button">Changer mon identité</button>
+
 <span id="live3TakeoverStatus"></span>
 <div id="live3TakeoverCountdown" style="display:none"></div>
 </section>
@@ -15448,7 +15448,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.15</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.19</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -27112,6 +27112,43 @@ function connectionDeviceLabel(){
     return changed?res.snapshot.val():null;
   }
 
+  function buildPreGameBriefing(selected){
+    const rows=Array.isArray(db?.history)?db.history:[];
+    const ranked=ranking(),byName=new Map(ranked.map(p=>[p.name,p]));
+    const games=[...new Set(rows.map(r=>Number(r.game)).filter(g=>g>0))].sort((a,b)=>a-b);
+    const winners=games.map(g=>rows.find(r=>Number(r.game)===g&&Number(r.place)===1)?.player||'');
+    let bestStreak=0,run=0,last='';
+    for(const winner of winners){run=winner&&winner===last?run+1:(winner?1:0);bestStreak=Math.max(bestStreak,run);last=winner;}
+    const leader=ranked[0],n=selected.length;
+    return selected.map(name=>{
+      const mine=rows.filter(r=>r.player===name).sort((a,b)=>Number(a.game)-Number(b.game));
+      const stat=byName.get(name)||{points:0,kills:0,wins:0,podiums:0};
+      const entry=(icon,title,text)=>({name,icon,title,text});
+      let streak=0;for(let i=winners.length-1;i>=0&&winners[i]===name;i--)streak++;
+      if(streak>0)return entry('🔥','LA SÉRIE À PROLONGER',`Après ${streak} victoire${streak>1?'s':''} consécutive${streak>1?'s':''}, une victoire ce soir porterait sa série à ${streak+1}${streak+1>bestStreak?' : un nouveau record cette saison.':streak+1===bestStreak?' : le record de la saison serait égalé.':'.'}`);
+      if(leader&&leader.name!==name&&n>=6){
+        const others=ranked.filter(p=>p.name!==name);
+        const possibilities=[];
+        for(let place=1;place<=Math.min(3,n);place++){
+          const total=Number(stat.points||0)+pointsFor(place,n);
+          const rivals=others.map(p=>({name:p.name,total:Number(p.points||0)+(selected.includes(p.name)?pointsFor(place===n?n-1:n,n):0)}));
+          if(rivals.every(p=>total>p.total))possibilities.push(place);
+        }
+        if(possibilities.length){const place=Math.max(...possibilities);return entry('👑','LA TÊTE EN VUE',`${place===3?'Un podium':place===2?'Une place dans les deux premiers':'Une victoire'} peut lui permettre de prendre la tête du championnat, selon les résultats des autres joueurs.`);}
+      }
+      const latest=mine[mine.length-1];
+      if(latest?.killer&&selected.includes(latest.killer))return entry('⚔️','L’HEURE DE LA REVANCHE',`${latest.killer} l’a éliminé lors de sa dernière participation. Ils sont tous les deux à la table ce soir.`);
+      const kills=Number(stat.kills||0);
+      if(kills>0&&(kills+1)%10===0)return entry('🎯','UN CAP À FRANCHIR',`Avec ${kills} éliminations cette saison, un kill lui permettrait d’atteindre le cap des ${kills+1}.`);
+      let podiumRun=0;for(let i=mine.length-1;i>=0&&Number(mine[i].place)<=3&&Number(mine[i].place)>0;i--)podiumRun++;
+      if(podiumRun>=2)return entry('🏅','LA RÉGULARITÉ',`${podiumRun} podiums sur ses ${podiumRun} dernières participations. Un podium ce soir prolongerait sa série.`);
+      if(!mine.length)return entry('✨','UNE NOUVELLE HISTOIRE', 'Première participation enregistrée cette saison : tout reste à écrire.');
+      if(!mine.some(r=>Number(r.place)===1))return entry('🏆','LA PREMIÈRE VICTOIRE',`Après ${mine.length} participation${mine.length>1?'s':''} cette saison, il vise sa première victoire.`);
+      if(leader?.name===name)return entry('👑','LE LEADER À DÉFIER',`En tête du championnat avec ${Number(stat.points||0)} points, il défend sa place ce soir.`);
+      return entry('💪','UN NOUVEAU RENDEZ-VOUS',`${mine.filter(r=>Number(r.place)<=3&&Number(r.place)>0).length} podium${mine.filter(r=>Number(r.place)<=3&&Number(r.place)>0).length>1?'s':''} en ${mine.length} participations cette saison : un nouveau podium enrichirait son palmarès.`);
+    });
+  }
+
   async function createLive(){
     if(!liveIdentityConfirmed || !liveIdentityName()){
       openSpectatorIdentity(true);
@@ -27152,6 +27189,7 @@ function connectionDeviceLabel(){
         players:selected.map(name=>({name,status:"in",place:null,killer:"",outAt:null,outLevel:null,outTime:"",outElapsedSec:null})),
         mysteryBountyName:selected[Math.floor(Math.random()*selected.length)],
         mysteryBountyRevealed:false,mysteryBountyHunter:"",mysteryBountyEvent:null,liveAlerts:[],
+        preGameBriefing:buildPreGameBriefing(selected),preGamePending:true,
         viewers:{},takeoverRequest:null,chat:[],paceAdaptive:false
       };
       await r.transaction(server=>{
@@ -27174,9 +27212,10 @@ function connectionDeviceLabel(){
     }
   }
 
-  async function toggleStartPause(){
+  async function toggleStartPause(launchOnly=false){
     if(!isOwner())return;
     await ownerTransaction(s=>{
+      if(launchOnly&&(!s.preGamePending||s.startedAt))return s;
       const now=Date.now();
       if(s.running){
         const rem=Math.max(0,Math.ceil((Number(s.deadline||now)-now)/1000));
@@ -27187,6 +27226,7 @@ function connectionDeviceLabel(){
         const rem=Math.max(0,Number(s.remainingSec)||0);
         s.running=true;
         if(!s.startedAt)s.startedAt=now;
+        s.preGamePending=false;
         s.runStartedAt=now;
         s.deadline=now+rem*1000;
       }
@@ -27406,7 +27446,7 @@ function connectionDeviceLabel(){
         victimPlayer.wasMysteryBounty=true;
         killerPlayer.bountyHunter=true;
         s.mysteryBountyEvent={id:'BOUNTY_'+elimNow+'_'+Math.random().toString(36).slice(2),at:elimNow,kind:'eliminated',player:victim,hunter:killer};
-        bptLive3QueueAlert(s,'🎯','BOUNTY RÉVÉLÉ !',`${victim} était le bounty mystère · éliminé par ${killer}`,elimNow);
+
       }
 
       // Accomplissements de kills réellement débloqués pendant la partie.
@@ -27461,7 +27501,7 @@ function connectionDeviceLabel(){
           s.mysteryBountyRevealed=true;
           survivors[0].wasMysteryBounty=true;
           s.mysteryBountyEvent={id:'BOUNTY_'+now+'_'+Math.random().toString(36).slice(2),at:now,kind:'winner',player:survivors[0].name,hunter:''};
-          bptLive3QueueAlert(s,'🎯','BOUNTY SURVIVANT !',`${survivors[0].name} était le bounty mystère et remporte la partie`,now);
+
         }
       }
 
@@ -28831,7 +28871,6 @@ async function requestTakeover(){
     $3("live3EndBtn")?.addEventListener("click",endLive);
     $3("live3TakeoverBtn")?.addEventListener("click",requestTakeover);
     $3("live3ForceTakeoverBtn")?.addEventListener("click",forceLive3Takeover);
-    $3("live3ChangeSpectatorNameBtn")?.addEventListener("click",()=>openSpectatorIdentity(true));
     $3("live3SpectatorIdentityConfirmBtn")?.addEventListener("click",setSpectatorIdentity);
     $3("live3SpectatorNameInput")?.addEventListener("change",()=>{
       const btn=$3("live3SpectatorIdentityConfirmBtn");
@@ -28954,12 +28993,15 @@ async function requestTakeover(){
     adjustMinute,
     changeLevel,
     toggleStartPause,
+    launchPreGame:()=>toggleStartPause(true),
     openElim,
     openChat,
     openFullscreen,
     closeFullscreen,
     endLive,
     requestTakeover,
+    approveTakeover,
+    rejectTakeover,
     forceLive3Takeover,
     startReflectionTimer,
     stopReflectionTimer,
@@ -30107,9 +30149,20 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 .bpt484-quickbar button{border:1px solid #2a5b52;border-radius:12px;background:#12372f;color:var(--text);font-size:17px;font-weight:900;cursor:pointer;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bpt484-actions{display:grid;grid-template-columns:.82fr .9fr 1.18fr .82fr .82fr 1.12fr 1fr 1.06fr;gap:8px}
 .bpt484-actions button{border:0;border-radius:14px;font-size:18px;font-weight:900;cursor:pointer;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bpt-pregame[hidden]{display:none!important}
+.bpt-pregame{position:absolute;inset:0;z-index:65;background:#071d19;color:#edf6f2;border-radius:inherit;overflow:auto;overscroll-behavior:contain;padding:clamp(12px,2vw,28px)}
+.bpt-pregame-inner{max-width:1100px;margin:auto}.bpt-pregame header{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid #24493f;padding-bottom:16px}.bpt-pregame header b{color:#f2c14e;font-size:32px;font-weight:900}.bpt-pregame header span{color:#a7c3b9;font-size:12px;letter-spacing:1px}
+.bpt-pregame-heading{padding:22px 0}.bpt-pregame-heading small{color:#26c6ba;font-size:11px;letter-spacing:2px}.bpt-pregame h2{font-size:clamp(24px,3vw,36px);margin:8px 0;color:#fff}.bpt-pregame-heading p{margin:8px 0;color:#a7c3b9}
+.bpt-pregame-stories{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.bpt-pregame article{background:#102b24;border:1px solid #24493f;border-radius:14px;padding:18px;display:flex;gap:12px;align-items:flex-start}.bpt-pregame-icon{font-size:26px}.bpt-pregame article>div{min-width:0}.bpt-pregame h3{margin:0;font-size:20px;overflow-wrap:anywhere}.bpt-pregame article small{display:block;font-size:11px;letter-spacing:1px;color:#f2c14e;margin-top:6px}.bpt-pregame article p{font-size:15px;line-height:1.5;margin:10px 0 0;color:#d6e5de;overflow-wrap:anywhere}
+.bpt-pregame footer{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 0 4px}.bpt-pregame footer span{color:#a7c3b9;font-size:14px}.bpt-pregame footer button{background:#f2c14e;color:#171007;border:0;border-radius:12px;padding:16px 24px;font-size:16px;font-weight:800;min-height:48px;cursor:pointer}.bpt-pregame footer button[hidden]{display:none!important}
+@media(max-width:600px){.bpt-pregame-stories{grid-template-columns:1fr}.bpt-pregame article{padding:14px}.bpt-pregame footer{flex-direction:column;align-items:stretch}}
+.bpt484-takeover-request[hidden]{display:none!important}
+.bpt484-takeover-request{position:absolute;z-index:70;top:90px;left:50%;transform:translateX(-50%);width:min(580px,calc(100% - 24px));box-sizing:border-box;padding:18px;border:2px solid #f2c14e;border-radius:16px;background:#09241f;color:#fff;box-shadow:0 16px 45px #0009;text-align:center}
+.bpt484-takeover-request strong{color:#f2c14e;font-size:18px}.bpt484-takeover-request p{font-size:16px;overflow-wrap:anywhere;margin:12px 0}.bpt484-takeover-request>div{display:flex;justify-content:center;gap:12px}.bpt484-takeover-request button{min-height:44px;padding:10px 20px;border:0;border-radius:10px;font-size:16px;font-weight:800;cursor:pointer;background:#26c6ba;color:#06201d}.bpt484-takeover-request button[data-do="reject-takeover"]{background:#b83a45;color:#fff}
+@media(max-width:760px){.bpt484-takeover-request{top:64px;padding:14px}}
 .bpt484-takeover{display:none;background:#e0ad38;color:#171007}
 .bpt484-live.is-spectator .bpt484-quickbar{display:none!important}
-.bpt484-live.is-spectator .bpt484-pause,.bpt484-live.is-spectator .bpt484-out,.bpt484-live.is-spectator .bpt484-timerbtn,.bpt484-live.is-spectator .bpt484-allinbtn,.bpt484-live.is-spectator .bpt484-end{display:none!important}
+.bpt484-live.is-spectator .bpt484-actions button:not(.bpt484-takeover):not(.bpt484-full){display:none!important}
 .bpt484-live.is-spectator .bpt484-takeover{display:block}
 .bpt484-live.is-spectator .bpt484-actions{grid-template-columns:2fr 1fr 1fr 1fr}
 .bpt484-live.is-spectator .bpt484-takeover.is-force{background:#dc5a57;color:#fff}
@@ -30235,6 +30288,8 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 
     <div class="bpt-bounty-overlay" data-role="bounty" hidden><section class="bpt-bounty-card" role="dialog" aria-modal="true" aria-label="Révélation du bounty mystère" tabindex="-1"><div class="bpt-bounty-icon">🎯</div><h2 data-role="bountytitle"></h2><div class="bpt-bounty-name" data-role="bountyname"></div><p data-role="bountytext"></p><strong data-role="bountyhunter"></strong><button type="button" data-bounty-close disabled>Continuer</button></section></div>
     <div class="bpt484-head"><div class="bpt484-brand">BPT</div><div class="bpt484-owner" data-role="owner">Organisateur · —</div><div class="bpt484-head-tools"><button class="bpt484-chat" data-do="chat">Chat</button><div class="bpt484-part" data-role="part">Partie n°—</div></div></div>
+    <section class="bpt-pregame" data-role="pregame" hidden aria-label="Les enjeux de la partie"><div class="bpt-pregame-inner"><header><b>BPT</b><span data-role="pregamecount"></span></header><div class="bpt-pregame-heading"><small>CE SOIR, TOUT PEUT CHANGER</small><h2>Les enjeux de la partie</h2><p>Une bonne raison de se dépasser pour chacun.</p></div><div class="bpt-pregame-stories" data-role="pregamestories"></div><footer><span data-role="pregamestatus"></span><button type="button" data-do="launch-pregame">▶ Lancer la partie</button></footer></div></section>
+    <section class="bpt484-takeover-request" data-role="takeoverrequest" role="alert" hidden><strong>DEMANDE DE REPRISE</strong><p data-role="takeoverrequesttext"></p><div><button type="button" data-do="approve-takeover">Accepter</button><button type="button" data-do="reject-takeover">Refuser</button></div></section>
     <div class="bpt484-live-alert" data-role="livealert"><button class="bpt484-live-alert-close" data-alert-close aria-label="Fermer">×</button><div class="bpt484-live-alert-icon" data-role="livealerticon">🏆</div><div><div class="bpt484-live-alert-title" data-role="livealerttitle"></div><div class="bpt484-live-alert-text" data-role="livealerttext"></div></div></div>
     <div class="bpt484-special-hud" data-role="specialhud"><div class="bpt484-allin-title" data-role="allintitle"></div><div class="bpt484-timebank-player" data-role="timebankplayer"></div><div class="bpt484-timebank-count" data-role="timebankcount"></div><div class="bpt484-timebank-meta" data-role="timebankmeta"></div><button data-timebank-stop>Décision prise</button></div>
     <div class="bpt484-main">
@@ -30262,7 +30317,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
   function install(){
     const shell=document.querySelector('#live3Game .b466-shell');if(shell&&!shell.querySelector('.bpt484-live'))shell.insertAdjacentHTML('afterbegin',makeMarkup(false));
     const fsShell=document.querySelector('#live3Fullscreen .b466-fs-shell');if(fsShell&&!fsShell.querySelector('.bpt484-live'))fsShell.insertAdjacentHTML('afterbegin',makeMarkup(true));
-    document.querySelectorAll('.bpt484-live').forEach(root=>{if(root.dataset.bound)return;root.dataset.bound='1';root.addEventListener('click',e=>{if(e.target.closest('[data-alert-close]')){window.__bptLiveAlertDismissedBefore=Date.now();sync();return;}if(e.target.closest('[data-timebank-stop]')){api()?.stopReflectionTimer?.();return;}const a=e.target.closest('[data-action]');if(a)info(a.dataset.action);const q=e.target.closest('[data-quick]');if(q){actionDirect(q.dataset.quick);return;}const b=e.target.closest('[data-do]');if(b)doit(b.dataset.do,root.dataset.fs==='1')})});
+    document.querySelectorAll('.bpt484-live').forEach(root=>{if(root.dataset.bound)return;root.dataset.bound='1';root.addEventListener('click',e=>{if(e.target.closest('[data-alert-close]')){window.__bptLiveAlertDismissedBefore=Date.now();sync();return;}if(e.target.closest('[data-timebank-stop]')){api()?.stopReflectionTimer?.();return;}const a=e.target.closest('[data-action]');if(a)info(a.dataset.action);const q=e.target.closest('[data-quick]');if(q){actionDirect(q.dataset.quick);return;}const b=e.target.closest('[data-do]');if(b){if(root.classList.contains('is-spectator')&&!['takeover','full','chat'].includes(b.dataset.do))return;doit(b.dataset.do,root.dataset.fs==='1')}})});
     ensureModal();enforceNav();sync();
   }
   function ensureModal(){if($('bpt484Modal'))return;document.body.insertAdjacentHTML('beforeend','<div id="bpt484Modal" class="bpt484-modal"><div id="bpt484Dialog" class="bpt484-dialog"></div></div>');$('bpt484Modal').onclick=e=>{if(e.target===$('bpt484Modal'))closeModal()}}
@@ -30272,12 +30327,15 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     const x=api();
     try{
       if(a==='pause')await x?.toggleStartPause?.();
+      else if(a==='launch-pregame')await x?.launchPreGame?.();
       else if(a==='out')x?.openElim?.();
       else if(a==='timer')openReflectionTimerPicker();
       else if(a==='chat')$('live3ChatBtn')?.click();
       else if(a==='odds')$('live3OddsBtn')?.click();
       else if(a==='full'){if(fs)x?.closeFullscreen?.();else x?.openFullscreen?.()}
       else if(a==='takeover')await x?.requestTakeover?.();
+      else if(a==='approve-takeover')await x?.approveTakeover?.();
+      else if(a==='reject-takeover')await x?.rejectTakeover?.();
       else if(a==='end')await x?.endLive?.();
     }catch(e){console.error('BPT action',a,e)}
     setTimeout(sync,80);
@@ -30508,6 +30566,24 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     window.__bpt484FitTimer=setTimeout(fitLiveTexts,20);
   }
   const bountySeenAt=new Map(),bountyDismissed=new Set();
+  function renderPreGame(root,st,owner){
+    const box=root.querySelector('[data-role="pregame"]');if(!box)return;
+    box.hidden=!(st.preGamePending&&!st.startedAt);
+    if(box.hidden)return;
+    const entries=Array.isArray(st.preGameBriefing)?st.preGameBriefing:[];
+    box.querySelector('[data-role="pregamecount"]').textContent='AVANT-PARTIE · '+entries.length+' JOUEURS';
+    box.querySelector('[data-role="pregamestatus"]').textContent=owner?'Le chrono attend le lancement.':'En attente du lancement par l’organisateur.';
+    box.querySelector('[data-do="launch-pregame"]').hidden=!owner;
+    const key=JSON.stringify(entries);
+    if(box.dataset.entries!==key){
+      box.dataset.entries=key;const host=box.querySelector('[data-role="pregamestories"]');host.replaceChildren();
+      for(const entry of entries){
+        const card=document.createElement('article'),icon=document.createElement('span'),copy=document.createElement('div'),name=document.createElement('h3'),title=document.createElement('small'),text=document.createElement('p');
+        icon.className='bpt-pregame-icon';icon.textContent=entry.icon||'🎯';name.textContent=entry.name;title.textContent=entry.title;text.textContent=entry.text;
+        copy.append(name,title,text);card.append(icon,copy);host.append(card);
+      }
+    }
+  }
   function renderBounty(root,st){
     const box=root.querySelector('[data-role="bounty"]');if(!box)return;
     const ev=st.mysteryBountyRevealed?st.mysteryBountyEvent:null;
@@ -30541,6 +30617,12 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     const owner=`Organisateur · ${st.ownerLabel||'—'}`,structure=st.paceAdaptive===true?'Structure · Adaptatif':'Structure · Classique';
     document.querySelectorAll('.bpt484-live').forEach(r=>{
       r.classList.toggle('is-spectator',!ownerRole);
+      const requestPanel=r.querySelector('[data-role="takeoverrequest"]');
+      if(requestPanel){
+        requestPanel.hidden=!(ownerRole&&takeoverReq?.requesterId&&String(takeoverReq.requesterId)!==myId);
+        const requestText=requestPanel.querySelector('[data-role="takeoverrequesttext"]');
+        if(requestText)requestText.textContent=(takeoverReq?.requesterLabel||'Un appareil')+' demande à reprendre la gestion du Live.';
+      }
       const takeoverBtn=r.querySelector('.bpt484-takeover');
       if(takeoverBtn){
         takeoverBtn.classList.toggle('is-force',!!(myTakeover && takeoverRemaining<=0));
@@ -30549,7 +30631,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
         else if(takeoverRemaining>0){takeoverBtn.disabled=true;takeoverBtn.textContent=`Reprise possible dans ${takeoverRemaining} s`;}
         else{takeoverBtn.disabled=false;takeoverBtn.textContent='Forcer la reprise';}
       }
-      renderBounty(r,st);const set=(role,val)=>{const e=r.querySelector(`[data-role="${role}"]`);if(e)e.textContent=val};set('owner',owner);set('structure',structure);set('part',`Partie n°${gameNo(st)}`);set('blinds',`${fmt(cur.sb)} / ${fmt(cur.bb)}`);const curDur=Math.max(1,Math.round(Number(st.levels?.[idx]?.durationSec||0)/60)||Math.round(Number(st.levels?.[idx]?.durationMin||0))||15);set('blinddur',`· ${curDur} min`);set('timer',$('live3Timer')?.textContent||'00:00');set('players',String(alive));set('avgchips',fmt(avg));set('avgbb',`${avgBB} BB`);set('next',`${fmt(nx.sb)} / ${fmt(nx.bb)}`);set('elapsed',$('live3Elapsed')?.textContent||'0 min');set('finish',$('live3EstimatedFinish')?.textContent||'—');set('delta',$('live3FinishDelta')?.textContent||'—');const nowAlert=Date.now();const dismissedBefore=Number(window.__bptLiveAlertDismissedBefore||0);const activeAlert=(Array.isArray(st.liveAlerts)?st.liveAlerts:[]).filter(a=>Number(a.at)<=nowAlert&&Number(a.until)>nowAlert&&Number(a.at)>dismissedBefore).sort((a,b)=>Number(b.at)-Number(a.at))[0]||null;const alertBox=r.querySelector('[data-role="livealert"]');if(alertBox){alertBox.classList.toggle('show',!!activeAlert);if(activeAlert){set('livealerticon',activeAlert.icon||'🏆');set('livealerttitle',activeAlert.title||'');set('livealerttext',activeAlert.text||'')}}const allIn=false;const activeTimer=st.activeReflectionTimer||null;const timerRemain=activeTimer?Math.max(0,Math.ceil((Number(activeTimer.endsAt||0)-Date.now())/1000)):0;const hud=r.querySelector('[data-role="specialhud"]');if(hud){hud.classList.toggle('show',allIn||!!activeTimer);hud.classList.toggle('is-allin',allIn);set('allintitle',allIn?'🔥 ALL-IN':'');set('timebankplayer',activeTimer?activeTimer.player:'');set('timebankcount',activeTimer?`${String(Math.floor(timerRemain/60)).padStart(2,'0')}:${String(timerRemain%60).padStart(2,'0')}`:'');const used=activeTimer?Number(st.reflectionTimers?.[activeTimer.player]?.used||activeTimer.timerNo||1):0;set('timebankmeta',activeTimer?`Timer ${used}/2 · 2 minutes`:'');const stopBtn=hud.querySelector('[data-timebank-stop]');if(stopBtn)stopBtn.style.display=activeTimer&&ownerRole?'inline-block':'none';}r.querySelector('.bpt484-stage')?.classList.toggle('is-allin',allIn);const allBtn=r.querySelector('[data-do="allin"]');if(allBtn){allBtn.classList.toggle('is-active',allIn);allBtn.textContent=allIn?'Fin du ALL-IN':'🔥 ALL-IN';}const de=r.querySelector('[data-role="delta"]');const dt=de?.textContent||'';const dm=Math.abs(Number((dt.match(/[-+]?\d+/)||['0'])[0])||0);de?.classList.toggle('is-alert',dm>=15);de?.classList.toggle('is-delay',/retard/i.test(dt));de?.classList.toggle('is-ahead',/avance/i.test(dt));set('mode',st.paceAdaptive===true?'Adaptatif':'Classique');set('level',idx<25?`${idx+1} / 25`:String(idx+1));const pb=r.querySelector('[data-do="pause"]');if(pb)pb.textContent=st.running?'Pause':(st.startedAt?'Reprendre':'Démarrer')});
+      renderPreGame(r,st,ownerRole);renderBounty(r,st);const set=(role,val)=>{const e=r.querySelector(`[data-role="${role}"]`);if(e)e.textContent=val};set('owner',owner);set('structure',structure);set('part',`Partie n°${gameNo(st)}`);set('blinds',`${fmt(cur.sb)} / ${fmt(cur.bb)}`);const curDur=Math.max(1,Math.round(Number(st.levels?.[idx]?.durationSec||0)/60)||Math.round(Number(st.levels?.[idx]?.durationMin||0))||15);set('blinddur',`· ${curDur} min`);set('timer',$('live3Timer')?.textContent||'00:00');set('players',String(alive));set('avgchips',fmt(avg));set('avgbb',`${avgBB} BB`);set('next',`${fmt(nx.sb)} / ${fmt(nx.bb)}`);set('elapsed',$('live3Elapsed')?.textContent||'0 min');set('finish',$('live3EstimatedFinish')?.textContent||'—');set('delta',$('live3FinishDelta')?.textContent||'—');const nowAlert=Date.now();const dismissedBefore=Number(window.__bptLiveAlertDismissedBefore||0);const activeAlert=(Array.isArray(st.liveAlerts)?st.liveAlerts:[]).filter(a=>!/^BOUNTY\b/i.test(String(a.title||''))&&Number(a.at)<=nowAlert&&Number(a.until)>nowAlert&&Number(a.at)>dismissedBefore).sort((a,b)=>Number(b.at)-Number(a.at))[0]||null;const alertBox=r.querySelector('[data-role="livealert"]');if(alertBox){alertBox.classList.toggle('show',!!activeAlert);if(activeAlert){set('livealerticon',activeAlert.icon||'🏆');set('livealerttitle',activeAlert.title||'');set('livealerttext',activeAlert.text||'')}}const allIn=false;const activeTimer=st.activeReflectionTimer||null;const timerRemain=activeTimer?Math.max(0,Math.ceil((Number(activeTimer.endsAt||0)-Date.now())/1000)):0;const hud=r.querySelector('[data-role="specialhud"]');if(hud){hud.classList.toggle('show',allIn||!!activeTimer);hud.classList.toggle('is-allin',allIn);set('allintitle',allIn?'🔥 ALL-IN':'');set('timebankplayer',activeTimer?activeTimer.player:'');set('timebankcount',activeTimer?`${String(Math.floor(timerRemain/60)).padStart(2,'0')}:${String(timerRemain%60).padStart(2,'0')}`:'');const used=activeTimer?Number(st.reflectionTimers?.[activeTimer.player]?.used||activeTimer.timerNo||1):0;set('timebankmeta',activeTimer?`Timer ${used}/2 · 2 minutes`:'');const stopBtn=hud.querySelector('[data-timebank-stop]');if(stopBtn)stopBtn.style.display=activeTimer&&ownerRole?'inline-block':'none';}r.querySelector('.bpt484-stage')?.classList.toggle('is-allin',allIn);const allBtn=r.querySelector('[data-do="allin"]');if(allBtn){allBtn.classList.toggle('is-active',allIn);allBtn.textContent=allIn?'Fin du ALL-IN':'🔥 ALL-IN';}const de=r.querySelector('[data-role="delta"]');const dt=de?.textContent||'';const dm=Math.abs(Number((dt.match(/[-+]?\d+/)||['0'])[0])||0);de?.classList.toggle('is-alert',dm>=15);de?.classList.toggle('is-delay',/retard/i.test(dt));de?.classList.toggle('is-ahead',/avance/i.test(dt));set('mode',st.paceAdaptive===true?'Adaptatif':'Classique');set('level',idx<25?`${idx+1} / 25`:String(idx+1));const pb=r.querySelector('[data-do="pause"]');if(pb)pb.textContent=st.running?'Pause':(st.startedAt?'Reprendre':'Démarrer')});
     if(ownerRole && st.activeReflectionTimer && Number(st.activeReflectionTimer.endsAt||0)<=Date.now() && !window.__bptStoppingExpiredTimer){window.__bptStoppingExpiredTimer=true;api()?.stopReflectionTimer?.().finally(()=>{window.__bptStoppingExpiredTimer=false})}
     scheduleFitLiveTexts();
     if(!repairTried){const bad=(st.levels||[]).slice(0,Math.min(25,(st.levels||[]).length)).some((lv,i)=>{const b=blindAt(i);return Number(lv?.sb)!==b.sb||Number(lv?.bb)!==b.bb});if(bad&&api()?.isOwner?.()){repairTried=true;api()?.repairStandardBlinds?.().catch(console.warn)}}
