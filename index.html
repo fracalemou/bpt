@@ -14189,7 +14189,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.39";
+const BPT_APP_VERSION="5.41";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14341,7 +14341,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.39</div>
+<div class="app-version" id="headerAppVersion">BPT v5.41</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -14607,7 +14607,7 @@ function simplifyRecordTextForMobile(text){
 <option value="">— Choisir votre nom —</option>
 </select>
 <p id="bptProfileCodeHint" class="muted" aria-live="polite">Choisissez votre profil.</p>
-<label>Code secret personnel · 4 chiffres<input id="bptProfileCodeInput" class="bpt-personal-code-input" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password" /></label>
+<label><span id="bptProfileCodeLabel">Code secret personnel · 4 chiffres</span><input id="bptProfileCodeInput" class="bpt-personal-code-input" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password" /></label>
 <label id="bptProfileCodeConfirmLabel" hidden>Confirmez votre nouveau code<input id="bptProfileCodeConfirm" class="bpt-personal-code-input" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" /></label>
 <div id="bptProfileCodeMigration" hidden><label>Nouveau code à 4 chiffres<input id="bptProfileCodeNew" class="bpt-personal-code-input" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" /></label><label>Confirmez le nouveau code<input id="bptProfileCodeNewConfirm" class="bpt-personal-code-input" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" /></label></div>
 <p id="bptProfileCodeError" role="alert"></p>
@@ -15458,7 +15458,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.39</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.41</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -26966,13 +26966,16 @@ function connectionDeviceLabel(){
       const exists=!!profileCodeState.record;
       const legacy=exists&&profileCodeState.record.codeLength!==4;
       $3('bptProfileCodeInput').maxLength=legacy?6:4;
+      $3('bptProfileCodeInput').minLength=legacy?6:4;
+      $3('bptProfileCodeInput').placeholder=legacy?'Ancien code complet à 6 chiffres':'Votre code à 4 chiffres';
+      $3('bptProfileCodeLabel').textContent=legacy?'Ancien code personnel · 6 chiffres':'Code secret personnel · 4 chiffres';
       $3('bptProfileCodeMigration').hidden=!legacy;
       $3('bptProfileCodeNew').value='';$3('bptProfileCodeNewConfirm').value='';
       hint.textContent=exists?'Saisissez votre code personnel habituel.':'Créez votre code personnel. Vous conserverez ce même code pour les prochaines connexions.';
       if(legacy)hint.textContent='Saisissez votre ancien code à 6 chiffres, puis choisissez votre nouveau code à 4 chiffres.';
       $3('bptProfileCodeConfirmLabel').hidden=exists;
       $3('bptProfileCodeInput').autocomplete=exists?'current-password':'new-password';
-      button.textContent=exists?'Se connecter':'Créer mon code et me connecter';button.disabled=false;
+      button.textContent=legacy?'Valider mon ancien code et passer à 4 chiffres':exists?'Se connecter':'Créer mon code et me connecter';button.disabled=false;
     }catch(e){if(profileCodeLoadingName!==name)return;hint.textContent='Impossible de vérifier le code. Vérifiez votre connexion et réessayez.';$3('bptProfileCodeError').textContent=e.message||'Connexion indisponible';profileCodeLoadingName='';}
   }
   async function verifyProfileCode(name){
@@ -26988,7 +26991,7 @@ function connectionDeviceLabel(){
       const result=await ref.transaction(server=>server?undefined:{salt,digest,codeLength:4,createdAt:Date.now()});
       record=result.snapshot.val()||(await ref.once('value')).val();
     }
-    if(!record?.salt||!record?.digest||await profileCodeDigest(record.salt+':'+pin)!==record.digest){error.textContent='Code incorrect pour ce profil.';return false;}
+    if(!record?.salt||!record?.digest||await profileCodeDigest(record.salt+':'+pin)!==record.digest){error.textContent=legacy?'Ancien code incorrect. Saisissez les 6 chiffres du code initial, sans le raccourcir.':'Code incorrect pour ce profil.';return false;}
     if(record.codeLength!==4){
       const nextPin=String($3('bptProfileCodeNew').value||'');
       if(!/^[0-9]{4}$/.test(nextPin)||nextPin!==String($3('bptProfileCodeNewConfirm').value||'')){error.textContent='Choisissez et confirmez un nouveau code de 4 chiffres.';return false;}
