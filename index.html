@@ -14189,7 +14189,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.41";
+const BPT_APP_VERSION="5.42";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14341,7 +14341,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.41</div>
+<div class="app-version" id="headerAppVersion">BPT v5.42</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15458,7 +15458,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.41</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.42</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -26996,8 +26996,12 @@ function connectionDeviceLabel(){
       const nextPin=String($3('bptProfileCodeNew').value||'');
       if(!/^[0-9]{4}$/.test(nextPin)||nextPin!==String($3('bptProfileCodeNewConfirm').value||'')){error.textContent='Choisissez et confirmez un nouveau code de 4 chiffres.';return false;}
       const oldDigest=record.digest,newDigest=await profileCodeDigest(record.salt+':'+nextPin);
-      const changed=await ref.transaction(server=>server?.digest===oldDigest?{...server,digest:newDigest,codeLength:4}:undefined);
-      if(!changed.committed){error.textContent='Le code a changé. Réessayez la connexion.';return false;}
+      const changed=await ref.transaction(server=>{
+        if(!server)return {...record,digest:newDigest,codeLength:4};
+        if(server.digest===newDigest&&server.codeLength===4)return server;
+        return server.digest===oldDigest?{...server,digest:newDigest,codeLength:4}:undefined;
+      });
+      if(!changed.committed){const latest=(await ref.once('value')).val();if(latest?.digest===newDigest&&latest?.codeLength===4){profileCodeState.record=latest;verifiedProfileName=name;return true;}error.textContent='La modification n’a pas été enregistrée. Rechargez le profil et réessayez.';return false;}
       record=changed.snapshot.val();
     }
     profileCodeState.record=record;verifiedProfileName=name;return true;
@@ -27023,7 +27027,11 @@ function connectionDeviceLabel(){
       const ref=await profileCodeRef(name),record=(await ref.once('value')).val();
       if(!record||await profileCodeDigest(record.salt+':'+oldPin)!==record.digest){status.textContent='Le code actuel est incorrect.';return;}
       const digest=await profileCodeDigest(record.salt+':'+newPin);
-      const result=await ref.transaction(server=>server?.digest===record.digest?{...server,digest,codeLength:4,updatedAt:Date.now()}:undefined);
+      const result=await ref.transaction(server=>{
+        if(!server)return {...record,digest,codeLength:4,updatedAt:Date.now()};
+        if(server.digest===digest&&server.codeLength===4)return server;
+        return server.digest===record.digest?{...server,digest,codeLength:4,updatedAt:Date.now()}:undefined;
+      });
       if(!result.committed){status.textContent='Le code a changé entre-temps. Réessayez.';return;}
       if(profileCodeState?.name===name)profileCodeState.record=result.snapshot.val();
       for(const id of ['bptChangeProfileCodeOld','bptChangeProfileCodeNew','bptChangeProfileCodeConfirm'])$3(id).value='';
