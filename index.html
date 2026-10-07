@@ -6979,8 +6979,8 @@ body.bpt-mobile-device .card h2{
 /* ===== V183 — mobile simplifié + portrait/paysage ===== */
 html.bpt-mobile-device .brand span,
 body.bpt-mobile-device .brand span,
-html.bpt-mobile-device footer,
-body.bpt-mobile-device footer,
+html.bpt-mobile-device body > footer,
+body.bpt-mobile-device > footer,
 html.bpt-mobile-device #liveHeroSubtitle,
 body.bpt-mobile-device #liveHeroSubtitle,
 html.bpt-mobile-device .hero p,
@@ -14186,7 +14186,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.23";
+const BPT_APP_VERSION="5.25";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14338,7 +14338,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.23</div>
+<div class="app-version" id="headerAppVersion">BPT v5.25</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15448,7 +15448,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.23</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.25</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -30201,17 +30201,16 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 
 .bpt484-quickbar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .bpt484-quickbar button{border:1px solid #2a5b52;border-radius:12px;background:#12372f;color:var(--text);font-size:17px;font-weight:900;cursor:pointer;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bpt484-actions{display:grid;grid-template-columns:.82fr .9fr 1.18fr .82fr .82fr 1.12fr 1fr 1.06fr;gap:8px}
+.bpt484-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:8px}
 .bpt484-actions button{border:0;border-radius:14px;font-size:18px;font-weight:900;cursor:pointer;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bpt-pregame-buttons{display:flex;flex-wrap:wrap;gap:12px}.bpt-pregame footer button[data-do="back-pregame"]{background:#173e35;color:#edf6f2;border:1px solid #3f7062}
-@media(max-width:600px){.bpt-pregame-buttons{flex-direction:column}}
 .bpt-pregame[hidden]{display:none!important}
 .bpt-pregame{position:absolute;inset:0;z-index:65;background:#071d19;color:#edf6f2;border-radius:inherit;overflow:hidden;overscroll-behavior:contain;padding:clamp(12px,2vw,28px);height:100%;max-height:calc(100dvh - 140px);box-sizing:border-box;display:flex;flex-direction:column}
 .bpt-pregame-inner{max-width:1100px;margin:0 auto;width:100%;height:100%;min-height:0;display:flex;flex-direction:column}.bpt-pregame header,.bpt-pregame-heading,.bpt-pregame footer{flex-shrink:0}#live3Fullscreen .bpt-pregame{max-height:calc(100dvh - 24px)}.bpt-pregame header{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid #24493f;padding-bottom:16px}.bpt-pregame header b{color:#f2c14e;font-size:32px;font-weight:900}.bpt-pregame header span{color:#a7c3b9;font-size:12px;letter-spacing:1px}
 .bpt-pregame-heading{padding:22px 0}.bpt-pregame-heading small{color:#26c6ba;font-size:11px;letter-spacing:2px}.bpt-pregame h2{font-size:clamp(24px,3vw,36px);margin:8px 0;color:#fff}.bpt-pregame-heading p{margin:8px 0;color:#a7c3b9}
 .bpt-pregame-stories{overflow:auto;min-height:0;flex:1;padding-right:4px;display:grid;align-content:start;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.bpt-pregame article{background:#102b24;border:1px solid #24493f;border-radius:14px;padding:18px;display:flex;gap:12px;align-items:flex-start}.bpt-pregame-icon{font-size:26px}.bpt-pregame article>div{min-width:0}.bpt-pregame h3{margin:0;font-size:20px;overflow-wrap:anywhere}.bpt-pregame article small{display:block;font-size:11px;letter-spacing:1px;color:#f2c14e;margin-top:6px}.bpt-pregame article p{font-size:15px;line-height:1.5;margin:10px 0 0;color:#d6e5de;overflow-wrap:anywhere}
 .bpt-pregame footer{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 0 4px}.bpt-pregame footer span{color:#a7c3b9;font-size:14px}.bpt-pregame footer button{background:#f2c14e;color:#171007;border:0;border-radius:12px;padding:16px 24px;font-size:16px;font-weight:800;min-height:48px;cursor:pointer}.bpt-pregame footer button[hidden]{display:none!important}
-@media(max-width:600px){.bpt-pregame-heading{padding:10px 0}.bpt-pregame-heading p{display:none}.bpt-pregame h2{font-size:22px}.bpt-pregame header{padding-bottom:8px}.bpt-pregame footer{padding-top:10px;gap:8px}.bpt-pregame-buttons{gap:6px}.bpt-pregame footer button{padding:10px 14px}.bpt-pregame-stories{grid-template-columns:1fr}.bpt-pregame article{padding:14px}.bpt-pregame footer{flex-direction:column;align-items:stretch}}
+@media(max-width:600px){.bpt-pregame-heading{padding:10px 0}.bpt-pregame-heading p{display:none}.bpt-pregame h2{font-size:22px}.bpt-pregame header{padding-bottom:8px}.bpt-pregame footer{padding-top:10px;gap:8px}.bpt-pregame-buttons{gap:6px;flex-direction:column}.bpt-pregame footer button{padding:10px 14px}.bpt-pregame-stories{grid-template-columns:1fr}.bpt-pregame article{padding:14px}.bpt-pregame footer{flex-direction:column;align-items:stretch}}
 .bpt484-takeover-request[hidden]{display:none!important}
 .bpt484-takeover-request{position:absolute;z-index:70;top:90px;left:50%;transform:translateX(-50%);width:min(580px,calc(100% - 24px));box-sizing:border-box;padding:18px;border:2px solid #f2c14e;border-radius:16px;background:#09241f;color:#fff;box-shadow:0 16px 45px #0009;text-align:center}
 .bpt484-takeover-request strong{color:#f2c14e;font-size:18px}.bpt484-takeover-request p{font-size:16px;overflow-wrap:anywhere;margin:12px 0}.bpt484-takeover-request>div{display:flex;justify-content:center;gap:12px}.bpt484-takeover-request button{min-height:44px;padding:10px 20px;border:0;border-radius:10px;font-size:16px;font-weight:800;cursor:pointer;background:#26c6ba;color:#06201d}.bpt484-takeover-request button[data-do="reject-takeover"]{background:#b83a45;color:#fff}
@@ -30220,7 +30219,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 .bpt484-live.is-spectator .bpt484-quickbar{display:none!important}
 .bpt484-live.is-spectator .bpt484-actions button:not(.bpt484-takeover):not(.bpt484-full){display:none!important}
 .bpt484-live.is-spectator .bpt484-takeover{display:block}
-.bpt484-live.is-spectator .bpt484-actions{grid-template-columns:2fr 1fr 1fr 1fr}
+
 .bpt484-live.is-spectator .bpt484-takeover.is-force{background:#dc5a57;color:#fff}
 .bpt484-live.is-spectator .bpt484-takeover:disabled{opacity:.72;cursor:default}
 .bpt484-pause{background:#f2c14e;color:#171007}.bpt484-out{background:#b83a45;color:#fff}.bpt484-timerbtn{background:#365fba;color:#fff}.bpt484-chat{background:#7251a3;color:#fff}.bpt484-odds{background:#26c6ba;color:#06201d}.bpt484-full{background:#dce9e6;color:#10231f}.bpt484-end{background:#783b24;color:#fff}.bpt484-takeover{background:#cc650e;color:#fff}.bpt484-live.is-spectator .bpt484-takeover.is-force{background:#cc650e;color:#fff}
@@ -30257,8 +30256,8 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
  .bpt484-info{order:3;min-height:210px;padding:13px;border-radius:13px;gap:8px}.bpt484-info-line{grid-template-columns:26px minmax(0,1fr) auto;gap:7px}.bpt484-info-icon{font-size:20px}.bpt484-info-copy{font-size:14px}.bpt484-level-inline{font-size:13px;padding-left:8px}.bpt484-timing{grid-template-columns:26px 1fr;gap:7px}.bpt484-timing .bpt484-value{font-size:36px}.bpt484-pace-line{font-size:12px;white-space:normal}
  .bpt484-next{font-size:13px;margin-top:6px}
  .bpt484-quickbar{gap:6px}.bpt484-quickbar button{height:46px;font-size:11px;border-radius:10px}
- .bpt484-actions{grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,58px);gap:7px}.bpt484-actions button{font-size:13px;border-radius:11px}
- .bpt484-live.is-spectator .bpt484-actions{grid-template-columns:1fr 1fr;grid-template-rows:repeat(2,58px)}
+ .bpt484-actions{gap:7px}.bpt484-actions button{font-size:13px;border-radius:11px}
+ 
 
  /* Plein écran téléphone portrait : layout dédié, tout tient dans 100dvh sans scroll */
  #live3Fullscreen .bpt484-live{
@@ -30292,9 +30291,9 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
  #live3Fullscreen .bpt484-next{font-size:9px;margin-top:2px}
  #live3Fullscreen .bpt484-quickbar{height:36px;gap:4px}
  #live3Fullscreen .bpt484-quickbar button{height:36px;min-height:0;font-size:8px;border-radius:7px;padding:2px}
- #live3Fullscreen .bpt484-actions{height:126px;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,1fr);gap:4px}
+ #live3Fullscreen .bpt484-actions{min-height:0;gap:4px}
  #live3Fullscreen .bpt484-actions button{height:auto;min-height:0;font-size:9px;line-height:1.05;border-radius:7px;padding:3px 4px;white-space:normal}
- #live3Fullscreen .bpt484-live.is-spectator .bpt484-actions{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,1fr)}
+ 
  #live3Fullscreen .bpt484-live-alert{top:48px;width:calc(100% - 10px);padding:9px 34px 9px 10px;border-radius:10px;gap:7px}
  #live3Fullscreen .bpt484-live-alert-icon{font-size:22px}
  #live3Fullscreen .bpt484-live-alert-title{font-size:11px}
