@@ -14110,7 +14110,21 @@ body.bpt-mobile-device .bpt-mobile-top-menu button{
 }
 </style>
 
-<style id="bpt-v484-nav-fix">@media(min-width:901px){#bptMobileMoreTopBtn,#bptMobileMoreTopMenu{display:none!important}}</style></head>
+<style id="bpt-v484-nav-fix">@media(min-width:901px){#bptMobileMoreTopBtn,#bptMobileMoreTopMenu{display:none!important}}</style><style>
+.bpt484-live{position:relative}
+.bpt-bounty-overlay[hidden]{display:none!important}
+.bpt-bounty-overlay{position:absolute;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,10,20,.92);border-radius:inherit;overflow:auto}
+.bpt-bounty-card{width:min(680px,100%);max-height:100%;overflow:auto;text-align:center;padding:clamp(18px,4vw,46px);border:2px solid #ffd36b;border-radius:24px;background:linear-gradient(145deg,#263044,#101723);color:#fff;box-shadow:0 0 60px #ffd36b33;animation:bptBountyReveal .45s ease-out}
+.bpt-bounty-icon{font-size:clamp(40px,7vw,80px)}
+.bpt-bounty-card h2{color:#ffd36b;font-size:clamp(20px,3vw,34px);line-height:1.2;margin:12px 0}
+.bpt-bounty-name{font-size:clamp(30px,6vw,64px);font-weight:900;overflow-wrap:anywhere;line-height:1.15}
+.bpt-bounty-card p,.bpt-bounty-card strong{font-size:clamp(16px,2.3vw,24px);overflow-wrap:anywhere;display:block;margin:16px 0}
+.bpt-bounty-card button{display:block;margin:24px auto 0;padding:12px 24px;border:0;border-radius:12px;background:#ffd36b;color:#111;font-size:18px;font-weight:800;cursor:pointer}
+.bpt-bounty-card button:disabled{opacity:.55;cursor:default}
+@keyframes bptBountyReveal{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.bpt-bounty-card{animation:none}}
+</style>
+</head>
 <body>
 <div id="headUpPhotoPrompt" style="
   display:none; position:fixed; inset:0; z-index:31000;
@@ -14172,7 +14186,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.10";
+const BPT_APP_VERSION="5.12";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14324,7 +14338,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.10</div>
+<div class="app-version" id="headerAppVersion">BPT v5.12</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15434,7 +15448,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.10</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.12</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -27137,7 +27151,7 @@ function connectionDeviceLabel(){
         )[0].durationSec,
         players:selected.map(name=>({name,status:"in",place:null,killer:"",outAt:null,outLevel:null,outTime:"",outElapsedSec:null})),
         mysteryBountyName:selected[Math.floor(Math.random()*selected.length)],
-        mysteryBountyRevealed:false,mysteryBountyHunter:"",liveAlerts:[],
+        mysteryBountyRevealed:false,mysteryBountyHunter:"",mysteryBountyEvent:null,liveAlerts:[],
         viewers:{},takeoverRequest:null,chat:[],paceAdaptive:false
       };
       await r.transaction(server=>{
@@ -27391,6 +27405,7 @@ function connectionDeviceLabel(){
         s.mysteryBountyHunter=killer;
         victimPlayer.wasMysteryBounty=true;
         killerPlayer.bountyHunter=true;
+        s.mysteryBountyEvent={id:'BOUNTY_'+elimNow+'_'+Math.random().toString(36).slice(2),at:elimNow,kind:'eliminated',player:victim,hunter:killer};
         bptLive3QueueAlert(s,'🎯','BOUNTY RÉVÉLÉ !',`${victim} était le bounty mystère · éliminé par ${killer}`,elimNow);
       }
 
@@ -27445,6 +27460,7 @@ function connectionDeviceLabel(){
         if(!s.mysteryBountyRevealed && String(s.mysteryBountyName||'')===survivors[0].name){
           s.mysteryBountyRevealed=true;
           survivors[0].wasMysteryBounty=true;
+          s.mysteryBountyEvent={id:'BOUNTY_'+now+'_'+Math.random().toString(36).slice(2),at:now,kind:'winner',player:survivors[0].name,hunter:''};
           bptLive3QueueAlert(s,'🎯','BOUNTY SURVIVANT !',`${survivors[0].name} était le bounty mystère et remporte la partie`,now);
         }
       }
@@ -30213,6 +30229,8 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     return '—';
   }
   function makeMarkup(fs=false){return `<div class="bpt484-live" data-fs="${fs?'1':'0'}">
+
+    <div class="bpt-bounty-overlay" data-role="bounty" hidden><section class="bpt-bounty-card" role="dialog" aria-modal="true" aria-label="Révélation du bounty mystère" tabindex="-1"><div class="bpt-bounty-icon">🎯</div><h2 data-role="bountytitle"></h2><div class="bpt-bounty-name" data-role="bountyname"></div><p data-role="bountytext"></p><strong data-role="bountyhunter"></strong><button type="button" data-bounty-close disabled>Continuer</button></section></div>
     <div class="bpt484-head"><div class="bpt484-brand">BPT</div><div class="bpt484-owner" data-role="owner">Organisateur · —</div><div class="bpt484-part" data-role="part">Partie n°—</div></div>
     <div class="bpt484-live-alert" data-role="livealert"><button class="bpt484-live-alert-close" data-alert-close aria-label="Fermer">×</button><div class="bpt484-live-alert-icon" data-role="livealerticon">🏆</div><div><div class="bpt484-live-alert-title" data-role="livealerttitle"></div><div class="bpt484-live-alert-text" data-role="livealerttext"></div></div></div>
     <div class="bpt484-special-hud" data-role="specialhud"><div class="bpt484-allin-title" data-role="allintitle"></div><div class="bpt484-timebank-player" data-role="timebankplayer"></div><div class="bpt484-timebank-count" data-role="timebankcount"></div><div class="bpt484-timebank-meta" data-role="timebankmeta"></div><button data-timebank-stop>Décision prise</button></div>
@@ -30236,7 +30254,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
       </div>
     </div>
     <div class="bpt484-quickbar"><button data-quick="prev">◀ Niveau</button><button data-quick="minus">−1 min</button><button data-quick="plus">+1 min</button><button data-quick="next">Niveau ▶</button></div>
-    <div class="bpt484-actions"><button class="bpt484-pause" data-do="pause">Pause</button><button class="bpt484-out" data-do="out">Sortir un joueur</button><button class="bpt484-timerbtn" data-do="timer">⏱ Timer</button><button class="bpt484-allinbtn" data-do="allin">🔥 ALL-IN</button><button class="bpt484-takeover" data-do="takeover">Demander la reprise</button><button class="bpt484-chat" data-do="chat">Chat</button><button class="bpt484-odds" data-do="odds">Calcul de côtes</button><button class="bpt484-full" data-do="full">${fs?'Quitter le plein écran':'Plein écran'}</button><button class="bpt484-end" data-do="end">Terminer le Live</button></div>
+    <div class="bpt484-actions"><button class="bpt484-pause" data-do="pause">Pause</button><button class="bpt484-out" data-do="out">Sortir un joueur</button><button class="bpt484-timerbtn" data-do="timer">⏱ Timer</button><button class="bpt484-takeover" data-do="takeover">Demander la reprise</button><button class="bpt484-chat" data-do="chat">Chat</button><button class="bpt484-odds" data-do="odds">Calcul de côtes</button><button class="bpt484-full" data-do="full">${fs?'Quitter le plein écran':'Plein écran'}</button><button class="bpt484-end" data-do="end">Terminer le Live</button></div>
   </div>`}
   function install(){
     const shell=document.querySelector('#live3Game .b466-shell');if(shell&&!shell.querySelector('.bpt484-live'))shell.insertAdjacentHTML('afterbegin',makeMarkup(false));
@@ -30253,7 +30271,6 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
       if(a==='pause')await x?.toggleStartPause?.();
       else if(a==='out')x?.openElim?.();
       else if(a==='timer')openReflectionTimerPicker();
-      else if(a==='allin')await x?.toggleAllIn?.();
       else if(a==='chat')$('live3ChatBtn')?.click();
       else if(a==='odds')$('live3OddsBtn')?.click();
       else if(a==='full'){if(fs)x?.closeFullscreen?.();else x?.openFullscreen?.()}
@@ -30466,6 +30483,26 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     clearTimeout(window.__bpt484FitTimer);
     window.__bpt484FitTimer=setTimeout(fitLiveTexts,20);
   }
+  const bountySeenAt=new Map(),bountyDismissed=new Set();
+  function renderBounty(root,st){
+    const box=root.querySelector('[data-role="bounty"]');if(!box)return;
+    const ev=st.mysteryBountyRevealed?st.mysteryBountyEvent:null;
+    let dismissed=ev&&bountyDismissed.has(ev.id);
+    try{dismissed=dismissed||(ev&&sessionStorage.getItem('bpt:bounty:'+ev.id)==='1')}catch(_){}
+    if(!ev||dismissed){box.hidden=true;return}
+    if(!bountySeenAt.has(ev.id))bountySeenAt.set(ev.id,Date.now());
+    const first=box.hidden;box.hidden=false;
+    const set=(role,value)=>{box.querySelector('[data-role="'+role+'"]').textContent=value};
+    set('bountytitle',ev.kind==='winner'?'LE BOUNTY A SURVÉCU !':'BOUNTY MYSTÈRE RÉVÉLÉ !');
+    set('bountyname',ev.player||'');
+    set('bountytext',ev.kind==='winner'?'était le bounty mystère et remporte la partie.':'était le bounty mystère · éliminé par '+(ev.hunter||'—'));
+    set('bountyhunter',ev.kind==='winner'?'':(ev.hunter||'')+' remporte le bounty');
+    const button=box.querySelector('[data-bounty-close]');
+    const remain=Math.max(0,Math.ceil((8000-(Date.now()-bountySeenAt.get(ev.id)))/1000));
+    button.disabled=remain>0;button.textContent=remain?'Continuer ('+remain+' s)':'Continuer';
+    button.onclick=()=>{if(button.disabled)return;bountyDismissed.add(ev.id);try{sessionStorage.setItem('bpt:bounty:'+ev.id,'1')}catch(_){}sync()};
+    if(first)box.querySelector('.bpt-bounty-card').focus({preventScroll:true});
+  }
   function sync(){
     const st=state();if(!st?.active)return;
     const idx=Math.max(0,Math.min(200,Number(st.levelIndex)||0)),cur=blindAt(idx),nx=blindAt(idx+1);
@@ -30488,7 +30525,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
         else if(takeoverRemaining>0){takeoverBtn.disabled=true;takeoverBtn.textContent=`Reprise possible dans ${takeoverRemaining} s`;}
         else{takeoverBtn.disabled=false;takeoverBtn.textContent='Forcer la reprise';}
       }
-      const set=(role,val)=>{const e=r.querySelector(`[data-role="${role}"]`);if(e)e.textContent=val};set('owner',owner);set('structure',structure);set('part',`Partie n°${gameNo(st)}`);set('blinds',`${fmt(cur.sb)} / ${fmt(cur.bb)}`);const curDur=Math.max(1,Math.round(Number(st.levels?.[idx]?.durationSec||0)/60)||Math.round(Number(st.levels?.[idx]?.durationMin||0))||15);set('blinddur',`· ${curDur} min`);set('timer',$('live3Timer')?.textContent||'00:00');set('players',String(alive));set('avgchips',fmt(avg));set('avgbb',`${avgBB} BB`);set('next',`${fmt(nx.sb)} / ${fmt(nx.bb)}`);set('elapsed',$('live3Elapsed')?.textContent||'0 min');set('finish',$('live3EstimatedFinish')?.textContent||'—');set('delta',$('live3FinishDelta')?.textContent||'—');const nowAlert=Date.now();const dismissedBefore=Number(window.__bptLiveAlertDismissedBefore||0);const activeAlert=(Array.isArray(st.liveAlerts)?st.liveAlerts:[]).filter(a=>Number(a.at)<=nowAlert&&Number(a.until)>nowAlert&&Number(a.at)>dismissedBefore).sort((a,b)=>Number(b.at)-Number(a.at))[0]||null;const alertBox=r.querySelector('[data-role="livealert"]');if(alertBox){alertBox.classList.toggle('show',!!activeAlert);if(activeAlert){set('livealerticon',activeAlert.icon||'🏆');set('livealerttitle',activeAlert.title||'');set('livealerttext',activeAlert.text||'')}}const allIn=!!st.allInActive;const activeTimer=st.activeReflectionTimer||null;const timerRemain=activeTimer?Math.max(0,Math.ceil((Number(activeTimer.endsAt||0)-Date.now())/1000)):0;const hud=r.querySelector('[data-role="specialhud"]');if(hud){hud.classList.toggle('show',allIn||!!activeTimer);hud.classList.toggle('is-allin',allIn);set('allintitle',allIn?'🔥 ALL-IN':'');set('timebankplayer',activeTimer?activeTimer.player:'');set('timebankcount',activeTimer?`${String(Math.floor(timerRemain/60)).padStart(2,'0')}:${String(timerRemain%60).padStart(2,'0')}`:'');const used=activeTimer?Number(st.reflectionTimers?.[activeTimer.player]?.used||activeTimer.timerNo||1):0;set('timebankmeta',activeTimer?`Timer ${used}/2 · 2 minutes`:'');const stopBtn=hud.querySelector('[data-timebank-stop]');if(stopBtn)stopBtn.style.display=activeTimer&&ownerRole?'inline-block':'none';}r.querySelector('.bpt484-stage')?.classList.toggle('is-allin',allIn);const allBtn=r.querySelector('[data-do="allin"]');if(allBtn){allBtn.classList.toggle('is-active',allIn);allBtn.textContent=allIn?'Fin du ALL-IN':'🔥 ALL-IN';}const de=r.querySelector('[data-role="delta"]');const dt=de?.textContent||'';const dm=Math.abs(Number((dt.match(/[-+]?\d+/)||['0'])[0])||0);de?.classList.toggle('is-alert',dm>=15);de?.classList.toggle('is-delay',/retard/i.test(dt));de?.classList.toggle('is-ahead',/avance/i.test(dt));set('mode',st.paceAdaptive===true?'Adaptatif':'Classique');set('level',idx<25?`${idx+1} / 25`:String(idx+1));const pb=r.querySelector('[data-do="pause"]');if(pb)pb.textContent=st.running?'Pause':(st.startedAt?'Reprendre':'Démarrer')});
+      renderBounty(r,st);const set=(role,val)=>{const e=r.querySelector(`[data-role="${role}"]`);if(e)e.textContent=val};set('owner',owner);set('structure',structure);set('part',`Partie n°${gameNo(st)}`);set('blinds',`${fmt(cur.sb)} / ${fmt(cur.bb)}`);const curDur=Math.max(1,Math.round(Number(st.levels?.[idx]?.durationSec||0)/60)||Math.round(Number(st.levels?.[idx]?.durationMin||0))||15);set('blinddur',`· ${curDur} min`);set('timer',$('live3Timer')?.textContent||'00:00');set('players',String(alive));set('avgchips',fmt(avg));set('avgbb',`${avgBB} BB`);set('next',`${fmt(nx.sb)} / ${fmt(nx.bb)}`);set('elapsed',$('live3Elapsed')?.textContent||'0 min');set('finish',$('live3EstimatedFinish')?.textContent||'—');set('delta',$('live3FinishDelta')?.textContent||'—');const nowAlert=Date.now();const dismissedBefore=Number(window.__bptLiveAlertDismissedBefore||0);const activeAlert=(Array.isArray(st.liveAlerts)?st.liveAlerts:[]).filter(a=>Number(a.at)<=nowAlert&&Number(a.until)>nowAlert&&Number(a.at)>dismissedBefore).sort((a,b)=>Number(b.at)-Number(a.at))[0]||null;const alertBox=r.querySelector('[data-role="livealert"]');if(alertBox){alertBox.classList.toggle('show',!!activeAlert);if(activeAlert){set('livealerticon',activeAlert.icon||'🏆');set('livealerttitle',activeAlert.title||'');set('livealerttext',activeAlert.text||'')}}const allIn=false;const activeTimer=st.activeReflectionTimer||null;const timerRemain=activeTimer?Math.max(0,Math.ceil((Number(activeTimer.endsAt||0)-Date.now())/1000)):0;const hud=r.querySelector('[data-role="specialhud"]');if(hud){hud.classList.toggle('show',allIn||!!activeTimer);hud.classList.toggle('is-allin',allIn);set('allintitle',allIn?'🔥 ALL-IN':'');set('timebankplayer',activeTimer?activeTimer.player:'');set('timebankcount',activeTimer?`${String(Math.floor(timerRemain/60)).padStart(2,'0')}:${String(timerRemain%60).padStart(2,'0')}`:'');const used=activeTimer?Number(st.reflectionTimers?.[activeTimer.player]?.used||activeTimer.timerNo||1):0;set('timebankmeta',activeTimer?`Timer ${used}/2 · 2 minutes`:'');const stopBtn=hud.querySelector('[data-timebank-stop]');if(stopBtn)stopBtn.style.display=activeTimer&&ownerRole?'inline-block':'none';}r.querySelector('.bpt484-stage')?.classList.toggle('is-allin',allIn);const allBtn=r.querySelector('[data-do="allin"]');if(allBtn){allBtn.classList.toggle('is-active',allIn);allBtn.textContent=allIn?'Fin du ALL-IN':'🔥 ALL-IN';}const de=r.querySelector('[data-role="delta"]');const dt=de?.textContent||'';const dm=Math.abs(Number((dt.match(/[-+]?\d+/)||['0'])[0])||0);de?.classList.toggle('is-alert',dm>=15);de?.classList.toggle('is-delay',/retard/i.test(dt));de?.classList.toggle('is-ahead',/avance/i.test(dt));set('mode',st.paceAdaptive===true?'Adaptatif':'Classique');set('level',idx<25?`${idx+1} / 25`:String(idx+1));const pb=r.querySelector('[data-do="pause"]');if(pb)pb.textContent=st.running?'Pause':(st.startedAt?'Reprendre':'Démarrer')});
     if(ownerRole && st.activeReflectionTimer && Number(st.activeReflectionTimer.endsAt||0)<=Date.now() && !window.__bptStoppingExpiredTimer){window.__bptStoppingExpiredTimer=true;api()?.stopReflectionTimer?.().finally(()=>{window.__bptStoppingExpiredTimer=false})}
     scheduleFitLiveTexts();
     if(!repairTried){const bad=(st.levels||[]).slice(0,Math.min(25,(st.levels||[]).length)).some((lv,i)=>{const b=blindAt(i);return Number(lv?.sb)!==b.sb||Number(lv?.bb)!==b.bb});if(bad&&api()?.isOwner?.()){repairTried=true;api()?.repairStandardBlinds?.().catch(console.warn)}}
