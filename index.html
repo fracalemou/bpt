@@ -14124,6 +14124,8 @@ body.bpt-mobile-device .bpt-mobile-top-menu button{
 .bpt-bounty-card p,.bpt-bounty-card strong{font-size:clamp(16px,2.3vw,24px);overflow-wrap:anywhere;display:block;margin:16px 0}
 .bpt-bounty-card button{display:block;margin:24px auto 0;padding:12px 24px;border:0;border-radius:12px;background:var(--celebration-color);color:#111;font-size:18px;font-weight:800;cursor:pointer}
 .bpt-bounty-card button:disabled{opacity:.55;cursor:default}
+.bpt-bounty-card button[hidden]{display:none!important}
+.bpt-bounty-card [data-bounty-back]{position:static;background:transparent;color:#fff;border:1px solid #657080;margin:12px auto 0;font-size:14px}
  .bpt-bounty-overlay[data-kind="objective"]{--celebration-color:#69b7ff}
 .bpt-bounty-overlay[data-kind="individual"]{--celebration-color:#c59aff}
 .bpt-bounty-overlay[data-kind="mode"][data-mode="individual"]{--celebration-color:#c59aff}
@@ -14214,7 +14216,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.52";
+const BPT_APP_VERSION="5.53";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14366,7 +14368,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.52</div>
+<div class="app-version" id="headerAppVersion">BPT v5.53</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15485,7 +15487,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.52</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.53</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -27634,11 +27636,11 @@ function connectionDeviceLabel(){
   }
 
   async function returnToPreGameSettings(){
-    if(!isOwner()||current?.startedAt||!current?.preGamePending)return;
+    if(!isOwner()||current?.startedAt||!(current?.preGamePending||current?.bountyModeRevealPending))return;
     const draft=clone(current),r=await ensureRef();
     const result=await r.transaction(server=>{
-      if(!server?.active||server.sessionId!==draft.sessionId||String(server.ownerId)!==uid()||server.startedAt||!server.preGamePending)return;
-      return {...server,active:false,preGamePending:false,updatedAt:Date.now()};
+      if(!server?.active||server.sessionId!==draft.sessionId||String(server.ownerId)!==uid()||server.startedAt||!(server.preGamePending||server.bountyModeRevealPending))return;
+      return {...server,active:false,preGamePending:false,bountyModeRevealPending:false,updatedAt:Date.now()};
     });
     if(!result.committed){alert('La partie a déjà été lancée ou sa gestion a changé.');return;}
     const selected=new Set((draft.players||[]).map(p=>p.name));
@@ -27651,9 +27653,30 @@ function connectionDeviceLabel(){
     updateMobilePlayerSelectionCount();
   }
 
+  async function launchPreGame(){
+    if(!isOwner())return;
+    return ownerTransaction(s=>{
+      if(!s.preGamePending||s.startedAt||s.bountyModeRevealPending)return null;
+      s.preGamePending=false;s.bountyModeRevealPending=true;s.bountyModeRevealAt=Date.now();
+      s.running=false;s.runStartedAt=null;s.deadline=null;
+      return s;
+    });
+  }
+  async function startAfterBountyReveal(){
+    if(!isOwner())return;
+    return ownerTransaction(s=>{
+      const now=Date.now();
+      if(!s.bountyModeRevealPending||s.startedAt||now-Number(s.bountyModeRevealAt||now)<1600)return null;
+      s.bountyModeRevealPending=false;s.preGamePending=false;
+      s.startedAt=now;s.running=true;s.runStartedAt=now;
+      s.deadline=now+Math.max(0,Number(s.remainingSec)||0)*1000;
+      return s;
+    });
+  }
   async function toggleStartPause(launchOnly=false){
     if(!isOwner())return;
     await ownerTransaction(s=>{
+      if(s.bountyModeRevealPending)return null;
       if(launchOnly&&(!s.preGamePending||s.startedAt))return s;
       const now=Date.now();
       if(s.running){
@@ -29451,7 +29474,8 @@ async function requestTakeover(){
     adjustMinute,
     changeLevel,
     toggleStartPause,
-    launchPreGame:()=>toggleStartPause(true),
+    launchPreGame,
+    startAfterBountyReveal,
     returnToPreGameSettings,
     refreshObjectives:()=>ownerTransaction(s=>s),
     resetPlayerProfileCode,
@@ -30461,7 +30485,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 .bpt484-actions button{border:0;border-radius:14px;font-size:18px;font-weight:900;cursor:pointer;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bpt-pregame-buttons{display:flex;flex-wrap:wrap;gap:12px}.bpt-pregame footer button[data-do="back-pregame"]{background:#173e35;color:#edf6f2;border:1px solid #3f7062}
 .bpt484-live.is-pregame{display:block!important;grid-template-rows:none!important;height:calc(100dvh - 140px)!important;min-height:0!important;max-height:none!important;padding:0!important;overflow:hidden!important}
-.bpt484-live.is-pregame>*:not(.bpt-pregame):not(.bpt484-takeover-request){display:none!important}
+.bpt484-live.is-pregame>*:not(.bpt-pregame):not(.bpt484-takeover-request):not(.bpt-bounty-overlay){display:none!important}
 .bpt484-live.is-pregame>.bpt-pregame{position:relative;inset:auto;height:100%;max-height:none;border-radius:inherit}
 #live3Fullscreen .bpt484-live.is-pregame{height:100%!important}
 .bpt-pregame[hidden]{display:none!important}
@@ -30613,9 +30637,9 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
   }
   function makeMarkup(fs=false){return `<div class="bpt484-live" data-fs="${fs?'1':'0'}">
 
-    <div class="bpt-bounty-overlay" data-role="bounty" hidden><section class="bpt-bounty-card" role="dialog" aria-modal="true" aria-label="Révélation du bounty mystère" tabindex="-1"><div class="bpt-bounty-icon">🎯</div><h2 data-role="bountytitle"></h2><div class="bpt-bounty-name" data-role="bountyname"></div><p data-role="bountytext"></p><strong data-role="bountyhunter"></strong><button type="button" data-bounty-close disabled>Continuer</button></section></div>
+    <div class="bpt-bounty-overlay" data-role="bounty" hidden><section class="bpt-bounty-card" role="dialog" aria-modal="true" aria-label="Révélation du bounty mystère" tabindex="-1"><div class="bpt-bounty-icon">🎯</div><h2 data-role="bountytitle"></h2><div class="bpt-bounty-name" data-role="bountyname"></div><p data-role="bountytext"></p><strong data-role="bountyhunter"></strong><button type="button" data-bounty-close disabled>Continuer</button><button type="button" data-bounty-back hidden>← Retour aux paramètres</button></section></div>
     <div class="bpt484-head"><div class="bpt484-brand">BPT</div><div class="bpt484-owner" data-role="owner">Organisateur · —</div><div class="bpt484-head-tools"><button class="bpt484-chat" data-do="chat">Chat</button><div class="bpt484-part" data-role="part">Partie n°—</div></div></div>
-    <section class="bpt-pregame" data-role="pregame" hidden aria-label="Les enjeux de la partie"><div class="bpt-pregame-inner"><header><b>BPT</b><span data-role="pregamecount"></span></header><div class="bpt-pregame-heading"><small>CE SOIR, TOUT PEUT CHANGER</small><h2>Les enjeux de la partie</h2><p>Trois enjeux pour la table : une rivalité, un changement de classement et un record à battre, lorsqu’ils sont réalisables.</p></div><div class="bpt-pregame-stories" data-role="pregamestories"></div><footer><span data-role="pregamestatus"></span><div class="bpt-pregame-buttons"><button type="button" data-do="back-pregame">← Retour aux paramètres</button><button type="button" data-do="launch-pregame">▶ Lancer la partie</button></div></footer></div></section>
+    <section class="bpt-pregame" data-role="pregame" hidden aria-label="Les enjeux de la partie"><div class="bpt-pregame-inner"><header><b>BPT</b><span data-role="pregamecount"></span></header><div class="bpt-pregame-heading"><small>CE SOIR, TOUT PEUT CHANGER</small><h2>Les enjeux de la partie</h2><p>Trois enjeux pour la table : une rivalité, un changement de classement et un record à battre, lorsqu’ils sont réalisables.</p></div><div class="bpt-pregame-stories" data-role="pregamestories"></div><footer><span data-role="pregamestatus"></span><div class="bpt-pregame-buttons"><button type="button" data-do="back-pregame">← Retour aux paramètres</button><button type="button" data-do="launch-pregame">▶ Révéler le type de bounty</button></div></footer></div></section>
     <section class="bpt484-takeover-request" data-role="takeoverrequest" role="alert" hidden><strong>DEMANDE DE REPRISE</strong><p data-role="takeoverrequesttext"></p><div><button type="button" data-do="approve-takeover">Accepter</button><button type="button" data-do="reject-takeover">Refuser</button></div></section>
     <div class="bpt484-special-hud" data-role="specialhud"><div class="bpt484-allin-title" data-role="allintitle"></div><div class="bpt484-timebank-player" data-role="timebankplayer"></div><div class="bpt484-timebank-count" data-role="timebankcount"></div><div class="bpt484-timebank-meta" data-role="timebankmeta"></div><button data-timebank-stop>Décision prise</button></div>
     <div class="bpt484-main">
@@ -30940,6 +30964,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     window.__bpt484FitTimer=setTimeout(fitLiveTexts,20);
   }
   const bountySeenAt=new Map(),bountyDismissed=new Set();
+  let bountyLaunchBusy=false;
   function renderPreGame(root,st,owner){
     const box=root.querySelector('[data-role="pregame"]');if(!box)return;
     box.hidden=!(st.preGamePending&&!st.startedAt);
@@ -30962,11 +30987,11 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
   }
   function bountyModeReveal(st,now=Date.now()){
     const at=Number(st.bountyModeRevealAt)||0,age=now-at;
-    if(!at||!st.startedAt||st.preGamePending||st.finishedAt||age<0||age>=8000)return null;
+    if(!at||!st.active||!st.bountyModeRevealPending||st.startedAt||st.finishedAt)return null;
     if(!['common','individual'].includes(st.bountyMode))return null;
     const drawing=age<1600,individual=st.bountyMode==='individual';
     return {
-      id:'MODE_'+String(st.sessionId||st.startedAt),at,kind:'mode',mode:drawing?'drawing':st.bountyMode,drawing,
+      id:'MODE_'+String(st.sessionId||at),at,kind:'mode',mode:drawing?'drawing':st.bountyMode,drawing,
       icon:drawing?'🎲':individual?'🃏':'🎯',label:drawing?'LE BOUNTY DE CE SOIR…':'LE SORT A CHOISI !',
       name:drawing?'COMMUN OU INDIVIDUEL ?':individual?'BOUNTYS INDIVIDUELS SECRETS':'BOUNTY COMMUN SECRET',
       text:drawing?'Une cible pour toute la table ou une mission personnelle pour chacun ?':individual?'Chaque joueur reçoit sa propre mission secrète.':'Une même cible secrète pour toute la table.',
@@ -30999,6 +31024,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     const box=root.querySelector('[data-role="bounty"]');if(!box)return;
     if(st.finishedAt||!root.getClientRects().length||st.preGamePending){box.hidden=true;return;}
     const pending=liveCelebrations(st).filter(ev=>{
+      if(ev.kind==='mode')return true;
       if(bountyDismissed.has(ev.id))return false;
       try{return sessionStorage.getItem('bpt:bounty:'+ev.id)!=='1'}catch(_){return true}
     });
@@ -31011,9 +31037,22 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     set('bountytitle',ev.label||ev.title||'');set('bountyname',ev.name||'');set('bountytext',ev.text||'');set('bountyhunter',ev.extra||'');
     const button=box.querySelector('[data-bounty-close]');
     const remain=Math.max(0,Math.ceil((8000-(Date.now()-bountySeenAt.get(ev.id)))/1000));
-    button.disabled=ev.kind==='mode'?ev.drawing:remain>0;
-    button.textContent=ev.kind==='mode'?(ev.drawing?'Tirage en cours…':'C’est parti !'):remain?'Continuer ('+remain+' s)':pending.length>1?'Continuer · '+(pending.length-1)+' à suivre':'Continuer';
-    button.onclick=()=>{if(button.disabled)return;for(const id of [ev.id,...(ev.relatedIds||[])]){bountyDismissed.add(id);try{sessionStorage.setItem('bpt:bounty:'+id,'1')}catch(_){}}sync()};
+    const owner=!!api()?.isOwner?.();
+    button.disabled=ev.kind==='mode'?(ev.drawing||!owner||bountyLaunchBusy):remain>0;
+    button.textContent=ev.kind==='mode'?(ev.drawing?'Tirage en cours…':!owner?'En attente de l’organisateur':bountyLaunchBusy?'Lancement…':'▶ Lancer la partie'):remain?'Continuer ('+remain+' s)':pending.length>1?'Continuer · '+(pending.length-1)+' à suivre':'Continuer';
+    button.onclick=async()=>{
+      if(button.disabled)return;
+      if(ev.kind==='mode'){
+        bountyLaunchBusy=true;button.disabled=true;
+        try{await api()?.startAfterBountyReveal?.();}catch(e){alert('Impossible de lancer la partie : '+(e?.message||e));}
+        finally{bountyLaunchBusy=false;sync();}
+        return;
+      }
+      for(const id of [ev.id,...(ev.relatedIds||[])]){bountyDismissed.add(id);try{sessionStorage.setItem('bpt:bounty:'+id,'1')}catch(_){}}sync();
+    };
+    const back=box.querySelector('[data-bounty-back]');
+    if(back){back.hidden=ev.kind!=='mode'||!owner;back.disabled=bountyLaunchBusy;back.onclick=()=>doit('back-pregame',root.dataset.fs==='1');}
+
     if(first)card.focus({preventScroll:true});
   }
   function sync(){
@@ -31031,7 +31070,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     const owner=`Organisateur · ${st.ownerLabel||'—'}`,structure=st.paceAdaptive===true?'Structure · Adaptatif':'Structure · Classique';
     document.querySelectorAll('.bpt484-live').forEach(r=>{
       r.classList.toggle('is-spectator',!ownerRole);
-      r.classList.toggle('is-pregame',!!(st.preGamePending&&!st.startedAt));
+      r.classList.toggle('is-pregame',!!((st.preGamePending||st.bountyModeRevealPending)&&!st.startedAt));
       const requestPanel=r.querySelector('[data-role="takeoverrequest"]');
       if(requestPanel){
         requestPanel.hidden=!(ownerRole&&takeoverReq?.requesterId&&String(takeoverReq.requesterId)!==myId);
