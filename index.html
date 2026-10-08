@@ -14232,7 +14232,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.60";
+const BPT_APP_VERSION="5.61";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14384,7 +14384,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.60</div>
+<div class="app-version" id="headerAppVersion">BPT v5.61</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15503,7 +15503,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.60</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.61</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -16666,22 +16666,29 @@ async function cloudFetchState(){
   return data;
 }
 
-// Correction historique approuvée : une seule partie, appliquée une seule fois.
-function bptApprovedTimeCorrection(game){
-  const marker='2026-09-25-franck-4h02';
-  if(!game||game.bptApprovedTimeCorrection===marker)return null;
+// Corrections historiques approuvées, chacune appliquée une seule fois.
+const BPT_APPROVED_TIME_CORRECTIONS={
+  g_9gjfd8:{marker:'2026-09-25-franck-4h02',date:'2026-09-25',n:9,winner:'Michel SCHERPEREEL',second:'Franck NAESSENS',third:'Jérôme BINOT',thirdTime:'01:00:13',duration:14520,headsUp:1007,endTime:'01:17:00'},
+  g_1dq0896:{marker:'2026-09-18-francois-headsup-20min',date:'2026-09-18',n:10,winner:'Franck NAESSENS',second:'François CATTEAU',third:'Alexis Volant',thirdTime:'01:35:00',thirdElapsed:15600,duration:16800,headsUp:1200,endTime:'01:55:00'}
+};
+function bptApprovedTimeCorrection(game,gameId=game?.id){
+  const correction=BPT_APPROVED_TIME_CORRECTIONS[gameId];
+  if(!game||!correction||game.bptApprovedTimeCorrection===correction.marker)return null;
   const rows=Array.isArray(game.game_data)?game.game_data:[];
-  if(rows.length!==9||rows.some(r=>r.date!=='2026-09-25'))return null;
-  const second=rows.find(r=>r.player==='Franck NAESSENS'&&Number(r.place)===2);
-  const winner=rows.find(r=>r.player==='Michel SCHERPEREEL'&&Number(r.place)===1);
-  const third=rows.find(r=>r.player==='Jérôme BINOT'&&Number(r.place)===3);
-  if(!second||!winner||!third||third.outTime!=='01:00:13')return null;
+  if(rows.length!==correction.n||rows.some(r=>r.date!==correction.date))return null;
+  const second=rows.find(r=>r.player===correction.second&&Number(r.place)===2);
+  const winner=rows.find(r=>r.player===correction.winner&&Number(r.place)===1);
+  const third=rows.find(r=>r.player===correction.third&&Number(r.place)===3);
+  if(!second||!winner||!third)return null;
+  if(correction.thirdElapsed==null&&third.outTime!==correction.thirdTime)return null;
+  if(correction.thirdElapsed!=null&&third.outTime&&third.outTime!==correction.thirdTime)return null;
   const corrected=rows.map(row=>{
-    const next={...row,gameDurationSec:14520,gameHeadsUpDurationSec:1007,gameTimingSource:'historical'};
-    if(row===second){next.outTime='01:17:00';next.outElapsedSec=14520;}
+    const next={...row,gameDurationSec:correction.duration,gameHeadsUpDurationSec:correction.headsUp,gameTimingSource:'historical'};
+    if(row===second){next.outTime=correction.endTime;next.outElapsedSec=correction.duration;}
+    if(row===third&&correction.thirdElapsed!=null){next.outTime=correction.thirdTime;next.outElapsedSec=correction.thirdElapsed;}
     return next;
   });
-  return {...game,game_data:corrected,bptApprovedTimeCorrection:marker};
+  return {...game,game_data:corrected,bptApprovedTimeCorrection:correction.marker};
 }
 
 async function cloudFetchGames(){
@@ -16694,13 +16701,13 @@ async function cloudFetchGames(){
 
   // Transaction sur la partie concernée : conserve les modifications concurrentes
   // et n'écrase pas une éventuelle correction ultérieure de l'organisateur.
-  const target=(data||[]).find(g=>g.id==='g_9gjfd8'&&bptApprovedTimeCorrection(g));
-  if(target&&window.bptFirebaseDb?.()){
+  const targets=(data||[]).filter(g=>bptApprovedTimeCorrection(g));
+  if(window.bptFirebaseDb?.())for(const target of targets){
     try{
-      const result=await window.bptFirebaseDb().ref('bpt/games/g_9gjfd8').transaction(game=>bptApprovedTimeCorrection(game)||undefined);
+      const result=await window.bptFirebaseDb().ref('bpt/games/'+target.id).transaction(game=>bptApprovedTimeCorrection(game,target.id)||undefined);
       const saved=result.snapshot.val();
       if(saved){const index=data.indexOf(target);data[index]={...saved,id:target.id};}
-    }catch(e){console.warn('Correction du temps de la partie 3 différée :',e);}
+    }catch(e){console.warn('Correction historique du temps différée :',e);}
   }
 
   const history=[];
@@ -30424,8 +30431,8 @@ body.b466-live-active #live3>.hero{display:none!important}
 }
 </style>
 
-<link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=5.60">
-<script id="bpt-live-ui" src="./live-ui.js?v=5.60"></script>
+<link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=5.61">
+<script id="bpt-live-ui" src="./live-ui.js?v=5.61"></script>
 
 
 <style id="bpt-v485-nav-clean">

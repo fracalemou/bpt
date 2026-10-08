@@ -1,5 +1,5 @@
-const CACHE='bpt-pwa-5.60';
-const ASSETS=['./','./index.html','./live-ui.css?v=5.60','./live-ui.js?v=5.60','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
+const CACHE='bpt-pwa-5.61';
+const ASSETS=['./','./index.html','./live-ui.css?v=5.61','./live-ui.js?v=5.61','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
@@ -11,7 +11,7 @@ self.addEventListener('fetch',event=>{
   if(req.method!=='GET') return;
   if(req.mode==='navigate'){
     event.respondWith(fetch(req).then(res=>{
-      const copy=res.clone(); caches.open(CACHE).then(c=>c.put('./index.html','./live-ui.css?v=5.60','./live-ui.js?v=5.60',copy)); return res;
+      const copy=res.clone(); caches.open(CACHE).then(c=>c.put('./index.html','./live-ui.css?v=5.61','./live-ui.js?v=5.61',copy)); return res;
     }).catch(()=>caches.match('./index.html')));
     return;
   }
