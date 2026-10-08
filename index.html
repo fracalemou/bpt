@@ -14206,7 +14206,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.47";
+const BPT_APP_VERSION="5.48";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14358,7 +14358,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.47</div>
+<div class="app-version" id="headerAppVersion">BPT v5.48</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15476,7 +15476,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.47</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.48</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -18863,7 +18863,7 @@ function buildFinishedRecap(state){
     bountyMode:state.bountyMode||'common',bountyName:state.mysteryBountyRevealed?state.mysteryBountyName||'':'',bountyHunter:state.mysteryBountyHunter||'',
     bountySurvived:state.mysteryBountyEvent?.kind==='winner',
     missions:(state.personalBounties||[]).filter(c=>c.status==='completed').map(c=>({name:c.hunter,title:c.title||'Cible secrète',text:c.text||'Éliminer '+c.target+' vous-même.',icon:c.icon||'🎯'})),
-    objectives:(state.preGameBriefing||[]).filter(e=>e.completed).map(e=>({name:e.name,title:e.title,text:e.text,icon:e.icon||'⭐'})),
+    objectives:(state.preGameBriefing||[]).filter(e=>e.completed).map(e=>({name:e.name,title:e.title,text:e.resultText||e.text,icon:e.icon||'⭐'})),
     highlights:(state.liveAlerts||[]).filter(e=>/RECORD|ACCOMPLISSEMENT/.test(e.title||'')).map(e=>({title:e.title,text:e.text,icon:e.icon||'🏆'}))
   };
 }
@@ -27321,8 +27321,8 @@ function connectionDeviceLabel(){
   function preGameObjective(entry,selected){
     const title=entry.title,text=entry.text||'',mine=(db?.history||[]).filter(r=>r.player===entry.name).sort((a,b)=>Number(a.game)-Number(b.game));
     const numbers=[...text.matchAll(/\d+/g)].map(m=>Number(m[0]));
-    const rival=selected.find(n=>n!==entry.name&&text.includes(n));
-    if(/REVANCHE|FACE-À-FACE/.test(title))return rival?{type:'rivalKill',rival}:null;
+    const rival=entry.rival||selected.find(n=>n!==entry.name&&text.includes(n));
+    if(/REVANCHE|FACE-À-FACE/.test(title))return rival?{type:'rivalKill',rival,...(entry.duelBaseline?{duelBaseline:entry.duelBaseline}:{})}:null;
     if(title==='DÉPASSER UN RIVAL')return rival?{type:'overtake',rival}:null;
     if(/TÊTE|LEADER/.test(title))return {type:'leader'};
     if(/SÉRIE|PREMIÈRE VICTOIRE/.test(title))return {type:'place',max:1};
@@ -27368,7 +27368,11 @@ function connectionDeviceLabel(){
       else if(objective.type==='overtake')achieved=finished&&(totals.get(p.name)||0)>(totals.get(objective.rival)||0);
       else if(objective.type==='leader')achieved=finished&&base.length>0&&[...totals].every(([name,total])=>name===p.name||(totals.get(p.name)||0)>total);
       entry.completed=!!achieved;
-      if(achieved&&!entry.announced){entry.announced=true;entry.completedAt=Date.now();bptLive3QueueAlert(st,entry.icon||'🎯','ENJEU RÉALISÉ · '+p.name,entry.title+' — '+entry.text,entry.completedAt);}
+      if(achieved&&objective.type==='rivalKill'&&objective.duelBaseline){
+        const {won,against}=objective.duelBaseline;
+        entry.resultText=`${p.name} a éliminé ${objective.rival} : son bilan face à lui passe de ${won}–${against} à ${won+1}–${against} (éliminations réalisées–subies cette saison).`;
+      }else delete entry.resultText;
+      if(achieved&&!entry.announced){entry.announced=true;entry.completedAt=Date.now();bptLive3QueueAlert(st,entry.icon||'🎯','ENJEU RÉALISÉ · '+p.name,entry.title+' — '+(entry.resultText||entry.text),entry.completedAt);}
     }
   }
 
@@ -27405,10 +27409,10 @@ function connectionDeviceLabel(){
       const mine=rows.filter(r=>r.player===name).sort((a,b)=>Number(a.game)-Number(b.game));
       const stat=byName.get(name)||{points:0,kills:0,wins:0,podiums:0};
       const candidates=[];
-      const offer=(icon,title,text)=>{
+      const offer=(icon,title,text,details={})=>{
         const theme=/REVANCHE|FACE-À-FACE|DÉPASSER|DUEL AU CLASSEMENT/.test(title)?'rivalry':/RECORD|SÉRIE/.test(title)?'record':/DÉBLOQUER/.test(title)?'achievement':/TÊTE|LEADER/.test(title)?'ranking':/VICTOIRE|PODIUM|RÉGULARITÉ|RÉSULTAT|CAP/.test(title)?'milestone':'other';
         const priority=/REVANCHE/.test(title)?110:/SÉRIE/.test(title)?115:/DÉPASSER/.test(title)?100:/RECORD DE LA SAISON/.test(title)?85:/DÉBLOQUER/.test(title)?80:/TÊTE/.test(title)?70:/FACE-À-FACE/.test(title)?80:/RECORD|CAP|RÉGULARITÉ|LEADER/.test(title)?75:/PREMIÈRE VICTOIRE/.test(title)?65:/DÉFI DE LA TABLE|OUVRIR LE COMPTEUR|TENIR LA DISTANCE|VISER LE DUEL|NOUVEAU RENDEZ-VOUS/.test(title)?25:55;
-        candidates.push({name,icon,title,text,theme,priority});
+        candidates.push({name,icon,title,text,theme,priority,...details});
       };
       let streak=0;for(let i=winners.length-1;i>=0&&winners[i]===name;i--)streak++;
       if(streak>0)offer('🔥','LA SÉRIE À PROLONGER',`Après ${streak} victoire${streak>1?'s':''} consécutive${streak>1?'s':''}, une victoire ce soir porterait sa série à ${streak+1}${streak+1>bestStreak?' : un nouveau record cette saison.':streak+1===bestStreak?' : le record de la saison serait égalé.':'.'}`);
@@ -27433,7 +27437,10 @@ function connectionDeviceLabel(){
       const unlock=previousKillBest<1?{count:1,label:'Premier sang'}:previousKillBest<3?{count:3,label:'Serial Killer'}:previousKillBest<5?{count:5,label:'Massacre'}:null;
       if(unlock&&unlock.count<=n-1)offer('🏅','UN ACCOMPLISSEMENT À DÉBLOQUER',`${unlock.count} kill${unlock.count>1?'s':''} dans cette partie lui permettrai${unlock.count>1?'ent':'t'} de débloquer « ${unlock.label} », encore inédit pour lui cette saison.`);
       const latest=mine[mine.length-1];
-      if(latest?.killer&&selected.includes(latest.killer))offer('⚔️','L’HEURE DE LA REVANCHE',`${latest.killer} l’a éliminé lors de sa dernière participation. Ils sont tous les deux à la table ce soir.`);
+      if(latest?.killer&&latest.killer!==name&&selected.includes(latest.killer)){
+        const rival=latest.killer,won=rows.filter(r=>r.player===rival&&r.killer===name).length,against=rows.filter(r=>r.player===name&&r.killer===rival).length;
+        offer('⚔️','L’HEURE DE LA REVANCHE',`${rival} l’a éliminé lors de sa dernière participation. En l’éliminant lui-même ce soir, ${name} améliorerait son bilan face à ${rival} de ${won}–${against} à ${won+1}–${against} (éliminations réalisées–subies cette saison).`,{rival,duelBaseline:{won,against}});
+      }
       const kills=Number(stat.kills||0);
       if(kills>0&&(kills+1)%10===0)offer('🎯','UN CAP À FRANCHIR',`Avec ${kills} éliminations cette saison, un kill lui permettrait d’atteindre le cap des ${kills+1}.`);
       let podiumRun=0;for(let i=mine.length-1;i>=0&&Number(mine[i].place)<=3&&Number(mine[i].place)>0;i--)podiumRun++;
@@ -27447,7 +27454,7 @@ function connectionDeviceLabel(){
       const bestKills=Math.max(0,...mine.map(r=>Number(r.kills)||0));
       if(mine.length&&bestKills<n-1)offer('🎯','SON RECORD DE KILLS',`Son record personnel cette saison est de ${bestKills} kill${bestKills>1?'s':''} dans une partie. Avec ${bestKills+1}, il établirait une nouvelle marque.`);
       const rivals=selected.filter(other=>other!==name).map(other=>({name:other,against:rows.filter(r=>r.player===name&&r.killer===other).length,won:rows.filter(r=>r.player===other&&r.killer===name).length})).filter(r=>r.against+r.won>0).sort((a,b)=>(b.against+b.won)-(a.against+a.won));
-      if(rivals.length){const rival=rivals[0];offer('⚔️','LE FACE-À-FACE',`Face à ${rival.name}, il compte ${rival.won} élimination${rival.won>1?'s':''} réalisée${rival.won>1?'s':''} et ${rival.against} subie${rival.against>1?'s':''} cette saison. Le prochain duel fera évoluer ce bilan.`);}
+      if(rivals.length){const rival=rivals[0];offer('⚔️','LE FACE-À-FACE',`En éliminant lui-même ${rival.name} ce soir, ${name} améliorerait son bilan face à lui de ${rival.won}–${rival.against} à ${rival.won+1}–${rival.against} (éliminations réalisées–subies cette saison).`,{rival:rival.name,duelBaseline:{won:rival.won,against:rival.against}});}
       const lastGame=games[games.length-1]||0;
       if(latest&&Number(latest.game)<lastGame)offer('↩️','LE RETOUR À LA TABLE',`Absent de la dernière partie enregistrée, il retrouve la table ce soir et peut relancer sa saison.`);
       if(mine.length&&(mine.length+1)%5===0)offer('🎉','UNE PARTICIPATION SYMBOLIQUE',`Ce soir sera sa ${mine.length+1}e participation cette saison : une occasion de marquer ce cap par un beau résultat.`);
@@ -30586,7 +30593,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
       const name=document.createElement('strong'),status=document.createElement('span'),text=document.createElement('p');
       name.textContent=(entry.icon||'🎯')+' '+entry.name+' · '+entry.title;
       status.textContent=entry.completed?'✓ Réalisé':entry.objective?'En cours':'À suivre';
-      status.className='bpt-objective-status';text.textContent=entry.text;row.append(name,status,text);host.append(row);
+      status.className='bpt-objective-status';text.textContent=entry.completed&&entry.resultText?entry.resultText:entry.text;row.append(name,status,text);host.append(row);
     }
   }
   function ensureModal(){if($('bpt484Modal'))return;document.body.insertAdjacentHTML('beforeend','<div id="bpt484Modal" class="bpt484-modal"><div id="bpt484Dialog" class="bpt484-dialog"></div></div>');$('bpt484Modal').onclick=e=>{if(e.target===$('bpt484Modal'))closeModal()}}
