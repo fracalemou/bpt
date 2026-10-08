@@ -14143,18 +14143,7 @@ body.bpt-mobile-device .bpt-mobile-top-menu button{
 @keyframes bptBountyReveal{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){.bpt-bounty-card{animation:none}}
 </style>
-<style id="bpt-live-ranking-style">
-.bpt484-live-ranking{color:#fff}
-.bpt484-live-ranking[hidden]{display:none!important}
-.bpt-ranking-subtitle{color:#2ac9c2;font-size:12px;font-weight:850;letter-spacing:.6px}
-.bpt-ranking-table{width:100%;table-layout:fixed;border-collapse:collapse;margin:16px 0;color:#f5f8f7}
-.bpt-ranking-table th,.bpt-ranking-table td{padding:12px 8px;border:1px solid #28584f;text-align:center;vertical-align:middle;overflow-wrap:anywhere}
-.bpt-ranking-table th:first-child,.bpt-ranking-table td:first-child{width:42%;text-align:left}
-.bpt-ranking-table th{color:#a6bbb6;background:#0d352f;font-size:13px}.bpt-ranking-table td{font-size:16px}.bpt-ranking-table td:first-child b{display:block}
-.bpt-ranking-table small{display:block;color:#a6bbb6;font-size:11px;line-height:1.4;margin-top:4px}
-.bpt-ranking-table .is-ahead{color:#57e0b5}.bpt-ranking-table .is-behind{color:#ef7777}.bpt-ranking-note{color:#a6bbb6;font-size:12px;line-height:1.45}
-@media(max-width:480px){.bpt-ranking-table th,.bpt-ranking-table td{padding:10px 5px}.bpt-ranking-table td{font-size:14px}}
-</style>
+
 <style id="bpt-final-duel-style">
 .bpt-bounty-overlay[data-kind="duel"]{--celebration-color:#2ac9c2;background:rgba(6,21,19,.97)}
 .bpt-bounty-overlay[data-kind="duel"] .bpt-bounty-card{width:min(1100px,100%);background:#0a2924;border:1px solid #2ac9c2;box-shadow:none;border-radius:18px;padding:clamp(14px,3vw,36px);font-family:Arial,Helvetica,sans-serif}
@@ -14243,7 +14232,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.57";
+const BPT_APP_VERSION="5.60";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14395,7 +14384,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.57</div>
+<div class="app-version" id="headerAppVersion">BPT v5.60</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15514,7 +15503,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.57</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.60</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -16677,6 +16666,24 @@ async function cloudFetchState(){
   return data;
 }
 
+// Correction historique approuvée : une seule partie, appliquée une seule fois.
+function bptApprovedTimeCorrection(game){
+  const marker='2026-09-25-franck-4h02';
+  if(!game||game.bptApprovedTimeCorrection===marker)return null;
+  const rows=Array.isArray(game.game_data)?game.game_data:[];
+  if(rows.length!==9||rows.some(r=>r.date!=='2026-09-25'))return null;
+  const second=rows.find(r=>r.player==='Franck NAESSENS'&&Number(r.place)===2);
+  const winner=rows.find(r=>r.player==='Michel SCHERPEREEL'&&Number(r.place)===1);
+  const third=rows.find(r=>r.player==='Jérôme BINOT'&&Number(r.place)===3);
+  if(!second||!winner||!third||third.outTime!=='01:00:13')return null;
+  const corrected=rows.map(row=>{
+    const next={...row,gameDurationSec:14520,gameHeadsUpDurationSec:1007,gameTimingSource:'historical'};
+    if(row===second){next.outTime='01:17:00';next.outElapsedSec=14520;}
+    return next;
+  });
+  return {...game,game_data:corrected,bptApprovedTimeCorrection:marker};
+}
+
 async function cloudFetchGames(){
   if(!sbClient)return [];
   const {data,error}=await sbClient
@@ -16684,6 +16691,17 @@ async function cloudFetchGames(){
     .select("id,game_key,game_data,created_at")
     .order("created_at",{ascending:true});
   if(error)throw error;
+
+  // Transaction sur la partie concernée : conserve les modifications concurrentes
+  // et n'écrase pas une éventuelle correction ultérieure de l'organisateur.
+  const target=(data||[]).find(g=>g.id==='g_9gjfd8'&&bptApprovedTimeCorrection(g));
+  if(target&&window.bptFirebaseDb?.()){
+    try{
+      const result=await window.bptFirebaseDb().ref('bpt/games/g_9gjfd8').transaction(game=>bptApprovedTimeCorrection(game)||undefined);
+      const saved=result.snapshot.val();
+      if(saved){const index=data.indexOf(target);data[index]={...saved,id:target.id};}
+    }catch(e){console.warn('Correction du temps de la partie 3 différée :',e);}
+  }
 
   const history=[];
   (data||[]).forEach((g,index)=>{
@@ -18120,22 +18138,14 @@ function bptDurationRecords(){
   for(const [game,gameRows] of games){
     if(!gameRows.length)continue;
     const n=Math.max(...gameRows.map(r=>Number(r.n)||0));
-    const duration=Math.max(...gameRows.map(r=>Number(r.gameDurationSec)||0));
+    const timing=bptGameTiming(gameRows),duration=timing.durationSec;
     if(!(duration>0))continue;
     const finalists=gameRows
       .filter(r=>Number(r.place)===1||Number(r.place)===2)
       .sort((a,b)=>Number(a.place)-Number(b.place))
       .map(r=>String(r.player||'').trim())
       .filter(Boolean);
-    let huStart=null;
-    if(n===2){
-      huStart=0;
-    }else if(n>=3){
-      const third=gameRows.find(r=>Number(r.place)===3);
-      const t=Number(third?.outElapsedSec);
-      if(Number.isFinite(t)&&t>=0)huStart=t;
-    }
-    const huDuration=huStart===null?null:Math.max(0,duration-huStart);
+    const huDuration=timing.headsUpDurationSec;
     const sample=gameRows[0]||{};
     rows.push({
       game,n,duration,huDuration,
@@ -18948,7 +18958,7 @@ function queuePublishedLiveSummary(state){
 function finishedRecapSections(rows){
   const recap=rows.find(r=>r.endGameRecap)?.endGameRecap;
   const kills=Math.max(0,...rows.map(r=>Number(r.kills)||0)),hunters=rows.filter(r=>Number(r.kills)===kills).map(r=>r.player);
-  const count=rows.filter(r=>r.killer).length,duration=Math.max(0,...rows.map(r=>Number(r.gameDurationSec)||0));
+  const count=rows.filter(r=>r.killer).length,duration=bptGameTiming(rows).durationSec;
   const items=(list)=>list.map(e=>'<article><strong>'+esc((e.icon||'⭐')+' '+(e.name?e.name+' · ':'')+e.title)+'</strong><p>'+esc(e.text||'')+'</p></article>').join('');
   let h='<section class="bpt-recap-stats"><div><span>Participants</span><strong>'+rows.length+'</strong></div><div><span>Durée réelle</span><strong>'+esc(duration?formatGameDuration(duration):'Non renseignée')+'</strong></div><div><span>Éliminations</span><strong>'+count+'</strong></div></section>';
   h+='<section class="bpt-recap-section"><h3>🔥 '+(hunters.length>1?'Meilleurs chasseurs':'Meilleur chasseur')+'</h3><p>'+esc(kills?hunters.join(' · ')+' — '+kills+' élimination'+(kills>1?'s':''):'Aucune élimination enregistrée.')+'</p></section>';
@@ -18969,12 +18979,7 @@ function showEndGameSummary(rows){
   const first=sorted[0];
 
   content.innerHTML=`
-    <div class="muted" style="margin-top:6px">Partie #${first.game} · ${esc(shortDate(first.date))}${first.location?" · "+esc(first.location):""} · ${sorted.length} joueurs${(
-  Number(first.gameDurationSec)>0 ||
-  (Number(first.gameFinishedAt)>0 && Number(first.gameStartedAt)>0)
-)?" · "+esc(formatGameDuration(
-  Number(first.gameDurationSec)||Math.floor((Number(first.gameFinishedAt)-Number(first.gameStartedAt))/1000)
-)):""}</div>
+    <div class="muted" style="margin-top:6px">Partie #${first.game} · ${esc(shortDate(first.date))}${first.location?" · "+esc(first.location):""} · ${sorted.length} joueurs${bptGameTiming(sorted).durationSec?" · "+esc(formatGameDuration(bptGameTiming(sorted).durationSec)):""}</div>
 
     <div class="summary-podium">
       ${sorted.slice(0,3).map((r,i)=>`<div class="summary-place">
@@ -19037,12 +19042,7 @@ function renderHistoryCards(){
     return `<details class="history-game">
       <summary>
         <div class="history-game-title">${esc(gameDisplayTitle(f,g))}</div>
-        <div><div>${esc(shortDate(f.date||""))}${f.location?" · "+esc(f.location):""} · ${rows.length} joueurs</div><div class="history-game-meta">Cagnotte ${euro(rows.length*Number(f.stake||0))}${(
-  Number(f.gameDurationSec)>0 ||
-  (Number(f.gameFinishedAt)>0 && Number(f.gameStartedAt)>0)
-)?" · "+esc(formatGameDuration(
-  Number(f.gameDurationSec)||Math.floor((Number(f.gameFinishedAt)-Number(f.gameStartedAt))/1000)
-)):""}</div></div>
+        <div><div>${esc(shortDate(f.date||""))}${f.location?" · "+esc(f.location):""} · ${rows.length} joueurs</div><div class="history-game-meta">Cagnotte ${euro(rows.length*Number(f.stake||0))}${bptGameTiming(rows).durationSec?" · "+esc(formatGameDuration(bptGameTiming(rows).durationSec)):""}</div></div>
         <div class="history-winner">🏆 ${win?playerNameHtml(win.player):"—"} <span>· ${num(win?.points||0,0)} pts</span></div>
       </summary>
       <div class="history-game-body"><div class="tablewrap"><table><thead><tr><th>Place</th><th>Joueur</th><th>Pts</th><th>Kills</th><th>Éliminé par</th><th>Temps de jeu</th><th>Gain</th><th>Net</th></tr></thead><tbody>
@@ -19813,6 +19813,49 @@ function funPlayerLabel(name){
   const real=String(name||"").trim();
   const nick=playerNicknameInfo(real).primary;
   return nick || real;
+}
+
+function bptHistoricalStartAt(date){
+  const match=String(date||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(!match)return null;
+  const target=Date.UTC(Number(match[1]),Number(match[2])-1,Number(match[3]),21,15);
+  const formatter=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});
+  let at=target;
+  for(let i=0;i<2;i++){
+    const parts=Object.fromEntries(formatter.formatToParts(new Date(at)).filter(p=>p.type!=='literal').map(p=>[p.type,Number(p.value)]));
+    const local=Date.UTC(parts.year,parts.month-1,parts.day,parts.hour,parts.minute,parts.second);
+    at+=target-local;
+  }
+  return at;
+}
+
+function bptGameTiming(rows){
+  const list=Array.isArray(rows)?rows:[],first=list[0]||{};
+  const positive=key=>list.map(r=>Number(r[key])).find(n=>Number.isFinite(n)&&n>0)||null;
+  const recordedStart=positive('gameStartedAt'),recordedEnd=positive('gameFinishedAt');
+  const startedAt=recordedStart||bptHistoricalStartAt(first.date);
+  const second=list.find(r=>Number(r.place)===2),third=list.find(r=>Number(r.place)===3);
+  const historical=!recordedStart;
+  let finishedAt=recordedEnd||Number(second?.outAt)||null;
+  let durationSec=recordedStart&&finishedAt?Math.max(0,Math.floor((finishedAt-recordedStart)/1000)):positive('gameDurationSec')||0;
+  if(!durationSec&&historical&&second)durationSec=bestElapsedForRow(second,list);
+  if(!finishedAt&&startedAt&&durationSec)finishedAt=startedAt+durationSec*1000;
+  let headsUpStartedAt=positive('gameHeadsUpStartedAt');
+  let huElapsed=null;
+  const n=Math.max(list.length,...list.map(r=>Number(r.n)||0));
+  if(!headsUpStartedAt&&n===2)headsUpStartedAt=startedAt;
+  if(!headsUpStartedAt&&third){
+    headsUpStartedAt=Number(third.outAt)||null;
+    if(!headsUpStartedAt){
+      const direct=Number(third.outElapsedSec);
+      huElapsed=Number.isFinite(direct)&&third.outElapsedSec!=null&&direct>=0?direct:historical?(legacyElapsedFromOutTime(third.outTime)||Math.floor(bestElapsedForRow(third,list)/60)*60):null;
+      if(huElapsed!=null&&startedAt)headsUpStartedAt=startedAt+huElapsed*1000;
+    }
+  }
+  let headsUpDurationSec=headsUpStartedAt&&finishedAt?Math.floor((finishedAt-headsUpStartedAt)/1000):huElapsed!=null?Math.floor(durationSec-huElapsed):null;
+  if(headsUpDurationSec==null)headsUpDurationSec=positive('gameHeadsUpDurationSec');
+  if(headsUpDurationSec!=null&&(headsUpDurationSec<0||headsUpDurationSec>durationSec))headsUpDurationSec=null;
+  return {startedAt,finishedAt,durationSec,headsUpStartedAt,headsUpDurationSec,source:historical?'historical':'recorded'};
 }
 
 function formatGameDuration(totalSec){
@@ -21234,20 +21277,15 @@ function renderLatestGame(){
     $("latestGamePhotoDeleteBtn").onclick=()=>deleteGamePhoto(gameNo,seasonKey);
   }
 
-  const gameDurationSec=Math.max(
-    0,
-    Number(first.gameDurationSec)||(
-      Number(first.gameFinishedAt)>0 && Number(first.gameStartedAt)>0
-        ? Math.floor((Number(first.gameFinishedAt)-Number(first.gameStartedAt))/1000)
-        : 0
-    )
-  );
+  const gameTiming=bptGameTiming(rows),gameDurationSec=gameTiming.durationSec;
 
   $("latestGameSummary").innerHTML=[
     ["Date",shortDate(first.date||"")],
     ["Lieu",first.location||"—"],
     ["Participants",`${rows.length}`],
+    ["Début",gameTiming.startedAt?new Date(gameTiming.startedAt).toLocaleTimeString("fr-FR",{timeZone:"Europe/Paris",hour:"2-digit",minute:"2-digit"}):"—"],
     ["Durée",formatGameDuration(gameDurationSec)],
+    ["Heads-up",formatGameDuration(gameTiming.headsUpDurationSec)],
     ["Cagnotte",euro(pot)]
   ].map(([label,value])=>`<div class="latestgame-summary-item"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join("");
 
@@ -27464,6 +27502,24 @@ function connectionDeviceLabel(){
     }
   }
 
+  function updateLiveTiming(st){
+    if(!st.startedAt)return;
+    const players=Array.isArray(st.players)?st.players:[],alive=players.filter(p=>p.status==='in');
+    if(!st.finishedAt&&alive.length>2){st.headsUpStartedAt=null;st.headsUpPlayers=[];}
+    if(alive.length===2&&!st.finishedAt){
+      const pair=alive.map(p=>p.name).sort();
+      if(!st.headsUpStartedAt||JSON.stringify(st.headsUpPlayers)!==JSON.stringify(pair)){
+        const third=players.find(p=>Number(p.place)===3&&p.status==='out');
+        st.headsUpStartedAt=players.length===2?Number(st.startedAt):Number(third?.outAt)||Date.now();
+        st.headsUpPlayers=pair;
+      }
+    }
+    if(st.finishedAt){
+      st.gameDurationSec=Math.max(0,Math.floor((Number(st.finishedAt)-Number(st.startedAt))/1000));
+      st.headsUpDurationSec=st.headsUpStartedAt?Math.max(0,Math.floor((Number(st.finishedAt)-Number(st.headsUpStartedAt))/1000)):null;
+    }
+  }
+
   function updateFinalDuel(st){
     const alive=(st.players||[]).filter(p=>p.status==='in');
     if(!st.startedAt||st.finishedAt||alive.length!==2){
@@ -27501,6 +27557,7 @@ function connectionDeviceLabel(){
       if(!next)return server;
       evaluatePersonalBounties(next);
       evaluateLiveObjectives(next);
+      updateLiveTiming(next);
       updateFinalDuel(next);
       next.updatedAt=Date.now();
       changed=true;
@@ -27946,8 +28003,8 @@ function connectionDeviceLabel(){
       const elimNow=Date.now();
       victimPlayer.outAt=elimNow;
       victimPlayer.outLevel=(Number(s.levelIndex)||0)+1;
-      victimPlayer.outTime=new Date(elimNow).toLocaleTimeString("fr-FR");
-      victimPlayer.outElapsedSec=Math.max(
+      victimPlayer.outTime=new Date(elimNow).toLocaleTimeString("fr-FR",{timeZone:"Europe/Paris"});
+      victimPlayer.outActiveElapsedSec=Math.max(
         1,
         Math.round(
           Number(s.elapsedSec||0) +
@@ -27956,6 +28013,7 @@ function connectionDeviceLabel(){
             : 0)
         )
       );
+      victimPlayer.outElapsedSec=Math.max(0,Math.floor((elimNow-Number(s.startedAt||elimNow))/1000));
 
       // Bounty mystère : uniquement un participant de cette partie, jamais révélé avant sa sortie.
       if(!s.mysteryBountyRevealed && String(s.mysteryBountyName||'')===victim){
@@ -27982,13 +28040,6 @@ function connectionDeviceLabel(){
       const survivors=(s.players||[]).filter(x=>x.status==="in");
       if(survivors.length===1){
         const now=Date.now();
-
-        if(s.running && s.runStartedAt){
-          s.elapsedSec=Number(s.elapsedSec||0)+Math.max(
-            0,
-            Math.floor((now-Number(s.runStartedAt||now))/1000)
-          );
-        }
 
         survivors[0].status="winner";
         survivors[0].place=1;
@@ -28114,6 +28165,8 @@ function connectionDeviceLabel(){
       target.outAt=null;
       target.outLevel=null;
       target.outTime="";
+      target.outElapsedSec=null;target.outActiveElapsedSec=null;
+      s.gameDurationSec=null;s.headsUpDurationSec=null;
 
       s.winnerName="";
       s.finishedAt=null;
@@ -28198,16 +28251,15 @@ function connectionDeviceLabel(){
           outLevel:p.outLevel||null,
           outTime:p.outTime||"",
           outElapsedSec:Number(p.outElapsedSec)||null,
+          outAt:Number(p.outAt)||null,
+          outActiveElapsedSec:Number(p.outActiveElapsedSec)||null,
           gameStartedAt:Number(state.startedAt)||null,
           gameFinishedAt:Number(state.finishedAt)||null,
-          gameDurationSec:Math.max(
-            0,
-            Number(state.elapsedSec)||(
-              Number(state.finishedAt)>0 && Number(state.startedAt)>0
-                ? Math.floor((Number(state.finishedAt)-Number(state.startedAt))/1000)
-                : 0
-            )
-          ),
+          gameDurationSec:Math.max(0,Math.floor((Number(state.finishedAt)-Number(state.startedAt))/1000)),
+          gameActiveDurationSec:Math.max(0,Number(state.elapsedSec)||0),
+          gameHeadsUpStartedAt:Number(state.headsUpStartedAt)||null,
+          gameHeadsUpDurationSec:state.headsUpStartedAt?Math.max(0,Math.floor((Number(state.finishedAt)-Number(state.headsUpStartedAt))/1000)):null,
+          gameTimingSource:'recorded',
           tablier:n>=Number(db?.settings?.tablierMinPlayers||10)&&place===1,
           n,
           points:pointsFor(place,n),
@@ -28338,7 +28390,7 @@ function connectionDeviceLabel(){
         const now=Date.now();
         s.elapsedSec=Number(s.elapsedSec||0)+Math.max(0,Math.floor((now-Number(s.runStartedAt))/1000));
       }
-      s.active=false;s.running=false;s.deadline=null;s.runStartedAt=null;s.endedAt=Date.now();
+      s.active=false;s.running=false;s.deadline=null;s.runStartedAt=null;s.endedAt=Date.now();s.finishedAt=s.endedAt;s.finishReason="manual";
       s.takeoverRequest=null;
       return s;
     });
@@ -30372,8 +30424,8 @@ body.b466-live-active #live3>.hero{display:none!important}
 }
 </style>
 
-<link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=5.57">
-<script id="bpt-live-ui" src="./live-ui.js?v=5.57"></script>
+<link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=5.60">
+<script id="bpt-live-ui" src="./live-ui.js?v=5.60"></script>
 
 
 <style id="bpt-v485-nav-clean">
