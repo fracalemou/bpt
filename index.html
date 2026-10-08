@@ -14143,6 +14143,21 @@ body.bpt-mobile-device .bpt-mobile-top-menu button{
 @keyframes bptBountyReveal{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){.bpt-bounty-card{animation:none}}
 </style>
+<style id="bpt-final-duel-style">
+.bpt-bounty-overlay[data-kind="duel"]{--celebration-color:#2ac9c2;background:rgba(6,21,19,.97)}
+.bpt-bounty-overlay[data-kind="duel"] .bpt-bounty-card{width:min(1100px,100%);background:#0a2924;border:1px solid #2ac9c2;box-shadow:none;border-radius:18px;padding:clamp(14px,3vw,36px);font-family:Arial,Helvetica,sans-serif}
+.bpt-bounty-overlay[data-kind="duel"] .bpt-bounty-card h2{color:#f5f8f7;font-size:clamp(24px,4vw,48px);font-weight:950;margin:0 0 24px}
+.bpt-bounty-overlay[data-kind="duel"] .bpt-bounty-icon,.bpt-bounty-overlay[data-kind="duel"] [data-role="bountyname"],.bpt-bounty-overlay[data-kind="duel"] [data-role="bountytext"],.bpt-bounty-overlay[data-kind="duel"] [data-role="bountyhunter"]{display:none}
+.bpt-final-duel[hidden]{display:none!important}
+.bpt-duel-names{display:grid;grid-template-columns:minmax(0,1fr) 50px minmax(0,1fr);align-items:center;gap:10px;margin-bottom:24px}
+.bpt-duel-person{min-width:0}.bpt-duel-person h3{color:#f5f8f7;font-size:clamp(20px,4vw,44px);font-weight:950;margin:0 0 8px;overflow-wrap:anywhere;text-transform:uppercase}
+.bpt-duel-meta{color:#a6bbb6;font-size:clamp(11px,1.5vw,17px);line-height:1.4}
+.bpt-duel-vs{color:#2ac9c2;font-size:clamp(22px,3vw,36px);font-weight:950}
+.bpt-duel-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.7fr) minmax(0,1fr);align-items:center;gap:8px;padding:18px 8px;background:#0d352f;border-radius:12px;margin-top:12px}
+.bpt-duel-score{font-size:clamp(34px,6vw,64px);font-weight:950;color:#f5f8f7;line-height:1.15}.bpt-duel-score.is-ahead{color:#57e0b5}.bpt-duel-score.is-behind{color:#ef7777}
+.bpt-duel-caption b{display:block;color:#f5f8f7;font-size:clamp(14px,2vw,24px);line-height:1.25}.bpt-duel-caption small{display:block;color:#a6bbb6;font-size:clamp(11px,1.5vw,18px);margin-top:5px;line-height:1.3}
+@media(max-height:520px){.bpt-bounty-overlay[data-kind="duel"] .bpt-bounty-card{padding:12px 18px}.bpt-bounty-overlay[data-kind="duel"] .bpt-bounty-card h2{font-size:24px;margin-bottom:12px}.bpt-duel-names{margin-bottom:12px}.bpt-duel-person h3{font-size:24px;margin-bottom:3px}.bpt-duel-row{padding:8px;margin-top:8px}.bpt-duel-score{font-size:34px}.bpt-duel-caption b{font-size:16px}.bpt-duel-caption small{font-size:12px}.bpt-bounty-overlay[data-kind="duel"] button{margin-top:12px}}
+</style>
 <style id="bpt-game-recap-style">
 #gameSummaryBackdrop,#bptFinishedQueue{z-index:2400000}
 #gameSummaryBackdrop .bpt-summary-modal{width:min(1100px,100%);max-height:94dvh;border-color:#c8952e}
@@ -14216,7 +14231,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.53";
+const BPT_APP_VERSION="5.54";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14368,7 +14383,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.53</div>
+<div class="app-version" id="headerAppVersion">BPT v5.54</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15487,7 +15502,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.53</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.54</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -27437,6 +27452,31 @@ function connectionDeviceLabel(){
     }
   }
 
+  function updateFinalDuel(st){
+    const alive=(st.players||[]).filter(p=>p.status==='in');
+    if(!st.startedAt||st.finishedAt||alive.length!==2){
+      if(!st.finishedAt)delete st.finalDuelEvent;
+      return;
+    }
+    const names=alive.map(p=>p.name),pairKey=JSON.stringify(names.slice().sort());
+    if(st.finalDuelEvent?.pairKey===pairKey)return;
+    const rows=(Array.isArray(db?.history)?db.history:[]).filter(r=>Number(r.place)>0&&!(Number(r.gameStartedAt)>0&&Number(r.gameStartedAt)===Number(st.startedAt)));
+    const ranked=ranking(),gamesFor=name=>new Map(rows.filter(r=>r.player===name).map(r=>[String(r.game),r]));
+    const left=gamesFor(names[0]),right=gamesFor(names[1]);
+    let common=0,aheadLeft=0,aheadRight=0,headsUp=0,headsLeft=0,headsRight=0;
+    for(const [game,a] of left){
+      const b=right.get(game);if(!b)continue;
+      common++;if(Number(a.place)<Number(b.place))aheadLeft++;else if(Number(b.place)<Number(a.place))aheadRight++;
+      if([Number(a.place),Number(b.place)].sort((a,b)=>a-b).join(',')==='1,2'){
+        headsUp++;if(Number(a.place)===1)headsLeft++;else headsRight++;
+      }
+    }
+    st.finalDuelEvent={
+      id:'DUEL_'+String(st.sessionId||st.startedAt)+'_'+pairKey,pairKey,at:Date.now(),common,headsUp,
+      players:names.map((name,i)=>({name,rank:ranked.findIndex(p=>p.name===name)+1,games:gamesFor(name).size,ahead:i?aheadRight:aheadLeft,headsWins:i?headsRight:headsLeft}))
+    };
+  }
+
   async function ownerTransaction(mutator){
     const r=await ensureRef();
     let changed=false;
@@ -27449,6 +27489,7 @@ function connectionDeviceLabel(){
       if(!next)return server;
       evaluatePersonalBounties(next);
       evaluateLiveObjectives(next);
+      updateFinalDuel(next);
       next.updatedAt=Date.now();
       changed=true;
       return next;
@@ -31015,11 +31056,37 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
       achievements.forEach(e=>merged.add(e.id));
     }
     const modeReveal=bountyModeReveal(st);if(modeReveal)list.push(modeReveal);
+    const duel=st.finalDuelEvent,alive=(st.players||[]).filter(p=>p.status==='in');
+    if(st.startedAt&&!st.finishedAt&&alive.length===2&&duel?.players?.length===2&&duel.pairKey===JSON.stringify(alive.map(p=>p.name).sort())){
+      list.push({id:duel.id,at:duel.at,kind:'duel',icon:'⚔️',label:'LE DUEL FINAL',duel});
+    }
     const ev=st.mysteryBountyRevealed?st.mysteryBountyEvent:null;
     if(ev)list.push({id:ev.id,at:ev.at,kind:'common',icon:'🎯',label:ev.kind==='winner'?'BOUNTY COMMUN · LA CIBLE A SURVÉCU !':'BOUNTY COMMUN REMPORTÉ !',name:ev.player||'',text:ev.kind==='winner'?'était la cible secrète et remporte la partie.':'était la cible secrète de la table.',extra:ev.kind==='winner'?'':(ev.hunter||'')+' remporte le bounty'});
     return list.filter(e=>!merged.has(e.id)).sort((a,b)=>Number(a.at)-Number(b.at)||String(a.id).localeCompare(String(b.id)));
   }
   window.bptGetLiveCelebrations=liveCelebrations;
+  function renderFinalDuel(box,event){
+    let host=box.querySelector('.bpt-final-duel');
+    if(!host){host=document.createElement('div');host.className='bpt-final-duel';box.querySelector('[data-bounty-close]').before(host);}
+    host.hidden=event.kind!=='duel';if(host.hidden)return;
+    const duel=event.duel,key=JSON.stringify(duel);if(host.dataset.content===key)return;
+    host.dataset.content=key;host.replaceChildren();
+    const add=(parent,tag,text,className)=>{const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined)node.textContent=text;parent.append(node);return node};
+    const head=add(host,'div',undefined,'bpt-duel-names');
+    duel.players.forEach((player,i)=>{
+      if(i)add(head,'div','VS','bpt-duel-vs');
+      const person=add(head,'div',undefined,'bpt-duel-person');add(person,'h3',player.name);
+      add(person,'div',(player.rank?(player.rank===1?'1er':player.rank+'e')+' au championnat':'Non classé')+' · '+player.games+' partie'+(player.games>1?'s':'')+' jouée'+(player.games>1?'s':''),'bpt-duel-meta');
+    });
+    const row=(metric,label,subtitle)=>{
+      const line=add(host,'div',undefined,'bpt-duel-row'),left=Number(duel.players[0][metric])||0,right=Number(duel.players[1][metric])||0;
+      add(line,'div',String(left),'bpt-duel-score'+(left>right?' is-ahead':left<right?' is-behind':''));
+      const copy=add(line,'div',undefined,'bpt-duel-caption');add(copy,'b',label);add(copy,'small',subtitle);
+      add(line,'div',String(right),'bpt-duel-score'+(right>left?' is-ahead':right<left?' is-behind':''));
+    };
+    row('ahead','Fois devant l’autre',duel.common?'sur '+duel.common+' partie'+(duel.common>1?'s':'')+' commune'+(duel.common>1?'s':''):'Aucune partie commune enregistrée');
+    row('headsWins','Heads-up remportés',duel.headsUp?duel.headsUp+' confrontation'+(duel.headsUp>1?'s':''):'Premier heads-up entre eux');
+  }
   function renderBounty(root,st){
     const box=root.querySelector('[data-role="bounty"]');if(!box)return;
     if(st.finishedAt||!root.getClientRects().length||st.preGamePending){box.hidden=true;return;}
@@ -31034,12 +31101,13 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     const card=box.querySelector('.bpt-bounty-card');card.setAttribute('aria-label',ev.label||ev.title||'Événement de la partie');
     box.querySelector('.bpt-bounty-icon').textContent=ev.icon||'🏆';
     const set=(role,value)=>{box.querySelector('[data-role="'+role+'"]').textContent=value};
+    renderFinalDuel(box,ev);
     set('bountytitle',ev.label||ev.title||'');set('bountyname',ev.name||'');set('bountytext',ev.text||'');set('bountyhunter',ev.extra||'');
     const button=box.querySelector('[data-bounty-close]');
     const remain=Math.max(0,Math.ceil((8000-(Date.now()-bountySeenAt.get(ev.id)))/1000));
     const owner=!!api()?.isOwner?.();
     button.disabled=ev.kind==='mode'?(ev.drawing||!owner||bountyLaunchBusy):remain>0;
-    button.textContent=ev.kind==='mode'?(ev.drawing?'Tirage en cours…':!owner?'En attente de l’organisateur':bountyLaunchBusy?'Lancement…':'▶ Lancer la partie'):remain?'Continuer ('+remain+' s)':pending.length>1?'Continuer · '+(pending.length-1)+' à suivre':'Continuer';
+    button.textContent=ev.kind==='duel'?(remain?'Place au duel ! ('+remain+' s)':'Place au duel !'):ev.kind==='mode'?(ev.drawing?'Tirage en cours…':!owner?'En attente de l’organisateur':bountyLaunchBusy?'Lancement…':'▶ Lancer la partie'):remain?'Continuer ('+remain+' s)':pending.length>1?'Continuer · '+(pending.length-1)+' à suivre':'Continuer';
     button.onclick=async()=>{
       if(button.disabled)return;
       if(ev.kind==='mode'){
@@ -31062,6 +31130,11 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     const total=players.length*Number(st.startStack||0),avg=alive?total/alive:0,avgBB=cur.bb?Math.round(avg/cur.bb*10)/10:0;
     const x=api();
     const ownerRole=!!x?.isOwner?.();
+    const duelPair=players.filter(p=>p.status==='in').map(p=>p.name).sort();
+    if(ownerRole&&st.startedAt&&!st.finishedAt&&duelPair.length===2&&st.finalDuelEvent?.pairKey!==JSON.stringify(duelPair)&&!window.__bptRefreshingDuel){
+      window.__bptRefreshingDuel=true;x.refreshObjectives?.().finally(()=>{window.__bptRefreshingDuel=false});
+    }
+
     if(ownerRole&&st.startedAt&&Array.isArray(st.preGameBriefing)&&st.preGameBriefing.some(e=>e.title==='UN ACCOMPLISSEMENT À DÉBLOQUER'||!Object.prototype.hasOwnProperty.call(e,'objective')||(e.objective?.type==='place'&&e.objective.max>=(st.players||[]).length)||(/REVANCHE|FACE-À-FACE|DÉPASSER/.test(e.title||'')&&(!e.objective?.rival||!(st.players||[]).some(p=>p.name===e.objective.rival))))&&!window.__bptRefreshingObjectives){window.__bptRefreshingObjectives=true;x.refreshObjectives?.().finally(()=>{window.__bptRefreshingObjectives=false})}
     const myId=String(x?.deviceId?.()||'');
     const takeoverReq=st?.takeoverRequest||null;
