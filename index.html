@@ -14126,6 +14126,13 @@ body.bpt-mobile-device .bpt-mobile-top-menu button{
 .bpt-bounty-card button:disabled{opacity:.55;cursor:default}
  .bpt-bounty-overlay[data-kind="objective"]{--celebration-color:#69b7ff}
 .bpt-bounty-overlay[data-kind="individual"]{--celebration-color:#c59aff}
+.bpt-bounty-overlay[data-kind="mode"][data-mode="individual"]{--celebration-color:#c59aff}
+.bpt-bounty-overlay[data-kind="mode"] .bpt-bounty-name{font-size:clamp(24px,5vw,48px)}
+.bpt-bounty-overlay[data-kind="mode"][data-mode="drawing"] .bpt-bounty-icon{animation:bptModeDraw .4s ease-in-out infinite alternate}
+.bpt-bounty-overlay[data-kind="mode"][data-mode="common"] .bpt-bounty-name,.bpt-bounty-overlay[data-kind="mode"][data-mode="individual"] .bpt-bounty-name{animation:bptBountyReveal .5s ease-out}
+@keyframes bptModeDraw{from{transform:rotate(-15deg) scale(.9)}to{transform:rotate(15deg) scale(1.1)}}
+@media(prefers-reduced-motion:reduce){.bpt-bounty-overlay[data-kind="mode"] .bpt-bounty-icon,.bpt-bounty-overlay[data-kind="mode"] .bpt-bounty-name{animation:none}}
+
 .bpt-bounty-overlay[data-kind="record"]{--celebration-color:#ff9970}
 .bpt-bounty-overlay[data-kind="achievement"]{--celebration-color:#57e0b5}
 .bpt-bounty-card strong{white-space:pre-line}
@@ -14207,7 +14214,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.50";
+const BPT_APP_VERSION="5.52";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14359,7 +14366,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.50</div>
+<div class="app-version" id="headerAppVersion">BPT v5.52</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -14615,6 +14622,7 @@ function simplifyRecordTextForMobile(text){
 </div>
 </div>
 </div>
+<div class="bpt-live3-modal" id="bptResetPasswordModal" aria-hidden="true"><form class="bpt-live3-modal-card" id="bptResetPasswordForm" role="dialog" aria-modal="true" aria-labelledby="bptResetPasswordTitle"><h2 id="bptResetPasswordTitle">Autoriser la réinitialisation</h2><p id="bptResetPasswordDescription"></p><label>Mot de passe administrateur<input id="bptResetPasswordInput" type="password" autocomplete="current-password" required /></label><p id="bptResetPasswordError" role="alert"></p><div class="bpt-live3-modal-actions"><button id="bptResetPasswordCancel" type="button">Annuler</button><button class="btn danger" type="submit">Autoriser</button></div></form></div>
 <div class="bpt-live3-modal" id="bptChangeProfileCodeModal" aria-hidden="true"><div class="bpt-live3-modal-card"><h2>Changer mon code</h2><p id="bptChangeProfileCodeName"></p><label>Code actuel<input id="bptChangeProfileCodeOld" class="bpt-personal-code-input" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password" /></label><label>Nouveau code · 4 chiffres<input id="bptChangeProfileCodeNew" class="bpt-personal-code-input" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" /></label><label>Confirmez le nouveau code<input id="bptChangeProfileCodeConfirm" class="bpt-personal-code-input" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" /></label><p id="bptChangeProfileCodeStatus" aria-live="polite"></p><div class="bpt-live3-modal-actions"><button id="bptChangeProfileCodeCancel" type="button">Fermer</button><button id="bptChangeProfileCodeSave" class="btn primary" type="button">Enregistrer</button></div></div></div>
 <div aria-hidden="true" class="bpt-live3-modal" id="live3SpectatorIdentityModal">
 <div class="bpt-live3-modal-card bpt-live3-spectator-id-card">
@@ -15477,7 +15485,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.50</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.52</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -24434,7 +24442,7 @@ async function saveCorrection(){
 
 
 async function resetFullHistory(){
-  if(!correctionUnlocked)return;
+  if(!settingsUnlocked||!correctionUnlocked)return;
 
   const games=correctionGames();
   if(!games.length){
@@ -24459,6 +24467,9 @@ async function resetFullHistory(){
     alert("RAZ annulée : le mot SUPPRIMER n'a pas été saisi exactement.");
     return;
   }
+
+  if(!await authorizeFullReset('Supprimer tout l’historique, le classement et les statistiques ?'))return;
+  if(!settingsUnlocked||!correctionUnlocked)return;
 
   db.history=[];
   db.liveState=null;
@@ -24541,10 +24552,50 @@ function moveCorrectionGame(delta){
 }
 
 
+const BPT_ADMIN_PASSWORD="7074";
 let settingsUnlocked=false;
+let fullResetAuthorizationPending=false;
+function authorizeFullReset(description){
+  if(!settingsUnlocked||fullResetAuthorizationPending)return Promise.resolve(false);
+  fullResetAuthorizationPending=true;
+  return new Promise(resolve=>{
+    const modal=$('bptResetPasswordModal'),form=$('bptResetPasswordForm'),input=$('bptResetPasswordInput'),error=$('bptResetPasswordError'),cancel=$('bptResetPasswordCancel');
+    const previousFocus=document.activeElement;
+    input.value='';error.textContent='';$('bptResetPasswordDescription').textContent=description;
+    modal.classList.add('open');modal.setAttribute('aria-hidden','false');input.focus();
+    function finish(authorized){
+      form.onsubmit=null;cancel.onclick=null;modal.onclick=null;document.removeEventListener('keydown',onKey);
+      input.value='';error.textContent='';modal.classList.remove('open');modal.setAttribute('aria-hidden','true');
+      fullResetAuthorizationPending=false;previousFocus?.focus?.();resolve(authorized);
+    }
+    function onKey(e){
+      if(e.key==='Escape'){e.preventDefault();finish(false);return;}
+      if(e.key==='Tab'){
+        const controls=[input,cancel,form.querySelector('button[type="submit"]')],index=controls.indexOf(document.activeElement);
+        if(e.shiftKey&&index<=0){e.preventDefault();controls[2].focus();}
+        else if(!e.shiftKey&&(index===2||index===-1)){e.preventDefault();input.focus();}
+      }
+    }
+    form.onsubmit=e=>{
+      e.preventDefault();
+      if(!settingsUnlocked){finish(false);return;}
+      if(input.value!==BPT_ADMIN_PASSWORD){input.value='';error.textContent='Mot de passe incorrect. Aucune donnée n’a été supprimée.';input.focus();return;}
+      finish(true);
+    };
+    cancel.onclick=()=>finish(false);modal.onclick=e=>{if(e.target===modal)finish(false)};
+    document.addEventListener('keydown',onKey);
+  });
+}
+async function resetOriginalData(){
+  if(!settingsUnlocked)return;
+  if(!confirm("Réinitialiser toutes les données avec celles du classeur Excel d'origine ?"))return;
+  if(!await authorizeFullReset('Remplacer toutes les données par celles du classeur Excel d’origine ?'))return;
+  if(!settingsUnlocked)return;
+  db=clone(SEED);cloudHistoryReplaceOnce=true;saveDB();renderAll();showView('dashboard');
+}
 
 function unlockSettings(){
-  if($("settingsPassword").value==="7074"){
+  if($("settingsPassword").value===BPT_ADMIN_PASSWORD){
     settingsUnlocked=true;
     $("settingsLock").style.display="none";
     $("settingsProtectedContent").style.display="block";
@@ -24765,7 +24816,7 @@ function backup(){const a=document.createElement("a");a.href=URL.createObjectURL
 if($("backupBtn"))$("backupBtn").onclick=backup;if($("backupBtn2"))$("backupBtn2").onclick=backup;
 function restoreInput(input){const f=input.files[0];if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const x=JSON.parse(rd.result);if(!x.players||!x.history||!x.points)throw 0;db=x;cloudHistoryReplaceOnce=true;saveDB();renderAll();alert("Sauvegarde restaurée.");}catch(e){alert("Fichier de sauvegarde invalide.");}};rd.readAsText(f);}
 if($("restoreInput"))$("restoreInput").onchange=e=>restoreInput(e.target);if($("restoreInput2"))$("restoreInput2").onchange=e=>restoreInput(e.target);
-$("resetDataBtn").onclick=()=>{if(confirm("Réinitialiser toutes les données avec celles du classeur Excel d'origine ?")){db=clone(SEED);cloudHistoryReplaceOnce=true;saveDB();renderAll();showView("dashboard");}};
+$("resetDataBtn").onclick=resetOriginalData;
 
 $("correctionGameSelect").onchange=()=>{
   if(correctionFormDirty && !confirm("Abandonner les modifications non enregistrées de cette partie ?")){
@@ -27613,7 +27664,10 @@ function connectionDeviceLabel(){
       }else{
         const rem=Math.max(0,Number(s.remainingSec)||0);
         s.running=true;
-        if(!s.startedAt)s.startedAt=now;
+        if(!s.startedAt){
+          s.startedAt=now;
+          s.bountyModeRevealAt=now;
+        }
         s.preGamePending=false;
         s.runStartedAt=now;
         s.deadline=now+rem*1000;
@@ -30906,6 +30960,19 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
       }
     }
   }
+  function bountyModeReveal(st,now=Date.now()){
+    const at=Number(st.bountyModeRevealAt)||0,age=now-at;
+    if(!at||!st.startedAt||st.preGamePending||st.finishedAt||age<0||age>=8000)return null;
+    if(!['common','individual'].includes(st.bountyMode))return null;
+    const drawing=age<1600,individual=st.bountyMode==='individual';
+    return {
+      id:'MODE_'+String(st.sessionId||st.startedAt),at,kind:'mode',mode:drawing?'drawing':st.bountyMode,drawing,
+      icon:drawing?'🎲':individual?'🃏':'🎯',label:drawing?'LE BOUNTY DE CE SOIR…':'LE SORT A CHOISI !',
+      name:drawing?'COMMUN OU INDIVIDUEL ?':individual?'BOUNTYS INDIVIDUELS SECRETS':'BOUNTY COMMUN SECRET',
+      text:drawing?'Une cible pour toute la table ou une mission personnelle pour chacun ?':individual?'Chaque joueur reçoit sa propre mission secrète.':'Une même cible secrète pour toute la table.',
+      extra:drawing?'':individual?'Consultez votre mission avec le bouton Bounty.':'La cible sera révélée à son élimination ou à la fin de la partie.'
+    };
+  }
   function liveCelebrations(st){
     const list=(Array.isArray(st.liveAlerts)?st.liveAlerts:[]).filter(a=>a.category==='individual'||/^BOUNTY INDIVIDUEL/.test(a.title||'')||!/^BOUNTY\b/i.test(a.title||'')).map(a=>{
       const title=String(a.title||'');
@@ -30922,6 +30989,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
       objective.extra=achievements.map(e=>'🏅 ACCOMPLISSEMENT DÉBLOQUÉ · '+e.title.split(' · ').slice(1).join(' · ')+' — '+e.text).join('\n');
       achievements.forEach(e=>merged.add(e.id));
     }
+    const modeReveal=bountyModeReveal(st);if(modeReveal)list.push(modeReveal);
     const ev=st.mysteryBountyRevealed?st.mysteryBountyEvent:null;
     if(ev)list.push({id:ev.id,at:ev.at,kind:'common',icon:'🎯',label:ev.kind==='winner'?'BOUNTY COMMUN · LA CIBLE A SURVÉCU !':'BOUNTY COMMUN REMPORTÉ !',name:ev.player||'',text:ev.kind==='winner'?'était la cible secrète et remporte la partie.':'était la cible secrète de la table.',extra:ev.kind==='winner'?'':(ev.hunter||'')+' remporte le bounty'});
     return list.filter(e=>!merged.has(e.id)).sort((a,b)=>Number(a.at)-Number(b.at)||String(a.id).localeCompare(String(b.id)));
@@ -30936,14 +31004,15 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     });
     const ev=pending[0];if(!ev){box.hidden=true;box.dataset.event='';return;}
     if(!bountySeenAt.has(ev.id))bountySeenAt.set(ev.id,Date.now());
-    const first=box.hidden||box.dataset.event!==ev.id;box.hidden=false;box.dataset.event=ev.id;box.dataset.kind=ev.kind;
+    const first=box.hidden||box.dataset.event!==ev.id;box.hidden=false;box.dataset.event=ev.id;box.dataset.kind=ev.kind;box.dataset.mode=ev.mode||'';
     const card=box.querySelector('.bpt-bounty-card');card.setAttribute('aria-label',ev.label||ev.title||'Événement de la partie');
     box.querySelector('.bpt-bounty-icon').textContent=ev.icon||'🏆';
     const set=(role,value)=>{box.querySelector('[data-role="'+role+'"]').textContent=value};
     set('bountytitle',ev.label||ev.title||'');set('bountyname',ev.name||'');set('bountytext',ev.text||'');set('bountyhunter',ev.extra||'');
     const button=box.querySelector('[data-bounty-close]');
     const remain=Math.max(0,Math.ceil((8000-(Date.now()-bountySeenAt.get(ev.id)))/1000));
-    button.disabled=remain>0;button.textContent=remain?'Continuer ('+remain+' s)':pending.length>1?'Continuer · '+(pending.length-1)+' à suivre':'Continuer';
+    button.disabled=ev.kind==='mode'?ev.drawing:remain>0;
+    button.textContent=ev.kind==='mode'?(ev.drawing?'Tirage en cours…':'C’est parti !'):remain?'Continuer ('+remain+' s)':pending.length>1?'Continuer · '+(pending.length-1)+' à suivre':'Continuer';
     button.onclick=()=>{if(button.disabled)return;for(const id of [ev.id,...(ev.relatedIds||[])]){bountyDismissed.add(id);try{sessionStorage.setItem('bpt:bounty:'+id,'1')}catch(_){}}sync()};
     if(first)card.focus({preventScroll:true});
   }
