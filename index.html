@@ -14128,6 +14128,7 @@ body.bpt-mobile-device .bpt-mobile-top-menu button{
 .bpt-bounty-overlay[data-kind="individual"]{--celebration-color:#c59aff}
 .bpt-bounty-overlay[data-kind="record"]{--celebration-color:#ff9970}
 .bpt-bounty-overlay[data-kind="achievement"]{--celebration-color:#57e0b5}
+.bpt-bounty-card strong{white-space:pre-line}
 .bpt-bounty-card button{position:sticky;bottom:0}
 @media(max-height:520px){.bpt-bounty-overlay{padding:8px}.bpt-bounty-card{padding:12px 20px}.bpt-bounty-icon{font-size:30px}.bpt-bounty-card h2{font-size:20px;margin:6px 0}.bpt-bounty-name{font-size:30px}.bpt-bounty-card p,.bpt-bounty-card strong{font-size:16px;margin:8px 0}.bpt-bounty-card button{margin:12px auto 0;padding:10px 20px}}
 @keyframes bptBountyReveal{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
@@ -14206,7 +14207,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.48";
+const BPT_APP_VERSION="5.50";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14358,7 +14359,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.48</div>
+<div class="app-version" id="headerAppVersion">BPT v5.50</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15476,7 +15477,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.48</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.50</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -18899,7 +18900,7 @@ function pumpFinishedSummary(){
   box.querySelector('.bpt-bounty-name').textContent=event.name||'';box.querySelector('p').textContent=event.text||'';box.querySelector('strong').textContent=event.extra||'';
   const button=box.querySelector('button'),remain=Math.max(0,Math.ceil((8000-(Date.now()-q.seenAt.get(event.id)))/1000));
   button.disabled=remain>0;button.textContent=remain?'Continuer ('+remain+' s)':'Continuer';
-  button.onclick=()=>{if(button.disabled)return;event.dismissed=true;try{sessionStorage.setItem('bpt:bounty:'+event.id,'1')}catch(_){}pumpFinishedSummary()};
+  button.onclick=()=>{if(button.disabled)return;event.dismissed=true;for(const id of [event.id,...(event.relatedIds||[])]){try{sessionStorage.setItem('bpt:bounty:'+id,'1')}catch(_){}}pumpFinishedSummary()};
   if(first)card.focus({preventScroll:true});
 }
 function queuePublishedLiveSummary(state){
@@ -18915,8 +18916,8 @@ function finishedRecapSections(rows){
   let h='<section class="bpt-recap-stats"><div><span>Participants</span><strong>'+rows.length+'</strong></div><div><span>Durée réelle</span><strong>'+esc(duration?formatGameDuration(duration):'Non renseignée')+'</strong></div><div><span>Éliminations</span><strong>'+count+'</strong></div></section>';
   h+='<section class="bpt-recap-section"><h3>🔥 '+(hunters.length>1?'Meilleurs chasseurs':'Meilleur chasseur')+'</h3><p>'+esc(kills?hunters.join(' · ')+' — '+kills+' élimination'+(kills>1?'s':''):'Aucune élimination enregistrée.')+'</p></section>';
   if(!recap)return h+'<p class="muted">Le détail des missions et enjeux est conservé pour les parties terminées avec cette version.</p>';
-  h+='<section class="bpt-recap-section"><h3>🎯 '+(recap.bountyMode==='individual'?'Missions individuelles':'Bounty commun')+'</h3>';
-  if(recap.bountyMode==='individual')h+=recap.missions.length?items(recap.missions):'<p>Aucune mission individuelle accomplie.</p>';
+  h+='<section class="bpt-recap-section"><h3>🎯 '+(recap.bountyMode==='individual'?'Bountys individuels':'Bounty commun')+'</h3>';
+  if(recap.bountyMode==='individual')h+=recap.missions.length?items(recap.missions):'<p>Aucun bounty individuel réussi.</p>';
   else h+='<p>'+esc(recap.bountyName?(recap.bountySurvived?recap.bountyName+' était la cible secrète et a remporté la partie.':recap.bountyHunter+' remporte le bounty en éliminant '+recap.bountyName+'.'):'Aucun bounty révélé.')+'</p>';
   h+='</section><section class="bpt-recap-section"><h3>⭐ Enjeux réalisés</h3>'+(recap.objectives.length?items(recap.objectives):'<p>Aucun enjeu réalisé.</p>')+'</section>';
   if(recap.highlights.length)h+='<section class="bpt-recap-section"><h3>🏅 Records et accomplissements</h3>'+items(recap.highlights)+'</section>';
@@ -27313,12 +27314,13 @@ function connectionDeviceLabel(){
       contract.status=success?'completed':failed?'failed':'pending';
       if(success&&!contract.announced){
         contract.announced=true;contract.completedAt=Date.now();
-        bptLive3QueueAlert(st,contract.icon||'🔥','MISSION INDIVIDUELLE ACCOMPLIE · '+contract.hunter,(contract.title||'Cible secrète')+' — '+(contract.text||'Éliminer '+contract.target+' vous-même.'),contract.completedAt);
+        bptLive3QueueAlert(st,contract.icon||'🔥','BOUNTY INDIVIDUEL RÉUSSI · '+contract.hunter,(contract.title||'Cible secrète')+' — '+(contract.text||'Éliminer '+contract.target+' vous-même.'),contract.completedAt,{category:'individual',player:contract.hunter});
       }
     }
   }
 
   function preGameObjective(entry,selected){
+    if(entry.goal)return entry.goal;
     const title=entry.title,text=entry.text||'',mine=(db?.history||[]).filter(r=>r.player===entry.name).sort((a,b)=>Number(a.game)-Number(b.game));
     const numbers=[...text.matchAll(/\d+/g)].map(m=>Number(m[0]));
     const rival=entry.rival||selected.find(n=>n!==entry.name&&text.includes(n));
@@ -27340,7 +27342,7 @@ function connectionDeviceLabel(){
   function evaluateLiveObjectives(st){
     if(!st.startedAt||!Array.isArray(st.preGameBriefing))return;
     const names=(st.players||[]).map(p=>p.name);
-    const invalid=entry=>(entry.objective?.type==='place'&&entry.objective.max>=names.length)||(/REVANCHE|FACE-À-FACE|DÉPASSER/.test(entry.title||'')&&(!entry.objective?.rival||!names.includes(entry.objective.rival)||entry.objective.rival===entry.name));
+    const invalid=entry=>entry.title==='UN ACCOMPLISSEMENT À DÉBLOQUER'||(entry.objective?.type==='place'&&entry.objective.max>=names.length)||(/REVANCHE|FACE-À-FACE|DÉPASSER/.test(entry.title||'')&&(!entry.objective?.rival||!names.includes(entry.objective.rival)||entry.objective.rival===entry.name));
     if(st.preGameBriefing.some(invalid)){
       const replacements=buildPreGameBriefing(names);
       st.preGameBriefing=st.preGameBriefing.map(entry=>{
@@ -27367,12 +27369,18 @@ function connectionDeviceLabel(){
       else if(objective.type==='firstKill')achieved=first?.killer===p.name;
       else if(objective.type==='overtake')achieved=finished&&(totals.get(p.name)||0)>(totals.get(objective.rival)||0);
       else if(objective.type==='leader')achieved=finished&&base.length>0&&[...totals].every(([name,total])=>name===p.name||(totals.get(p.name)||0)>total);
+      else if(objective.type==='championshipPodium')achieved=finished&&[...totals].filter(([name,total])=>name!==p.name&&total>=(totals.get(p.name)||0)).length<3;
       entry.completed=!!achieved;
       if(achieved&&objective.type==='rivalKill'&&objective.duelBaseline){
         const {won,against}=objective.duelBaseline;
         entry.resultText=`${p.name} a éliminé ${objective.rival} : son bilan face à lui passe de ${won}–${against} à ${won+1}–${against} (éliminations réalisées–subies cette saison).`;
       }else delete entry.resultText;
-      if(achieved&&!entry.announced){entry.announced=true;entry.completedAt=Date.now();bptLive3QueueAlert(st,entry.icon||'🎯','ENJEU RÉALISÉ · '+p.name,entry.title+' — '+(entry.resultText||entry.text),entry.completedAt);}
+      if(achieved&&!entry.announced){
+        entry.announced=true;entry.completedAt=Date.now();
+        const ownKills=eliminated.filter(v=>v.killer===p.name).sort((a,b)=>Number(a.outAt)-Number(b.outAt));
+        const trigger=objective.type==='rivalKill'?ownKills.find(v=>v.name===objective.rival):objective.type==='kills'?ownKills[objective.min-1]:objective.type==='firstKill'?first:null;
+        bptLive3QueueAlert(st,entry.icon||'🎯','ENJEU RÉALISÉ · '+p.name,entry.title+' — '+(entry.resultText||entry.text),entry.completedAt,{category:'objective',player:p.name,actionAt:Number(trigger?.outAt)||0});
+      }
     }
   }
 
@@ -27404,27 +27412,41 @@ function connectionDeviceLabel(){
     for(const winner of winners){run=winner&&winner===last?run+1:(winner?1:0);bestStreak=Math.max(bestStreak,run);last=winner;}
     const leader=ranked[0],n=selected.length;
     const waitingForFirst=selected.map(name=>({name,rows:rows.filter(r=>r.player===name)})).filter(p=>p.rows.length&&!p.rows.some(r=>Number(r.place)===1)).sort((a,b)=>b.rows.length-a.rows.length||Math.min(...a.rows.map(r=>Number(r.game)))-Math.min(...b.rows.map(r=>Number(r.game)))||a.name.localeCompare(b.name,'fr'))[0]?.name;
-    const used=new Map(),usedThemes=new Map();
-    return selected.map(name=>{
+    // Teste une répartition possible des places, sans attribuer la dernière
+    // place à tous les adversaires simultanément. Les égalités restent prudentes.
+    function bestChampionshipRank(name,place){
+      const total=Number(byName.get(name)?.points||0)+pointsFor(place,n);
+      const absent=ranked.filter(p=>p.name!==name&&!selected.includes(p.name)&&Number(p.points)>=total).length;
+      const others=selected.filter(other=>other!==name),slots=Array.from({length:n},(_,i)=>i+1).filter(i=>i!==place),assigned=new Map();
+      function match(other,seen){
+        for(const slot of slots){
+          if(seen.has(slot)||Number(byName.get(other)?.points||0)+pointsFor(slot,n)>=total)continue;
+          seen.add(slot);
+          if(!assigned.has(slot)||match(assigned.get(slot),seen)){assigned.set(slot,other);return true;}
+        }
+        return false;
+      }
+      let below=0;for(const other of others)if(match(other,new Set()))below++;
+      return 1+absent+others.length-below;
+    }
+    const pools=selected.map(name=>{
       const mine=rows.filter(r=>r.player===name).sort((a,b)=>Number(a.game)-Number(b.game));
       const stat=byName.get(name)||{points:0,kills:0,wins:0,podiums:0};
       const candidates=[];
       const offer=(icon,title,text,details={})=>{
-        const theme=/REVANCHE|FACE-À-FACE|DÉPASSER|DUEL AU CLASSEMENT/.test(title)?'rivalry':/RECORD|SÉRIE/.test(title)?'record':/DÉBLOQUER/.test(title)?'achievement':/TÊTE|LEADER/.test(title)?'ranking':/VICTOIRE|PODIUM|RÉGULARITÉ|RÉSULTAT|CAP/.test(title)?'milestone':'other';
+        const theme=/REVANCHE|FACE-À-FACE/.test(title)?'rivalry':/RECORD|SÉRIE/.test(title)?'record':/TÊTE|LEADER|CHAMPIONNAT|DÉPASSER|DUEL AU CLASSEMENT/.test(title)?'ranking':/VICTOIRE|PODIUM|RÉGULARITÉ|RÉSULTAT|CAP/.test(title)?'milestone':'other';
         const priority=/REVANCHE/.test(title)?110:/SÉRIE/.test(title)?115:/DÉPASSER/.test(title)?100:/RECORD DE LA SAISON/.test(title)?85:/DÉBLOQUER/.test(title)?80:/TÊTE/.test(title)?70:/FACE-À-FACE/.test(title)?80:/RECORD|CAP|RÉGULARITÉ|LEADER/.test(title)?75:/PREMIÈRE VICTOIRE/.test(title)?65:/DÉFI DE LA TABLE|OUVRIR LE COMPTEUR|TENIR LA DISTANCE|VISER LE DUEL|NOUVEAU RENDEZ-VOUS/.test(title)?25:55;
         candidates.push({name,icon,title,text,theme,priority,...details});
       };
       let streak=0;for(let i=winners.length-1;i>=0&&winners[i]===name;i--)streak++;
-      if(streak>0)offer('🔥','LA SÉRIE À PROLONGER',`Après ${streak} victoire${streak>1?'s':''} consécutive${streak>1?'s':''}, une victoire ce soir porterait sa série à ${streak+1}${streak+1>bestStreak?' : un nouveau record cette saison.':streak+1===bestStreak?' : le record de la saison serait égalé.':'.'}`);
+      if(streak>0&&streak+1>bestStreak)offer('🔥','LA SÉRIE À PROLONGER',`Après ${streak} victoire${streak>1?'s':''} consécutive${streak>1?'s':''}, une victoire ce soir porterait sa série à ${streak+1}${streak+1>bestStreak?' : un nouveau record cette saison.':streak+1===bestStreak?' : le record de la saison serait égalé.':'.'}`);
       if(leader&&leader.name!==name&&n>=6){
-        const others=ranked.filter(p=>p.name!==name);
-        const possibilities=[];
-        for(let place=1;place<=Math.min(3,n);place++){
-          const total=Number(stat.points||0)+pointsFor(place,n);
-          const rivals=others.map(p=>({name:p.name,total:Number(p.points||0)+(selected.includes(p.name)?pointsFor(place===n?n-1:n,n):0)}));
-          if(rivals.every(p=>total>p.total))possibilities.push(place);
-        }
-        if(possibilities.length){const place=Math.max(...possibilities);offer('👑','LA TÊTE EN VUE',`${place===3?'Un podium':place===2?'Une place dans les deux premiers':'Une victoire'} peut lui permettre de prendre la tête du championnat, selon les résultats des autres joueurs.`);}
+        const possibilities=Array.from({length:Math.min(3,n)},(_,i)=>i+1).filter(place=>bestChampionshipRank(name,place)===1);
+        if(possibilities.length){const place=Math.max(...possibilities);offer('👑','LA TÊTE EN VUE',`${name} peut prendre la tête du championnat ${place===3?'en finissant sur le podium':place===2?'en finissant dans les deux premiers':'en gagnant ce soir'}, selon les résultats des autres joueurs.`,{goal:{type:'leader'},priority:105});}
+      }
+      if(n>=6&&ranked.length>=3&&(!byName.has(name)||Number(stat.rank||ranked.findIndex(p=>p.name===name)+1)>3)){
+        const possibilities=Array.from({length:Math.min(3,n)},(_,i)=>i+1).filter(place=>bestChampionshipRank(name,place)<=3);
+        if(possibilities.length){const place=Math.max(...possibilities);offer('🥉','LE PODIUM DU CHAMPIONNAT',`${name} peut entrer dans les trois premiers du championnat ${place===3?'en finissant sur le podium ce soir':place===2?'en finissant dans les deux premiers ce soir':'en gagnant ce soir'}, selon les résultats de ses concurrents.`,{goal:{type:'championshipPodium'},priority:100});}
       }
       if(n>=6){
         const myPoints=Number(stat.points||0),winPoints=pointsFor(1,n);
@@ -27433,13 +27455,10 @@ function connectionDeviceLabel(){
       }
       const seasonKillRecord=Math.max(0,...rows.map(r=>Number(r.kills)||0));
       if(seasonKillRecord>0&&seasonKillRecord+1<=n-1)offer('💥','LE RECORD DE LA SAISON',`Le record de kills sur une partie cette saison est de ${seasonKillRecord}. Avec ${seasonKillRecord+1} éliminations ce soir, il établirait un nouveau record.`);
-      const previousKillBest=Math.max(0,...mine.map(r=>Number(r.kills)||0));
-      const unlock=previousKillBest<1?{count:1,label:'Premier sang'}:previousKillBest<3?{count:3,label:'Serial Killer'}:previousKillBest<5?{count:5,label:'Massacre'}:null;
-      if(unlock&&unlock.count<=n-1)offer('🏅','UN ACCOMPLISSEMENT À DÉBLOQUER',`${unlock.count} kill${unlock.count>1?'s':''} dans cette partie lui permettrai${unlock.count>1?'ent':'t'} de débloquer « ${unlock.label} », encore inédit pour lui cette saison.`);
       const latest=mine[mine.length-1];
       if(latest?.killer&&latest.killer!==name&&selected.includes(latest.killer)){
         const rival=latest.killer,won=rows.filter(r=>r.player===rival&&r.killer===name).length,against=rows.filter(r=>r.player===name&&r.killer===rival).length;
-        offer('⚔️','L’HEURE DE LA REVANCHE',`${rival} l’a éliminé lors de sa dernière participation. En l’éliminant lui-même ce soir, ${name} améliorerait son bilan face à ${rival} de ${won}–${against} à ${won+1}–${against} (éliminations réalisées–subies cette saison).`,{rival,duelBaseline:{won,against}});
+        offer('⚔️','L’HEURE DE LA REVANCHE',`${name} peut éliminer ${rival}, son bourreau lors de sa dernière participation. Une revanche ferait passer leur bilan de ${won}–${against} à ${won+1}–${against} (éliminations réalisées–subies cette saison).`,{rival,duelBaseline:{won,against}});
       }
       const kills=Number(stat.kills||0);
       if(kills>0&&(kills+1)%10===0)offer('🎯','UN CAP À FRANCHIR',`Avec ${kills} éliminations cette saison, un kill lui permettrait d’atteindre le cap des ${kills+1}.`);
@@ -27450,11 +27469,11 @@ function connectionDeviceLabel(){
       const best=places.length?Math.min(...places):0;
       if(mine.length&&podiums===0)offer('🏅','LE PREMIER PODIUM',`Après ${mine.length} participations sans podium cette saison, une place dans les trois premiers ouvrirait son palmarès.`);
       if(latest&&Number(latest.place)>1)offer('📈','FAIRE MIEUX QUE LA DERNIÈRE FOIS',`Lors de sa dernière participation, il a terminé ${Number(latest.place)}e. Une meilleure place marquerait une progression ce soir.`);
-      if(best>1)offer('🚀','SON MEILLEUR RÉSULTAT EN VUE',`Son meilleur classement cette saison est une ${best}e place. Finir dans les ${best-1} premiers lui permettrait de battre sa meilleure performance.`);
+      if(best>1)offer('🚀','SON MEILLEUR RÉSULTAT EN VUE',`Son meilleur classement cette saison est une ${best}e place. Finir dans les ${best-1} premiers lui permettrait de battre sa meilleure performance.`,{theme:'record'});
       const bestKills=Math.max(0,...mine.map(r=>Number(r.kills)||0));
-      if(mine.length&&bestKills<n-1)offer('🎯','SON RECORD DE KILLS',`Son record personnel cette saison est de ${bestKills} kill${bestKills>1?'s':''} dans une partie. Avec ${bestKills+1}, il établirait une nouvelle marque.`);
-      const rivals=selected.filter(other=>other!==name).map(other=>({name:other,against:rows.filter(r=>r.player===name&&r.killer===other).length,won:rows.filter(r=>r.player===other&&r.killer===name).length})).filter(r=>r.against+r.won>0).sort((a,b)=>(b.against+b.won)-(a.against+a.won));
-      if(rivals.length){const rival=rivals[0];offer('⚔️','LE FACE-À-FACE',`En éliminant lui-même ${rival.name} ce soir, ${name} améliorerait son bilan face à lui de ${rival.won}–${rival.against} à ${rival.won+1}–${rival.against} (éliminations réalisées–subies cette saison).`,{rival:rival.name,duelBaseline:{won:rival.won,against:rival.against}});}
+      if(mine.length&&bestKills>0&&bestKills<n-1)offer('🎯','SON RECORD DE KILLS',`Son record personnel cette saison est de ${bestKills} kill${bestKills>1?'s':''} dans une partie. Avec ${bestKills+1}, il établirait une nouvelle marque.`);
+      const rivals=selected.filter(other=>other!==name).map(other=>({name:other,against:rows.filter(r=>r.player===name&&r.killer===other).length,won:rows.filter(r=>r.player===other&&r.killer===name).length})).filter(r=>r.against+r.won>0).sort((a,b)=>Number(b.won===0&&b.against>0)-Number(a.won===0&&a.against>0)||(b.against-b.won)-(a.against-a.won)||(b.against+b.won)-(a.against+a.won));
+      if(rivals.length){const rival=rivals[0];offer('⚔️','LE FACE-À-FACE',`${rival.won===0&&rival.against>0?`${name} peut enfin éliminer ${rival.name}, qui l’a déjà éliminé ${rival.against} fois cette saison.`:`${name} peut améliorer son face-à-face avec ${rival.name} en l’éliminant lui-même ce soir.`} Leur bilan passerait de ${rival.won}–${rival.against} à ${rival.won+1}–${rival.against} (éliminations réalisées–subies).`,{rival:rival.name,duelBaseline:{won:rival.won,against:rival.against}});}
       const lastGame=games[games.length-1]||0;
       if(latest&&Number(latest.game)<lastGame)offer('↩️','LE RETOUR À LA TABLE',`Absent de la dernière partie enregistrée, il retrouve la table ce soir et peut relancer sa saison.`);
       if(mine.length&&(mine.length+1)%5===0)offer('🎉','UNE PARTICIPATION SYMBOLIQUE',`Ce soir sera sa ${mine.length+1}e participation cette saison : une occasion de marquer ce cap par un beau résultat.`);
@@ -27466,12 +27485,34 @@ function connectionDeviceLabel(){
       offer('💥','OUVRIR LE COMPTEUR', 'Réaliser la première élimination de la soirée : un objectif à saisir dès le début de la partie.');
       offer('🛡️','TENIR LA DISTANCE', 'Atteindre les trois derniers joueurs en jeu : le défi de ce soir.');
       offer('🏁','VISER LE DUEL FINAL', 'Se hisser parmi les deux derniers joueurs et jouer la victoire en tête-à-tête.');
-      const allowed=candidates.filter(c=>{if(c.title==='LA PREMIÈRE VICTOIRE'&&used.has(c.title))return false;const objective=preGameObjective(c,selected);if(/REVANCHE|FACE-À-FACE|DÉPASSER/.test(c.title)&&(!objective?.rival||!selected.includes(objective.rival)||objective.rival===name))return false;return !objective||objective.type!=='place'||(objective.max>0&&objective.max<n);});
-      const score=c=>c.priority-70*(used.get(c.title)||0)-15*(usedThemes.get(c.theme)||0);
-      const chosen=allowed.reduce((a,b)=>score(b)>score(a)?b:a);
-      used.set(chosen.title,(used.get(chosen.title)||0)+1);
-      usedThemes.set(chosen.theme,(usedThemes.get(chosen.theme)||0)+1);
-      const {theme,priority,...entry}=chosen;return {...entry,objective:preGameObjective(entry,selected),completed:false};
+      const allowed=candidates.filter(c=>{const objective=preGameObjective(c,selected);if(/REVANCHE|FACE-À-FACE|DÉPASSER/.test(c.title)&&(!objective?.rival||!selected.includes(objective.rival)||objective.rival===name))return false;return !objective||objective.type!=='place'||(objective.max>0&&objective.max<n);});
+      return allowed;
+    });
+    // Réserve des joueurs différents aux trois familles lorsqu'elles existent.
+    // Le choix global évite de consommer trop tôt le seul joueur ayant un enjeu
+    // de classement ou une véritable rivalité.
+    const themes=['rivalry','ranking','record'];
+    let states=new Map([[0,{score:0,picks:new Map()}]]);
+    pools.forEach((pool,index)=>{
+      const next=new Map(states);
+      for(const [mask,state] of states)for(let t=0;t<themes.length;t++){
+        if(mask&(1<<t))continue;
+        const choices=pool.filter(c=>c.theme===themes[t]&&c.title!=='LE LEADER À DÉFIER');if(!choices.length)continue;
+        const candidate=choices.reduce((a,b)=>b.priority>a.priority?b:a),key=mask|(1<<t),score=state.score+candidate.priority;
+        if(!next.has(key)||score>next.get(key).score){const picks=new Map(state.picks);picks.set(index,candidate);next.set(key,{score,picks});}
+      }
+      states=next;
+    });
+    const bits=mask=>themes.filter((_,i)=>mask&(1<<i)).length;
+    const [,best]=[...states].reduce((a,b)=>bits(b[0])>bits(a[0])||(bits(b[0])===bits(a[0])&&b[1].score>a[1].score)?b:a);
+    const picks=[...best.picks.values()];
+    for(const theme of themes){
+      if(picks.some(c=>c.theme===theme))continue;
+      const eligible=pools.flat().filter(c=>c.theme===theme&&c.title!=='LE LEADER À DÉFIER');
+      if(eligible.length)picks.push(eligible.reduce((a,b)=>b.priority>a.priority?b:a));
+    }
+    return picks.sort((a,b)=>themes.indexOf(a.theme)-themes.indexOf(b.theme)).map(chosen=>{
+      const {priority,...entry}=chosen;return {...entry,objective:preGameObjective(entry,selected),completed:false};
     });
   }
 
@@ -27726,11 +27767,11 @@ function connectionDeviceLabel(){
   function bptLive3HistoricalPlayerMaxKills(name){
     return Math.max(0,...(Array.isArray(db?.history)?db.history:[]).filter(r=>r.player===name).map(r=>Number(r.kills)||0));
   }
-  function bptLive3QueueAlert(s,icon,title,text,baseAt){
+  function bptLive3QueueAlert(s,icon,title,text,baseAt,details={}){
     const now=Number(baseAt)||Date.now();
     const list=Array.isArray(s.liveAlerts)?s.liveAlerts.slice():[];
     const at=now;
-    list.push({id:'A_'+at+'_'+Math.random().toString(36).slice(2,6),icon,title,text,at,until:at+1200000});
+    list.push({id:'A_'+at+'_'+Math.random().toString(36).slice(2,6),icon,title,text,at,until:at+1200000,...details});
     s.liveAlerts=list;
   }
 
@@ -27801,7 +27842,7 @@ function connectionDeviceLabel(){
       if(killsAfter>=5 && previousPlayerMaxKills<5) unlocked={icon:'☠️',name:'Massacre',text:`${killer} atteint 5 kills dans la partie`};
       else if(killsAfter>=3 && previousPlayerMaxKills<3) unlocked={icon:'🔫',name:'Serial Killer',text:`${killer} atteint 3 kills dans la partie`};
       else if(killsAfter>=1 && previousPlayerMaxKills<1) unlocked={icon:'💥',name:'Premier sang',text:`${killer} réalise son premier kill`};
-      if(unlocked)bptLive3QueueAlert(s,unlocked.icon,'NOUVEL ACCOMPLISSEMENT · '+unlocked.name,unlocked.text,elimNow);
+      if(unlocked)bptLive3QueueAlert(s,unlocked.icon,'NOUVEL ACCOMPLISSEMENT · '+unlocked.name,unlocked.text,elimNow,{category:'achievement',player:killer,actionAt:elimNow});
 
       // Record live : meilleur nombre de kills jamais réalisé sur une partie.
       if(killsAfter>previousGameKillRecord){
@@ -30520,7 +30561,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 
     <div class="bpt-bounty-overlay" data-role="bounty" hidden><section class="bpt-bounty-card" role="dialog" aria-modal="true" aria-label="Révélation du bounty mystère" tabindex="-1"><div class="bpt-bounty-icon">🎯</div><h2 data-role="bountytitle"></h2><div class="bpt-bounty-name" data-role="bountyname"></div><p data-role="bountytext"></p><strong data-role="bountyhunter"></strong><button type="button" data-bounty-close disabled>Continuer</button></section></div>
     <div class="bpt484-head"><div class="bpt484-brand">BPT</div><div class="bpt484-owner" data-role="owner">Organisateur · —</div><div class="bpt484-head-tools"><button class="bpt484-chat" data-do="chat">Chat</button><div class="bpt484-part" data-role="part">Partie n°—</div></div></div>
-    <section class="bpt-pregame" data-role="pregame" hidden aria-label="Les enjeux de la partie"><div class="bpt-pregame-inner"><header><b>BPT</b><span data-role="pregamecount"></span></header><div class="bpt-pregame-heading"><small>CE SOIR, TOUT PEUT CHANGER</small><h2>Les enjeux de la partie</h2><p>Une bonne raison de se dépasser pour chacun.</p></div><div class="bpt-pregame-stories" data-role="pregamestories"></div><footer><span data-role="pregamestatus"></span><div class="bpt-pregame-buttons"><button type="button" data-do="back-pregame">← Retour aux paramètres</button><button type="button" data-do="launch-pregame">▶ Lancer la partie</button></div></footer></div></section>
+    <section class="bpt-pregame" data-role="pregame" hidden aria-label="Les enjeux de la partie"><div class="bpt-pregame-inner"><header><b>BPT</b><span data-role="pregamecount"></span></header><div class="bpt-pregame-heading"><small>CE SOIR, TOUT PEUT CHANGER</small><h2>Les enjeux de la partie</h2><p>Trois enjeux pour la table : une rivalité, un changement de classement et un record à battre, lorsqu’ils sont réalisables.</p></div><div class="bpt-pregame-stories" data-role="pregamestories"></div><footer><span data-role="pregamestatus"></span><div class="bpt-pregame-buttons"><button type="button" data-do="back-pregame">← Retour aux paramètres</button><button type="button" data-do="launch-pregame">▶ Lancer la partie</button></div></footer></div></section>
     <section class="bpt484-takeover-request" data-role="takeoverrequest" role="alert" hidden><strong>DEMANDE DE REPRISE</strong><p data-role="takeoverrequesttext"></p><div><button type="button" data-do="approve-takeover">Accepter</button><button type="button" data-do="reject-takeover">Refuser</button></div></section>
     <div class="bpt484-special-hud" data-role="specialhud"><div class="bpt484-allin-title" data-role="allintitle"></div><div class="bpt484-timebank-player" data-role="timebankplayer"></div><div class="bpt484-timebank-count" data-role="timebankcount"></div><div class="bpt484-timebank-meta" data-role="timebankmeta"></div><button data-timebank-stop>Décision prise</button></div>
     <div class="bpt484-main">
@@ -30552,7 +30593,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     ensureModal();enforceNav();sync();
   }
   function openPersonalBounty(){
-    open('🎯 Bounty de la partie','<div id="bpt484PersonalBounty"></div>');refreshPersonalBounty();
+    open('🎯 Bounty · défi secret de la partie','<div id="bpt484PersonalBounty"></div>');refreshPersonalBounty();
   }
   function refreshPersonalBounty(){
     const host=$('bpt484PersonalBounty');if(!host||!$('bpt484Modal')?.classList.contains('open'))return;
@@ -30567,21 +30608,21 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     if(!contracts.length){add('p','Les bountys personnels sont disponibles pour les parties créées avec cette version.');return;}
     if(!visible.length){add('p','Aucun contrat pour votre identité : '+(identity||'non identifiée')+'. Les contrats sont réservés aux joueurs inscrits.');return;}
     if(!unlocked){
-      add('p','Connectez-vous avec le code secret de votre profil pour consulter votre mission.');return;
+      add('p','Connectez-vous avec le code secret de votre profil pour consulter votre bounty individuel.');return;
     }
-    if(!finished){add('p','Votre mission reste secrète jusqu’à sa réussite.');}
+    if(!finished){add('p','Votre bounty individuel est une mission secrète, révélée à sa réussite.');}
     for(const contract of visible){
       const row=document.createElement('article');row.className='bpt-objective-row';
       const name=document.createElement('strong'),status=document.createElement('span'),text=document.createElement('p');
       name.textContent=(finished?contract.hunter+' · ':'')+(contract.icon||'🎯')+' '+(contract.title||'Cible secrète');
-      status.className='bpt-objective-status';status.textContent=contract.status==='completed'?'✓ Mission accomplie':contract.status==='failed'?'Mission manquée':'Mission en cours';
+      status.className='bpt-objective-status';status.textContent=contract.status==='completed'?'✓ Bounty individuel réussi':contract.status==='failed'?'Bounty individuel manqué':'Bounty individuel en cours';
       text.textContent=contract.text||'Éliminer '+contract.target+' vous-même.';
       row.append(name,status,text);host.append(row);
     }
-    if(!finished)add('p','Une mission individuelle par joueur. Sa réussite est révélée à la table. Les points du championnat restent inchangés.');
+    if(!finished)add('p','Un bounty individuel tiré au sort par joueur. Sa réussite est révélée à la table. Les points du championnat restent inchangés.');
   }
   function openLiveObjectives(){
-    open('🎯 Les enjeux de la partie','<div id="bpt484ObjectivesList"></div>');refreshLiveObjectives();
+    open('🎯 Les enjeux de la partie','<p>Des objectifs liés à cette table et à votre histoire : classement, rivalités et records. Les badges du palmarès se débloquent séparément.</p><div id="bpt484ObjectivesList"></div>');refreshLiveObjectives();
   }
   function refreshLiveObjectives(){
     const host=$('bpt484ObjectivesList');if(!host||!$('bpt484Modal')?.classList.contains('open'))return;
@@ -30850,29 +30891,40 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     box.hidden=!(st.preGamePending&&!st.startedAt);
     if(box.hidden)return;
     const entries=Array.isArray(st.preGameBriefing)?st.preGameBriefing:[];
-    box.querySelector('[data-role="pregamecount"]').textContent='AVANT-PARTIE · '+entries.length+' JOUEURS';
+    box.querySelector('[data-role="pregamecount"]').textContent='AVANT-PARTIE · '+(st.players||[]).length+' JOUEURS · '+entries.length+' ENJEU'+(entries.length>1?'X':'');
     box.querySelector('[data-role="pregamestatus"]').textContent=owner?'Le chrono attend le lancement.':'En attente du lancement par l’organisateur.';
     box.querySelector('[data-do="launch-pregame"]').hidden=!owner;
     box.querySelector('[data-do="back-pregame"]').hidden=!owner;
     const key=JSON.stringify(entries);
     if(box.dataset.entries!==key){
       box.dataset.entries=key;const host=box.querySelector('[data-role="pregamestories"]');host.replaceChildren();
+      if(!entries.length)host.textContent='Pas encore assez d’historique ou d’enjeux réalisables pour cette table. La partie peut être lancée.';
       for(const entry of entries){
         const card=document.createElement('article'),icon=document.createElement('span'),copy=document.createElement('div'),name=document.createElement('h3'),title=document.createElement('small'),text=document.createElement('p');
-        icon.className='bpt-pregame-icon';icon.textContent=entry.icon||'🎯';name.textContent=entry.name;title.textContent=entry.title;text.textContent=entry.text;
+        icon.className='bpt-pregame-icon';icon.textContent=entry.icon||'🎯';name.textContent=entry.name;title.textContent=({rivalry:'RIVALITÉ',ranking:'CLASSEMENT',record:'RECORD À BATTRE'}[entry.theme]||entry.title)+(entry.theme?' · '+entry.title:'');text.textContent=entry.text;
         copy.append(name,title,text);card.append(icon,copy);host.append(card);
       }
     }
   }
   function liveCelebrations(st){
-    const list=(Array.isArray(st.liveAlerts)?st.liveAlerts:[]).filter(a=>!/^BOUNTY\b/i.test(a.title||'')).map(a=>{
+    const list=(Array.isArray(st.liveAlerts)?st.liveAlerts:[]).filter(a=>a.category==='individual'||/^BOUNTY INDIVIDUEL/.test(a.title||'')||!/^BOUNTY\b/i.test(a.title||'')).map(a=>{
       const title=String(a.title||'');
-      const kind=title.startsWith('ENJEU RÉALISÉ')?'objective':/MISSION INDIVIDUELLE|CONTRAT REMPLI/.test(title)?'individual':title.includes('RECORD')?'record':'achievement';
-      return {...a,kind,name:title.includes(' · ')?title.split(' · ').slice(1).join(' · '):'',label:kind==='objective'?'ENJEU DE PARTIE RÉALISÉ':kind==='individual'?'MISSION INDIVIDUELLE ACCOMPLIE':title};
+      const kind=a.category||(title.startsWith('ENJEU RÉALISÉ')?'objective':/BOUNTY INDIVIDUEL|MISSION INDIVIDUELLE|CONTRAT REMPLI/.test(title)?'individual':title.includes('RECORD')?'record':'achievement');
+      return {...a,kind,name:a.player||(title.includes(' · ')?title.split(' · ').slice(1).join(' · '):''),label:kind==='objective'?'ENJEU DE PARTIE RÉALISÉ':kind==='individual'?'BOUNTY INDIVIDUEL RÉUSSI':kind==='achievement'?'ACCOMPLISSEMENT DÉBLOQUÉ':title};
     });
+    // Une action peut avoir deux effets distincts : regrouper leur présentation,
+    // tout en gardant les deux événements et leurs catégories dans le bilan.
+    const merged=new Set();
+    for(const objective of list.filter(e=>e.kind==='objective'&&e.actionAt&&e.player)){
+      const achievements=list.filter(e=>e.kind==='achievement'&&e.player===objective.player&&e.actionAt===objective.actionAt&&!merged.has(e.id));
+      if(!achievements.length)continue;
+      objective.relatedIds=achievements.map(e=>e.id);
+      objective.extra=achievements.map(e=>'🏅 ACCOMPLISSEMENT DÉBLOQUÉ · '+e.title.split(' · ').slice(1).join(' · ')+' — '+e.text).join('\n');
+      achievements.forEach(e=>merged.add(e.id));
+    }
     const ev=st.mysteryBountyRevealed?st.mysteryBountyEvent:null;
-    if(ev)list.push({id:ev.id,at:ev.at,kind:'common',icon:'🎯',label:ev.kind==='winner'?'LE BOUNTY A SURVÉCU !':'BOUNTY COMMUN REMPORTÉ !',name:ev.player||'',text:ev.kind==='winner'?'était la cible secrète et remporte la partie.':'était la cible secrète de la table.',extra:ev.kind==='winner'?'':(ev.hunter||'')+' remporte le bounty'});
-    return list.sort((a,b)=>Number(a.at)-Number(b.at)||String(a.id).localeCompare(String(b.id)));
+    if(ev)list.push({id:ev.id,at:ev.at,kind:'common',icon:'🎯',label:ev.kind==='winner'?'BOUNTY COMMUN · LA CIBLE A SURVÉCU !':'BOUNTY COMMUN REMPORTÉ !',name:ev.player||'',text:ev.kind==='winner'?'était la cible secrète et remporte la partie.':'était la cible secrète de la table.',extra:ev.kind==='winner'?'':(ev.hunter||'')+' remporte le bounty'});
+    return list.filter(e=>!merged.has(e.id)).sort((a,b)=>Number(a.at)-Number(b.at)||String(a.id).localeCompare(String(b.id)));
   }
   window.bptGetLiveCelebrations=liveCelebrations;
   function renderBounty(root,st){
@@ -30892,7 +30944,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     const button=box.querySelector('[data-bounty-close]');
     const remain=Math.max(0,Math.ceil((8000-(Date.now()-bountySeenAt.get(ev.id)))/1000));
     button.disabled=remain>0;button.textContent=remain?'Continuer ('+remain+' s)':pending.length>1?'Continuer · '+(pending.length-1)+' à suivre':'Continuer';
-    button.onclick=()=>{if(button.disabled)return;bountyDismissed.add(ev.id);try{sessionStorage.setItem('bpt:bounty:'+ev.id,'1')}catch(_){}sync()};
+    button.onclick=()=>{if(button.disabled)return;for(const id of [ev.id,...(ev.relatedIds||[])]){bountyDismissed.add(id);try{sessionStorage.setItem('bpt:bounty:'+id,'1')}catch(_){}}sync()};
     if(first)card.focus({preventScroll:true});
   }
   function sync(){
@@ -30902,7 +30954,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     const total=players.length*Number(st.startStack||0),avg=alive?total/alive:0,avgBB=cur.bb?Math.round(avg/cur.bb*10)/10:0;
     const x=api();
     const ownerRole=!!x?.isOwner?.();
-    if(ownerRole&&st.startedAt&&Array.isArray(st.preGameBriefing)&&st.preGameBriefing.some(e=>!Object.prototype.hasOwnProperty.call(e,'objective')||(e.objective?.type==='place'&&e.objective.max>=(st.players||[]).length)||(/REVANCHE|FACE-À-FACE|DÉPASSER/.test(e.title||'')&&(!e.objective?.rival||!(st.players||[]).some(p=>p.name===e.objective.rival))))&&!window.__bptRefreshingObjectives){window.__bptRefreshingObjectives=true;x.refreshObjectives?.().finally(()=>{window.__bptRefreshingObjectives=false})}
+    if(ownerRole&&st.startedAt&&Array.isArray(st.preGameBriefing)&&st.preGameBriefing.some(e=>e.title==='UN ACCOMPLISSEMENT À DÉBLOQUER'||!Object.prototype.hasOwnProperty.call(e,'objective')||(e.objective?.type==='place'&&e.objective.max>=(st.players||[]).length)||(/REVANCHE|FACE-À-FACE|DÉPASSER/.test(e.title||'')&&(!e.objective?.rival||!(st.players||[]).some(p=>p.name===e.objective.rival))))&&!window.__bptRefreshingObjectives){window.__bptRefreshingObjectives=true;x.refreshObjectives?.().finally(()=>{window.__bptRefreshingObjectives=false})}
     const myId=String(x?.deviceId?.()||'');
     const takeoverReq=st?.takeoverRequest||null;
     const myTakeover=!!(takeoverReq?.requesterId && String(takeoverReq.requesterId)===myId);
