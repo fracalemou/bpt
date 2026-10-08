@@ -14143,6 +14143,18 @@ body.bpt-mobile-device .bpt-mobile-top-menu button{
 @keyframes bptBountyReveal{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){.bpt-bounty-card{animation:none}}
 </style>
+<style id="bpt-live-ranking-style">
+.bpt484-actions .bpt484-live-ranking{background:#287cac;color:#fff;grid-column:1/-1}
+.bpt484-live-ranking[hidden]{display:none!important}
+.bpt-ranking-subtitle{color:#2ac9c2;font-size:12px;font-weight:850;letter-spacing:.6px}
+.bpt-ranking-table{width:100%;table-layout:fixed;border-collapse:collapse;margin:16px 0;color:#f5f8f7}
+.bpt-ranking-table th,.bpt-ranking-table td{padding:12px 8px;border:1px solid #28584f;text-align:center;vertical-align:middle;overflow-wrap:anywhere}
+.bpt-ranking-table th:first-child,.bpt-ranking-table td:first-child{width:42%;text-align:left}
+.bpt-ranking-table th{color:#a6bbb6;background:#0d352f;font-size:13px}.bpt-ranking-table td{font-size:16px}.bpt-ranking-table td:first-child b{display:block}
+.bpt-ranking-table small{display:block;color:#a6bbb6;font-size:11px;line-height:1.4;margin-top:4px}
+.bpt-ranking-table .is-ahead{color:#57e0b5}.bpt-ranking-table .is-behind{color:#ef7777}.bpt-ranking-note{color:#a6bbb6;font-size:12px;line-height:1.45}
+@media(max-width:480px){.bpt-ranking-table th,.bpt-ranking-table td{padding:10px 5px}.bpt-ranking-table td{font-size:14px}}
+</style>
 <style id="bpt-final-duel-style">
 .bpt-bounty-overlay[data-kind="duel"]{--celebration-color:#2ac9c2;background:rgba(6,21,19,.97)}
 .bpt-bounty-overlay[data-kind="duel"] .bpt-bounty-card{width:min(1100px,100%);background:#0a2924;border:1px solid #2ac9c2;box-shadow:none;border-radius:18px;padding:clamp(14px,3vw,36px);font-family:Arial,Helvetica,sans-serif}
@@ -14231,7 +14243,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.54";
+const BPT_APP_VERSION="5.55";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14383,7 +14395,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.54</div>
+<div class="app-version" id="headerAppVersion">BPT v5.55</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15502,7 +15514,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.54</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.55</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -27421,7 +27433,7 @@ function connectionDeviceLabel(){
     }
     const players=Array.isArray(st.players)?st.players:[],remaining=players.filter(p=>p.status==='in'||p.status==='winner').length;
     const finished=!!st.finishedAt&&players.every(p=>Number(p.place)>0);
-    if(!Array.isArray(st.preGameRanking)&&!st.finishedAt)st.preGameRanking=ranking().map(p=>({name:p.name,points:Number(p.points)||0}));
+    if(!Array.isArray(st.preGameRanking)&&!st.finishedAt)st.preGameRanking=ranking().map(p=>({name:p.name,points:Number(p.points)||0,gamesCount:Number(p.gamesCount)||0}));
     const base=Array.isArray(st.preGameRanking)?st.preGameRanking:[];
     const totals=new Map(base.map(p=>[p.name,Number(p.points)||0]));
     if(finished)for(const p of players)totals.set(p.name,(totals.get(p.name)||0)+pointsFor(Number(p.place),players.length));
@@ -27653,7 +27665,7 @@ function connectionDeviceLabel(){
         mysteryBountyName:bountyMode==="common"?selected[Math.floor(Math.random()*selected.length)]:"",
         mysteryBountyRevealed:false,mysteryBountyHunter:"",mysteryBountyEvent:null,liveAlerts:[],
         personalBounties:bountyMode==="individual"?drawPersonalBounties(selected):[],
-        preGameBriefing:buildPreGameBriefing(selected),preGameRanking:ranking().map(p=>({name:p.name,points:Number(p.points)||0})),preGamePending:true,
+        preGameBriefing:buildPreGameBriefing(selected),preGameRanking:ranking().map(p=>({name:p.name,points:Number(p.points)||0,gamesCount:Number(p.gamesCount)||0})),preGamePending:true,
         viewers:{},takeoverRequest:null,chat:[],paceAdaptive:$3("live3StructureMode")?.value==="adaptive"
       };
       await r.transaction(server=>{
@@ -30547,7 +30559,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
 .bpt-objective-row{padding:14px 0;border-bottom:1px solid #28584f}.bpt-objective-row strong{display:block;font-size:16px}.bpt-objective-row p{font-size:14px;line-height:1.5;margin:8px 0}.bpt-objective-status{display:inline-block;margin-top:8px;padding:4px 8px;border-radius:7px;background:#173e35;color:#bed7cd;font-size:12px;font-weight:800}.bpt-objective-row.is-completed .bpt-objective-status{background:#26c6ba;color:#06201d}
 .bpt484-takeover{display:none;background:#e0ad38;color:#171007}
 .bpt484-live.is-spectator .bpt484-quickbar{display:none!important}
-.bpt484-live.is-spectator .bpt484-actions button:not(.bpt484-takeover):not(.bpt484-full):not(.bpt484-enjeux):not(.bpt484-personal){display:none!important}
+.bpt484-live.is-spectator .bpt484-actions button:not(.bpt484-takeover):not(.bpt484-full):not(.bpt484-enjeux):not(.bpt484-personal):not(.bpt484-live-ranking){display:none!important}
 .bpt484-live.is-spectator .bpt484-takeover{display:block}
 
 .bpt484-live.is-spectator .bpt484-takeover.is-force{background:#dc5a57;color:#fff}
@@ -30703,12 +30715,12 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
       </div>
     </div>
     <div class="bpt484-quickbar"><button data-quick="prev">◀ Niveau</button><button data-quick="minus">−1 min</button><button data-quick="plus">+1 min</button><button data-quick="next">Niveau ▶</button></div>
-    <div class="bpt484-actions"><button class="bpt484-enjeux" data-do="enjeux">🎯 Enjeux</button><button class="bpt484-personal" data-do="personal-bounty">🎯 Bounty</button><button class="bpt484-pause" data-do="pause">Pause</button><button class="bpt484-out" data-do="out">Sortir un joueur</button><button class="bpt484-timerbtn" data-do="timer">⏱ Timer</button><button class="bpt484-takeover" data-do="takeover">Demander la reprise</button><button class="bpt484-odds" data-do="odds">Calcul de côtes</button><button class="bpt484-full" data-do="full">${fs?'Quitter le plein écran':'Plein écran'}</button><button class="bpt484-end" data-do="end">Terminer le Live</button></div>
+    <div class="bpt484-actions">${fs?'':'<button class="bpt484-live-ranking" data-do="live-ranking">📊 Classement en direct</button>'}<button class="bpt484-enjeux" data-do="enjeux">🎯 Enjeux</button><button class="bpt484-personal" data-do="personal-bounty">🎯 Bounty</button><button class="bpt484-pause" data-do="pause">Pause</button><button class="bpt484-out" data-do="out">Sortir un joueur</button><button class="bpt484-timerbtn" data-do="timer">⏱ Timer</button><button class="bpt484-takeover" data-do="takeover">Demander la reprise</button><button class="bpt484-odds" data-do="odds">Calcul de côtes</button><button class="bpt484-full" data-do="full">${fs?'Quitter le plein écran':'Plein écran'}</button><button class="bpt484-end" data-do="end">Terminer le Live</button></div>
   </div>`}
   function install(){
     const shell=document.querySelector('#live3Game .b466-shell');if(shell&&!shell.querySelector('.bpt484-live'))shell.insertAdjacentHTML('afterbegin',makeMarkup(false));
     const fsShell=document.querySelector('#live3Fullscreen .b466-fs-shell');if(fsShell&&!fsShell.querySelector('.bpt484-live'))fsShell.insertAdjacentHTML('afterbegin',makeMarkup(true));
-    document.querySelectorAll('.bpt484-live').forEach(root=>{if(root.dataset.bound)return;root.dataset.bound='1';root.addEventListener('click',e=>{if(e.target.closest('[data-timebank-stop]')){api()?.stopReflectionTimer?.();return;}const a=e.target.closest('[data-action]');if(a)info(a.dataset.action);const q=e.target.closest('[data-quick]');if(q){actionDirect(q.dataset.quick);return;}const b=e.target.closest('[data-do]');if(b){if(root.classList.contains('is-spectator')&&!['takeover','full','chat','enjeux','personal-bounty'].includes(b.dataset.do))return;doit(b.dataset.do,root.dataset.fs==='1')}})});
+    document.querySelectorAll('.bpt484-live').forEach(root=>{if(root.dataset.bound)return;root.dataset.bound='1';root.addEventListener('click',e=>{if(e.target.closest('[data-timebank-stop]')){api()?.stopReflectionTimer?.();return;}const a=e.target.closest('[data-action]');if(a)info(a.dataset.action);const q=e.target.closest('[data-quick]');if(q){actionDirect(q.dataset.quick);return;}const b=e.target.closest('[data-do]');if(b){if(root.classList.contains('is-spectator')&&!['takeover','full','chat','enjeux','personal-bounty','live-ranking'].includes(b.dataset.do))return;doit(b.dataset.do,root.dataset.fs==='1')}})});
     ensureModal();enforceNav();sync();
   }
   function openPersonalBounty(){
@@ -30740,6 +30752,90 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     }
     if(!finished)add('p','Un bounty individuel tiré au sort par joueur. Sa réussite est révélée à la table. Les points du championnat restent inchangés.');
   }
+  function calculateLiveRanking(st,history,award){
+    const players=Array.isArray(st?.players)?st.players:[],n=players.length;
+    if(!n)return null;
+    const rows=(history||[]).filter(r=>!(Number(r.gameStartedAt)>0&&Number(r.gameStartedAt)===Number(st.startedAt)));
+    const historical=new Map();
+    for(const row of rows){
+      if(!historical.has(row.player))historical.set(row.player,{name:row.player,points:0,games:new Set()});
+      const p=historical.get(row.player);p.points+=Number(row.points)||0;p.games.add(row.game);
+    }
+    const source=Array.isArray(st.preGameRanking)?st.preGameRanking:[...historical.values()].map(p=>({name:p.name,points:p.points,gamesCount:p.games.size}));
+    const base=new Map(source.map(p=>[p.name,{name:p.name,points:Number(p.points)||0,games:Number.isFinite(Number(p.gamesCount))?Number(p.gamesCount):historical.get(p.name)?.games.size||0}]));
+    for(const p of players)if(!base.has(p.name))base.set(p.name,{name:p.name,points:0,games:0});
+    const compare=(a,b)=>b.points-a.points||(b.games?b.points/b.games:0)-(a.games?a.points/a.games:0)||a.name.localeCompare(b.name,'fr');
+    const before=new Map([...base.values()].filter(p=>p.games>0).sort(compare).map((p,i)=>[p.name,i+1]));
+    const live=new Map(players.map(p=>[p.name,p])),active=players.filter(p=>p.status==='in'&&!Number(p.place)),m=active.length;
+    const fixed=players.filter(p=>Number(p.place)>0),fixedPlaces=fixed.map(p=>Number(p.place));
+    if(fixed.length+active.length!==n||new Set(fixedPlaces).size!==fixedPlaces.length||fixedPlaces.some(p=>!Number.isInteger(p)||p<=m||p>n))return null;
+    const awards=Array.from({length:n},(_,i)=>Number(award(i+1,n))||0);
+    const outcome=(name,place)=>{const p=base.get(name);return {name,points:p.points+(place?awards[place-1]:0),games:p.games+(live.has(name)?1:0)}};
+    const slots=Array.from({length:m},(_,i)=>i+1);
+    // Une place finale ne peut appartenir qu'à un joueur : les appariements
+    // calculent les bornes exactes sans énumérer toutes les permutations.
+    function maxMatching(others,remaining,target,wantAbove){
+      const assigned=new Map();
+      function visit(name,seen){
+        for(const slot of remaining){
+          if(seen.has(slot)||(compare(outcome(name,slot),target)<0)!==wantAbove)continue;
+          seen.add(slot);
+          if(!assigned.has(slot)||visit(assigned.get(slot),seen)){assigned.set(slot,name);return true;}
+        }
+        return false;
+      }
+      let count=0;for(const name of others)if(visit(name,new Set()))count++;
+      return count;
+    }
+    const projections=[...base.keys()].map(name=>{
+      const player=live.get(name),inPlay=active.some(p=>p.name===name),possible=inPlay?slots:[Number(player?.place)||0];
+      let best=Infinity,worst=0,minPoints=Infinity,maxPoints=-Infinity;
+      for(const place of possible){
+        const target=outcome(name,place),others=active.filter(p=>p.name!==name).map(p=>p.name),remaining=inPlay?slots.filter(p=>p!==place):slots;
+        const fixedAbove=[...base.keys()].filter(other=>other!==name&&!others.includes(other)&&compare(outcome(other,Number(live.get(other)?.place)||0),target)<0).length;
+        best=Math.min(best,1+fixedAbove+others.length-maxMatching(others,remaining,target,false));
+        worst=Math.max(worst,1+fixedAbove+maxMatching(others,remaining,target,true));
+        minPoints=Math.min(minPoints,target.points);maxPoints=Math.max(maxPoints,target.points);
+      }
+      return {name,before:before.get(name)||null,best,worst,minPoints,maxPoints,status:!player?'Absent':inPlay?'En jeu':player.status==='winner'?'Vainqueur':'Éliminé',fixedPoints:!inPlay};
+    });
+    projections.sort((a,b)=>(a.before||Infinity)-(b.before||Infinity)||a.name.localeCompare(b.name,'fr'));
+    return {rows:projections,scoreless:awards.every(p=>p===0),finished:!!st.finishedAt};
+  }
+  function openLiveRanking(){
+    open('Classement en direct','<div id="bpt484LiveRanking"></div><div class="bpt484-btnrow"><button id="bpt484RankingBack">Retour au live</button></div>');
+    $('bpt484RankingBack').onclick=closeModal;refreshLiveRanking();
+  }
+  function refreshLiveRanking(){
+    const host=$('bpt484LiveRanking');if(!host||!$('bpt484Modal')?.classList.contains('open'))return;
+    const st=state();if(!st?.startedAt){host.textContent='Le classement en direct sera disponible au lancement de la partie.';return;}
+    const key=JSON.stringify([st.startedAt,st.finishedAt,st.preGameRanking,(st.players||[]).map(p=>[p.name,p.status,p.place]),db.history.map(r=>[r.player,r.game,r.points,r.gameStartedAt]),bptGetPointsTable()]);
+    if(host.dataset.content===key)return;host.dataset.content=key;host.replaceChildren();
+    const data=calculateLiveRanking(st,db.history,pointsFor);
+    if(!data){host.textContent='Les positions seront affichées dès que les places des joueurs auront été synchronisées.';return;}
+    const add=(parent,tag,text,className)=>{const e=document.createElement(tag);if(className)e.className=className;e.textContent=text;parent.append(e);return e};
+    const ordinal=n=>n===1?'1er':n+'e';
+    add(host,'p',data.finished?'CHAMPIONNAT · CLASSEMENT FINAL':'CHAMPIONNAT · POSITIONS POSSIBLES','bpt-ranking-subtitle');
+    const table=document.createElement('table');table.className='bpt-ranking-table';host.append(table);
+    const thead=document.createElement('thead'),head=document.createElement('tr');table.append(thead);thead.append(head);
+    for(const label of ['Joueur','Avant',data.finished?'Après':'Possible']){const th=add(head,'th',label);th.scope='col';}
+    const tbody=document.createElement('tbody');table.append(tbody);
+    for(const p of data.rows){
+      const row=document.createElement('tr');tbody.append(row);
+      const name=add(row,'td','');add(name,'b',p.name);
+      const status=p.status+(p.status==='Éliminé'?' · points fixés':'');add(name,'small',status,p.status==='En jeu'?'is-ahead':'');
+      add(name,'small',(p.minPoints===p.maxPoints?fmt(p.minPoints):fmt(p.minPoints)+'–'+fmt(p.maxPoints))+' pts');
+      add(row,'td',p.before?ordinal(p.before):'—');
+      const projected=add(row,'td','');add(projected,'b',p.best===p.worst?ordinal(p.best):ordinal(p.best)+'–'+ordinal(p.worst));
+      if(p.before){
+        const up=Math.max(0,p.before-p.best),down=Math.max(0,p.worst-p.before);
+        if(up)add(projected,'small','↑ '+(p.best===p.worst?'':'jusqu’à ')+up+' place'+(up>1?'s':''),'is-ahead');
+        if(down)add(projected,'small','↓ '+(p.best===p.worst?'':'jusqu’à ')+down+' place'+(down>1?'s':''),'is-behind');
+      }
+    }
+    if(data.scoreless)add(host,'p','Cette partie n’attribue aucun point au championnat.','bpt-ranking-note');
+    add(host,'p',data.finished?'Les résultats de la partie sont inclus une seule fois.':'Les points des joueurs éliminés sont fixés. Leur position dépend encore des résultats des joueurs en jeu.','bpt-ranking-note');
+  }
   function openLiveObjectives(){
     open('🎯 Les enjeux de la partie','<p>Des objectifs liés à cette table et à votre histoire : classement, rivalités et records. Les badges du palmarès se débloquent séparément.</p><div id="bpt484ObjectivesList"></div>');refreshLiveObjectives();
   }
@@ -30768,6 +30864,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
       else if(a==='out')x?.openElim?.();
       else if(a==='timer')openReflectionTimerPicker();
       else if(a==='enjeux')openLiveObjectives();
+      else if(a==='live-ranking')openLiveRanking();
       else if(a==='personal-bounty')openPersonalBounty();
       else if(a==='chat')$('live3ChatBtn')?.click();
       else if(a==='odds')$('live3OddsBtn')?.click();
@@ -30972,7 +31069,8 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     const fullscreen=root.dataset.fs==='1';
     const minWidth=width<480?112:140;
     const columns=Math.max(1,Math.min(buttons.length,Math.floor((width+gap)/(minWidth+gap))));
-    const rows=Math.max(1,Math.ceil(buttons.length/columns));
+    const featured=buttons.some(b=>b.dataset.do==='live-ranking');
+    const rows=Math.max(1,Math.ceil((buttons.length-(featured?1:0))/columns)+(featured?1:0));
     const rowHeight=compact?44:(width<760?48:56);
     bar.style.gridTemplateColumns='repeat('+columns+',minmax(0,1fr))';
     bar.style.gridTemplateRows='repeat('+rows+','+rowHeight+'px)';
@@ -31143,6 +31241,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
     const owner=`Organisateur · ${st.ownerLabel||'—'}`,structure=st.paceAdaptive===true?'Structure · Adaptatif':'Structure · Classique';
     document.querySelectorAll('.bpt484-live').forEach(r=>{
       r.classList.toggle('is-spectator',!ownerRole);
+      const rankingButton=r.querySelector('[data-do="live-ranking"]');if(rankingButton)rankingButton.hidden=!st.startedAt;
       r.classList.toggle('is-pregame',!!((st.preGamePending||st.bountyModeRevealPending)&&!st.startedAt));
       const requestPanel=r.querySelector('[data-role="takeoverrequest"]');
       if(requestPanel){
@@ -31162,7 +31261,7 @@ body.bpt-modular-layout-on #live3Fullscreen .b466-fs-main,body.bpt-modular-layou
       const chatButton=r.querySelector('.bpt484-head-tools .bpt484-chat');if(chatButton){const unread=Math.max(0,Number(api()?.getUnreadChatCount?.())||0);chatButton.textContent=unread?'Chat ('+unread+')':'Chat';chatButton.setAttribute('aria-label',unread?'Chat · '+unread+' messages non lus':'Chat');}
       renderPreGame(r,st,ownerRole);renderBounty(r,st);const set=(role,val)=>{const e=r.querySelector(`[data-role="${role}"]`);if(e)e.textContent=val};set('owner',owner);set('structure',structure);set('part',`Partie n°${gameNo(st)}`);set('blinds',`${fmt(cur.sb)} / ${fmt(cur.bb)}`);const curDur=Math.max(1,Math.round(Number(st.levels?.[idx]?.durationSec||0)/60)||Math.round(Number(st.levels?.[idx]?.durationMin||0))||15);set('blinddur',`· ${curDur} min`);set('timer',$('live3Timer')?.textContent||'00:00');set('players',String(alive));set('avgchips',fmt(avg));set('avgbb',`${avgBB} BB`);set('next',`${fmt(nx.sb)} / ${fmt(nx.bb)}`);set('elapsed',$('live3Elapsed')?.textContent||'0 min');set('finish',$('live3EstimatedFinish')?.textContent||'—');set('delta',$('live3FinishDelta')?.textContent||'—');const allIn=false;const activeTimer=st.activeReflectionTimer||null;const timerRemain=activeTimer?Math.max(0,Math.ceil((Number(activeTimer.endsAt||0)-Date.now())/1000)):0;const hud=r.querySelector('[data-role="specialhud"]');if(hud){hud.classList.toggle('show',allIn||!!activeTimer);hud.classList.toggle('is-allin',allIn);set('allintitle',allIn?'🔥 ALL-IN':'');set('timebankplayer',activeTimer?activeTimer.player:'');set('timebankcount',activeTimer?`${String(Math.floor(timerRemain/60)).padStart(2,'0')}:${String(timerRemain%60).padStart(2,'0')}`:'');const used=activeTimer?Number(st.reflectionTimers?.[activeTimer.player]?.used||activeTimer.timerNo||1):0;set('timebankmeta',activeTimer?`Timer ${used}/2 · 2 minutes`:'');const stopBtn=hud.querySelector('[data-timebank-stop]');if(stopBtn)stopBtn.style.display=activeTimer&&ownerRole?'inline-block':'none';}r.querySelector('.bpt484-stage')?.classList.toggle('is-allin',allIn);const allBtn=r.querySelector('[data-do="allin"]');if(allBtn){allBtn.classList.toggle('is-active',allIn);allBtn.textContent=allIn?'Fin du ALL-IN':'🔥 ALL-IN';}const de=r.querySelector('[data-role="delta"]');const dt=de?.textContent||'';const dm=Math.abs(Number((dt.match(/[-+]?\d+/)||['0'])[0])||0);de?.classList.toggle('is-alert',dm>=15);de?.classList.toggle('is-delay',/retard/i.test(dt));de?.classList.toggle('is-ahead',/avance/i.test(dt));set('mode',st.paceAdaptive===true?'Adaptatif':'Classique');set('level',idx<25?`${idx+1} / 25`:String(idx+1));const pb=r.querySelector('[data-do="pause"]');if(pb)pb.textContent=st.running?'Pause':(st.startedAt?'Reprendre':'Démarrer')});
     if(ownerRole && st.activeReflectionTimer && Number(st.activeReflectionTimer.endsAt||0)<=Date.now() && !window.__bptStoppingExpiredTimer){window.__bptStoppingExpiredTimer=true;api()?.stopReflectionTimer?.().finally(()=>{window.__bptStoppingExpiredTimer=false})}
-    refreshPersonalBounty();refreshLiveObjectives();scheduleFitLiveTexts();
+    refreshPersonalBounty();refreshLiveObjectives();refreshLiveRanking();scheduleFitLiveTexts();
     if(!repairTried){const bad=(st.levels||[]).slice(0,Math.min(25,(st.levels||[]).length)).some((lv,i)=>{const b=blindAt(i);return Number(lv?.sb)!==b.sb||Number(lv?.bb)!==b.bb});if(bad&&api()?.isOwner?.()){repairTried=true;api()?.repairStandardBlinds?.().catch(console.warn)}}
   }
   function enforceNav(){
