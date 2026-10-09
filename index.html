@@ -473,6 +473,9 @@ header .app-version{
 /* ===== BPT Club Edition ===== */
 .bpt-header{height:auto;min-height:72px;padding:8px 18px}
 .bpt-brand-wrap{display:flex;align-items:center;gap:12px}
+.brand{display:flex;flex-direction:column;min-width:0}
+.bpt-connected-identity{display:inline-flex;align-items:center;gap:5px;width:max-content;max-width:100%;margin-top:4px;padding:3px 8px;border:1px solid #3f806b;border-radius:999px;background:#173b30;color:#fff;font-size:11px;font-weight:850;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bpt-connected-identity:empty{display:none}
 .bpt-logo{display:flex;align-items:center;gap:8px;font-weight:950;letter-spacing:.06em;font-size:27px}
 .bpt-logo svg{width:48px;height:48px}
 .bpt-logo circle{fill:#0f2118;stroke:#c8952e;stroke-width:3}
@@ -13367,6 +13370,7 @@ nav button[data-view="live"],#live,#liveFullscreenDisplay,#spectatorServerOverla
 </style>
 <style id="bpt-agenda-past-style">.bpt-agenda-day.has-past-event{background:#263246;border-color:#8694aa;color:#dfe7f0}</style>
 <style id="bpt-agenda-form-compact-style">#bptAgendaDetail:has(.bpt-agenda-form){position:fixed;z-index:1200;left:50%;top:50%;transform:translate(-50%,-50%);width:min(680px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;padding:18px;box-shadow:0 24px 90px rgba(0,0,0,.65);border:1px solid #2ac9c2;background:#16251f!important;color:#f4f7f2!important}#bptAgendaDetail:has(.bpt-agenda-form) h2{margin:0 0 10px;font-size:20px;color:#fff}#bptAgendaDetail:has(.bpt-agenda-form) label{color:#d7e4dc!important}#bptAgendaDetail:has(.bpt-agenda-form) input,#bptAgendaDetail:has(.bpt-agenda-form) select{background:#07120f!important;color:#fff!important;border-color:#4a9d86!important}#bptAgendaDetail:has(.bpt-agenda-form) option{background:#16251f;color:#fff}#bptAgendaDetail:has(.bpt-agenda-form) .bpt-btnrow{margin-top:10px!important}@media(max-width:760px){#bptAgendaDetail:has(.bpt-agenda-form){padding:14px}#bptAgendaDetail:has(.bpt-agenda-form) .bpt-agenda-form{grid-template-columns:1fr 1fr;gap:8px}#bptAgendaDetail:has(.bpt-agenda-form) .bpt-agenda-form label:last-child{grid-column:1/-1}}</style>
+<style id="bpt-agenda-upcoming-style">.bpt-agenda-upcoming-modal{position:fixed;inset:0;z-index:1400;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.72)}.bpt-agenda-upcoming-modal[hidden]{display:none}.bpt-agenda-upcoming-card{position:relative;width:min(560px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:24px;border:1px solid #2ac9c2;border-radius:18px;background:#16251f;color:#f4f7f2;box-shadow:0 24px 100px rgba(0,0,0,.65)}.bpt-agenda-upcoming-card h2{margin:4px 0 6px;color:#fff}.bpt-agenda-upcoming-close{position:absolute;top:10px;right:12px;width:34px;height:34px;border:1px solid #547166;border-radius:50%;background:#0b1713;color:#fff;font-size:24px;line-height:1;cursor:pointer}.bpt-agenda-upcoming-item{margin:12px 0;padding:14px;border:1px solid #36594b;border-radius:13px;background:#0d1a15}.bpt-agenda-upcoming-item strong{display:block;font-size:17px;color:#fff}.bpt-agenda-upcoming-item small{display:block;margin:4px 0 10px;color:#c5d4cc}.bpt-agenda-upcoming-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bpt-agenda-upcoming-actions button{min-height:42px;border:1px solid #3f806b;border-radius:9px;background:#173b30;color:#fff;font-weight:900;cursor:pointer}.bpt-agenda-upcoming-actions button.is-active[data-status="present"]{background:#19885f;border-color:#57e0b5}.bpt-agenda-upcoming-actions button.is-active[data-status="absent"]{background:#8b3e45;border-color:#ef7777}</style>
 <script id="bpt-agenda-script">
 (function(){
 if(false){
@@ -13436,6 +13440,8 @@ if(false){
   function render(){renderCalendar();renderList();renderDetail()}
   document.addEventListener('DOMContentLoaded',()=>{const now=new Date();cursor=new Date(now.getFullYear(),now.getMonth(),1);$('bptAgendaPrevMonth')?.addEventListener('click',()=>{cursor.setMonth(cursor.getMonth()-1);renderCalendar()});$('bptAgendaNextMonth')?.addEventListener('click',()=>{cursor.setMonth(cursor.getMonth()+1);renderCalendar()});document.querySelectorAll('[data-view="agenda"],[data-mobile-nav-view="agenda"]').forEach(b=>b.addEventListener('click',()=>load()));load()});
   window.bptAgendaRender=load;
+  window.bptAgendaUpcoming=()=>{const t=today(),end=new Date();end.setDate(end.getDate()+14);const until=`${end.getFullYear()}-${String(end.getMonth()+1).padStart(2,'0')}-${String(end.getDate()).padStart(2,'0')}`;return events.filter(e=>String(e.date||'')>=t&&String(e.date||'')<=until)};
+  window.bptAgendaSetResponse=async(id,status)=>{const e=events.find(x=>x.id===id);if(!e)return;const name=identity();e.responses=e.responses||{};e.responses[name]=status;await save(e)};
 })();
 </script>
 
@@ -13443,6 +13449,34 @@ if(false){
 
 
 
+<script id="bpt-agenda-venue-list-only">
+(function(){
+  function enforceVenueList(){
+    const root=document.getElementById('bptAgendaDetail');
+    const select=document.getElementById('bptAgendaFormLocationSelect');
+    const input=document.getElementById('bptAgendaFormLocation');
+    if(!root||!select||!input)return;
+    [...select.options].filter(o=>o.value==='__free').forEach(o=>o.remove());
+    input.type='hidden'; input.setAttribute('aria-hidden','true'); input.tabIndex=-1;
+    if(!select.value&&select.options.length){select.selectedIndex=0;input.value=`Chez ${select.value}`;}
+  }
+  document.addEventListener('DOMContentLoaded',()=>{
+    const root=document.getElementById('bptAgendaDetail'); if(!root)return;
+    new MutationObserver(enforceVenueList).observe(root,{childList:true,subtree:true}); enforceVenueList();
+  });
+})();
+</script>
+
+<script id="bpt-agenda-upcoming-script">
+(function(){
+  const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]||c));
+  const dateLabel=v=>v?new Date(v+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'}):'Date à définir';
+  const todayKey=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
+  function open(){const modal=$('bptAgendaUpcomingModal'),list=$('bptAgendaUpcomingList'),items=window.bptAgendaUpcoming?.()||[];if(!modal||!list||!items.length||sessionStorage.getItem('bpt_agenda_upcoming_seen')===todayKey())return;list.innerHTML=items.map(e=>{const me=(e.responses||{})[(typeof liveIdentityName==='function'?liveIdentityName():'')]||'',place=String(e.location||'').trim(),venue=place&&/^chez\s/i.test(place)?place:(place?`Chez ${place}`:'Lieu à définir');return `<div class="bpt-agenda-upcoming-item"><strong>${esc(dateLabel(e.date))}</strong><small>🕘 ${esc(e.time||'21:00')} · 📍 ${esc(venue)}</small><div class="bpt-agenda-upcoming-actions"><button data-id="${esc(e.id)}" data-status="present" class="${me==='present'?'is-active':''}">✓ Présent</button><button data-id="${esc(e.id)}" data-status="absent" class="${me==='absent'?'is-active':''}">✕ Absent</button></div></div>`}).join('');modal.hidden=false;modal.setAttribute('aria-hidden','false');list.querySelectorAll('[data-status]').forEach(b=>b.onclick=async()=>{await window.bptAgendaSetResponse?.(b.dataset.id,b.dataset.status);b.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('is-active',x===b))})}
+  function close(){const m=$('bptAgendaUpcomingModal');if(!m)return;m.hidden=true;m.setAttribute('aria-hidden','true');sessionStorage.setItem('bpt_agenda_upcoming_seen',todayKey())}
+  document.addEventListener('DOMContentLoaded',()=>{$('bptAgendaUpcomingClose')?.addEventListener('click',close);window.addEventListener('bpt-agenda-ready',()=>setTimeout(open,120));setTimeout(open,800)});
+})();
+</script>
 <style id="bpt-live3-v318-chat-badge">
 .bpt-live3-chat-button{position:relative}
 .bpt-live3-chat-unread{
@@ -14309,12 +14343,13 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.83";
+const BPT_APP_VERSION="5.87";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
   const headerEl=document.getElementById("headerAppVersion");
   if(headerEl)headerEl.textContent=`BPT v${BPT_APP_VERSION}`;
+  if(typeof renderConnectedIdentityBadge==='function')renderConnectedIdentityBadge();
 }
 window.addEventListener("resize",updateBptSettingsVersion,{passive:true});
 window.addEventListener("orientationchange",updateBptSettingsVersion,{passive:true});
@@ -14459,9 +14494,10 @@ function simplifyRecordTextForMobile(text){
 <div class="brand">
 <b>Championnat de poker</b>
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
+<span aria-live="polite" class="bpt-connected-identity" id="bptConnectedIdentity"></span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.83</div>
+<div class="app-version" id="headerAppVersion">BPT v5.87</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15582,13 +15618,14 @@ function simplifyRecordTextForMobile(text){
 <div class="hero tab-premium-hero bpt-agenda-hero"><div class="home-kicker">BPT · Organisation</div><h1>Agenda</h1><p>Cliquez sur une date pour proposer une soirée.</p></div>
 <div class="bpt-agenda-layout"><section class="card bpt-agenda-calendar-card"><div class="bpt-agenda-month"><button class="btn ghost" id="bptAgendaPrevMonth" type="button">‹</button><strong id="bptAgendaMonthLabel">—</strong><button class="btn ghost" id="bptAgendaNextMonth" type="button">›</button></div><div class="bpt-agenda-week"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div><div class="bpt-agenda-days" id="bptAgendaDays"></div></section><section class="card bpt-agenda-events-card"><h2>Prochaines soirées</h2><div id="bptAgendaEvents"><p class="muted">Aucune soirée programmée.</p></div></section></div>
 <div class="bpt-agenda-detail card" id="bptAgendaDetail" hidden></div>
+<div class="bpt-agenda-upcoming-modal" id="bptAgendaUpcomingModal" hidden aria-hidden="true"><div class="bpt-agenda-upcoming-card" role="dialog" aria-modal="true" aria-labelledby="bptAgendaUpcomingTitle"><button class="bpt-agenda-upcoming-close" id="bptAgendaUpcomingClose" type="button" aria-label="Fermer">×</button><div class="home-kicker">BPT · Agenda</div><h2 id="bptAgendaUpcomingTitle">Prochaines parties</h2><p class="muted">Confirme ta présence pour les soirées à venir.</p><div id="bptAgendaUpcomingList"></div></div></div>
 </section>
 <section class="view" id="settings">
 <div class="hero tab-premium-hero">
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.83</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.87</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -26587,6 +26624,14 @@ document.addEventListener("visibilitychange",()=>{
     return "";
   }
 
+  function renderConnectedIdentityBadge(){
+    const el=document.getElementById("bptConnectedIdentity");
+    if(!el)return;
+    const name=String(liveIdentityName()||"").trim();
+    el.textContent=name?`Connecté : ${name}`:"";
+    el.title=name?`Profil connecté : ${name}`:"";
+  }
+
   function spectatorName(){
     return liveIdentityName();
   }
@@ -26977,6 +27022,7 @@ function connectionDeviceLabel(){
   }
 
   function renderAppPresence(viewers){
+    renderConnectedIdentityBadge();
     const countEl=document.getElementById("bptOnlineCount");
     const tipEl=document.getElementById("bptOnlineTooltip");
     if(!countEl||!tipEl)return;
@@ -27322,6 +27368,7 @@ function connectionDeviceLabel(){
     catch(e){$3('bptProfileCodeError').textContent='Connexion impossible : '+(e.message||'réessayez');return;}
     finally{confirmButton.disabled=false;}
     localStorage.setItem(LIVE_IDENTITY_KEY,clean);
+    renderConnectedIdentityBadge();
     markIdentityConfirmedThisSession();
     startAppPresence();
     logConnectionSession();
@@ -30518,8 +30565,12 @@ setTimeout(()=>{
 <style id="bpt-live-container-style">
 :root{--b466-bg:#071710;--b466-panel:#0e281d;--b466-panel2:#133325;--b466-line:#2b5b47;--b466-gold:#d39a28;--b466-gold2:#f0b73a;--b466-teal:#0f7e78;--b466-teal2:#15a19a;--b466-red:#a64d4d;--b466-white:#f6f8f6;--b466-muted:#a9bbb2}
 
-body.b466-live-active:not(.spectator-live-open)>header.bpt-header,body.b466-live-active>footer,body.b466-live-active>#cloudStatus{display:none!important}
-body.b466-live-active:not(.spectator-live-open)>nav#nav{display:flex!important}
+/* Ne masquer l'en-tête que lorsque la vue Live est réellement active.
+   La classe b466-live-active peut rester brièvement après un changement d'onglet. */
+body.b466-live-active:not(.spectator-live-open):has(#live3.active)>header.bpt-header,
+body.b466-live-active:has(#live3.active)>footer,
+body.b466-live-active:has(#live3.active)>#cloudStatus{display:none!important}
+body.b466-live-active:not(.spectator-live-open):has(#live3.active)>nav#nav{display:flex!important}
 body.b466-live-active:not(.spectator-live-open)>#bptMobileMoreTopMenu:not([hidden]){display:grid!important}
 body.b466-live-active>main{max-width:none!important;padding:0!important;margin:0!important}
 body.b466-live-active #live3{padding:0!important;margin:0!important}
@@ -30535,8 +30586,8 @@ body.b466-live-active #live3>.hero{display:none!important}
 }
 </style>
 
-<link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=5.83">
-<script id="bpt-live-ui" src="./live-ui.js?v=5.83"></script>
+<link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=5.87">
+<script id="bpt-live-ui" src="./live-ui.js?v=5.87"></script>
 
 
 <style id="bpt-v485-nav-clean">
