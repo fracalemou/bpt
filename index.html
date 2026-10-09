@@ -13458,7 +13458,14 @@ if(false){
     if(!root||!select||!input)return;
     [...select.options].filter(o=>o.value==='__free').forEach(o=>o.remove());
     input.type='hidden'; input.setAttribute('aria-hidden','true'); input.tabIndex=-1;
-    if(!select.value&&select.options.length){select.selectedIndex=0;input.value=`Chez ${select.value}`;}
+    const title=String(root.querySelector('h2')?.textContent||'');
+    const raw=String(typeof liveIdentityName==='function'?liveIdentityName():'').trim();
+    const wanted=/^dealer$/i.test(raw)?'François CATTEAU':raw;
+    if(/^Réserver/.test(title)&&wanted){
+      const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('fr').replace(/^chez\s+/,'').trim();
+      const option=[...select.options].find(o=>norm(o.value)===norm(wanted));
+      if(option){select.value=option.value;input.value=`Chez ${option.value}`;}
+    }else if(!select.value&&select.options.length){select.selectedIndex=0;input.value=`Chez ${select.value}`;}
   }
   document.addEventListener('DOMContentLoaded',()=>{
     const root=document.getElementById('bptAgendaDetail'); if(!root)return;
@@ -13474,8 +13481,8 @@ if(false){
   const todayKey=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
   function currentIdentity(){const raw=String(typeof liveIdentityName==='function'?liveIdentityName():'').trim();return /^dealer$/i.test(raw)?'François CATTEAU':raw}
   function responseLabel(v){return v==='present'?'Présent':v==='absent'?'Refusé':v==='maybe'?'Peut-être':'Sans réponse'}
-  function open(){const modal=$('bptAgendaUpcomingModal'),list=$('bptAgendaUpcomingList'),items=window.bptAgendaUpcoming?.()||[];if(!modal||!list||!items.length||sessionStorage.getItem('bpt_agenda_upcoming_seen')===todayKey())return;const names=(typeof db!=='undefined'&&Array.isArray(db?.players)?db.players:[]).map(p=>String(p?.name||'').trim()).filter(Boolean);list.innerHTML=items.map(e=>{const responses=e.responses||{},me=responses[currentIdentity()]||'',place=String(e.location||'').trim(),venue=place&&/^chez\s/i.test(place)?place:(place?`Chez ${place}`:'Lieu à définir'),all=[...new Set(names.concat(Object.keys(responses)))].filter(Boolean),rows=all.filter(n=>responses[n]).map(n=>`<span><b>${esc(n)}</b><em>${esc(responseLabel(responses[n]))}</em></span>`).join('')||'<span>Aucune réponse pour le moment</span>';return `<div class="bpt-agenda-upcoming-item"><strong>${esc(dateLabel(e.date))}</strong><small>🕘 ${esc(e.time||'21:00')} · 📍 ${esc(venue)}</small><div class="bpt-agenda-upcoming-actions"><button data-id="${esc(e.id)}" data-status="present" class="${me==='present'?'is-active':''}">✓ Présent</button><button data-id="${esc(e.id)}" data-status="absent" class="${me==='absent'?'is-active':''}">✕ Absent</button><button data-id="${esc(e.id)}" data-status="maybe" class="${me==='maybe'?'is-active':''}">? Peut-être</button></div><div class="bpt-agenda-upcoming-responses"><strong>Réponses des joueurs</strong>${rows}</div></div>`}).join('');modal.hidden=false;modal.setAttribute('aria-hidden','false');list.querySelectorAll('[data-status]').forEach(b=>b.onclick=async()=>{await window.bptAgendaSetResponse?.(b.dataset.id,b.dataset.status);open()})}
-  function close(){const m=$('bptAgendaUpcomingModal');if(!m)return;m.hidden=true;m.setAttribute('aria-hidden','true');sessionStorage.setItem('bpt_agenda_upcoming_seen',todayKey())}
+  function open(){const modal=$('bptAgendaUpcomingModal'),list=$('bptAgendaUpcomingList'),items=window.bptAgendaUpcoming?.()||[];if(!modal||!list||!items.length)return;const names=(typeof db!=='undefined'&&Array.isArray(db?.players)?db.players:[]).map(p=>String(p?.name||'').trim()).filter(Boolean);list.innerHTML=items.map(e=>{const responses=e.responses||{},me=responses[currentIdentity()]||'',place=String(e.location||'').trim(),venue=place&&/^chez\s/i.test(place)?place:(place?`Chez ${place}`:'Lieu à définir'),all=[...new Set(names.concat(Object.keys(responses)))].filter(Boolean),rows=all.filter(n=>responses[n]).map(n=>`<span><b>${esc(n)}</b><em>${esc(responseLabel(responses[n]))}</em></span>`).join('')||'<span>Aucune réponse pour le moment</span>';return `<div class="bpt-agenda-upcoming-item"><strong>${esc(dateLabel(e.date))}</strong><small>🕘 ${esc(e.time||'21:00')} · 📍 ${esc(venue)}</small><div class="bpt-agenda-upcoming-actions"><button data-id="${esc(e.id)}" data-status="present" class="${me==='present'?'is-active':''}">✓ Présent</button><button data-id="${esc(e.id)}" data-status="absent" class="${me==='absent'?'is-active':''}">✕ Absent</button><button data-id="${esc(e.id)}" data-status="maybe" class="${me==='maybe'?'is-active':''}">? Peut-être</button></div><div class="bpt-agenda-upcoming-responses"><strong>Réponses des joueurs</strong>${rows}</div></div>`}).join('');modal.hidden=false;modal.setAttribute('aria-hidden','false');list.querySelectorAll('[data-status]').forEach(b=>b.onclick=async()=>{await window.bptAgendaSetResponse?.(b.dataset.id,b.dataset.status);open()})}
+  function close(){const m=$('bptAgendaUpcomingModal');if(!m)return;m.hidden=true;m.setAttribute('aria-hidden','true')}
   document.addEventListener('DOMContentLoaded',()=>{$('bptAgendaUpcomingClose')?.addEventListener('click',close);window.addEventListener('bpt-agenda-ready',()=>setTimeout(open,120));setTimeout(open,800)});
 })();
 </script>
@@ -14345,7 +14352,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.88";
+const BPT_APP_VERSION="5.89";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14499,7 +14506,7 @@ function simplifyRecordTextForMobile(text){
 <span aria-live="polite" class="bpt-connected-identity" id="bptConnectedIdentity"></span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.88</div>
+<div class="app-version" id="headerAppVersion">BPT v5.89</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15627,7 +15634,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.88</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.89</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -30588,8 +30595,8 @@ body.b466-live-active #live3>.hero{display:none!important}
 }
 </style>
 
-<link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=5.88">
-<script id="bpt-live-ui" src="./live-ui.js?v=5.88"></script>
+<link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=5.89">
+<script id="bpt-live-ui" src="./live-ui.js?v=5.89"></script>
 
 
 <style id="bpt-v485-nav-clean">
