@@ -14394,7 +14394,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.98";
+const BPT_APP_VERSION="5.99";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14548,7 +14548,7 @@ function simplifyRecordTextForMobile(text){
 <span aria-live="polite" class="bpt-connected-identity" id="bptConnectedIdentity"></span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.98</div>
+<div class="app-version" id="headerAppVersion">BPT v5.99</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15667,7 +15667,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.98</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.99</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -27254,6 +27254,9 @@ function connectionDeviceLabel(){
   }
 
   function openSpectatorIdentity(force=false){
+    // Les appels automatiques du Live peuvent arriver avant le contrôleur
+    // d’entrée : restaurer l’appareil approuvé avant d’afficher la fenêtre.
+    if(!liveIdentityConfirmed && restoreTrustedDevice())return;
     if(!force){
       if(isOwner())return;
       if(!isActive())return;
@@ -30653,8 +30656,8 @@ body.b466-live-active #live3>.hero{display:none!important}
 }
 </style>
 
-<link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=5.98">
-<script id="bpt-live-ui" src="./live-ui.js?v=5.98"></script>
+<link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=5.99">
+<script id="bpt-live-ui" src="./live-ui.js?v=5.99"></script>
 
 
 <style id="bpt-v485-nav-clean">
