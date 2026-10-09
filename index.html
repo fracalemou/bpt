@@ -13370,7 +13370,7 @@ nav button[data-view="live"],#live,#liveFullscreenDisplay,#spectatorServerOverla
 </style>
 <style id="bpt-agenda-past-style">.bpt-agenda-day.has-past-event{background:#263246;border-color:#8694aa;color:#dfe7f0}</style>
 <style id="bpt-agenda-form-compact-style">#bptAgendaDetail:has(.bpt-agenda-form){position:fixed;z-index:1200;left:50%;top:50%;transform:translate(-50%,-50%);width:min(680px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;padding:18px;box-shadow:0 24px 90px rgba(0,0,0,.65);border:1px solid #2ac9c2;background:#16251f!important;color:#f4f7f2!important}#bptAgendaDetail:has(.bpt-agenda-form) h2{margin:0 0 10px;font-size:20px;color:#fff}#bptAgendaDetail:has(.bpt-agenda-form) label{color:#d7e4dc!important}#bptAgendaDetail:has(.bpt-agenda-form) input,#bptAgendaDetail:has(.bpt-agenda-form) select{background:#07120f!important;color:#fff!important;border-color:#4a9d86!important}#bptAgendaDetail:has(.bpt-agenda-form) option{background:#16251f;color:#fff}#bptAgendaDetail:has(.bpt-agenda-form) .bpt-btnrow{margin-top:10px!important}@media(max-width:760px){#bptAgendaDetail:has(.bpt-agenda-form){padding:14px}#bptAgendaDetail:has(.bpt-agenda-form) .bpt-agenda-form{grid-template-columns:1fr 1fr;gap:8px}#bptAgendaDetail:has(.bpt-agenda-form) .bpt-agenda-form label:last-child{grid-column:1/-1}}</style>
-<style id="bpt-agenda-upcoming-style">.bpt-agenda-upcoming-modal{position:fixed;inset:0;z-index:1400;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.72)}.bpt-agenda-upcoming-modal[hidden]{display:none}.bpt-agenda-upcoming-card{position:relative;width:min(560px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:24px;border:1px solid #2ac9c2;border-radius:18px;background:#16251f;color:#f4f7f2;box-shadow:0 24px 100px rgba(0,0,0,.65)}.bpt-agenda-upcoming-card h2{margin:4px 0 6px;color:#fff}.bpt-agenda-upcoming-close{position:absolute;top:10px;right:12px;width:34px;height:34px;border:1px solid #547166;border-radius:50%;background:#0b1713;color:#fff;font-size:24px;line-height:1;cursor:pointer}.bpt-agenda-upcoming-item{margin:12px 0;padding:14px;border:1px solid #36594b;border-radius:13px;background:#0d1a15}.bpt-agenda-upcoming-item strong{display:block;font-size:17px;color:#fff}.bpt-agenda-upcoming-item small{display:block;margin:4px 0 10px;color:#c5d4cc}.bpt-agenda-upcoming-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bpt-agenda-upcoming-actions button{min-height:42px;border:1px solid #3f806b;border-radius:9px;background:#173b30;color:#fff;font-weight:900;cursor:pointer}.bpt-agenda-upcoming-actions button.is-active[data-status="present"]{background:#19885f;border-color:#57e0b5}.bpt-agenda-upcoming-actions button.is-active[data-status="absent"]{background:#8b3e45;border-color:#ef7777}</style>
+<style id="bpt-agenda-upcoming-style">.bpt-agenda-upcoming-modal{position:fixed;inset:0;z-index:200000;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.78)}.bpt-agenda-upcoming-modal[hidden]{display:none}.bpt-agenda-upcoming-card{position:relative;width:min(620px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:24px;border:1px solid #2ac9c2;border-radius:18px;background:#16251f;color:#f4f7f2;box-shadow:0 24px 100px rgba(0,0,0,.65)}.bpt-agenda-upcoming-card h2{margin:4px 0 6px;color:#fff}.bpt-agenda-upcoming-close{position:absolute;top:10px;right:12px;width:34px;height:34px;border:1px solid #547166;border-radius:50%;background:#0b1713;color:#fff;font-size:24px;line-height:1;cursor:pointer}.bpt-agenda-upcoming-item{margin:12px 0;padding:14px;border:1px solid #36594b;border-radius:13px;background:#0d1a15}.bpt-agenda-upcoming-item strong{display:block;font-size:17px;color:#fff}.bpt-agenda-upcoming-item small{display:block;margin:4px 0 10px;color:#c5d4cc}.bpt-agenda-upcoming-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.bpt-agenda-upcoming-actions button{min-height:42px;border:1px solid #3f806b;border-radius:9px;background:#173b30;color:#fff;font-weight:900;cursor:pointer}.bpt-agenda-upcoming-actions button.is-active[data-status="present"]{background:#19885f;border-color:#57e0b5}.bpt-agenda-upcoming-actions button.is-active[data-status="absent"]{background:#8b3e45;border-color:#ef7777}.bpt-agenda-upcoming-actions button.is-active[data-status="maybe"]{background:#8a6a28;border-color:#e5c86d}.bpt-agenda-upcoming-responses{display:grid;gap:4px;margin:10px 0 0;padding-top:9px;border-top:1px solid #29473b;color:#c9d8d0;font-size:12px}.bpt-agenda-upcoming-responses span{display:flex;justify-content:space-between;gap:10px}.bpt-agenda-upcoming-responses b{color:#fff}</style>
 <script id="bpt-agenda-script">
 (function(){
 if(false){
@@ -13472,7 +13472,9 @@ if(false){
   const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]||c));
   const dateLabel=v=>v?new Date(v+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'}):'Date à définir';
   const todayKey=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
-  function open(){const modal=$('bptAgendaUpcomingModal'),list=$('bptAgendaUpcomingList'),items=window.bptAgendaUpcoming?.()||[];if(!modal||!list||!items.length||sessionStorage.getItem('bpt_agenda_upcoming_seen')===todayKey())return;list.innerHTML=items.map(e=>{const me=(e.responses||{})[(typeof liveIdentityName==='function'?liveIdentityName():'')]||'',place=String(e.location||'').trim(),venue=place&&/^chez\s/i.test(place)?place:(place?`Chez ${place}`:'Lieu à définir');return `<div class="bpt-agenda-upcoming-item"><strong>${esc(dateLabel(e.date))}</strong><small>🕘 ${esc(e.time||'21:00')} · 📍 ${esc(venue)}</small><div class="bpt-agenda-upcoming-actions"><button data-id="${esc(e.id)}" data-status="present" class="${me==='present'?'is-active':''}">✓ Présent</button><button data-id="${esc(e.id)}" data-status="absent" class="${me==='absent'?'is-active':''}">✕ Absent</button></div></div>`}).join('');modal.hidden=false;modal.setAttribute('aria-hidden','false');list.querySelectorAll('[data-status]').forEach(b=>b.onclick=async()=>{await window.bptAgendaSetResponse?.(b.dataset.id,b.dataset.status);b.parentElement.querySelectorAll('button').forEach(x=>x.classList.toggle('is-active',x===b))})}
+  function currentIdentity(){const raw=String(typeof liveIdentityName==='function'?liveIdentityName():'').trim();return /^dealer$/i.test(raw)?'François CATTEAU':raw}
+  function responseLabel(v){return v==='present'?'Présent':v==='absent'?'Refusé':v==='maybe'?'Peut-être':'Sans réponse'}
+  function open(){const modal=$('bptAgendaUpcomingModal'),list=$('bptAgendaUpcomingList'),items=window.bptAgendaUpcoming?.()||[];if(!modal||!list||!items.length||sessionStorage.getItem('bpt_agenda_upcoming_seen')===todayKey())return;const names=(typeof db!=='undefined'&&Array.isArray(db?.players)?db.players:[]).map(p=>String(p?.name||'').trim()).filter(Boolean);list.innerHTML=items.map(e=>{const responses=e.responses||{},me=responses[currentIdentity()]||'',place=String(e.location||'').trim(),venue=place&&/^chez\s/i.test(place)?place:(place?`Chez ${place}`:'Lieu à définir'),all=[...new Set(names.concat(Object.keys(responses)))].filter(Boolean),rows=all.filter(n=>responses[n]).map(n=>`<span><b>${esc(n)}</b><em>${esc(responseLabel(responses[n]))}</em></span>`).join('')||'<span>Aucune réponse pour le moment</span>';return `<div class="bpt-agenda-upcoming-item"><strong>${esc(dateLabel(e.date))}</strong><small>🕘 ${esc(e.time||'21:00')} · 📍 ${esc(venue)}</small><div class="bpt-agenda-upcoming-actions"><button data-id="${esc(e.id)}" data-status="present" class="${me==='present'?'is-active':''}">✓ Présent</button><button data-id="${esc(e.id)}" data-status="absent" class="${me==='absent'?'is-active':''}">✕ Absent</button><button data-id="${esc(e.id)}" data-status="maybe" class="${me==='maybe'?'is-active':''}">? Peut-être</button></div><div class="bpt-agenda-upcoming-responses"><strong>Réponses des joueurs</strong>${rows}</div></div>`}).join('');modal.hidden=false;modal.setAttribute('aria-hidden','false');list.querySelectorAll('[data-status]').forEach(b=>b.onclick=async()=>{await window.bptAgendaSetResponse?.(b.dataset.id,b.dataset.status);open()})}
   function close(){const m=$('bptAgendaUpcomingModal');if(!m)return;m.hidden=true;m.setAttribute('aria-hidden','true');sessionStorage.setItem('bpt_agenda_upcoming_seen',todayKey())}
   document.addEventListener('DOMContentLoaded',()=>{$('bptAgendaUpcomingClose')?.addEventListener('click',close);window.addEventListener('bpt-agenda-ready',()=>setTimeout(open,120));setTimeout(open,800)});
 })();
@@ -14343,7 +14345,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.87";
+const BPT_APP_VERSION="5.88";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14497,7 +14499,7 @@ function simplifyRecordTextForMobile(text){
 <span aria-live="polite" class="bpt-connected-identity" id="bptConnectedIdentity"></span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.87</div>
+<div class="app-version" id="headerAppVersion">BPT v5.88</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15625,7 +15627,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.87</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.88</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -30586,8 +30588,8 @@ body.b466-live-active #live3>.hero{display:none!important}
 }
 </style>
 
-<link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=5.87">
-<script id="bpt-live-ui" src="./live-ui.js?v=5.87"></script>
+<link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=5.88">
+<script id="bpt-live-ui" src="./live-ui.js?v=5.88"></script>
 
 
 <style id="bpt-v485-nav-clean">

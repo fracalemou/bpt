@@ -1,5 +1,5 @@
-const CACHE='bpt-pwa-5.87';
-const ASSETS=['./','./index.html','./live-ui.css?v=5.87','./live-ui.js?v=5.87','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
+const CACHE='bpt-pwa-5.88';
+const ASSETS=['./','./index.html','./live-ui.css?v=5.88','./live-ui.js?v=5.88','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
