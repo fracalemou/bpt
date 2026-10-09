@@ -13500,6 +13500,7 @@ if(false){
 </script>
 <script id="bpt-agenda-v2-clean">
 (function(){
+if(false){
   const $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]||c));
   const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/^chez\s+/,'').trim();
   const today=()=>{const d=new Date();return d.toISOString().slice(0,10)};
@@ -13523,6 +13524,7 @@ if(false){
   function closeUpcoming(){const m=$('bptAgendaUpcomingModal');if(m){m.hidden=true;m.setAttribute('aria-hidden','true')}}
   document.addEventListener('DOMContentLoaded',()=>{const now=new Date();cursor=new Date(now.getFullYear(),now.getMonth(),1);$('bptAgendaPrevMonth')?.addEventListener('click',()=>{cursor.setMonth(cursor.getMonth()-1);renderCalendar()});$('bptAgendaNextMonth')?.addEventListener('click',()=>{cursor.setMonth(cursor.getMonth()+1);renderCalendar()});$('bptAgendaAddBtn')?.addEventListener('click',()=>openForm());$('bptAgendaUpcomingClose')?.addEventListener('click',closeUpcoming);document.querySelectorAll('[data-view="agenda"],[data-mobile-nav-view="agenda"]').forEach(b=>b.addEventListener('click',load));let tries=0;const boot=async()=>{await load();if(!events.length&&tries++<20)setTimeout(boot,1000)};boot()});
   window.bptAgendaRender=load;window.bptAgendaUpcoming=()=>events;window.bptAgendaSetResponse=async(id,status)=>{const e=events.find(x=>x.id===id);if(e){e.responses=e.responses||{};e.responses[identity()]=status;await save(e)}};
+}
 })();
 </script>
 <style id="bpt-agenda-v2-calendar-colors">#bptAgendaDays .bpt-agenda-unreserved{background:#111a25!important;color:#f4f7f2!important;border-color:#304052!important}#bptAgendaDays .bpt-agenda-reserved{background:#d9a82f!important;color:#10140f!important;border-color:#f1c85a!important}#bptAgendaUpcomingValidate{display:block;width:100%;margin-top:16px}</style>
@@ -14392,7 +14394,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.96";
+const BPT_APP_VERSION="5.98";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14546,7 +14548,7 @@ function simplifyRecordTextForMobile(text){
 <span aria-live="polite" class="bpt-connected-identity" id="bptConnectedIdentity"></span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.96</div>
+<div class="app-version" id="headerAppVersion">BPT v5.98</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -14562,14 +14564,12 @@ function simplifyRecordTextForMobile(text){
 <span class="bpt-nav-ranking-compact">♛ Clt</span>
 </button>
 <button class="bpt-nav-desktop-only" data-view="records">★ Records &amp; accomplissements</button>
-<button class="bpt-nav-desktop-only" data-view="agenda">▣ Agenda</button>
 <button class="bpt-nav-desktop-only" data-view="settings">⚙ Paramètres</button>
 <button class="bpt-nav-mobile-only" id="bptMobileMoreTopBtn" type="button">☰ Plus</button>
 </nav>
 <div class="bpt-mobile-top-menu" hidden="" id="bptMobileMoreTopMenu">
 <button data-mobile-nav-view="records" type="button">★ Records</button>
 <button data-mobile-nav-view="profile" type="button">♤ Profil</button>
-<button data-mobile-nav-view="agenda" type="button">▣ Agenda</button>
 <button data-mobile-nav-view="settings" type="button">⚙ Paramètres</button>
 </div>
 <main>
@@ -15313,7 +15313,6 @@ function simplifyRecordTextForMobile(text){
 <h1 id="latestGameTitle">Dernière partie</h1>
 <p id="latestGameMeta">Aucune partie enregistrée.</p>
 <button class="btn ghost" id="latestGameRecapBtn" type="button" hidden>🏆 Revoir le bilan</button>
-<button class="btn ghost" id="agendaReturnBtn" type="button" hidden>← Retour à l’agenda</button>
 </div>
 <div class="latestgame-photo-area" id="latestGamePhotoArea">
 <button class="game-photo-thumb-btn" id="latestGamePhotoThumbBtn" style="display:none" title="Agrandir la photo" type="button">
@@ -15663,18 +15662,12 @@ function simplifyRecordTextForMobile(text){
 </div>
 </details>
 </section>
-<section class="view" id="agenda">
-<div class="hero tab-premium-hero bpt-agenda-hero"><div class="home-kicker">BPT · Organisation</div><h1>Agenda</h1><p>Cliquez sur une date pour proposer une soirée.</p></div>
-<div class="bpt-agenda-layout"><section class="card bpt-agenda-calendar-card"><div class="bpt-agenda-month"><button class="btn ghost" id="bptAgendaPrevMonth" type="button">‹</button><strong id="bptAgendaMonthLabel">—</strong><button class="btn ghost" id="bptAgendaNextMonth" type="button">›</button></div><div class="bpt-agenda-week"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div><div class="bpt-agenda-days" id="bptAgendaDays"></div></section><section class="card bpt-agenda-events-card"><h2>Prochaines soirées</h2><div id="bptAgendaEvents"><p class="muted">Aucune soirée programmée.</p></div></section></div>
-<div class="bpt-agenda-detail card" id="bptAgendaDetail" hidden></div>
-<div class="bpt-agenda-upcoming-modal" id="bptAgendaUpcomingModal" hidden aria-hidden="true"><div class="bpt-agenda-upcoming-card" role="dialog" aria-modal="true" aria-labelledby="bptAgendaUpcomingTitle"><button class="bpt-agenda-upcoming-close" id="bptAgendaUpcomingClose" type="button" aria-label="Fermer">×</button><div class="home-kicker">BPT · Agenda</div><h2 id="bptAgendaUpcomingTitle">Prochaines parties</h2><p class="muted">Confirme ta présence pour les soirées à venir.</p><div id="bptAgendaUpcomingList"></div></div></div>
-</section>
 <section class="view" id="settings">
 <div class="hero tab-premium-hero">
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.96</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.98</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -24979,7 +24972,6 @@ async function showView(id){
   }else{
     if(id==="dashboard")renderDashboard();
     if(id==="latestgame"){renderLatestGame();renderHistory();}
-    if(id==="agenda")window.bptAgendaRender?.();
     if(id==="ranking")renderRanking();
     if(id==="records"){renderRecords();renderAchievements();}
     if(id==="profile"){renderProfile();renderVersus();}
@@ -26121,6 +26113,8 @@ document.addEventListener("visibilitychange",()=>{
   let viewerRenderSignature="";
   let liveIdentityConfirmed=false;
   const LIVE_IDENTITY_SESSION_KEY="bpt_live3_identity_confirmed_session";
+  const LIVE_TRUSTED_DEVICE_KEY="bpt_live3_trusted_device_v1";
+  const LIVE_TRUSTED_DEVICE_MS=30*24*60*60*1000;
 
   function identityConfirmedThisSession(){
     return liveIdentityConfirmed===true;
@@ -26129,6 +26123,28 @@ document.addEventListener("visibilitychange",()=>{
   function markIdentityConfirmedThisSession(){
     liveIdentityConfirmed=true;
     try{sessionStorage.setItem(LIVE_IDENTITY_SESSION_KEY,"1");}catch(_e){}
+  }
+
+  function rememberTrustedDevice(name){
+    try{localStorage.setItem(LIVE_TRUSTED_DEVICE_KEY,JSON.stringify({name,expiresAt:Date.now()+LIVE_TRUSTED_DEVICE_MS}));}catch(_e){}
+  }
+
+  function restoreTrustedDevice(){
+    try{
+      const saved=JSON.parse(localStorage.getItem(LIVE_TRUSTED_DEVICE_KEY)||"null");
+      if(!saved?.name||Number(saved.expiresAt)<=Date.now()){
+        localStorage.removeItem(LIVE_TRUSTED_DEVICE_KEY);
+        return false;
+      }
+      const current=String(localStorage.getItem(LIVE_IDENTITY_KEY)||"").trim();
+      if(current && current!==String(saved.name).trim())return false;
+      localStorage.setItem(LIVE_IDENTITY_KEY,String(saved.name).trim());
+      liveIdentityConfirmed=true;
+      verifiedProfileName=String(saved.name).trim();
+      renderConnectedIdentityBadge();
+      startAppPresence();
+      return true;
+    }catch(_e){return false;}
   }
   let spectatorSelectSignature="";
   let lastChatMessageId=null;
@@ -27198,10 +27214,11 @@ function connectionDeviceLabel(){
 
 
   function requireIdentityOnSiteEntry(){
-    // Chaque chargement de page repart non confirmé.
-    // Le nom mémorisé sert uniquement de présélection dans la liste.
+    // L’appareil reste approuvé pendant 30 jours après validation du code.
     liveIdentityConfirmed=false;verifiedProfileName='';
     try{sessionStorage.removeItem(LIVE_IDENTITY_SESSION_KEY);}catch(_e){}
+
+    if(restoreTrustedDevice())return;
 
     setTimeout(()=>{
       try{ openSpectatorIdentity(true); }catch(e){ console.warn("Identification BPT :",e); }
@@ -27417,6 +27434,7 @@ function connectionDeviceLabel(){
     catch(e){$3('bptProfileCodeError').textContent='Connexion impossible : '+(e.message||'réessayez');return;}
     finally{confirmButton.disabled=false;}
     localStorage.setItem(LIVE_IDENTITY_KEY,clean);
+    rememberTrustedDevice(clean);
     renderConnectedIdentityBadge();
     markIdentityConfirmedThisSession();
     startAppPresence();
@@ -30635,8 +30653,8 @@ body.b466-live-active #live3>.hero{display:none!important}
 }
 </style>
 
-<link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=5.96">
-<script id="bpt-live-ui" src="./live-ui.js?v=5.96"></script>
+<link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=5.98">
+<script id="bpt-live-ui" src="./live-ui.js?v=5.98"></script>
 
 
 <style id="bpt-v485-nav-clean">
@@ -30654,6 +30672,7 @@ body.b466-live-active #live3>.hero{display:none!important}
 
 <script id="bpt-agenda-stable-module">
 (function(){
+if(false){
   const $=id=>document.getElementById(id), norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/^chez\s+/,'').trim();
   const me=()=>{const raw=String(typeof liveIdentityName==='function'?liveIdentityName():localStorage.getItem('bpt_live_identity')||'').trim();return /^dealer$/i.test(raw)?'François CATTEAU':(raw||'Invité')};
   const ref=()=>window.bptFirebaseDb?.()?.ref?.('bpt/agenda')||null; let events=[];
@@ -30662,6 +30681,18 @@ body.b466-live-active #live3>.hero{display:none!important}
   function openUpcoming(){const modal=$('bptAgendaUpcomingModal'),list=$('bptAgendaUpcomingList');if(!modal||!list)return;const now=new Date(),end=new Date(now);end.setDate(end.getDate()+14),iso=d=>d.toISOString().slice(0,10),items=events.filter(e=>String(e.date||'')>=iso(now)&&String(e.date||'')<=iso(end)).sort((a,b)=>String(a.date+a.time).localeCompare(String(b.date+b.time))).slice(0,1);if(!items.length)return;const name=me(),players=[...new Set((typeof db!=='undefined'&&Array.isArray(db?.players)?db.players:[]).map(p=>p.name).filter(Boolean).concat(name!=='Invité'?[name]:[]))];list.innerHTML=items.map(e=>{const r=e.responses||{},fmt=e.date?new Date(e.date+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'}):'';return `<div class="bpt-agenda-upcoming-item"><strong>${fmt}</strong><small>🕘 ${e.time||'21:00'} · 📍 ${e.location||''}</small><div class="bpt-agenda-upcoming-actions">${[['present','✓ Présent'],['absent','✕ Absent'],['maybe','? Peut-être']].map(([s,l])=>`<button data-status="${s}" class="${r[name]===s?'is-active':''}">${l}</button>`).join('')}</div><div class="bpt-agenda-upcoming-responses"><strong>Réponses des joueurs</strong>${players.map(p=>`<span><b>${p}</b><em>${r[p]==='present'?'Présent':r[p]==='absent'?'Refusé':r[p]==='maybe'?'Peut-être':'Sans réponse'}</em></span>`).join('')}</div></div>`}).join('');modal.hidden=false;modal.setAttribute('aria-hidden','false');let ok=$('bptAgendaUpcomingValidate');if(!ok){ok=document.createElement('button');ok.id='bptAgendaUpcomingValidate';ok.className='btn primary';ok.textContent='Valider mes choix';$('bptAgendaUpcomingModal').querySelector('.bpt-agenda-upcoming-card')?.append(ok);ok.onclick=()=>{modal.hidden=true;modal.setAttribute('aria-hidden','true')}}list.querySelectorAll('[data-status]').forEach(b=>b.onclick=async()=>{const e=items[0];e.responses=e.responses||{};e.responses[name]=b.dataset.status;const r=ref();if(r)await r.child(e.id).set(e);saveLocal();openUpcoming()})}
   function forceVenue(){const s=$('bptAgendaFormLocationSelect'),i=$('bptAgendaFormLocation');if(!s||!i)return;const target=me();const o=[...s.options].find(x=>norm(x.value)===norm(target));if(o){s.value=o.value;i.value=`Chez ${o.value}`}}
   document.addEventListener('DOMContentLoaded',()=>{let n=0;const boot=async()=>{await load();if(!events.length&&n++<20)setTimeout(boot,1000)};boot();const root=$('bptAgendaDetail');if(root)new MutationObserver(forceVenue).observe(root,{childList:true,subtree:true});});
+}
+})();
+</script>
+<script id="bpt-agenda-removal-migration">
+(async function(){
+  try{
+    localStorage.removeItem('bpt_agenda_local_v1');
+    if(window.bptFirebaseEnsure) await window.bptFirebaseEnsure();
+    const dbx=window.bptFirebaseDb?.();
+    if(dbx?.ref) await dbx.ref('bpt/agenda').remove();
+    localStorage.setItem('bpt_agenda_purged_v597','1');
+  }catch(error){ console.warn('Nettoyage des anciennes réservations impossible',error); }
 })();
 </script>
 </body>
