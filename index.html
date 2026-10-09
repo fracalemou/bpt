@@ -13366,7 +13366,7 @@ nav button[data-view="live"],#live,#liveFullscreenDisplay,#spectatorServerOverla
 .bpt-agenda-hero{position:relative}.bpt-agenda-layout{display:grid;grid-template-columns:minmax(300px,1.1fr) minmax(300px,.9fr);gap:14px;margin-top:14px}.bpt-agenda-calendar-card,.bpt-agenda-events-card{padding:18px}.bpt-agenda-month{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;text-align:center}.bpt-agenda-month strong{font-size:20px}.bpt-agenda-month .btn{padding:6px 10px;font-size:24px;line-height:1}.bpt-agenda-week,.bpt-agenda-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin-top:14px}.bpt-agenda-week span{text-align:center;color:var(--gold);font-size:12px;font-weight:900}.bpt-agenda-day{min-height:42px;border:1px solid #293b50;border-radius:8px;background:#111a27;background-clip:padding-box;color:#fff;cursor:pointer;font-weight:800;overflow:hidden;position:relative;isolation:isolate}.bpt-agenda-day.is-empty{visibility:hidden}.bpt-agenda-day.has-event{background:#123c38;border-color:#2ac9c2;box-shadow:none}.bpt-agenda-day.is-selected{background:#e0ad38;color:#16130d;border-color:#f5c852;box-shadow:0 0 0 2px rgba(245,200,82,.35)}.bpt-agenda-event{width:100%;display:grid;text-align:left;gap:4px;padding:13px 14px;margin:8px 0;border:1px solid #2b4154;border-radius:12px;background:#111a27;color:#fff;cursor:pointer}.bpt-agenda-event.is-selected{border-color:#2ac9c2}.bpt-agenda-event strong{font-size:16px}.bpt-agenda-event small{color:#aebdc8}.bpt-agenda-badge{justify-self:start;padding:3px 8px;border-radius:999px;background:#173e35;color:#57e0b5;font-size:11px;font-weight:900}.bpt-agenda-detail{margin-top:14px;padding:20px}.bpt-agenda-detail h2{margin-top:0}.bpt-agenda-form{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.bpt-agenda-form label{display:grid;gap:5px;color:#aebdc8;font-size:12px;font-weight:800}.bpt-agenda-form input,.bpt-agenda-form select{width:100%;box-sizing:border-box;padding:10px;border:1px solid #315d53;border-radius:9px;background:#091b18;color:#fff}.bpt-agenda-response{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}.bpt-agenda-response button{min-height:44px;border:1px solid #315d53;border-radius:10px;color:#fff;background:#163f38;font-weight:900;cursor:pointer}.bpt-agenda-response button[data-status="present"].is-active{background:#19885f;border-color:#57e0b5}.bpt-agenda-response button[data-status="absent"].is-active{background:#8b3e45;border-color:#ef7777}.bpt-agenda-response button[data-status="maybe"].is-active{background:#9a7622;border-color:#ffd36b}.bpt-agenda-people{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px}.bpt-agenda-person{padding:5px 9px;border-radius:999px;background:#172638;color:#e8f0f5;font-size:12px}.bpt-agenda-person-button{font:inherit;cursor:pointer}.bpt-agenda-person-button:hover{filter:brightness(1.2);outline:1px solid #2ac9c2}.bpt-agenda-person.present{border:1px solid #57e0b5}.bpt-agenda-person.absent{border:1px solid #ef7777}.bpt-agenda-person.maybe{border:1px solid #ffd36b}.bpt-agenda-person.pending{border:1px solid #708296;color:#b5c0ca}.bpt-agenda-decision-target{padding:10px 12px;border:1px solid #2ac9c2;border-radius:10px;background:#0e2925}@media(max-width:760px){.bpt-agenda-layout{grid-template-columns:1fr}.bpt-agenda-calendar-card,.bpt-agenda-events-card,.bpt-agenda-detail{padding:13px}.bpt-agenda-form{grid-template-columns:1fr 1fr}.bpt-agenda-form label:last-child{grid-column:1/-1}.bpt-agenda-day{min-height:38px}.bpt-agenda-response{gap:5px}.bpt-agenda-response button{font-size:12px;padding:5px 2px}}
 </style>
 <style id="bpt-agenda-past-style">.bpt-agenda-day.has-past-event{background:#263246;border-color:#8694aa;color:#dfe7f0}</style>
-<style id="bpt-agenda-form-compact-style">#bptAgendaDetail:has(.bpt-agenda-form){position:fixed;z-index:1200;left:50%;top:50%;transform:translate(-50%,-50%);width:min(680px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;padding:14px;box-shadow:0 24px 90px rgba(0,0,0,.55);border:1px solid #2ac9c2}#bptAgendaDetail:has(.bpt-agenda-form) h2{margin:0 0 10px;font-size:20px}#bptAgendaDetail:has(.bpt-agenda-form) .bpt-btnrow{margin-top:10px!important}@media(max-width:760px){#bptAgendaDetail:has(.bpt-agenda-form) .bpt-agenda-form{grid-template-columns:1fr 1fr;gap:8px}#bptAgendaDetail:has(.bpt-agenda-form) .bpt-agenda-form label:last-child{grid-column:1/-1}}</style>
+<style id="bpt-agenda-form-compact-style">#bptAgendaDetail:has(.bpt-agenda-form){position:fixed;z-index:1200;left:50%;top:50%;transform:translate(-50%,-50%);width:min(680px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:auto;padding:18px;box-shadow:0 24px 90px rgba(0,0,0,.65);border:1px solid #2ac9c2;background:#16251f!important;color:#f4f7f2!important}#bptAgendaDetail:has(.bpt-agenda-form) h2{margin:0 0 10px;font-size:20px;color:#fff}#bptAgendaDetail:has(.bpt-agenda-form) label{color:#d7e4dc!important}#bptAgendaDetail:has(.bpt-agenda-form) input,#bptAgendaDetail:has(.bpt-agenda-form) select{background:#07120f!important;color:#fff!important;border-color:#4a9d86!important}#bptAgendaDetail:has(.bpt-agenda-form) option{background:#16251f;color:#fff}#bptAgendaDetail:has(.bpt-agenda-form) .bpt-btnrow{margin-top:10px!important}@media(max-width:760px){#bptAgendaDetail:has(.bpt-agenda-form){padding:14px}#bptAgendaDetail:has(.bpt-agenda-form) .bpt-agenda-form{grid-template-columns:1fr 1fr;gap:8px}#bptAgendaDetail:has(.bpt-agenda-form) .bpt-agenda-form label:last-child{grid-column:1/-1}}</style>
 <script id="bpt-agenda-script">
 (function(){
 if(false){
@@ -13413,7 +13413,7 @@ if(false){
   const localKey='bpt_agenda_local_v1';
   const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
   const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('fr').replace(/^chez\s+/,'').trim();
-  const identity=()=>{const raw=String(typeof liveIdentityName==='function'?liveIdentityName():localStorage.getItem('bpt_live_identity')||'').trim();if(!raw)return'Invité';const aliases=typeof BPT_ANNALES_NICKNAMES!=='undefined'?BPT_ANNALES_NICKNAMES:{};const alias=Object.entries(aliases).find(([name,nicks])=>norm(name)===norm(raw)||nicks.some(n=>norm(n)===norm(raw)));if(alias)return alias[0];const players=typeof db!=='undefined'&&Array.isArray(db?.players)?db.players:[];return players.find(p=>norm(p.name)===norm(raw))?.name||raw};
+  const identity=()=>{const raw=String(typeof liveIdentityName==='function'?liveIdentityName():localStorage.getItem('bpt_live_identity')||'').trim();if(!raw)return'Invité';if(norm(raw)==='dealer')return'François CATTEAU';const aliases=typeof BPT_ANNALES_NICKNAMES!=='undefined'?BPT_ANNALES_NICKNAMES:{};const alias=Object.entries(aliases).find(([name,nicks])=>norm(name)===norm(raw)||nicks.some(n=>norm(n)===norm(raw)));if(alias)return alias[0];const players=typeof db!=='undefined'&&Array.isArray(db?.players)?db.players:[];return players.find(p=>norm(p.name)===norm(raw))?.name||raw};
   const firebaseRef=()=>{const dbx=window.bptFirebaseDb?.();return dbx?.ref?.('bpt/agenda')||null};
   const readLocal=()=>{try{return JSON.parse(localStorage.getItem(localKey)||'[]')}catch(_){return[]}};
   const writeLocal=()=>{try{localStorage.setItem(localKey,JSON.stringify(events))}catch(_){}};
@@ -14309,7 +14309,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.81";
+const BPT_APP_VERSION="5.83";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14461,7 +14461,7 @@ function simplifyRecordTextForMobile(text){
 <span id="headerSeasonLabel">Gestion du championnat 2026–2027</span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.81</div>
+<div class="app-version" id="headerAppVersion">BPT v5.83</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15588,7 +15588,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.81</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.83</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -30535,8 +30535,8 @@ body.b466-live-active #live3>.hero{display:none!important}
 }
 </style>
 
-<link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=5.81">
-<script id="bpt-live-ui" src="./live-ui.js?v=5.81"></script>
+<link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=5.83">
+<script id="bpt-live-ui" src="./live-ui.js?v=5.83"></script>
 
 
 <style id="bpt-v485-nav-clean">
