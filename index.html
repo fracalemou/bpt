@@ -14332,6 +14332,7 @@ body.bpt-mobile-device .bpt-mobile-top-menu button{
 .bpt-recap-section h3{margin:0 0 10px;color:#e6bd5a}.bpt-recap-section p{margin:6px 0;line-height:1.5;color:#e7ece9}.bpt-recap-section article+article{margin-top:12px;padding-top:12px;border-top:1px solid #34483c}
 @media(max-width:600px){#gameSummaryBackdrop{padding:8px}#gameSummaryBackdrop .bpt-summary-modal{padding:14px}.bpt-recap-stats{gap:6px}.bpt-recap-stats>div{padding:10px 6px}.bpt-recap-stats strong{font-size:17px}.bpt-recap-stats span{font-size:10px}}
 </style>
+<link rel="stylesheet" href="./agenda-v2.css?v=1">
 </head>
 <body>
 <div id="headUpPhotoPrompt" style="
@@ -14394,7 +14395,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="5.99";
+const BPT_APP_VERSION="6.01";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14548,7 +14549,7 @@ function simplifyRecordTextForMobile(text){
 <span aria-live="polite" class="bpt-connected-identity" id="bptConnectedIdentity"></span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v5.99</div>
+<div class="app-version" id="headerAppVersion">BPT v6.01</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -14564,12 +14565,14 @@ function simplifyRecordTextForMobile(text){
 <span class="bpt-nav-ranking-compact">♛ Clt</span>
 </button>
 <button class="bpt-nav-desktop-only" data-view="records">★ Records &amp; accomplissements</button>
+<button class="bpt-nav-desktop-only" data-view="agenda">▣ Agenda</button>
 <button class="bpt-nav-desktop-only" data-view="settings">⚙ Paramètres</button>
 <button class="bpt-nav-mobile-only" id="bptMobileMoreTopBtn" type="button">☰ Plus</button>
 </nav>
 <div class="bpt-mobile-top-menu" hidden="" id="bptMobileMoreTopMenu">
 <button data-mobile-nav-view="records" type="button">★ Records</button>
 <button data-mobile-nav-view="profile" type="button">♤ Profil</button>
+<button data-mobile-nav-view="agenda" type="button">▣ Agenda</button>
 <button data-mobile-nav-view="settings" type="button">⚙ Paramètres</button>
 </div>
 <main>
@@ -15662,12 +15665,18 @@ function simplifyRecordTextForMobile(text){
 </div>
 </details>
 </section>
+<section class="view" id="agenda">
+<div class="hero tab-premium-hero"><div class="home-kicker">BPT · Organisation</div><h1>Agenda</h1><p>Planifiez les prochaines parties et suivez les réponses.</p></div>
+<div class="bpt-agenda-v2-grid"><section class="card"><div class="bpt-agenda-v2-toolbar"><button class="btn ghost" id="bptAgendaPrev" type="button">‹</button><strong id="bptAgendaMonth">—</strong><button class="btn ghost" id="bptAgendaNext" type="button">›</button></div><div class="bpt-agenda-v2-week"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div><div class="bpt-agenda-v2-days" id="bptAgendaDaysV2"></div></section><section class="card"><div class="bpt-agenda-v2-head"><h2>Parties à venir</h2><button class="btn primary" id="bptAgendaNew" type="button">Nouvelle partie</button></div><div id="bptAgendaListV2"><p class="muted">Aucune partie programmée.</p></div></section></div>
+<div class="card bpt-agenda-v2-detail" id="bptAgendaDetailV2" hidden></div>
+<div class="bpt-agenda-v2-modal" id="bptAgendaPopupV2" hidden><div class="bpt-agenda-v2-modal-card"><button class="bpt-agenda-v2-close" id="bptAgendaPopupClose" type="button">×</button><div class="home-kicker">BPT · Prochaine partie</div><div id="bptAgendaPopupContent"></div><button class="btn primary" id="bptAgendaPopupValidate" type="button">Valider mon choix</button></div></div>
+</section>
 <section class="view" id="settings">
 <div class="hero tab-premium-hero">
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 5.99</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 6.01</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -17937,6 +17946,7 @@ function loadDB(){
   return fresh;
 }
 let db = loadDB();
+window.bptAgendaGetPlayers=()=>Array.isArray(db?.players)?db.players:[];
 
 // Un Live distant conservé dans localStorage ne doit jamais être utilisé comme source.
 // Seul le navigateur créateur conserve son Live local ; les spectateurs relisent Firebase.
@@ -20373,6 +20383,11 @@ function latestGameEntries(){
     seasonKey:(rows?.[0]?.seasonKey)||currentGamePhotoSeasonKey()
   }));
 }
+window.bptOpenLatestGame=(gameNumber)=>{
+  const entry=latestGameEntries().find(g=>Number(g.gameNo)===Number(gameNumber));
+  if(entry)latestGameSelectedKey=latestGameEntryKey(entry);
+  showView('latestgame');
+};
 
 function latestGameEntryKey(entry){
   return `${entry.seasonKey||currentGamePhotoSeasonKey()}|${entry.gameNo}`;
@@ -26688,6 +26703,7 @@ document.addEventListener("visibilitychange",()=>{
     }
     return "";
   }
+  window.bptAgendaGetIdentity=liveIdentityName;
 
   function renderConnectedIdentityBadge(){
     const el=document.getElementById("bptConnectedIdentity");
@@ -30656,8 +30672,8 @@ body.b466-live-active #live3>.hero{display:none!important}
 }
 </style>
 
-<link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=5.99">
-<script id="bpt-live-ui" src="./live-ui.js?v=5.99"></script>
+<link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=6.00">
+<script id="bpt-live-ui" src="./live-ui.js?v=6.00"></script>
 
 
 <style id="bpt-v485-nav-clean">
@@ -30687,6 +30703,7 @@ if(false){
 }
 })();
 </script>
+<script src="./agenda-v2.js?v=1"></script>
 <script id="bpt-agenda-removal-migration">
 (async function(){
   try{
