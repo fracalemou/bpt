@@ -14469,6 +14469,14 @@ body.bpt-mobile-device .bpt-mobile-top-menu button{
   window.addEventListener("orientationchange", applyBptMobileClass, {passive:true});
 })();
 </script>
+<style id="bpt-agenda-temporary-hide">
+/* Agenda temporarily hidden from the interface; its implementation stays available for a later reactivation. */
+button[data-view="agenda"],
+button[data-mobile-nav-view="agenda"],
+#agenda,
+#bptAgendaUpcomingModal,
+#bptAgendaPopupV2 { display:none !important; }
+</style>
 <script>
 function isBptMobileDevice(){
   return document.documentElement.classList.contains("bpt-mobile-device")
@@ -14476,7 +14484,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="6.20";
+const BPT_APP_VERSION="6.25";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14630,7 +14638,7 @@ function simplifyRecordTextForMobile(text){
 <span aria-live="polite" class="bpt-connected-identity" id="bptConnectedIdentity"></span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v6.20</div>
+<div class="app-version" id="headerAppVersion">BPT v6.25</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15757,7 +15765,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 6.20</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 6.25</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -28111,6 +28119,62 @@ function connectionDeviceLabel(){
     });
   }
 
+  function buildPredictionOdds(selected){
+    if(window.BPTBetting?.buildOdds)return window.BPTBetting.buildOdds(selected,Array.isArray(db?.history)?db.history:[]);
+    const names=[...new Set((selected||[]).map(x=>String(x||'').trim()).filter(Boolean))];
+    const rows=Array.isArray(db?.history)?db.history:[];
+    const games=new Map();
+    rows.forEach(r=>{const g=String(r.game||'');if(!g)return;(games.get(g)||games.set(g,[]).get(g)).push(r);});
+    const stats=new Map(names.map(name=>[name,{games:0,wins:0,firstOut:0}]));
+    for(const group of games.values()){
+      const n=group.length;if(!n)continue;
+      const first=Math.max(...group.map(r=>Number(r.place)||0));
+      group.forEach(r=>{const s=stats.get(r.player);if(!s)return;s.games++;if(Number(r.place)===1)s.wins++;if(Number(r.place)===first)s.firstOut++;});
+    }
+    const make=(field,prior)=>{
+      const raw=names.map(name=>{const s=stats.get(name),g=s.games;return {name,score:((s[field]+prior)/(g+prior*names.length))};});
+      const total=raw.reduce((a,x)=>a+x.score,0)||1;
+      return Object.fromEntries(raw.map(x=>[x.name,Math.max(1.05,Math.min(20,Math.round((total/x.score)*10)/10))]));
+    };
+    return {winner:make('wins',0.5),firstEliminated:make('firstOut',0.5)};
+  }
+
+  async function setLivePrediction(type,pick){
+    const kind=type==='winner'?'winner':'firstEliminated',choice=String(pick||'').trim();
+    if(!isActive()||!current?.preGamePending||current?.startedAt)return false;
+    const name=String(liveIdentityName()||'').trim();
+    if(!name || !(current.players||[]).some(p=>p.name===name))return false;
+    const r=await ensureRef(),session=current.sessionId;let changed=false;
+    const result=await r.transaction(server=>{
+      if(!server?.active||server.sessionId!==session||server.startedAt||!server.preGamePending)return server;
+      if(!(server.players||[]).some(p=>p.name===name)|| (choice && !(server.players||[]).some(p=>p.name===choice)))return server;
+      server.betting=server.betting||{stakeCents:50,odds:buildPredictionOdds((server.players||[]).map(p=>p.name)),bets:{}};
+      server.betting.bets=server.betting.bets||{};
+      const previous=server.betting.bets[name]||{};
+      server.betting.bets[name]={...previous,[kind]:choice,confirmed:false,updatedAt:Date.now()};
+      server.updatedAt=Date.now();changed=true;return server;
+    });
+    if(changed)current=result.snapshot.val();
+    return changed;
+  }
+
+  async function confirmLivePredictions(){
+    if(!isActive()||!current?.preGamePending||current?.startedAt)return false;
+    const name=String(liveIdentityName()||'').trim();
+    if(!name || !(current.players||[]).some(p=>p.name===name))return false;
+    const r=await ensureRef(),session=current.sessionId;let changed=false;
+    const result=await r.transaction(server=>{
+      if(!server?.active||server.sessionId!==session||server.startedAt||!server.preGamePending)return server;
+      server.betting=server.betting||{stakeCents:50,odds:buildPredictionOdds((server.players||[]).map(p=>p.name)),bets:{}};
+      server.betting.bets=server.betting.bets||{};
+      const previous=server.betting.bets[name]||{};
+      server.betting.bets[name]={winner:String(previous.winner||''),firstEliminated:String(previous.firstEliminated||''),confirmed:true,updatedAt:Date.now()};
+      server.updatedAt=Date.now();changed=true;return server;
+    });
+    if(changed)current=result.snapshot.val();
+    return changed;
+  }
+
   async function createLive(){
     if(!liveIdentityConfirmed || !liveIdentityName()){
       openSpectatorIdentity(true);
@@ -28154,7 +28218,8 @@ function connectionDeviceLabel(){
         mysteryBountyName:bountyMode==="common"?selected[Math.floor(Math.random()*selected.length)]:"",
         mysteryBountyRevealed:false,mysteryBountyHunter:"",mysteryBountyEvent:null,liveAlerts:[],
         personalBounties:bountyMode==="individual"?drawPersonalBounties(selected):[],
-        preGameBriefing:buildPreGameBriefing(selected),preGameRanking:ranking().map(p=>({name:p.name,points:Number(p.points)||0,gamesCount:Number(p.gamesCount)||0})),preGamePending:true,
+        preGameBriefing:buildPreGameBriefing(selected),preGameRanking:ranking().map(p=>({name:p.name,points:Number(p.points)||0,gamesCount:Number(p.gamesCount)||0})),
+        betting:{stakeCents:50,odds:buildPredictionOdds(selected),bets:{}},preGamePending:true,
         viewers:{},takeoverRequest:null,chat:[],paceAdaptive:$3("live3StructureMode")?.value==="adaptive"
       };
       await r.transaction(server=>{
@@ -28199,6 +28264,8 @@ function connectionDeviceLabel(){
     if(!isOwner())return;
     return ownerTransaction(s=>{
       if(!s.preGamePending||s.startedAt||s.bountyModeRevealPending)return null;
+      const names=(s.players||[]).map(p=>p.name),bets=s.betting?.bets||{};
+      if(names.some(name=>!bets[name]?.confirmed))return null;
       s.preGamePending=false;s.bountyModeRevealPending=true;s.bountyModeRevealAt=Date.now();
       s.running=false;s.runStartedAt=null;s.deadline=null;
       return s;
@@ -28336,6 +28403,32 @@ function connectionDeviceLabel(){
     if(advancing||!isOwner()||!current?.running||remainingSeconds()>0)return;
     advancing=true;
     try{await changeLevel(1,true);}finally{advancing=false;}
+  }
+
+  // Les minuteurs JavaScript sont suspendus ou fortement ralentis par iOS/Android
+  // lorsque le téléphone se met en veille. Le deadline Firebase reste absolu :
+  // au réveil, on rattrape donc tous les niveaux réellement écoulés d'un coup.
+  async function catchUpTimerAfterWake(){
+    if(advancing||!isOwner()||!current?.running||!current?.deadline)return;
+    if(Date.now()<Number(current.deadline))return;
+    advancing=true;
+    try{
+      await ownerTransaction(s=>{
+        const now=Date.now();let guard=0;
+        while(s.running&&Number(s.deadline||0)>0&&now>=Number(s.deadline||0)&&guard<100){
+          const transition=Number(s.deadline),started=Number(s.runStartedAt||transition);
+          s.elapsedSec=Number(s.elapsedSec||0)+Math.max(0,Math.floor((transition-started)/1000));
+          const nextIndex=Math.max(0,Number(s.levelIndex)||0)+1;
+          bptEnsureLevelExists(s,nextIndex);
+          s.levelIndex=nextIndex;
+          s.remainingSec=Math.max(1,Number(s.levels?.[nextIndex]?.durationSec||900));
+          s.runStartedAt=transition;
+          s.deadline=transition+s.remainingSec*1000;
+          guard++;
+        }
+        return s;
+      });
+    }finally{advancing=false;}
   }
 
 
@@ -28789,6 +28882,7 @@ function connectionDeviceLabel(){
       // rafraîchissement du classement et résumé de fin.
       const result=await persistCompletedGame(rows,{showSummary:false});
 
+      await settleLivePredictions(state);
       await markLive3Published(state,rows,result?.synced===true);
       queueFinishedGameSummary(rows,state);
 
@@ -28812,6 +28906,34 @@ function connectionDeviceLabel(){
     }finally{
       winnerFinalizationInProgress=false;
     }
+  }
+
+  async function settleLivePredictions(state){
+    const betting=state?.betting;if(!betting||betting.settledAt)return;
+    const dbx=window.bptFirebaseDb?.();if(!dbx?.ref)return;
+    const winner=(state.players||[]).find(p=>Number(p.place)===1)?.name||state.winnerName||'';
+    const first=(state.players||[]).filter(p=>Number(p.place)>0).sort((a,b)=>Number(b.place)-Number(a.place))[0]?.name||'';
+    const session=String(state.sessionId||'');if(!session)return;
+    const key=name=>encodeURIComponent(String(name||'')).replace(/%/g,'_');
+    const bets=betting.bets||{},odds=betting.odds||{},stake=Math.max(1,Number(betting.stakeCents)||50);
+    await dbx.ref('bpt/bettingLedger').transaction(root=>{
+      root=root||{};root.sessions=root.sessions||{};root.players=root.players||{};
+      if(root.sessions[session])return root;
+      const sessionRows=[];
+      Object.entries(bets).forEach(([player,bet])=>{
+        if(!bet?.confirmed)return;
+        for(const type of ['winner','firstEliminated']){
+          const pick=String(bet[type]||'').trim();if(!pick)continue;
+          const odd=Number(odds?.[type]?.[pick])||1.05,actual=type==='winner'?winner:first,hit=pick===actual;
+          const gross=hit?Math.round(stake*odd):0,net=gross-stake,pk=key(player);
+          const rec=root.players[pk]||{name:player,stakedCents:0,grossWonCents:0,netCents:0,bets:[]};
+          rec.stakedCents=Number(rec.stakedCents||0)+stake;rec.grossWonCents=Number(rec.grossWonCents||0)+gross;rec.netCents=Number(rec.netCents||0)+net;
+          rec.bets=Array.isArray(rec.bets)?rec.bets:[];rec.bets.push({session,type,pick,actual,odds:odd,stakeCents:stake,grossWonCents:gross,netCents:net,at:Date.now()});root.players[pk]=rec;
+          sessionRows.push({player,type,pick,actual,odds:odd,stakeCents:stake,grossWonCents:gross,netCents:net});
+        }
+      });
+      root.sessions[session]={session,settledAt:Date.now(),winner,firstEliminated:first,rows:sessionRows};return root;
+    });
   }
 
   async function endLive(){
@@ -29963,6 +30085,8 @@ async function requestTakeover(){
       if(!document.hidden){
         if(!liveIdentityConfirmed){
           openSpectatorIdentity(true);
+        }else if(isActive() && isOwner()){
+          catchUpTimerAfterWake().finally(()=>{render();installListener();});
         }else if(isActive() && !isOwner()){
           updateViewerPresence();
         }
@@ -30049,6 +30173,8 @@ async function requestTakeover(){
     startReflectionTimer,
     stopReflectionTimer,
     toggleAllIn,
+    setLivePrediction,
+    confirmLivePredictions,
     undoLastElimination,
     correctLastElimination,
     getLastEliminated:()=>clone(lastEliminatedPlayer()),
@@ -30879,7 +31005,8 @@ body.b466-live-active #live3>.hero{display:none!important}
 </style>
 
 <link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=6.00">
-<script id="bpt-live-ui" src="./live-ui.js?v=6.20"></script>
+<script id="bpt-live-betting" src="./live-betting.js?v=6.25"></script>
+<script id="bpt-live-ui" src="./live-ui.js?v=6.25"></script>
 
 
 <style id="bpt-v485-nav-clean">
