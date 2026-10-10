@@ -66,11 +66,11 @@
       root.addEventListener('click',e=>{
         const spectator=!api()?.isOwner?.();
         const toggle=e.target.closest('[data-menu-toggle]');
-        if(toggle){if(!spectator||toggle.dataset.menuToggle==='follow')toggleActionMenu(root,toggle);return;}
+        if(toggle){if(!spectator||toggle.dataset.menuToggle==='follow'||toggle.dataset.menuToggle==='tools')toggleActionMenu(root,toggle);return;}
         if(e.target.closest('[data-timebank-stop]')){if(!spectator)api()?.stopReflectionTimer?.();return;}
         const a=e.target.closest('[data-action]');if(a){closeActionMenus();info(a.dataset.action);return;}
         const b=e.target.closest('[data-do]');if(b){
-          if(spectator&&!['takeover','full','chat','enjeux','personal-bounty','live-ranking'].includes(b.dataset.do))return;
+          if(spectator&&!['takeover','full','chat','enjeux','personal-bounty','live-ranking','odds'].includes(b.dataset.do))return;
           closeActionMenus();doit(b.dataset.do,root.dataset.fs==='1');
         }
       });
@@ -143,6 +143,12 @@
     if(fixed.length+active.length!==n||new Set(fixedPlaces).size!==fixedPlaces.length||fixedPlaces.some(p=>!Number.isInteger(p)||p<=m||p>n))return null;
     const awards=Array.from({length:n},(_,i)=>Number(award(i+1,n))||0);
     const outcome=(name,place)=>{const p=base.get(name);return {name,points:p.points+(place?awards[place-1]:0),games:p.games+(live.has(name)?1:0)}};
+    // Classement actualisé : les joueurs éliminés ont déjà sécurisé leurs
+    // points, les joueurs encore en jeu conservent provisoirement leur score.
+    const currentRanking=new Map([...base.values()].map(p=>{
+      const livePlayer=live.get(p.name),place=Number(livePlayer?.place)||0;
+      return {name:p.name,points:p.points+(place?awards[place-1]:0),games:p.games+(livePlayer?1:0)};
+    }).sort(compare).map((p,i)=>[p.name,i+1]));
     const slots=Array.from({length:m},(_,i)=>i+1);
     // Une place finale ne peut appartenir qu'à un joueur : les appariements
     // calculent les bornes exactes sans énumérer toutes les permutations.
@@ -169,7 +175,7 @@
         worst=Math.max(worst,1+fixedAbove+maxMatching(others,remaining,target,true));
         minPoints=Math.min(minPoints,target.points);maxPoints=Math.max(maxPoints,target.points);
       }
-      return {name,before:before.get(name)||null,best,worst,minPoints,maxPoints,status:!player?'Absent':inPlay?'En jeu':player.status==='winner'?'Vainqueur':'Éliminé',fixedPoints:!inPlay};
+      return {name,before:before.get(name)||null,current:currentRanking.get(name)||null,best,worst,minPoints,maxPoints,status:!player?'Absent':inPlay?'En jeu':player.status==='winner'?'Vainqueur':'Éliminé',fixedPoints:!inPlay};
     });
     projections.sort((a,b)=>(a.before||Infinity)-(b.before||Infinity)||a.name.localeCompare(b.name,'fr'));
     return {rows:projections,scoreless:awards.every(p=>p===0),finished:!!st.finishedAt};
@@ -190,7 +196,7 @@
     add(host,'p',data.finished?'CHAMPIONNAT · CLASSEMENT FINAL':'CHAMPIONNAT · POSITIONS POSSIBLES','bpt-ranking-subtitle');
     const table=document.createElement('table');table.className='bpt-ranking-table';host.append(table);
     const thead=document.createElement('thead'),head=document.createElement('tr');table.append(thead);thead.append(head);
-    for(const label of ['Joueur','Avant',data.finished?'Après':'Possible']){const th=add(head,'th',label);th.scope='col';}
+    for(const label of ['Joueur','Avant','Actuelle',data.finished?'Après':'Possible']){const th=add(head,'th',label);th.scope='col';}
     const tbody=document.createElement('tbody');table.append(tbody);
     for(const p of data.rows){
       const row=document.createElement('tr');tbody.append(row);
@@ -198,6 +204,7 @@
       const status=p.status+(p.status==='Éliminé'?' · points fixés':'');add(name,'small',status,p.status==='En jeu'?'is-ahead':'');
       add(name,'small',(p.minPoints===p.maxPoints?fmt(p.minPoints):fmt(p.minPoints)+'–'+fmt(p.maxPoints))+' pts');
       add(row,'td',p.before?ordinal(p.before):'—');
+      add(row,'td',p.current?ordinal(p.current):'—');
       const projected=add(row,'td','');add(projected,'b',p.best===p.worst?ordinal(p.best):ordinal(p.best)+'–'+ordinal(p.worst));
       if(p.before){
         const up=Math.max(0,p.before-p.best),down=Math.max(0,p.worst-p.before);
@@ -573,10 +580,10 @@
     renderFinalDuel(box,ev);
     set('bountytitle',ev.label||ev.title||'');set('bountyname',ev.name||'');set('bountytext',ev.text||'');set('bountyhunter',ev.extra||'');
     const button=box.querySelector('[data-bounty-close]');
-    const remain=Math.max(0,Math.ceil((8000-(Date.now()-bountySeenAt.get(ev.id)))/1000));
+    const remain=0;
     const owner=!!api()?.isOwner?.();
-    button.disabled=ev.kind==='mode'?(ev.drawing||!owner||bountyLaunchBusy):remain>0;
-    button.textContent=ev.kind==='duel'?(remain?'Place au duel ! ('+remain+' s)':'Place au duel !'):ev.kind==='mode'?(ev.drawing?'Tirage en cours…':!owner?'En attente de l’organisateur':bountyLaunchBusy?'Lancement…':'▶ Lancer la partie'):remain?'Continuer ('+remain+' s)':pending.length>1?'Continuer · '+(pending.length-1)+' à suivre':'Continuer';
+    button.disabled=ev.kind==='mode'?(ev.drawing||!owner||bountyLaunchBusy):false;
+    button.textContent=ev.kind==='duel'?'Place au duel !':ev.kind==='mode'?(ev.drawing?'Tirage en cours…':!owner?'En attente de l’organisateur':bountyLaunchBusy?'Lancement…':'▶ Lancer la partie'):pending.length>1?'Continuer · '+(pending.length-1)+' à suivre':'Continuer';
     button.onclick=async()=>{
       if(button.disabled)return;
       if(ev.kind==='mode'){
@@ -630,6 +637,13 @@
         else{takeoverBtn.disabled=false;setText(takeoverBtn,'Forcer la reprise');}
       }
       const personalButton=r.querySelector('.bpt484-personal');if(personalButton){personalButton.hidden=false;setText(personalButton,'🎯 Bounty');}
+      const toolsMenu=r.querySelector('[data-menu-panel="tools"]');
+      if(toolsMenu){
+        const reflection=toolsMenu.querySelector('[data-do="timer"]'),end=toolsMenu.querySelector('[data-do="end"]'),odds=toolsMenu.querySelector('[data-do="odds"]');
+        if(reflection)reflection.hidden=!ownerRole;
+        if(end)end.hidden=!ownerRole;
+        if(odds)odds.hidden=false;
+      }
       const chatButton=r.querySelector('.bpt484-head-tools .bpt484-chat');if(chatButton){const unread=Math.max(0,Number(api()?.getUnreadChatCount?.())||0);setText(chatButton,unread?'Chat ('+unread+')':'Chat');chatButton.setAttribute('aria-label',unread?'Chat · '+unread+' messages non lus':'Chat');}
       renderPreGame(r,st,ownerRole);
       renderBounty(r,st);

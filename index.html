@@ -14395,7 +14395,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="6.01";
+const BPT_APP_VERSION="6.04";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14549,7 +14549,7 @@ function simplifyRecordTextForMobile(text){
 <span aria-live="polite" class="bpt-connected-identity" id="bptConnectedIdentity"></span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v6.01</div>
+<div class="app-version" id="headerAppVersion">BPT v6.04</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15676,7 +15676,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 6.01</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 6.04</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -19132,7 +19132,9 @@ function pumpFinishedSummary(){
   if(first)card.focus({preventScroll:true});
 }
 function queuePublishedLiveSummary(state){
-  if(!state?.publishedToHistory||!state.finishedAt)return;
+  // Les accomplissements et bountys sont affichés uniquement pendant le Live.
+  // Ils ne doivent pas être rejoués à l’ouverture de l’application.
+  return;
   const rows=(db.history||[]).filter(r=>Number(r.gameStartedAt)>0&&Number(r.gameStartedAt)===Number(state.startedAt));
   if(rows.length)queueFinishedGameSummary(rows,state);
 }
@@ -26309,7 +26311,7 @@ document.addEventListener("visibilitychange",()=>{
 
   let live3PendingPaceAdvice=null;
   let live3PaceLastCheckAt=0;
-  const LIVE3_PACE_MIN_INTERVAL_MS=30*60*1000;
+  const LIVE3_PACE_MIN_INTERVAL_MS=15*60*1000;
 
   function live3PaceStorageKey(){
     return `bpt_pace_advice_${String(current?.sessionId||"none")}`;
@@ -26331,13 +26333,17 @@ document.addEventListener("visibilitychange",()=>{
     const elapsed=Math.max(0,elapsedSeconds());
     const eliminationProgress=(totalPlayers-remaining)/(totalPlayers-1);
     const timeProgress=elapsed/targetSec;
-    // Projection volontairement amortie : elle réagit au rythme des éliminations
-    // sans extrapoler de façon excessive après une seule sortie.
+    // Projection progressive : une seule élimination ne peut plus provoquer
+    // une heure de retard annoncée ni une chute brutale des blinds.
     let projectedTotal=targetSec;
     if(elapsed>0 && eliminationProgress>0){
-      const delta=timeProgress-eliminationProgress;
-      projectedTotal=targetSec*(1+delta*0.80);
-      projectedTotal=Math.max(targetSec*0.65,Math.min(targetSec*1.75,projectedTotal));
+      const observedTotal=elapsed/Math.max(.01,eliminationProgress);
+      const eliminations=totalPlayers-remaining;
+      const weight=Math.min(.55,.08+.10*eliminations);
+      projectedTotal=targetSec+(observedTotal-targetSec)*weight;
+      const minFactor=eliminations===1?.92:.80;
+      const maxFactor=eliminations===1?1.08:1.30;
+      projectedTotal=Math.max(targetSec*minFactor,Math.min(targetSec*maxFactor,projectedTotal));
     }
     const projectedFinish=Number(current.startedAt)+projectedTotal*1000;
     const targetFinish=Number(current.startedAt)+targetSec*1000;
@@ -26386,17 +26392,16 @@ document.addEventListener("visibilitychange",()=>{
     if(!upcoming)return null;
     const currentMin=Math.max(1,Math.round(Number(upcoming.durationSec||0)/60)||currentBlindDurationMinutes());
 
-    // V4.91 : l'adaptation se base directement sur l'écart de fin estimée,
-    // sans attendre 50 % de la partie. Dès 8 min, le conseil est disponible au clic.
+    // L’adaptation commence tôt, mais reste progressive et mesurée.
     const deltaMin=Math.round(Number(projection.deltaSec||0)/60); // + = retard, - = avance
     const absDeltaMin=Math.abs(deltaMin);
     if(absDeltaMin<8)return null;
     const type=deltaMin>0?"accelerate":"slow";
-    const change=(absDeltaMin>=25?4:2)*(type==="accelerate"?-1:1);
+    const change=Math.max(1,Math.min(2,Math.round(absDeltaMin/20)))*(type==="accelerate"?-1:1);
     const proposedMin=Math.max(2,Math.min(40,currentMin+change));
     if(proposedMin===currentMin)return null;
     const targetRemaining=Math.max(0,targetSec-elapsed);
-    return {type,deltaMin,deltaSec:projection.deltaSec,currentMin,proposedMin,totalPlayers,remaining,elapsed,targetRemaining,timeProgress,eliminationProgress,autoSuggest:absDeltaMin>=15};
+    return {type,deltaMin,deltaSec:projection.deltaSec,currentMin,proposedMin,totalPlayers,remaining,elapsed,targetRemaining,timeProgress,eliminationProgress,autoSuggest:absDeltaMin>=10};
   }
 
   function live3ClosePaceModal(){
@@ -26440,7 +26445,7 @@ document.addEventListener("visibilitychange",()=>{
     const sinceLast=Number(memo.at||0)>0 ? now-Number(memo.at) : Infinity;
     // Une élimination déclenche bien une nouvelle analyse, mais pas une nouvelle alerte
     // toutes les quelques minutes : 15 min mini après une alerte, 30 min sinon.
-    if(afterElimination && sinceLast<15*60*1000)return;
+    if(afterElimination && sinceLast<5*60*1000)return;
     if(!afterElimination && sinceLast<LIVE3_PACE_MIN_INTERVAL_MS)return;
 
     if(current?.paceAdaptive===true){
@@ -30673,7 +30678,7 @@ body.b466-live-active #live3>.hero{display:none!important}
 </style>
 
 <link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=6.00">
-<script id="bpt-live-ui" src="./live-ui.js?v=6.00"></script>
+<script id="bpt-live-ui" src="./live-ui.js?v=6.04"></script>
 
 
 <style id="bpt-v485-nav-clean">
