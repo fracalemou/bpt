@@ -7276,6 +7276,63 @@ body.bpt-mobile-device #ranking td:nth-child(14){
   display:none !important;
 }
 
+/* L’évolution reste visible sur téléphone : c’est l’information clé du classement. */
+html.bpt-mobile-device #ranking th:nth-child(4),
+html.bpt-mobile-device #ranking td:nth-child(4),
+body.bpt-mobile-device #ranking th:nth-child(4),
+body.bpt-mobile-device #ranking td:nth-child(4){
+  display:table-cell !important;
+}
+html.bpt-mobile-device #ranking table,
+body.bpt-mobile-device #ranking table{
+  table-layout:fixed !important;
+  width:100% !important;
+}
+html.bpt-mobile-device #ranking th:nth-child(1),
+html.bpt-mobile-device #ranking td:nth-child(1),
+body.bpt-mobile-device #ranking th:nth-child(1),
+body.bpt-mobile-device #ranking td:nth-child(1){width:12% !important}
+html.bpt-mobile-device #ranking th:nth-child(2),
+html.bpt-mobile-device #ranking td:nth-child(2),
+body.bpt-mobile-device #ranking th:nth-child(2),
+body.bpt-mobile-device #ranking td:nth-child(2){width:35% !important}
+html.bpt-mobile-device #ranking th:nth-child(3),
+html.bpt-mobile-device #ranking td:nth-child(3),
+body.bpt-mobile-device #ranking th:nth-child(3),
+body.bpt-mobile-device #ranking td:nth-child(3){width:17% !important}
+html.bpt-mobile-device #ranking th:nth-child(4),
+html.bpt-mobile-device #ranking td:nth-child(4),
+body.bpt-mobile-device #ranking th:nth-child(4),
+body.bpt-mobile-device #ranking td:nth-child(4){width:18% !important}
+html.bpt-mobile-device #ranking .progress-indicator,
+body.bpt-mobile-device #ranking .progress-indicator{white-space:nowrap}
+
+/* Demande utilisateur : toutes les colonnes restent accessibles sur mobile. */
+html.bpt-mobile-device #ranking .tablewrap,
+body.bpt-mobile-device #ranking .tablewrap{
+  overflow-x:auto !important;
+  -webkit-overflow-scrolling:touch;
+}
+html.bpt-mobile-device #ranking table,
+body.bpt-mobile-device #ranking table{
+  min-width:920px !important;
+  table-layout:auto !important;
+}
+html.bpt-mobile-device #ranking th:nth-child(n),
+html.bpt-mobile-device #ranking td:nth-child(n),
+body.bpt-mobile-device #ranking th:nth-child(n),
+body.bpt-mobile-device #ranking td:nth-child(n){
+  display:table-cell !important;
+  white-space:nowrap;
+}
+html.bpt-mobile-device #ranking th,
+html.bpt-mobile-device #ranking td,
+body.bpt-mobile-device #ranking th,
+body.bpt-mobile-device #ranking td{
+  padding:7px 6px !important;
+  font-size:11px !important;
+}
+
 html.bpt-mobile-device #ranking .combined-block > summary,
 body.bpt-mobile-device #ranking .combined-block > summary{
   display:none !important;
@@ -14395,7 +14452,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="6.04";
+const BPT_APP_VERSION="6.08";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14549,7 +14606,7 @@ function simplifyRecordTextForMobile(text){
 <span aria-live="polite" class="bpt-connected-identity" id="bptConnectedIdentity"></span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v6.04</div>
+<div class="app-version" id="headerAppVersion">BPT v6.08</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15474,7 +15531,7 @@ function simplifyRecordTextForMobile(text){
 </details>
 <div class="tablewrap"><table>
 <thead><tr>
-<th>Clt</th><th>Joueur</th><th>Points</th><th>Progression</th><th>3 dernières</th><th>Moy. pts</th>
+<th>Clt</th><th>Joueur</th><th>Points</th><th>Évolution</th><th>3 dernières</th><th>Moy. pts</th>
 <th>Participations</th><th>Victoires</th><th>Podiums</th><th>Tabliers</th>
 <th>Kills</th><th>Kills/partie</th><th>Solde net</th><th>Bourreau</th><th>Victime</th>
 </tr></thead>
@@ -15676,7 +15733,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 6.04</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 6.08</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -21076,6 +21133,12 @@ function renderDashboard(){
       const V=(cat,arr)=>bptDashboardFunnyVariant(cat,gameKey,arr);
       const history=Array.isArray(db.history)?db.history:[];
       const gameNos=[...new Set(history.map(r=>Number(r.game)).filter(g=>Number.isFinite(g)&&g>0))].sort((a,b)=>a-b);
+      const rankingSnapshots=rankingSnapshotByGame();
+      const currentRankingSnapshot=rankingSnapshots.find(s=>s.game===lastGameNo);
+      const currentLeaderName=currentRankingSnapshot?Object.entries(currentRankingSnapshot.ranks||{}).sort((a,b)=>a[1]-b[1])[0]?.[0]:null;
+      const previousRankingSnapshot=rankingSnapshots.filter(s=>s.game<lastGameNo).slice(-1)[0];
+      const previousLeaderName=previousRankingSnapshot?Object.entries(previousRankingSnapshot.ranks||{}).sort((a,b)=>a[1]-b[1])[0]?.[0]:null;
+      const leaderTakesLead=Boolean(currentLeaderName===leader.name && currentLeaderName!==previousLeaderName);
 
       const currentPodiumStreak=(name)=>{
         let streak=0;
@@ -21106,21 +21169,21 @@ function renderDashboard(){
         const gapTxt=`${Math.abs(gap)} point${Math.abs(gap)>1?'s':''}`;
         if(leaderPodiums>=2){
           parts.push(V('narrativeLeaderPodium',[
-            `${L(leader.name)} signe un ${leaderPodiums}e podium de suite et conserve la tête du championnat devant ${L(second.name)}, à ${gapTxt}.`,
-            `${L(leader.name)} enchaîne un ${leaderPodiums}e podium consécutif et reste leader, avec ${gapTxt} d’avance sur ${L(second.name)}.`,
-            `Toujours régulier, ${L(leader.name)} monte sur un ${leaderPodiums}e podium de suite et garde les commandes devant ${L(second.name)} (${gapTxt} d’écart).`
+            `${L(leader.name)} signe un ${leaderPodiums}e podium de suite et ${leaderTakesLead?'prend':'conserve'} la tête du championnat devant ${L(second.name)}, à ${gapTxt}.`,
+            `${L(leader.name)} enchaîne un ${leaderPodiums}e podium consécutif et ${leaderTakesLead?'prend la tête':'reste leader'}, avec ${gapTxt} d’avance sur ${L(second.name)}.`,
+            `Toujours régulier, ${L(leader.name)} monte sur un ${leaderPodiums}e podium de suite et ${leaderTakesLead?'prend les commandes':'garde les commandes'} devant ${L(second.name)} (${gapTxt} d’écart).`
           ]));
         }else if(Math.abs(gap)<=5){
           parts.push(V('narrativeLeaderClose',[
-            `${L(leader.name)} conserve la tête du championnat, mais ${L(second.name)} reste au contact à seulement ${gapTxt}.`,
-            `${L(leader.name)} reste leader devant ${L(second.name)}, avec seulement ${gapTxt} entre les deux : rien n’est joué.`,
-            `Le duel reste serré : ${L(leader.name)} mène encore, ${L(second.name)} n’est qu’à ${gapTxt}.`
+            `${L(leader.name)} ${leaderTakesLead?'prend':'conserve'} la tête du championnat, mais ${L(second.name)} reste au contact à seulement ${gapTxt}.`,
+            `${L(leader.name)} ${leaderTakesLead?'prend la tête':'reste leader'} devant ${L(second.name)}, avec seulement ${gapTxt} entre les deux : rien n’est joué.`,
+            `Le duel reste serré : ${L(leader.name)} ${leaderTakesLead?'prend les commandes':'mène encore'}, ${L(second.name)} n’est qu’à ${gapTxt}.`
           ]));
         }else{
           parts.push(V('narrativeLeaderWide',[
-            `${L(leader.name)} conserve la tête du championnat avec ${gapTxt} d’avance sur ${L(second.name)}.`,
-            `${L(leader.name)} reste solidement installé en tête, ${gapTxt} devant ${L(second.name)}.`,
-            `${L(leader.name)} garde les commandes du championnat, avec ${L(second.name)} à ${gapTxt}.`
+            `${L(leader.name)} ${leaderTakesLead?'prend':'conserve'} la tête du championnat avec ${gapTxt} d’avance sur ${L(second.name)}.`,
+            `${L(leader.name)} ${leaderTakesLead?'prend la tête':'reste solidement installé en tête'}, ${gapTxt} devant ${L(second.name)}.`,
+            `${L(leader.name)} ${leaderTakesLead?'prend les commandes':'garde les commandes'} du championnat, avec ${L(second.name)} à ${gapTxt}.`
           ]));
         }
       }else{
@@ -30678,7 +30741,7 @@ body.b466-live-active #live3>.hero{display:none!important}
 </style>
 
 <link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=6.00">
-<script id="bpt-live-ui" src="./live-ui.js?v=6.04"></script>
+<script id="bpt-live-ui" src="./live-ui.js?v=6.08"></script>
 
 
 <style id="bpt-v485-nav-clean">
