@@ -30,7 +30,7 @@
 
     <div class="bpt-bounty-overlay" data-role="bounty" hidden><section class="bpt-bounty-card" role="dialog" aria-modal="true" aria-label="Révélation du bounty mystère" tabindex="-1"><div class="bpt-bounty-icon">🎯</div><h2 data-role="bountytitle"></h2><div class="bpt-bounty-name" data-role="bountyname"></div><p data-role="bountytext"></p><strong data-role="bountyhunter"></strong><button type="button" data-bounty-close disabled>Continuer</button><button type="button" data-bounty-back hidden>← Retour aux paramètres</button></section></div>
     <div class="bpt484-head"><div class="bpt484-brand">BPT</div><div class="bpt484-owner" data-role="owner">Organisateur · —</div><div class="bpt484-head-tools"><button class="bpt484-chat" data-do="chat">Chat</button><button class="bpt484-full" data-do="full" aria-label="${fs?'Quitter le plein écran':'Plein écran'}" title="${fs?'Quitter le plein écran':'Plein écran'}">⛶</button><div class="bpt484-part" data-role="part">Partie n°—</div></div></div>
-    <section class="bpt-pregame" data-role="pregame" hidden aria-label="Paris avant la partie"><div class="bpt-pregame-inner"><header><b>BPT</b><span data-role="pregamecount"></span></header><div class="bpt-pregame-heading bpt-pregame-bets-heading"><small>AVANT LE LANCEMENT</small><h2>Placez vos paris</h2><p>Choisissez éventuellement un vainqueur et un 1er éliminé, puis validez votre pari.</p></div><div class="bpt-pregame-heading bpt-pregame-objectives-heading" hidden><h2>Les enjeux de la partie</h2></div><div class="bpt-pregame-stories" data-role="pregamestories" hidden></div><section class="bpt-predictions" data-role="predictions" aria-label="Pronostics"></section><footer><span data-role="pregamestatus"></span><div class="bpt-pregame-buttons"><button type="button" data-do="back-pregame">← Retour aux paramètres</button><button type="button" data-do="launch-pregame">▶ Révéler le type de bounty</button></div></footer></div></section>
+    <section class="bpt-pregame" data-role="pregame" hidden aria-label="Paris avant la partie"><div class="bpt-pregame-inner"><header><b>BPT</b><span data-role="pregamecount"></span></header><div class="bpt-pregame-heading bpt-pregame-bets-heading"><small>AVANT LE LANCEMENT</small><h2>Placez vos paris</h2><p>Choisissez éventuellement un vainqueur et un 1er éliminé, puis validez votre pari.</p></div><section class="bpt-predictions" data-role="predictions" aria-label="Pronostics"></section><footer><span data-role="pregamestatus"></span><div class="bpt-pregame-buttons"><button type="button" data-do="back-pregame">← Retour aux paramètres</button><button type="button" data-do="launch-pregame">▶ Révéler le type de bounty</button></div></footer></div></section>
     <section class="bpt484-takeover-request" data-role="takeoverrequest" role="alert" hidden><strong>DEMANDE DE REPRISE</strong><p data-role="takeoverrequesttext"></p><div><button type="button" data-do="approve-takeover">Accepter</button><button type="button" data-do="reject-takeover">Refuser</button></div></section>
     <div class="bpt484-special-hud" data-role="specialhud"><div class="bpt484-timebank-player" data-role="timebankplayer"></div><div class="bpt484-timebank-count" data-role="timebankcount"></div><div class="bpt484-timebank-meta" data-role="timebankmeta"></div><button data-timebank-stop>Décision prise</button></div>
     <div class="bpt484-main">
@@ -473,11 +473,11 @@
       const landscapePhone=matchMedia('(max-width:1000px) and (max-height:560px) and (orientation:landscape)').matches;
       /* Hiérarchie validée : Timer > Blinds > Joueurs = Tapis moyen = Prochaines blinds = Temps écoulé. */
       fitText(root.querySelector('.bpt484-clock .bpt484-value'),{max:portrait?148:(landscapePhone?100:210),min:portrait?72:(landscapePhone?46:74),widthRatio:.92,heightRatio:.78});
-      fitText(root.querySelector('.bpt484-blinds .bpt484-value'),{max:portrait?78:(landscapePhone?66:104),min:portrait?34:(landscapePhone?30:42),widthRatio:.96,heightRatio:.86});
+      fitText(root.querySelector('.bpt484-blinds .bpt484-value'),{max:portrait?90:(landscapePhone?78:130),min:portrait?38:(landscapePhone?34:48),widthRatio:.96,heightRatio:.9});
       fitText(root.querySelector('.bpt484-players .bpt484-value'),{max:portrait?78:(landscapePhone?56:98),min:portrait?44:(landscapePhone?30:52),widthRatio:.88,heightRatio:.76});
       fitText(root.querySelector('.bpt484-stack [data-role="avgchips"]'),{max:portrait?42:(landscapePhone?30:48),min:portrait?22:(landscapePhone?17:26),widthRatio:.88,heightRatio:.48});
       fitText(root.querySelector('.bpt484-timing .bpt484-value'),{max:portrait?42:(landscapePhone?26:50),min:portrait?24:(landscapePhone?16:24),widthRatio:.92,heightRatio:.56});
-      fitText(root.querySelector('.bpt484-next strong'),{max:portrait?32:(landscapePhone?23:42),min:portrait?18:(landscapePhone?13:20),widthRatio:.90,heightRatio:.48});
+      fitText(root.querySelector('.bpt484-next strong'),{max:portrait?27:(landscapePhone?19:30),min:portrait?16:(landscapePhone?12:16),widthRatio:.90,heightRatio:.42});
       root.querySelectorAll('.bpt484-actions>button').forEach(btn=>fitText(btn,{max:portrait?16:(landscapePhone?14:20),min:12,wrap:true,widthRatio:.98,heightRatio:.98}));
     });
   }
@@ -524,23 +524,10 @@
     const box=root.querySelector('[data-role="pregame"]');if(!box)return;
     box.hidden=!(st.preGamePending&&!st.startedAt);
     if(box.hidden)return;
-    const entries=Array.isArray(st.preGameBriefing)?st.preGameBriefing:[];
-    box.querySelector('[data-role="pregamecount"]').textContent='AVANT-PARTIE · '+(st.players||[]).length+' JOUEURS · PARIS';
-    box.querySelector('[data-role="pregamestatus"]').textContent=owner?'Le chrono attend le lancement.':'En attente du lancement par l’organisateur.';
-    renderPredictions(root,st,owner);
-    const launchButton=box.querySelector('[data-do="launch-pregame"]');if(launchButton){launchButton.disabled=!owner;launchButton.title=owner?'L’organisateur peut passer à la révélation du bounty.':'En attente de l’organisateur.';}
-    box.querySelector('[data-do="launch-pregame"]').hidden=false;
-    box.querySelector('[data-do="back-pregame"]').hidden=false;
-    const key=JSON.stringify(entries);
-    if(box.dataset.entries!==key){
-      box.dataset.entries=key;const host=box.querySelector('[data-role="pregamestories"]');host.replaceChildren();
-      if(!entries.length)host.textContent='Pas encore assez d’historique ou d’enjeux réalisables pour cette table. La partie peut être lancée.';
-      for(const entry of entries){
-        const card=document.createElement('article'),icon=document.createElement('span'),copy=document.createElement('div'),name=document.createElement('h3'),title=document.createElement('small'),text=document.createElement('p');
-        icon.className='bpt-pregame-icon';icon.textContent=entry.icon||'🎯';name.textContent=entry.name;title.textContent=({rivalry:'RIVALITÉ',ranking:'CLASSEMENT',record:'RECORD À BATTRE'}[entry.theme]||entry.title)+(entry.theme?' · '+entry.title:'');text.textContent=entry.text;
-        copy.append(name,title,text);card.append(icon,copy);host.append(card);
-      }
-    }
+    const players=predictionNames(st),rawIdentity=String(api()?.getIdentityName?.()||'').trim(),norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('fr').trim(),identity=players.find(p=>norm(p)===norm(rawIdentity))||rawIdentity,me=st?.betting?.bets?.[identity]||{},odds=st?.betting?.odds||{},selected=(me.winner?1:0)+(me.firstEliminated?1:0);
+    const key=JSON.stringify({players,identity,me,odds,owner});if(box.dataset.screenKey===key)return;box.dataset.screenKey=key;
+    const options=(type)=>['<option value="">Pas de pari</option>',...players.slice().sort((a,b)=>predictionOdds(st,type,a)-predictionOdds(st,type,b)).map(name=>`<option value="${esc(name)}" ${me[type]===name?'selected':''}>${esc(name)} · Cote ${predictionOdds(st,type,name).toFixed(2).replace('.',',')}</option>`)].join('');
+    box.innerHTML=`<div class="bpt-pregame-inner"><header><b>BPT</b><span>AVANT-PARTIE · ${players.length} JOUEURS · PARIS</span></header><div class="bpt-pregame-heading bpt-pregame-bets-heading"><small>AVANT LE LANCEMENT</small><h2>Placez vos paris</h2><p>Pari de <strong>${esc(identity||'joueur connecté')}</strong> · 0,50 € par pari</p></div><section class="bpt-predictions" data-role="predictions" aria-label="Pronostics"><p class="bpt-prediction-note">Un pari vainqueur et/ou un pari 1er éliminé. Vous pouvez aussi choisir « Pas de pari ».</p><div class="bpt-prediction-card"><div class="bpt-prediction-head"><strong>Vainqueur</strong><span>0,50 €</span></div><select class="bpt-prediction-select" data-bet-action="pick" data-bet-type="winner">${options('winner')}</select></div><div class="bpt-prediction-card"><div class="bpt-prediction-head"><strong>1er éliminé</strong><span>0,50 €</span></div><select class="bpt-prediction-select" data-bet-action="pick" data-bet-type="firstEliminated">${options('firstEliminated')}</select><div class="bpt-prediction-footer"><span class="bpt-prediction-status">${me.confirmed?'✓ Pari enregistré':'Sélectionnez puis validez'}</span><button type="button" data-bet-action="confirm" class="bpt-prediction-confirm" ${me.confirmed?'disabled':''}>${me.confirmed?'Pari validé':(selected?'Valider le pari':'Valider pas de pari')}</button></div></div></section><footer><span>${owner?'Le chrono attend le lancement.':'En attente du lancement par l’organisateur.'}</span><div class="bpt-pregame-buttons"><button type="button" data-do="back-pregame">← Retour aux paramètres</button><button type="button" data-do="launch-pregame" ${owner?'':'disabled'}>▶ Révéler le type de bounty</button></div></footer></div>`;
   }
   function bountyModeReveal(st,now=Date.now()){
     const at=Number(st.bountyModeRevealAt)||0,age=now-at;
