@@ -473,7 +473,7 @@
       const landscapePhone=matchMedia('(max-width:1000px) and (max-height:560px) and (orientation:landscape)').matches;
       /* Hiérarchie validée : Timer > Blinds > Joueurs = Tapis moyen = Prochaines blinds = Temps écoulé. */
       fitText(root.querySelector('.bpt484-clock .bpt484-value'),{max:portrait?148:(landscapePhone?100:210),min:portrait?72:(landscapePhone?46:74),widthRatio:.92,heightRatio:.78});
-      fitText(root.querySelector('.bpt484-blinds .bpt484-value'),{max:portrait?90:(landscapePhone?78:130),min:portrait?38:(landscapePhone?34:48),widthRatio:.96,heightRatio:.9});
+      fitText(root.querySelector('.bpt484-blinds .bpt484-value'),{max:portrait?102:(landscapePhone?88:170),min:portrait?42:(landscapePhone?38:56),widthRatio:.96,heightRatio:.92});
       fitText(root.querySelector('.bpt484-players .bpt484-value'),{max:portrait?78:(landscapePhone?56:98),min:portrait?44:(landscapePhone?30:52),widthRatio:.88,heightRatio:.76});
       fitText(root.querySelector('.bpt484-stack [data-role="avgchips"]'),{max:portrait?42:(landscapePhone?30:48),min:portrait?22:(landscapePhone?17:26),widthRatio:.88,heightRatio:.48});
       fitText(root.querySelector('.bpt484-timing .bpt484-value'),{max:portrait?42:(landscapePhone?26:50),min:portrait?24:(landscapePhone?16:24),widthRatio:.92,heightRatio:.56});

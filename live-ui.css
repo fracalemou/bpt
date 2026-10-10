@@ -33,6 +33,7 @@
 .bpt484-clock{display:flex;align-items:center;justify-content:center;text-align:center;min-height:0;cursor:pointer;position:relative}
 .bpt484-clock .bpt484-value{font-weight:950;line-height:.86;white-space:nowrap;letter-spacing:-.055em}
 .bpt484-blinds{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0;cursor:pointer;position:relative;padding-top:10px}
+.bpt484-blinds{min-height:clamp(100px,16vh,180px)}
 .bpt484-blinds .bpt484-value{font-weight:950;line-height:.95;white-space:nowrap;color:var(--gold);letter-spacing:-.055em;max-width:100%}
 .bpt484-next{margin-top:10px;color:var(--muted);font-size:18px;font-weight:750;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:clip;text-align:center;align-self:stretch}
 .bpt484-next strong{color:var(--text);font-weight:950}
@@ -206,6 +207,7 @@
  .bpt484-head-tools .bpt484-chat,.bpt484-head-tools .bpt484-full{min-height:26px;height:26px;min-width:28px;padding:3px 7px;font-size:12px}
  .bpt484-clock-settings{font-size:18px;padding:4px;right:1%}
 }
+@media(max-width:760px){.bpt484-blinds{min-height:clamp(64px,12vh,108px)}}
 
 /* Classement du championnat : ne pas hériter des grandes tables mobiles. */
 .bpt484-live-ranking{color:#fff}
