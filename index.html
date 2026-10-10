@@ -14476,7 +14476,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="6.18";
+const BPT_APP_VERSION="6.20";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14630,7 +14630,7 @@ function simplifyRecordTextForMobile(text){
 <span aria-live="polite" class="bpt-connected-identity" id="bptConnectedIdentity"></span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v6.18</div>
+<div class="app-version" id="headerAppVersion">BPT v6.20</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15757,7 +15757,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 6.18</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 6.20</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -16442,7 +16442,9 @@ async function bptUploadPhotoBlobToUrl(path,blob){
   form.append("file",blob,"bpt-photo.jpg");
   form.append("upload_preset",cfg.uploadPreset);
   form.append("folder","bpt");
-  form.append("public_id",bptSafeFilePart(path.replace(/\.[^.]+$/,"")));
+  // Un identifiant unique évite que Cloudinary ou son CDN ne renvoie une ancienne
+  // image conservée sous le même public_id (notamment pour la partie 5).
+  form.append("public_id",`${bptSafeFilePart(path.replace(/\.[^.]+$/,""))}-${Date.now()}`);
 
   const endpoint=`https://api.cloudinary.com/v1_1/${encodeURIComponent(cfg.cloudName)}/image/upload`;
   const res=await fetch(endpoint,{method:"POST",body:form});
@@ -24988,7 +24990,11 @@ const BPT_ADMIN_PASSWORD="7074";
 let settingsUnlocked=false;
 let fullResetAuthorizationPending=false;
 function isDealerIdentity(){
-  const raw=String(typeof liveIdentityName==='function'?liveIdentityName():localStorage.getItem('bpt_live_identity')||'').trim();
+  const raw=String(
+    typeof liveIdentityName==='function'
+      ? liveIdentityName()
+      : localStorage.getItem('bpt_live3_identity_name')||localStorage.getItem('bpt_live_identity')||localStorage.getItem('bpt_live3_spectator_name')||''
+  ).trim();
   const key=raw.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').toLocaleLowerCase('fr');
   return key==='dealer'||key==='francois catteau';
 }
@@ -30873,7 +30879,7 @@ body.b466-live-active #live3>.hero{display:none!important}
 </style>
 
 <link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=6.00">
-<script id="bpt-live-ui" src="./live-ui.js?v=6.18"></script>
+<script id="bpt-live-ui" src="./live-ui.js?v=6.20"></script>
 
 
 <style id="bpt-v485-nav-clean">
