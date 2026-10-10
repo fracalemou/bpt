@@ -503,13 +503,13 @@
       const card=document.createElement('div');card.className='bpt-prediction-card';
       const head=document.createElement('div');head.className='bpt-prediction-head';const strong=document.createElement('strong');strong.textContent=type==='winner'?'Vainqueur — choisissez un joueur':'1er éliminé — choisissez un joueur';const stake=document.createElement('span');stake.textContent='0,50 €';head.append(strong,stake);card.append(head);
       const choices=document.createElement('div');choices.className='bpt-prediction-choices';
-      const select=document.createElement('select');select.className='bpt-prediction-select';select.dataset.betAction='pick';select.dataset.betType=type;select.disabled=!canConfirm;
+      const select=document.createElement('select');select.className='bpt-prediction-select';select.dataset.betAction='pick';select.dataset.betType=type;
       const none=document.createElement('option');none.value='';none.textContent='Pas de pari';select.append(none);
       [...players].sort((a,b)=>predictionOdds(st,type,a)-predictionOdds(st,type,b)).forEach(name=>{const option=document.createElement('option');option.value=name;option.textContent=`${name} · Cote ${predictionOdds(st,type,name).toFixed(2).replace('.',',')}`;select.append(option)});
       select.value=me[type]||'';choices.append(select);
       card.append(choices);host.append(card);
     }
-    const selectedCount=(me.winner?1:0)+(me.firstEliminated?1:0);const footer=document.createElement('div');footer.className='bpt-prediction-footer';const status=document.createElement('span');status.className='bpt-prediction-status';status.textContent=me.confirmed?'✓ Pari enregistré':(canConfirm?'1. Choisissez vos paris · 2. Validez ci-dessous':'Validation disponible après connexion');const btn=document.createElement('button');btn.type='button';btn.dataset.betAction='confirm';btn.className='bpt-prediction-confirm';btn.disabled=!canConfirm||!!me.confirmed;btn.textContent=me.confirmed?'Pari validé':(selectedCount?'Valider mon pari':'Valider « Pas de pari »');footer.append(status,btn);host.append(footer);
+    const selectedCount=(me.winner?1:0)+(me.firstEliminated?1:0);const footer=document.createElement('div');footer.className='bpt-prediction-footer';const status=document.createElement('span');status.className='bpt-prediction-status';status.textContent=me.confirmed?'✓ Pari enregistré':(canConfirm?'1. Choisissez vos paris · 2. Validez ci-dessous':'Validation disponible après connexion');const btn=document.createElement('button');btn.type='button';btn.dataset.betAction='confirm';btn.className='bpt-prediction-confirm';btn.disabled=!!me.confirmed;btn.textContent=me.confirmed?'Pari validé':(selectedCount?'Valider mon pari':'Valider « Pas de pari »');footer.append(status,btn);host.append(footer);
     const progress=document.createElement('small');progress.className='bpt-prediction-progress';progress.textContent=`${confirmed} / ${players.length} joueur${players.length>1?'s':''} a${confirmed>1?'nt':''} validé`;host.append(progress);
   }
   async function handleBetAction(button){
@@ -645,7 +645,7 @@
     const players=Array.isArray(st.players)?st.players:[],alive=players.filter(p=>p.status==='in').length+(players.some(p=>p.status==='winner')?1:0);
     const total=players.length*Number(st.startStack||0),avg=alive?total/alive:0,avgBB=cur.bb?Math.round(avg/cur.bb*10)/10:0;
     const x=api();
-    const ownerRole=!!x?.isOwner?.();
+    const ownerRole=!!x?.isOwner?.()||!!(st.ownerId&&String(st.ownerId)===String(x?.deviceId?.()));
     const duelPair=players.filter(p=>p.status==='in').map(p=>p.name).sort();
     if(ownerRole&&st.startedAt&&!st.finishedAt&&duelPair.length===2&&st.finalDuelEvent?.pairKey!==JSON.stringify(duelPair)&&!window.__bptRefreshingDuel){
       window.__bptRefreshingDuel=true;x.refreshObjectives?.().finally(()=>{window.__bptRefreshingDuel=false});
