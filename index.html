@@ -14476,7 +14476,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="6.10";
+const BPT_APP_VERSION="6.12";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14630,7 +14630,7 @@ function simplifyRecordTextForMobile(text){
 <span aria-live="polite" class="bpt-connected-identity" id="bptConnectedIdentity"></span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v6.10</div>
+<div class="app-version" id="headerAppVersion">BPT v6.12</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15757,7 +15757,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 6.10</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 6.12</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -18235,10 +18235,14 @@ function stats(excludeLatest=false){
     const games=groupedGames(); if(games.length){const last=games[games.length-1][0];rows=rows.filter(r=>r.game!==last);}
   }
   const by={};
-  for(const p of db.players)by[p.name]={name:p.name,points:0,games:new Set(),wins:0,podiums:0,tabliers:0,kills:0,stake:0,gross:0,net:0};
+  for(const p of db.players){
+    const name=canonicalPlayerName(p.name);
+    if(!by[name])by[name]={name,points:0,games:new Set(),wins:0,podiums:0,tabliers:0,kills:0,stake:0,gross:0,net:0};
+  }
   for(const r of rows){
-    if(!by[r.player])by[r.player]={name:r.player,points:0,games:new Set(),wins:0,podiums:0,tabliers:0,kills:0,stake:0,gross:0,net:0};
-    const s=by[r.player];s.points+=Number(r.points||0);s.games.add(r.game);
+    const name=canonicalPlayerName(r.player);
+    if(!by[name])by[name]={name,points:0,games:new Set(),wins:0,podiums:0,tabliers:0,kills:0,stake:0,gross:0,net:0};
+    const s=by[name];s.points+=Number(r.points||0);s.games.add(r.game);
     s.wins+=r.win?1:0;s.podiums+=r.podium?1:0;s.tabliers+=r.tablier?1:0;s.kills+=Number(r.kills||0);
     s.stake+=Number(r.stake||0);s.gross+=Number(r.gross||0);s.net+=Number(r.net||0);
   }
@@ -18291,14 +18295,14 @@ function rankSnapshotUntil(maxGame){
   const rows=old.filter(r=>Number(r.game)<=Number(maxGame));
   const by={};
   for(const r of rows){
-    const n=r.player;
+    const n=canonicalPlayerName(r.player);
     if(!by[n])by[n]={name:n,points:0,games:0};
     by[n].points+=Number(r.points||0);
   }
   const seen={};
   for(const r of rows){
-    const k=r.player+"|"+r.game;
-    if(!seen[k]){seen[k]=1;by[r.player].games++;}
+    const k=canonicalPlayerName(r.player)+"|"+r.game;
+    if(!seen[k]){seen[k]=1;by[canonicalPlayerName(r.player)].games++;}
   }
   return Object.values(by).sort((a,b)=>b.points-a.points||a.name.localeCompare(b.name,"fr")).map((x,i)=>({...x,rank:i+1}));
 }
@@ -20634,7 +20638,7 @@ function applyRequestedPlayerMergesToState(state){
     }
     for(const key of ["playerNicknames","playerPhotos"]){
       if(state[key]&&typeof state[key]==="object"){
-        if(state[key][source]&&!state[key][target])state[key][target]=state[key][source];
+        if(state[key][source])state[key][target]=state[key][source];
         if(Object.prototype.hasOwnProperty.call(state[key],source)){delete state[key][source];changed=true;}
       }
     }
@@ -30814,7 +30818,7 @@ body.b466-live-active #live3>.hero{display:none!important}
 </style>
 
 <link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=6.00">
-<script id="bpt-live-ui" src="./live-ui.js?v=6.10"></script>
+<script id="bpt-live-ui" src="./live-ui.js?v=6.12"></script>
 
 
 <style id="bpt-v485-nav-clean">
