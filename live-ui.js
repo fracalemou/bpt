@@ -524,8 +524,7 @@
     box.querySelector('[data-role="pregamecount"]').textContent='AVANT-PARTIE · '+(st.players||[]).length+' JOUEURS · '+entries.length+' ENJEU'+(entries.length>1?'X':'');
     box.querySelector('[data-role="pregamestatus"]').textContent=owner?'Le chrono attend le lancement.':'En attente du lancement par l’organisateur.';
     renderPredictions(root,st,owner);
-    const names=predictionNames(st),bets=st?.betting?.bets||{},allConfirmed=names.length>0&&names.every(name=>bets[name]?.confirmed);
-    const launchButton=box.querySelector('[data-do="launch-pregame"]');if(launchButton){launchButton.disabled=!owner||!allConfirmed;launchButton.title=allConfirmed?'Tous les choix sont validés.':'Chaque joueur doit confirmer son choix ou « Pas de pari ».';}
+    const launchButton=box.querySelector('[data-do="launch-pregame"]');if(launchButton){launchButton.disabled=!owner;launchButton.title=owner?'L’organisateur peut passer à la révélation du bounty.':'En attente de l’organisateur.';}
     box.querySelector('[data-do="launch-pregame"]').hidden=!owner;
     box.querySelector('[data-do="back-pregame"]').hidden=!owner;
     const key=JSON.stringify(entries);
