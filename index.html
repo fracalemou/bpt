@@ -14476,7 +14476,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="6.12";
+const BPT_APP_VERSION="6.15";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14630,7 +14630,7 @@ function simplifyRecordTextForMobile(text){
 <span aria-live="polite" class="bpt-connected-identity" id="bptConnectedIdentity"></span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v6.12</div>
+<div class="app-version" id="headerAppVersion">BPT v6.15</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15757,7 +15757,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 6.12</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 6.15</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -20415,7 +20415,8 @@ async function fetchFirebaseGamePhoto(gameNo,seasonKey=null){
   return "";
 }
 function getGamePhoto(gameNo,seasonKey=null){
-  const key=gamePhotoKey(gameNo,seasonKey); const local=String(ensureGamePhotos()[key]||"");
+  const key=gamePhotoKey(gameNo,seasonKey);
+  const local=String(ensureGamePhotos()[key]||"");
   if(local.startsWith("data:image/") || /^https?:\/\//i.test(local)){ firebasePhotoCache[key]=local; return local; }
   if(firebasePhotoCache[key])return firebasePhotoCache[key];
   fetchFirebaseGamePhoto(gameNo,seasonKey); return "";
@@ -20619,22 +20620,22 @@ function applyRequestedPlayerMergesToState(state){
   if(!state.playerAliases||typeof state.playerAliases!=="object"||Array.isArray(state.playerAliases))state.playerAliases={};
   let changed=false;
   for(const [source,target] of Object.entries(REQUESTED_PLAYER_MERGES)){
+    const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toLocaleLowerCase('fr');
+    const sourceKey=norm(source),targetKey=norm(target);
     if(state.playerAliases[source]!==target){state.playerAliases[source]=target;changed=true;}
     const rewrite=rows=>(Array.isArray(rows)?rows:[]).map(r=>({...r,
-      player:r.player===source?target:r.player,
-      killer:r.killer===source?target:r.killer
+      player:[sourceKey,targetKey].includes(norm(r.player))?target:r.player,
+      killer:[sourceKey,targetKey].includes(norm(r.killer))?target:r.killer
     }));
     const oldHistory=JSON.stringify(state.history||[]);
     state.history=rewrite(state.history);
     if(JSON.stringify(state.history)!==oldHistory)changed=true;
     if(Array.isArray(state.players)){
       const had=state.players.length;
-      state.players=state.players.filter(p=>p?.name!==source);
+      state.players=state.players.filter(p=>norm(p?.name)!==sourceKey && norm(p?.name)!==targetKey);
       if(state.players.length!==had)changed=true;
-      if(!state.players.some(p=>p?.name===target)){
-        state.players.push({name:target,active:true});
-        changed=true;
-      }
+      state.players.push({name:target,active:true});
+      changed=true;
     }
     for(const key of ["playerNicknames","playerPhotos"]){
       if(state[key]&&typeof state[key]==="object"){
@@ -20648,12 +20649,19 @@ function applyRequestedPlayerMergesToState(state){
 }
 function canonicalPlayerName(name){
   let cur=String(name||"").trim();
+  const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toLocaleLowerCase('fr');
+  const key=norm(cur);
+  for(const [source,target] of Object.entries(REQUESTED_PLAYER_MERGES)){
+    if(key===norm(source)||key===norm(target))return target;
+  }
   const aliases=ensurePlayerAliases();
   const seen=new Set();
   while(cur && aliases[cur] && !seen.has(cur)){
     seen.add(cur);
     cur=String(aliases[cur]||"").trim();
   }
+  const aliasEntry=Object.entries(aliases).find(([source])=>norm(source)===norm(cur));
+  if(aliasEntry)cur=String(aliasEntry[1]||cur).trim();
   return cur;
 }
 function applyPlayerAliasesToRows(rows){
@@ -30818,7 +30826,7 @@ body.b466-live-active #live3>.hero{display:none!important}
 </style>
 
 <link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=6.00">
-<script id="bpt-live-ui" src="./live-ui.js?v=6.12"></script>
+<script id="bpt-live-ui" src="./live-ui.js?v=6.15"></script>
 
 
 <style id="bpt-v485-nav-clean">
