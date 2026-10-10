@@ -14415,6 +14415,7 @@ body.bpt-mobile-device .bpt-mobile-top-menu button{
 @media(max-width:600px){#gameSummaryBackdrop{padding:8px}#gameSummaryBackdrop .bpt-summary-modal{padding:14px}.bpt-recap-stats{gap:6px}.bpt-recap-stats>div{padding:10px 6px}.bpt-recap-stats strong{font-size:17px}.bpt-recap-stats span{font-size:10px}.bpt-recap-bets-row{grid-template-columns:1fr 1fr 1.15fr .8fr .75fr;gap:4px;padding:8px 5px;font-size:10px}.bpt-recap-bets-row.head{font-size:8px}}
 </style>
 <link rel="stylesheet" href="./agenda-v2.css?v=1">
+<style id="bpt-betting-ranking-style">.ranking-mode-toggle{display:flex;gap:8px;margin:14px 0;flex-wrap:wrap}.ranking-mode-btn{border:1px solid #31594d;border-radius:10px;padding:10px 15px;background:#0b211c;color:#b7cfc5;font-weight:800;cursor:pointer}.ranking-mode-btn.active{background:#173e35;border-color:#2ac9c2;color:#fff}.bpt-betting-ranking-panel{padding:16px}.bpt-betting-ranking-panel[hidden]{display:none}.bpt-betting-ranking-total{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 14px}.bpt-betting-ranking-total>div{flex:1 1 150px;padding:12px;border:1px solid #34483c;border-radius:11px;background:#101a15;text-align:center}.bpt-betting-ranking-total span{display:block;color:#a7c3b9;font-size:11px}.bpt-betting-ranking-total strong{display:block;color:#f0cf79;font-size:21px;margin-top:5px}.bpt-betting-table{width:100%;border-collapse:collapse}.bpt-betting-table th,.bpt-betting-table td{padding:10px 8px;border-bottom:1px solid #2a4036;text-align:left}.bpt-betting-table th{color:#a7c3b9;background:#173e35;font-size:11px;text-transform:uppercase}.bpt-betting-table td{color:#e7f0eb}.bpt-betting-table .positive{color:#57e0b5;font-weight:800}.bpt-betting-table .negative{color:#ef7777;font-weight:800}.bpt-betting-ranking-note{color:#91aca0;font-size:12px}@media(max-width:600px){.ranking-mode-btn{flex:1;padding:10px 6px;font-size:12px}.bpt-betting-ranking-panel{padding:10px}.bpt-betting-table{font-size:11px}.bpt-betting-table th,.bpt-betting-table td{padding:8px 4px}.bpt-betting-table th:nth-child(5),.bpt-betting-table td:nth-child(5){display:none}}</style>
 </head>
 <body>
 <div id="headUpPhotoPrompt" style="
@@ -14485,7 +14486,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="7.9";
+const BPT_APP_VERSION="8.1";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14639,7 +14640,7 @@ function simplifyRecordTextForMobile(text){
 <span aria-live="polite" class="bpt-connected-identity" id="bptConnectedIdentity"></span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v7.9</div>
+<div class="app-version" id="headerAppVersion">BPT v8.1</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15527,9 +15528,11 @@ function simplifyRecordTextForMobile(text){
 <button class="season-nav-btn" data-season-action="next" onclick="changeSeasonFromToolbar('next')" type="button">Saison suivante →</button>
 <button class="season-cumul-btn" data-season-action="all" onclick="changeSeasonFromToolbar('all')" type="button">Cumul toutes saisons</button>
 </div>
-<details class="combined-block combined-ranking-block" open="">
+<div class="ranking-mode-toggle" role="tablist" aria-label="Type de classement"><button type="button" class="ranking-mode-btn active" id="rankingPointsModeBtn" onclick="setRankingMode('points')">🏆 Classement BPT</button><button type="button" class="ranking-mode-btn" id="rankingBetsModeBtn" onclick="setRankingMode('bets')">🎲 Classement des paris</button></div>
+<section id="bptBettingRankingPanel" class="combined-block bpt-betting-ranking-panel" hidden aria-label="Classement des paris"></section>
+<details id="rankingPointsContent" class="combined-block combined-ranking-block" open="">
 <summary>
-<span><strong>♛ Classement des points</strong><small>Classement général et statistiques individuelles</small></span>
+<span><strong>♛ Classement BPT</strong><small>Points, classement général et statistiques individuelles</small></span>
 </summary>
 <div class="combined-block-content">
 <details class="collapsible-block">
@@ -15766,7 +15769,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 7.9</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 8.1</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -20910,6 +20913,38 @@ function updateSeasonContextTitles(){
   set("profileSeasonTitle","Profil joueur BPT");
 }
 
+let rankingMode='points';
+function setRankingMode(mode){
+  rankingMode=mode==='bets'?'bets':'points';
+  const points=document.getElementById('rankingPointsContent'),bets=document.getElementById('bptBettingRankingPanel');
+  if(points)points.hidden=rankingMode==='bets';
+  if(bets)bets.hidden=rankingMode!=='bets';
+  document.getElementById('rankingPointsModeBtn')?.classList.toggle('active',rankingMode==='points');
+  document.getElementById('rankingBetsModeBtn')?.classList.toggle('active',rankingMode==='bets');
+  if(rankingMode==='bets')renderBettingRanking();
+}
+
+async function renderBettingRanking(){
+  const panel=document.getElementById('bptBettingRankingPanel');if(!panel)return;
+  try{
+    const dbx=window.bptFirebaseDb?.();
+    if(!dbx?.ref){panel.innerHTML='<p class="bpt-betting-ranking-note">Classement des paris indisponible hors connexion.</p>';return;}
+    const snap=await dbx.ref('bpt/bettingLedger').once('value'),root=snap.val()||{},sessions=Object.values(root.sessions||{});
+    const all=isAllSeasons(),season=String(selectedSeasonKey||CURRENT_SEASON_KEY);
+    const relevant=sessions.filter(s=>all||!s.season||String(s.season)===season);
+    const by=new Map();
+    relevant.forEach(s=>(s.rows||[]).forEach(row=>{
+      const name=String(row.player||'').trim();if(!name)return;
+      const item=by.get(name)||{name,staked:0,gross:0,net:0,bets:0,wins:0};
+      item.staked+=Number(row.stakeCents)||0;item.gross+=Number(row.grossWonCents)||0;item.net+=Number(row.netCents)||0;item.bets++;if(Number(row.grossWonCents)>0)item.wins++;
+      by.set(name,item);
+    }));
+    const rows=[...by.values()].sort((a,b)=>b.net-a.net||b.gross-a.gross||a.name.localeCompare(b.name,'fr'));
+    const money=c=>`${(Number(c||0)/100).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})} €`,total=rows.reduce((a,r)=>({staked:a.staked+r.staked,gross:a.gross+r.gross,net:a.net+r.net}),{staked:0,gross:0,net:0});
+    panel.innerHTML=`<div class="combined-block-content"><h2>🎲 Classement des paris</h2><p class="bpt-betting-ranking-note">${all?'Cumul de toutes les saisons':'Saison '+seasonDisplayName(selectedSeasonKey)} · un pari vaut 0,50 €.</p><div class="bpt-betting-ranking-total"><div><span>Mises cumulées</span><strong>${money(total.staked)}</strong></div><div><span>Gains cumulés</span><strong>${money(total.gross)}</strong></div><div><span>Solde global</span><strong class="${total.net>=0?'positive':'negative'}">${total.net>=0?'+':''}${money(total.net)}</strong></div></div>${rows.length?`<div class="tablewrap"><table class="bpt-betting-table"><thead><tr><th>Rang</th><th>Joueur</th><th>Mises</th><th>Gains</th><th>Solde</th><th>Réussis</th></tr></thead><tbody>${rows.map((r,i)=>`<tr><td>${i+1}</td><td><strong>${esc(r.name)}</strong></td><td>${money(r.staked)}</td><td>${money(r.gross)}</td><td class="${r.net>=0?'positive':'negative'}">${r.net>=0?'+':''}${money(r.net)}</td><td>${r.wins} / ${r.bets}</td></tr>`).join('')}</tbody></table></div>`:'<p class="bpt-betting-ranking-note">Aucun pari enregistré pour cette période.</p>'}</div>`;
+  }catch(e){console.warn('Classement paris',e);panel.innerHTML='<p class="bpt-betting-ranking-note">Impossible de charger le classement des paris.</p>';}
+}
+
 
 applyHistoricalPointScale();
 if(selectedSeasonKey===CURRENT_SEASON_KEY){
@@ -20934,6 +20969,7 @@ function renderAll(){
   safeRender("tableau de bord",renderDashboard);
   safeRender("dernière partie",renderLatestGame);
   safeRender("classement",renderRanking);
+  safeRender("mode classement",()=>setRankingMode(rankingMode));
   safeRender("versus",renderVersus);
   safeRender("records",renderRecords);
   safeRender("succès",renderAchievements);
@@ -28982,7 +29018,7 @@ function connectionDeviceLabel(){
           sessionRows.push({player,type,pick,actual,odds:odd,stakeCents:stake,grossWonCents:gross,netCents:net});
         }
       });
-      root.sessions[session]={session,settledAt:Date.now(),winner,firstEliminated:first,rows:sessionRows};return root;
+      root.sessions[session]={session,season:String(db?.settings?.season||CURRENT_SEASON_KEY),settledAt:Date.now(),winner,firstEliminated:first,rows:sessionRows};return root;
     });
   }
 
@@ -31056,8 +31092,8 @@ body.b466-live-active #live3>.hero{display:none!important}
 </style>
 
 <link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=6.00">
-<script id="bpt-live-betting" src="./live-betting.js?v=7.9"></script>
-<script id="bpt-live-ui" src="./live-ui.js?v=7.9"></script>
+<script id="bpt-live-betting" src="./live-betting.js?v=8.1"></script>
+<script id="bpt-live-ui" src="./live-ui.js?v=8.1"></script>
 
 
 <style id="bpt-v485-nav-clean">
