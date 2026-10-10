@@ -95,6 +95,7 @@
 .bpt484-live.is-pregame{background:#071d19!important}
 .bpt484-live.is-pregame> *:not(.bpt-pregame):not(.bpt484-takeover-request):not(.bpt-bounty-overlay){visibility:hidden!important}
 .bpt484-live.is-pregame>.bpt-pregame{z-index:1000!important;visibility:visible!important;background:#071d19!important;opacity:1!important}
+.bpt-pregame-stories[hidden],.bpt-pregame-objectives-heading[hidden]{display:none!important}
 .bpt484-takeover-request[hidden]{display:none!important}
 .bpt484-takeover-request{position:absolute;z-index:70;top:90px;left:50%;transform:translateX(-50%);width:min(580px,calc(100% - 24px));box-sizing:border-box;padding:18px;border:2px solid #f2c14e;border-radius:16px;background:#09241f;color:#fff;box-shadow:0 16px 45px #0009;text-align:center}
 .bpt484-takeover-request strong{color:#f2c14e;font-size:18px}.bpt484-takeover-request p{font-size:16px;overflow-wrap:anywhere;margin:12px 0}.bpt484-takeover-request>div{display:flex;justify-content:center;gap:12px}.bpt484-takeover-request button{min-height:44px;padding:10px 20px;border:0;border-radius:10px;font-size:16px;font-weight:800;cursor:pointer;background:#26c6ba;color:#06201d}.bpt484-takeover-request button[data-do="reject-takeover"]{background:#b83a45;color:#fff}
