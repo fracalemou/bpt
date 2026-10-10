@@ -14476,7 +14476,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="6.15";
+const BPT_APP_VERSION="6.18";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14630,7 +14630,7 @@ function simplifyRecordTextForMobile(text){
 <span aria-live="polite" class="bpt-connected-identity" id="bptConnectedIdentity"></span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v6.15</div>
+<div class="app-version" id="headerAppVersion">BPT v6.18</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15757,7 +15757,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 6.15</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 6.18</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -19992,7 +19992,7 @@ function mergeAllSeasonsOfficialStats(rawItems){
 
   for(const seasonRanking of [ARCHIVE_2023_2024_RANKING,ARCHIVE_2025_2026_RANKING]){
     for(const r of seasonRanking||[]){
-      const s=ensure(r.name);
+      const s=ensure(canonicalPlayerName(r.name));
       s.points+=Number(r.points||0);
       s.gamesCount+=Number(r.gamesCount||0);
       s.wins+=Number(r.wins||0);
@@ -20003,7 +20003,7 @@ function mergeAllSeasonsOfficialStats(rawItems){
 
   const currentStats=statsFromRows(currentRowsForCumulative()).filter(s=>s.gamesCount>0);
   for(const r of currentStats){
-    const s=ensure(r.name);
+    const s=ensure(canonicalPlayerName(r.name));
     s.points+=Number(r.points||0);
     s.gamesCount+=Number(r.gamesCount||0);
     s.wins+=Number(r.wins||0);
@@ -20011,7 +20011,12 @@ function mergeAllSeasonsOfficialStats(rawItems){
     s.kills+=Number(r.kills||0);
   }
 
-  const rawMap=new Map((rawItems||[]).map(r=>[r.name,r]));
+  const rawMap=new Map();
+  for(const r of rawItems||[]){
+    const name=canonicalPlayerName(r.name);
+    const prev=rawMap.get(name);
+    rawMap.set(name,prev?{...prev,points:Number(prev.points||0)+Number(r.points||0),gamesCount:Number(prev.gamesCount||0)+Number(r.gamesCount||0)}:{...r,name});
+  }
   const names=new Set([...rawMap.keys(),...official.keys()]);
 
   return [...names].map(name=>{
@@ -20468,6 +20473,41 @@ async function deleteGamePhoto(gameNo,seasonKey=null){
   const key=gamePhotoKey(gameNo,seasonKey); if(!confirm("Retirer la photo de cette partie ?"))return;
   try{if(!await ensureGamePhotoStorageClient())throw new Error("Firebase indisponible.");const dbx=window.bptFirebaseDb?.();await dbx.ref(gamePhotoFirebasePath(gameNo,seasonKey)).remove();delete firebasePhotoCache[key];firebasePhotoRequested.delete(key);delete ensureGamePhotos()[key];saveLocalOnly();setCloudStatus("ok","Photo retirée","La photo n’est plus affichée dans BPT.");renderLatestGame();}
   catch(e){setCloudStatus("offline","Suppression impossible",firebasePhotoErrorMessage(e));alert(firebasePhotoErrorMessage(e));}
+}
+
+let gamePhotoCleanupAfter4Done=false;
+async function purgeGamePhotosAfter4(){
+  if(gamePhotoCleanupAfter4Done)return;
+  gamePhotoCleanupAfter4Done=true;
+  try{
+    const gameMap=ensureGamePhotos();
+    for(const key of Object.keys(gameMap)){
+      const gameNo=Number(String(key).split('|').pop());
+      if(gameNo>4)delete gameMap[key];
+    }
+    for(const key of Object.keys(firebasePhotoCache)){
+      const gameNo=Number(String(key).split('|').pop());
+      if(gameNo>4)delete firebasePhotoCache[key];
+    }
+    firebasePhotoRequested.clear();
+    if(!await ensureGamePhotoStorageClient())return false;
+    const dbx=window.bptFirebaseDb?.();
+    const root=dbx?.ref('bpt/photos');
+    if(!root)return false;
+    const snap=await root.once('value');
+    const removals=[];
+    snap.forEach(seasonSnap=>seasonSnap.forEach(photoSnap=>{
+      const match=String(photoSnap.key||'').match(/^game-(\d+)$/i);
+      if(match && Number(match[1])>4)removals.push(photoSnap.ref.remove());
+    }));
+    await Promise.all(removals);
+    saveLocalOnly();
+    return true;
+  }catch(e){
+    gamePhotoCleanupAfter4Done=false;
+    console.warn('Nettoyage photos après partie 4 impossible :',e);
+    return false;
+  }
 }
 
 function latestGameEntries(){
@@ -24947,6 +24987,11 @@ function moveCorrectionGame(delta){
 const BPT_ADMIN_PASSWORD="7074";
 let settingsUnlocked=false;
 let fullResetAuthorizationPending=false;
+function isDealerIdentity(){
+  const raw=String(typeof liveIdentityName==='function'?liveIdentityName():localStorage.getItem('bpt_live_identity')||'').trim();
+  const key=raw.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').toLocaleLowerCase('fr');
+  return key==='dealer'||key==='francois catteau';
+}
 function authorizeFullReset(description){
   if(!settingsUnlocked||fullResetAuthorizationPending)return Promise.resolve(false);
   fullResetAuthorizationPending=true;
@@ -24987,7 +25032,7 @@ async function resetOriginalData(){
 }
 
 function unlockSettings(){
-  if($("settingsPassword").value===BPT_ADMIN_PASSWORD){
+  if(isDealerIdentity() || $("settingsPassword").value===BPT_ADMIN_PASSWORD){
     settingsUnlocked=true;
     $("settingsLock").style.display="none";
     $("settingsProtectedContent").style.display="block";
@@ -25184,6 +25229,8 @@ async function showView(id){
   }
 
   if(id==="settings"){
+    if(!settingsUnlocked && isDealerIdentity())settingsUnlocked=true;
+    if(isDealerIdentity())void purgeGamePhotosAfter4();
     if(settingsUnlocked){
       $("settingsLock").style.display="none";
       $("settingsProtectedContent").style.display="block";
@@ -30826,7 +30873,7 @@ body.b466-live-active #live3>.hero{display:none!important}
 </style>
 
 <link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=6.00">
-<script id="bpt-live-ui" src="./live-ui.js?v=6.15"></script>
+<script id="bpt-live-ui" src="./live-ui.js?v=6.18"></script>
 
 
 <style id="bpt-v485-nav-clean">
