@@ -7629,6 +7629,30 @@ body.bpt-mobile-device #ranking .tablewrap{
   -webkit-overflow-scrolling:touch !important;
 }
 
+/* Nom du joueur : jamais tronqué, prénom puis nom sur deux lignes. */
+html.bpt-mobile-device #ranking td:nth-child(2),
+body.bpt-mobile-device #ranking td:nth-child(2){
+  width:118px !important;
+  min-width:118px !important;
+  max-width:118px !important;
+  white-space:normal !important;
+  overflow:visible !important;
+}
+html.bpt-mobile-device #ranking td:nth-child(2) .player-name-stack,
+body.bpt-mobile-device #ranking td:nth-child(2) .player-name-stack{
+  display:flex !important;
+  width:100% !important;
+  align-items:flex-start !important;
+  white-space:normal !important;
+  overflow:visible !important;
+}
+html.bpt-mobile-device #ranking td:nth-child(2) .player-primary-name,
+body.bpt-mobile-device #ranking td:nth-child(2) .player-primary-name{
+  white-space:normal !important;
+  overflow:visible !important;
+  line-height:1.15 !important;
+}
+
 
 
 /* ===== V193 — préparation Live mobile minimale ===== */
@@ -14452,7 +14476,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="6.08";
+const BPT_APP_VERSION="6.10";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14606,7 +14630,7 @@ function simplifyRecordTextForMobile(text){
 <span aria-live="polite" class="bpt-connected-identity" id="bptConnectedIdentity"></span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v6.08</div>
+<div class="app-version" id="headerAppVersion">BPT v6.10</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -15733,7 +15757,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 6.08</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 6.10</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -17516,6 +17540,7 @@ async function applyCloudState(row){
     const serverHistory=await cloudFetchGames();
     currentSeasonHistoryCache=clone(serverHistory);
 
+    applyRequestedPlayerMergesToState(remoteState);
     db=remoteState;
     saveLocalOnly();
     if(remoteActive && !thisDeviceOwnsRemoteLive)cloudLocalDirty=false;
@@ -17988,18 +18013,21 @@ function dedupeHistory(history){
   return kept.flatMap(([g,rows])=>rows.map(r=>({...r,game:renum.get(g)})));
 }
 
+const REQUESTED_PLAYER_MERGES={"Helene Fiona":"Elen Miron"};
 function loadDB(){
   try{
     const x=JSON.parse(localStorage.getItem(STORE));
     if(x&&x.players&&x.history&&x.points){
       const before=x.history.length;
       x.history=dedupeHistory(x.history);
+      applyRequestedPlayerMergesToState(x);
       if(x.history.length!==before)localStorage.setItem(STORE,JSON.stringify(x));
       return x;
     }
   }catch(e){}
   const fresh=clone(SEED);
   fresh.history=dedupeHistory(fresh.history);
+  applyRequestedPlayerMergesToState(fresh);
   return fresh;
 }
 let db = loadDB();
@@ -20234,10 +20262,12 @@ function gameUnlockedAchievements(gameNo){
   return unlocked;
 }
 
-function playerNameHtml(name,{button=false,buttonClass="",onclick=""}={}){
+function playerNameHtml(name,{button=false,buttonClass="",onclick="",breakName=false}={}){
   const real=String(name||"").trim();
   const nick=playerNicknameInfo(real).primary;
-  const inner=`<span class="player-primary-name">${esc(real)}</span>${nick?`<span class="player-secondary-nickname">(${esc(nick)})</span>`:""}`;
+  const nameParts=real.split(/\s+/);
+  const official=breakName&&nameParts.length>1?`${esc(nameParts[0])}<br>${esc(nameParts.slice(1).join(" "))}`:esc(real);
+  const inner=`<span class="player-primary-name">${official}</span>${nick?`<span class="player-secondary-nickname">(${esc(nick)})</span>`:""}`;
   if(button){
     return `<button class="player-link player-name-stack ${buttonClass}" ${onclick?`onclick="${onclick}"`:""}>${inner}</button>`;
   }
@@ -20579,6 +20609,38 @@ async function savePlayerNickname(name,value){
 function ensurePlayerAliases(){
   if(!db.playerAliases || typeof db.playerAliases!=="object" || Array.isArray(db.playerAliases))db.playerAliases={};
   return db.playerAliases;
+}
+function applyRequestedPlayerMergesToState(state){
+  if(!state||typeof state!=="object")return false;
+  if(!state.playerAliases||typeof state.playerAliases!=="object"||Array.isArray(state.playerAliases))state.playerAliases={};
+  let changed=false;
+  for(const [source,target] of Object.entries(REQUESTED_PLAYER_MERGES)){
+    if(state.playerAliases[source]!==target){state.playerAliases[source]=target;changed=true;}
+    const rewrite=rows=>(Array.isArray(rows)?rows:[]).map(r=>({...r,
+      player:r.player===source?target:r.player,
+      killer:r.killer===source?target:r.killer
+    }));
+    const oldHistory=JSON.stringify(state.history||[]);
+    state.history=rewrite(state.history);
+    if(JSON.stringify(state.history)!==oldHistory)changed=true;
+    if(Array.isArray(state.players)){
+      const had=state.players.length;
+      state.players=state.players.filter(p=>p?.name!==source);
+      if(state.players.length!==had)changed=true;
+      if(!state.players.some(p=>p?.name===target)){
+        state.players.push({name:target,active:true});
+        changed=true;
+      }
+    }
+    for(const key of ["playerNicknames","playerPhotos"]){
+      if(state[key]&&typeof state[key]==="object"){
+        if(state[key][source]&&!state[key][target])state[key][target]=state[key][source];
+        if(Object.prototype.hasOwnProperty.call(state[key],source)){delete state[key][source];changed=true;}
+      }
+    }
+    if(state.liveState?.players)state.liveState.players=state.liveState.players.filter(p=>p?.name!==source).map(p=>({...p,killer:p.killer===source?target:p.killer}));
+  }
+  return changed;
 }
 function canonicalPlayerName(name){
   let cur=String(name||"").trim();
@@ -21836,7 +21898,7 @@ function renderRanking(){
   document.querySelectorAll("[data-ranking-filter]").forEach(btn=>btn.classList.toggle("active",btn.dataset.rankingFilter===rankingFilterKey));
   $("rankingBody").innerHTML=rankingRowsForDisplay().map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}">
     <td>${medalForRank(s.rank)} ${s.rank}</td>
-    <td>${playerNameHtml(s.name,{button:true,buttonClass:"ranking-player-link",onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(s.name)}'))`})}</td>
+    <td>${playerNameHtml(s.name,{button:true,buttonClass:"ranking-player-link",breakName:true,onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(s.name)}'))`})}</td>
     <td><b>${num(s.points,0)}</b></td>
     <td>${s.progress===null
       ? (isArchiveSeason()?"—":'<span class="progress-new">Nouveau</span>')
@@ -27394,6 +27456,16 @@ function connectionDeviceLabel(){
     const key=await profileCodeDigest(name.trim().toLocaleLowerCase('fr'));
     return env.rtdb.ref('bpt_profile_codes_v1/'+key);
   }
+  async function migrateRequestedProfileCode(name){
+    const target=String(name||'').trim();
+    if(target!=='Elen Miron')return;
+    const sourceRef=await profileCodeRef('Helene Fiona');
+    const targetRef=await profileCodeRef(target);
+    const sourceRecord=(await sourceRef.once('value')).val();
+    if(!sourceRecord)return;
+    await targetRef.set(sourceRecord);
+    await sourceRef.remove();
+  }
   async function loadProfileCodeState(force=false){
     const name=String($3('live3SpectatorNameInput')?.value||'').trim();
     if(!force&&profileCodeLoadingName===name)return;
@@ -27404,6 +27476,7 @@ function connectionDeviceLabel(){
     if(!name){hint.textContent='Choisissez votre profil.';return;}
     hint.textContent='Vérification du profil…';
     try{
+      await migrateRequestedProfileCode(name);
       const ref=await profileCodeRef(name),snap=await ref.once('value');
       if(profileCodeLoadingName!==name)return;
       profileCodeState={name,ref,record:snap.val()};
@@ -30741,7 +30814,7 @@ body.b466-live-active #live3>.hero{display:none!important}
 </style>
 
 <link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=6.00">
-<script id="bpt-live-ui" src="./live-ui.js?v=6.08"></script>
+<script id="bpt-live-ui" src="./live-ui.js?v=6.10"></script>
 
 
 <style id="bpt-v485-nav-clean">
