@@ -239,10 +239,10 @@
   function openLiveBets(){
     const st=state(),players=Array.isArray(st?.players)?st.players:[],bets=st?.betting?.bets||{},odds=st?.betting?.odds||{},stake=Number(st?.betting?.stakeCents||50);
     const money=v=>Number(v||0).toFixed(2).replace('.',',')+' €',gain=(type,name)=>name?(Number(odds?.[type]?.[name])||0)*stake/100:0;
-    const rows=players.map(p=>{const b=bets[p.name]||{},g1=gain('winner',b.winner),g2=gain('firstEliminated',b.firstEliminated),count=(b.winner?1:0)+(b.firstEliminated?1:0);return {name:p.name,winner:b.winner,first:b.firstEliminated,g1,g2,total:g1+g2,count}});
-    const table=rows.map(r=>`<article class="bpt-live-bet-row"><header><strong>${esc(r.name)}</strong><span class="bpt-live-bet-count">${r.count===0?'Sans pari':r.count+' pari'+(r.count>1?'s':'')}</span><b>${money(r.total)}</b></header><p>Vainqueur : ${esc(r.winner||'Pas de pari')}${r.winner?` · gain possible ${money(r.g1)}`:''}</p><p>1er éliminé : ${esc(r.first||'Pas de pari')}${r.first?` · gain possible ${money(r.g2)}`:''}</p></article>`).join('');
+    const rows=players.map(p=>{const b=bets[p.name]||{},g1=gain('winner',b.winner),g2=gain('firstEliminated',b.firstEliminated),count=(b.winner?1:0)+(b.firstEliminated?1:0);return {name:p.name,winner:b.winner,first:b.firstEliminated,g1,g2,total:g1+g2,count}}).filter(r=>r.count>0);
+    const table=rows.map(r=>`<div class="bpt-live-bet-grid-row"><strong>${esc(r.name)}</strong><span class="bpt-live-bet-count">${r.count===0?'Sans pari':r.count+' pari'+(r.count>1?'s':'')}</span><span>${esc(r.winner||'—')}${r.winner?` <small>(${money(r.g1)})</small>`:' '}</span><span>${esc(r.first||'—')}${r.first?` <small>(${money(r.g2)})`:''}</span><b>${money(r.total)}</b></div>`).join('');
     const total=rows.reduce((sum,r)=>sum+r.total,0),active=rows.filter(r=>r.count>0).length;
-    open('🎲 Paris de la table',`<div class="bpt-live-bets-head"><span>${active} joueur${active>1?'s':''} ayant parié</span><strong>Gain total possible · ${money(total)}</strong></div><div class="bpt-live-bets-list">${table||'<p>Aucun pari enregistré pour cette partie.</p>'}</div><p class="bpt-live-bets-note">Les gains sont calculés à la fin de la partie selon le résultat réel.</p>`);
+    open('🎲 Paris de la table',`<div class="bpt-live-bets-head"><span>${active} joueur${active>1?'s':''} ayant parié</span><strong>Gain total possible · ${money(total)}</strong></div><div class="bpt-live-bets-table"><div class="bpt-live-bet-grid-row bpt-live-bet-grid-head"><b>Joueur</b><b>Paris</b><b>Vainqueur</b><b>1er éliminé</b><b>Gain total</b></div>${table||'<p>Aucun pari enregistré pour cette partie.</p>'}</div><p class="bpt-live-bets-note">Les gains sont calculés à la fin de la partie selon le résultat réel.</p>`);
   }
   function ensureModal(){if($('bpt484Modal'))return;document.body.insertAdjacentHTML('beforeend','<div id="bpt484Modal" class="bpt484-modal"><div id="bpt484Dialog" class="bpt484-dialog"></div></div>');$('bpt484Modal').onclick=e=>{if(e.target===$('bpt484Modal'))closeModal()}}
   function closeModal(){$('bpt484Modal')?.classList.remove('open')}
@@ -557,7 +557,7 @@
     const list=(Array.isArray(st.liveAlerts)?st.liveAlerts:[]).filter(a=>a.category==='individual'||/^BOUNTY INDIVIDUEL/.test(a.title||'')||!/^BOUNTY\b/i.test(a.title||'')).map(a=>{
       const title=String(a.title||'');
       const kind=a.category||(title.startsWith('ENJEU RÉALISÉ')?'objective':/BOUNTY INDIVIDUEL|MISSION INDIVIDUELLE|CONTRAT REMPLI/.test(title)?'individual':title.includes('RECORD')?'record':'achievement');
-      return {...a,kind,name:a.player||(title.includes(' · ')?title.split(' · ').slice(1).join(' · '):''),label:kind==='objective'?'ENJEU DE PARTIE RÉALISÉ':kind==='individual'?'BOUNTY INDIVIDUEL RÉUSSI':kind==='achievement'?'ACCOMPLISSEMENT DÉBLOQUÉ':title};
+      return {...a,kind,name:a.player||(title.includes(' · ')?title.split(' · ').slice(1).join(' · '):''),label:kind==='objective'?'ENJEU DE PARTIE RÉALISÉ':kind==='individual'?'BOUNTY INDIVIDUEL RÉUSSI':kind==='betting'?'PARI RÉUSSI':kind==='achievement'?'ACCOMPLISSEMENT DÉBLOQUÉ':title};
     });
     // Une action peut avoir deux effets distincts : regrouper leur présentation,
     // tout en gardant les deux événements et leurs catégories dans le bilan.
@@ -603,7 +603,7 @@
   }
   function renderBounty(root,st){
     const box=root.querySelector('[data-role="bounty"]');if(!box)return;
-    if(st.finishedAt||!root.getClientRects().length||st.preGamePending){box.hidden=true;return;}
+    if(!root.getClientRects().length||st.preGamePending){box.hidden=true;return;}
     const pending=liveCelebrations(st).filter(ev=>{
       if(ev.kind==='mode')return true;
       if(bountyDismissed.has(ev.id))return false;

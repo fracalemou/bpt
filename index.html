@@ -14409,9 +14409,10 @@ body.bpt-mobile-device .bpt-mobile-top-menu button{
 .bpt-recap-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}
 .bpt-recap-stats>div{padding:14px;border:1px solid #34483c;border-radius:12px;background:#101a15;text-align:center}
 .bpt-recap-stats span{display:block;color:#b7c3bb;font-size:12px}.bpt-recap-stats strong{display:block;color:#e6bd5a;font-size:22px;margin-top:6px}
+.bpt-recap-bets-table{border:1px solid #34483c;border-radius:10px;overflow:hidden;background:#101a15}.bpt-recap-bets-row{display:grid;grid-template-columns:1.1fr 1fr 1.2fr .9fr .8fr;gap:8px;align-items:center;padding:9px 10px;border-top:1px solid #26382f;font-size:12px}.bpt-recap-bets-row:first-child{border-top:0}.bpt-recap-bets-row.head{background:#173e35;color:#b7c3bb;font-size:10px;text-transform:uppercase;letter-spacing:.3px}.bpt-recap-bets-row .is-hit{color:#57e0b5}.bpt-recap-bets-row .is-miss{color:#ef7777}.bpt-recap-bets-total{color:#b7c3bb;font-size:12px;margin:10px 0 0}
 .bpt-recap-section{margin:12px 0;padding:16px;border:1px solid #34483c;border-radius:14px;background:#101a15}
 .bpt-recap-section h3{margin:0 0 10px;color:#e6bd5a}.bpt-recap-section p{margin:6px 0;line-height:1.5;color:#e7ece9}.bpt-recap-section article+article{margin-top:12px;padding-top:12px;border-top:1px solid #34483c}
-@media(max-width:600px){#gameSummaryBackdrop{padding:8px}#gameSummaryBackdrop .bpt-summary-modal{padding:14px}.bpt-recap-stats{gap:6px}.bpt-recap-stats>div{padding:10px 6px}.bpt-recap-stats strong{font-size:17px}.bpt-recap-stats span{font-size:10px}}
+@media(max-width:600px){#gameSummaryBackdrop{padding:8px}#gameSummaryBackdrop .bpt-summary-modal{padding:14px}.bpt-recap-stats{gap:6px}.bpt-recap-stats>div{padding:10px 6px}.bpt-recap-stats strong{font-size:17px}.bpt-recap-stats span{font-size:10px}.bpt-recap-bets-row{grid-template-columns:1fr 1fr 1.15fr .8fr .75fr;gap:4px;padding:8px 5px;font-size:10px}.bpt-recap-bets-row.head{font-size:8px}}
 </style>
 <link rel="stylesheet" href="./agenda-v2.css?v=1">
 </head>
@@ -14484,7 +14485,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="7.5";
+const BPT_APP_VERSION="7.9";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -14638,7 +14639,7 @@ function simplifyRecordTextForMobile(text){
 <span aria-live="polite" class="bpt-connected-identity" id="bptConnectedIdentity"></span>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v7.5</div>
+<div class="app-version" id="headerAppVersion">BPT v7.9</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -14650,7 +14651,7 @@ function simplifyRecordTextForMobile(text){
 <button class="bpt-nav-core" data-view="live3" id="live3NavBtn">● Live</button>
 <button class="bpt-nav-core" data-view="latestgame">◷ Partie</button>
 <button class="bpt-nav-core" data-view="ranking">
-<span class="bpt-nav-ranking-full">♛ Classement</span>
+<span class="bpt-nav-ranking-full">♛ Classements</span>
 <span class="bpt-nav-ranking-compact">♛ Clt</span>
 </button>
 <button class="bpt-nav-desktop-only" data-view="records">★ Records &amp; accomplissements</button>
@@ -15518,8 +15519,8 @@ function simplifyRecordTextForMobile(text){
 </div>
 <section class="view" id="ranking">
 <div class="hero tab-premium-hero">
-<h1 id="rankingSeasonTitle">Classement BPT</h1>
-<p>Classement général et statistiques individuelles pour la saison sélectionnée.</p>
+<h1 id="rankingSeasonTitle">Classements BPT</h1>
+<p>Classement des points et statistiques individuelles pour la saison sélectionnée.</p>
 </div>
 <div class="tab-season-nav season-nav-toolbar">
 <button class="season-nav-btn" data-season-action="prev" onclick="changeSeasonFromToolbar('prev')" type="button">← Saison précédente</button>
@@ -15528,7 +15529,7 @@ function simplifyRecordTextForMobile(text){
 </div>
 <details class="combined-block combined-ranking-block" open="">
 <summary>
-<span><strong>♛ Classement général</strong><small>Classement et statistiques individuelles</small></span>
+<span><strong>♛ Classement des points</strong><small>Classement général et statistiques individuelles</small></span>
 </summary>
 <div class="combined-block-content">
 <details class="collapsible-block">
@@ -15765,7 +15766,7 @@ function simplifyRecordTextForMobile(text){
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 7.5</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 7.9</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -19186,13 +19187,32 @@ function buildEndGameSummaryText(rows){
   return lines.join("\n");
 }
 
+function buildLiveBettingRecap(state){
+  const betting=state?.betting;if(!betting)return {rows:[],stakeCents:50,totalStakedCents:0,totalGrossWonCents:0,totalNetCents:0};
+  const stake=Math.max(1,Number(betting.stakeCents)||50),bets=betting.bets||{},odds=betting.odds||{};
+  const winner=(state.players||[]).find(p=>Number(p.place)===1)?.name||state.winnerName||'';
+  const first=(state.players||[]).filter(p=>Number(p.place)>0).sort((a,b)=>Number(b.place)-Number(a.place))[0]?.name||'';
+  const rows=[];
+  Object.entries(bets).forEach(([player,bet])=>{
+    if(!bet?.confirmed)return;
+    for(const type of ['winner','firstEliminated']){
+      const pick=String(bet[type]||'').trim();if(!pick)continue;
+      const odd=Number(odds?.[type]?.[pick])||1.05,actual=type==='winner'?winner:first,hit=pick===actual;
+      const gross=hit?Math.round(stake*odd):0;
+      rows.push({player,type,pick,actual,odds:odd,stakeCents:stake,grossWonCents:gross,netCents:gross-stake,hit});
+    }
+  });
+  return {rows,stakeCents:stake,totalStakedCents:rows.length*stake,totalGrossWonCents:rows.reduce((s,r)=>s+r.grossWonCents,0),totalNetCents:rows.reduce((s,r)=>s+r.netCents,0)};
+}
+
 function buildFinishedRecap(state){
   return {
     bountyMode:state.bountyMode||'common',bountyName:state.mysteryBountyRevealed?state.mysteryBountyName||'':'',bountyHunter:state.mysteryBountyHunter||'',
     bountySurvived:state.mysteryBountyEvent?.kind==='winner',
     missions:(state.personalBounties||[]).filter(c=>c.status==='completed').map(c=>({name:c.hunter,title:c.title||'Cible secrète',text:c.text||'Éliminer '+c.target+' vous-même.',icon:c.icon||'🎯'})),
     objectives:(state.preGameBriefing||[]).filter(e=>e.completed).map(e=>({name:e.name,title:e.title,text:e.resultText||e.text,icon:e.icon||'⭐'})),
-    highlights:(state.liveAlerts||[]).filter(e=>/RECORD|ACCOMPLISSEMENT/.test(e.title||'')).map(e=>({title:e.title,text:e.text,icon:e.icon||'🏆'}))
+    highlights:(state.liveAlerts||[]).filter(e=>/RECORD|ACCOMPLISSEMENT/.test(e.title||'')).map(e=>({title:e.title,text:e.text,icon:e.icon||'🏆'})),
+    betting:buildLiveBettingRecap(state)
   };
 }
 const finishedSummaryShown=new Set();
@@ -19249,6 +19269,10 @@ function finishedRecapSections(rows){
   if(recap.bountyMode==='individual')h+=recap.missions.length?items(recap.missions):'<p>Aucun bounty individuel réussi.</p>';
   else h+='<p>'+esc(recap.bountyName?(recap.bountySurvived?recap.bountyName+' était la cible secrète et a remporté la partie.':recap.bountyHunter+' remporte le bounty en éliminant '+recap.bountyName+'.'):'Aucun bounty révélé.')+'</p>';
   h+='</section><section class="bpt-recap-section"><h3>⭐ Enjeux réalisés</h3>'+(recap.objectives.length?items(recap.objectives):'<p>Aucun enjeu réalisé.</p>')+'</section>';
+  if(recap.betting?.rows?.length){
+    const betLabel=t=>t==='winner'?'Vainqueur':'1er éliminé';
+    h+='<section class="bpt-recap-section"><h3>🎲 Résultats des paris</h3><div class="bpt-recap-bets-table"><div class="bpt-recap-bets-row head"><b>Joueur</b><b>Pari</b><b>Choix</b><b>Résultat</b><b>Solde</b></div>'+recap.betting.rows.map(b=>`<div class="bpt-recap-bets-row"><strong>${esc(b.player)}</strong><span>${betLabel(b.type)}</span><span>${esc(b.pick)}</span><span class="${b.hit?'is-hit':'is-miss'}">${b.hit?'✓ Réussi':'✕ Perdu'}</span><b class="${b.netCents>=0?'is-hit':'is-miss'}">${b.netCents>=0?'+':''}${euro(b.netCents/100)}</b></div>`).join('')+'</div><p class="bpt-recap-bets-total">Mises : '+euro(recap.betting.totalStakedCents/100)+' · Gains : '+euro(recap.betting.totalGrossWonCents/100)+' · Solde de la partie : '+(recap.betting.totalNetCents>=0?'+':'')+euro(recap.betting.totalNetCents/100)+'</p></section>';
+  }
   if(recap.highlights.length)h+='<section class="bpt-recap-section"><h3>🏅 Records et accomplissements</h3>'+items(recap.highlights)+'</section>';
   return h;
 }
@@ -20881,7 +20905,7 @@ function updateSeasonContextTitles(){
     const el=document.getElementById(id);
     if(el)el.textContent=`${label} ${suffix}`;
   };
-  set("rankingSeasonTitle","Classement BPT");
+  set("rankingSeasonTitle","Classements BPT");
   set("recordsSeasonTitle","Records & accomplissements BPT");
   set("profileSeasonTitle","Profil joueur BPT");
 }
@@ -26064,7 +26088,7 @@ document.addEventListener("visibilitychange",()=>{
     live:'Live',
     dashboard:'⌂ Accueil',
     latestgame:'◷ Parties',
-    ranking:'♛ Classement',
+    ranking:'♛ Classements',
     records:'★ Records & accomplissements',
     profile:'♤ Profil joueur',
     settings:'⚙ Paramètres'
@@ -26073,7 +26097,7 @@ document.addEventListener("visibilitychange",()=>{
     live:'Live',
     dashboard:'⌂ Accueil',
     latestgame:'◷ Parties',
-    ranking:'♛ Classement',
+    ranking:'♛ Classements',
     records:'★ Records',
     profile:'♤ Profil',
     settings:'⚙ Réglages'
@@ -28494,6 +28518,19 @@ function connectionDeviceLabel(){
     s.liveAlerts=list;
   }
 
+  function bptLive3QueueSuccessfulBetAlerts(s,type,actual,at){
+    const betting=s?.betting;if(!betting||!actual)return;
+    const stake=Math.max(1,Number(betting.stakeCents)||50),bets=betting.bets||{},odds=betting.odds||{};
+    const existing=new Set((s.liveAlerts||[]).filter(a=>a.category==='betting').map(a=>a.betKey));
+    Object.entries(bets).forEach(([player,bet])=>{
+      if(!bet?.confirmed||String(bet[type]||'')!==String(actual))return;
+      const betKey=`${type}|${player}|${actual}`;if(existing.has(betKey))return;
+      const odd=Number(odds?.[type]?.[actual])||1.05,gross=Math.round(stake*odd),gain=(gross/100).toFixed(2).replace('.',',');
+      bptLive3QueueAlert(s,'🎲','PARI RÉUSSI · '+player,`${player} gagne ${gain} € sur son pari ${type==='winner'?'vainqueur':'1er éliminé'}.`,at,{category:'betting',player,betKey});
+      existing.add(betKey);
+    });
+  }
+
   async function eliminate(){
     if(!isOwner())return;
 
@@ -28547,6 +28584,11 @@ function connectionDeviceLabel(){
       );
       victimPlayer.outElapsedSec=Math.max(0,Math.floor((elimNow-Number(s.startedAt||elimNow))/1000));
 
+      // Le premier pari gagnant est annoncé immédiatement après la première élimination.
+      if((s.players||[]).filter(p=>p.status==='out').length===1){
+        bptLive3QueueSuccessfulBetAlerts(s,'firstEliminated',victim,elimNow);
+      }
+
       // Bounty mystère : uniquement un participant de cette partie, jamais révélé avant sa sortie.
       if(!s.mysteryBountyRevealed && String(s.mysteryBountyName||'')===victim){
         s.mysteryBountyRevealed=true;
@@ -28598,6 +28640,7 @@ function connectionDeviceLabel(){
         s.winnerName=survivors[0].name;
         s.finishedAt=now;
         s.finishReason="winner";
+        bptLive3QueueSuccessfulBetAlerts(s,'winner',survivors[0].name,now);
         if(!s.mysteryBountyRevealed && String(s.mysteryBountyName||'')===survivors[0].name){
           s.mysteryBountyRevealed=true;
           survivors[0].wasMysteryBounty=true;
@@ -31013,8 +31056,8 @@ body.b466-live-active #live3>.hero{display:none!important}
 </style>
 
 <link id="bpt-live-ui-style" rel="stylesheet" href="./live-ui.css?v=6.00">
-<script id="bpt-live-betting" src="./live-betting.js?v=7.5"></script>
-<script id="bpt-live-ui" src="./live-ui.js?v=7.5"></script>
+<script id="bpt-live-betting" src="./live-betting.js?v=7.9"></script>
+<script id="bpt-live-ui" src="./live-ui.js?v=7.9"></script>
 
 
 <style id="bpt-v485-nav-clean">
