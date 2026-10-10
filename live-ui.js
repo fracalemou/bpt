@@ -60,7 +60,7 @@
   </div>`}
   function install(){
     if(!$('bpt-predictions-style')){const style=document.createElement('style');style.id='bpt-predictions-style';style.textContent=`
-      .bpt-predictions{margin:18px auto 0;max-width:760px;padding:16px;border:1px solid rgba(42,201,194,.35);border-radius:16px;background:rgba(8,30,25,.72);color:#f6faf7}.bpt-predictions h3{margin:0 0 5px;font-size:18px}.bpt-prediction-note,.bpt-prediction-wait{margin:0 0 12px;color:#b9cec5;font-size:12px}.bpt-prediction-card{padding:11px 0;border-top:1px solid rgba(255,255,255,.12)}.bpt-prediction-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.bpt-prediction-head span{color:#f0cf79;font-weight:900}.bpt-prediction-choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:7px}.bpt-prediction-choice{display:flex;align-items:center;justify-content:space-between;gap:7px;min-height:38px;padding:7px 9px;border:1px solid #3a5b4f;border-radius:10px;background:#142c24;color:#edf8f2;font-weight:700;cursor:pointer}.bpt-prediction-choice b{color:#f0cf79}.bpt-prediction-choice.is-selected{border-color:#2ac9c2;background:#1d5b52;box-shadow:0 0 0 2px rgba(42,201,194,.15)}.bpt-prediction-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:13px}.bpt-prediction-status{font-size:12px;color:#c5d8cf}.bpt-prediction-confirm{border:0;border-radius:10px;padding:10px 14px;background:#e1b957;color:#1a251e;font-weight:900;cursor:pointer}.bpt-prediction-confirm:disabled{opacity:.6;cursor:default}.bpt-prediction-progress{display:block;margin-top:9px;color:#91aca0}@media(max-width:700px){.bpt-predictions{padding:12px}.bpt-prediction-choices{grid-template-columns:repeat(2,minmax(0,1fr))}.bpt-prediction-footer{align-items:stretch;flex-direction:column}.bpt-prediction-confirm{width:100%}}
+      .bpt-predictions{margin:18px auto 0;max-width:760px;padding:16px;border:1px solid rgba(42,201,194,.35);border-radius:16px;background:rgba(8,30,25,.72);color:#f6faf7}.bpt-predictions h3{margin:0 0 5px;font-size:18px}.bpt-prediction-note,.bpt-prediction-wait{margin:0 0 12px;color:#b9cec5;font-size:12px}.bpt-prediction-card{padding:11px 0;border-top:1px solid rgba(255,255,255,.12)}.bpt-prediction-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.bpt-prediction-head span{color:#f0cf79;font-weight:900}.bpt-prediction-choices{display:block}.bpt-prediction-select{width:100%;min-height:48px;padding:10px 40px 10px 13px;border:1px solid #3a5b4f;border-radius:10px;background:#142c24;color:#edf8f2;font-size:15px;font-weight:700}.bpt-prediction-select:focus{outline:2px solid #2ac9c2;outline-offset:1px}.bpt-prediction-select:disabled{opacity:.78}.bpt-prediction-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:16px;padding:12px;border:1px solid rgba(225,185,87,.45);border-radius:12px;background:rgba(225,185,87,.08)}.bpt-prediction-status{font-size:12px;color:#c5d8cf}.bpt-prediction-confirm{border:0;border-radius:10px;padding:13px 18px;background:#e1b957;color:#1a251e;font-weight:900;font-size:15px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.25)}.bpt-prediction-confirm:disabled{opacity:.75;cursor:default;background:#5c806f;color:#eff8f2;box-shadow:none}.bpt-prediction-progress{display:block;margin-top:9px;color:#91aca0}@media(max-width:700px){.bpt-predictions{padding:12px}.bpt-prediction-footer{align-items:stretch;flex-direction:column}.bpt-prediction-confirm{width:100%;min-height:48px}}
     `;document.head.append(style)}
     const shell=document.querySelector('#live3Game .b466-shell');if(shell&&!shell.querySelector('.bpt484-live'))shell.insertAdjacentHTML('afterbegin',makeMarkup(false));
     const fsShell=document.querySelector('#live3Fullscreen .b466-fs-shell');if(fsShell&&!fsShell.querySelector('.bpt484-live'))fsShell.insertAdjacentHTML('afterbegin',makeMarkup(true));
@@ -78,6 +78,7 @@
           closeActionMenus();doit(b.dataset.do,root.dataset.fs==='1');
         }
       });
+      root.addEventListener('change',e=>{const bet=e.target.closest('[data-bet-action="pick"]');if(bet)handleBetAction(bet);});
       root.addEventListener('keydown',e=>{const a=e.target.closest('[data-action="chrono"]');if(a&&(e.key==='Enter'||e.key===' ')){e.preventDefault();closeActionMenus();info('chrono');}});
     });
     if(!window.__bptLiveMenusBound){
@@ -496,22 +497,25 @@
     const key=JSON.stringify([players,identity,me,odds,confirmed,owner]);if(host.dataset.content===key)return;host.dataset.content=key;host.replaceChildren();
     const title=document.createElement('h3');title.textContent='Pronostics · 0,50 € par pari';host.append(title);
     const note=document.createElement('p');note.className='bpt-prediction-note';note.textContent='Deux paris maximum : un vainqueur et un premier éliminé. Vous pouvez aussi confirmer « Pas de pari ».';host.append(note);
-    if(!identity||!players.includes(identity)){const p=document.createElement('p');p.className='bpt-prediction-wait';p.textContent='Connectez-vous avec votre identité de joueur pour valider vos pronostics.';host.append(p);return;}
+    const canConfirm=!!identity&&players.includes(identity);
+    if(!canConfirm){const p=document.createElement('p');p.className='bpt-prediction-wait';p.textContent='Liste des joueurs et cotes ci-dessous. Connectez-vous avec une identité de joueur pour valider votre pari.';host.append(p);}
     for(const type of ['winner','firstEliminated']){
       const card=document.createElement('div');card.className='bpt-prediction-card';
-      const head=document.createElement('div');head.className='bpt-prediction-head';const strong=document.createElement('strong');strong.textContent=predictionLabel(type);const stake=document.createElement('span');stake.textContent='0,50 €';head.append(strong,stake);card.append(head);
+      const head=document.createElement('div');head.className='bpt-prediction-head';const strong=document.createElement('strong');strong.textContent=type==='winner'?'Vainqueur — choisissez un joueur':'1er éliminé — choisissez un joueur';const stake=document.createElement('span');stake.textContent='0,50 €';head.append(strong,stake);card.append(head);
       const choices=document.createElement('div');choices.className='bpt-prediction-choices';
-      const none=document.createElement('button');none.type='button';none.dataset.betAction='pick';none.dataset.betType=type;none.dataset.betPick='';none.className='bpt-prediction-choice'+(!me[type]?' is-selected':'');none.textContent='Pas de pari';choices.append(none);
-      players.forEach(name=>{const b=document.createElement('button');b.type='button';b.dataset.betAction='pick';b.dataset.betType=type;b.dataset.betPick=name;b.className='bpt-prediction-choice'+(me[type]===name?' is-selected':'');b.innerHTML=`<span>${esc(name)}</span><b>${predictionOdds(st,type,name).toFixed(2).replace('.',',')}</b>`;choices.append(b)});
+      const select=document.createElement('select');select.className='bpt-prediction-select';select.dataset.betAction='pick';select.dataset.betType=type;select.disabled=!canConfirm;
+      const none=document.createElement('option');none.value='';none.textContent='Pas de pari';select.append(none);
+      [...players].sort((a,b)=>predictionOdds(st,type,a)-predictionOdds(st,type,b)).forEach(name=>{const option=document.createElement('option');option.value=name;option.textContent=`${name} · Cote ${predictionOdds(st,type,name).toFixed(2).replace('.',',')}`;select.append(option)});
+      select.value=me[type]||'';choices.append(select);
       card.append(choices);host.append(card);
     }
-    const footer=document.createElement('div');footer.className='bpt-prediction-footer';const status=document.createElement('span');status.className='bpt-prediction-status';status.textContent=me.confirmed?'✓ Choix validé':'Choisissez éventuellement vos paris puis validez';const btn=document.createElement('button');btn.type='button';btn.dataset.betAction='confirm';btn.className='bpt-prediction-confirm';btn.disabled=!!me.confirmed;btn.textContent=me.confirmed?'Choix validé':'Valider mes choix';footer.append(status,btn);host.append(footer);
+    const selectedCount=(me.winner?1:0)+(me.firstEliminated?1:0);const footer=document.createElement('div');footer.className='bpt-prediction-footer';const status=document.createElement('span');status.className='bpt-prediction-status';status.textContent=me.confirmed?'✓ Pari enregistré':(canConfirm?'1. Choisissez vos paris · 2. Validez ci-dessous':'Validation disponible après connexion');const btn=document.createElement('button');btn.type='button';btn.dataset.betAction='confirm';btn.className='bpt-prediction-confirm';btn.disabled=!canConfirm||!!me.confirmed;btn.textContent=me.confirmed?'Pari validé':(selectedCount?'Valider mon pari':'Valider « Pas de pari »');footer.append(status,btn);host.append(footer);
     const progress=document.createElement('small');progress.className='bpt-prediction-progress';progress.textContent=`${confirmed} / ${players.length} joueur${players.length>1?'s':''} a${confirmed>1?'nt':''} validé`;host.append(progress);
   }
   async function handleBetAction(button){
     const x=api();if(!x)return;
     try{
-      if(button.dataset.betAction==='pick'){await x.setLivePrediction?.(button.dataset.betType,button.dataset.betPick||'');}
+      if(button.dataset.betAction==='pick'){await x.setLivePrediction?.(button.dataset.betType,button.value!==undefined?button.value:(button.dataset.betPick||''));}
       if(button.dataset.betAction==='confirm'){await x.confirmLivePredictions?.();}
       sync();
     }catch(e){console.warn('BPT pronostic',e);alert('Impossible d’enregistrer ce choix.');}
