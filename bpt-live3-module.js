@@ -1185,32 +1185,56 @@ function connectionDeviceLabel(){
     },120);
   }
 
-  function populateSpectatorNameList(){
-    const select=$3("live3SpectatorNameInput");
-    if(!select)return;
+  let authoritativeLoginPlayersCache=null;
 
-    const currentValue=String(select.value||liveIdentityName()||"").trim();
-    const names=(db?.players||[])
+  function normalizeLoginPlayers(players){
+    const list=Array.isArray(players)?players:Object.values(players||{});
+    const names=list
       .filter(p=>p && p.active===true && String(p.name||"").trim())
       .map(p=>String(p.name).trim())
       .sort((a,b)=>a.localeCompare(b,"fr",{sensitivity:"base"}));
+    return [...new Set(names)];
+  }
 
-    const unique=[...new Set(names)];
-    const signature=unique.join("|");
+  async function fetchAuthoritativeLoginPlayers(){
+    try{
+      if(!window.bptFirebaseEnsure)throw new Error("Firebase indisponible");
+      const env=await window.bptFirebaseEnsure();
+      const dbx=env?.rtdb||window.bptFirebaseDb?.();
+      if(!dbx)throw new Error("Base Firebase indisponible");
+      const snap=await dbx.ref("bpt/state/main/data/players").once("value");
+      const remote=normalizeLoginPlayers(snap.val());
+      authoritativeLoginPlayersCache=remote;
+      return remote;
+    }catch(e){
+      console.warn("Liste login Firebase : utilisation du secours local",e);
+      return authoritativeLoginPlayersCache||normalizeLoginPlayers(db?.players||[]);
+    }
+  }
 
-    // Ne reconstruire les options que si la liste des joueurs actifs change.
+  function renderSpectatorNameOptions(unique){
+    const select=$3("live3SpectatorNameInput");
+    if(!select)return;
+    const currentValue=String(select.value||liveIdentityName()||"").trim();
+    const signature=(unique||[]).join("|");
     if(signature!==spectatorSelectSignature){
       select.innerHTML=
-        '<option value="">— Choisir votre nom —</option>'+
-        unique.map(name=>`<option value="${escapeAttr(name)}">${escapeHtml(funPlayerLabel(name))}</option>`).join("");
+        '<option value="">— Choisir votre nom —</option>'+ 
+        (unique||[]).map(name=>`<option value="${escapeAttr(name)}">${escapeHtml(funPlayerLabel(name))}</option>`).join("");
       spectatorSelectSignature=signature;
     }
+    if(currentValue && (unique||[]).includes(currentValue))select.value=currentValue;
+    else if(!select.value || !(unique||[]).includes(select.value))select.value="";
+  }
 
-    if(currentValue && unique.includes(currentValue)){
-      select.value=currentValue;
-    }else if(!select.value || !unique.includes(select.value)){
-      select.value="";
-    }
+  function populateSpectatorNameList(){
+    // Affichage immédiat avec l'état connu, puis remplacement par la liste
+    // officielle Firebase. PC et téléphone utilisent ainsi la même source.
+    renderSpectatorNameOptions(authoritativeLoginPlayersCache||normalizeLoginPlayers(db?.players||[]));
+    fetchAuthoritativeLoginPlayers().then(names=>{
+      renderSpectatorNameOptions(names);
+      if($3("live3SpectatorIdentityModal")?.classList.contains("open"))loadProfileCodeState(true);
+    });
   }
 
   function openSpectatorIdentity(force=false){
@@ -1392,13 +1416,12 @@ function connectionDeviceLabel(){
       return;
     }
 
-    const activeNames=(db?.players||[])
-      .filter(p=>p && p.active===true)
-      .map(p=>String(p.name||"").trim());
+    // Contrôle sur la même liste officielle que celle affichée au login.
+    const activeNames=await fetchAuthoritativeLoginPlayers();
 
     if(!activeNames.includes(clean)){
-      alert("Ce joueur n’est plus actif. Choisissez un autre nom.");
-      populateSpectatorNameList();
+      alert("Ce joueur n’est plus actif. La liste vient d’être actualisée.");
+      renderSpectatorNameOptions(activeNames);
       input?.focus();
       return;
     }
