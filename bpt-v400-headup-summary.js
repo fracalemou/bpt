@@ -1,0 +1,7 @@
+
+(function(){
+  function phone(){return matchMedia("(max-width:700px)").matches||/android|iphone|ipad|ipod/i.test(navigator.userAgent);}
+  function add(){try{const valid=Array.isArray(lastGameSummaryRows)&&lastGameSummaryRows.filter(r=>Number(r.place)===1).length===1;if(!valid){document.getElementById('summaryHeadUpPhotoCta')?.remove();return;}if(!phone())return;const modal=document.querySelector(".bpt-summary-modal"),podium=modal?.querySelector(".summary-podium");if(!modal||!podium||modal.querySelector("#summaryHeadUpPhotoCta"))return;const d=document.createElement("div");d.id="summaryHeadUpPhotoCta";d.style.cssText="margin:16px 0 18px;padding:16px;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(255,255,255,.045);text-align:center";d.innerHTML='<div style="font-size:19px;font-weight:900;margin-bottom:7px">📸 Photo du Head-Up</div><div class="muted" style="font-size:12px;margin-bottom:12px">Le vainqueur est désigné. Prenez maintenant la photo des deux finalistes.</div><button id="summaryHeadUpPhotoBtn" class="btn secondary" type="button" style="width:100%;min-height:50px;font-size:16px">Prendre la photo du Head-Up</button>';podium.insertAdjacentElement("afterend",d);}catch(e){console.warn("Photo Head-Up résumé :",e);}}
+  document.addEventListener("click",e=>{if(e.target?.closest?.("#summaryHeadUpPhotoBtn")){const i=document.getElementById("latestGameHeadUpCameraInput");if(i)i.click();}});
+  new MutationObserver(add).observe(document.documentElement,{childList:true,subtree:true});
+})();
