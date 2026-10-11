@@ -5,7 +5,6 @@
   const PATH="bpt/live_v3/current";
   const DEVICE_KEY="bpt_live3_device_id";
   const LIVE_IDENTITY_KEY="bpt_live3_identity_name";
-  const LEGACY_SPECTATOR_NAME_KEY="bpt_live3_spectator_name";
   const VIEWER_STALE_MS=300000;
   const $3=(id)=>document.getElementById(id);
 
@@ -56,7 +55,7 @@
       const now=Date.now();
       let expiresAt=Number(saved?.expiresAt)||0;
 
-      // Compatibilité avec les appareils déjà approuvés avant la V9.0.15 :
+      // Compatibilité avec les appareils déjà approuvés avant la V9.0.17 :
       // on leur accorde 30 jours à compter de cette première restauration.
       if(!expiresAt){
         expiresAt=now+LIVE_TRUST_DURATION_MS;
@@ -619,15 +618,7 @@
   }
 
   function liveIdentityName(){
-    const currentName=String(localStorage.getItem(LIVE_IDENTITY_KEY)||"").trim();
-    if(currentName)return currentName;
-
-    const legacy=String(localStorage.getItem(LEGACY_SPECTATOR_NAME_KEY)||"").trim();
-    if(legacy){
-      localStorage.setItem(LIVE_IDENTITY_KEY,legacy);
-      return legacy;
-    }
-    return "";
+    return String(localStorage.getItem(LIVE_IDENTITY_KEY)||"").trim();
   }
 
   function renderConnectedIdentityBadge(){
@@ -652,7 +643,6 @@
     try{sessionStorage.removeItem(LIVE_IDENTITY_SESSION_KEY);}catch(_e){}
     try{
       localStorage.removeItem(LIVE_IDENTITY_KEY);
-      localStorage.removeItem(LEGACY_SPECTATOR_NAME_KEY);
       localStorage.removeItem(LIVE_TRUSTED_DEVICE_KEY);
     }catch(_e){}
 
@@ -1219,17 +1209,12 @@ function connectionDeviceLabel(){
     },120);
   }
 
-  // CONTRAT D’ARCHITECTURE BPT : une seule source de connexion.
-  // Le login lit DIRECTEMENT bpt/state/main/data/players.
-  // Chaque joueur porte name, nickname, active et auth {salt,digest,codeLength}.
-  const BPT_PLAYER_STATE_ROOT_PATH="bpt/state/main/data";
-  const BPT_PLAYER_LIST_PATH=BPT_PLAYER_STATE_ROOT_PATH+"/players";
-  const BPT_LEGACY_NICKNAMES_PATH=BPT_PLAYER_STATE_ROOT_PATH+"/playerNicknames";
-  const BPT_LEGACY_LOGIN_PATH="bpt/login_registry_v2";
+  // CONTRAT D’ARCHITECTURE BPT : Paramètres > Joueurs est l’unique référentiel.
+  // Le login lit directement bpt/state/main/data/players. Aucun registre parallèle, aucune liste locale.
+  const BPT_PLAYER_LIST_PATH="bpt/state/main/data/players";
   let authoritativeLoginPlayersCache=null;
   let authoritativeLoginPlayersRef=null;
   let authoritativeLoginPlayersListenerInstalled=false;
-  let playerDirectoryMigrationPromise=null;
 
   function normalizeIdentityKey(v){
     return String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim().toLocaleLowerCase("fr");
@@ -1239,13 +1224,14 @@ function connectionDeviceLabel(){
     const players=Array.isArray(playersRaw)?playersRaw:Object.values(playersRaw||{});
     const rows=players
       .filter(p=>p && p.active===true && String(p.name||"").trim())
-      .map(p=>({name:String(p.name||"").trim(),label:String(p.nickname||p.name||"").trim()}))
-      .sort((a,b)=>a.label.localeCompare(b.label,"fr",{sensitivity:"base"})||a.name.localeCompare(b.name,"fr",{sensitivity:"base"}));
+      .map(p=>({name:String(p.name||"").trim()}))
+      .sort((a,b)=>a.name.localeCompare(b.name,"fr",{sensitivity:"base"}));
     const seen=new Set();
     return rows.filter(row=>{
       const key=normalizeIdentityKey(row.name);
-      if(seen.has(key))return false;
-      seen.add(key);return true;
+      if(!key || seen.has(key))return false;
+      seen.add(key);
+      return true;
     });
   }
 
@@ -1263,98 +1249,7 @@ function connectionDeviceLabel(){
     return Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');
   }
 
-  async function loginRegistryKey(name){
-    return profileCodeDigest(String(name||"").trim().toLocaleLowerCase("fr"));
-  }
-
-  async function migratePlayerDirectoryOnce(){
-    if(playerDirectoryMigrationPromise)return playerDirectoryMigrationPromise;
-    playerDirectoryMigrationPromise=(async()=>{
-      const env=await window.bptFirebaseEnsure?.();
-      const dbx=env?.rtdb||window.bptFirebaseDb?.();
-      if(!dbx)throw new Error("Base Firebase indisponible");
-      const [playersSnap,nickSnap,legacyLoginSnap]=await Promise.all([
-        dbx.ref(BPT_PLAYER_LIST_PATH).once("value"),
-        dbx.ref(BPT_LEGACY_NICKNAMES_PATH).once("value"),
-        dbx.ref(BPT_LEGACY_LOGIN_PATH).once("value")
-      ]);
-      const raw=playersSnap.val();
-      const players=Array.isArray(raw)?raw:Object.values(raw||{});
-      const nicknames=nickSnap.val()||{};
-      const legacy=legacyLoginSnap.val()||{};
-      let changed=false;
-
-      // V9.0.15 — réparation explicite du référentiel de connexion.
-      // Une seule table fait foi : bpt/state/main/data/players.
-      // Cas validés par l'utilisateur :
-      // - supprimer l'entrée parasite « ELEN » ;
-      // - conserver « Elen Miron » avec le surnom « Fiona » ;
-      // - garantir « Test » avec le surnom « Surnom test » et le code 7074.
-      const migrationMarkerRef=dbx.ref("bpt/migrations/v9_0_14_player_directory_repair");
-      const markerSnap=await migrationMarkerRef.once("value");
-      if(!markerSnap.exists()){
-        const norm=v=>normalizeIdentityKey(v);
-
-        // ELEN est une entrée parasite distincte de la fiche canonique Elen Miron.
-        const elenLegacy=players.find(p=>norm(p?.name)==="elen")||null;
-        for(let i=players.length-1;i>=0;i--){
-          if(norm(players[i]?.name)==="elen"){players.splice(i,1);changed=true;}
-        }
-
-        let elenMiron=players.find(p=>norm(p?.name)==="elen miron");
-        if(!elenMiron){
-          elenMiron={name:"Elen Miron",nickname:"Fiona",active:true};
-          if(elenLegacy?.auth?.salt&&elenLegacy?.auth?.digest)elenMiron.auth={...elenLegacy.auth,codeLength:4};
-          players.push(elenMiron);changed=true;
-        }else{
-          if(elenMiron.name!=="Elen Miron"){elenMiron.name="Elen Miron";changed=true;}
-          if(elenMiron.nickname!=="Fiona"){elenMiron.nickname="Fiona";changed=true;}
-          if(elenMiron.active!==true){elenMiron.active=true;changed=true;}
-          if(!(elenMiron.auth?.salt&&elenMiron.auth?.digest) && elenLegacy?.auth?.salt&&elenLegacy?.auth?.digest){
-            elenMiron.auth={...elenLegacy.auth,codeLength:4};changed=true;
-          }
-        }
-
-        let testPlayer=players.find(p=>norm(p?.name)==="test");
-        if(!testPlayer){testPlayer={name:"Test",nickname:"Surnom test",active:true};players.push(testPlayer);changed=true;}
-        if(testPlayer.name!=="Test"){testPlayer.name="Test";changed=true;}
-        if(testPlayer.nickname!=="Surnom test"){testPlayer.nickname="Surnom test";changed=true;}
-        if(testPlayer.active!==true){testPlayer.active=true;changed=true;}
-        const testSalt="bpt-v9.0.15-test-7074";
-        const testDigest=await profileCodeDigest(testSalt+":7074");
-        if(testPlayer.auth?.salt!==testSalt || testPlayer.auth?.digest!==testDigest || testPlayer.auth?.codeLength!==4){
-          testPlayer.auth={salt:testSalt,digest:testDigest,codeLength:4,createdAt:testPlayer.auth?.createdAt||Date.now(),updatedAt:Date.now()};
-          changed=true;
-        }
-
-        if(changed)await dbx.ref(BPT_PLAYER_LIST_PATH).set(players);
-        await migrationMarkerRef.set({done:true,at:Date.now(),version:"9.0.15"});
-      }
-
-      for(const p of players){
-        if(!p||!String(p.name||"").trim())continue;
-        const name=String(p.name).trim();
-        if(!String(p.nickname||"").trim()){
-          const shared=String(nicknames?.[name]||"").trim();
-          const fallback=(typeof window.bptPlayerDisplayLabel==="function")?String(window.bptPlayerDisplayLabel(name,nicknames)||"").trim():"";
-          const label=shared || (fallback&&normalizeIdentityKey(fallback)!==normalizeIdentityKey(name)?fallback:"");
-          if(label){p.nickname=label;changed=true;}
-        }
-        if(!(p.auth?.salt&&p.auth?.digest)){
-          const key=await loginRegistryKey(name);
-          const old=legacy[key]||{};
-          if(old.salt&&old.digest){p.auth={salt:old.salt,digest:old.digest,codeLength:4,createdAt:old.createdAt||Date.now(),updatedAt:Date.now()};changed=true;}
-        }else if(p.auth.codeLength!==4){p.auth.codeLength=4;changed=true;}
-      }
-      if(changed)await dbx.ref(BPT_PLAYER_LIST_PATH).set(players);
-      if(Object.keys(legacy).length){try{await dbx.ref(BPT_LEGACY_LOGIN_PATH).remove();}catch(_e){}}
-      return players;
-    })().finally(()=>{playerDirectoryMigrationPromise=null;});
-    return playerDirectoryMigrationPromise;
-  }
-
   async function fetchAuthoritativeLoginPlayers(){
-    await migratePlayerDirectoryOnce();
     const ref=await playerDirectoryFirebaseRef();
     const snap=await ref.once("value");
     const remote=normalizeLoginPlayers(snap.val());
@@ -1389,9 +1284,9 @@ function connectionDeviceLabel(){
     if(!select)return;
     const currentValue=String(select.value||liveIdentityName()||"").trim();
     const rows=Array.isArray(records)?records:[];
-    const signature=rows.map(row=>`${row.name}\u0000${row.label}`).join("|");
+    const signature=rows.map(row=>row.name).join("|");
     if(signature!==spectatorSelectSignature){
-      select.innerHTML='<option value="">— Choisir votre nom —</option>'+rows.map(row=>`<option value="${escapeAttr(row.name)}">${escapeHtml(row.label)}</option>`).join("");
+      select.innerHTML='<option value="">— Choisir votre nom —</option>'+rows.map(row=>`<option value="${escapeAttr(row.name)}">${escapeHtml(row.name)}</option>`).join("");
       spectatorSelectSignature=signature;
     }
     if(currentValue && rows.some(row=>row.name===currentValue))select.value=currentValue;
@@ -1502,7 +1397,7 @@ function connectionDeviceLabel(){
     profileCodeLoadingName=name;profileCodeState=null;
     const button=$3('live3SpectatorIdentityConfirmBtn'),hint=$3('bptProfileCodeHint');
     if(button)button.disabled=true;
-    $3('bptProfileCodeInput').value='';$3('bptProfileCodeConfirm').value='';$3('bptProfileCodeConfirmLabel').hidden=true;$3('bptProfileCodeMigration').hidden=true;$3('bptProfileCodeError').textContent='';
+    $3('bptProfileCodeInput').value='';$3('bptProfileCodeConfirm').value='';$3('bptProfileCodeConfirmLabel').hidden=true;$3('bptProfileCodeError').textContent='';
     if(!name){hint.textContent='Choisissez votre profil.';return;}
     hint.textContent='Vérification du profil…';
     try{
@@ -1514,8 +1409,6 @@ function connectionDeviceLabel(){
       $3('bptProfileCodeInput').minLength=4;
       $3('bptProfileCodeInput').placeholder='Votre code à 4 chiffres';
       $3('bptProfileCodeLabel').textContent='Code secret personnel · 4 chiffres';
-      $3('bptProfileCodeMigration').hidden=true;
-      $3('bptProfileCodeNew').value='';$3('bptProfileCodeNewConfirm').value='';
       hint.textContent=exists?'Saisissez votre code personnel habituel.':'Créez votre code personnel. Vous conserverez ce même code pour les prochaines connexions.';
       $3('bptProfileCodeConfirmLabel').hidden=exists;
       $3('bptProfileCodeInput').autocomplete=exists?'current-password':'new-password';
@@ -1526,7 +1419,7 @@ function connectionDeviceLabel(){
     if(!settingsUnlocked)throw new Error('Déverrouillez les paramètres administrateur.');
     const codeRef=await profileCodeRef(name);
     const snap=await codeRef.once('value');
-    if(!snap.exists())throw new Error('Joueur introuvable dans le registre de connexion.');
+    if(!snap.val())throw new Error('Aucun code à réinitialiser pour ce joueur.');
     if(!settingsUnlocked)throw new Error('Les paramètres ont été verrouillés.');
     await codeRef.update({salt:null,digest:null,codeLength:null,createdAt:null,updatedAt:Date.now()});
     if(profileCodeState?.name===name||profileCodeLoadingName===name){profileCodeState=null;profileCodeLoadingName='';}
@@ -1545,7 +1438,7 @@ function connectionDeviceLabel(){
       const digest=await profileCodeDigest(salt+':'+pin);
       const result=await ref.transaction(server=>{
         if(server?.salt&&server?.digest)return;
-        return {...(server||{}),name,active:server?.active!==false,salt,digest,codeLength:4,createdAt:Date.now()};
+        return {...(server||{}),salt,digest,codeLength:4,createdAt:Date.now(),updatedAt:Date.now()};
       });
       record=result.snapshot.val()||(await ref.once('value')).val();
     }
@@ -1615,8 +1508,6 @@ function connectionDeviceLabel(){
     renderConnectedIdentityBadge();
     markIdentityConfirmedThisSession();
     startAppPresence();
-    logConnectionSession();
-    logConnectionSession();
     logConnectionSession();
 
     // Si aucun Live n'est actif, ce joueur est le futur organisateur :

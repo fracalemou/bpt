@@ -544,27 +544,6 @@ function mergeHistories(remoteHistory,localHistory){
   return result.flatMap((rows,i)=>rows.map(r=>({...r,game:i+1})));
 }
 
-function mergePlayers(remotePlayers,localPlayers){
-  const map=new Map();
-  (remotePlayers||[]).forEach(p=>map.set(String(p.name||"").toLocaleLowerCase("fr"),{...p}));
-  (localPlayers||[]).forEach(p=>map.set(String(p.name||"").toLocaleLowerCase("fr"),{...p}));
-  return [...map.values()];
-}
-
-function mergeStateForPush(remote,local){
-  if(!isValidBptState(remote))return JSON.parse(JSON.stringify(local));
-
-  const merged=JSON.parse(JSON.stringify(local));
-
-  if(cloudHistoryReplaceOnce){
-    merged.history=dedupeHistory(local.history||[]);
-  }else{
-    merged.history=mergeHistories(remote.history||[],local.history||[]);
-  }
-
-  merged.players=mergePlayers(remote.players||[],local.players||[]);
-  return merged;
-}
 
 function saveLocalOnly(){
   try{localStorage.setItem(STORE,JSON.stringify(db));}catch(e){}
@@ -577,7 +556,6 @@ function cloudBuildLeanPayload(){
     points:clone(db?.points||{}),
     settings:clone(db?.settings||{}),
     playerAliases:clone(db?.playerAliases||{}),
-    playerNicknames:clone(db?.playerNicknames||{}),
     liveState:null,
     liveWire:null,
     gamePhotos:{},
@@ -1259,7 +1237,6 @@ async function applyCloudState(row){
     const serverHistory=await cloudFetchGames();
     currentSeasonHistoryCache=clone(serverHistory);
 
-    applyRequestedPlayerMergesToState(remoteState);
     db=remoteState;
     saveLocalOnly();
     if(remoteActive && !thisDeviceOwnsRemoteLive)cloudLocalDirty=false;
@@ -1728,21 +1705,18 @@ function dedupeHistory(history){
   return kept.flatMap(([g,rows])=>rows.map(r=>({...r,game:renum.get(g)})));
 }
 
-const REQUESTED_PLAYER_MERGES={"Helene Fiona":"Elen Miron"};
 function loadDB(){
   try{
     const x=JSON.parse(localStorage.getItem(STORE));
     if(x&&x.players&&x.history&&x.points){
       const before=x.history.length;
       x.history=dedupeHistory(x.history);
-      applyRequestedPlayerMergesToState(x);
       if(x.history.length!==before)localStorage.setItem(STORE,JSON.stringify(x));
       return x;
     }
   }catch(e){}
   const fresh=clone(SEED);
   fresh.history=dedupeHistory(fresh.history);
-  applyRequestedPlayerMergesToState(fresh);
   return fresh;
 }
 let db = loadDB();
@@ -3787,13 +3761,6 @@ function normalizePlayerLookupName(name){
     .trim().replace(/\s+/g," ").toLocaleUpperCase("fr");
 }
 
-function ensurePlayerNicknames(){
-  if(!db.playerNicknames || typeof db.playerNicknames!=="object" || Array.isArray(db.playerNicknames)){
-    db.playerNicknames={};
-  }
-  return db.playerNicknames;
-}
-
 function annalesNicknamesFor(name){
   const key=normalizePlayerLookupName(name);
   for(const [fullName,nicks] of Object.entries(BPT_ANNALES_NICKNAMES)){
@@ -3805,12 +3772,11 @@ function annalesNicknamesFor(name){
 function playerNicknameInfo(name){
   const real=String(name||"").trim();
   const player=(db.players||[]).find(p=>normalizePlayerLookupName(p?.name)===normalizePlayerLookupName(real));
-  const embedded=String(player?.nickname||"").trim();
-  const legacy=String(ensurePlayerNicknames()[real]||"").trim();
+  const configured=String(player?.nickname||"").trim();
   const annales=annalesNicknamesFor(real);
-  const primary=embedded || legacy || annales[0] || "";
+  const primary=configured || annales[0] || "";
   const others=annales.filter(n=>n!==primary);
-  return {primary,others,source:embedded?"joueur":(legacy?"personnalisé":(annales.length?"annales":""))};
+  return {primary,others,source:configured?"joueur":(annales.length?"annales":"")};
 }
 
 function displayPlayerName(name){
@@ -3827,16 +3793,6 @@ function funPlayerLabel(name){
   const nick=playerNicknameInfo(real).primary;
   return nick || real;
 }
-
-// Source unique de libellé joueur pour toute l’application, y compris le login.
-// Même règle sur PC et téléphone : surnom partagé/personnalisé, puis surnom historique, sinon nom réel.
-window.bptPlayerDisplayLabel=function(name,sharedNicknames){
-  const real=String(name||"").trim();
-  const shared=String((sharedNicknames&&sharedNicknames[real])||"").trim();
-  if(shared)return shared;
-  const annales=annalesNicknamesFor(real);
-  return String(annales[0]||real).trim();
-};
 
 function bptHistoricalStartAt(date){
   const match=String(date||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -4390,11 +4346,8 @@ async function savePlayerNickname(name,value){
   if(!player)return;
   const nick=String(value||"").trim().replace(/\s+/g," ");
   const rec=(db.players||[]).find(p=>normalizePlayerLookupName(p?.name)===normalizePlayerLookupName(player));
-  if(rec)rec.nickname=nick;
-  // Compatibilité temporaire avec les anciens écrans ; le login n'utilise plus cette map.
-  const map=ensurePlayerNicknames();
-  if(nick)map[player]=nick;
-  else delete map[player];
+  if(!rec)return;
+  rec.nickname=nick;
   saveDB();
   renderPlayers();
   if($("profilePlayerSelect")?.value===player)renderProfile(player);
@@ -4404,55 +4357,17 @@ function ensurePlayerAliases(){
   if(!db.playerAliases || typeof db.playerAliases!=="object" || Array.isArray(db.playerAliases))db.playerAliases={};
   return db.playerAliases;
 }
-function applyRequestedPlayerMergesToState(state){
-  if(!state||typeof state!=="object")return false;
-  if(!state.playerAliases||typeof state.playerAliases!=="object"||Array.isArray(state.playerAliases))state.playerAliases={};
-  let changed=false;
-  for(const [source,target] of Object.entries(REQUESTED_PLAYER_MERGES)){
-    const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toLocaleLowerCase('fr');
-    const sourceKey=norm(source),targetKey=norm(target);
-    if(state.playerAliases[source]!==target){state.playerAliases[source]=target;changed=true;}
-    const rewrite=rows=>(Array.isArray(rows)?rows:[]).map(r=>({...r,
-      player:[sourceKey,targetKey].includes(norm(r.player))?target:r.player,
-      killer:[sourceKey,targetKey].includes(norm(r.killer))?target:r.killer
-    }));
-    const oldHistory=JSON.stringify(state.history||[]);
-    state.history=rewrite(state.history);
-    if(JSON.stringify(state.history)!==oldHistory)changed=true;
-    if(Array.isArray(state.players)){
-      const had=state.players.length;
-      state.players=state.players.filter(p=>norm(p?.name)!==sourceKey && norm(p?.name)!==targetKey);
-      if(state.players.length!==had)changed=true;
-      state.players.push({name:target,active:true});
-      changed=true;
-    }
-    for(const key of ["playerNicknames","playerPhotos"]){
-      if(state[key]&&typeof state[key]==="object"){
-        if(state[key][source])state[key][target]=state[key][source];
-        if(Object.prototype.hasOwnProperty.call(state[key],source)){delete state[key][source];changed=true;}
-      }
-    }
-    if(state.liveState?.players)state.liveState.players=state.liveState.players.filter(p=>p?.name!==source).map(p=>({...p,killer:p.killer===source?target:p.killer}));
-  }
-  return changed;
-}
 function canonicalPlayerName(name){
   let cur=String(name||"").trim();
-  const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toLocaleLowerCase('fr');
-  const key=norm(cur);
-  for(const [source,target] of Object.entries(REQUESTED_PLAYER_MERGES)){
-    if(key===norm(source)||key===norm(target))return target;
-  }
   const aliases=ensurePlayerAliases();
   const seen=new Set();
   while(cur && aliases[cur] && !seen.has(cur)){
     seen.add(cur);
     cur=String(aliases[cur]||"").trim();
   }
-  const aliasEntry=Object.entries(aliases).find(([source])=>norm(source)===norm(cur));
-  if(aliasEntry)cur=String(aliasEntry[1]||cur).trim();
   return cur;
 }
+
 function applyPlayerAliasesToRows(rows){
   return (rows||[]).map(r=>({
     ...clone(r),
@@ -6250,10 +6165,6 @@ async function mergePlayersByName(){
     setCloudStatus("busy","Fusion des joueurs…");
     ensurePlayerAliases()[source]=target;
 
-    const nickMap=ensurePlayerNicknames();
-    if(nickMap[source] && !nickMap[target])nickMap[target]=nickMap[source];
-    delete nickMap[source];
-
     const photoMap=ensurePlayerPhotos();
     if(photoMap[source] && !photoMap[target])photoMap[target]=photoMap[source];
     delete photoMap[source];
@@ -6283,7 +6194,11 @@ async function mergePlayersByName(){
     // Player directory
     const src=db.players.find(p=>p.name===source);
     const dst=db.players.find(p=>p.name===target);
-    if(dst && src)dst.active=dst.active||src.active;
+    if(dst && src){
+      dst.active=dst.active||src.active;
+      if(!String(dst.nickname||"").trim() && String(src.nickname||"").trim())dst.nickname=src.nickname;
+      if(!(dst.auth?.salt&&dst.auth?.digest) && src.auth?.salt&&src.auth?.digest)dst.auth=clone(src.auth);
+    }
     db.players=(db.players||[]).filter(p=>p.name!==source);
 
     // Refresh displayed archive/cumulative context

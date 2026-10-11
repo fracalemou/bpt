@@ -1,4 +1,4 @@
-BPT V9.0.15
+BPT V9.0.17
 
 Correctif login :
 - source unique joueurs : bpt/state/main/data/players
