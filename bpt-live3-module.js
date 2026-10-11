@@ -55,7 +55,7 @@
       const now=Date.now();
       let expiresAt=Number(saved?.expiresAt)||0;
 
-      // Compatibilité avec les appareils déjà approuvés avant la V9.0.17 :
+      // Compatibilité avec les appareils déjà approuvés avant la V9.0.18 :
       // on leur accorde 30 jours à compter de cette première restauration.
       if(!expiresAt){
         expiresAt=now+LIVE_TRUST_DURATION_MS;
@@ -1210,10 +1210,9 @@ function connectionDeviceLabel(){
   }
 
   // CONTRAT D’ARCHITECTURE BPT : Paramètres > Joueurs est l’unique référentiel.
-  // Le login lit directement bpt/state/main/data/players. Aucun registre parallèle, aucune liste locale.
-  const BPT_PLAYER_LIST_PATH="bpt/state/main/data/players";
+  // Le login consomme exactement db.players via l’API partagée de application.js.
+  // Aucun lecteur Firebase parallèle n’est autorisé pour construire la liste du login.
   let authoritativeLoginPlayersCache=null;
-  let authoritativeLoginPlayersRef=null;
   let authoritativeLoginPlayersListenerInstalled=false;
 
   function normalizeIdentityKey(v){
@@ -1235,36 +1234,20 @@ function connectionDeviceLabel(){
     });
   }
 
-  async function playerDirectoryFirebaseRef(){
-    if(authoritativeLoginPlayersRef)return authoritativeLoginPlayersRef;
-    const env=await window.bptFirebaseEnsure?.();
-    const dbx=env?.rtdb||window.bptFirebaseDb?.();
-    if(!dbx)throw new Error("Base Firebase indisponible");
-    authoritativeLoginPlayersRef=dbx.ref(BPT_PLAYER_LIST_PATH);
-    return authoritativeLoginPlayersRef;
-  }
-
-  async function profileCodeDigest(value){
-    const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value));
-    return Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');
-  }
-
   async function fetchAuthoritativeLoginPlayers(){
-    const ref=await playerDirectoryFirebaseRef();
-    const snap=await ref.once("value");
-    const remote=normalizeLoginPlayers(snap.val());
-    authoritativeLoginPlayersCache=remote;
-    return remote;
+    if(typeof window.bptWaitForSettingsPlayers!=="function")throw new Error("Référentiel Joueurs indisponible");
+    const records=normalizeLoginPlayers(await window.bptWaitForSettingsPlayers());
+    authoritativeLoginPlayersCache=records;
+    return records;
   }
 
   async function installAuthoritativeLoginPlayersListener(){
     if(authoritativeLoginPlayersListenerInstalled)return;
-    const ref=await playerDirectoryFirebaseRef();
     authoritativeLoginPlayersListenerInstalled=true;
-    ref.on("value",snap=>{
-      const remote=normalizeLoginPlayers(snap.val());
-      authoritativeLoginPlayersCache=remote;
-      renderSpectatorNameOptions(remote);
+    window.addEventListener('bpt:settings-players-changed',event=>{
+      const records=normalizeLoginPlayers(event?.detail?.players||[]);
+      authoritativeLoginPlayersCache=records;
+      renderSpectatorNameOptions(records);
       const modal=$3("live3SpectatorIdentityModal");
       if(modal?.classList.contains("open")){
         const select=$3("live3SpectatorNameInput");
@@ -1272,11 +1255,12 @@ function connectionDeviceLabel(){
         const btn=$3("live3SpectatorIdentityConfirmBtn");
         if(btn)btn.disabled=!String(select?.value||"").trim();
       }
-    },err=>{
-      console.error("Écoute de la liste joueurs Firebase impossible",err);
-      const error=$3("bptProfileCodeError");
-      if(error)error.textContent="Connexion à la liste joueurs Firebase interrompue.";
     });
+  }
+
+  async function profileCodeDigest(value){
+    const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(value));
+    return Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');
   }
 
   function renderSpectatorNameOptions(records){
@@ -1361,7 +1345,7 @@ function connectionDeviceLabel(){
   let profileCodeState=null,profileCodeLoadingName='',verifiedProfileName='';
   async function profileCodeRef(name){
     const env=await window.bptFirebaseEnsure?.();if(!env?.rtdb)throw new Error('Connexion indisponible.');
-    const dbx=env.rtdb,clean=String(name||'').trim(),target=normalizeIdentityKey(clean),playersRef=dbx.ref(BPT_PLAYER_LIST_PATH);
+    const dbx=env.rtdb,clean=String(name||'').trim(),target=normalizeIdentityKey(clean),playersRef=dbx.ref("bpt/state/main/data/players");
     async function read(){
       const snap=await playersRef.once('value');
       const raw=snap.val(),players=Array.isArray(raw)?raw:Object.values(raw||{});

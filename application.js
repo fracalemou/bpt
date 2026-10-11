@@ -1721,6 +1721,25 @@ function loadDB(){
 }
 let db = loadDB();
 
+// Référentiel unique des joueurs : exactement le tableau affiché dans Paramètres > Joueurs.
+// Le login ne doit jamais charger une autre liste de son côté.
+function bptSettingsPlayersSnapshot(){
+  return JSON.parse(JSON.stringify(Array.isArray(db?.players)?db.players:[]));
+}
+window.bptGetSettingsPlayers=()=>bptSettingsPlayersSnapshot();
+window.bptWaitForSettingsPlayers=async (timeoutMs=10000)=>{
+  const started=Date.now();
+  while((!cloudReady || cloudApplying) && Date.now()-started<timeoutMs){
+    await new Promise(resolve=>setTimeout(resolve,80));
+  }
+  return bptSettingsPlayersSnapshot();
+};
+function bptNotifySettingsPlayers(){
+  try{
+    window.dispatchEvent(new CustomEvent('bpt:settings-players-changed',{detail:{players:bptSettingsPlayersSnapshot()}}));
+  }catch(_e){}
+}
+
 // Un Live distant conservé dans localStorage ne doit jamais être utilisé comme source.
 // Seul le navigateur créateur conserve son Live local ; les spectateurs relisent Firebase.
 if(
@@ -5873,6 +5892,7 @@ function renderPlayers(){
   if(!wrap)return;
 
   const players=[...db.players].sort((a,b)=>a.name.localeCompare(b.name,"fr",{sensitivity:"base"}));
+  bptNotifySettingsPlayers();
   if(!players.length){
     wrap.innerHTML='<div class="muted">Aucun joueur.</div>';
     return;
