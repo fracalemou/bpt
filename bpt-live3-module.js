@@ -19,6 +19,7 @@
   let liveIdentityConfirmed=false;
   const LIVE_IDENTITY_SESSION_KEY="bpt_live3_identity_confirmed_session";
   const LIVE_TRUSTED_DEVICE_KEY="bpt_live3_trusted_device_v1";
+  const LIVE_TRUST_DURATION_MS=30*24*60*60*1000;
 
   function identityConfirmedThisSession(){
     return liveIdentityConfirmed===true;
@@ -30,21 +31,53 @@
   }
 
   function rememberTrustedDevice(name){
-    try{localStorage.setItem(LIVE_TRUSTED_DEVICE_KEY,JSON.stringify({name}));}catch(_e){}
+    try{
+      const clean=String(name||"").trim();
+      if(!clean)return;
+      const now=Date.now();
+      localStorage.setItem(LIVE_TRUSTED_DEVICE_KEY,JSON.stringify({
+        name:clean,
+        trustedAt:now,
+        expiresAt:now+LIVE_TRUST_DURATION_MS
+      }));
+      localStorage.setItem(LIVE_IDENTITY_KEY,clean);
+    }catch(_e){}
   }
 
   function restoreTrustedDevice(){
     try{
       const saved=JSON.parse(localStorage.getItem(LIVE_TRUSTED_DEVICE_KEY)||"null");
-      if(!saved?.name){
+      const name=String(saved?.name||"").trim();
+      if(!name){
         localStorage.removeItem(LIVE_TRUSTED_DEVICE_KEY);
         return false;
       }
-      const current=String(localStorage.getItem(LIVE_IDENTITY_KEY)||"").trim();
-      if(current && current!==String(saved.name).trim())return false;
-      localStorage.setItem(LIVE_IDENTITY_KEY,String(saved.name).trim());
+
+      const now=Date.now();
+      let expiresAt=Number(saved?.expiresAt)||0;
+
+      // Compatibilité avec les appareils déjà approuvés avant la V9.0.15 :
+      // on leur accorde 30 jours à compter de cette première restauration.
+      if(!expiresAt){
+        expiresAt=now+LIVE_TRUST_DURATION_MS;
+        localStorage.setItem(LIVE_TRUSTED_DEVICE_KEY,JSON.stringify({
+          name,
+          trustedAt:Number(saved?.trustedAt)||now,
+          expiresAt
+        }));
+      }
+
+      if(expiresAt<=now){
+        localStorage.removeItem(LIVE_TRUSTED_DEVICE_KEY);
+        localStorage.removeItem(LIVE_IDENTITY_KEY);
+        return false;
+      }
+
+      // Le profil approuvé est la référence sur cet appareil pendant 30 jours.
+      // Une ancienne valeur locale ne doit jamais forcer une nouvelle saisie du code.
+      localStorage.setItem(LIVE_IDENTITY_KEY,name);
       liveIdentityConfirmed=true;
-      verifiedProfileName=String(saved.name).trim();
+      verifiedProfileName=name;
       renderConnectedIdentityBadge();
       startAppPresence();
       return true;
@@ -1250,6 +1283,54 @@ function connectionDeviceLabel(){
       const nicknames=nickSnap.val()||{};
       const legacy=legacyLoginSnap.val()||{};
       let changed=false;
+
+      // V9.0.15 — réparation explicite du référentiel de connexion.
+      // Une seule table fait foi : bpt/state/main/data/players.
+      // Cas validés par l'utilisateur :
+      // - supprimer l'entrée parasite « ELEN » ;
+      // - conserver « Elen Miron » avec le surnom « Fiona » ;
+      // - garantir « Test » avec le surnom « Surnom test » et le code 7074.
+      const migrationMarkerRef=dbx.ref("bpt/migrations/v9_0_14_player_directory_repair");
+      const markerSnap=await migrationMarkerRef.once("value");
+      if(!markerSnap.exists()){
+        const norm=v=>normalizeIdentityKey(v);
+
+        // ELEN est une entrée parasite distincte de la fiche canonique Elen Miron.
+        const elenLegacy=players.find(p=>norm(p?.name)==="elen")||null;
+        for(let i=players.length-1;i>=0;i--){
+          if(norm(players[i]?.name)==="elen"){players.splice(i,1);changed=true;}
+        }
+
+        let elenMiron=players.find(p=>norm(p?.name)==="elen miron");
+        if(!elenMiron){
+          elenMiron={name:"Elen Miron",nickname:"Fiona",active:true};
+          if(elenLegacy?.auth?.salt&&elenLegacy?.auth?.digest)elenMiron.auth={...elenLegacy.auth,codeLength:4};
+          players.push(elenMiron);changed=true;
+        }else{
+          if(elenMiron.name!=="Elen Miron"){elenMiron.name="Elen Miron";changed=true;}
+          if(elenMiron.nickname!=="Fiona"){elenMiron.nickname="Fiona";changed=true;}
+          if(elenMiron.active!==true){elenMiron.active=true;changed=true;}
+          if(!(elenMiron.auth?.salt&&elenMiron.auth?.digest) && elenLegacy?.auth?.salt&&elenLegacy?.auth?.digest){
+            elenMiron.auth={...elenLegacy.auth,codeLength:4};changed=true;
+          }
+        }
+
+        let testPlayer=players.find(p=>norm(p?.name)==="test");
+        if(!testPlayer){testPlayer={name:"Test",nickname:"Surnom test",active:true};players.push(testPlayer);changed=true;}
+        if(testPlayer.name!=="Test"){testPlayer.name="Test";changed=true;}
+        if(testPlayer.nickname!=="Surnom test"){testPlayer.nickname="Surnom test";changed=true;}
+        if(testPlayer.active!==true){testPlayer.active=true;changed=true;}
+        const testSalt="bpt-v9.0.15-test-7074";
+        const testDigest=await profileCodeDigest(testSalt+":7074");
+        if(testPlayer.auth?.salt!==testSalt || testPlayer.auth?.digest!==testDigest || testPlayer.auth?.codeLength!==4){
+          testPlayer.auth={salt:testSalt,digest:testDigest,codeLength:4,createdAt:testPlayer.auth?.createdAt||Date.now(),updatedAt:Date.now()};
+          changed=true;
+        }
+
+        if(changed)await dbx.ref(BPT_PLAYER_LIST_PATH).set(players);
+        await migrationMarkerRef.set({done:true,at:Date.now(),version:"9.0.15"});
+      }
+
       for(const p of players){
         if(!p||!String(p.name||"").trim())continue;
         const name=String(p.name).trim();
