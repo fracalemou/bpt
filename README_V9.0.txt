@@ -1,17 +1,21 @@
-BPT V9.0.7 — REGISTRE DE CONNEXION UNIQUE
+BPT V9.0 — nettoyage du code
 
-Règle d'architecture :
-- PC et téléphone = même application, même Firebase, mêmes données et mêmes règles.
-- La seule différence entre PC et téléphone est l'affichage responsive.
-- Dans le Live, les droits diffèrent uniquement selon le rôle organisateur/spectateur.
+Structure
+- index.html : structure de la page et ordre des dépendances
+- css/app.css : styles
+- js/core : socle applicatif, version, Firebase et navigation
+- js/modules/live : Live et interface du Live
+- js/modules/betting : paris et cotes
+- js/features : identité, présence, PWA, photos et résumé de partie
+- service-worker.js : cache V9.0
+- assets, icônes et manifest : ressources de l’application
 
-Connexion :
-- Une seule table Firebase de référence : bpt/login_registry_v1
-- Chaque entrée contient : nom, actif/inactif et code personnel chiffré.
-- Le login PC et téléphone lit exactement ce même registre.
-- Aucun fallback local pour la liste de connexion.
-- L'ancienne table bpt_profile_codes_v1 est migrée puis supprimée automatiquement.
+Les scripts de suppression automatique des anciennes données ont été retirés sans être
+exécutés. Cette livraison ne modifie aucune donnée locale ni Firebase.
 
-Déploiement GitHub Pages :
-- Tous les fichiers du ZIP sont à la racine.
-- Dézipper, sélectionner tout, Add file > Upload files, Commit sur main.
+Le document HTML, les styles et les scripts sont séparés, mais le cœur applicatif reste
+encore largement regroupé dans js/core/application.js : cette copie n’est pas une
+architecture complète en modules indépendants.
+
+Déploiement
+Déployer le contenu du dossier bpt/ comme racine du site, en conservant l’arborescence.
