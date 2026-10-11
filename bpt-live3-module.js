@@ -142,9 +142,10 @@
     }
     return id;
   }
+  // Métadonnée d'affichage uniquement : elle ne doit jamais piloter une lecture/écriture métier.
   function deviceLabel(){
-    const mobile=window.matchMedia&&window.matchMedia("(max-width:700px)").matches;
-    return mobile?"Téléphone":"PC";
+    const compact=window.matchMedia&&window.matchMedia("(max-width:700px)").matches;
+    return compact?"Téléphone":"PC";
   }
   function clone(v){return JSON.parse(JSON.stringify(v));}
   function fmt(n){return Math.round(Number(n)||0).toLocaleString("fr-FR");}
@@ -1185,31 +1186,138 @@ function connectionDeviceLabel(){
     },120);
   }
 
+  // CONTRAT D’ARCHITECTURE BPT : une seule source de connexion pour tous les appareils.
+  // PC et téléphone lisent EXACTEMENT le même registre Firebase.
+  // Aucune liste locale ou source alternative n’est utilisée par le login.
+  const BPT_LOGIN_REGISTRY_PATH="bpt/login_registry_v1";
+  const BPT_PLAYER_STATE_PATH="bpt/state/main/data/players";
+  const BPT_LEGACY_CODES_PATH="bpt_profile_codes_v1";
   let authoritativeLoginPlayersCache=null;
+  let authoritativeLoginPlayersRef=null;
+  let authoritativeLoginPlayersListenerInstalled=false;
+  let loginRegistryReconcilePromise=null;
+  let loginRegistryStateBridgeInstalled=false;
 
-  function normalizeLoginPlayers(players){
-    const list=Array.isArray(players)?players:Object.values(players||{});
-    const names=list
-      .filter(p=>p && p.active===true && String(p.name||"").trim())
-      .map(p=>String(p.name).trim())
+  function normalizeLoginRegistry(value){
+    const rows=value&&typeof value==="object"?Object.values(value):[];
+    const names=rows
+      .filter(row=>row && row.active===true && String(row.name||"").trim())
+      .map(row=>String(row.name).trim())
       .sort((a,b)=>a.localeCompare(b,"fr",{sensitivity:"base"}));
     return [...new Set(names)];
   }
 
-  async function fetchAuthoritativeLoginPlayers(){
-    try{
-      if(!window.bptFirebaseEnsure)throw new Error("Firebase indisponible");
-      const env=await window.bptFirebaseEnsure();
+  async function loginRegistryFirebaseRef(){
+    if(authoritativeLoginPlayersRef)return authoritativeLoginPlayersRef;
+    const env=await window.bptFirebaseEnsure?.();
+    const dbx=env?.rtdb||window.bptFirebaseDb?.();
+    if(!dbx)throw new Error("Base Firebase indisponible");
+    authoritativeLoginPlayersRef=dbx.ref(BPT_LOGIN_REGISTRY_PATH);
+    return authoritativeLoginPlayersRef;
+  }
+
+  async function loginRegistryKey(name){
+    return profileCodeDigest(String(name||"").trim().toLocaleLowerCase("fr"));
+  }
+
+  async function reconcileLoginRegistry(){
+    if(loginRegistryReconcilePromise)return loginRegistryReconcilePromise;
+    loginRegistryReconcilePromise=(async()=>{
+      const env=await window.bptFirebaseEnsure?.();
       const dbx=env?.rtdb||window.bptFirebaseDb?.();
       if(!dbx)throw new Error("Base Firebase indisponible");
-      const snap=await dbx.ref("bpt/state/main/data/players").once("value");
-      const remote=normalizeLoginPlayers(snap.val());
+
+      const [playersSnap,registrySnap,legacyCodesSnap]=await Promise.all([
+        dbx.ref(BPT_PLAYER_STATE_PATH).once("value"),
+        dbx.ref(BPT_LOGIN_REGISTRY_PATH).once("value"),
+        dbx.ref(BPT_LEGACY_CODES_PATH).once("value")
+      ]);
+      const playersRaw=playersSnap.val();
+      const players=Array.isArray(playersRaw)?playersRaw:Object.values(playersRaw||{});
+      const registry=registrySnap.val()||{};
+      const legacyCodes=legacyCodesSnap.val()||{};
+      const updates={};
+      const keep=new Set();
+
+      let elenLegacyAlias=null;
+      try{elenLegacyAlias=legacyCodes[await loginRegistryKey("Helene Fiona")]||null;}catch(_e){}
+
+      for(const player of players){
+        const name=String(player?.name||"").trim();
+        if(!name)continue;
+        const key=await loginRegistryKey(name);
+        keep.add(key);
+        const previous=registry[key]||{};
+        let legacy=legacyCodes[key]||{};
+        if(name==="Elen Miron" && !legacy?.digest && !previous?.digest && elenLegacyAlias?.digest)legacy=elenLegacyAlias;
+        const codeSource=previous?.digest?previous:legacy;
+        updates[key]={
+          ...previous,
+          name,
+          active:player.active===true,
+          ...(codeSource?.salt?{salt:codeSource.salt}:{}),
+          ...(codeSource?.digest?{digest:codeSource.digest}:{}),
+          ...(codeSource?.codeLength?{codeLength:codeSource.codeLength}:{}),
+          ...(codeSource?.createdAt?{createdAt:codeSource.createdAt}:{}),
+          ...(codeSource?.updatedAt?{updatedAt:codeSource.updatedAt}:{})
+        };
+      }
+      for(const key of Object.keys(registry)){
+        if(!keep.has(key))updates[key]=null;
+      }
+
+      await dbx.ref(BPT_LOGIN_REGISTRY_PATH).update(updates);
+      // Migration terminée : l'ancienne table de codes ne doit plus pouvoir
+      // devenir une seconde source de vérité.
+      if(legacyCodesSnap.exists())await dbx.ref(BPT_LEGACY_CODES_PATH).remove();
+      const finalSnap=await dbx.ref(BPT_LOGIN_REGISTRY_PATH).once("value");
+      return normalizeLoginRegistry(finalSnap.val());
+    })().finally(()=>{loginRegistryReconcilePromise=null;});
+    return loginRegistryReconcilePromise;
+  }
+
+  async function installLoginRegistryStateBridge(){
+    if(loginRegistryStateBridgeInstalled)return;
+    const env=await window.bptFirebaseEnsure?.();
+    const dbx=env?.rtdb||window.bptFirebaseDb?.();
+    if(!dbx)return;
+    loginRegistryStateBridgeInstalled=true;
+    let timer=null;
+    dbx.ref(BPT_PLAYER_STATE_PATH).on("value",()=>{
+      clearTimeout(timer);
+      timer=setTimeout(()=>reconcileLoginRegistry().catch(e=>console.error("Synchronisation registre de connexion",e)),120);
+    });
+  }
+
+  async function fetchAuthoritativeLoginPlayers(){
+    await reconcileLoginRegistry();
+    const ref=await loginRegistryFirebaseRef();
+    const snap=await ref.once("value");
+    const remote=normalizeLoginRegistry(snap.val());
+    authoritativeLoginPlayersCache=remote;
+    return remote;
+  }
+
+  async function installAuthoritativeLoginPlayersListener(){
+    if(authoritativeLoginPlayersListenerInstalled)return;
+    const ref=await loginRegistryFirebaseRef();
+    authoritativeLoginPlayersListenerInstalled=true;
+    ref.on("value",snap=>{
+      const remote=normalizeLoginRegistry(snap.val());
       authoritativeLoginPlayersCache=remote;
-      return remote;
-    }catch(e){
-      console.warn("Liste login Firebase : utilisation du secours local",e);
-      return authoritativeLoginPlayersCache||normalizeLoginPlayers(db?.players||[]);
-    }
+      renderSpectatorNameOptions(remote);
+      const modal=$3("live3SpectatorIdentityModal");
+      if(modal?.classList.contains("open")){
+        const select=$3("live3SpectatorNameInput");
+        if(select)select.disabled=false;
+        const btn=$3("live3SpectatorIdentityConfirmBtn");
+        if(btn)btn.disabled=!String(select?.value||"").trim();
+      }
+    },err=>{
+      console.error("Écoute du registre unique de connexion impossible",err);
+      const error=$3("bptProfileCodeError");
+      if(error)error.textContent="Connexion au registre unique Firebase interrompue.";
+    });
   }
 
   function renderSpectatorNameOptions(unique){
@@ -1228,12 +1336,27 @@ function connectionDeviceLabel(){
   }
 
   function populateSpectatorNameList(){
-    // Affichage immédiat avec l'état connu, puis remplacement par la liste
-    // officielle Firebase. PC et téléphone utilisent ainsi la même source.
-    renderSpectatorNameOptions(authoritativeLoginPlayersCache||normalizeLoginPlayers(db?.players||[]));
-    fetchAuthoritativeLoginPlayers().then(names=>{
+    const select=$3("live3SpectatorNameInput");
+    if(select){
+      select.innerHTML='<option value="">Chargement du registre unique…</option>';
+      select.disabled=true;
+      spectatorSelectSignature='';
+    }
+    const btn=$3("live3SpectatorIdentityConfirmBtn");
+    if(btn)btn.disabled=true;
+    Promise.all([fetchAuthoritativeLoginPlayers(),installAuthoritativeLoginPlayersListener(),installLoginRegistryStateBridge()]).then(([names])=>{
+      if(select)select.disabled=false;
       renderSpectatorNameOptions(names);
+      if(btn)btn.disabled=!String(select?.value||"").trim();
       if($3("live3SpectatorIdentityModal")?.classList.contains("open"))loadProfileCodeState(true);
+    }).catch(e=>{
+      console.error("Registre unique de connexion indisponible",e);
+      if(select){
+        select.disabled=true;
+        select.innerHTML='<option value="">Connexion indisponible — vérifiez Internet</option>';
+      }
+      const err=$3('bptProfileCodeError');
+      if(err)err.textContent='Impossible de charger le registre unique de connexion Firebase.';
     });
   }
 
@@ -1291,18 +1414,8 @@ function connectionDeviceLabel(){
   }
   async function profileCodeRef(name){
     const env=await window.bptFirebaseEnsure?.();if(!env?.rtdb)throw new Error('Connexion indisponible.');
-    const key=await profileCodeDigest(name.trim().toLocaleLowerCase('fr'));
-    return env.rtdb.ref('bpt_profile_codes_v1/'+key);
-  }
-  async function migrateRequestedProfileCode(name){
-    const target=String(name||'').trim();
-    if(target!=='Elen Miron')return;
-    const sourceRef=await profileCodeRef('Helene Fiona');
-    const targetRef=await profileCodeRef(target);
-    const sourceRecord=(await sourceRef.once('value')).val();
-    if(!sourceRecord)return;
-    await targetRef.set(sourceRecord);
-    await sourceRef.remove();
+    const key=await loginRegistryKey(name);
+    return env.rtdb.ref(BPT_LOGIN_REGISTRY_PATH+'/'+key);
   }
   async function loadProfileCodeState(force=false){
     const name=String($3('live3SpectatorNameInput')?.value||'').trim();
@@ -1314,11 +1427,11 @@ function connectionDeviceLabel(){
     if(!name){hint.textContent='Choisissez votre profil.';return;}
     hint.textContent='Vérification du profil…';
     try{
-      await migrateRequestedProfileCode(name);
+      await reconcileLoginRegistry();
       const ref=await profileCodeRef(name),snap=await ref.once('value');
       if(profileCodeLoadingName!==name)return;
       profileCodeState={name,ref,record:snap.val()};
-      const exists=!!profileCodeState.record;
+      const exists=!!(profileCodeState.record?.salt&&profileCodeState.record?.digest);
       const legacy=exists&&profileCodeState.record.codeLength!==4;
       $3('bptProfileCodeInput').maxLength=legacy?6:4;
       $3('bptProfileCodeInput').minLength=legacy?6:4;
@@ -1335,10 +1448,12 @@ function connectionDeviceLabel(){
   }
   async function resetPlayerProfileCode(name){
     if(!settingsUnlocked)throw new Error('Déverrouillez les paramètres administrateur.');
-    if(!(db.players||[]).some(p=>p.name===name))throw new Error('Joueur introuvable.');
+    await reconcileLoginRegistry();
     const codeRef=await profileCodeRef(name);
+    const snap=await codeRef.once('value');
+    if(!snap.exists())throw new Error('Joueur introuvable dans le registre de connexion.');
     if(!settingsUnlocked)throw new Error('Les paramètres ont été verrouillés.');
-    await codeRef.remove();
+    await codeRef.update({salt:null,digest:null,codeLength:null,createdAt:null,updatedAt:Date.now()});
     if(profileCodeState?.name===name||profileCodeLoadingName===name){profileCodeState=null;profileCodeLoadingName='';}
     if($3('live3SpectatorIdentityModal')?.classList.contains('open')&&$3('live3SpectatorNameInput')?.value===name)await loadProfileCodeState(true);
     return true;
@@ -1350,11 +1465,14 @@ function connectionDeviceLabel(){
     const legacy=profileCodeState.record&&profileCodeState.record.codeLength!==4;
     if(!(legacy?/^[0-9]{6}$/:/^[0-9]{4}$/).test(pin)){error.textContent=legacy?'Saisissez votre ancien code de 6 chiffres.':'Saisissez un code de 4 chiffres.';return false;}
     const {ref}=profileCodeState;let record=(await ref.once('value')).val();
-    if(!record){
+    if(!record?.salt||!record?.digest){
       if(pin!==String($3('bptProfileCodeConfirm').value||'')){error.textContent='Les deux codes ne correspondent pas.';return false;}
       const salt=Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('');
       const digest=await profileCodeDigest(salt+':'+pin);
-      const result=await ref.transaction(server=>server?undefined:{salt,digest,codeLength:4,createdAt:Date.now()});
+      const result=await ref.transaction(server=>{
+        if(server?.salt&&server?.digest)return;
+        return {...(server||{}),name,active:server?.active!==false,salt,digest,codeLength:4,createdAt:Date.now()};
+      });
       record=result.snapshot.val()||(await ref.once('value')).val();
     }
     if(!record?.salt||!record?.digest||await profileCodeDigest(record.salt+':'+pin)!==record.digest){error.textContent=legacy?'Ancien code incorrect. Saisissez les 6 chiffres du code initial, sans le raccourcir.':'Code incorrect pour ce profil.';return false;}
