@@ -3803,11 +3803,14 @@ function annalesNicknamesFor(name){
 }
 
 function playerNicknameInfo(name){
-  const custom=String(ensurePlayerNicknames()[name]||"").trim();
-  const annales=annalesNicknamesFor(name);
-  const primary=custom || annales[0] || "";
+  const real=String(name||"").trim();
+  const player=(db.players||[]).find(p=>normalizePlayerLookupName(p?.name)===normalizePlayerLookupName(real));
+  const embedded=String(player?.nickname||"").trim();
+  const legacy=String(ensurePlayerNicknames()[real]||"").trim();
+  const annales=annalesNicknamesFor(real);
+  const primary=embedded || legacy || annales[0] || "";
   const others=annales.filter(n=>n!==primary);
-  return {primary,others,source:custom?"personnalisé":(annales.length?"annales":"")};
+  return {primary,others,source:embedded?"joueur":(legacy?"personnalisé":(annales.length?"annales":""))};
 }
 
 function displayPlayerName(name){
@@ -3824,6 +3827,16 @@ function funPlayerLabel(name){
   const nick=playerNicknameInfo(real).primary;
   return nick || real;
 }
+
+// Source unique de libellé joueur pour toute l’application, y compris le login.
+// Même règle sur PC et téléphone : surnom partagé/personnalisé, puis surnom historique, sinon nom réel.
+window.bptPlayerDisplayLabel=function(name,sharedNicknames){
+  const real=String(name||"").trim();
+  const shared=String((sharedNicknames&&sharedNicknames[real])||"").trim();
+  if(shared)return shared;
+  const annales=annalesNicknamesFor(real);
+  return String(annales[0]||real).trim();
+};
 
 function bptHistoricalStartAt(date){
   const match=String(date||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -4376,6 +4389,9 @@ async function savePlayerNickname(name,value){
   const player=String(name||"").trim();
   if(!player)return;
   const nick=String(value||"").trim().replace(/\s+/g," ");
+  const rec=(db.players||[]).find(p=>normalizePlayerLookupName(p?.name)===normalizePlayerLookupName(player));
+  if(rec)rec.nickname=nick;
+  // Compatibilité temporaire avec les anciens écrans ; le login n'utilise plus cette map.
   const map=ensurePlayerNicknames();
   if(nick)map[player]=nick;
   else delete map[player];
@@ -6067,7 +6083,7 @@ function addActivePlayer(name){
     return {ok:true,name:existing.name,existing:true};
   }
 
-  db.players.push({name:clean,active:true});
+  db.players.push({name:clean,nickname:"",active:true});
   saveDB();
   renderAll();
   return {ok:true,name:clean,existing:false};
