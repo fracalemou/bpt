@@ -1425,7 +1425,6 @@ function connectionDeviceLabel(){
     if(!name){hint.textContent='Choisissez votre profil.';return;}
     hint.textContent='Vérification du profil…';
     try{
-      await reconcileLoginRegistry();
       const ref=await profileCodeRef(name),snap=await ref.once('value');
       if(profileCodeLoadingName!==name)return;
       profileCodeState={name,ref,record:snap.val()};
@@ -1444,7 +1443,6 @@ function connectionDeviceLabel(){
   }
   async function resetPlayerProfileCode(name){
     if(!settingsUnlocked)throw new Error('Déverrouillez les paramètres administrateur.');
-    await reconcileLoginRegistry();
     const codeRef=await profileCodeRef(name);
     const snap=await codeRef.once('value');
     if(!snap.exists())throw new Error('Joueur introuvable dans le registre de connexion.');
