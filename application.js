@@ -1241,10 +1241,9 @@ async function applyCloudState(row){
     saveLocalOnly();
     if(remoteActive && !thisDeviceOwnsRemoteLive)cloudLocalDirty=false;
 
-    if(liveSeasonKey==="2023-2024"){
-      db.history=applyPlayerAliasesToRows(ARCHIVE_2023_2024);
-    }else if(liveSeasonKey==="2025-2026"){
-      db.history=applyPlayerAliasesToRows(ARCHIVE_2025_2026);
+    const displayedArchiveRows=archiveRowsForSeason(liveSeasonKey);
+    if(Array.isArray(displayedArchiveRows)){
+      db.history=applyPlayerAliasesToRows(displayedArchiveRows);
     }else if(liveSeasonKey==="all"){
       db.history=buildAllSeasonsHistory();
     }else{
@@ -1455,10 +1454,9 @@ async function initCloudSync(){
         const serverHistory=await cloudFetchGames();
         currentSeasonHistoryCache=clone(serverHistory);
 
-        if(selectedSeasonKey==="2023-2024"){
-          db.history=applyPlayerAliasesToRows(ARCHIVE_2023_2024);
-        }else if(selectedSeasonKey==="2025-2026"){
-          db.history=applyPlayerAliasesToRows(ARCHIVE_2025_2026);
+        const displayedArchiveRows=archiveRowsForSeason(selectedSeasonKey);
+        if(Array.isArray(displayedArchiveRows)){
+          db.history=applyPlayerAliasesToRows(displayedArchiveRows);
         }else if(selectedSeasonKey==="all"){
           db.history=buildAllSeasonsHistory();
         }else{
@@ -2027,6 +2025,8 @@ function longestParticipationRun(name){
 
 function allAvailableSeasonSets(){
   return [
+    {key:"2020-2021",label:"2020–2021",rows:applyPlayerAliasesToRows(ARCHIVE_2020_2021),ranking:null},
+    {key:"2022-2023",label:"2022–2023",rows:applyPlayerAliasesToRows(ARCHIVE_2022_2023),ranking:null},
     {key:"2023-2024",label:"2023–2024",rows:applyPlayerAliasesToRows(ARCHIVE_2023_2024),ranking:mergeRankingAliases(ARCHIVE_2023_2024_RANKING)},
     {key:"2025-2026",label:"2025–2026",rows:applyPlayerAliasesToRows(ARCHIVE_2025_2026),ranking:mergeRankingAliases(ARCHIVE_2025_2026_RANKING)},
     {key:"2026-2027",label:"2026–2027",rows:currentRowsForCumulative(),ranking:null}
@@ -2610,6 +2610,8 @@ async function deleteSelectedPlayerAvatar(){
 
 function playerSeasonBreakdown(name){
   const seasons=[
+    {key:"2020-2021",label:"2020–2021",rows:applyPlayerAliasesToRows(ARCHIVE_2020_2021),official:null},
+    {key:"2022-2023",label:"2022–2023",rows:applyPlayerAliasesToRows(ARCHIVE_2022_2023),official:null},
     {key:"2023-2024",label:"2023–2024",rows:applyPlayerAliasesToRows(ARCHIVE_2023_2024),official:mergeRankingAliases(ARCHIVE_2023_2024_RANKING)},
     {key:"2025-2026",label:"2025–2026",rows:applyPlayerAliasesToRows(ARCHIVE_2025_2026),official:mergeRankingAliases(ARCHIVE_2025_2026_RANKING)},
     {key:"2026-2027",label:"2026–2027",rows:currentRowsForCumulative(),official:null}
@@ -3722,8 +3724,23 @@ function mergeAllSeasonsOfficialStats(rawItems){
     return official.get(name);
   };
 
+  // Archives sans classement officiel dédié : calculer directement depuis les lignes.
+  for(const archiveRows of [ARCHIVE_2020_2021,ARCHIVE_2022_2023]){
+    const archiveStats=statsFromRows(applyPlayerAliasesToRows(archiveRows)).filter(s=>s.gamesCount>0);
+    for(const r of archiveStats){
+      const s=ensure(canonicalPlayerName(r.name));
+      s.points+=Number(r.points||0);
+      s.gamesCount+=Number(r.gamesCount||0);
+      s.wins+=Number(r.wins||0);
+      s.tabliers+=Number(r.tabliers||0);
+      s.kills+=Number(r.kills||0);
+    }
+  }
+
+  // Archives disposant d'un classement officiel : conserver leurs totaux officiels.
   for(const seasonRanking of [ARCHIVE_2023_2024_RANKING,ARCHIVE_2025_2026_RANKING]){
     for(const r of seasonRanking||[]){
+      if(String(r.name||"").toLowerCase()==="max")continue;
       const s=ensure(canonicalPlayerName(r.name));
       s.points+=Number(r.points||0);
       s.gamesCount+=Number(r.gamesCount||0);
@@ -4382,13 +4399,60 @@ function ensurePlayerAliases(){
   if(!db.playerAliases || typeof db.playerAliases!=="object" || Array.isArray(db.playerAliases))db.playerAliases={};
   return db.playerAliases;
 }
+const BPT_BUILTIN_PLAYER_ALIASES={
+  // Correspondances historiques validées par l'organisateur BPT.
+  "ALEXIS BIOGOLD":"Alexis Volant",
+  "ANNE MAYA":"Anne BERA",
+  "ARESKI":"Areski AIT GHERBI",
+  "ARMELLE":"Armelle BRAHIMI",
+  "ARMELLE ARRAS":"Armell ARRAS",
+  "ARNAUD":"Arnaud HEDIN",
+  "CLEMENT":"Clément MARAVAL",
+  "DAVID SHAKER":"David SAGALOWICZ",
+  "DYLAN":"Dylan DECOTTE",
+  "FLORENCE":"Florence SAGALOWICZ",
+  "FRANCK CHATARD":"Franck NAESSENS",
+  "FRANCOIS":"François CATTEAU",
+  "GERARD":"Gérard CANDELIER",
+  "GREG":"Grégoire DUFORET",
+  "HELENE":"Hélène MORIZUR",
+  "JEREMIE TRADER":"Jérémie CARPENTIER",
+  "JEROME ICAMER":"Jérôme RIFFE",
+  "JEROME SUPERMAN":"Jérôme BERA",
+  "JULIETTE H":"Juliette HENGUELLE",
+  "MEHDI EL ESPANOL":"Mehdi BRAHIMI",
+  "MEL":"Mélanie NAESSENS",
+  "MEL N":"Mélanie NAESSENS",
+  "MEL B":"Mélanie BINOT",
+  "MICHEL SCOTTY":"Michel SCHERPEREEL",
+  "MIG":"Olivier HENGUELLE",
+  "PHOENIX":"Stéphane LEFIN",
+  "SHREK":"Jérémy COQUEL",
+  "SOLENE":"Solène BALLOIS",
+  "STEPHANE PHOENIX":"Stéphane LEFIN",
+  "STEPHANE RIMBAUD":"Stéphane ROBERT",
+  "SUPERMAN":"Jérôme BERA",
+  "TAZ":"Philippe DUBOIS",
+  "TCHOBIN PANAMA":"Jérôme BINOT",
+  "THIERRY":"Thierry MONNIAUX"
+};
+function playerAliasLookupKey(name){
+  return String(name||"").trim().replace(/\s+/g," ")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase();
+}
 function canonicalPlayerName(name){
-  let cur=String(name||"").trim();
+  let cur=String(name||"").trim().replace(/\s+/g," ");
   const aliases=ensurePlayerAliases();
   const seen=new Set();
-  while(cur && aliases[cur] && !seen.has(cur)){
-    seen.add(cur);
-    cur=String(aliases[cur]||"").trim();
+  while(cur){
+    const key=playerAliasLookupKey(cur);
+    if(!key || seen.has(key))break;
+    seen.add(key);
+    const builtinKey=Object.keys(BPT_BUILTIN_PLAYER_ALIASES).find(k=>playerAliasLookupKey(k)===key);
+    const customKey=Object.keys(aliases).find(k=>playerAliasLookupKey(k)===key);
+    const next=(builtinKey?BPT_BUILTIN_PLAYER_ALIASES[builtinKey]:null)||(customKey?aliases[customKey]:null);
+    if(!next)break;
+    cur=String(next||"").trim().replace(/\s+/g," ");
   }
   return cur;
 }
@@ -4533,8 +4597,11 @@ function seasonNavigationOrder(){
 }
 
 function seasonNeighbor(delta){
-  if(isAllSeasons())return null;
   const order=seasonNavigationOrder();
+  // Le cumul reste un point de navigation, pas un état terminal.
+  // Depuis « toutes saisons » : précédent revient à la saison courante,
+  // suivant repart de la plus ancienne saison disponible.
+  if(isAllSeasons())return delta<0 ? order[order.length-1] : order[0];
   const i=order.indexOf(selectedSeasonKey);
   if(i<0)return null;
   const ni=i+delta;
@@ -6247,8 +6314,8 @@ async function mergePlayersByName(){
     db.players=(db.players||[]).filter(p=>p.name!==source);
 
     // Refresh displayed archive/cumulative context
-    if(selectedSeasonKey==="2023-2024")db.history=applyPlayerAliasesToRows(ARCHIVE_2023_2024);
-    else if(selectedSeasonKey==="2025-2026")db.history=applyPlayerAliasesToRows(ARCHIVE_2025_2026);
+    const restoredArchiveRows=archiveRowsForSeason(selectedSeasonKey);
+    if(Array.isArray(restoredArchiveRows))db.history=applyPlayerAliasesToRows(restoredArchiveRows);
     else if(selectedSeasonKey==="all")db.history=buildAllSeasonsHistory();
 
     saveLocalOnly();
