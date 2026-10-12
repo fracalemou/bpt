@@ -7450,19 +7450,10 @@ body.bpt-mobile-device.bpt-mobile-landscape #profile .premium-profile-identity{
 
 
 
-/* ===== V193 — mobile épuré : sans saisons, records sûrs, classement enrichi ===== */
+/* ===== V193 — mobile : mêmes fonctions de saison que sur PC ===== */
 
-/* Aucun changement de saison n'est présenté sur téléphone. */
-html.bpt-mobile-device .season-nav-toolbar,
-body.bpt-mobile-device .season-nav-toolbar,
-html.bpt-mobile-device .tab-season-nav,
-body.bpt-mobile-device .tab-season-nav,
-html.bpt-mobile-device .dashboard-season-nav,
-body.bpt-mobile-device .dashboard-season-nav,
-html.bpt-mobile-device .dashboard-season-nav-label,
-body.bpt-mobile-device .dashboard-season-nav-label{
-  display:none !important;
-}
+/* La navigation de saison reste disponible sur mobile.
+   Seule sa mise en page est adaptée par les règles responsive existantes. */
 
 /* Sécurité générale : aucun texte ne doit déborder sur une autre zone mobile. */
 html.bpt-mobile-device .card,
