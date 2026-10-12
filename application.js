@@ -1978,12 +1978,25 @@ function killerStats(){
   const pair={}, asK={}, asV={};
   for(const r of db.history){
     if(!r.killer)continue;
-    const key=r.killer+"|||"+r.player;pair[key]=(pair[key]||0)+1;
-    asK[r.killer]=asK[r.killer]||{};asK[r.killer][r.player]=(asK[r.killer][r.player]||0)+1;
-    asV[r.player]=asV[r.player]||{};asV[r.player][r.killer]=(asV[r.player][r.killer]||0)+1;
+    const killer=canonicalPlayerName(r.killer);
+    const victim=canonicalPlayerName(r.player);
+    if(!killer || !victim)continue;
+    const key=killer+"|||"+victim;pair[key]=(pair[key]||0)+1;
+    asK[killer]=asK[killer]||{};asK[killer][victim]=(asK[killer][victim]||0)+1;
+    asV[victim]=asV[victim]||{};asV[victim][killer]=(asV[victim][killer]||0)+1;
   }
-  const top=o=>{if(!o)return "";return Object.entries(o).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],"fr"))[0]?.[0]||"";};
-  return {pair,mainVictim:n=>top(asK[n]),mainKiller:n=>top(asV[n])};
+  const topEntry=o=>{
+    if(!o)return null;
+    const hit=Object.entries(o).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],"fr"))[0];
+    return hit?{name:hit[0],count:Number(hit[1]||0)}:null;
+  };
+  return {
+    pair,
+    mainVictim:n=>topEntry(asK[canonicalPlayerName(n)])?.name||"",
+    mainKiller:n=>topEntry(asV[canonicalPlayerName(n)])?.name||"",
+    mainVictimEntry:n=>topEntry(asK[canonicalPlayerName(n)]),
+    mainKillerEntry:n=>topEntry(asV[canonicalPlayerName(n)])
+  };
 }
 
 
@@ -4168,6 +4181,9 @@ function getGamePhoto(gameNo,seasonKey=null){
   const local=String(ensureGamePhotos()[key]||"");
   if(local.startsWith("data:image/") || /^https?:\/\//i.test(local)){ firebasePhotoCache[key]=local; return local; }
   if(firebasePhotoCache[key])return firebasePhotoCache[key];
+  // V9.0.24 : la photo historique embarquée de la partie 5 de la saison courante
+  // sert de secours si l'ancien nettoyage l'a déjà supprimée de Firebase.
+  if(Number(gameNo)===5 && String(seasonKey||currentGamePhotoSeasonKey())===String(CURRENT_SEASON_KEY)) return "./partie-5.jpg";
   fetchFirebaseGamePhoto(gameNo,seasonKey); return "";
 }
 async function uploadGamePhotoBlob(gameNo,seasonKey,blob,{silent=false}={}){
@@ -4219,40 +4235,9 @@ async function deleteGamePhoto(gameNo,seasonKey=null){
   catch(e){setCloudStatus("offline","Suppression impossible",firebasePhotoErrorMessage(e));alert(firebasePhotoErrorMessage(e));}
 }
 
-let gamePhotoCleanupAfter4Done=false;
-async function purgeGamePhotosAfter4(){
-  if(gamePhotoCleanupAfter4Done)return;
-  gamePhotoCleanupAfter4Done=true;
-  try{
-    const gameMap=ensureGamePhotos();
-    for(const key of Object.keys(gameMap)){
-      const gameNo=Number(String(key).split('|').pop());
-      if(gameNo>4)delete gameMap[key];
-    }
-    for(const key of Object.keys(firebasePhotoCache)){
-      const gameNo=Number(String(key).split('|').pop());
-      if(gameNo>4)delete firebasePhotoCache[key];
-    }
-    firebasePhotoRequested.clear();
-    if(!await ensureGamePhotoStorageClient())return false;
-    const dbx=window.bptFirebaseDb?.();
-    const root=dbx?.ref('bpt/photos');
-    if(!root)return false;
-    const snap=await root.once('value');
-    const removals=[];
-    snap.forEach(seasonSnap=>seasonSnap.forEach(photoSnap=>{
-      const match=String(photoSnap.key||'').match(/^game-(\d+)$/i);
-      if(match && Number(match[1])>4)removals.push(photoSnap.ref.remove());
-    }));
-    await Promise.all(removals);
-    saveLocalOnly();
-    return true;
-  }catch(e){
-    gamePhotoCleanupAfter4Done=false;
-    console.warn('Nettoyage photos après partie 4 impossible :',e);
-    return false;
-  }
-}
+// V9.0.24 — les photos de parties sont conservées sans limite de numéro.
+// Ancienne fonction gardée en no-op pour compatibilité avec d'éventuels appels historiques.
+async function purgeGamePhotosAfter4(){ return true; }
 
 function latestGameEntries(){
   return groupedGames().map(([gameNo,rows])=>({
@@ -5777,8 +5762,8 @@ function renderRanking(){
     <td>${s.kills}</td>
     <td>${num(s.kpg,2)}</td>
     <td>${euro(s.net)}</td>
-    <td>${ks.mainKiller(s.name)?playerNameHtml(ks.mainKiller(s.name)):"—"}</td>
-    <td>${ks.mainVictim(s.name)?playerNameHtml(ks.mainVictim(s.name)):"—"}</td>
+    <td>${(()=>{const e=ks.mainKillerEntry(s.name);return e?`${playerNameHtml(e.name)} <span class="muted">· ${e.count} élimination${e.count>1?"s":""}</span>`:"—";})()}</td>
+    <td>${(()=>{const e=ks.mainVictimEntry(s.name);return e?`${playerNameHtml(e.name)} <span class="muted">· ${e.count} kill${e.count>1?"s":""}</span>`:"—";})()}</td>
   </tr>`).join("");
 }
 
@@ -9043,7 +9028,7 @@ async function showView(id){
 
   if(id==="settings"){
     if(!settingsUnlocked && isDealerIdentity())settingsUnlocked=true;
-    if(isDealerIdentity())void purgeGamePhotosAfter4();
+    // V9.0.24 : aucun nettoyage automatique destructif des photos de parties.
     if(settingsUnlocked){
       $("settingsLock").style.display="none";
       $("settingsProtectedContent").style.display="block";
