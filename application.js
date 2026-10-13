@@ -1944,7 +1944,7 @@ function stats(excludeLatest=false){
     const name=canonicalPlayerName(r.player);
     if(!by[name])by[name]={name,points:0,games:new Set(),wins:0,podiums:0,tabliers:0,kills:0,stake:0,gross:0,net:0};
     const s=by[name];s.points+=Number(r.points||0);s.games.add(r.game);
-    s.wins+=r.win?1:0;s.podiums+=r.podium?1:0;s.tabliers+=r.tablier?1:0;s.kills+=Number(r.kills||0);
+    s.wins+=r.win?1:0;s.podiums+=r.podium?1:0;s.tabliers+=isTablierRow(r)?1:0;s.kills+=Number(r.kills||0);
     s.stake+=Number(r.stake||0);s.gross+=Number(r.gross||0);s.net+=Number(r.net||0);
   }
   const out=Object.values(by).map(s=>({
@@ -2264,7 +2264,7 @@ function renderRecords(){
 
     for(const r of playerRows){
       const isWin=Number(r.place)===1;
-      const isTablier=!!r.tablier || (isWin && Number(r.n)>=10);
+      const isTablier=isTablierRow(r);
 
       curWin=isWin?curWin+1:0;
       if(curWin>bestWin)bestWin=curWin;
@@ -3739,7 +3739,7 @@ function mergeAllSeasonsOfficialStats(rawItems){
 
   // Archives sans classement officiel dédié : calculer directement depuis les lignes.
   for(const archiveRows of [ARCHIVE_2020_2021,ARCHIVE_2022_2023]){
-    const archiveStats=statsFromRows(applyPlayerAliasesToRows(archiveRows)).filter(s=>s.gamesCount>0);
+    const archiveStats=statsFromRows(applyPlayerAliasesToRows(archiveRows).map(r=>({...r,seasonKey:archiveRows===ARCHIVE_2020_2021?"2020-2021":"2022-2023"}))).filter(s=>s.gamesCount>0);
     for(const r of archiveStats){
       const s=ensure(canonicalPlayerName(r.name));
       s.points+=Number(r.points||0);
@@ -3750,15 +3750,21 @@ function mergeAllSeasonsOfficialStats(rawItems){
     }
   }
 
-  // Archives disposant d'un classement officiel : conserver leurs totaux officiels.
-  for(const seasonRanking of [ARCHIVE_2023_2024_RANKING,ARCHIVE_2025_2026_RANKING]){
+  // Archives disposant d'un classement officiel : conserver points/participations/victoires/kills,
+  // mais recalculer les tabliers avec la règle historique de la saison.
+  for(const [seasonKey,seasonRanking,seasonRows] of [
+    ["2023-2024",ARCHIVE_2023_2024_RANKING,ARCHIVE_2023_2024],
+    ["2025-2026",ARCHIVE_2025_2026_RANKING,ARCHIVE_2025_2026]
+  ]){
+    const tabs=tablierCountsFromRows(applyPlayerAliasesToRows(seasonRows).map(r=>({...r,seasonKey})));
     for(const r of seasonRanking||[]){
       if(String(r.name||"").toLowerCase()==="max")continue;
-      const s=ensure(canonicalPlayerName(r.name));
+      const name=canonicalPlayerName(r.name);
+      const s=ensure(name);
       s.points+=Number(r.points||0);
       s.gamesCount+=Number(r.gamesCount||0);
       s.wins+=Number(r.wins||0);
-      s.tabliers+=Number(r.tabliers||0);
+      s.tabliers+=Number(tabs.get(name)||0);
       s.kills+=Number(r.kills||0);
     }
   }
@@ -4478,15 +4484,19 @@ function rankingFromArchiveRows(rows){
     const name=canonicalPlayerName(r.player);
     if(!by.has(name))by.set(name,{name,points:0,games:new Set(),wins:0,tabliers:0,kills:0});
     const x=by.get(name); x.points+=Number(r.points||0); x.games.add(Number(r.game||0));
-    if(r.win||Number(r.place)===1)x.wins++; if(r.tablier)x.tabliers++; x.kills+=Number(r.kills||0);
+    if(r.win||Number(r.place)===1)x.wins++; if(isTablierRow(r))x.tabliers++; x.kills+=Number(r.kills||0);
   }
   return [...by.values()].map(x=>({name:x.name,points:x.points,gamesCount:x.games.size,wins:x.wins,tabliers:x.tabliers,kills:x.kills}));
 }
 function archiveOfficialRanking(){
-  if(selectedSeasonKey==="2025-2026")return mergeRankingAliases(ARCHIVE_2025_2026_RANKING);
-  if(selectedSeasonKey==="2023-2024")return mergeRankingAliases(ARCHIVE_2023_2024_RANKING);
+  if(selectedSeasonKey==="2025-2026" || selectedSeasonKey==="2023-2024"){
+    const ranking=mergeRankingAliases(selectedSeasonKey==="2025-2026"?ARCHIVE_2025_2026_RANKING:ARCHIVE_2023_2024_RANKING);
+    const rows=applyPlayerAliasesToRows(selectedSeasonKey==="2025-2026"?ARCHIVE_2025_2026:ARCHIVE_2023_2024).map(r=>({...r,seasonKey:selectedSeasonKey}));
+    const tabs=tablierCountsFromRows(rows);
+    return ranking.map(r=>({...r,tabliers:Number(tabs.get(canonicalPlayerName(r.name))||0)}));
+  }
   const rows=archiveRowsForSeason(selectedSeasonKey);
-  return rows?mergeRankingAliases(rankingFromArchiveRows(rows)):null;
+  return rows?mergeRankingAliases(rankingFromArchiveRows((rows||[]).map(r=>({...r,seasonKey:selectedSeasonKey})))):null;
 }
 
 function mergeArchiveOfficialStats(items){
@@ -4781,6 +4791,37 @@ function groupedGamesFromRows(rows){
   return [...m.entries()].sort((a,b)=>a[0]-b[0]);
 }
 
+
+function tablierMinPlayersForRow(r){
+  const season=String(r?.seasonKey||r?.season||'').trim();
+  if(season){
+    const m=season.match(/^(\d{4})-(\d{4})$/);
+    if(m)return Number(m[1])<=2023?12:10;
+  }
+  const d=String(r?.date||'');
+  const m=d.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m){
+    const y=Number(m[1]), mo=Number(m[2]);
+    const startYear=mo>=7?y:y-1;
+    return startYear<=2023?12:10;
+  }
+  // Par défaut, règle actuelle depuis 2024-2025.
+  return 10;
+}
+function isTablierRow(r){
+  const isWin=!!r?.win || Number(r?.place)===1;
+  return isWin && Number(r?.n||0)>=tablierMinPlayersForRow(r);
+}
+function tablierCountsFromRows(rows){
+  const out=new Map();
+  for(const r of rows||[]){
+    if(!isTablierRow(r))continue;
+    const name=canonicalPlayerName(r.player);
+    out.set(name,(out.get(name)||0)+1);
+  }
+  return out;
+}
+
 function statsFromRows(rows){
   const by={};
   for(const p of (db.players||[]))by[p.name]={name:p.name,points:0,games:new Set(),wins:0,podiums:0,tabliers:0,kills:0,stake:0,gross:0,net:0};
@@ -4791,7 +4832,7 @@ function statsFromRows(rows){
     s.games.add(r.game);
     s.wins+=r.win?1:0;
     s.podiums+=r.podium?1:0;
-    s.tabliers+=r.tablier?1:0;
+    s.tabliers+=isTablierRow(r)?1:0;
     s.kills+=Number(r.kills||0);
     s.stake+=Number(r.stake||0);
     s.gross+=Number(r.gross||0);
@@ -4872,7 +4913,7 @@ function buildDashboardRecordPool(games,ranked,sourceRows){
     let curWin=0,bestWin=0,curTab=0,bestTab=0,totalTab=0;
     for(const r of playerRows){
       const isWin=Number(r.place)===1;
-      const isTablier=!!r.tablier || (isWin && Number(r.n)>=10);
+      const isTablier=isTablierRow(r);
       curWin=isWin?curWin+1:0;
       if(curWin>bestWin)bestWin=curWin;
       if(isTablier)totalTab++;
