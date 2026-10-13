@@ -4647,11 +4647,58 @@ function setRankingMode(mode){
   if(rankingMode==='bets')renderBettingRanking();
 }
 
+function bettingLedgerRebuildPlayers(root){
+  root=root||{};root.sessions=root.sessions||{};
+  const players={};
+  const key=name=>encodeURIComponent(String(name||'')).replace(/%/g,'_');
+  Object.values(root.sessions).forEach(session=>{
+    (session?.rows||[]).forEach(row=>{
+      const player=String(row?.player||'').trim();if(!player)return;
+      const pk=key(player),rec=players[pk]||{name:player,stakedCents:0,grossWonCents:0,netCents:0,bets:[]};
+      const stake=Number(row.stakeCents)||0,gross=Number(row.grossWonCents)||0,net=Number(row.netCents)||0;
+      rec.stakedCents+=stake;rec.grossWonCents+=gross;rec.netCents+=net;
+      rec.bets.push({session:String(session?.session||''),type:row.type,pick:row.pick,actual:row.actual,odds:row.odds,stakeCents:stake,grossWonCents:gross,netCents:net,at:Number(session?.settledAt)||Date.now()});
+      players[pk]=rec;
+    });
+  });
+  root.players=players;return root;
+}
+
+async function pruneOrphanBettingSessionsForSeason(seasonKey=CURRENT_SEASON_KEY){
+  const dbx=window.bptFirebaseDb?.();if(!dbx?.ref)return {removed:0};
+  const season=String(seasonKey||CURRENT_SEASON_KEY);
+  const gameCount=new Set((db.history||[]).filter(r=>String(db?.settings?.season||CURRENT_SEASON_KEY)===season).map(r=>Number(r.game)).filter(Number.isFinite)).size;
+  let removed=0;
+  await dbx.ref('bpt/bettingLedger').transaction(root=>{
+    root=root||{};root.sessions=root.sessions||{};
+    const entries=Object.entries(root.sessions).filter(([,s])=>String(s?.season||CURRENT_SEASON_KEY)===season).sort((a,b)=>(Number(a[1]?.settledAt)||0)-(Number(b[1]?.settledAt)||0));
+    const excess=Math.max(0,entries.length-gameCount);
+    if(!excess)return root;
+    entries.slice(-excess).forEach(([id])=>{delete root.sessions[id];removed++;});
+    return bettingLedgerRebuildPlayers(root);
+  });
+  return {removed};
+}
+
+async function purgeLatestBettingSessionForSeason(seasonKey=CURRENT_SEASON_KEY){
+  const dbx=window.bptFirebaseDb?.();if(!dbx?.ref)return false;
+  const season=String(seasonKey||CURRENT_SEASON_KEY);let removed=false;
+  await dbx.ref('bpt/bettingLedger').transaction(root=>{
+    root=root||{};root.sessions=root.sessions||{};
+    const entries=Object.entries(root.sessions).filter(([,s])=>String(s?.season||CURRENT_SEASON_KEY)===season).sort((a,b)=>(Number(a[1]?.settledAt)||0)-(Number(b[1]?.settledAt)||0));
+    const last=entries[entries.length-1];if(!last)return root;
+    delete root.sessions[last[0]];removed=true;
+    return bettingLedgerRebuildPlayers(root);
+  });
+  return removed;
+}
+
 async function renderBettingRanking(){
   const panel=document.getElementById('bptBettingRankingPanel');if(!panel)return;
   try{
     const dbx=window.bptFirebaseDb?.();
     if(!dbx?.ref){panel.innerHTML='<p class="bpt-betting-ranking-note">Classement des paris indisponible hors connexion.</p>';return;}
+    if(!isAllSeasons() && String(selectedSeasonKey||CURRENT_SEASON_KEY)===String(CURRENT_SEASON_KEY)){await pruneOrphanBettingSessionsForSeason(CURRENT_SEASON_KEY);}
     const snap=await dbx.ref('bpt/bettingLedger').once('value'),root=snap.val()||{},sessions=Object.values(root.sessions||{});
     const all=isAllSeasons(),season=String(selectedSeasonKey||CURRENT_SEASON_KEY);
     const relevant=sessions.filter(s=>all||!s.season||String(s.season)===season);
@@ -8721,7 +8768,7 @@ async function resetFullHistory(){
   }
 }
 
-function deleteCorrectionGame(){
+async function deleteCorrectionGame(){
   if(!correctionUnlocked)return;
 
   const games=correctionGames();
@@ -8746,6 +8793,13 @@ function deleteCorrectionGame(){
 
   db.history=db.history.filter(r=>r.game!==current);
   cloudHistoryReplaceOnce=true;
+
+  // La suppression de la dernière partie doit également supprimer son règlement de paris.
+  // Les parties ne pouvant être supprimées que par la fin, la dernière session réglée
+  // de la saison courante est nécessairement celle de la partie supprimée.
+  if(String(selectedSeasonKey||CURRENT_SEASON_KEY)===String(CURRENT_SEASON_KEY)){
+    try{await purgeLatestBettingSessionForSeason(CURRENT_SEASON_KEY);}catch(e){console.warn('Purge paris partie supprimée',e);}
+  }
 
   // Si le live conservé correspond à la partie supprimée,
   // on le remet à zéro pour éviter une resynchronisation accidentelle.
