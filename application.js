@@ -4677,15 +4677,51 @@ function bettingLedgerRebuildPlayers(root){
 async function pruneOrphanBettingSessionsForSeason(seasonKey=CURRENT_SEASON_KEY){
   const dbx=window.bptFirebaseDb?.();if(!dbx?.ref)return {removed:0};
   const season=String(seasonKey||CURRENT_SEASON_KEY);
-  const gameCount=new Set((db.history||[]).filter(r=>String(db?.settings?.season||CURRENT_SEASON_KEY)===season).map(r=>Number(r.game)).filter(Number.isFinite)).size;
+  const validGameNos=new Set((db.history||[]).map(r=>Number(r.game)).filter(g=>Number.isFinite(g)&&g>0));
+  const gameCount=validGameNos.size;
   let removed=0;
   await dbx.ref('bpt/bettingLedger').transaction(root=>{
     root=root||{};root.sessions=root.sessions||{};
-    const entries=Object.entries(root.sessions).filter(([,s])=>String(s?.season||CURRENT_SEASON_KEY)===season).sort((a,b)=>(Number(a[1]?.settledAt)||0)-(Number(b[1]?.settledAt)||0));
-    const excess=Math.max(0,entries.length-gameCount);
-    if(!excess)return root;
-    entries.slice(-excess).forEach(([id])=>{delete root.sessions[id];removed++;});
-    return bettingLedgerRebuildPlayers(root);
+    const entries=Object.entries(root.sessions)
+      .filter(([,s])=>String(s?.season||CURRENT_SEASON_KEY)===season)
+      .sort((a,b)=>(Number(a[1]?.settledAt)||0)-(Number(b[1]?.settledAt)||0));
+
+    // 1) Purge exacte : toute session numérotée dont la partie n'existe plus
+    //    dans l'historique de la saison est orpheline (ex. ancienne partie 6 supprimée).
+    entries.forEach(([id,s])=>{
+      const gameNo=Number(s?.gameNo);
+      if(Number.isFinite(gameNo)&&gameNo>0&&!validGameNos.has(gameNo)){
+        delete root.sessions[id];removed++;
+      }
+    });
+
+    // 2) Compatibilité avec les anciennes sessions qui n'avaient pas encore gameNo.
+    //    On ne conserve au maximum qu'une session réglée par partie réelle.
+    const remaining=Object.entries(root.sessions)
+      .filter(([,s])=>String(s?.season||CURRENT_SEASON_KEY)===season)
+      .sort((a,b)=>(Number(a[1]?.settledAt)||0)-(Number(b[1]?.settledAt)||0));
+    const excess=Math.max(0,remaining.length-gameCount);
+    if(excess){
+      // Les sessions explicitement rattachées à une partie réelle sont protégées ;
+      // on élimine d'abord les sessions legacy sans numéro, en partant des plus récentes.
+      const legacy=remaining.filter(([,s])=>!(Number.isFinite(Number(s?.gameNo))&&Number(s?.gameNo)>0));
+      let todo=excess;
+      for(const [id] of legacy.slice().reverse()){
+        if(!todo)break;
+        if(root.sessions[id]){delete root.sessions[id];removed++;todo--;}
+      }
+      // Dernier filet de sécurité si le ledger contenait encore des doublons numérotés.
+      if(todo){
+        const rest=Object.entries(root.sessions)
+          .filter(([,s])=>String(s?.season||CURRENT_SEASON_KEY)===season)
+          .sort((a,b)=>(Number(a[1]?.settledAt)||0)-(Number(b[1]?.settledAt)||0));
+        for(const [id] of rest.slice().reverse()){
+          if(!todo)break;
+          if(root.sessions[id]){delete root.sessions[id];removed++;todo--;}
+        }
+      }
+    }
+    return removed?bettingLedgerRebuildPlayers(root):root;
   });
   return {removed};
 }
@@ -4708,7 +4744,7 @@ async function renderBettingRanking(){
   try{
     const dbx=window.bptFirebaseDb?.();
     if(!dbx?.ref){panel.innerHTML='<p class="bpt-betting-ranking-note">Classement des paris indisponible hors connexion.</p>';return;}
-    if(!isAllSeasons() && String(selectedSeasonKey||CURRENT_SEASON_KEY)===String(CURRENT_SEASON_KEY)){await pruneOrphanBettingSessionsForSeason(CURRENT_SEASON_KEY);}
+    await pruneOrphanBettingSessionsForSeason(CURRENT_SEASON_KEY);
     const snap=await dbx.ref('bpt/bettingLedger').once('value'),root=snap.val()||{},sessions=Object.values(root.sessions||{});
     const all=isAllSeasons(),season=String(selectedSeasonKey||CURRENT_SEASON_KEY);
     const relevant=sessions.filter(s=>all||!s.season||String(s.season)===season);
