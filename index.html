@@ -16,7 +16,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 <!-- BPT V9.0 — code extrait en fichiers ordonnés, logique fonctionnelle conservée -->
 <title>BPT — Gestion du championnat</title>
 <link href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23173a2b'/%3E%3Cpath d='M32 10c-6 10-18 15-18 26 0 7 5 12 11 12 3 0 5-1 7-4-1 5-3 8-7 10h14c-4-2-6-5-7-10 2 3 4 4 7 4 6 0 11-5 11-12 0-11-12-16-18-26z' fill='%23c8952e'/%3E%3C/svg%3E" rel="icon"/>
-<link rel="stylesheet" href="./app.css?v=9.0.25">
+<link rel="stylesheet" href="./app.css?v=9.0.30">
 
 
 
@@ -203,7 +203,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 <div class="bpt-identity-session"><span aria-live="polite" class="bpt-connected-identity" id="bptConnectedIdentity"></span><button class="bpt-logout-btn" id="bptLogoutBtn" type="button" hidden aria-label="Se déconnecter de BPT" title="Se déconnecter">Déconnexion</button></div>
 </div>
 </div>
-<div class="app-version" id="headerAppVersion">BPT v9.0</div>
+<div class="app-version" id="headerAppVersion">BPT v9.0.30</div>
 <div aria-label="Personnes connectées" class="bpt-online-presence" id="bptOnlinePresence" tabindex="0">
 <span class="bpt-online-dot">●</span>
 <strong id="bptOnlineCount">0</strong>
@@ -219,11 +219,13 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 <span class="bpt-nav-ranking-compact">♛ Clt</span>
 </button>
 <button class="bpt-nav-desktop-only" data-view="records">★ Records &amp; accomplissements</button>
+<button class="bpt-nav-desktop-only" data-view="seasons">▦ Saisons</button>
 <button class="bpt-nav-desktop-only" data-view="settings">⚙ Paramètres</button>
 <button class="bpt-nav-mobile-only" id="bptMobileMoreTopBtn" type="button">☰ Plus</button>
 </nav>
 <div class="bpt-mobile-top-menu" hidden="" id="bptMobileMoreTopMenu">
 <button data-mobile-nav-view="records" type="button">★ Records</button>
+<button data-mobile-nav-view="seasons" type="button">▦ Saisons</button>
 <button data-mobile-nav-view="profile" type="button">♤ Profil</button>
 <button data-mobile-nav-view="settings" type="button">⚙ Paramètres</button>
 </div>
@@ -1091,6 +1093,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 </div>
 <div class="ranking-mode-toggle" role="tablist" aria-label="Type de classement"><button type="button" class="ranking-mode-btn active" id="rankingPointsModeBtn" onclick="setRankingMode('points')">🏆 Classement BPT</button><button type="button" class="ranking-mode-btn" id="rankingBetsModeBtn" onclick="setRankingMode('bets')">🎲 Classement des paris</button></div>
 <section id="bptBettingRankingPanel" class="combined-block bpt-betting-ranking-panel" hidden aria-label="Classement des paris"></section>
+<section class="career-ratio-summary" id="careerRatioSummary" hidden aria-label="Indicateurs carrière cumulés"></section>
 <details id="rankingPointsContent" class="combined-block combined-ranking-block" open="">
 <summary>
 <span><strong>♛ Classement BPT</strong><small>Points, classement général et statistiques individuelles</small></span>
@@ -1129,7 +1132,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 <div class="tablewrap"><table>
 <thead><tr>
 <th>Clt</th><th>Joueur</th><th>Points</th><th>Évolution</th><th>3 dernières</th><th>Moy. pts</th>
-<th>Participations</th><th>Victoires</th><th>Podiums</th><th>Tabliers</th>
+<th>Participations</th><th>Victoires</th><th>Victoires %</th><th>Podiums</th><th>Podiums %</th><th>Tabliers</th>
 <th>Kills</th><th>Kills/partie</th><th>Solde net</th><th>Bourreau · éliminations</th><th>Victime · kills</th>
 </tr></thead>
 <tbody id="rankingBody"></tbody>
@@ -1138,6 +1141,15 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 </details>
 
 
+</section>
+<section class="view" id="seasons">
+<div class="hero tab-premium-hero">
+<div class="home-kicker">BPT · Archives</div>
+<h1>Historique des saisons</h1>
+<p>Vue consolidée des saisons disponibles. Un clic ouvre directement le classement correspondant.</p>
+</div>
+<div class="season-history-grid" id="seasonHistoryGrid"></div>
+<div class="card season-history-note"><strong>Source des archives</strong><p>Les fichiers BPT historiques sont prioritaires. WhatsApp n'est utilisé qu'en complément lorsqu'une donnée manque.</p></div>
 </section>
 <section class="view" id="records">
 <div class="hero tab-premium-hero">
@@ -1324,7 +1336,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 <div class="home-kicker">BPT · Administration</div>
 <h1>Paramètres du championnat</h1>
 <p>Gestion des parties, des joueurs, des corrections et des règles du championnat.</p>
-<div class="settings-version-info" id="settingsVersionInfo">Version BPT 9.0</div>
+<div class="settings-version-info" id="settingsVersionInfo">Version BPT 9.0.30</div>
 <div class="card" id="firebaseDiagnostic" style="margin-top:14px;padding:12px 14px;max-width:680px">
 <div style="font-weight:900;margin-bottom:9px">État BPT</div>
 <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;align-items:center">
@@ -1352,6 +1364,14 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 <div id="settingsPasswordError" style="margin-top:10px;color:#ff8f8f;font-weight:800"></div>
 </div>
 <div id="settingsProtectedContent" style="display:none">
+<details class="settings-block" open>
+<summary>Diagnostic de cohérence automatique</summary>
+<div class="settings-block-content" style="padding:14px 18px 18px">
+<div class="diagnostic-summary" id="consistencyDiagnosticSummary">Analyse en cours…</div>
+<div class="diagnostic-list" id="consistencyDiagnosticList"></div>
+<div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap"><button class="btn ghost" type="button" onclick="renderConsistencyDiagnostic(true)">Actualiser le diagnostic</button></div>
+</div>
+</details>
 
 
 <details class="settings-block">

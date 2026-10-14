@@ -1,4 +1,4 @@
-BPT V9.0.28
+BPT V9.0.30
 
 Correctif login :
 - source unique joueurs : bpt/state/main/data/players
@@ -16,3 +16,7 @@ Correctif login :
 - V9.0.28 : affichage du nombre d’éliminations pour le bourreau principal et du nombre de kills sur la victime principale dans le classement.
 
 - V9.0.28 : purge exacte des sessions de paris orphelines via gameNo ; suppression de la trace d'une partie supprimée (notamment l'ancienne partie 6) et recalcul du ledger joueurs.
+
+- V9.0.30 : diagnostic automatique de cohérence (parties, doublons, places, règles de tablier, sessions de paris orphelines).
+- V9.0.30 : nouvel écran Historique des saisons avec accès direct au classement de chaque archive.
+- V9.0.30 : cumul carrière enrichi avec taux de victoire, taux de podium, ratio kills/partie et synthèse carrière.

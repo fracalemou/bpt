@@ -14723,3 +14723,19 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only {
   display: flex !important;
 }
 
+
+
+/* BPT V9.0.29 — historique saisons, diagnostic et ratios carrière */
+.season-history-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin:16px 0}
+.season-history-card{border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:16px;background:rgba(255,255,255,.035);box-shadow:0 12px 28px rgba(0,0,0,.12)}
+.season-history-card.current{border-color:rgba(200,149,46,.7)}
+.season-history-card h3{margin:0 0 4px;font-size:20px}.season-history-card .season-status{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;opacity:.75}
+.season-history-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0}.season-history-metric{padding:9px 10px;border-radius:10px;background:rgba(255,255,255,.05)}
+.season-history-metric span{display:block;font-size:11px;opacity:.68}.season-history-metric strong{display:block;font-size:17px;margin-top:2px}
+.season-history-champion{margin:10px 0 14px}.season-history-note{margin-top:12px}.season-history-note p{margin:5px 0 0;opacity:.78}
+.career-ratio-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+.career-ratio-card{padding:12px;border-radius:14px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.1)}
+.career-ratio-card span{display:block;font-size:11px;opacity:.68;text-transform:uppercase;letter-spacing:.04em}.career-ratio-card strong{display:block;margin-top:4px;font-size:18px}.career-ratio-card small{display:block;margin-top:3px;opacity:.66}
+.diagnostic-summary{padding:12px 14px;border-radius:12px;font-weight:850;margin-bottom:10px}.diagnostic-summary.ok{background:rgba(50,180,110,.13);border:1px solid rgba(50,180,110,.36)}.diagnostic-summary.warn{background:rgba(231,164,45,.13);border:1px solid rgba(231,164,45,.38)}
+.diagnostic-list{display:grid;gap:8px}.diagnostic-item{display:grid;grid-template-columns:auto 1fr;gap:9px;align-items:start;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.035)}.diagnostic-item b{font-size:13px}.diagnostic-item small{display:block;opacity:.7;margin-top:2px;line-height:1.35}
+@media(max-width:700px){.season-history-grid{grid-template-columns:1fr}.career-ratio-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.season-history-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}

@@ -2046,6 +2046,129 @@ function allAvailableSeasonSets(){
   ];
 }
 
+
+function seasonSummaryData(season){
+  const rows=Array.isArray(season?.rows)?season.rows:[];
+  const statsList=statsFromRows(rows).filter(s=>s.gamesCount>0);
+  const games=new Set(rows.map(r=>Number(r.sourceGame||r.game||0)).filter(g=>g>0));
+  const players=new Set(rows.map(r=>canonicalPlayerName(r.player)).filter(Boolean));
+  const ranked=(season?.ranking&&season.ranking.length?season.ranking:rankingFromRows(rows)).filter(r=>Number(r.gamesCount||0)>0 || Number(r.points||0)>0);
+  const champion=[...ranked].sort((a,b)=>Number(b.points||0)-Number(a.points||0)||String(a.name).localeCompare(String(b.name),'fr'))[0]||null;
+  const wins=statsList.reduce((n,s)=>n+Number(s.wins||0),0);
+  return {games:games.size,players:players.size,champion,wins};
+}
+
+function renderSeasonHistoryScreen(){
+  const holder=document.getElementById('seasonHistoryGrid');
+  if(!holder)return;
+  holder.innerHTML=allAvailableSeasonSets().map(season=>{
+    const x=seasonSummaryData(season);
+    const current=season.key===CURRENT_SEASON_KEY;
+    return `<article class="season-history-card ${current?'current':''}">
+      <div class="season-status">${current?'Saison en cours':'Archive BPT'}</div>
+      <h3>${esc(season.label)}</h3>
+      <div class="season-history-metrics">
+        <div class="season-history-metric"><span>Parties</span><strong>${x.games}</strong></div>
+        <div class="season-history-metric"><span>Joueurs</span><strong>${x.players}</strong></div>
+        <div class="season-history-metric"><span>Victoires enregistrées</span><strong>${x.wins}</strong></div>
+        <div class="season-history-metric"><span>Statut</span><strong>${current?'En cours':'Clôturée'}</strong></div>
+      </div>
+      <div class="season-history-champion"><span class="muted">Leader aux points</span><br><strong>${x.champion?playerDisplayWithRealName(x.champion.name):'—'}</strong>${x.champion?` · ${num(x.champion.points,0)} pts`:''}</div>
+      <button class="btn secondary" type="button" onclick="openSeasonFromHistory('${season.key}')">Ouvrir le classement</button>
+    </article>`;
+  }).join('');
+}
+
+async function openSeasonFromHistory(key){
+  await selectSeason(key);
+  await showView('ranking');
+}
+
+function bestSeasonRankForPlayer(name){
+  let best=null;
+  for(const season of allAvailableSeasonSets()){
+    const ranked=(season.ranking&&season.ranking.length?season.ranking:rankingFromRows(season.rows)).filter(r=>Number(r.gamesCount||0)>0||Number(r.points||0)>0);
+    ranked.sort((a,b)=>Number(b.points||0)-Number(a.points||0)||String(a.name).localeCompare(String(b.name),'fr'));
+    const idx=ranked.findIndex(r=>canonicalPlayerName(r.name)===canonicalPlayerName(name));
+    if(idx>=0 && (!best || idx+1<best.rank))best={rank:idx+1,season:season.label};
+  }
+  return best;
+}
+
+function renderCareerRatioSummary(){
+  const holder=document.getElementById('careerRatioSummary');
+  if(!holder)return;
+  if(!isAllSeasons()){holder.hidden=true;holder.innerHTML='';return;}
+  holder.hidden=false;
+  const rows=[...ranking()].sort((a,b)=>Number(b.points||0)-Number(a.points||0));
+  const leader=rows[0];
+  const bestWin=[...rows].filter(r=>r.gamesCount>=5).sort((a,b)=>Number(b.winRate||0)-Number(a.winRate||0)||Number(b.wins||0)-Number(a.wins||0))[0];
+  const bestPod=[...rows].filter(r=>r.gamesCount>=5).sort((a,b)=>Number(b.podiumRate||0)-Number(a.podiumRate||0)||Number(b.podiums||0)-Number(a.podiums||0))[0];
+  const bestKpg=[...rows].filter(r=>r.gamesCount>=5).sort((a,b)=>Number(b.kpg||0)-Number(a.kpg||0)||Number(b.kills||0)-Number(a.kills||0))[0];
+  const mostActive=[...rows].sort((a,b)=>Number(b.gamesCount||0)-Number(a.gamesCount||0))[0];
+  const bestSeason=leader?bestSeasonRankForPlayer(leader.name):null;
+  const card=(label,who,value,small='')=>`<div class="career-ratio-card"><span>${label}</span><strong>${esc(value||'—')}</strong><small>${esc(who||'')}${small?` · ${esc(small)}`:''}</small></div>`;
+  holder.innerHTML=[
+    card('Leader carrière',leader?.name,leader?`${num(leader.points,0)} pts`:'—',bestSeason?`meilleur rang #${bestSeason.rank} (${bestSeason.season})`:''),
+    card('Meilleur taux de victoire',bestWin?.name,bestWin?`${num(bestWin.winRate,1)} %`:'—',bestWin?`${bestWin.wins}/${bestWin.gamesCount}`:''),
+    card('Meilleur taux de podium',bestPod?.name,bestPod?`${num(bestPod.podiumRate,1)} %`:'—',bestPod?`${bestPod.podiums}/${bestPod.gamesCount}`:''),
+    card('Meilleur ratio kills',bestKpg?.name,bestKpg?`${num(bestKpg.kpg,2)} / partie`:'—',bestKpg?`${bestKpg.kills} kills`:''),
+    card('Plus assidu',mostActive?.name,mostActive?`${mostActive.gamesCount} parties`:'—')
+  ].join('');
+}
+
+function consistencyDiagnosticData(){
+  const issues=[];
+  let checkedGames=0,checkedRows=0;
+  const all=allAvailableSeasonSets();
+  for(const season of all){
+    const rows=season.rows||[]; checkedRows+=rows.length;
+    const groups=groupedGamesFromRows(rows); checkedGames+=groups.length;
+    for(const [game,grows] of groups){
+      const names=new Set(),places=new Set();
+      for(const r of grows){
+        const name=canonicalPlayerName(r.player);
+        if(names.has(name))issues.push({level:'error',title:`${season.label} · partie ${game}`,detail:`Joueur en double : ${name}`});
+        names.add(name);
+        const place=Number(r.place||0);
+        if(place>0){if(places.has(place))issues.push({level:'error',title:`${season.label} · partie ${game}`,detail:`Place ${place} attribuée plusieurs fois.`});places.add(place);}
+        const n=Number(r.n||0); if(n>0 && n!==grows.length)issues.push({level:'warn',title:`${season.label} · partie ${game}`,detail:`Nombre de joueurs annoncé ${n}, lignes présentes ${grows.length}.`});
+        if(r.tablier!==undefined && Boolean(r.tablier)!==Boolean(isTablierRow({...r,seasonKey:season.key})))issues.push({level:'warn',title:`${season.label} · partie ${game}`,detail:`Ancien indicateur de tablier différent de la règle de saison ; le recalcul automatique fait foi.`});
+      }
+    }
+  }
+  const canonicalSeen=new Map();
+  for(const p of (db.players||[])){
+    const c=canonicalPlayerName(p.name);
+    if(canonicalSeen.has(c) && canonicalSeen.get(c)!==p.name)issues.push({level:'error',title:'Référentiel joueurs',detail:`Doublon d'identité : ${canonicalSeen.get(c)} / ${p.name}`});
+    else canonicalSeen.set(c,p.name);
+  }
+  return {issues,checkedGames,checkedRows,seasons:all.length};
+}
+
+async function renderConsistencyDiagnostic(force=false){
+  const summary=document.getElementById('consistencyDiagnosticSummary');
+  const list=document.getElementById('consistencyDiagnosticList');
+  if(!summary||!list)return;
+  const d=consistencyDiagnosticData();
+  let bettingIssue=null;
+  try{
+    const dbx=window.bptFirebaseDb?.();
+    if(dbx?.ref){
+      const snap=await dbx.ref('bpt/bettingLedger/sessions').once('value');
+      const sessions=Object.values(snap.val()||{});
+      const currentGames=new Set((currentRowsForCumulative()||[]).map(r=>Number(r.sourceGame||r.game||0)).filter(Boolean));
+      const orphan=sessions.filter(s=>String(s.season||CURRENT_SEASON_KEY)===CURRENT_SEASON_KEY && Number(s.gameNo)>0 && !currentGames.has(Number(s.gameNo)));
+      if(orphan.length)bettingIssue={level:'error',title:'Paris',detail:`${orphan.length} session(s) de paris référence(nt) une partie absente.`};
+    }
+  }catch(_e){}
+  const issues=[...d.issues,...(bettingIssue?[bettingIssue]:[])];
+  const errors=issues.filter(i=>i.level==='error').length,warns=issues.filter(i=>i.level==='warn').length;
+  summary.className=`diagnostic-summary ${issues.length?'warn':'ok'}`;
+  summary.textContent=issues.length?`${errors} anomalie(s) bloquante(s), ${warns} avertissement(s) · ${d.seasons} saisons, ${d.checkedGames} parties et ${d.checkedRows} lignes contrôlées.`:`Cohérence OK · ${d.seasons} saisons, ${d.checkedGames} parties et ${d.checkedRows} lignes contrôlées.`;
+  list.innerHTML=issues.length?issues.slice(0,60).map(i=>`<div class="diagnostic-item"><span>${i.level==='error'?'⛔':'⚠'}</span><div><b>${esc(i.title)}</b><small>${esc(i.detail)}</small></div></div>`).join(''):'<div class="diagnostic-item"><span>✓</span><div><b>Aucune anomalie détectée</b><small>Les contrôles structurels et le rattachement des paris sont cohérents.</small></div></div>';
+}
+
 function renderRecordScopeSummary(){
   const holder=$("recordsScopeSummary");
   if(!holder)return;
@@ -4674,67 +4797,70 @@ function bettingLedgerRebuildPlayers(root){
   root.players=players;return root;
 }
 
+function bettingValidGameNumbersForSeason(seasonKey=CURRENT_SEASON_KEY){
+  const season=String(seasonKey||CURRENT_SEASON_KEY);
+  if(season===String(CURRENT_SEASON_KEY)){
+    return new Set((db.history||[]).map(r=>Number(r.game)).filter(g=>Number.isFinite(g)&&g>0));
+  }
+  const set=allAvailableSeasonSets().find(s=>String(s.key)===season);
+  return new Set((set?.rows||[]).map(r=>Number(r.sourceGame||r.game)).filter(g=>Number.isFinite(g)&&g>0));
+}
+
 async function pruneOrphanBettingSessionsForSeason(seasonKey=CURRENT_SEASON_KEY){
   const dbx=window.bptFirebaseDb?.();if(!dbx?.ref)return {removed:0};
   const season=String(seasonKey||CURRENT_SEASON_KEY);
-  const validGameNos=new Set((db.history||[]).map(r=>Number(r.game)).filter(g=>Number.isFinite(g)&&g>0));
-  const gameCount=validGameNos.size;
+  const validGameNos=bettingValidGameNumbersForSeason(season);
   let removed=0;
   await dbx.ref('bpt/bettingLedger').transaction(root=>{
     root=root||{};root.sessions=root.sessions||{};
+    const seenByGame=new Map();
     const entries=Object.entries(root.sessions)
       .filter(([,s])=>String(s?.season||CURRENT_SEASON_KEY)===season)
-      .sort((a,b)=>(Number(a[1]?.settledAt)||0)-(Number(b[1]?.settledAt)||0));
+      .sort((a,b)=>(Number(b[1]?.settledAt)||0)-(Number(a[1]?.settledAt)||0));
 
-    // 1) Purge exacte : toute session numérotée dont la partie n'existe plus
-    //    dans l'historique de la saison est orpheline (ex. ancienne partie 6 supprimée).
-    entries.forEach(([id,s])=>{
+    // Règle unique : pas de partie = pas de pari.
+    // Une session doit avoir un gameNo explicite correspondant à une partie existante.
+    // Une seule session réglée est conservée par partie (la plus récente).
+    for(const [id,s] of entries){
       const gameNo=Number(s?.gameNo);
-      if(Number.isFinite(gameNo)&&gameNo>0&&!validGameNos.has(gameNo)){
-        delete root.sessions[id];removed++;
+      if(!Number.isFinite(gameNo) || gameNo<=0 || !validGameNos.has(gameNo)){
+        delete root.sessions[id];removed++;continue;
       }
-    });
-
-    // 2) Compatibilité avec les anciennes sessions qui n'avaient pas encore gameNo.
-    //    On ne conserve au maximum qu'une session réglée par partie réelle.
-    const remaining=Object.entries(root.sessions)
-      .filter(([,s])=>String(s?.season||CURRENT_SEASON_KEY)===season)
-      .sort((a,b)=>(Number(a[1]?.settledAt)||0)-(Number(b[1]?.settledAt)||0));
-    const excess=Math.max(0,remaining.length-gameCount);
-    if(excess){
-      // Les sessions explicitement rattachées à une partie réelle sont protégées ;
-      // on élimine d'abord les sessions legacy sans numéro, en partant des plus récentes.
-      const legacy=remaining.filter(([,s])=>!(Number.isFinite(Number(s?.gameNo))&&Number(s?.gameNo)>0));
-      let todo=excess;
-      for(const [id] of legacy.slice().reverse()){
-        if(!todo)break;
-        if(root.sessions[id]){delete root.sessions[id];removed++;todo--;}
+      if(seenByGame.has(gameNo)){
+        delete root.sessions[id];removed++;continue;
       }
-      // Dernier filet de sécurité si le ledger contenait encore des doublons numérotés.
-      if(todo){
-        const rest=Object.entries(root.sessions)
-          .filter(([,s])=>String(s?.season||CURRENT_SEASON_KEY)===season)
-          .sort((a,b)=>(Number(a[1]?.settledAt)||0)-(Number(b[1]?.settledAt)||0));
-        for(const [id] of rest.slice().reverse()){
-          if(!todo)break;
-          if(root.sessions[id]){delete root.sessions[id];removed++;todo--;}
-        }
-      }
+      seenByGame.set(gameNo,id);
     }
     return removed?bettingLedgerRebuildPlayers(root):root;
   });
   return {removed};
 }
 
-async function purgeLatestBettingSessionForSeason(seasonKey=CURRENT_SEASON_KEY){
+async function purgeBettingForGame(seasonKey=CURRENT_SEASON_KEY,gameNo){
+  const dbx=window.bptFirebaseDb?.();if(!dbx?.ref)return false;
+  const season=String(seasonKey||CURRENT_SEASON_KEY),target=Number(gameNo);let removed=false;
+  if(!Number.isFinite(target)||target<=0)return false;
+  await dbx.ref('bpt/bettingLedger').transaction(root=>{
+    root=root||{};root.sessions=root.sessions||{};
+    for(const [id,s] of Object.entries(root.sessions)){
+      if(String(s?.season||CURRENT_SEASON_KEY)===season && Number(s?.gameNo)===target){
+        delete root.sessions[id];removed=true;
+      }
+    }
+    return removed?bettingLedgerRebuildPlayers(root):root;
+  });
+  return removed;
+}
+
+async function purgeBettingForSeason(seasonKey=CURRENT_SEASON_KEY){
   const dbx=window.bptFirebaseDb?.();if(!dbx?.ref)return false;
   const season=String(seasonKey||CURRENT_SEASON_KEY);let removed=false;
   await dbx.ref('bpt/bettingLedger').transaction(root=>{
     root=root||{};root.sessions=root.sessions||{};
-    const entries=Object.entries(root.sessions).filter(([,s])=>String(s?.season||CURRENT_SEASON_KEY)===season).sort((a,b)=>(Number(a[1]?.settledAt)||0)-(Number(b[1]?.settledAt)||0));
-    const last=entries[entries.length-1];if(!last)return root;
-    delete root.sessions[last[0]];removed=true;
-    return bettingLedgerRebuildPlayers(root);
+    for(const [id,s] of Object.entries(root.sessions)){
+      if(String(s?.season||CURRENT_SEASON_KEY)===season){delete root.sessions[id];removed=true;}
+    }
+    return removed?bettingLedgerRebuildPlayers(root):root;
   });
   return removed;
 }
@@ -4744,9 +4870,13 @@ async function renderBettingRanking(){
   try{
     const dbx=window.bptFirebaseDb?.();
     if(!dbx?.ref){panel.innerHTML='<p class="bpt-betting-ranking-note">Classement des paris indisponible hors connexion.</p>';return;}
-    await pruneOrphanBettingSessionsForSeason(CURRENT_SEASON_KEY);
-    const snap=await dbx.ref('bpt/bettingLedger').once('value'),root=snap.val()||{},sessions=Object.values(root.sessions||{});
     const all=isAllSeasons(),season=String(selectedSeasonKey||CURRENT_SEASON_KEY);
+    if(all){
+      for(const s of allAvailableSeasonSets())await pruneOrphanBettingSessionsForSeason(s.key);
+    }else{
+      await pruneOrphanBettingSessionsForSeason(season);
+    }
+    const snap=await dbx.ref('bpt/bettingLedger').once('value'),root=snap.val()||{},sessions=Object.values(root.sessions||{});
     const relevant=sessions.filter(s=>all||!s.season||String(s.season)===season);
     const by=new Map();
     relevant.forEach(s=>(s.rows||[]).forEach(row=>{
@@ -4785,6 +4915,9 @@ function renderAll(){
   safeRender("tableau de bord",renderDashboard);
   safeRender("dernière partie",renderLatestGame);
   safeRender("classement",renderRanking);
+  safeRender("historique saisons",renderSeasonHistoryScreen);
+  safeRender("ratios carrière",renderCareerRatioSummary);
+  safeRender("diagnostic cohérence",renderConsistencyDiagnostic);
   safeRender("mode classement",()=>setRankingMode(rankingMode));
   safeRender("versus",renderVersus);
   safeRender("records",renderRecords);
@@ -5859,6 +5992,7 @@ function rankingRowsForDisplay(){
 }
 
 function renderRanking(){
+  renderCareerRatioSummary();
   const ks=killerStats();
   const select=$("rankingSortSelect");
   if(select && select.value!==rankingSortKey)select.value=rankingSortKey;
@@ -5881,7 +6015,9 @@ function renderRanking(){
     <td>${num(s.avgPoints,1)}</td>
     <td>${s.gamesCount}</td>
     <td>${s.wins}</td>
+    <td>${num(s.winRate,1)} %</td>
     <td>${s.podiums}</td>
+    <td>${num(s.podiumRate,1)} %</td>
     <td>${s.tabliers}</td>
     <td>${s.kills}</td>
     <td>${num(s.kpg,2)}</td>
@@ -8826,6 +8962,9 @@ async function resetFullHistory(){
   pendingGamesSave([]);
   cloudHistoryReplaceOnce=true;
 
+  // Pas de partie = pas de pari : la RAZ historique supprime aussi les paris de la saison.
+  try{await purgeBettingForSeason(CURRENT_SEASON_KEY);}catch(e){console.warn('RAZ paris saison',e);}
+
   saveLocalOnly();
   renderAll();
   renderHistory();
@@ -8875,7 +9014,7 @@ async function deleteCorrectionGame(){
   // Les parties ne pouvant être supprimées que par la fin, la dernière session réglée
   // de la saison courante est nécessairement celle de la partie supprimée.
   if(String(selectedSeasonKey||CURRENT_SEASON_KEY)===String(CURRENT_SEASON_KEY)){
-    try{await purgeLatestBettingSessionForSeason(CURRENT_SEASON_KEY);}catch(e){console.warn('Purge paris partie supprimée',e);}
+    try{await purgeBettingForGame(CURRENT_SEASON_KEY,current);}catch(e){console.warn('Purge paris partie supprimée',e);}
   }
 
   // Si le live conservé correspond à la partie supprimée,
@@ -9095,13 +9234,14 @@ async function showView(id){
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===id));
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
 
-  if((id==="dashboard" || id==="latestgame" || id==="ranking" || id==="versus" || id==="records" || id==="achievements" || id==="profile" || id==="history") && cloudReady && firebaseStore && !(typeof isArchiveSeason==="function" && isArchiveSeason())){
+  if((id==="dashboard" || id==="latestgame" || id==="ranking" || id==="versus" || id==="records" || id==="achievements" || id==="profile" || id==="history" || id==="seasons") && cloudReady && firebaseStore && !(typeof isArchiveSeason==="function" && isArchiveSeason())){
     await refreshCanonicalHistoryUI(true);
   }else{
     if(id==="dashboard")renderDashboard();
     if(id==="latestgame"){renderLatestGame();renderHistory();}
     if(id==="ranking")renderRanking();
     if(id==="records"){renderRecords();renderAchievements();}
+    if(id==="seasons")renderSeasonHistoryScreen();
     if(id==="profile"){renderProfile();renderVersus();}
   }
 
@@ -9437,7 +9577,7 @@ document.querySelectorAll("nav button[data-view]").forEach(b=>{
 
 /* V183 — navigation mobile par balayage horizontal */
 (function initMobileSwipeTabs(){
-  const order=["live","dashboard","latestgame","ranking","records","profile","settings"];
+  const order=["live","dashboard","latestgame","ranking","records","seasons","profile","settings"];
   let startX=0,startY=0,startTime=0,tracking=false;
 
   function isMobile(){

@@ -6,6 +6,7 @@
     latestgame:'◷ Parties',
     ranking:'♛ Classements',
     records:'★ Records & accomplissements',
+    seasons:'▦ Saisons',
     profile:'♤ Profil joueur',
     settings:'⚙ Paramètres'
   };
@@ -15,6 +16,7 @@
     latestgame:'◷ Parties',
     ranking:'♛ Classements',
     records:'★ Records',
+    seasons:'▦ Saisons',
     profile:'♤ Profil',
     settings:'⚙ Réglages'
   };
