@@ -2050,7 +2050,12 @@ function allAvailableSeasonSets(){
 function seasonSummaryData(season){
   const rows=Array.isArray(season?.rows)?season.rows:[];
   const statsList=statsFromRows(rows).filter(s=>s.gamesCount>0);
-  const games=new Set(rows.map(r=>Number(r.sourceGame||r.game||0)).filter(g=>g>0));
+  const games=new Set(rows.map(r=>{
+    const gameNo=Number(r.sourceGame||r.game||0);
+    if(!(gameNo>0))return null;
+    const seasonKey=String(r.seasonKey||season?.key||'');
+    return `${seasonKey}|${gameNo}`;
+  }).filter(Boolean));
   const players=new Set(rows.map(r=>canonicalPlayerName(r.player)).filter(Boolean));
   const ranked=(season?.ranking&&season.ranking.length?season.ranking:rankingFromRows(rows)).filter(r=>Number(r.gamesCount||0)>0 || Number(r.points||0)>0);
   const champion=[...ranked].sort((a,b)=>Number(b.points||0)-Number(a.points||0)||String(a.name).localeCompare(String(b.name),'fr'))[0]||null;
@@ -2061,8 +2066,9 @@ function seasonSummaryData(season){
 function renderSeasonHistoryScreen(){
   const holder=document.getElementById('seasonHistoryGrid');
   if(!holder)return;
-  const seasons=allAvailableSeasonSets();
-  const cumulativeRows=seasons.flatMap(season=>(season.rows||[]).map(r=>({...r,seasonKey:season.key,seasonLabel:season.label})));
+  const allSeasons=[...allAvailableSeasonSets()];
+  const seasons=allSeasons.filter(season=>season.key!==CURRENT_SEASON_KEY).sort((a,b)=>String(b.key).localeCompare(String(a.key)));
+  const cumulativeRows=allSeasons.flatMap(season=>(season.rows||[]).map(r=>({...r,seasonKey:season.key,seasonLabel:season.label})));
   const cumulativeStats=seasonSummaryData({rows:cumulativeRows,ranking:rankingFromRows(cumulativeRows)});
   const cumulativeCard=`<article class="season-history-card cumulative">
       <div class="season-status">Toutes saisons</div>
@@ -2078,21 +2084,20 @@ function renderSeasonHistoryScreen(){
     </article>`;
   const seasonCards=seasons.map(season=>{
     const x=seasonSummaryData(season);
-    const current=season.key===CURRENT_SEASON_KEY;
-    return `<article class="season-history-card ${current?'current':''}">
-      <div class="season-status">${current?'Saison en cours':'Archive BPT'}</div>
+    return `<article class="season-history-card">
+      <div class="season-status">Archive BPT</div>
       <h3>${esc(season.label)}</h3>
       <div class="season-history-metrics">
         <div class="season-history-metric"><span>Parties</span><strong>${x.games}</strong></div>
         <div class="season-history-metric"><span>Joueurs</span><strong>${x.players}</strong></div>
         <div class="season-history-metric"><span>Victoires enregistrées</span><strong>${x.wins}</strong></div>
-        <div class="season-history-metric"><span>Statut</span><strong>${current?'En cours':'Clôturée'}</strong></div>
+        <div class="season-history-metric"><span>Statut</span><strong>Clôturée</strong></div>
       </div>
       <div class="season-history-champion"><span class="muted">Leader aux points</span><br><strong>${x.champion?playerDisplayWithRealName(x.champion.name):'—'}</strong>${x.champion?` · ${num(x.champion.points,0)} pts`:''}</div>
       <button class="btn secondary" type="button" onclick="openSeasonFromHistory('${season.key}')">Ouvrir le classement</button>
     </article>`;
   }).join('');
-  holder.innerHTML=cumulativeCard+seasonCards;
+  holder.innerHTML=seasonCards+cumulativeCard;
 }
 
 async function openSeasonFromHistory(key){
@@ -2297,7 +2302,56 @@ function bptHeadsUpPlayers(rec){
   return rec?.finalists?.length>=2?`${rec.finalists[0]} / ${rec.finalists[1]}`:'—';
 }
 
+function recordsScopeTitle(key=recordsScopeKey){
+  if(key==="all")return "toutes saisons";
+  return `de la saison ${seasonDisplayName(key)}`;
+}
+
+function updateRecordsScopeSelector(){
+  const key=recordsScopeKey||CURRENT_SEASON_KEY;
+  const current=document.getElementById("recordsScopeCurrentBtn");
+  const all=document.getElementById("recordsScopeAllBtn");
+  const past=document.getElementById("recordsScopePastWrap");
+  const select=document.getElementById("recordsPastSeasonSelect");
+  const label=document.getElementById("recordsPastSeasonLabel");
+  const isPast=key!==CURRENT_SEASON_KEY && key!=="all";
+  current?.classList.toggle("active",key===CURRENT_SEASON_KEY);
+  all?.classList.toggle("active",key==="all");
+  past?.classList.toggle("active",isPast);
+  if(select){
+    select.value=isPast?key:"";
+  }
+  if(label)label.textContent=isPast?seasonDisplayName(key):"Choisir une saison";
+  const recordTitle=document.getElementById("recordsContextTitle");
+  if(recordTitle)recordTitle.textContent=key==="all"?"Records toutes saisons":`Records de la saison ${seasonDisplayName(key)}`;
+  const achievementTitle=document.getElementById("achievementsContextTitle");
+  if(achievementTitle)achievementTitle.textContent=key==="all"?"Accomplissements carrière":`Accomplissements de la saison ${seasonDisplayName(key)}`;
+}
+
+async function selectRecordsScope(key){
+  key=String(key||CURRENT_SEASON_KEY);
+  if(![CURRENT_SEASON_KEY,"2025-2026","2023-2024","2022-2023","2020-2021","all"].includes(key))key=CURRENT_SEASON_KEY;
+  recordsScopeKey=key;
+  if(selectedSeasonKey!==key)await selectSeason(key);
+  updateRecordsScopeSelector();
+  renderRecords();
+  renderAchievements();
+}
+
+async function selectRecordsPastSeason(key){
+  if(!key)return;
+  await selectRecordsScope(key);
+}
+
+async function openRecordsView(){
+  const key=recordsScopeKey||CURRENT_SEASON_KEY;
+  if(selectedSeasonKey!==key)await selectSeason(key);
+  await showView("records");
+  updateRecordsScopeSelector();
+}
+
 function renderRecords(){
+  updateRecordsScopeSelector();
   renderRecordScopeSummary();
   const holder=$("recordsGrid"); if(!holder)return;
   const ranked=ranking();
@@ -3763,6 +3817,7 @@ function latestGameUnlockedAchievements(){
 }
 
 function renderAchievements(){
+  updateRecordsScopeSelector();
   const holder=$("achievementsGrid");
   if(!holder)return;
 
@@ -3796,6 +3851,7 @@ const ARCHIVE_2025_2026_RANKING=[{"rank":1,"name":"David SAGALOWICZ","points":30
 const ARCHIVE_2025_2026_META={"season":"2025–2026","source":"Classeur BPT 2025-2026","games":23,"participations":234,"players":29,"tabliers":5,"ranking":[{"rank":1,"name":"David SAGALOWICZ","points":304,"gamesCount":19,"wins":4,"tabliers":0,"kills":17},{"rank":2,"name":"Jérôme RIFFE","points":281,"gamesCount":20,"wins":1,"tabliers":1,"kills":15},{"rank":3,"name":"Jérémy COQUEL","points":253,"gamesCount":19,"wins":1,"tabliers":0,"kills":22},{"rank":3,"name":"Mehdi BRAHIMI","points":253,"gamesCount":19,"wins":0,"tabliers":0,"kills":13},{"rank":5,"name":"Franck NAESSENS","points":242,"gamesCount":21,"wins":1,"tabliers":0,"kills":16},{"rank":6,"name":"Thierry MONNIAUX","points":231,"gamesCount":14,"wins":2,"tabliers":1,"kills":19},{"rank":7,"name":"Grégoire DUFORET","points":179,"gamesCount":12,"wins":2,"tabliers":0,"kills":11},{"rank":8,"name":"Alexis Volant","points":176,"gamesCount":18,"wins":2,"tabliers":0,"kills":3},{"rank":9,"name":"François CATTEAU","points":155,"gamesCount":13,"wins":2,"tabliers":0,"kills":14},{"rank":9,"name":"Jérôme BERA","points":155,"gamesCount":14,"wins":2,"tabliers":2,"kills":12},{"rank":11,"name":"Areski AIT GHERBI","points":131,"gamesCount":11,"wins":0,"tabliers":0,"kills":12},{"rank":12,"name":"Michel SCHERPEREEL","points":104,"gamesCount":10,"wins":0,"tabliers":0,"kills":3},{"rank":13,"name":"Jules NAESSENS","points":102,"gamesCount":7,"wins":1,"tabliers":0,"kills":8},{"rank":14,"name":"Jérôme BINOT","points":81,"gamesCount":8,"wins":2,"tabliers":0,"kills":4},{"rank":15,"name":"Quentin","points":73,"gamesCount":3,"wins":1,"tabliers":1,"kills":9},{"rank":16,"name":"Jérémie CARPENTIER","points":72,"gamesCount":3,"wins":0,"tabliers":0,"kills":0},{"rank":17,"name":"Olivier HENGUELLE","points":47,"gamesCount":4,"wins":0,"tabliers":0,"kills":0},{"rank":18,"name":"Clément MARAVAL","points":44,"gamesCount":3,"wins":0,"tabliers":0,"kills":0},{"rank":19,"name":"Clément Thery","points":34,"gamesCount":2,"wins":0,"tabliers":0,"kills":2},{"rank":19,"name":"Hélène Fiona","points":34,"gamesCount":1,"wins":1,"tabliers":0,"kills":5},{"rank":21,"name":"Philippe DUBOIS","points":30,"gamesCount":2,"wins":1,"tabliers":0,"kills":0},{"rank":22,"name":"Théo Maraval","points":24,"gamesCount":1,"wins":0,"tabliers":0,"kills":2},{"rank":23,"name":"Stéphane LEFIN","points":22,"gamesCount":1,"wins":0,"tabliers":0,"kills":0},{"rank":24,"name":"Frédéric Tavernier","points":19,"gamesCount":3,"wins":0,"tabliers":0,"kills":1},{"rank":25,"name":"Gérard CANDELIER","points":16,"gamesCount":1,"wins":0,"tabliers":0,"kills":1},{"rank":26,"name":"Adrien Thiriez","points":13,"gamesCount":1,"wins":0,"tabliers":0,"kills":0},{"rank":27,"name":"Romain Schepereel","points":8,"gamesCount":1,"wins":0,"tabliers":0,"kills":0}]};
 const BPT_PAST_CHAMPIONS=[{"season":"2023–2024","champion":"Mehdi BRAHIMI"},{"season":"2022–2023","champion":"Franck NAESSENS"},{"season":"2021–2022","champion":"Franck NAESSENS"},{"season":"2020–2021","champion":"Alexis Volant"},{"season":"2019–2020","champion":"Franck NAESSENS"},{"season":"2018–2019","champion":"Franck NAESSENS"},{"season":"2017–2018","champion":"François CATTEAU"},{"season":"2016–2017","champion":"Jérémy COQUEL"},{"season":"2015–2016","champion":"Franck NAESSENS"},{"season":"2014–2015","champion":"Franck NAESSENS"},{"season":"2013–2014","champion":"Franck NAESSENS"},{"season":"2012–2013","champion":"Franck NAESSENS"},{"season":"2011–2012","champion":"Jérôme BINOT"},{"season":"2010–2011","champion":"Jérôme BINOT"}];
 let selectedSeasonKey=CURRENT_SEASON_KEY; // défaut à chaque chargement : saison en cours ; conservation uniquement durant la visite
+let recordsScopeKey=CURRENT_SEASON_KEY; // périmètre autonome de Records & accomplissements
 let currentSeasonHistoryCache=null;
 
 function isAllSeasons(){return selectedSeasonKey==="all";}
@@ -4781,7 +4837,8 @@ function updateSeasonContextTitles(){
     if(el)el.textContent=`${label} ${suffix}`;
   };
   set("rankingSeasonTitle","Classements BPT");
-  set("recordsSeasonTitle","Records & accomplissements BPT");
+  const recordsSeasonTitle=document.getElementById("recordsSeasonTitle");
+  if(recordsSeasonTitle)recordsSeasonTitle.textContent="Records & accomplissements";
   set("profileSeasonTitle","Profil joueur BPT");
   const recordsContextTitle=document.getElementById("recordsContextTitle");
   if(recordsContextTitle){
@@ -4789,6 +4846,7 @@ function updateSeasonContextTitles(){
       ? "Records toutes saisons"
       : `Records de la saison ${seasonDisplayName(selectedSeasonKey)}`;
   }
+  updateRecordsScopeSelector();
 }
 
 let rankingMode='points';
@@ -9592,6 +9650,15 @@ document.querySelectorAll("nav button[data-view]").forEach(b=>{
       await showView("live");
       return;
     }
+    if(target==="ranking"){
+      if(selectedSeasonKey!==CURRENT_SEASON_KEY)await selectSeason(CURRENT_SEASON_KEY);
+      await showView("ranking");
+      return;
+    }
+    if(target==="records"){
+      await openRecordsView();
+      return;
+    }
     showView(target);
   });
 });
@@ -9653,6 +9720,11 @@ document.querySelectorAll("nav button[data-view]").forEach(b=>{
 
     if(target==="live"){
       await showView("live");
+    }else if(target==="ranking"){
+      if(selectedSeasonKey!==CURRENT_SEASON_KEY)await selectSeason(CURRENT_SEASON_KEY);
+      await showView("ranking");
+    }else if(target==="records"){
+      await openRecordsView();
     }else{
       showView(target);
     }

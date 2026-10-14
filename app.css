@@ -14742,3 +14742,54 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only {
 
 .season-history-card.cumulative{border-color:rgba(0,153,178,.75);box-shadow:0 12px 28px rgba(0,153,178,.10)}
 .season-history-card.cumulative .season-status{color:#5bd5e8}
+
+/* BPT V9.0.36 — périmètre autonome Records & accomplissements */
+.records-scope-selector{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+  margin:14px 0 18px;
+}
+.records-scope-choice{
+  min-height:78px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  position:relative;
+  padding:14px 16px;
+  border:1px solid rgba(149,174,196,.28);
+  border-radius:14px;
+  background:rgba(18,29,37,.86);
+  color:var(--text,#f5f7fa);
+  text-align:left;
+  cursor:pointer;
+  transition:.18s ease;
+  box-sizing:border-box;
+}
+.records-scope-choice:hover{border-color:rgba(44,210,223,.65);transform:translateY(-1px)}
+.records-scope-choice.active{
+  border-color:#18c8db;
+  background:linear-gradient(135deg,rgba(11,132,161,.92),rgba(17,195,219,.92));
+  box-shadow:0 8px 28px rgba(0,190,210,.16);
+}
+.records-scope-choice strong{display:block;font-size:15px;line-height:1.2}
+.records-scope-choice small{display:block;margin-top:4px;opacity:.82;font-size:12px}
+.records-scope-icon{font-size:22px;min-width:26px;text-align:center}
+.records-scope-past select{
+  position:absolute;
+  inset:0;
+  width:100%;height:100%;
+  opacity:0;
+  cursor:pointer;
+}
+.records-scope-past:after{
+  content:'⌄';
+  position:absolute;
+  right:16px;top:50%;transform:translateY(-50%);
+  font-size:20px;opacity:.9;
+}
+.achievements-context-title{margin:0 0 12px;font-size:20px}
+@media(max-width:760px){
+  .records-scope-selector{grid-template-columns:1fr;gap:9px}
+  .records-scope-choice{min-height:64px;padding:11px 14px}
+}
