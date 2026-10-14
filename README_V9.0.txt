@@ -1,4 +1,4 @@
-BPT V9.0.30
+BPT V9.0.32
 
 Correctif login :
 - source unique joueurs : bpt/state/main/data/players
@@ -20,3 +20,7 @@ Correctif login :
 - V9.0.30 : diagnostic automatique de cohérence (parties, doublons, places, règles de tablier, sessions de paris orphelines).
 - V9.0.30 : nouvel écran Historique des saisons avec accès direct au classement de chaque archive.
 - V9.0.30 : cumul carrière enrichi avec taux de victoire, taux de podium, ratio kills/partie et synthèse carrière.
+
+- V9.0.32 : libellé dynamique des records : « Records de la saison XXXX-XXXX » ou « Records toutes saisons » selon le contexte affiché.
+
+- V9.0.32 : ajout d’une tuile « Cumul toutes saisons » dans l’écran Saisons, au même format que les tuiles de saison, avec accès direct au classement cumulé.

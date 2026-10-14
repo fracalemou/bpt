@@ -2061,7 +2061,22 @@ function seasonSummaryData(season){
 function renderSeasonHistoryScreen(){
   const holder=document.getElementById('seasonHistoryGrid');
   if(!holder)return;
-  holder.innerHTML=allAvailableSeasonSets().map(season=>{
+  const seasons=allAvailableSeasonSets();
+  const cumulativeRows=seasons.flatMap(season=>(season.rows||[]).map(r=>({...r,seasonKey:season.key,seasonLabel:season.label})));
+  const cumulativeStats=seasonSummaryData({rows:cumulativeRows,ranking:rankingFromRows(cumulativeRows)});
+  const cumulativeCard=`<article class="season-history-card cumulative">
+      <div class="season-status">Toutes saisons</div>
+      <h3>Cumul toutes saisons</h3>
+      <div class="season-history-metrics">
+        <div class="season-history-metric"><span>Parties</span><strong>${cumulativeStats.games}</strong></div>
+        <div class="season-history-metric"><span>Joueurs</span><strong>${cumulativeStats.players}</strong></div>
+        <div class="season-history-metric"><span>Victoires enregistrées</span><strong>${cumulativeStats.wins}</strong></div>
+        <div class="season-history-metric"><span>Statut</span><strong>Cumul</strong></div>
+      </div>
+      <div class="season-history-champion"><span class="muted">Leader carrière aux points</span><br><strong>${cumulativeStats.champion?playerDisplayWithRealName(cumulativeStats.champion.name):'—'}</strong>${cumulativeStats.champion?` · ${num(cumulativeStats.champion.points,0)} pts`:''}</div>
+      <button class="btn secondary" type="button" onclick="openSeasonFromHistory('all')">Ouvrir le cumul</button>
+    </article>`;
+  const seasonCards=seasons.map(season=>{
     const x=seasonSummaryData(season);
     const current=season.key===CURRENT_SEASON_KEY;
     return `<article class="season-history-card ${current?'current':''}">
@@ -2077,6 +2092,7 @@ function renderSeasonHistoryScreen(){
       <button class="btn secondary" type="button" onclick="openSeasonFromHistory('${season.key}')">Ouvrir le classement</button>
     </article>`;
   }).join('');
+  holder.innerHTML=cumulativeCard+seasonCards;
 }
 
 async function openSeasonFromHistory(key){
@@ -4767,6 +4783,12 @@ function updateSeasonContextTitles(){
   set("rankingSeasonTitle","Classements BPT");
   set("recordsSeasonTitle","Records & accomplissements BPT");
   set("profileSeasonTitle","Profil joueur BPT");
+  const recordsContextTitle=document.getElementById("recordsContextTitle");
+  if(recordsContextTitle){
+    recordsContextTitle.textContent=isAllSeasons()
+      ? "Records toutes saisons"
+      : `Records de la saison ${seasonDisplayName(selectedSeasonKey)}`;
+  }
 }
 
 let rankingMode='points';

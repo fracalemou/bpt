@@ -14739,3 +14739,6 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only {
 .diagnostic-summary{padding:12px 14px;border-radius:12px;font-weight:850;margin-bottom:10px}.diagnostic-summary.ok{background:rgba(50,180,110,.13);border:1px solid rgba(50,180,110,.36)}.diagnostic-summary.warn{background:rgba(231,164,45,.13);border:1px solid rgba(231,164,45,.38)}
 .diagnostic-list{display:grid;gap:8px}.diagnostic-item{display:grid;grid-template-columns:auto 1fr;gap:9px;align-items:start;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.035)}.diagnostic-item b{font-size:13px}.diagnostic-item small{display:block;opacity:.7;margin-top:2px;line-height:1.35}
 @media(max-width:700px){.season-history-grid{grid-template-columns:1fr}.career-ratio-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.season-history-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.season-history-card.cumulative{border-color:rgba(0,153,178,.75);box-shadow:0 12px 28px rgba(0,153,178,.10)}
+.season-history-card.cumulative .season-status{color:#5bd5e8}
