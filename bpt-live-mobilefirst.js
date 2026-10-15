@@ -32,10 +32,10 @@
     const root=ensure(),nav=$('nav');if(!root)return;
     const vv=window.visualViewport;
     const vh=Math.round(vv?.height||window.innerHeight||document.documentElement.clientHeight||600);
-    const navVisible=nav&&getComputedStyle(nav).display!=='none';
-    const header=document.querySelector('.bpt-header');
-    const topEdge=navVisible?Math.max(0,Math.round(nav.getBoundingClientRect().bottom)):(header?Math.max(0,Math.round(header.getBoundingClientRect().bottom)):0);
-    const available=Math.max(210,vh-topEdge);
+    // En Pré-Live / Live, l'interface métier occupe tout le viewport visible.
+    // Le bandeau BPT et la navigation hôte sont masqués : aucune hauteur n'est réservée.
+    const topEdge=0;
+    const available=Math.max(210,vh);
     root.style.top=topEdge+'px';
     root.style.height=available+'px';
     $('bptLandscapeRotate')?.classList.toggle('is-visible',activeView());
@@ -140,14 +140,30 @@
 
   function playerPageLayout(box,count){
     const w=Math.max(1,box?.clientWidth||1),h=Math.max(1,box?.clientHeight||1);
-    const gap=Math.max(4,Math.min(9,Math.round(Math.min(w,h)*0.012)));
-    // Mobile-first : lisibilité avant densité. La même règle s'étend naturellement au PC.
-    const minW=Math.max(118,Math.min(190,Math.round(w*0.145)));
-    const minH=Math.max(42,Math.min(62,Math.round(h*0.22)));
-    const cols=Math.max(1,Math.floor((w+gap)/(minW+gap)));
-    const rows=Math.max(1,Math.floor((h+gap)/(minH+gap)));
+    const gap=Math.max(3,Math.min(8,Math.round(Math.min(w,h)*0.010)));
+
+    // Une seule règle pour tous les écrans : on exploite toute la surface réellement disponible.
+    // Sur téléphone paysage on vise ~5 colonnes et plusieurs lignes ; sur PC la grille s'élargit
+    // naturellement jusqu'à pouvoir afficher presque/tous les joueurs sur une seule page.
+    const targetW=Math.max(145,Math.min(220,Math.round(w/6)));
+    const targetH=Math.max(44,Math.min(64,Math.round(h/5)));
+    let cols=Math.max(1,Math.floor((w+gap)/(targetW+gap)));
+    let rows=Math.max(1,Math.floor((h+gap)/(targetH+gap)));
+
+    // Si tous les joueurs peuvent tenir avec une grille légèrement plus dense, on évite une page
+    // supplémentaire inutile sans descendre sous les tailles minimales de lisibilité.
+    const minW=132,minH=40;
+    while(cols*rows < (count||1)) {
+      const canAddCol=(w+gap)/(cols+1)-gap >= minW;
+      const canAddRow=(h+gap)/(rows+1)-gap >= minH;
+      if(!canAddCol && !canAddRow) break;
+      const colGain=canAddCol ? rows : -1;
+      const rowGain=canAddRow ? cols : -1;
+      if(colGain>=rowGain) cols++; else rows++;
+    }
+
     const capacity=Math.max(1,Math.min(count||1,cols*rows));
-    return {cols,rows,capacity,gap,rowH:Math.max(34,(h-gap*(rows-1))/rows)};
+    return {cols,rows,capacity,gap,rowH:Math.max(minH,(h-gap*(rows-1))/rows)};
   }
 
   function applyPlayerPageGrid(grid,layout){

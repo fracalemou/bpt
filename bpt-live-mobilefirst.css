@@ -1,4 +1,4 @@
-/* BPT 10.4.1 — Pré-Live mobile-first.
+/* BPT 10.4.3 — Pré-Live mobile-first.
    UNE structure HTML. UNE grille horizontale. Le téléphone paysage est la référence.
    Le PC utilise exactement la même structure avec des dimensions qui grandissent.
    Aucun correctif historique n'est repris dans ce fichier. */
@@ -292,83 +292,47 @@
   #live3.active #bptLandscapeLive.is-visible{visibility:hidden}
 }
 
-/* Pendant Pré-Live / Live, les onglets principaux disparaissent :
-   toute la hauteur est réservée à la partie. Même règle sur téléphone et PC. */
+/* V10.4.3 — Pendant Pré-Live / Live, toute la surface appartient au jeu.
+   Le bandeau BPT ET la navigation hôte sont masqués sur tous les écrans.
+   Ce n'est pas un second layout : le même écran métier prend simplement 100% du viewport. */
+html.bpt-live-landscape-open .bpt-header,
+body.bpt-live-landscape-open .bpt-header,
 html.bpt-live-landscape-open nav#nav,
 body.bpt-live-landscape-open nav#nav{
   display:none!important;
 }
 
-/* Densité de l'application hôte : téléphone paysage prioritaire.
-   La structure reste identique ; seules les dimensions non métier diminuent. */
+/* Densité fluide : mêmes composants partout, uniquement des tailles qui évoluent. */
 @media (max-height:620px){
-  html.bpt-live-landscape-open .bpt-header,
-  body.bpt-live-landscape-open .bpt-header{
-    min-height:34px!important;
-    height:34px!important;
-    padding:2px 7px!important;
-    overflow:hidden!important;
-  }
-  html.bpt-live-landscape-open .bpt-header .logo,
-  body.bpt-live-landscape-open .bpt-header .logo{
-    max-height:27px!important;
-    width:auto!important;
-  }
-  html.bpt-live-landscape-open .bpt-header .brand,
-  body.bpt-live-landscape-open .bpt-header .brand{
-    min-height:0!important;
-  }
-  html.bpt-live-landscape-open .bpt-header .brand b,
-  body.bpt-live-landscape-open .bpt-header .brand b{
-    font-size:11px!important; line-height:1!important;
-  }
-  html.bpt-live-landscape-open .bpt-header .brand>span,
-  body.bpt-live-landscape-open .bpt-header .brand>span{
-    display:none!important;
-  }
-  html.bpt-live-landscape-open .bpt-header .bpt-identity-session,
-  body.bpt-live-landscape-open .bpt-header .bpt-identity-session{
-    margin:0!important;
-    font-size:9px!important;
-    line-height:1!important;
-  }
-  html.bpt-live-landscape-open .bpt-header .bpt-logout-btn,
-  body.bpt-live-landscape-open .bpt-header .bpt-logout-btn{
-    padding:2px 5px!important;
-    font-size:9px!important;
-    min-height:22px!important;
-  }
   #bptLandscapeLive{
-    --gap:4px;
-    --px:7px;
-    --py:3px;
-    --control:31px;
+    --gap:3px;
+    --px:6px;
+    --py:2px;
+    --control:30px;
     --fs-xs:9px;
     --fs-sm:10px;
     --fs-md:11px;
-    --fs-lg:17px;
+    --fs-lg:16px;
   }
-  #bptLandscapeLive .bptll-head-left{gap:7px}
+  #bptLandscapeLive .bptll-head{padding-block:2px}
   #bptLandscapeLive .bptll-player-add strong{display:none}
-  #bptLandscapeLive .bptll-player-tools{grid-template-columns:minmax(170px,.9fr) minmax(260px,1.1fr)}
-  #bptLandscapeLive .bptll-player-card{min-height:43px}
+  #bptLandscapeLive .bptll-player-tools{grid-template-columns:minmax(160px,.9fr) minmax(250px,1.1fr)}
 }
 
-/* Grand écran : même layout, simplement plus confortable. */
 @media (min-width:1200px) and (min-height:700px){
   #bptLandscapeLive{
-    --gap:10px;
-    --px:24px;
-    --py:9px;
-    --control:48px;
-    --fs-xs:12px;
-    --fs-sm:14px;
-    --fs-md:16px;
-    --fs-lg:28px;
+    --gap:7px;
+    --px:18px;
+    --py:5px;
+    --control:40px;
+    --fs-xs:11px;
+    --fs-sm:13px;
+    --fs-md:15px;
+    --fs-lg:24px;
   }
 }
 
-/* V10.4.2 — Étape Joueurs paginée, zéro scroll. */
+/* V10.4.3 — Étape Joueurs paginée, zéro scroll. */
 .bptll-player-pagebox{
   overflow:hidden!important;
   touch-action:none;
