@@ -9,6 +9,27 @@
   const $3=(id)=>document.getElementById(id);
 
   let current=null;
+  let prepWizardStep=1;
+
+  function setPrepWizardStep(step){
+    prepWizardStep=step===2?2:1;
+    const s1=$3("live3PrepStep1"),s2=$3("live3PrepStep2");
+    if(s1)s1.hidden=prepWizardStep!==1;
+    if(s2)s2.hidden=prepWizardStep!==2;
+    const chip=$3("live3PrepStepChip"),title=$3("live3PrepStepTitle"),sub=$3("live3PrepStepSubtitle");
+    if(chip)chip.textContent=`Étape ${prepWizardStep} / 4`;
+    if(title)title.textContent=prepWizardStep===1?"Paramètres de la partie":"Sélection des joueurs";
+    if(sub)sub.textContent=prepWizardStep===1?"Renseignez les paramètres réels de la partie avant de choisir les joueurs.":"Choisissez les joueurs qui participeront à la partie.";
+    const panel=$3("live3Prep");
+    if(panel&&panel.getClientRects().length){try{panel.scrollIntoView({block:"start",behavior:"smooth"})}catch(_e){}}
+  }
+
+  function goToPlayerSelection(){
+    const location=String($3("live3Location")?.value||"").trim();
+    if(!location){alert("Indiquez le nom / lieu de la partie.");$3("live3Location")?.focus();return;}
+    setPrepWizardStep(2);
+    renderPrepPlayers();
+  }
   let ref=null;
   let ticker=null;
   let listenerInstalled=false;
@@ -2088,7 +2109,8 @@ function connectionDeviceLabel(){
     const values={live3Location:draft.location,live3Date:draft.date,live3Stack:draft.startStack,live3BuyIn:draft.buyIn,live3TargetHours:draft.targetHours,live3StructureMode:draft.paceAdaptive===true?"adaptive":"classic"};
     for(const [id,value] of Object.entries(values)){const field=$3(id);if(field)field.value=value??'';}
     current=result.snapshot.val();
-    await closeFullscreen();render();renderPrepPlayers();
+    prepWizardStep=1;
+    await closeFullscreen();render();setPrepWizardStep(1);renderPrepPlayers();
     document.querySelectorAll('#live3PlayerPicker input[type="checkbox"]').forEach(cb=>{cb.checked=selected.has(cb.value)});
     updateMobilePlayerSelectionCount();
   }
@@ -3803,6 +3825,7 @@ async function requestTakeover(){
     ["pointerdown","touchstart","keydown"].forEach(evt=>{
       document.addEventListener(evt,primeBlindAudio,{once:true,passive:true});
     });
+    setPrepWizardStep(1);
     const today=new Date().toISOString().slice(0,10);
     if($3("live3Date"))$3("live3Date").value=today;
     renderStructurePreview();
@@ -3848,6 +3871,8 @@ async function requestTakeover(){
       }
     });
 
+    $3("live3PrepNextBtn")?.addEventListener("click",goToPlayerSelection);
+    $3("live3PrepBackBtn")?.addEventListener("click",()=>setPrepWizardStep(1));
     $3("live3CreateBtn")?.addEventListener("click",createLive);
     $3("live3StartPauseBtn")?.addEventListener("click",toggleStartPause);
     $3("live3PrevLevelBtn")?.addEventListener("click",()=>changeLevel(-1));

@@ -1,3 +1,13 @@
+BPT V9.0.38 — Pré-Live en 4 étapes
+
+Cette version conserve la logique métier existante et ne modifie pas l'écran de partie en cours.
+
+Étape 1 / 4 — Paramètres réels de la partie : lieu, date, tapis de départ, buy-in, durée, structure.
+Étape 2 / 4 — Sélection des joueurs depuis le référentiel existant.
+Étape 3 / 4 — Paris existants : vainqueur et/ou 1er éliminé, 0,50 €, ou pas de pari.
+Étape 4 / 4 — Révélation du type de bounty, puis lancement.
+
+Aucune fonctionnalité métier supplémentaire n'a été ajoutée.
 BPT V9.0.34
 
 Correctif login :
@@ -27,12 +37,12 @@ Correctif login :
 
 - V9.0.34 : écran Saisons trié de la saison la plus récente à la plus ancienne ; tuile « Cumul toutes saisons » placée en dernier.
 
-V9.0.37
+V9.0.38
 - Records & accomplissements : sélecteur autonome Saison actuelle / Saison précédente / Cumul toutes saisons.
 - Saisons précédentes : la saison en cours n'est plus affichée dans les archives ; cumul conservé en dernier.
 - Classements : un clic sur l'onglet revient toujours à la saison 2026-2027.
 
-V9.0.37 — Correctif affichage Live mobile : actions avant-partie et révélation bounty toujours visibles.
+V9.0.38 — Correctif affichage Live mobile : actions avant-partie et révélation bounty toujours visibles.
 
 
-V9.0.37 : Classements regroupe saison en cours, archives et cumul. L'onglet Saisons précédentes est retiré.
+V9.0.38 : Classements regroupe saison en cours, archives et cumul. L'onglet Saisons précédentes est retiré.

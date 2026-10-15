@@ -14743,7 +14743,7 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only {
 .season-history-card.cumulative{border-color:rgba(0,153,178,.75);box-shadow:0 12px 28px rgba(0,153,178,.10)}
 .season-history-card.cumulative .season-status{color:#5bd5e8}
 
-/* BPT V9.0.37 — périmètre autonome Records & accomplissements */
+/* BPT V9.0.38 — périmètre autonome Records & accomplissements */
 .records-scope-selector{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
@@ -14794,7 +14794,7 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only {
   .records-scope-choice{min-height:64px;padding:11px 14px}
 }
 
-/* ===== V9.0.37 — Live mobile : lancement + révélation bounty toujours accessibles ===== */
+/* ===== V9.0.38 — Live mobile : lancement + révélation bounty toujours accessibles ===== */
 @media (max-width: 760px){
   /* L'écran avant-partie ne doit jamais couper les actions en bas. */
   .bpt484-live.is-pregame{
@@ -14891,7 +14891,7 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only {
 }
 
 
-/* ===== V9.0.37 — Classements : saison courante + Archives + Cumul ===== */
+/* ===== V9.0.38 — Classements : saison courante + Archives + Cumul ===== */
 .ranking-season-scope{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;margin:14px 0 8px;position:relative;z-index:30}
 .ranking-season-scope-btn{display:flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:10px 16px;border:1px solid #31594d;border-radius:12px;background:#0b211c;color:#d9ebe3;font-weight:900;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.12)}
 .ranking-season-scope-btn:hover{border-color:#2ac9c2}.ranking-season-scope-btn.active{background:#13c6d9;color:#05242a;border-color:#46e4ee;box-shadow:0 8px 22px rgba(19,198,217,.18)}
@@ -14901,3 +14901,53 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only {
 .ranking-archive-menu button:last-child{border-bottom:0}.ranking-archive-menu button:hover{background:#173e35;color:#5be1e0}
 .ranking-scope-context{display:flex;gap:8px;align-items:center;margin:0 0 12px;color:#9ebdb1;font-size:12px}.ranking-scope-context strong{color:#f0cf79}.ranking-scope-context span{color:#8fe3e1}
 @media(max-width:700px){.ranking-season-scope{display:grid;grid-template-columns:1.2fr 1fr .8fr;gap:7px;position:sticky;top:0;background:rgba(5,22,18,.96);padding:8px 0;backdrop-filter:blur(8px);z-index:60}.ranking-season-scope-btn{min-width:0;padding:9px 8px;font-size:12px;min-height:44px}.ranking-season-scope-btn.current{min-width:0}.ranking-archive-menu{position:fixed;left:12px;right:12px;top:auto;bottom:84px;min-width:0;max-height:55vh;overflow:auto;border-radius:16px;padding:10px}.ranking-archive-menu button{font-size:15px;padding:14px 12px}.ranking-scope-context{margin:2px 0 10px;padding:0 2px}.ranking-season-scope-btn strong{white-space:nowrap}}
+
+
+/* BPT V9.0.38 — préparation en 4 étapes, étapes 1 et 2 uniquement ici. */
+.bpt-live3-prep-wizard{background:#0d241d!important;border:1px solid #245f51!important;color:#f5faf7!important;box-shadow:0 14px 40px rgba(0,0,0,.22)}
+.bpt-live3-prep-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}
+.bpt-live3-prep-head .bpt-live3-title{margin:8px 0 4px;font-size:clamp(24px,3vw,34px);color:#fff!important}
+.bpt-live3-prep-head .muted{color:#b9cec5!important}
+.bpt-live3-step-chip,.bpt-stage-chip{display:inline-flex;align-items:center;min-height:30px;padding:5px 12px;border:1px solid #2ac9c2;border-radius:999px;color:#67ebe3!important;background:rgba(15,91,77,.24);font-weight:900;font-size:12px;letter-spacing:.04em}
+.bpt-live3-prep-step[hidden]{display:none!important}
+.bpt-live3-config-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.bpt-live3-config-grid label{color:#f6faf7!important;font-size:14px}
+.bpt-live3-config-grid input,.bpt-live3-config-grid select{min-height:48px;background:#101a25!important;border:1px solid #42536d!important;color:#fff!important;border-radius:12px;padding:10px 12px}
+.bpt-live3-step-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:12px;align-items:center;margin-top:20px}
+.bpt-live3-step-actions.single{grid-template-columns:minmax(220px,420px);justify-content:end}
+.bpt-live3-step-actions .btn{min-height:50px;border-radius:12px;font-weight:900}
+.bpt-live3-step-actions .primary{background:#e7ba50!important;color:#172018!important;border-color:#f0cb70!important}
+.bpt-live3-step-actions .secondary{background:#173e35!important;color:#fff!important;border-color:#3e7565!important}
+#live3PrepStep2 .bpt-live3-player-picker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+#live3PrepStep2 .bpt-live3-player-check{border-radius:12px;background:#172720;color:#fff!important;border-color:#3b5f52;padding:11px 12px;min-height:48px}
+#live3PrepStep2 .bpt-live3-player-check span{color:#fff!important;-webkit-text-fill-color:#fff!important}
+#live3PrepStep2 .bpt-live3-player-check:has(input:checked){background:#273c31;border-color:#d4a73f;box-shadow:inset 0 0 0 1px rgba(212,167,63,.25)}
+#live3PrepStep2 .bpt-live3-new-player{margin-top:12px}
+#live3PrepStep2 .bpt-live3-new-player input{background:#101a25!important;color:#fff!important;border-color:#42536d!important}
+.bpt-pregame .bpt-stage-chip{margin-bottom:10px}
+.bpt-bounty-card>.bpt-stage-chip{margin:0 auto 10px}
+@media(max-width:700px){
+  .bpt-live3-prep-wizard{padding:14px!important}
+  .bpt-live3-config-grid{grid-template-columns:1fr;gap:10px}
+  .bpt-live3-step-actions,.bpt-live3-step-actions.single{grid-template-columns:1fr 1.25fr;gap:10px;justify-content:stretch}
+  .bpt-live3-step-actions.single{grid-template-columns:1fr}
+  #live3PrepStep2 .bpt-live3-player-picker{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));max-height:48dvh;overflow:auto;padding-right:2px}
+  #live3PrepStep2 .bpt-live3-mobile-player-select{display:none!important}
+  #live3PrepStep2 .bpt-live3-player-check{font-size:12px;min-height:46px;padding:8px}
+  #live3PrepStep2 .bpt-live3-new-player{grid-template-columns:1fr}
+  #live3PrepStep2 #live3AddNewPlayerBtn{width:100%}
+}
+@media(max-width:420px){
+  #live3PrepStep2 .bpt-live3-player-picker{grid-template-columns:repeat(2,minmax(0,1fr));max-height:44dvh}
+  .bpt-live3-prep-head .bpt-live3-title{font-size:24px}
+}
+@media(max-height:520px) and (orientation:landscape){
+  .bpt-live3-prep-wizard{padding:12px!important}
+  .bpt-live3-prep-head{margin-bottom:10px}
+  .bpt-live3-prep-head .bpt-live3-title{font-size:24px}
+  .bpt-live3-config-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .bpt-live3-config-grid input,.bpt-live3-config-grid select{min-height:42px;padding:7px 9px}
+  #live3PrepStep2 .bpt-live3-player-picker{grid-template-columns:repeat(3,minmax(0,1fr));max-height:42dvh}
+  .bpt-live3-step-actions{margin-top:10px}
+  .bpt-live3-step-actions .btn{min-height:44px}
+}
