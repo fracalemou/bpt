@@ -119,7 +119,7 @@
 /* Étape 2 : tous les joueurs, classés automatiquement par participations.
    Le scroll appartient uniquement à la liste : le footer reste toujours visible. */
 .bptll-playerselect{
-  width:min(1540px,100%); height:100%; min-height:0; margin:auto;
+  width:100%; height:100%; min-height:0; margin:0;
   display:grid;
   grid-template-rows:auto auto minmax(0,1fr);
   gap:clamp(4px,calc(var(--u)*.7),10px);
@@ -174,7 +174,7 @@
 }
 .bptll-player-list{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(clamp(150px,20cqw,280px),1fr));
+  grid-template-columns:repeat(auto-fit,minmax(clamp(132px,14cqw,240px),1fr));
   gap:clamp(4px,calc(var(--u)*.65),10px);
   align-content:start;
 }
@@ -291,4 +291,160 @@
 @media (max-width:900px) and (orientation:portrait){
   #bptLandscapeRotate.is-visible{display:flex}
   #live3.active #bptLandscapeLive.is-visible{visibility:hidden}
+}
+
+/* V10.3.1 — zone joueurs réellement scrollable sur PC + téléphone paysage.
+   Le footer reste hors scroll ; cette zone seule accepte le pan vertical. */
+#bptLandscapeLive .bptll-player-scroll{
+  min-height:0 !important;
+  height:100% !important;
+  overflow-y:scroll !important;
+  overflow-x:hidden !important;
+  touch-action:pan-y !important;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-y:contain !important;
+  scrollbar-width:auto;
+  scrollbar-color:#49cdb9 #0b211d;
+  pointer-events:auto !important;
+}
+#bptLandscapeLive .bptll-player-scroll *{
+  touch-action:pan-y !important;
+}
+#bptLandscapeLive .bptll-player-scroll::-webkit-scrollbar{
+  width:10px;
+}
+#bptLandscapeLive .bptll-player-scroll::-webkit-scrollbar-track{
+  background:#0b211d;
+  border-radius:999px;
+}
+#bptLandscapeLive .bptll-player-scroll::-webkit-scrollbar-thumb{
+  background:#49cdb9;
+  border-radius:999px;
+  border:2px solid #0b211d;
+}
+#bptLandscapeLive .bptll-playerselect{
+  min-height:0 !important;
+  overflow:hidden !important;
+}
+
+
+/* V10.3.2 — Étape Joueurs : occuper toute la largeur utile, quel que soit l'écran.
+   Une seule règle responsive : la grille ajoute/retire des colonnes selon l'espace réel. */
+#bptLandscapeLive .bptll-body{
+  padding-inline:clamp(5px,1.2cqw,22px);
+}
+#bptLandscapeLive .bptll-playerselect{
+  width:100% !important;
+  max-width:none !important;
+  margin:0 !important;
+}
+#bptLandscapeLive .bptll-player-tools{
+  width:100%;
+  grid-template-columns:minmax(180px,1.15fr) minmax(260px,.85fr);
+}
+#bptLandscapeLive .bptll-player-list{
+  width:100%;
+  grid-template-columns:repeat(auto-fit,minmax(clamp(132px,14cqw,240px),1fr));
+}
+
+
+/* V10.3.3 — même structure, densité verticale adaptative.
+   Aucun déplacement de bloc : quand la hauteur disponible baisse, seuls
+   header/nav/titre/outils/footer se compactent pour rendre la place au contenu. */
+html.bpt-live-landscape-open,
+body.bpt-live-landscape-open{
+  --bpt-live-density:clamp(.72, calc((100vh - 320px) / 300), 1);
+}
+
+/* La navigation conserve sa place, mais réduit naturellement sa hauteur
+   sur les écrans bas (téléphone paysage notamment). */
+html.bpt-live-landscape-open nav#nav,
+body.bpt-live-landscape-open nav#nav{
+  gap:clamp(2px,calc(4px * var(--bpt-live-density)),4px) !important;
+  padding-block:clamp(3px,calc(8px * var(--bpt-live-density)),8px) !important;
+}
+html.bpt-live-landscape-open nav#nav button,
+body.bpt-live-landscape-open nav#nav button{
+  padding-block:clamp(4px,calc(9px * var(--bpt-live-density)),9px) !important;
+  padding-inline:clamp(7px,calc(12px * var(--bpt-live-density)),12px) !important;
+  font-size:clamp(10px,calc(14px * var(--bpt-live-density)),14px) !important;
+  line-height:1 !important;
+}
+
+/* Même header applicatif, simplement plus dense quand l'écran est bas. */
+html.bpt-live-landscape-open .bpt-header,
+body.bpt-live-landscape-open .bpt-header{
+  min-height:clamp(42px,calc(72px * var(--bpt-live-density)),72px) !important;
+  height:auto !important;
+  padding-block:clamp(3px,calc(8px * var(--bpt-live-density)),8px) !important;
+}
+html.bpt-live-landscape-open .bpt-header .logo,
+body.bpt-live-landscape-open .bpt-header .logo{
+  transform:scale(clamp(.72,var(--bpt-live-density),1));
+  transform-origin:left center;
+}
+html.bpt-live-landscape-open .bpt-header .brand b,
+body.bpt-live-landscape-open .bpt-header .brand b{
+  font-size:clamp(12px,calc(16px * var(--bpt-live-density)),16px) !important;
+  line-height:1.05 !important;
+}
+html.bpt-live-landscape-open .bpt-header .brand > span,
+body.bpt-live-landscape-open .bpt-header .brand > span{
+  font-size:clamp(9px,calc(12px * var(--bpt-live-density)),12px) !important;
+  line-height:1 !important;
+}
+html.bpt-live-landscape-open .bpt-header .bpt-identity-session,
+body.bpt-live-landscape-open .bpt-header .bpt-identity-session{
+  margin-top:clamp(1px,calc(4px * var(--bpt-live-density)),4px) !important;
+}
+html.bpt-live-landscape-open .bpt-header .bpt-logout-btn,
+body.bpt-live-landscape-open .bpt-header .bpt-logout-btn{
+  padding:clamp(2px,calc(5px * var(--bpt-live-density)),5px) clamp(5px,calc(9px * var(--bpt-live-density)),9px) !important;
+  font-size:clamp(9px,calc(11px * var(--bpt-live-density)),11px) !important;
+}
+
+/* Titre / progression : toujours mêmes éléments, plus serrés si hauteur faible. */
+#bptLandscapeLive .bptll-head{
+  padding-block:clamp(3px,calc(var(--pad-y) * var(--bpt-live-density,1)),var(--pad-y));
+}
+#bptLandscapeLive .bptll-kicker{
+  font-size:clamp(8px,calc(var(--font-s) * var(--bpt-live-density,1)),var(--font-s));
+}
+#bptLandscapeLive .bptll-title{
+  margin-top:clamp(0px,calc(2px * var(--bpt-live-density,1)),2px);
+  font-size:clamp(15px,calc(var(--font-l) * var(--bpt-live-density,1)),var(--font-l));
+}
+#bptLandscapeLive .bptll-step{
+  padding-block:clamp(2px,calc(5px * var(--bpt-live-density,1)),5px);
+  font-size:clamp(8px,calc(var(--font-s) * var(--bpt-live-density,1)),var(--font-s));
+}
+
+/* Étape joueurs : on économise la hauteur hors liste, sans changer l'ordre. */
+#bptLandscapeLive .bptll-playerselect{
+  gap:clamp(2px,calc(8px * var(--bpt-live-density,1)),8px);
+}
+#bptLandscapeLive .bptll-player-search{
+  height:clamp(28px,calc(var(--control-h) * var(--bpt-live-density,1)),var(--control-h));
+  font-size:clamp(10px,calc(var(--font-m) * var(--bpt-live-density,1)),var(--font-m));
+}
+#bptLandscapeLive .bptll-player-add{
+  padding:clamp(2px,calc(6px * var(--bpt-live-density,1)),6px);
+}
+#bptLandscapeLive .bptll-player-add input,
+#bptLandscapeLive .bptll-player-add .bptll-btn{
+  height:clamp(26px,calc((var(--control-h) - 8px) * var(--bpt-live-density,1)),calc(var(--control-h) - 8px));
+}
+#bptLandscapeLive .bptll-player-meta{
+  min-height:0;
+  line-height:1;
+  font-size:clamp(8px,calc(var(--font-s) * var(--bpt-live-density,1)),var(--font-s));
+}
+#bptLandscapeLive .bptll-player-meta strong{
+  font-size:clamp(10px,calc(var(--font-m) * var(--bpt-live-density,1)),var(--font-m));
+}
+#bptLandscapeLive .bptll-foot{
+  padding-block:clamp(3px,calc(var(--pad-y) * var(--bpt-live-density,1)),var(--pad-y));
+}
+#bptLandscapeLive .bptll-foot .bptll-btn{
+  height:clamp(30px,calc(var(--control-h) * var(--bpt-live-density,1)),var(--control-h));
 }

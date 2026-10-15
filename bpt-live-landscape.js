@@ -40,7 +40,12 @@
     // La liste des joueurs gère sa propre zone scrollable ; aucun recalcul de grille nécessaire.
   }
 
-  function show(v){ensure().classList.toggle('is-visible',!!v);$('bptLandscapeRotate')?.classList.toggle('is-visible',!!v)}
+  function show(v){
+    ensure().classList.toggle('is-visible',!!v);
+    $('bptLandscapeRotate')?.classList.toggle('is-visible',!!v);
+    document.documentElement.classList.toggle('bpt-live-landscape-open',!!v);
+    document.body.classList.toggle('bpt-live-landscape-open',!!v);
+  }
   function title(kicker,label,n){$('bptllKicker').textContent=kicker;$('bptllTitle').textContent=label;$('bptllStep').textContent='Étape '+n+' / 4'}
   function button(label,primary,handler,disabled=false){const b=document.createElement('button');b.type='button';b.className='bptll-btn'+(primary?' primary':'');b.textContent=label;b.disabled=disabled;b.addEventListener('click',handler);return b}
   function footer(buttons){const f=$('bptllFoot');f.className='bptll-foot'+(buttons.length===1?' one':'');f.replaceChildren(...buttons)}
