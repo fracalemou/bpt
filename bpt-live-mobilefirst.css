@@ -1,0 +1,386 @@
+/* BPT 10.4.0 — Pré-Live mobile-first.
+   UNE structure HTML. UNE grille horizontale. Le téléphone paysage est la référence.
+   Le PC utilise exactement la même structure avec des dimensions qui grandissent.
+   Aucun correctif historique n'est repris dans ce fichier. */
+
+#bptLandscapeLive{
+  position:fixed;
+  left:0; right:0;
+  z-index:9500;
+  display:none;
+  box-sizing:border-box;
+  overflow:hidden;
+  background:linear-gradient(180deg,#061f1a 0%,#082a23 100%);
+  color:#f4f8f6;
+  font-family:inherit;
+  container-type:size;
+
+  /* Mobile paysage d'abord : valeurs petites par défaut, qui grandissent avec le viewport. */
+  --gap:clamp(4px,1.1cqh,12px);
+  --px:clamp(7px,1.5cqw,24px);
+  --py:clamp(3px,.9cqh,10px);
+  --radius:clamp(7px,1.6cqh,13px);
+  --control:clamp(30px,7.2cqh,48px);
+  --fs-xs:clamp(9px,2.2cqh,12px);
+  --fs-sm:clamp(10px,2.6cqh,14px);
+  --fs-md:clamp(11px,3.1cqh,17px);
+  --fs-lg:clamp(16px,4.9cqh,30px);
+}
+#live3.active #bptLandscapeLive.is-visible{display:block}
+#live3.active .bpt-live3-hero,
+#live3.active #live3Prep{display:none!important}
+#live3.active .bpt484-live.is-pregame .bpt-pregame,
+#live3.active .bpt484-live.is-pregame>.bpt-bounty-overlay{display:none!important}
+
+.bptll-shell{
+  height:100%; min-height:0;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr) auto;
+  overflow:hidden;
+}
+.bptll-head{
+  min-height:0;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:var(--gap);
+  padding:var(--py) var(--px);
+  border-bottom:1px solid #21483e;
+  background:#0a191d;
+}
+.bptll-head-left{
+  min-width:0;
+  display:flex;
+  align-items:baseline;
+  gap:clamp(6px,1.4cqw,18px);
+}
+.bptll-kicker{
+  flex:0 0 auto;
+  font-size:var(--fs-xs); line-height:1; letter-spacing:.10em;
+  color:#45d6c3; text-transform:uppercase; white-space:nowrap;
+}
+.bptll-title{
+  min-width:0; margin:0;
+  font-size:var(--fs-lg); line-height:1;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.bptll-step{
+  flex:0 0 auto;
+  padding:clamp(2px,.6cqh,5px) clamp(7px,1.1cqw,14px);
+  border:1px solid #2ac9c2; border-radius:999px;
+  color:#8df0e3; font-size:var(--fs-xs); font-weight:800; white-space:nowrap;
+}
+.bptll-body{
+  min-height:0;
+  overflow:hidden;
+  padding:var(--py) var(--px);
+  display:grid;
+}
+.bptll-foot{
+  display:grid;
+  grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);
+  gap:var(--gap);
+  padding:var(--py) var(--px) max(var(--py),env(safe-area-inset-bottom));
+  border-top:1px solid #21483e;
+  background:#071f1a;
+}
+.bptll-foot.one{grid-template-columns:minmax(180px,460px);justify-content:end}
+.bptll-btn{
+  min-width:0;
+  height:var(--control);
+  box-sizing:border-box;
+  border:1px solid #376b5c;
+  border-radius:var(--radius);
+  background:#144c40;
+  color:#f4f7f5;
+  padding:0 clamp(8px,1.4cqw,18px);
+  font:inherit; font-size:var(--fs-md); font-weight:900;
+  line-height:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.bptll-btn.primary{border-color:#e1b957;background:#f2c853;color:#172018}
+.bptll-btn:disabled{opacity:.5}
+
+/* Étape 1 — même grille sur tous supports, plus dense sur petit écran. */
+.bptll-form{
+  width:100%; height:100%; min-height:0; margin:0;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-template-rows:repeat(2,minmax(0,1fr));
+  gap:var(--gap);
+}
+.bptll-field{
+  min-width:0; min-height:0;
+  display:grid; grid-template-rows:auto minmax(0,1fr);
+  gap:2px;
+}
+.bptll-field label{
+  font-size:var(--fs-xs); color:#a8c4ba; font-weight:750;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.bptll-field input,.bptll-field select,
+.bptll-select,.bptll-add-select,.bptll-add-input{
+  width:100%; min-width:0; box-sizing:border-box;
+  height:100%; min-height:28px; max-height:var(--control);
+  border:1px solid #36574d; border-radius:var(--radius);
+  background:#101a22; color:#fff;
+  padding:0 clamp(7px,1.1cqw,14px);
+  font:inherit; font-size:var(--fs-md);
+}
+
+/* Étape 2 — mobile-first : outils très courts, liste = presque toute la hauteur. */
+.bptll-playerselect{
+  width:100%; height:100%; min-height:0;
+  display:grid;
+  grid-template-rows:auto auto minmax(0,1fr);
+  gap:clamp(2px,.7cqh,7px);
+  overflow:hidden;
+}
+.bptll-player-tools{
+  min-width:0;
+  display:grid;
+  grid-template-columns:minmax(180px,1fr) minmax(270px,1.15fr);
+  gap:var(--gap);
+  align-items:center;
+}
+.bptll-player-search,
+.bptll-player-add input{
+  width:100%; min-width:0; box-sizing:border-box;
+  height:var(--control);
+  border:1px solid #36574d; border-radius:var(--radius);
+  background:#101a22; color:#fff;
+  padding:0 clamp(7px,1.1cqw,14px);
+  font:inherit; font-size:var(--fs-sm);
+}
+.bptll-player-add{
+  min-width:0;
+  display:grid;
+  grid-template-columns:auto minmax(110px,1fr) auto;
+  gap:clamp(4px,.7cqw,8px);
+  align-items:center;
+  padding:2px;
+  border:1px solid #1aa89b; border-radius:var(--radius);
+  background:#0a3028;
+}
+.bptll-player-add strong{
+  padding-left:5px;
+  font-size:var(--fs-xs); white-space:nowrap; color:#e7f3ef;
+}
+.bptll-player-add input{height:calc(var(--control) - 4px)}
+.bptll-player-add .bptll-btn{height:calc(var(--control) - 4px);font-size:var(--fs-sm)}
+.bptll-player-meta{
+  min-width:0;
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  color:#9fc1b6; font-size:var(--fs-xs);
+  line-height:1;
+}
+.bptll-player-meta strong{color:#f0cf79;font-size:var(--fs-sm)}
+.bptll-player-scroll{
+  min-height:0;
+  height:100%;
+  overflow-y:auto;
+  overflow-x:hidden;
+  touch-action:pan-y;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-y:contain;
+  scrollbar-gutter:stable;
+  scrollbar-width:thin;
+  scrollbar-color:#49cdb9 #0b211d;
+  padding-right:2px;
+}
+.bptll-player-scroll *{touch-action:pan-y}
+.bptll-player-scroll::-webkit-scrollbar{width:7px}
+.bptll-player-scroll::-webkit-scrollbar-track{background:#0b211d;border-radius:999px}
+.bptll-player-scroll::-webkit-scrollbar-thumb{background:#49cdb9;border-radius:999px}
+.bptll-player-list{
+  width:100%;
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(clamp(138px,18cqw,215px),1fr));
+  gap:clamp(3px,.8cqh,8px);
+  align-content:start;
+}
+.bptll-player-card{
+  min-width:0; box-sizing:border-box;
+  display:grid;
+  grid-template-columns:auto auto minmax(0,1fr);
+  align-items:center;
+  gap:clamp(4px,.7cqw,8px);
+  min-height:clamp(42px,10cqh,66px);
+  border:1px solid #31574c; border-radius:var(--radius);
+  background:#0d2f28;
+  padding:clamp(3px,.7cqh,7px);
+  color:#eef5f2;
+  overflow:hidden;
+}
+.bptll-player-card:hover{border-color:#3c8f7c}
+.bptll-player-card.is-selected{border-color:#35d8c5;background:#124438;box-shadow:inset 0 0 0 1px rgba(53,216,197,.22)}
+.bptll-player-card input{
+  width:clamp(15px,3.4cqh,20px); height:clamp(15px,3.4cqh,20px);
+  margin:0; accent-color:#f2c853;
+}
+.bptll-player-avatar{
+  width:clamp(28px,7.8cqh,44px); aspect-ratio:1;
+  display:grid; place-items:center;
+  border-radius:50%;
+  background:linear-gradient(145deg,#2364d8,#4b49cc);
+  color:#fff; font-size:var(--fs-sm); font-weight:900;
+}
+.bptll-player-copy{min-width:0;display:flex;flex-direction:column;gap:1px;line-height:1.02}
+.bptll-player-copy strong{min-width:0;font-size:var(--fs-sm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bptll-player-copy small{font-size:var(--fs-xs);color:#afc8bf;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bptll-player-copy em{font-size:var(--fs-xs);color:#77d8ca;font-style:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bptll-player-empty{grid-column:1/-1;padding:18px;text-align:center;color:#a9c6bc;font-size:var(--fs-sm)}
+
+/* Étape 3 — toujours deux paris côte à côte. */
+.bptll-bets{
+  width:100%; height:100%; min-height:0;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:auto minmax(0,1fr) auto;
+  gap:var(--gap);
+  overflow:hidden;
+}
+.bptll-bet-note{
+  grid-column:1/-1; margin:0;
+  font-size:var(--fs-xs); color:#bdd1ca; text-align:center;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.bptll-bet-card{
+  min-width:0; min-height:0;
+  display:grid; grid-template-rows:auto minmax(0,1fr);
+  gap:3px;
+  padding:clamp(4px,.9cqh,9px);
+  border:1px solid #294d42; border-radius:var(--radius);
+  background:#0b2a23;
+  overflow:hidden;
+}
+.bptll-bet-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:clamp(13px,3.5cqh,21px);font-weight:900;line-height:1}
+.bptll-bet-head span{color:#f0cf79}
+.bptll-confirm{
+  grid-column:1/-1;
+  min-width:0;
+  display:grid; grid-template-columns:minmax(0,1fr) auto;
+  align-items:center; gap:var(--gap);
+  padding:clamp(3px,.7cqh,7px) clamp(6px,1cqw,12px);
+  border:1px solid #9c8442; border-radius:var(--radius); background:#244338;
+  overflow:hidden;
+}
+.bptll-confirm-copy{min-width:0}
+.bptll-confirm-copy strong,.bptll-confirm-copy small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bptll-confirm-copy strong{font-size:var(--fs-xs)}
+.bptll-confirm-copy small{font-size:var(--fs-xs);color:#dce8e3}
+.bptll-confirm .bptll-btn{height:clamp(28px,6.8cqh,40px);font-size:var(--fs-sm)}
+
+/* Étape 4 */
+.bptll-bounty{
+  height:100%; min-height:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; gap:clamp(3px,1cqh,10px);
+  overflow:hidden;
+}
+.bptll-bounty-icon{font-size:clamp(28px,11cqh,64px);line-height:1}
+.bptll-bounty-label{font-size:var(--fs-xs);letter-spacing:.12em;color:#d5bb74;font-weight:800}
+.bptll-bounty-name{font-size:clamp(19px,6.5cqh,38px);line-height:1;font-weight:950;color:#f5d36f}
+.bptll-bounty p{max-width:760px;margin:0;font-size:var(--fs-sm);line-height:1.08;color:#c7d8d2}
+
+/* Téléphone portrait : pas de second layout, juste l'instruction de tourner. */
+#bptLandscapeRotate{
+  position:fixed; inset:0; z-index:9600; display:none;
+  align-items:center; justify-content:center; text-align:center;
+  padding:24px; box-sizing:border-box;
+  background:#061f1a; color:#fff;
+}
+#bptLandscapeRotate .inner{max-width:360px}
+#bptLandscapeRotate .icon{font-size:50px;line-height:1;margin-bottom:10px}
+#bptLandscapeRotate strong{display:block;font-size:21px;margin-bottom:6px}
+#bptLandscapeRotate span{font-size:13px;color:#b9d2c9}
+@media (max-width:900px) and (orientation:portrait){
+  #bptLandscapeRotate.is-visible{display:flex}
+  #live3.active #bptLandscapeLive.is-visible{visibility:hidden}
+}
+
+/* Densité de l'application hôte : téléphone paysage prioritaire.
+   La structure reste identique ; seules les dimensions non métier diminuent. */
+@media (max-height:620px){
+  html.bpt-live-landscape-open .bpt-header,
+  body.bpt-live-landscape-open .bpt-header{
+    min-height:34px!important;
+    height:34px!important;
+    padding:2px 7px!important;
+    overflow:hidden!important;
+  }
+  html.bpt-live-landscape-open .bpt-header .logo,
+  body.bpt-live-landscape-open .bpt-header .logo{
+    max-height:27px!important;
+    width:auto!important;
+  }
+  html.bpt-live-landscape-open .bpt-header .brand,
+  body.bpt-live-landscape-open .bpt-header .brand{
+    min-height:0!important;
+  }
+  html.bpt-live-landscape-open .bpt-header .brand b,
+  body.bpt-live-landscape-open .bpt-header .brand b{
+    font-size:11px!important; line-height:1!important;
+  }
+  html.bpt-live-landscape-open .bpt-header .brand>span,
+  body.bpt-live-landscape-open .bpt-header .brand>span{
+    display:none!important;
+  }
+  html.bpt-live-landscape-open .bpt-header .bpt-identity-session,
+  body.bpt-live-landscape-open .bpt-header .bpt-identity-session{
+    margin:0!important;
+    font-size:9px!important;
+    line-height:1!important;
+  }
+  html.bpt-live-landscape-open .bpt-header .bpt-logout-btn,
+  body.bpt-live-landscape-open .bpt-header .bpt-logout-btn{
+    padding:2px 5px!important;
+    font-size:9px!important;
+    min-height:22px!important;
+  }
+  html.bpt-live-landscape-open nav#nav,
+  body.bpt-live-landscape-open nav#nav{
+    min-height:32px!important;
+    height:32px!important;
+    padding:2px 5px!important;
+    gap:2px!important;
+    overflow:hidden!important;
+  }
+  html.bpt-live-landscape-open nav#nav button,
+  body.bpt-live-landscape-open nav#nav button{
+    min-height:27px!important;
+    height:27px!important;
+    padding:2px 8px!important;
+    font-size:10px!important;
+    line-height:1!important;
+  }
+  #bptLandscapeLive{
+    --gap:4px;
+    --px:7px;
+    --py:3px;
+    --control:31px;
+    --fs-xs:9px;
+    --fs-sm:10px;
+    --fs-md:11px;
+    --fs-lg:17px;
+  }
+  #bptLandscapeLive .bptll-head-left{gap:7px}
+  #bptLandscapeLive .bptll-player-add strong{display:none}
+  #bptLandscapeLive .bptll-player-tools{grid-template-columns:minmax(170px,.9fr) minmax(260px,1.1fr)}
+  #bptLandscapeLive .bptll-player-card{min-height:43px}
+}
+
+/* Grand écran : même layout, simplement plus confortable. */
+@media (min-width:1200px) and (min-height:700px){
+  #bptLandscapeLive{
+    --gap:10px;
+    --px:24px;
+    --py:9px;
+    --control:48px;
+    --fs-xs:12px;
+    --fs-sm:14px;
+    --fs-md:16px;
+    --fs-lg:28px;
+  }
+  #bptLandscapeLive .bptll-player-list{
+    grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+  }
+  #bptLandscapeLive .bptll-player-card{min-height:62px}
+}
