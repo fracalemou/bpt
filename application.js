@@ -5074,7 +5074,6 @@ function renderAll(){
   safeRender("classement",renderRanking);
   safeRender("historique saisons",renderSeasonHistoryScreen);
   safeRender("ratios carrière",renderCareerRatioSummary);
-  safeRender("diagnostic cohérence",renderConsistencyDiagnostic);
   safeRender("mode classement",()=>setRankingMode(rankingMode));
   safeRender("versus",renderVersus);
   safeRender("records",renderRecords);
