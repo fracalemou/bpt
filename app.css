@@ -14743,7 +14743,7 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only {
 .season-history-card.cumulative{border-color:rgba(0,153,178,.75);box-shadow:0 12px 28px rgba(0,153,178,.10)}
 .season-history-card.cumulative .season-status{color:#5bd5e8}
 
-/* BPT V9.0.36 — périmètre autonome Records & accomplissements */
+/* BPT V9.0.37 — périmètre autonome Records & accomplissements */
 .records-scope-selector{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
@@ -14793,3 +14793,111 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only {
   .records-scope-selector{grid-template-columns:1fr;gap:9px}
   .records-scope-choice{min-height:64px;padding:11px 14px}
 }
+
+/* ===== V9.0.37 — Live mobile : lancement + révélation bounty toujours accessibles ===== */
+@media (max-width: 760px){
+  /* L'écran avant-partie ne doit jamais couper les actions en bas. */
+  .bpt484-live.is-pregame{
+    overflow:visible !important;
+    min-height:0 !important;
+  }
+  .bpt484-live.is-pregame > .bpt-pregame{
+    overflow-y:auto !important;
+    overflow-x:hidden !important;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+  }
+  .bpt-pregame-inner{
+    height:auto !important;
+    min-height:100% !important;
+  }
+  .bpt-pregame .bpt-predictions{
+    flex:0 0 auto !important;
+    min-height:0 !important;
+  }
+  .bpt-pregame > .bpt-pregame-inner > footer{
+    position:sticky !important;
+    bottom:0 !important;
+    z-index:40 !important;
+    background:#071d19 !important;
+    border-top:1px solid #24493f !important;
+    padding:10px 0 max(8px,env(safe-area-inset-bottom)) !important;
+    margin-top:8px !important;
+  }
+  .bpt-pregame-buttons{
+    width:100% !important;
+  }
+  .bpt-pregame-buttons > button{
+    display:block !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    min-height:46px !important;
+  }
+  .bpt-pregame-buttons > button[data-do="launch-pregame"]{
+    flex:1 1 58% !important;
+  }
+  .bpt-pregame-buttons > button[data-do="back-pregame"]{
+    flex:1 1 38% !important;
+  }
+
+  /* La révélation bounty doit passer au-dessus de tout le Live mobile. */
+  .bpt484-live.is-pregame > .bpt-bounty-overlay:not([hidden]),
+  .bpt484-live > .bpt-bounty-overlay:not([hidden]){
+    position:fixed !important;
+    inset:0 !important;
+    width:100vw !important;
+    height:100dvh !important;
+    max-width:none !important;
+    max-height:none !important;
+    z-index:2147483000 !important;
+    display:flex !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    overflow-y:auto !important;
+    border-radius:0 !important;
+    padding:10px !important;
+    box-sizing:border-box !important;
+  }
+  .bpt-bounty-card{
+    max-height:calc(100dvh - 20px) !important;
+    overflow-y:auto !important;
+    margin:auto !important;
+    padding-bottom:max(18px,env(safe-area-inset-bottom)) !important;
+  }
+  .bpt-bounty-card [data-bounty-close],
+  .bpt-bounty-card [data-bounty-back]{
+    position:sticky !important;
+    bottom:0 !important;
+    z-index:2 !important;
+    min-height:46px !important;
+  }
+}
+
+@media (max-width:1000px) and (max-height:560px) and (orientation:landscape){
+  .bpt-pregame > .bpt-pregame-inner > footer{
+    position:sticky !important;
+    bottom:0 !important;
+    background:#071d19 !important;
+  }
+  .bpt-pregame-buttons{
+    display:grid !important;
+    grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr) !important;
+    gap:8px !important;
+  }
+  .bpt-pregame-buttons > button{
+    width:100% !important;
+    min-width:0 !important;
+  }
+}
+
+
+/* ===== V9.0.37 — Classements : saison courante + Archives + Cumul ===== */
+.ranking-season-scope{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;margin:14px 0 8px;position:relative;z-index:30}
+.ranking-season-scope-btn{display:flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:10px 16px;border:1px solid #31594d;border-radius:12px;background:#0b211c;color:#d9ebe3;font-weight:900;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.12)}
+.ranking-season-scope-btn:hover{border-color:#2ac9c2}.ranking-season-scope-btn.active{background:#13c6d9;color:#05242a;border-color:#46e4ee;box-shadow:0 8px 22px rgba(19,198,217,.18)}
+.ranking-season-scope-btn.current{min-width:160px}.ranking-archive-picker{position:relative}.ranking-archive-chevron{font-size:16px;opacity:.85}
+.ranking-archive-menu{position:absolute;top:54px;left:0;min-width:220px;padding:8px;border-radius:13px;border:1px solid #31594d;background:#10251f;box-shadow:0 18px 38px rgba(0,0,0,.38);z-index:80}
+.ranking-archive-menu[hidden]{display:none}.ranking-archive-menu button{display:block;width:100%;text-align:left;padding:11px 12px;border:0;border-bottom:1px solid rgba(255,255,255,.08);background:transparent;color:#e9f4ef;font-weight:800;cursor:pointer;border-radius:8px}
+.ranking-archive-menu button:last-child{border-bottom:0}.ranking-archive-menu button:hover{background:#173e35;color:#5be1e0}
+.ranking-scope-context{display:flex;gap:8px;align-items:center;margin:0 0 12px;color:#9ebdb1;font-size:12px}.ranking-scope-context strong{color:#f0cf79}.ranking-scope-context span{color:#8fe3e1}
+@media(max-width:700px){.ranking-season-scope{display:grid;grid-template-columns:1.2fr 1fr .8fr;gap:7px;position:sticky;top:0;background:rgba(5,22,18,.96);padding:8px 0;backdrop-filter:blur(8px);z-index:60}.ranking-season-scope-btn{min-width:0;padding:9px 8px;font-size:12px;min-height:44px}.ranking-season-scope-btn.current{min-width:0}.ranking-archive-menu{position:fixed;left:12px;right:12px;top:auto;bottom:84px;min-width:0;max-height:55vh;overflow:auto;border-radius:16px;padding:10px}.ranking-archive-menu button{font-size:15px;padding:14px 12px}.ranking-scope-context{margin:2px 0 10px;padding:0 2px}.ranking-season-scope-btn strong{white-space:nowrap}}

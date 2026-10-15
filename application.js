@@ -4718,6 +4718,48 @@ function mergeArchiveOfficialStats(items){
   });
 }
 
+
+const RANKING_ARCHIVE_KEYS=["2025-2026","2023-2024","2022-2023","2020-2021"];
+
+function closeRankingArchiveMenu(){
+  const menu=document.getElementById("rankingArchiveMenu");
+  if(menu)menu.hidden=true;
+}
+
+function toggleRankingArchiveMenu(event){
+  if(event)event.stopPropagation();
+  const menu=document.getElementById("rankingArchiveMenu");
+  if(!menu)return;
+  menu.hidden=!menu.hidden;
+}
+
+async function selectRankingSeasonScope(key){
+  closeRankingArchiveMenu();
+  if(key!==selectedSeasonKey)await selectSeason(key);
+  if(document.querySelector('.view.active')?.id!=="ranking")await showView("ranking");
+  syncRankingSeasonScopeUI();
+}
+
+function syncRankingSeasonScopeUI(){
+  const current=document.getElementById("rankingCurrentSeasonBtn");
+  const archives=document.getElementById("rankingArchivesBtn");
+  const cumul=document.getElementById("rankingCumulativeBtn");
+  current?.classList.toggle("active",selectedSeasonKey===CURRENT_SEASON_KEY);
+  archives?.classList.toggle("active",RANKING_ARCHIVE_KEYS.includes(selectedSeasonKey));
+  cumul?.classList.toggle("active",selectedSeasonKey==="all");
+  const ctx=document.getElementById("rankingScopeContext");
+  if(ctx){
+    if(selectedSeasonKey==="all")ctx.innerHTML='<strong>Cumul toutes saisons</strong><span>Classement carrière BPT</span>';
+    else if(RANKING_ARCHIVE_KEYS.includes(selectedSeasonKey))ctx.innerHTML=`<strong>Archive sélectionnée</strong><span>${seasonDisplayName(selectedSeasonKey)}</span>`;
+    else ctx.innerHTML=`<strong>Saison en cours</strong><span>${seasonDisplayName(CURRENT_SEASON_KEY)}</span>`;
+  }
+}
+
+document.addEventListener("click",e=>{
+  const picker=document.getElementById("rankingArchivePicker");
+  if(picker && !picker.contains(e.target))closeRankingArchiveMenu();
+});
+
 function setArchiveUiState(){
   const archive=isArchiveSeason();
   document.body.classList.toggle("archive-season",archive);
@@ -4730,6 +4772,7 @@ function setArchiveUiState(){
   document.querySelectorAll('[data-season-action="all"]').forEach(btn=>btn.classList.toggle("active",isAllSeasons()));
   updateSeasonNavigationState();
   updateSeasonContextTitles();
+  syncRankingSeasonScopeUI();
 }
 
 async function selectSeason(key){
@@ -9321,7 +9364,6 @@ async function showView(id){
     if(id==="latestgame"){renderLatestGame();renderHistory();}
     if(id==="ranking")renderRanking();
     if(id==="records"){renderRecords();renderAchievements();}
-    if(id==="seasons")renderSeasonHistoryScreen();
     if(id==="profile"){renderProfile();renderVersus();}
   }
 
