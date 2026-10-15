@@ -1,4 +1,4 @@
-/* BPT 10.2.0 — Live horizontal unique.
+/* BPT 10.3.0 — Live horizontal unique + sélection joueurs par participations.
    Un seul layout pour PC + téléphone paysage. Les composants changent de taille,
    jamais de structure. En téléphone portrait, on demande de tourner l'appareil. */
 
@@ -116,70 +116,114 @@
   font:inherit; font-size:var(--font-m);
 }
 
-/* Étape 2 : structure unique liste + panneau latéral. */
-.bptll-players-wrap{
-  width:min(1480px,100%); height:100%; min-height:0; margin:auto;
+/* Étape 2 : tous les joueurs, classés automatiquement par participations.
+   Le scroll appartient uniquement à la liste : le footer reste toujours visible. */
+.bptll-playerselect{
+  width:min(1540px,100%); height:100%; min-height:0; margin:auto;
   display:grid;
-  grid-template-columns:minmax(0,3.4fr) minmax(190px,1fr);
-  gap:var(--gap);
+  grid-template-rows:auto auto minmax(0,1fr);
+  gap:clamp(4px,calc(var(--u)*.7),10px);
   overflow:hidden;
 }
-.bptll-players-main{
-  min-width:0; min-height:0;
-  display:grid; grid-template-rows:auto minmax(0,1fr);
-  gap:clamp(3px,calc(var(--u)*.65),9px);
-  overflow:hidden;
-}
-.bptll-players-summary{
+.bptll-player-tools{
   min-width:0;
-  display:flex; align-items:center; justify-content:space-between; gap:8px;
-  font-size:var(--font-s); color:#a9c6bc; white-space:nowrap;
-}
-.bptll-players-summary strong{color:#f0cf79;font-size:var(--font-m)}
-.bptll-players{
-  min-height:0;
   display:grid;
-  grid-template-columns:repeat(var(--bptll-cols,4),minmax(0,1fr));
-  grid-template-rows:repeat(var(--bptll-rows,1),minmax(0,1fr));
-  grid-auto-flow:column;
-  gap:clamp(3px,calc(var(--u)*.6),9px);
-  overflow:hidden;
+  grid-template-columns:minmax(220px,1.05fr) minmax(300px,.95fr);
+  gap:var(--gap);
+  align-items:stretch;
 }
-.bptll-player{
-  min-width:0; min-height:0; box-sizing:border-box;
-  display:flex; align-items:center;
-  gap:clamp(4px,calc(var(--u)*.65),9px);
+.bptll-player-search,
+.bptll-player-add input{
+  width:100%; min-width:0; box-sizing:border-box;
+  height:var(--control-h);
+  border:1px solid #36574d; border-radius:var(--radius);
+  background:#101a22; color:#fff;
+  padding:0 clamp(8px,calc(var(--u)*1.2),16px);
+  font:inherit; font-size:var(--font-m);
+}
+.bptll-player-add{
+  min-width:0;
+  display:grid;
+  grid-template-columns:auto minmax(130px,1fr) auto;
+  gap:clamp(5px,calc(var(--u)*.7),10px);
+  align-items:center;
+  padding:clamp(3px,calc(var(--u)*.45),7px);
+  border:1px solid #1aa89b; border-radius:var(--radius);
+  background:#0a3028;
+}
+.bptll-player-add strong{
+  font-size:var(--font-s); white-space:nowrap; color:#e7f3ef;
+}
+.bptll-player-add input{height:calc(var(--control-h) - 8px);font-size:var(--font-s)}
+.bptll-player-add .bptll-btn{height:calc(var(--control-h) - 8px);font-size:var(--font-s)}
+.bptll-player-meta{
+  min-width:0;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  color:#9fc1b6; font-size:var(--font-s);
+  padding-inline:2px;
+}
+.bptll-player-meta strong{color:#f0cf79;font-size:var(--font-m)}
+.bptll-player-scroll{
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+  padding-right:clamp(2px,calc(var(--u)*.35),6px);
+  padding-bottom:2px;
+}
+.bptll-player-list{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(clamp(150px,20cqw,280px),1fr));
+  gap:clamp(4px,calc(var(--u)*.65),10px);
+  align-content:start;
+}
+.bptll-player-card{
+  min-width:0; box-sizing:border-box;
+  display:grid;
+  grid-template-columns:auto auto minmax(0,1fr);
+  align-items:center;
+  gap:clamp(5px,calc(var(--u)*.7),10px);
+  min-height:clamp(48px,calc(var(--u)*7),78px);
   border:1px solid #31574c; border-radius:var(--radius);
   background:#0d2f28;
-  padding:clamp(2px,calc(var(--u)*.45),8px) clamp(4px,calc(var(--u)*.75),12px);
+  padding:clamp(4px,calc(var(--u)*.65),10px);
   color:#eef5f2;
-  font-size:var(--bptll-player-font,12px); font-weight:750; line-height:1.03;
   overflow:hidden;
 }
-.bptll-player input{
-  width:clamp(13px,calc(var(--u)*1.75),21px);
-  height:clamp(13px,calc(var(--u)*1.75),21px);
-  flex:0 0 auto; margin:0; accent-color:#f2c853;
+.bptll-player-card:hover{border-color:#3c8f7c}
+.bptll-player-card.is-selected{border-color:#35d8c5;background:#124438;box-shadow:inset 0 0 0 1px rgba(53,216,197,.22)}
+.bptll-player-card input{
+  width:clamp(15px,calc(var(--u)*1.8),22px);
+  height:clamp(15px,calc(var(--u)*1.8),22px);
+  margin:0; accent-color:#f2c853; flex:0 0 auto;
 }
-.bptll-player span{
-  min-width:0; overflow-wrap:anywhere;
-  display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden;
+.bptll-player-avatar{
+  width:clamp(30px,calc(var(--u)*4.4),52px);
+  aspect-ratio:1;
+  display:grid; place-items:center;
+  border-radius:50%;
+  background:linear-gradient(145deg,#2364d8,#4b49cc);
+  color:#fff; font-size:clamp(11px,calc(var(--u)*1.65),18px); font-weight:900;
+  flex:0 0 auto;
 }
-.bptll-player.is-selected{border-color:#d7ae4d;background:#173d32}
-.bptll-add-panel{
-  min-width:0; min-height:0;
-  display:grid;
-  grid-template-rows:auto minmax(0,1fr) auto minmax(0,1fr);
-  gap:var(--gap);
-  padding:var(--gap);
-  border:1px solid #31574c; border-radius:var(--radius);
-  background:#0b2a23;
-  overflow:hidden;
+.bptll-player-copy{min-width:0;display:flex;flex-direction:column;gap:1px;line-height:1.05}
+.bptll-player-copy strong{
+  min-width:0; font-size:var(--font-m);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
-.bptll-add-label{font-size:var(--font-s);color:#a9c6bc;font-weight:800}
-.bptll-add-actions{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--gap);align-items:stretch}
-.bptll-add-actions .bptll-btn{height:100%;min-height:28px;font-size:var(--font-s);padding-inline:clamp(6px,calc(var(--u)*.8),12px)}
-.bptll-add-select,.bptll-add-input{height:100%;max-height:none;font-size:var(--font-s)}
+.bptll-player-copy small{
+  font-size:var(--font-s); color:#afc8bf;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.bptll-player-copy em{
+  font-size:clamp(8px,calc(var(--u)*.95),11px); color:#77d8ca; font-style:normal;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.bptll-player-empty{
+  grid-column:1/-1;
+  padding:24px; text-align:center; color:#a9c6bc; font-size:var(--font-m);
+}
 
 /* Étape 3 : toujours 2 tuiles côte à côte. */
 .bptll-bets{
@@ -245,6 +289,6 @@
 #bptLandscapeRotate strong{display:block;font-size:22px;margin-bottom:8px}
 #bptLandscapeRotate span{font-size:14px;color:#b9d2c9}
 @media (max-width:900px) and (orientation:portrait){
-  #live3.active #bptLandscapeRotate.is-visible{display:flex}
+  #bptLandscapeRotate.is-visible{display:flex}
   #live3.active #bptLandscapeLive.is-visible{visibility:hidden}
 }

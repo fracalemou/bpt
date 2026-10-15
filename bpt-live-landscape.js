@@ -23,7 +23,7 @@
     rotate.id='bptLandscapeRotate';
     rotate.innerHTML='<div class="inner"><div class="icon">↻</div><strong>Tournez le téléphone</strong><span>Le Live BPT s’utilise en mode paysage pour garder tous les boutons, textes et joueurs visibles.</span></div>';
     document.body.append(rotate);
-    resizeObserver=new ResizeObserver(()=>{if(step===2)requestAnimationFrame(fitPlayerGrid)});
+    resizeObserver=new ResizeObserver(()=>{});
     resizeObserver.observe(root);
     return root;
   }
@@ -37,7 +37,7 @@
     root.style.top=navBottom+'px';
     root.style.height=available+'px';
     $('bptLandscapeRotate')?.classList.toggle('is-visible',activeView());
-    if(step===2)requestAnimationFrame(fitPlayerGrid);
+    // La liste des joueurs gère sa propre zone scrollable ; aucun recalcul de grille nécessaire.
   }
 
   function show(v){ensure().classList.toggle('is-visible',!!v);$('bptLandscapeRotate')?.classList.toggle('is-visible',!!v)}
@@ -75,78 +75,129 @@
       return {name:cb?.value||label.querySelector('span')?.textContent||'',checked:!!cb?.checked,cb};
     }).filter(x=>x.name);
   }
-  function inactivePlayers(){
+
+  function participationCount(name){
     try{
-      const players=(typeof db!=='undefined'&&Array.isArray(db?.players))?db.players:[];
-      return players.filter(p=>p&&p.active!==true&&String(p.name||'').trim()).map(p=>String(p.name).trim()).sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'}));
-    }catch(_e){return []}
+      if(typeof bptPlayerParticipationCount==='function')return Number(bptPlayerParticipationCount(name)||0);
+    }catch(_e){}
+    try{
+      const target=norm(name);
+      const rows=Array.isArray(db?.history)?db.history:[];
+      return rows.reduce((n,row)=>norm(row?.player)===target?n+1:n,0);
+    }catch(_e){return 0}
   }
 
-  function chooseGrid(count,w,h){
-    if(!count||w<1||h<1)return {cols:1,rows:1,font:12};
-    const gap=Math.max(3,Math.min(9,h*.018));
-    let best=null;
-    for(let cols=2;cols<=Math.min(count,12);cols++){
-      const rows=Math.ceil(count/cols);
-      const cw=(w-gap*(cols-1))/cols, ch=(h-gap*(rows-1))/rows;
-      if(cw<=0||ch<=0)continue;
-      const font=Math.max(9,Math.min(16,ch*.34,cw*.115));
-      const valid=cw>=66&&ch>=24&&font>=9.5;
-      const score=(valid?1000:0)+font*8+Math.min(cw/95,2)*5-Math.abs(cw/ch-3.0);
-      if(!best||score>best.score)best={cols,rows,font,score};
-    }
-    return best||{cols:2,rows:Math.ceil(count/2),font:9};
+  function nicknameFor(name){
+    try{
+      if(typeof playerNicknameInfo==='function')return String(playerNicknameInfo(name)?.primary||'').trim();
+    }catch(_e){}
+    try{
+      const p=(db?.players||[]).find(x=>norm(x?.name)===norm(name));
+      return String(p?.nickname||'').trim();
+    }catch(_e){return ''}
   }
-  function fitPlayerGrid(){
-    const grid=$('bptllPlayerGrid');if(!grid)return;
-    const g=chooseGrid(grid.children.length,grid.clientWidth,grid.clientHeight);
-    grid.style.setProperty('--bptll-cols',String(g.cols));
-    grid.style.setProperty('--bptll-rows',String(g.rows));
-    grid.style.setProperty('--bptll-player-font',g.font.toFixed(1)+'px');
+
+  function allPlayerData(){
+    const selected=new Map(playerData().map(p=>[norm(p.name),p]));
+    let players=[];
+    try{players=Array.isArray(db?.players)?db.players:[]}catch(_e){}
+    const seen=new Set(),out=[];
+    players.forEach(rec=>{
+      const name=String(rec?.name||'').trim();
+      const key=norm(name);if(!name||seen.has(key))return;seen.add(key);
+      const legacyRec=selected.get(key);
+      out.push({
+        name,
+        nickname:nicknameFor(name),
+        participations:participationCount(name),
+        checked:!!legacyRec?.checked,
+        cb:legacyRec?.cb||null
+      });
+    });
+    selected.forEach((legacyRec,key)=>{
+      if(seen.has(key))return;
+      out.push({name:legacyRec.name,nickname:nicknameFor(legacyRec.name),participations:participationCount(legacyRec.name),checked:legacyRec.checked,cb:legacyRec.cb});
+    });
+    return out.sort((a,b)=>b.participations-a.participations||a.name.localeCompare(b.name,'fr',{sensitivity:'base'}));
   }
 
   function useLegacyAdd(name){
     const clean=String(name||'').trim().replace(/\s+/g,' ');if(!clean)return;
     const input=$('live3NewPlayerName'),add=$('live3AddNewPlayerBtn');if(!input||!add)return;
-    input.value=clean;add.click();setTimeout(()=>render(true),100);
+    input.value=clean;add.click();setTimeout(()=>render(true),120);
   }
 
   function renderStep2(){
     title('PRÉPARATION','Sélection des joueurs',2);
-    const body=$('bptllBody'),data=playerData();
-    const wrap=document.createElement('div');wrap.className='bptll-players-wrap';
-    const main=document.createElement('div');main.className='bptll-players-main';
-    const summary=document.createElement('div');summary.className='bptll-players-summary';
-    const selectedCount=document.createElement('strong');selectedCount.textContent=data.filter(x=>x.checked).length+' sélectionné(s)';
-    const total=document.createElement('span');total.textContent=data.length+' joueur(s) actif(s)';summary.append(selectedCount,total);
-    const grid=document.createElement('div');grid.className='bptll-players';grid.id='bptllPlayerGrid';
-    data.forEach(p=>{
-      const lab=document.createElement('label');lab.className='bptll-player'+(p.checked?' is-selected':'');
-      const cb=document.createElement('input');cb.type='checkbox';cb.checked=p.checked;
-      const name=document.createElement('span');name.textContent=p.name;
-      cb.addEventListener('change',()=>{p.cb.checked=cb.checked;p.cb.dispatchEvent(new Event('change',{bubbles:true}));lab.classList.toggle('is-selected',cb.checked);selectedCount.textContent=grid.querySelectorAll('input:checked').length+' sélectionné(s)'});
-      lab.append(cb,name);grid.append(lab);
-    });
-    main.append(summary,grid);
+    const body=$('bptllBody');
+    const all=allPlayerData();
+    const shell=document.createElement('div');shell.className='bptll-playerselect';
 
-    const panel=document.createElement('div');panel.className='bptll-add-panel';
-    const inactiveLabel=document.createElement('div');inactiveLabel.className='bptll-add-label';inactiveLabel.textContent='Joueur inactif';
-    const inactiveActions=document.createElement('div');inactiveActions.className='bptll-add-actions';
-    const inactive=inactivePlayers();
-    const select=document.createElement('select');select.className='bptll-add-select';
-    const opt=document.createElement('option');opt.value='';opt.textContent=inactive.length?'Choisir…':'Aucun joueur inactif';select.append(opt);
-    inactive.forEach(name=>{const o=document.createElement('option');o.value=name;o.textContent=name;select.append(o)});
-    const reactivate=button('Ajouter',false,()=>{if(select.value)useLegacyAdd(select.value)},!inactive.length);
-    inactiveActions.append(select,reactivate);
-    const newLabel=document.createElement('div');newLabel.className='bptll-add-label';newLabel.textContent='Nouveau joueur';
-    const newActions=document.createElement('div');newActions.className='bptll-add-actions';
-    const input=document.createElement('input');input.className='bptll-add-input';input.type='text';input.placeholder='Nom du joueur';input.autocomplete='off';
-    const create=button('Créer + ajouter',true,()=>{const name=input.value.trim();if(!name){input.focus();return;}useLegacyAdd(name);input.value=''});
-    input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();create.click()}});
-    newActions.append(input,create);panel.append(inactiveLabel,inactiveActions,newLabel,newActions);
-    wrap.append(main,panel);body.replaceChildren(wrap);
-    requestAnimationFrame(fitPlayerGrid);
-    footer([button('← Retour',false,()=>{step=1;render(true)}),button('Continuer →',true,()=>{const n=playerData().filter(x=>x.checked).length;if(n<2){alert('Sélectionnez au moins 2 joueurs.');return;}legacy().create?.click()})]);
+    const tools=document.createElement('div');tools.className='bptll-player-tools';
+    const search=document.createElement('input');
+    search.type='search';search.className='bptll-player-search';search.placeholder='Rechercher un joueur (nom ou pseudo)…';search.autocomplete='off';
+    const addBox=document.createElement('div');addBox.className='bptll-player-add';
+    const addLabel=document.createElement('strong');addLabel.textContent='Ajouter un joueur';
+    const addInput=document.createElement('input');addInput.type='text';addInput.placeholder='Nom du joueur…';addInput.autocomplete='off';
+    const addBtn=button('Ajouter',true,()=>{const name=addInput.value.trim();if(!name){addInput.focus();return;}useLegacyAdd(name);addInput.value=''});
+    addInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addBtn.click()}});
+    addBox.append(addLabel,addInput,addBtn);tools.append(search,addBox);
+
+    const meta=document.createElement('div');meta.className='bptll-player-meta';
+    const selectedCount=document.createElement('strong');
+    const total=document.createElement('span');total.textContent=all.length+' joueur(s)';
+    meta.append(selectedCount,total);
+
+    const scroll=document.createElement('div');scroll.className='bptll-player-scroll';
+    const grid=document.createElement('div');grid.className='bptll-player-list';
+    scroll.append(grid);
+
+    function updateSelected(){
+      const n=all.filter(p=>p.checked).length;
+      selectedCount.textContent=n+' sélectionné(s)';
+    }
+
+    function draw(){
+      const q=norm(search.value);
+      const rows=all.filter(p=>!q||norm(p.name).includes(q)||norm(p.nickname).includes(q));
+      grid.replaceChildren();
+      rows.forEach(p=>{
+        const lab=document.createElement('label');lab.className='bptll-player-card'+(p.checked?' is-selected':'');
+        const cb=document.createElement('input');cb.type='checkbox';cb.checked=p.checked;
+        const avatar=document.createElement('span');avatar.className='bptll-player-avatar';
+        avatar.textContent=p.name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();
+        const copy=document.createElement('span');copy.className='bptll-player-copy';
+        const name=document.createElement('strong');name.textContent=p.name;
+        const stats=document.createElement('small');stats.textContent=p.participations+' participation'+(p.participations===1?'':'s');
+        copy.append(name,stats);
+        if(p.nickname){const nick=document.createElement('em');nick.textContent=p.nickname;copy.append(nick)}
+        cb.addEventListener('change',()=>{
+          if(p.cb){
+            p.cb.checked=cb.checked;
+            p.cb.dispatchEvent(new Event('change',{bubbles:true}));
+            p.checked=cb.checked;
+            lab.classList.toggle('is-selected',cb.checked);
+            updateSelected();
+          }else if(cb.checked){
+            // Joueur connu mais actuellement hors de la liste active : le moteur historique
+            // le réactive dans db.players et le sélectionne pour la partie.
+            useLegacyAdd(p.name);
+          }
+        });
+        lab.append(cb,avatar,copy);grid.append(lab);
+      });
+      if(!rows.length){
+        const empty=document.createElement('div');empty.className='bptll-player-empty';empty.textContent='Aucun joueur trouvé.';grid.append(empty);
+      }
+      updateSelected();
+    }
+    search.addEventListener('input',draw);
+    shell.append(tools,meta,scroll);body.replaceChildren(shell);draw();
+
+    footer([
+      button('← Retour',false,()=>{step=1;render(true)}),
+      button('Continuer →',true,()=>{const n=playerData().filter(x=>x.checked).length;if(n<2){alert('Sélectionnez au moins 2 joueurs.');return;}legacy().create?.click()})
+    ]);
   }
 
   function oddsFor(st,type,name){const raw=st?.betting?.odds?.[type]?.[name];const n=Number(raw);return Number.isFinite(n)&&n>0?n:1}
@@ -171,7 +222,11 @@
     const validate=button(me.confirmed?'Pari validé':can?'Valider le pari':'Connexion joueur requise',true,async()=>{if(!can||me.confirmed)return;await api()?.confirmLivePredictions?.();render(true)},!can||me.confirmed);
     confirm.append(copy,validate);wrap.append(confirm);body.replaceChildren(wrap);
     const owner=!!api()?.isOwner?.();
-    footer([button('← Retour aux paramètres',false,()=>api()?.returnToPreGameSettings?.()),button('▶ Révéler le type de bounty',true,()=>api()?.launchPreGame?.(),!owner)]);
+    const spectator=(typeof window.liveIsSpectator==='function'&&window.liveIsSpectator())||!owner;
+    footer(spectator
+      ? [button('← Retour aux paramètres',false,()=>api()?.returnToPreGameSettings?.())]
+      : [button('← Retour aux paramètres',false,()=>api()?.returnToPreGameSettings?.()),button('▶ Révéler le type de bounty',true,()=>api()?.launchPreGame?.())]
+    );
   }
 
   function renderStep4(st){
