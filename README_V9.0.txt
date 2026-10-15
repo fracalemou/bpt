@@ -1,4 +1,4 @@
-BPT V10.0.1 — Live joueurs + orientation
+BPT V10.0.2 — Live joueurs + orientation
 
 BPT V10.0.0 — Pré-Live en 4 étapes
 

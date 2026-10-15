@@ -1,59 +1,110 @@
-/* BPT Live Clean — isolated pre-live UI. No legacy pre-live layout dependency. */
-#bptCleanLive{position:fixed;left:0;right:0;z-index:9500;display:none;box-sizing:border-box;background:#06251f;color:#f5f8f6;font-family:inherit;overflow:hidden}
+/* BPT 10.1.0 — Pré-Live responsive reconstruit à zéro.
+   Un seul DOM, un seul moteur responsive, aucune classe appareil/orientation. */
+#bptCleanLive{
+  position:fixed; left:0; right:0; z-index:9500; display:none;
+  box-sizing:border-box; overflow:hidden; container-type:size;
+  background:linear-gradient(180deg,#061f1a 0%,#082a23 100%);
+  color:#f4f8f6; font-family:inherit;
+  --gap:clamp(5px,1.2cqh,12px);
+  --pad-x:clamp(8px,2.2cqw,28px);
+  --pad-y:clamp(6px,1.6cqh,18px);
+  --control-h:clamp(34px,7.2cqh,52px);
+  --radius:clamp(8px,1.4cqh,14px);
+}
 #live3.active #bptCleanLive.is-visible{display:block}
 #live3.active .bpt-live3-hero,#live3.active #live3Prep{display:none!important}
 #live3.active .bpt484-live.is-pregame .bpt-pregame,
 #live3.active .bpt484-live.is-pregame>.bpt-bounty-overlay{display:none!important}
 
-.bptcl-shell{height:100%;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden;background:linear-gradient(180deg,#06251f 0%,#082b24 100%)}
-.bptcl-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;border-bottom:1px solid #21483e;background:#0b1b20}
-.bptcl-head-left{min-width:0}.bptcl-kicker{font-size:11px;letter-spacing:.18em;color:#42d4c0;text-transform:uppercase}.bptcl-title{margin:1px 0 0;font-size:clamp(18px,4vw,28px);line-height:1.05}.bptcl-step{flex:0 0 auto;padding:5px 9px;border:1px solid #2ac9c2;border-radius:999px;color:#8df0e3;font-size:11px;font-weight:800}
-.bptcl-body{min-height:0;padding:10px 12px;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
-.bptcl-foot{display:grid;grid-template-columns:1fr 1.35fr;gap:8px;padding:8px 12px max(8px,env(safe-area-inset-bottom));border-top:1px solid #21483e;background:#071f1a}
-.bptcl-foot.one{grid-template-columns:1fr}
-.bptcl-btn{min-height:44px;border:1px solid #376b5c;border-radius:12px;background:#144c40;color:#f4f7f5;font-weight:900;font-size:clamp(12px,3.4vw,16px);padding:8px 10px;white-space:normal;line-height:1.05}
-.bptcl-btn.primary{border-color:#e1b957;background:#f2c853;color:#172018}.bptcl-btn:disabled{opacity:.5}
+.bptcl-shell{height:100%;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden}
+.bptcl-head{min-height:0;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:var(--pad-y) var(--pad-x);border-bottom:1px solid #21483e;background:#0a191d}
+.bptcl-head-left{min-width:0}
+.bptcl-kicker{font-size:clamp(9px,1.7cqh,13px);line-height:1;letter-spacing:.15em;color:#45d6c3;text-transform:uppercase;white-space:nowrap}
+.bptcl-title{margin:2px 0 0;font-size:clamp(17px,3.5cqh,34px);line-height:1.02;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bptcl-step{flex:0 0 auto;padding:clamp(4px,.9cqh,8px) clamp(7px,1.2cqw,14px);border:1px solid #2ac9c2;border-radius:999px;color:#8df0e3;font-size:clamp(9px,1.6cqh,13px);font-weight:800;white-space:nowrap}
 
-.bptcl-form{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:center}
-.bptcl-field{min-width:0;display:grid;gap:3px}.bptcl-field label{font-size:10px;color:#a8c4ba;font-weight:700}.bptcl-field input,.bptcl-field select{width:100%;min-width:0;height:40px;box-sizing:border-box;border:1px solid #36574d;border-radius:9px;background:#101a22;color:#fff;padding:0 9px;font:inherit;font-size:13px}
+.bptcl-body{min-height:0;overflow:hidden;padding:var(--pad-y) var(--pad-x);display:grid;align-items:stretch}
+.bptcl-foot{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:var(--gap);padding:var(--pad-y) var(--pad-x) max(var(--pad-y),env(safe-area-inset-bottom));border-top:1px solid #21483e;background:#071f1a}
+.bptcl-foot.one{grid-template-columns:minmax(0,1fr)}
+.bptcl-btn{box-sizing:border-box;min-width:0;height:var(--control-h);border:1px solid #376b5c;border-radius:var(--radius);background:#144c40;color:#f4f7f5;font-weight:900;font-size:clamp(11px,2.2cqh,17px);padding:0 clamp(8px,1.5cqw,18px);white-space:normal;line-height:1.05;overflow:hidden}
+.bptcl-btn.primary{border-color:#e1b957;background:#f2c853;color:#172018}
+.bptcl-btn:disabled{opacity:.5}
 
-.bptcl-players-wrap{height:100%;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr);gap:6px}
-.bptcl-players-summary{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;color:#a9c6bc}.bptcl-players-summary strong{color:#f0cf79;font-size:14px}
-.bptcl-players{min-height:0;display:grid;grid-template-columns:repeat(var(--bptcl-cols,2),minmax(0,1fr));grid-template-rows:repeat(var(--bptcl-rows,1),minmax(0,1fr));grid-auto-flow:column;gap:5px;overflow:hidden}
-.bptcl-player{position:relative;min-width:0;min-height:0;display:flex;align-items:center;gap:5px;border:1px solid #31574c;border-radius:8px;background:#0d2f28;padding:3px 6px;color:#eef5f2;font-size:var(--bptcl-player-font,12px);font-weight:750;line-height:1.05}
-.bptcl-player input{width:17px;height:17px;flex:0 0 17px;accent-color:#f2c853}.bptcl-player span{min-width:0;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}.bptcl-player.is-selected{border-color:#d7ae4d;background:#173d32}
-.bptcl-add-row{display:none}
+/* Étape 1 */
+.bptcl-form{height:100%;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:var(--gap);align-content:stretch}
+.bptcl-field{min-width:0;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr);gap:clamp(2px,.5cqh,7px)}
+.bptcl-field label{font-size:clamp(9px,1.7cqh,13px);line-height:1.05;color:#a8c4ba;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bptcl-field input,.bptcl-field select{width:100%;height:100%;min-height:30px;max-height:var(--control-h);box-sizing:border-box;border:1px solid #36574d;border-radius:var(--radius);background:#101a22;color:#fff;padding:0 clamp(7px,1.2cqw,14px);font:inherit;font-size:clamp(11px,2cqh,16px)}
 
-.bptcl-bets{height:100%;min-height:0;display:grid;grid-template-rows:auto auto auto;gap:7px;align-content:center}
-.bptcl-bet-note{font-size:11px;line-height:1.2;color:#bdd1ca;margin:0}
-.bptcl-bet-card{border-top:1px solid #294d42;padding-top:6px;display:grid;gap:4px}.bptcl-bet-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:clamp(15px,4vw,20px);font-weight:900}.bptcl-bet-head span{color:#f0cf79}.bptcl-select{height:42px;width:100%;box-sizing:border-box;border:1px solid #3a4f5c;border-radius:10px;background:#111a24;color:#fff;padding:0 10px;font-size:14px;font-weight:800}
-.bptcl-confirm{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;padding:6px 8px;border:1px solid #9c8442;border-radius:10px;background:#244338}.bptcl-confirm-copy{min-width:0}.bptcl-confirm-copy strong,.bptcl-confirm-copy small{display:block}.bptcl-confirm-copy strong{font-size:11px}.bptcl-confirm-copy small{font-size:10px;color:#dce8e3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bptcl-confirm .bptcl-btn{min-height:38px;font-size:11px;padding:5px 9px}
+/* Étape 2 */
+.bptcl-players-wrap{height:100%;min-height:0;display:grid;grid-template-rows:minmax(0,1fr) auto;gap:var(--gap);overflow:hidden}
+.bptcl-players-main{min-width:0;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr);gap:clamp(3px,.7cqh,8px);overflow:hidden}
+.bptcl-players-summary{min-width:0;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:clamp(9px,1.7cqh,14px);line-height:1.05;color:#a9c6bc;white-space:nowrap}
+.bptcl-players-summary strong{color:#f0cf79;font-size:clamp(11px,2.2cqh,18px)}
+.bptcl-players{min-height:0;display:grid;grid-template-columns:repeat(var(--bptcl-cols,2),minmax(0,1fr));grid-template-rows:repeat(var(--bptcl-rows,1),minmax(0,1fr));grid-auto-flow:column;gap:clamp(3px,.7cqh,9px);overflow:hidden}
+.bptcl-player{box-sizing:border-box;min-width:0;min-height:0;display:flex;align-items:center;gap:clamp(4px,.6cqw,9px);border:1px solid #31574c;border-radius:clamp(6px,1cqh,11px);background:#0d2f28;padding:clamp(2px,.5cqh,8px) clamp(4px,.8cqw,12px);color:#eef5f2;font-size:var(--bptcl-player-font,12px);font-weight:750;line-height:1.04;overflow:hidden}
+.bptcl-player input{width:clamp(14px,2.6cqh,20px);height:clamp(14px,2.6cqh,20px);flex:0 0 auto;margin:0;accent-color:#f2c853}
+.bptcl-player span{min-width:0;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.bptcl-player.is-selected{border-color:#d7ae4d;background:#173d32}
+.bptcl-add-row{min-width:0;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto;gap:clamp(4px,.7cqw,9px);align-items:center}
+.bptcl-add-select,.bptcl-add-input{box-sizing:border-box;min-width:0;width:100%;height:clamp(32px,6.2cqh,46px);border:1px solid #36574d;border-radius:var(--radius);background:#101a22;color:#fff;padding:0 clamp(7px,1cqw,12px);font:inherit;font-size:clamp(10px,1.8cqh,14px)}
+.bptcl-add-btn{height:clamp(32px,6.2cqh,46px)!important;min-height:0!important;font-size:clamp(10px,1.8cqh,14px)!important;padding:0 clamp(7px,1cqw,12px)!important;white-space:nowrap}
 
-.bptcl-bounty{height:100%;display:grid;grid-template-columns:1fr;align-content:center;justify-items:center;text-align:center;gap:7px}.bptcl-bounty-icon{font-size:clamp(28px,8vh,58px);line-height:1}.bptcl-bounty-label{font-size:10px;letter-spacing:.15em;color:#42d4c0}.bptcl-bounty-name{font-size:clamp(20px,6vw,34px);font-weight:950;color:#f0cf79;line-height:1}.bptcl-bounty p{max-width:520px;margin:0;color:#c8d8d2;font-size:clamp(11px,2.8vw,15px);line-height:1.2}
+/* Étape 3 */
+.bptcl-bets{height:100%;min-height:0;display:grid;grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr) minmax(0,1fr) auto;gap:var(--gap);align-content:stretch;overflow:hidden}
+.bptcl-bet-note{font-size:clamp(9px,1.7cqh,14px);line-height:1.15;color:#bdd1ca;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bptcl-bet-card{min-height:0;border-top:1px solid #294d42;padding-top:clamp(4px,.8cqh,10px);display:grid;grid-template-rows:auto minmax(0,1fr);gap:clamp(3px,.6cqh,8px);overflow:hidden}
+.bptcl-bet-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:clamp(14px,2.8cqh,22px);font-weight:900;line-height:1}
+.bptcl-bet-head span{color:#f0cf79}
+.bptcl-select{box-sizing:border-box;width:100%;height:100%;min-height:30px;max-height:var(--control-h);border:1px solid #3a4f5c;border-radius:var(--radius);background:#111a24;color:#fff;padding:0 clamp(8px,1.2cqw,14px);font-size:clamp(11px,2cqh,16px);font-weight:800}
+.bptcl-confirm{min-width:0;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:var(--gap);padding:clamp(4px,.8cqh,10px) clamp(7px,1.1cqw,14px);border:1px solid #9c8442;border-radius:var(--radius);background:#244338;overflow:hidden}
+.bptcl-confirm-copy{min-width:0}.bptcl-confirm-copy strong,.bptcl-confirm-copy small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bptcl-confirm-copy strong{font-size:clamp(9px,1.7cqh,14px)}.bptcl-confirm-copy small{font-size:clamp(8px,1.5cqh,12px);color:#dce8e3}
+.bptcl-confirm .bptcl-btn{height:clamp(30px,5.8cqh,44px);font-size:clamp(9px,1.7cqh,13px)}
 
-@media (orientation:landscape) and (max-height:560px){
-  .bptcl-head{padding:4px 10px}.bptcl-title{font-size:17px}.bptcl-kicker{font-size:9px}.bptcl-step{font-size:9px;padding:3px 7px}
-  .bptcl-body{padding:6px 10px}.bptcl-foot{padding:5px 10px max(5px,env(safe-area-inset-bottom))}.bptcl-btn{min-height:36px;font-size:12px;padding:5px 8px}
-  .bptcl-form{grid-template-columns:repeat(3,1fr);gap:6px}.bptcl-field label{font-size:8px}.bptcl-field input,.bptcl-field select{height:32px;font-size:11px}
-  .bptcl-players{gap:4px}.bptcl-player{padding:2px 5px;font-size:10px}.bptcl-player input{width:15px;height:15px;flex-basis:15px}
-  .bptcl-bets{grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr;gap:8px}.bptcl-bet-note{grid-column:1/-1;font-size:9px}.bptcl-bet-card{padding-top:4px}.bptcl-bet-head{font-size:14px}.bptcl-select{height:34px;font-size:11px}.bptcl-confirm{grid-column:1/-1;padding:4px 6px}.bptcl-confirm .bptcl-btn{min-height:30px;font-size:10px}
-  .bptcl-bounty{grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto auto;column-gap:18px}.bptcl-bounty-icon{grid-row:1/4;font-size:52px}.bptcl-bounty-name{font-size:23px}.bptcl-bounty p{font-size:11px}
+/* Étape 4 */
+.bptcl-bounty{height:100%;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:clamp(4px,1cqh,14px);overflow:hidden}
+.bptcl-bounty-icon{font-size:clamp(34px,11cqh,76px);line-height:1}
+.bptcl-bounty-label{font-size:clamp(9px,1.8cqh,13px);letter-spacing:.12em;color:#d5bb74;font-weight:800}
+.bptcl-bounty-name{font-size:clamp(20px,5.5cqh,44px);line-height:1;font-weight:950;color:#f5d36f}
+.bptcl-bounty p{max-width:760px;margin:0;font-size:clamp(10px,2cqh,17px);line-height:1.15;color:#c7d8d2}
+
+/* Même composants, réorganisation automatique selon la place réellement disponible. */
+@container (min-width:680px){
+  .bptcl-form{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr))}
+  .bptcl-players-wrap{grid-template-columns:minmax(0,1fr) minmax(250px,30cqw);grid-template-rows:minmax(0,1fr)}
+  .bptcl-add-row{grid-template-columns:1fr;grid-template-rows:repeat(4,minmax(0,1fr));align-content:center;padding:clamp(8px,1.5cqh,18px);border:1px solid #31574c;border-radius:var(--radius);background:#0b2a23}
+  .bptcl-add-select,.bptcl-add-input,.bptcl-add-btn{height:100%!important;min-height:32px!important}
+  .bptcl-bets{grid-template-columns:1fr 1fr;grid-template-rows:auto minmax(0,1fr) auto}
+  .bptcl-bet-note,.bptcl-confirm{grid-column:1/-1}
+  .bptcl-foot{grid-template-columns:minmax(160px,.75fr) minmax(220px,1.25fr)}
+  .bptcl-foot.one{grid-template-columns:minmax(220px,520px);justify-content:end}
 }
 
-/* V10.0.1 — joueurs connus/inactifs/nouveaux + layouts orientation dédiés */
-.bptcl-players-wrap{display:grid;grid-template-rows:minmax(0,1fr) auto;gap:6px;height:100%;min-height:0}
-.bptcl-players-main{min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr);gap:5px}
-.bptcl-add-row{display:grid;grid-template-columns:minmax(0,1.2fr) auto minmax(0,1fr) auto;gap:5px;align-items:center;min-height:0}
-.bptcl-add-select,.bptcl-add-input{min-width:0;width:100%;height:34px;box-sizing:border-box;border:1px solid #36574d;border-radius:8px;background:#101a22;color:#fff;padding:0 7px;font:inherit;font-size:11px}
-.bptcl-add-btn{min-height:34px!important;height:34px;padding:4px 8px!important;font-size:10px!important;white-space:nowrap!important}
-#bptCleanLive.is-portrait .bptcl-add-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"inactive addInactive" "new addNew"}
-#bptCleanLive.is-portrait .bptcl-add-select{grid-area:inactive}
-#bptCleanLive.is-portrait .bptcl-add-row>.bptcl-add-btn:nth-of-type(1){grid-area:addInactive}
-#bptCleanLive.is-portrait .bptcl-add-input{grid-area:new}
-#bptCleanLive.is-portrait .bptcl-add-row>.bptcl-add-btn:nth-of-type(2){grid-area:addNew}
-#bptCleanLive.is-landscape .bptcl-players-wrap{grid-template-columns:minmax(0,1fr) minmax(250px,32%);grid-template-rows:minmax(0,1fr);gap:8px}
-#bptCleanLive.is-landscape .bptcl-add-row{grid-template-columns:minmax(0,1fr) auto;align-content:center;grid-auto-rows:34px}
-@media (max-height:520px) and (orientation:landscape){
-  .bptcl-add-select,.bptcl-add-input,.bptcl-add-btn{height:30px!important;min-height:30px!important;font-size:9px!important}
-  .bptcl-players-summary{font-size:9px}.bptcl-players-summary strong{font-size:11px}
+@container (min-width:1100px) and (min-height:620px){
+  .bptcl-shell{--pad-x:32px;--pad-y:18px;--gap:14px;--control-h:56px}
+  .bptcl-head{padding-left:32px;padding-right:32px}
+  .bptcl-title{font-size:34px}.bptcl-kicker{font-size:13px}.bptcl-step{font-size:13px}
+  .bptcl-form{width:min(1120px,100%);margin:auto;gap:18px 22px}
+  .bptcl-field label{font-size:13px}.bptcl-field input,.bptcl-field select{font-size:16px}
+  .bptcl-players-wrap{width:min(1320px,100%);margin:auto;grid-template-columns:minmax(0,1fr) 340px;gap:20px}
+  .bptcl-players-summary{font-size:14px}.bptcl-players-summary strong{font-size:18px}
+  .bptcl-bets{width:min(1040px,100%);margin:auto;gap:18px 24px}.bptcl-bet-note{text-align:center;font-size:15px}
+}
+
+/* Faible hauteur : on réduit la décoration, jamais le contenu utile. */
+@container (max-height:480px){
+  .bptcl-shell{--pad-y:4px;--gap:4px;--control-h:36px}
+  .bptcl-kicker{display:none}.bptcl-head{padding-top:4px;padding-bottom:4px}.bptcl-title{font-size:18px}.bptcl-step{font-size:9px;padding:3px 7px}
+  .bptcl-add-row{gap:4px}.bptcl-add-select,.bptcl-add-input,.bptcl-add-btn{height:30px!important;min-height:30px!important}
+  .bptcl-bet-note{font-size:9px}.bptcl-bounty-icon{font-size:34px}.bptcl-bounty-name{font-size:22px}
+}
+
+@container (max-width:540px){
+  .bptcl-head{gap:6px}.bptcl-title{font-size:clamp(16px,3.2cqh,22px)}
+  .bptcl-add-row{grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto}
+  .bptcl-add-select{grid-column:1}.bptcl-add-row>.bptcl-add-btn:nth-of-type(1){grid-column:2}
+  .bptcl-add-input{grid-column:1}.bptcl-add-row>.bptcl-add-btn:nth-of-type(2){grid-column:2}
+  .bptcl-foot{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr)}
+  .bptcl-btn{padding-left:6px;padding-right:6px}
 }
