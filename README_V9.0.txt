@@ -1,3 +1,5 @@
+BPT V10.0.1 — Live joueurs + orientation
+
 BPT V10.0.0 — Pré-Live en 4 étapes
 
 Cette version conserve la logique métier existante et ne modifie pas l'écran de partie en cours.

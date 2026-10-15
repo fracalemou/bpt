@@ -39,3 +39,21 @@
   .bptcl-bets{grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr;gap:8px}.bptcl-bet-note{grid-column:1/-1;font-size:9px}.bptcl-bet-card{padding-top:4px}.bptcl-bet-head{font-size:14px}.bptcl-select{height:34px;font-size:11px}.bptcl-confirm{grid-column:1/-1;padding:4px 6px}.bptcl-confirm .bptcl-btn{min-height:30px;font-size:10px}
   .bptcl-bounty{grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto auto;column-gap:18px}.bptcl-bounty-icon{grid-row:1/4;font-size:52px}.bptcl-bounty-name{font-size:23px}.bptcl-bounty p{font-size:11px}
 }
+
+/* V10.0.1 — joueurs connus/inactifs/nouveaux + layouts orientation dédiés */
+.bptcl-players-wrap{display:grid;grid-template-rows:minmax(0,1fr) auto;gap:6px;height:100%;min-height:0}
+.bptcl-players-main{min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr);gap:5px}
+.bptcl-add-row{display:grid;grid-template-columns:minmax(0,1.2fr) auto minmax(0,1fr) auto;gap:5px;align-items:center;min-height:0}
+.bptcl-add-select,.bptcl-add-input{min-width:0;width:100%;height:34px;box-sizing:border-box;border:1px solid #36574d;border-radius:8px;background:#101a22;color:#fff;padding:0 7px;font:inherit;font-size:11px}
+.bptcl-add-btn{min-height:34px!important;height:34px;padding:4px 8px!important;font-size:10px!important;white-space:nowrap!important}
+#bptCleanLive.is-portrait .bptcl-add-row{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"inactive addInactive" "new addNew"}
+#bptCleanLive.is-portrait .bptcl-add-select{grid-area:inactive}
+#bptCleanLive.is-portrait .bptcl-add-row>.bptcl-add-btn:nth-of-type(1){grid-area:addInactive}
+#bptCleanLive.is-portrait .bptcl-add-input{grid-area:new}
+#bptCleanLive.is-portrait .bptcl-add-row>.bptcl-add-btn:nth-of-type(2){grid-area:addNew}
+#bptCleanLive.is-landscape .bptcl-players-wrap{grid-template-columns:minmax(0,1fr) minmax(250px,32%);grid-template-rows:minmax(0,1fr);gap:8px}
+#bptCleanLive.is-landscape .bptcl-add-row{grid-template-columns:minmax(0,1fr) auto;align-content:center;grid-auto-rows:34px}
+@media (max-height:520px) and (orientation:landscape){
+  .bptcl-add-select,.bptcl-add-input,.bptcl-add-btn{height:30px!important;min-height:30px!important;font-size:9px!important}
+  .bptcl-players-summary{font-size:9px}.bptcl-players-summary strong{font-size:11px}
+}

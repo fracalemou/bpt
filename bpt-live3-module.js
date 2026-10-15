@@ -2040,6 +2040,19 @@ function connectionDeviceLabel(){
     if(!location){alert("Indiquez le nom / lieu de la partie.");return;}
     if(selected.length<2){alert("Sélectionnez au moins 2 joueurs.");return;}
 
+    // Tout participant au Live doit être présent et actif dans Paramètres > Joueurs.
+    let directoryChanged=false;
+    for(const name of selected){
+      let p=(db?.players||[]).find(x=>String(x?.name||"").trim().localeCompare(String(name).trim(),"fr",{sensitivity:"base"})===0);
+      if(!p){ db.players.push({name:String(name).trim(),nickname:"",active:true}); directoryChanged=true; }
+      else if(p.active!==true){ p.active=true; directoryChanged=true; }
+    }
+    if(directoryChanged){
+      saveDB();
+      try{ window.renderAll?.(); }catch(_e){}
+      try{ window.bptNotifySettingsPlayers?.(); }catch(_e){}
+    }
+
     $3("live3CreateBtn").disabled=true;
     $3("live3CreateStatus").textContent="Création…";
 
@@ -3348,43 +3361,33 @@ async function requestTakeover(){
       return;
     }
 
-    const known=(db?.players||[]).find(
+    let known=(db?.players||[]).find(
       p=>String(p?.name||"").trim().localeCompare(clean,"fr",{sensitivity:"base"})===0
     );
 
-    const canonical=known ? String(known.name).trim() : clean;
-
-    const activeAlready=(db?.players||[]).some(
-      p=>p?.active===true &&
-         String(p.name||"").trim().localeCompare(canonical,"fr",{sensitivity:"base"})===0
-    );
-
-    if(activeAlready){
-      // Le joueur est déjà visible : on se contente de le cocher.
-      const existing=[...document.querySelectorAll('#live3PlayerPicker input[type="checkbox"]')]
-        .find(cb=>String(cb.value).localeCompare(canonical,"fr",{sensitivity:"base"})===0);
-      if(existing)existing.checked=true;
-      updateMobilePlayerSelectionCount();
-      input.value="";
-      if(hint)hint.textContent=`${canonical} est déjà un joueur actif et a été sélectionné.`;
-      renderStructurePreview();
-      return;
+    if(known){
+      known.active=true;
+    }else{
+      known={name:clean,nickname:"",active:true};
+      db.players.push(known);
     }
+    const canonical=String(known.name).trim();
 
-    const duplicateTemp=[...live3TemporaryPlayers].some(
-      n=>String(n).localeCompare(canonical,"fr",{sensitivity:"base"})===0
-    );
-
-    if(!duplicateTemp)live3TemporaryPlayers.add(canonical);
-
-    input.value="";
+    // Règle BPT : un joueur qui rejoint une partie existe dans Paramètres et est actif.
+    live3TemporaryPlayers.delete(canonical);
+    saveDB();
+    try{ window.renderAll?.(); }catch(_e){}
+    try{ window.bptNotifySettingsPlayers?.(); }catch(_e){}
     renderPrepPlayers();
 
-    if(hint){
-      hint.textContent=known
-        ? `${canonical} participera à cette partie et redeviendra actif lors de la publication.`
-        : `${canonical} participera à cette partie et sera ajouté aux joueurs actifs lors de la publication.`;
-    }
+    const existing=[...document.querySelectorAll('#live3PlayerPicker input[type="checkbox"]')]
+      .find(cb=>String(cb.value).localeCompare(canonical,"fr",{sensitivity:"base"})===0);
+    if(existing)existing.checked=true;
+
+    input.value="";
+    updateMobilePlayerSelectionCount();
+    renderStructurePreview();
+    if(hint)hint.textContent=`${canonical} est maintenant actif et sélectionné pour cette partie.`;
   }
 
   function renderPlayers(target,fullscreen=false){

@@ -21,6 +21,7 @@
     const root=ensure(),nav=$('nav');if(!root||!nav)return;
     const vv=window.visualViewport,viewportH=Math.round(vv?.height||window.innerHeight),offsetTop=Math.round(vv?.offsetTop||0),top=Math.max(0,Math.round(nav.getBoundingClientRect().bottom));
     root.style.top=top+'px';root.style.height=Math.max(220,viewportH-top+offsetTop)+'px';
+    const landscape=(window.innerWidth>window.innerHeight);root.classList.toggle('is-landscape',landscape);root.classList.toggle('is-portrait',!landscape);
   }
   function show(v){const r=ensure();r.classList.toggle('is-visible',!!v)}
   function text(kicker,title,n){$('bptclKicker').textContent=kicker;$('bptclTitle').textContent=title;$('bptclStep').textContent='Étape '+n+' / 4'}
@@ -40,14 +41,52 @@
   }
 
   function playerData(){return [...(legacy().picker?.querySelectorAll('label.bpt-live3-player-check')||[])].map(label=>{const cb=label.querySelector('input[type=checkbox]');return {name:cb?.value||label.querySelector('span')?.textContent||'',checked:!!cb?.checked,cb}}).filter(x=>x.name)}
-  function setPlayerFit(count){const root=ensure(),body=$('bptclBody');const landscape=matchMedia('(orientation: landscape)').matches;const w=root.clientWidth,h=body.clientHeight;let cols;
-    if(landscape)cols=count<=12?3:count<=20?4:5; else cols=count<=10?2:count<=18?3:4;
-    const rows=Math.max(1,Math.ceil(count/cols));root.style.setProperty('--bptcl-cols',cols);root.style.setProperty('--bptcl-rows',rows);root.style.setProperty('--bptcl-player-font',(landscape?10:Math.max(10.5,Math.min(13,w/(cols*12))))+'px');
+  function inactivePlayers(){
+    try{return (db?.players||[]).filter(p=>p&&p.active!==true&&String(p.name||'').trim()).map(p=>String(p.name).trim()).sort((a,b)=>a.localeCompare(b,'fr',{sensitivity:'base'}))}catch(_e){return []}
+  }
+  function setPlayerFit(count){
+    const root=ensure(),body=$('bptclBody');
+    const landscape=matchMedia('(orientation: landscape)').matches;
+    root.classList.toggle('is-landscape',landscape);root.classList.toggle('is-portrait',!landscape);
+    const grid=$('bptclPlayerGrid'); if(!grid)return;
+    const h=Math.max(1,grid.clientHeight),w=Math.max(1,grid.clientWidth);
+    const minCellH=landscape?31:34, maxRows=Math.max(1,Math.floor(h/minCellH));
+    let cols=Math.max(2,Math.ceil(count/maxRows));
+    cols=Math.min(landscape?6:4,cols);
+    const rows=Math.max(1,Math.ceil(count/cols));
+    root.style.setProperty('--bptcl-cols',cols);
+    root.style.setProperty('--bptcl-rows',rows);
+    root.style.setProperty('--bptcl-player-font',(landscape?Math.max(9.5,Math.min(12,w/(cols*13))):Math.max(10.5,Math.min(13,w/(cols*12))))+'px');
+  }
+  function useLegacyAdd(name){
+    const clean=String(name||'').trim().replace(/\s+/g,' ');if(!clean)return;
+    const hidden=$('live3NewPlayerName'),add=$('live3AddNewPlayerBtn');
+    if(!hidden||!add)return;
+    hidden.value=clean;add.click();
+    setTimeout(()=>render(true),40);
   }
   function renderStep2(){
     text('PRÉPARATION','Sélection des joueurs',2);const body=$('bptclBody'),data=playerData();
-    const wrap=document.createElement('div');wrap.className='bptcl-players-wrap';const sum=document.createElement('div');sum.className='bptcl-players-summary';const count=document.createElement('strong');count.textContent=data.filter(x=>x.checked).length+' sélectionné(s)';const info=document.createElement('span');info.textContent=data.length+' joueur(s) actif(s)';sum.append(count,info);
-    const grid=document.createElement('div');grid.className='bptcl-players';data.forEach(p=>{const lab=document.createElement('label');lab.className='bptcl-player'+(p.checked?' is-selected':'');const cb=document.createElement('input');cb.type='checkbox';cb.checked=p.checked;const sp=document.createElement('span');sp.textContent=p.name;cb.onchange=()=>{p.cb.checked=cb.checked;p.cb.dispatchEvent(new Event('change',{bubbles:true}));lab.classList.toggle('is-selected',cb.checked);count.textContent=grid.querySelectorAll('input:checked').length+' sélectionné(s)'};lab.append(cb,sp);grid.append(lab)});wrap.append(sum,grid);body.replaceChildren(wrap);requestAnimationFrame(()=>setPlayerFit(data.length));
+    const wrap=document.createElement('div');wrap.className='bptcl-players-wrap';
+    const main=document.createElement('div');main.className='bptcl-players-main';
+    const sum=document.createElement('div');sum.className='bptcl-players-summary';
+    const count=document.createElement('strong');count.textContent=data.filter(x=>x.checked).length+' sélectionné(s)';
+    const info=document.createElement('span');info.textContent=data.length+' joueur(s) actif(s)';sum.append(count,info);
+    const grid=document.createElement('div');grid.className='bptcl-players';grid.id='bptclPlayerGrid';
+    data.forEach(p=>{const lab=document.createElement('label');lab.className='bptcl-player'+(p.checked?' is-selected':'');const cb=document.createElement('input');cb.type='checkbox';cb.checked=p.checked;const sp=document.createElement('span');sp.textContent=p.name;cb.onchange=()=>{p.cb.checked=cb.checked;p.cb.dispatchEvent(new Event('change',{bubbles:true}));lab.classList.toggle('is-selected',cb.checked);count.textContent=grid.querySelectorAll('input:checked').length+' sélectionné(s)'};lab.append(cb,sp);grid.append(lab)});
+    main.append(sum,grid);
+
+    const add=document.createElement('div');add.className='bptcl-add-row';
+    const inactive=inactivePlayers();
+    const sel=document.createElement('select');sel.className='bptcl-add-select';
+    const first=document.createElement('option');first.value='';first.textContent=inactive.length?'Réactiver un joueur inactif…':'Aucun joueur inactif';sel.append(first);
+    inactive.forEach(name=>{const o=document.createElement('option');o.value=name;o.textContent=name;sel.append(o)});
+    const reactivate=btn('Ajouter',false,()=>{if(sel.value)useLegacyAdd(sel.value)},!inactive.length);reactivate.classList.add('bptcl-add-btn');
+    const input=document.createElement('input');input.className='bptcl-add-input';input.type='text';input.placeholder='Nouveau joueur';input.autocomplete='off';
+    const create=btn('Créer + ajouter',true,()=>{if(!input.value.trim()){input.focus();return;}useLegacyAdd(input.value);input.value=''});create.classList.add('bptcl-add-btn');
+    input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();create.click()}});
+    add.append(sel,reactivate,input,create);
+    wrap.append(main,add);body.replaceChildren(wrap);requestAnimationFrame(()=>setPlayerFit(data.length));
     foot([btn('← Retour',false,()=>{step=1;render(true)}),btn('Continuer →',true,()=>{const n=playerData().filter(x=>x.checked).length;if(n<2){alert('Sélectionnez au moins 2 joueurs.');return;}legacy().create?.click()})]);
   }
 
