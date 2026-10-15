@@ -1,0 +1,250 @@
+/* BPT 10.2.0 — Live horizontal unique.
+   Un seul layout pour PC + téléphone paysage. Les composants changent de taille,
+   jamais de structure. En téléphone portrait, on demande de tourner l'appareil. */
+
+#bptLandscapeLive{
+  position:fixed;
+  left:0; right:0;
+  z-index:9500;
+  display:none;
+  box-sizing:border-box;
+  overflow:hidden;
+  background:linear-gradient(180deg,#061f1a 0%,#082a23 100%);
+  color:#f4f8f6;
+  font-family:inherit;
+  container-type:size;
+
+  --u:min(1cqw,1.9cqh);
+  --gap:clamp(4px,calc(var(--u)*1.1),14px);
+  --pad-x:clamp(8px,calc(var(--u)*2.2),30px);
+  --pad-y:clamp(5px,calc(var(--u)*1.25),18px);
+  --radius:clamp(7px,calc(var(--u)*1.2),14px);
+  --control-h:clamp(30px,calc(var(--u)*5.2),56px);
+  --font-s:clamp(9px,calc(var(--u)*1.18),14px);
+  --font-m:clamp(11px,calc(var(--u)*1.55),17px);
+  --font-l:clamp(17px,calc(var(--u)*2.65),34px);
+}
+#live3.active #bptLandscapeLive.is-visible{display:block}
+#live3.active .bpt-live3-hero,
+#live3.active #live3Prep{display:none!important}
+#live3.active .bpt484-live.is-pregame .bpt-pregame,
+#live3.active .bpt484-live.is-pregame>.bpt-bounty-overlay{display:none!important}
+
+.bptll-shell{
+  height:100%; min-height:0;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr) auto;
+  overflow:hidden;
+}
+.bptll-head{
+  min-height:0;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:var(--gap);
+  padding:var(--pad-y) var(--pad-x);
+  border-bottom:1px solid #21483e;
+  background:#0a191d;
+}
+.bptll-head-left{min-width:0}
+.bptll-kicker{
+  font-size:var(--font-s); line-height:1; letter-spacing:.13em;
+  color:#45d6c3; text-transform:uppercase; white-space:nowrap;
+}
+.bptll-title{
+  margin:2px 0 0;
+  font-size:var(--font-l); line-height:1;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.bptll-step{
+  flex:0 0 auto;
+  padding:clamp(3px,calc(var(--u)*.7),8px) clamp(7px,calc(var(--u)*1.2),14px);
+  border:1px solid #2ac9c2; border-radius:999px;
+  color:#8df0e3; font-size:var(--font-s); font-weight:800; white-space:nowrap;
+}
+.bptll-body{
+  min-height:0; overflow:hidden;
+  padding:var(--pad-y) var(--pad-x);
+  display:grid;
+}
+.bptll-foot{
+  display:grid;
+  grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);
+  gap:var(--gap);
+  padding:var(--pad-y) var(--pad-x) max(var(--pad-y),env(safe-area-inset-bottom));
+  border-top:1px solid #21483e;
+  background:#071f1a;
+}
+.bptll-foot.one{grid-template-columns:minmax(220px,520px);justify-content:end}
+.bptll-btn{
+  min-width:0;
+  height:var(--control-h);
+  box-sizing:border-box;
+  border:1px solid #376b5c;
+  border-radius:var(--radius);
+  background:#144c40;
+  color:#f4f7f5;
+  padding:0 clamp(8px,calc(var(--u)*1.3),18px);
+  font:inherit; font-size:var(--font-m); font-weight:900;
+  line-height:1.04; white-space:normal; overflow:hidden;
+}
+.bptll-btn.primary{border-color:#e1b957;background:#f2c853;color:#172018}
+.bptll-btn:disabled{opacity:.5}
+
+/* Étape 1 : structure unique 3 x 2. */
+.bptll-form{
+  width:min(1180px,100%); height:100%; min-height:0; margin:auto;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-template-rows:repeat(2,minmax(0,1fr));
+  gap:var(--gap);
+}
+.bptll-field{
+  min-width:0; min-height:0;
+  display:grid; grid-template-rows:auto minmax(0,1fr);
+  gap:clamp(2px,calc(var(--u)*.45),7px);
+}
+.bptll-field label{
+  font-size:var(--font-s); color:#a8c4ba; font-weight:750;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.bptll-field input,.bptll-field select,
+.bptll-select,.bptll-add-select,.bptll-add-input{
+  width:100%; min-width:0; box-sizing:border-box;
+  height:100%; min-height:28px; max-height:var(--control-h);
+  border:1px solid #36574d; border-radius:var(--radius);
+  background:#101a22; color:#fff;
+  padding:0 clamp(7px,calc(var(--u)*1.1),14px);
+  font:inherit; font-size:var(--font-m);
+}
+
+/* Étape 2 : structure unique liste + panneau latéral. */
+.bptll-players-wrap{
+  width:min(1480px,100%); height:100%; min-height:0; margin:auto;
+  display:grid;
+  grid-template-columns:minmax(0,3.4fr) minmax(190px,1fr);
+  gap:var(--gap);
+  overflow:hidden;
+}
+.bptll-players-main{
+  min-width:0; min-height:0;
+  display:grid; grid-template-rows:auto minmax(0,1fr);
+  gap:clamp(3px,calc(var(--u)*.65),9px);
+  overflow:hidden;
+}
+.bptll-players-summary{
+  min-width:0;
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  font-size:var(--font-s); color:#a9c6bc; white-space:nowrap;
+}
+.bptll-players-summary strong{color:#f0cf79;font-size:var(--font-m)}
+.bptll-players{
+  min-height:0;
+  display:grid;
+  grid-template-columns:repeat(var(--bptll-cols,4),minmax(0,1fr));
+  grid-template-rows:repeat(var(--bptll-rows,1),minmax(0,1fr));
+  grid-auto-flow:column;
+  gap:clamp(3px,calc(var(--u)*.6),9px);
+  overflow:hidden;
+}
+.bptll-player{
+  min-width:0; min-height:0; box-sizing:border-box;
+  display:flex; align-items:center;
+  gap:clamp(4px,calc(var(--u)*.65),9px);
+  border:1px solid #31574c; border-radius:var(--radius);
+  background:#0d2f28;
+  padding:clamp(2px,calc(var(--u)*.45),8px) clamp(4px,calc(var(--u)*.75),12px);
+  color:#eef5f2;
+  font-size:var(--bptll-player-font,12px); font-weight:750; line-height:1.03;
+  overflow:hidden;
+}
+.bptll-player input{
+  width:clamp(13px,calc(var(--u)*1.75),21px);
+  height:clamp(13px,calc(var(--u)*1.75),21px);
+  flex:0 0 auto; margin:0; accent-color:#f2c853;
+}
+.bptll-player span{
+  min-width:0; overflow-wrap:anywhere;
+  display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden;
+}
+.bptll-player.is-selected{border-color:#d7ae4d;background:#173d32}
+.bptll-add-panel{
+  min-width:0; min-height:0;
+  display:grid;
+  grid-template-rows:auto minmax(0,1fr) auto minmax(0,1fr);
+  gap:var(--gap);
+  padding:var(--gap);
+  border:1px solid #31574c; border-radius:var(--radius);
+  background:#0b2a23;
+  overflow:hidden;
+}
+.bptll-add-label{font-size:var(--font-s);color:#a9c6bc;font-weight:800}
+.bptll-add-actions{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:var(--gap);align-items:stretch}
+.bptll-add-actions .bptll-btn{height:100%;min-height:28px;font-size:var(--font-s);padding-inline:clamp(6px,calc(var(--u)*.8),12px)}
+.bptll-add-select,.bptll-add-input{height:100%;max-height:none;font-size:var(--font-s)}
+
+/* Étape 3 : toujours 2 tuiles côte à côte. */
+.bptll-bets{
+  width:min(1180px,100%); height:100%; min-height:0; margin:auto;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  grid-template-rows:auto minmax(0,1fr) auto;
+  gap:var(--gap);
+  overflow:hidden;
+}
+.bptll-bet-note{
+  grid-column:1/-1;
+  margin:0; font-size:var(--font-s); color:#bdd1ca; text-align:center;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.bptll-bet-card{
+  min-width:0; min-height:0;
+  display:grid; grid-template-rows:auto minmax(0,1fr);
+  gap:clamp(3px,calc(var(--u)*.55),8px);
+  padding:clamp(5px,calc(var(--u)*.9),12px);
+  border:1px solid #294d42; border-radius:var(--radius);
+  background:#0b2a23;
+  overflow:hidden;
+}
+.bptll-bet-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:clamp(13px,calc(var(--u)*2),24px);font-weight:900;line-height:1}
+.bptll-bet-head span{color:#f0cf79}
+.bptll-confirm{
+  grid-column:1/-1;
+  min-width:0;
+  display:grid; grid-template-columns:minmax(0,1fr) auto;
+  align-items:center; gap:var(--gap);
+  padding:clamp(4px,calc(var(--u)*.7),10px) clamp(7px,calc(var(--u)*1),14px);
+  border:1px solid #9c8442; border-radius:var(--radius); background:#244338;
+  overflow:hidden;
+}
+.bptll-confirm-copy{min-width:0}
+.bptll-confirm-copy strong,.bptll-confirm-copy small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bptll-confirm-copy strong{font-size:var(--font-s)}
+.bptll-confirm-copy small{font-size:clamp(8px,calc(var(--u)*1),12px);color:#dce8e3}
+.bptll-confirm .bptll-btn{height:clamp(28px,calc(var(--u)*4.4),44px);font-size:var(--font-s)}
+
+/* Étape 4 */
+.bptll-bounty{
+  height:100%; min-height:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; gap:clamp(4px,calc(var(--u)*.9),14px);
+  overflow:hidden;
+}
+.bptll-bounty-icon{font-size:clamp(30px,calc(var(--u)*6.3),78px);line-height:1}
+.bptll-bounty-label{font-size:var(--font-s);letter-spacing:.12em;color:#d5bb74;font-weight:800}
+.bptll-bounty-name{font-size:clamp(20px,calc(var(--u)*4.1),46px);line-height:1;font-weight:950;color:#f5d36f}
+.bptll-bounty p{max-width:760px;margin:0;font-size:var(--font-m);line-height:1.12;color:#c7d8d2}
+
+/* Portrait téléphone : aucune recomposition. On demande simplement le paysage. */
+#bptLandscapeRotate{
+  position:fixed; inset:0; z-index:9600; display:none;
+  align-items:center; justify-content:center; text-align:center;
+  padding:28px; box-sizing:border-box;
+  background:#061f1a; color:#fff;
+}
+#bptLandscapeRotate .inner{max-width:360px}
+#bptLandscapeRotate .icon{font-size:54px;line-height:1;margin-bottom:14px}
+#bptLandscapeRotate strong{display:block;font-size:22px;margin-bottom:8px}
+#bptLandscapeRotate span{font-size:14px;color:#b9d2c9}
+@media (max-width:900px) and (orientation:portrait){
+  #live3.active #bptLandscapeRotate.is-visible{display:flex}
+  #live3.active #bptLandscapeLive.is-visible{visibility:hidden}
+}
