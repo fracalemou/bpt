@@ -1,4 +1,4 @@
-/* BPT 10.4.3 — Pré-Live mobile-first.
+/* BPT 10.4.4 — Pré-Live mobile-first.
    UNE structure HTML. UNE grille horizontale. Le téléphone paysage est la référence.
    Le PC utilise exactement la même structure avec des dimensions qui grandissent.
    Aucun correctif historique n'est repris dans ce fichier. */
@@ -175,22 +175,24 @@
 .bptll-player-scroll{
   min-height:0;
   height:100%;
-  overflow:hidden;
-  padding:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:0 4px 0 0;
+  touch-action:pan-y;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-gutter:stable;
 }
 .bptll-player-list{
-  --player-cols:4;
-  --player-gap:4px;
-  --player-row-h:48px;
   width:100%;
-  height:100%;
   min-height:0;
   display:grid;
-  grid-template-columns:repeat(var(--player-cols),minmax(0,1fr));
-  grid-auto-rows:minmax(0,var(--player-row-h));
-  gap:var(--player-gap);
-  align-content:center;
-  overflow:hidden;
+  grid-template-columns:repeat(auto-fill,minmax(clamp(150px,18cqw,230px),1fr));
+  grid-auto-rows:minmax(clamp(46px,9cqh,64px),auto);
+  gap:clamp(4px,.8cqh,8px);
+  align-content:start;
+  overflow:visible;
+  padding-bottom:4px;
 }
 .bptll-player-card{
   min-width:0; box-sizing:border-box;
@@ -332,34 +334,10 @@ body.bpt-live-landscape-open nav#nav{
   }
 }
 
-/* V10.4.3 — Étape Joueurs paginée, zéro scroll. */
-.bptll-player-pagebox{
-  overflow:hidden!important;
-  touch-action:none;
-}
-.bptll-player-pager{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:clamp(4px,.6cqw,8px);
-  min-width:0;
-}
-.bptll-player-pager[hidden]{display:none!important}
-.bptll-player-pager .bptll-page-btn{
-  width:clamp(28px,4.5cqh,38px);
-  min-width:28px;
-  height:clamp(24px,4.8cqh,34px);
-  padding:0;
-  border-radius:8px;
-  font-size:clamp(16px,4cqh,22px);
-  line-height:1;
-}
-.bptll-player-pager .bptll-page-btn:disabled{opacity:.35;cursor:default}
-.bptll-page-label{
-  min-width:clamp(68px,9cqw,110px);
-  text-align:center;
-  white-space:nowrap;
-  color:#d6e8e1;
-  font-weight:800;
-  font-size:var(--fs-xs);
-}
+
+/* V10.4.4 — Liste joueurs continue et scrollable.
+   Le footer reste hors de la zone de scroll. */
+.bptll-player-scroll::-webkit-scrollbar{width:8px}
+.bptll-player-scroll::-webkit-scrollbar-track{background:#08251f;border-radius:999px}
+.bptll-player-scroll::-webkit-scrollbar-thumb{background:#2f7667;border-radius:999px}
+.bptll-player-scroll{scrollbar-width:thin;scrollbar-color:#2f7667 #08251f}

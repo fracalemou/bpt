@@ -135,43 +135,7 @@
     input.value=clean;add.click();setTimeout(()=>render(true),120);
   }
 
-  let playerPage=0;
   let playerQuery='';
-
-  function playerPageLayout(box,count){
-    const w=Math.max(1,box?.clientWidth||1),h=Math.max(1,box?.clientHeight||1);
-    const gap=Math.max(3,Math.min(8,Math.round(Math.min(w,h)*0.010)));
-
-    // Une seule règle pour tous les écrans : on exploite toute la surface réellement disponible.
-    // Sur téléphone paysage on vise ~5 colonnes et plusieurs lignes ; sur PC la grille s'élargit
-    // naturellement jusqu'à pouvoir afficher presque/tous les joueurs sur une seule page.
-    const targetW=Math.max(145,Math.min(220,Math.round(w/6)));
-    const targetH=Math.max(44,Math.min(64,Math.round(h/5)));
-    let cols=Math.max(1,Math.floor((w+gap)/(targetW+gap)));
-    let rows=Math.max(1,Math.floor((h+gap)/(targetH+gap)));
-
-    // Si tous les joueurs peuvent tenir avec une grille légèrement plus dense, on évite une page
-    // supplémentaire inutile sans descendre sous les tailles minimales de lisibilité.
-    const minW=132,minH=40;
-    while(cols*rows < (count||1)) {
-      const canAddCol=(w+gap)/(cols+1)-gap >= minW;
-      const canAddRow=(h+gap)/(rows+1)-gap >= minH;
-      if(!canAddCol && !canAddRow) break;
-      const colGain=canAddCol ? rows : -1;
-      const rowGain=canAddRow ? cols : -1;
-      if(colGain>=rowGain) cols++; else rows++;
-    }
-
-    const capacity=Math.max(1,Math.min(count||1,cols*rows));
-    return {cols,rows,capacity,gap,rowH:Math.max(minH,(h-gap*(rows-1))/rows)};
-  }
-
-  function applyPlayerPageGrid(grid,layout){
-    if(!grid||!layout)return;
-    grid.style.setProperty('--player-cols',String(layout.cols));
-    grid.style.setProperty('--player-gap',layout.gap+'px');
-    grid.style.setProperty('--player-row-h',layout.rowH+'px');
-  }
 
   function renderStep2(){
     title('PRÉPARATION','Sélection des joueurs',2);
@@ -191,19 +155,12 @@
 
     const meta=document.createElement('div');meta.className='bptll-player-meta';
     const selectedCount=document.createElement('strong');
-    const pager=document.createElement('div');pager.className='bptll-player-pager';
-    const prev=button('‹',false,()=>{if(playerPage>0){playerPage--;draw()}});
-    prev.classList.add('bptll-page-btn');
-    const pageLabel=document.createElement('span');pageLabel.className='bptll-page-label';
-    const next=button('›',false,()=>{playerPage++;draw()});
-    next.classList.add('bptll-page-btn');
-    pager.append(prev,pageLabel,next);
     const total=document.createElement('span');
-    meta.append(selectedCount,pager,total);
+    meta.append(selectedCount,total);
 
-    const pageBox=document.createElement('div');pageBox.className='bptll-player-scroll bptll-player-pagebox';
+    const scroll=document.createElement('div');scroll.className='bptll-player-scroll';
     const grid=document.createElement('div');grid.className='bptll-player-list';
-    pageBox.append(grid);
+    scroll.append(grid);
 
     function updateSelected(){
       const n=all.filter(p=>p.checked).length;
@@ -238,27 +195,17 @@
       playerQuery=search.value;
       const q=norm(playerQuery);
       const rows=all.filter(p=>!q||norm(p.name).includes(q)||norm(p.nickname).includes(q));
-      const layout=playerPageLayout(pageBox,rows.length);
-      const pageCount=Math.max(1,Math.ceil(rows.length/layout.capacity));
-      playerPage=Math.max(0,Math.min(playerPage,pageCount-1));
-      const from=playerPage*layout.capacity;
-      const pageRows=rows.slice(from,from+layout.capacity);
       grid.replaceChildren();
-      applyPlayerPageGrid(grid,layout);
-      pageRows.forEach(p=>grid.append(makeCard(p)));
+      rows.forEach(p=>grid.append(makeCard(p)));
       if(!rows.length){
         const empty=document.createElement('div');empty.className='bptll-player-empty';empty.textContent='Aucun joueur trouvé.';grid.append(empty);
       }
-      pageLabel.textContent='Page '+(playerPage+1)+' / '+pageCount;
-      prev.disabled=playerPage<=0;
-      next.disabled=playerPage>=pageCount-1;
-      pager.hidden=pageCount<=1;
       total.textContent=rows.length+' joueur'+(rows.length===1?'':'s');
       updateSelected();
     }
 
-    search.addEventListener('input',()=>{playerPage=0;draw()});
-    shell.append(tools,meta,pageBox);body.replaceChildren(shell);
+    search.addEventListener('input',draw);
+    shell.append(tools,meta,scroll);body.replaceChildren(shell);
 
     footer([
       button('← Retour',false,()=>{step=1;render(true)}),
