@@ -32,9 +32,11 @@
     const root=ensure(),nav=$('nav');if(!root)return;
     const vv=window.visualViewport;
     const vh=Math.round(vv?.height||window.innerHeight||document.documentElement.clientHeight||600);
-    const navBottom=nav?Math.max(0,Math.round(nav.getBoundingClientRect().bottom)):0;
-    const available=Math.max(210,vh-navBottom);
-    root.style.top=navBottom+'px';
+    const navVisible=nav&&getComputedStyle(nav).display!=='none';
+    const header=document.querySelector('.bpt-header');
+    const topEdge=navVisible?Math.max(0,Math.round(nav.getBoundingClientRect().bottom)):(header?Math.max(0,Math.round(header.getBoundingClientRect().bottom)):0);
+    const available=Math.max(210,vh-topEdge);
+    root.style.top=topEdge+'px';
     root.style.height=available+'px';
     $('bptLandscapeRotate')?.classList.toggle('is-visible',activeView());
     // La liste des joueurs gère sa propre zone scrollable ; aucun recalcul de grille nécessaire.
@@ -133,6 +135,28 @@
     input.value=clean;add.click();setTimeout(()=>render(true),120);
   }
 
+  let playerPage=0;
+  let playerQuery='';
+
+  function playerPageLayout(box,count){
+    const w=Math.max(1,box?.clientWidth||1),h=Math.max(1,box?.clientHeight||1);
+    const gap=Math.max(4,Math.min(9,Math.round(Math.min(w,h)*0.012)));
+    // Mobile-first : lisibilité avant densité. La même règle s'étend naturellement au PC.
+    const minW=Math.max(118,Math.min(190,Math.round(w*0.145)));
+    const minH=Math.max(42,Math.min(62,Math.round(h*0.22)));
+    const cols=Math.max(1,Math.floor((w+gap)/(minW+gap)));
+    const rows=Math.max(1,Math.floor((h+gap)/(minH+gap)));
+    const capacity=Math.max(1,Math.min(count||1,cols*rows));
+    return {cols,rows,capacity,gap,rowH:Math.max(34,(h-gap*(rows-1))/rows)};
+  }
+
+  function applyPlayerPageGrid(grid,layout){
+    if(!grid||!layout)return;
+    grid.style.setProperty('--player-cols',String(layout.cols));
+    grid.style.setProperty('--player-gap',layout.gap+'px');
+    grid.style.setProperty('--player-row-h',layout.rowH+'px');
+  }
+
   function renderStep2(){
     title('PRÉPARATION','Sélection des joueurs',2);
     const body=$('bptllBody');
@@ -141,7 +165,7 @@
 
     const tools=document.createElement('div');tools.className='bptll-player-tools';
     const search=document.createElement('input');
-    search.type='search';search.className='bptll-player-search';search.placeholder='Rechercher un joueur (nom ou pseudo)…';search.autocomplete='off';
+    search.type='search';search.className='bptll-player-search';search.placeholder='Rechercher un joueur (nom ou pseudo)…';search.autocomplete='off';search.value=playerQuery;
     const addBox=document.createElement('div');addBox.className='bptll-player-add';
     const addLabel=document.createElement('strong');addLabel.textContent='Ajouter un joueur';
     const addInput=document.createElement('input');addInput.type='text';addInput.placeholder='Nom du joueur…';addInput.autocomplete='off';
@@ -151,59 +175,80 @@
 
     const meta=document.createElement('div');meta.className='bptll-player-meta';
     const selectedCount=document.createElement('strong');
-    const total=document.createElement('span');total.textContent=all.length+' joueur(s)';
-    meta.append(selectedCount,total);
+    const pager=document.createElement('div');pager.className='bptll-player-pager';
+    const prev=button('‹',false,()=>{if(playerPage>0){playerPage--;draw()}});
+    prev.classList.add('bptll-page-btn');
+    const pageLabel=document.createElement('span');pageLabel.className='bptll-page-label';
+    const next=button('›',false,()=>{playerPage++;draw()});
+    next.classList.add('bptll-page-btn');
+    pager.append(prev,pageLabel,next);
+    const total=document.createElement('span');
+    meta.append(selectedCount,pager,total);
 
-    const scroll=document.createElement('div');scroll.className='bptll-player-scroll';
+    const pageBox=document.createElement('div');pageBox.className='bptll-player-scroll bptll-player-pagebox';
     const grid=document.createElement('div');grid.className='bptll-player-list';
-    scroll.append(grid);
+    pageBox.append(grid);
 
     function updateSelected(){
       const n=all.filter(p=>p.checked).length;
       selectedCount.textContent=n+' sélectionné(s)';
     }
 
-    function draw(){
-      const q=norm(search.value);
-      const rows=all.filter(p=>!q||norm(p.name).includes(q)||norm(p.nickname).includes(q));
-      grid.replaceChildren();
-      rows.forEach(p=>{
-        const lab=document.createElement('label');lab.className='bptll-player-card'+(p.checked?' is-selected':'');
-        const cb=document.createElement('input');cb.type='checkbox';cb.checked=p.checked;
-        const avatar=document.createElement('span');avatar.className='bptll-player-avatar';
-        avatar.textContent=p.name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();
-        const copy=document.createElement('span');copy.className='bptll-player-copy';
-        const name=document.createElement('strong');name.textContent=p.name;
-        const stats=document.createElement('small');stats.textContent=p.participations+' participation'+(p.participations===1?'':'s');
-        copy.append(name,stats);
-        if(p.nickname){const nick=document.createElement('em');nick.textContent=p.nickname;copy.append(nick)}
-        cb.addEventListener('change',()=>{
-          if(p.cb){
-            p.cb.checked=cb.checked;
-            p.cb.dispatchEvent(new Event('change',{bubbles:true}));
-            p.checked=cb.checked;
-            lab.classList.toggle('is-selected',cb.checked);
-            updateSelected();
-          }else if(cb.checked){
-            // Joueur connu mais actuellement hors de la liste active : le moteur historique
-            // le réactive dans db.players et le sélectionne pour la partie.
-            useLegacyAdd(p.name);
-          }
-        });
-        lab.append(cb,avatar,copy);grid.append(lab);
+    function makeCard(p){
+      const lab=document.createElement('label');lab.className='bptll-player-card'+(p.checked?' is-selected':'');
+      const cb=document.createElement('input');cb.type='checkbox';cb.checked=p.checked;
+      const avatar=document.createElement('span');avatar.className='bptll-player-avatar';
+      avatar.textContent=p.name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();
+      const copy=document.createElement('span');copy.className='bptll-player-copy';
+      const name=document.createElement('strong');name.textContent=p.name;
+      const stats=document.createElement('small');stats.textContent=p.participations+' participation'+(p.participations===1?'':'s');
+      copy.append(name,stats);
+      if(p.nickname){const nick=document.createElement('em');nick.textContent=p.nickname;copy.append(nick)}
+      cb.addEventListener('change',()=>{
+        if(p.cb){
+          p.cb.checked=cb.checked;
+          p.cb.dispatchEvent(new Event('change',{bubbles:true}));
+          p.checked=cb.checked;
+          lab.classList.toggle('is-selected',cb.checked);
+          updateSelected();
+        }else if(cb.checked){
+          useLegacyAdd(p.name);
+        }
       });
+      lab.append(cb,avatar,copy);return lab;
+    }
+
+    function draw(){
+      playerQuery=search.value;
+      const q=norm(playerQuery);
+      const rows=all.filter(p=>!q||norm(p.name).includes(q)||norm(p.nickname).includes(q));
+      const layout=playerPageLayout(pageBox,rows.length);
+      const pageCount=Math.max(1,Math.ceil(rows.length/layout.capacity));
+      playerPage=Math.max(0,Math.min(playerPage,pageCount-1));
+      const from=playerPage*layout.capacity;
+      const pageRows=rows.slice(from,from+layout.capacity);
+      grid.replaceChildren();
+      applyPlayerPageGrid(grid,layout);
+      pageRows.forEach(p=>grid.append(makeCard(p)));
       if(!rows.length){
         const empty=document.createElement('div');empty.className='bptll-player-empty';empty.textContent='Aucun joueur trouvé.';grid.append(empty);
       }
+      pageLabel.textContent='Page '+(playerPage+1)+' / '+pageCount;
+      prev.disabled=playerPage<=0;
+      next.disabled=playerPage>=pageCount-1;
+      pager.hidden=pageCount<=1;
+      total.textContent=rows.length+' joueur'+(rows.length===1?'':'s');
       updateSelected();
     }
-    search.addEventListener('input',draw);
-    shell.append(tools,meta,scroll);body.replaceChildren(shell);draw();
+
+    search.addEventListener('input',()=>{playerPage=0;draw()});
+    shell.append(tools,meta,pageBox);body.replaceChildren(shell);
 
     footer([
       button('← Retour',false,()=>{step=1;render(true)}),
       button('Continuer →',true,()=>{const n=playerData().filter(x=>x.checked).length;if(n<2){alert('Sélectionnez au moins 2 joueurs.');return;}legacy().create?.click()})
     ]);
+    requestAnimationFrame(draw);
   }
 
   function oddsFor(st,type,name){const raw=st?.betting?.odds?.[type]?.[name];const n=Number(raw);return Number.isFinite(n)&&n>0?n:1}

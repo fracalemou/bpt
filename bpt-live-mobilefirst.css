@@ -1,4 +1,4 @@
-/* BPT 10.4.0 — Pré-Live mobile-first.
+/* BPT 10.4.1 — Pré-Live mobile-first.
    UNE structure HTML. UNE grille horizontale. Le téléphone paysage est la référence.
    Le PC utilise exactement la même structure avec des dimensions qui grandissent.
    Aucun correctif historique n'est repris dans ce fichier. */
@@ -175,26 +175,22 @@
 .bptll-player-scroll{
   min-height:0;
   height:100%;
-  overflow-y:auto;
-  overflow-x:hidden;
-  touch-action:pan-y;
-  -webkit-overflow-scrolling:touch;
-  overscroll-behavior-y:contain;
-  scrollbar-gutter:stable;
-  scrollbar-width:thin;
-  scrollbar-color:#49cdb9 #0b211d;
-  padding-right:2px;
+  overflow:hidden;
+  padding:0;
 }
-.bptll-player-scroll *{touch-action:pan-y}
-.bptll-player-scroll::-webkit-scrollbar{width:7px}
-.bptll-player-scroll::-webkit-scrollbar-track{background:#0b211d;border-radius:999px}
-.bptll-player-scroll::-webkit-scrollbar-thumb{background:#49cdb9;border-radius:999px}
 .bptll-player-list{
+  --player-cols:4;
+  --player-gap:4px;
+  --player-row-h:48px;
   width:100%;
+  height:100%;
+  min-height:0;
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(clamp(138px,18cqw,215px),1fr));
-  gap:clamp(3px,.8cqh,8px);
-  align-content:start;
+  grid-template-columns:repeat(var(--player-cols),minmax(0,1fr));
+  grid-auto-rows:minmax(0,var(--player-row-h));
+  gap:var(--player-gap);
+  align-content:center;
+  overflow:hidden;
 }
 .bptll-player-card{
   min-width:0; box-sizing:border-box;
@@ -202,7 +198,7 @@
   grid-template-columns:auto auto minmax(0,1fr);
   align-items:center;
   gap:clamp(4px,.7cqw,8px);
-  min-height:clamp(42px,10cqh,66px);
+  min-height:0; height:100%;
   border:1px solid #31574c; border-radius:var(--radius);
   background:#0d2f28;
   padding:clamp(3px,.7cqh,7px);
@@ -296,6 +292,13 @@
   #live3.active #bptLandscapeLive.is-visible{visibility:hidden}
 }
 
+/* Pendant Pré-Live / Live, les onglets principaux disparaissent :
+   toute la hauteur est réservée à la partie. Même règle sur téléphone et PC. */
+html.bpt-live-landscape-open nav#nav,
+body.bpt-live-landscape-open nav#nav{
+  display:none!important;
+}
+
 /* Densité de l'application hôte : téléphone paysage prioritaire.
    La structure reste identique ; seules les dimensions non métier diminuent. */
 @media (max-height:620px){
@@ -335,22 +338,6 @@
     font-size:9px!important;
     min-height:22px!important;
   }
-  html.bpt-live-landscape-open nav#nav,
-  body.bpt-live-landscape-open nav#nav{
-    min-height:32px!important;
-    height:32px!important;
-    padding:2px 5px!important;
-    gap:2px!important;
-    overflow:hidden!important;
-  }
-  html.bpt-live-landscape-open nav#nav button,
-  body.bpt-live-landscape-open nav#nav button{
-    min-height:27px!important;
-    height:27px!important;
-    padding:2px 8px!important;
-    font-size:10px!important;
-    line-height:1!important;
-  }
   #bptLandscapeLive{
     --gap:4px;
     --px:7px;
@@ -379,8 +366,36 @@
     --fs-md:16px;
     --fs-lg:28px;
   }
-  #bptLandscapeLive .bptll-player-list{
-    grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
-  }
-  #bptLandscapeLive .bptll-player-card{min-height:62px}
+}
+
+/* V10.4.2 — Étape Joueurs paginée, zéro scroll. */
+.bptll-player-pagebox{
+  overflow:hidden!important;
+  touch-action:none;
+}
+.bptll-player-pager{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:clamp(4px,.6cqw,8px);
+  min-width:0;
+}
+.bptll-player-pager[hidden]{display:none!important}
+.bptll-player-pager .bptll-page-btn{
+  width:clamp(28px,4.5cqh,38px);
+  min-width:28px;
+  height:clamp(24px,4.8cqh,34px);
+  padding:0;
+  border-radius:8px;
+  font-size:clamp(16px,4cqh,22px);
+  line-height:1;
+}
+.bptll-player-pager .bptll-page-btn:disabled{opacity:.35;cursor:default}
+.bptll-page-label{
+  min-width:clamp(68px,9cqw,110px);
+  text-align:center;
+  white-space:nowrap;
+  color:#d6e8e1;
+  font-weight:800;
+  font-size:var(--fs-xs);
 }
