@@ -37,12 +37,20 @@
     const landscape=matchMedia('(orientation: landscape)').matches;
     const holder=document.getElementById('live3PrepStep2');
     const h=Math.max(80,holder?.clientHeight||200);
-    const reserve=landscape?70:105;
-    const gridH=Math.max(55,h-reserve);
-    let cols=landscape?Math.ceil(count/3):Math.ceil(count/6);
-    cols=Math.max(landscape?3:2,Math.min(landscape?7:4,cols));
+    // Etape 2 : privilégier la lisibilité, pas seulement le fait de “tenir”.
+    // Portrait : 3 colonnes par défaut, 4 seulement si la liste est très longue.
+    // Paysage : 4 à 6 colonnes selon le nombre de joueurs.
+    const reserve=landscape?62:92;
+    const gridH=Math.max(70,h-reserve);
+    let cols;
+    if(landscape){
+      cols = count<=16 ? 4 : (count<=24 ? 5 : 6);
+    }else{
+      cols = count<=18 ? 3 : 4;
+    }
     const rows=Math.ceil(count/cols);
-    const row=Math.max(24,Math.min(landscape?31:34,Math.floor((gridH-(rows-1)*4)/rows)));
+    const gap=landscape?4:5;
+    const row=Math.max(32,Math.min(landscape?38:42,Math.floor((gridH-(rows-1)*gap)/rows)));
     picker.style.setProperty('--bpt-player-cols',String(cols));
     picker.style.setProperty('--bpt-player-row',row+'px');
   }

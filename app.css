@@ -14938,3 +14938,51 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only {
   .bpt-bounty-card p,.bpt-bounty-card strong{font-size:9px!important;line-height:1.05!important;margin:2px 0!important}
   .bpt-bounty-card [data-bounty-close],.bpt-bounty-card [data-bounty-back]{height:30px!important;min-height:30px!important;margin-top:3px!important;padding:2px 7px!important;font-size:9px!important}
 }
+
+/* ===== BPT V9.0.45 — Etape 2 portrait lisible sans scroll ===== */
+@media (max-width:600px) and (orientation:portrait){
+  #live3PrepStep2{min-height:0!important;}
+  #live3PrepStep2 .bpt-live3-player-picker{
+    gap:5px!important;
+    align-content:start!important;
+    overflow:hidden!important;
+  }
+  #live3PrepStep2 .bpt-live3-player-check{
+    min-width:0!important;
+    height:var(--bpt-player-row,38px)!important;
+    padding:4px 5px!important;
+    font-size:11px!important;
+    line-height:1.05!important;
+    white-space:normal!important;
+    text-align:center!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:4px!important;
+  }
+  #live3PrepStep2 .bpt-live3-player-check span{
+    min-width:0!important;
+    display:-webkit-box!important;
+    -webkit-line-clamp:2!important;
+    -webkit-box-orient:vertical!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    text-align:center!important;
+  }
+  #live3PrepStep2 .bpt-live3-player-check input[type=checkbox]{
+    flex:0 0 auto!important;
+    width:16px!important;
+    height:16px!important;
+    margin:0!important;
+  }
+  #live3PrepStep2 .bpt-live3-new-player{
+    margin-top:4px!important;
+    min-height:30px!important;
+  }
+  #live3PrepStep2 .bpt-live3-new-player input,
+  #live3PrepStep2 #live3AddNewPlayerBtn{
+    height:30px!important;
+    min-height:30px!important;
+    font-size:10px!important;
+  }
+}
