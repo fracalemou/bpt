@@ -1238,6 +1238,7 @@ async function applyCloudState(row){
     currentSeasonHistoryCache=clone(serverHistory);
 
     db=remoteState;
+    bptMigrateLegacyElenPlayerDirectory();
     saveLocalOnly();
     if(remoteActive && !thisDeviceOwnsRemoteLive)cloudLocalDirty=false;
 
@@ -1719,9 +1720,42 @@ function loadDB(){
 }
 let db = loadDB();
 
+// Migration de référentiel : ancienne entrée locale/cloud « Elen » -> « Elen Miron ».
+// La correction est faite dans db.players lui-même afin que Paramètres et Connexion
+// lisent strictement la même source, sans registre parallèle ni filtre spécifique au login.
+function bptMigrateLegacyElenPlayerDirectory(){
+  if(!Array.isArray(db?.players))return false;
+  const key=v=>String(v||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\s+/g," ").trim().toLocaleLowerCase("fr");
+  const legacyKey='elen', canonicalKey='elen miron', canonicalName='Elen Miron';
+  const legacy=db.players.filter(p=>key(p?.name)===legacyKey);
+  let canonicals=db.players.filter(p=>key(p?.name)===canonicalKey);
+  if(!legacy.length && canonicals.length<=1)return false;
+
+  let target=canonicals[0]||null;
+  if(!target && legacy.length){
+    target=legacy[0];
+    target.name=canonicalName;
+  }
+  if(!target)return false;
+
+  const all=[...canonicals,...legacy].filter((p,i,a)=>p&&a.indexOf(p)===i);
+  for(const src of all){
+    if(src===target)continue;
+    if(src.active===true)target.active=true;
+    for(const field of ['nickname','avatarId']){
+      if(!target[field] && src[field])target[field]=src[field];
+    }
+  }
+  target.name=canonicalName;
+  db.players=db.players.filter(p=>p===target || (key(p?.name)!==legacyKey && key(p?.name)!==canonicalKey));
+  return true;
+}
+if(bptMigrateLegacyElenPlayerDirectory())saveLocalOnly();
+
 // Référentiel unique des joueurs : exactement le tableau affiché dans Paramètres > Joueurs.
 // Le login ne doit jamais charger une autre liste de son côté.
 function bptSettingsPlayersSnapshot(){
+  if(bptMigrateLegacyElenPlayerDirectory())saveLocalOnly();
   return JSON.parse(JSON.stringify(Array.isArray(db?.players)?db.players:[]));
 }
 window.bptGetSettingsPlayers=()=>bptSettingsPlayersSnapshot();
@@ -6350,6 +6384,7 @@ function renderHistory(){
 function renderPlayers(){
   const wrap=$("playersAdmin");
   if(!wrap)return;
+  if(bptMigrateLegacyElenPlayerDirectory())saveLocalOnly();
 
   const players=[...db.players].sort((a,b)=>a.name.localeCompare(b.name,"fr",{sensitivity:"base"}));
   bptNotifySettingsPlayers();

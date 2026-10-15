@@ -14743,7 +14743,7 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only {
 .season-history-card.cumulative{border-color:rgba(0,153,178,.75);box-shadow:0 12px 28px rgba(0,153,178,.10)}
 .season-history-card.cumulative .season-status{color:#5bd5e8}
 
-/* BPT V9.0.39 — périmètre autonome Records & accomplissements */
+/* BPT V9.0.41 — périmètre autonome Records & accomplissements */
 .records-scope-selector{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
@@ -14794,7 +14794,7 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only {
   .records-scope-choice{min-height:64px;padding:11px 14px}
 }
 
-/* ===== V9.0.39 — Live mobile : lancement + révélation bounty toujours accessibles ===== */
+/* ===== V9.0.41 — Live mobile : lancement + révélation bounty toujours accessibles ===== */
 @media (max-width: 760px){
   /* L'écran avant-partie ne doit jamais couper les actions en bas. */
   .bpt484-live.is-pregame{
@@ -14891,7 +14891,7 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only {
 }
 
 
-/* ===== V9.0.39 — Classements : saison courante + Archives + Cumul ===== */
+/* ===== V9.0.41 — Classements : saison courante + Archives + Cumul ===== */
 .ranking-season-scope{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;margin:14px 0 8px;position:relative;z-index:30}
 .ranking-season-scope-btn{display:flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:10px 16px;border:1px solid #31594d;border-radius:12px;background:#0b211c;color:#d9ebe3;font-weight:900;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.12)}
 .ranking-season-scope-btn:hover{border-color:#2ac9c2}.ranking-season-scope-btn.active{background:#13c6d9;color:#05242a;border-color:#46e4ee;box-shadow:0 8px 22px rgba(19,198,217,.18)}
@@ -14903,7 +14903,7 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only {
 @media(max-width:700px){.ranking-season-scope{display:grid;grid-template-columns:1.2fr 1fr .8fr;gap:7px;position:sticky;top:0;background:rgba(5,22,18,.96);padding:8px 0;backdrop-filter:blur(8px);z-index:60}.ranking-season-scope-btn{min-width:0;padding:9px 8px;font-size:12px;min-height:44px}.ranking-season-scope-btn.current{min-width:0}.ranking-archive-menu{position:fixed;left:12px;right:12px;top:auto;bottom:84px;min-width:0;max-height:55vh;overflow:auto;border-radius:16px;padding:10px}.ranking-archive-menu button{font-size:15px;padding:14px 12px}.ranking-scope-context{margin:2px 0 10px;padding:0 2px}.ranking-season-scope-btn strong{white-space:nowrap}}
 
 
-/* BPT V9.0.39 — préparation en 4 étapes, étapes 1 et 2 uniquement ici. */
+/* BPT V9.0.41 — préparation en 4 étapes, étapes 1 et 2 uniquement ici. */
 .bpt-live3-prep-wizard{background:#0d241d!important;border:1px solid #245f51!important;color:#f5faf7!important;box-shadow:0 14px 40px rgba(0,0,0,.22)}
 .bpt-live3-prep-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}
 .bpt-live3-prep-head .bpt-live3-title{margin:8px 0 4px;font-size:clamp(24px,3vw,34px);color:#fff!important}
@@ -14952,7 +14952,7 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only {
   .bpt-live3-step-actions .btn{min-height:44px}
 }
 
-/* ===== V9.0.39 — Pré-Live mobile : une étape = un écran, actions toujours visibles ===== */
+/* ===== V9.0.41 — Pré-Live mobile : une étape = un écran, actions toujours visibles ===== */
 @media (max-width:760px){
   /* Le héros marketing ne doit pas consommer la hauteur utile du workflow Pré-Live. */
   #live3:has(#live3Prep:not([hidden])) .bpt-live3-hero{display:none!important;}
@@ -15227,4 +15227,57 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only {
   .bpt-bounty-name{font-size:24px!important;}
   .bpt-bounty-card p,.bpt-bounty-card strong{font-size:11px!important;margin:3px 0!important;}
   .bpt-bounty-card [data-bounty-close],.bpt-bounty-card [data-bounty-back]{height:36px!important;min-height:36px!important;margin-top:4px!important;}
+}
+
+/* ===== BPT V9.0.41 — Paris portrait : bloc connexion/validation compact ===== */
+@media (max-width:600px) and (orientation:portrait){
+  .bpt-pregame .bpt-prediction-note{
+    margin:0 0 5px!important;
+    font-size:10.5px!important;
+    line-height:1.2!important;
+  }
+  .bpt-pregame .bpt-prediction-footer{
+    position:static!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    align-items:center!important;
+    gap:6px!important;
+    margin-top:4px!important;
+    padding:4px 6px!important;
+    min-height:0!important;
+  }
+  .bpt-pregame .bpt-prediction-footer>div{
+    min-width:0!important;
+  }
+  .bpt-pregame .bpt-prediction-status,
+  .bpt-pregame .bpt-prediction-summary{
+    font-size:10px!important;
+    line-height:1.1!important;
+    margin-top:1px!important;
+    white-space:normal!important;
+  }
+  .bpt-pregame .bpt-prediction-confirm{
+    width:auto!important;
+    min-width:0!important;
+    min-height:32px!important;
+    height:32px!important;
+    padding:4px 8px!important;
+    font-size:10px!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+    border-radius:8px!important;
+  }
+  .bpt-pregame .bpt-predictions{
+    padding-bottom:3px!important;
+  }
+  .bpt-pregame > .bpt-pregame-inner > footer{
+    margin-top:2px!important;
+    padding-top:4px!important;
+  }
+  .bpt-pregame-buttons > button{
+    min-height:38px!important;
+    height:38px!important;
+    padding:5px 7px!important;
+    font-size:11px!important;
+  }
 }
