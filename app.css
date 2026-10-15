@@ -14794,103 +14794,6 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only {
   .records-scope-choice{min-height:64px;padding:11px 14px}
 }
 
-/* ===== V9.0.42 — Live mobile : lancement + révélation bounty toujours accessibles ===== */
-@media (max-width: 760px){
-  /* L'écran avant-partie ne doit jamais couper les actions en bas. */
-  .bpt484-live.is-pregame{
-    overflow:visible !important;
-    min-height:0 !important;
-  }
-  .bpt484-live.is-pregame > .bpt-pregame{
-    overflow-y:auto !important;
-    overflow-x:hidden !important;
-    -webkit-overflow-scrolling:touch;
-    overscroll-behavior:contain;
-  }
-  .bpt-pregame-inner{
-    height:auto !important;
-    min-height:100% !important;
-  }
-  .bpt-pregame .bpt-predictions{
-    flex:0 0 auto !important;
-    min-height:0 !important;
-  }
-  .bpt-pregame > .bpt-pregame-inner > footer{
-    position:sticky !important;
-    bottom:0 !important;
-    z-index:40 !important;
-    background:#071d19 !important;
-    border-top:1px solid #24493f !important;
-    padding:10px 0 max(8px,env(safe-area-inset-bottom)) !important;
-    margin-top:8px !important;
-  }
-  .bpt-pregame-buttons{
-    width:100% !important;
-  }
-  .bpt-pregame-buttons > button{
-    display:block !important;
-    visibility:visible !important;
-    opacity:1 !important;
-    min-height:46px !important;
-  }
-  .bpt-pregame-buttons > button[data-do="launch-pregame"]{
-    flex:1 1 58% !important;
-  }
-  .bpt-pregame-buttons > button[data-do="back-pregame"]{
-    flex:1 1 38% !important;
-  }
-
-  /* La révélation bounty doit passer au-dessus de tout le Live mobile. */
-  .bpt484-live.is-pregame > .bpt-bounty-overlay:not([hidden]),
-  .bpt484-live > .bpt-bounty-overlay:not([hidden]){
-    position:fixed !important;
-    inset:0 !important;
-    width:100vw !important;
-    height:100dvh !important;
-    max-width:none !important;
-    max-height:none !important;
-    z-index:2147483000 !important;
-    display:flex !important;
-    visibility:visible !important;
-    opacity:1 !important;
-    overflow-y:auto !important;
-    border-radius:0 !important;
-    padding:10px !important;
-    box-sizing:border-box !important;
-  }
-  .bpt-bounty-card{
-    max-height:calc(100dvh - 20px) !important;
-    overflow-y:auto !important;
-    margin:auto !important;
-    padding-bottom:max(18px,env(safe-area-inset-bottom)) !important;
-  }
-  .bpt-bounty-card [data-bounty-close],
-  .bpt-bounty-card [data-bounty-back]{
-    position:sticky !important;
-    bottom:0 !important;
-    z-index:2 !important;
-    min-height:46px !important;
-  }
-}
-
-@media (max-width:1000px) and (max-height:560px) and (orientation:landscape){
-  .bpt-pregame > .bpt-pregame-inner > footer{
-    position:sticky !important;
-    bottom:0 !important;
-    background:#071d19 !important;
-  }
-  .bpt-pregame-buttons{
-    display:grid !important;
-    grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr) !important;
-    gap:8px !important;
-  }
-  .bpt-pregame-buttons > button{
-    width:100% !important;
-    min-width:0 !important;
-  }
-}
-
-
 /* ===== V9.0.42 — Classements : saison courante + Archives + Cumul ===== */
 .ranking-season-scope{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;margin:14px 0 8px;position:relative;z-index:30}
 .ranking-season-scope-btn{display:flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:10px 16px;border:1px solid #31594d;border-radius:12px;background:#0b211c;color:#d9ebe3;font-weight:900;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.12)}
@@ -14903,471 +14806,135 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only {
 @media(max-width:700px){.ranking-season-scope{display:grid;grid-template-columns:1.2fr 1fr .8fr;gap:7px;position:sticky;top:0;background:rgba(5,22,18,.96);padding:8px 0;backdrop-filter:blur(8px);z-index:60}.ranking-season-scope-btn{min-width:0;padding:9px 8px;font-size:12px;min-height:44px}.ranking-season-scope-btn.current{min-width:0}.ranking-archive-menu{position:fixed;left:12px;right:12px;top:auto;bottom:84px;min-width:0;max-height:55vh;overflow:auto;border-radius:16px;padding:10px}.ranking-archive-menu button{font-size:15px;padding:14px 12px}.ranking-scope-context{margin:2px 0 10px;padding:0 2px}.ranking-season-scope-btn strong{white-space:nowrap}}
 
 
-/* BPT V9.0.42 — préparation en 4 étapes, étapes 1 et 2 uniquement ici. */
-.bpt-live3-prep-wizard{background:#0d241d!important;border:1px solid #245f51!important;color:#f5faf7!important;box-shadow:0 14px 40px rgba(0,0,0,.22)}
-.bpt-live3-prep-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}
-.bpt-live3-prep-head .bpt-live3-title{margin:8px 0 4px;font-size:clamp(24px,3vw,34px);color:#fff!important}
-.bpt-live3-prep-head .muted{color:#b9cec5!important}
-.bpt-live3-step-chip,.bpt-stage-chip{display:inline-flex;align-items:center;min-height:30px;padding:5px 12px;border:1px solid #2ac9c2;border-radius:999px;color:#67ebe3!important;background:rgba(15,91,77,.24);font-weight:900;font-size:12px;letter-spacing:.04em}
-.bpt-live3-prep-step[hidden]{display:none!important}
-.bpt-live3-config-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-.bpt-live3-config-grid label{color:#f6faf7!important;font-size:14px}
-.bpt-live3-config-grid input,.bpt-live3-config-grid select{min-height:48px;background:#101a25!important;border:1px solid #42536d!important;color:#fff!important;border-radius:12px;padding:10px 12px}
-.bpt-live3-step-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:12px;align-items:center;margin-top:20px}
-.bpt-live3-step-actions.single{grid-template-columns:minmax(220px,420px);justify-content:end}
-.bpt-live3-step-actions .btn{min-height:50px;border-radius:12px;font-weight:900}
-.bpt-live3-step-actions .primary{background:#e7ba50!important;color:#172018!important;border-color:#f0cb70!important}
-.bpt-live3-step-actions .secondary{background:#173e35!important;color:#fff!important;border-color:#3e7565!important}
-#live3PrepStep2 .bpt-live3-player-picker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-#live3PrepStep2 .bpt-live3-player-check{border-radius:12px;background:#172720;color:#fff!important;border-color:#3b5f52;padding:11px 12px;min-height:48px}
-#live3PrepStep2 .bpt-live3-player-check span{color:#fff!important;-webkit-text-fill-color:#fff!important}
-#live3PrepStep2 .bpt-live3-player-check:has(input:checked){background:#273c31;border-color:#d4a73f;box-shadow:inset 0 0 0 1px rgba(212,167,63,.25)}
-#live3PrepStep2 .bpt-live3-new-player{margin-top:12px}
-#live3PrepStep2 .bpt-live3-new-player input{background:#101a25!important;color:#fff!important;border-color:#42536d!important}
-.bpt-pregame .bpt-stage-chip{margin-bottom:10px}
-.bpt-bounty-card>.bpt-stage-chip{margin:0 auto 10px}
-@media(max-width:700px){
-  .bpt-live3-prep-wizard{padding:14px!important}
-  .bpt-live3-config-grid{grid-template-columns:1fr;gap:10px}
-  .bpt-live3-step-actions,.bpt-live3-step-actions.single{grid-template-columns:1fr 1.25fr;gap:10px;justify-content:stretch}
-  .bpt-live3-step-actions.single{grid-template-columns:1fr}
-  #live3PrepStep2 .bpt-live3-player-picker{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));max-height:48dvh;overflow:auto;padding-right:2px}
+
+/* ===== BPT V9.0.44 — moteur unique de layout Pré-Live mobile ===== */
+@media (max-width:1000px){
+  #live3:has(#live3Prep:not([hidden])) .bpt-live3-hero{display:none!important}
+  #live3:has(#live3Prep:not([hidden])){overflow:hidden!important}
+  #live3Prep{height:var(--bpt-prelive-height,auto)!important;max-height:var(--bpt-prelive-height,none)!important;min-height:0!important;overflow:hidden!important;margin:0!important}
+  #live3Prep .bpt-live3-prep-wizard{height:100%!important;min-height:0!important;box-sizing:border-box!important;overflow:hidden!important;display:grid!important;grid-template-rows:auto minmax(0,1fr)!important}
+  #live3Prep .bpt-live3-prep-head{min-height:0!important}
+  #live3Prep .bpt-live3-prep-step:not([hidden]){height:100%!important;min-height:0!important;overflow:hidden!important;display:grid!important;grid-template-rows:minmax(0,1fr) auto!important}
+  #live3Prep .bpt-live3-step-actions{align-self:end!important}
+
+  #live3PrepStep1 .bpt-live3-config-grid{min-height:0!important;overflow:hidden!important;align-content:start!important}
+  #live3PrepStep2 .bpt-live3-player-picker{min-height:0!important;max-height:none!important;overflow:hidden!important;display:grid!important;grid-template-columns:repeat(var(--bpt-player-cols,2),minmax(0,1fr))!important;grid-auto-rows:var(--bpt-player-row,34px)!important;align-content:start!important}
+  #live3PrepStep2 .bpt-live3-player-check{height:var(--bpt-player-row,34px)!important;min-height:0!important;overflow:hidden!important;white-space:nowrap!important;text-overflow:ellipsis!important}
   #live3PrepStep2 .bpt-live3-mobile-player-select{display:none!important}
-  #live3PrepStep2 .bpt-live3-player-check{font-size:12px;min-height:46px;padding:8px}
-  #live3PrepStep2 .bpt-live3-new-player{grid-template-columns:1fr}
-  #live3PrepStep2 #live3AddNewPlayerBtn{width:100%}
-}
-@media(max-width:420px){
-  #live3PrepStep2 .bpt-live3-player-picker{grid-template-columns:repeat(2,minmax(0,1fr));max-height:44dvh}
-  .bpt-live3-prep-head .bpt-live3-title{font-size:24px}
-}
-@media(max-height:520px) and (orientation:landscape){
-  .bpt-live3-prep-wizard{padding:12px!important}
-  .bpt-live3-prep-head{margin-bottom:10px}
-  .bpt-live3-prep-head .bpt-live3-title{font-size:24px}
-  .bpt-live3-config-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-  .bpt-live3-config-grid input,.bpt-live3-config-grid select{min-height:42px;padding:7px 9px}
-  #live3PrepStep2 .bpt-live3-player-picker{grid-template-columns:repeat(3,minmax(0,1fr));max-height:42dvh}
-  .bpt-live3-step-actions{margin-top:10px}
-  .bpt-live3-step-actions .btn{min-height:44px}
-}
 
-/* ===== V9.0.42 — Pré-Live mobile : une étape = un écran, actions toujours visibles ===== */
-@media (max-width:760px){
-  /* Le héros marketing ne doit pas consommer la hauteur utile du workflow Pré-Live. */
-  #live3:has(#live3Prep:not([hidden])) .bpt-live3-hero{display:none!important;}
-  #live3Prep{margin:0!important;min-height:0!important;}
-  #live3Prep .bpt-live3-prep-wizard{
-    height:calc(100dvh - 116px)!important;
-    max-height:calc(100dvh - 116px)!important;
-    min-height:0!important;
-    display:flex!important;
-    flex-direction:column!important;
-    overflow:hidden!important;
-    padding:10px 12px max(8px,env(safe-area-inset-bottom))!important;
-    border-radius:0!important;
-  }
-  #live3Prep .bpt-live3-prep-head{
-    flex:0 0 auto!important;
-    margin:0 0 7px!important;
-  }
-  #live3Prep .bpt-live3-prep-head .bpt-live3-title{
-    font-size:20px!important;
-    line-height:1.1!important;
-    margin:4px 0 2px!important;
-  }
-  #live3Prep .bpt-live3-prep-head .muted{
-    font-size:11px!important;
-    line-height:1.2!important;
-    margin:0!important;
-  }
-  #live3Prep .bpt-live3-step-chip{
-    min-height:24px!important;
-    padding:3px 9px!important;
-    font-size:10px!important;
-  }
-  #live3Prep .bpt-live3-prep-step:not([hidden]){
-    flex:1 1 auto!important;
-    min-height:0!important;
-    display:flex!important;
-    flex-direction:column!important;
-    overflow:hidden!important;
-  }
+  .bpt484-live.is-pregame{height:var(--bpt-prelive-height,auto)!important;max-height:var(--bpt-prelive-height,none)!important;min-height:0!important;overflow:hidden!important;padding:0!important}
+  .bpt484-live.is-pregame>*:not(.bpt-pregame):not(.bpt484-takeover-request):not(.bpt-bounty-overlay){display:none!important}
+  .bpt484-live.is-pregame>.bpt-pregame{position:absolute!important;inset:0!important;height:100%!important;max-height:100%!important;min-height:0!important;overflow:hidden!important;box-sizing:border-box!important}
+  .bpt-pregame-inner{height:100%!important;min-height:0!important;overflow:hidden!important}
+  .bpt-pregame header{display:none!important}
+  .bpt-pregame .bpt-predictions{overflow:hidden!important;min-height:0!important}
+  .bpt-pregame > .bpt-pregame-inner > footer{position:static!important;overflow:hidden!important;background:#071d19!important;border-top:1px solid #24493f!important}
+  .bpt-pregame-buttons{width:100%!important}
+  .bpt-pregame-buttons>button{min-width:0!important;max-width:100%!important;box-sizing:border-box!important;overflow:hidden!important}
 
-  /* Étape 1 : 6 vrais paramètres sur 3 lignes, sans scroll de page. */
-  #live3PrepStep1 .bpt-live3-config-grid{
-    flex:1 1 auto!important;
-    min-height:0!important;
-    display:grid!important;
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    align-content:start!important;
-    gap:7px 8px!important;
-    overflow:hidden!important;
-  }
-  #live3PrepStep1 .bpt-live3-config-grid label{
-    display:flex!important;
-    flex-direction:column!important;
-    gap:3px!important;
-    min-width:0!important;
-    font-size:10px!important;
-    line-height:1.1!important;
-  }
-  #live3PrepStep1 .bpt-live3-config-grid input,
-  #live3PrepStep1 .bpt-live3-config-grid select{
-    width:100%!important;
-    min-width:0!important;
-    min-height:38px!important;
-    height:38px!important;
-    padding:6px 8px!important;
-    font-size:12px!important;
-    border-radius:9px!important;
-  }
-
-  /* Footer fixe des étapes 1 et 2. */
-  #live3Prep .bpt-live3-step-actions,
-  #live3Prep .bpt-live3-step-actions.single{
-    flex:0 0 auto!important;
-    position:sticky!important;
-    bottom:0!important;
-    z-index:12!important;
-    margin:7px -2px 0!important;
-    padding:7px 2px 0!important;
-    background:#0d241d!important;
-    grid-template-columns:minmax(0,.72fr) minmax(0,1.28fr)!important;
-    gap:8px!important;
-  }
-  #live3Prep .bpt-live3-step-actions.single{
-    grid-template-columns:1fr!important;
-  }
-  #live3Prep .bpt-live3-step-actions .btn{
-    min-height:42px!important;
-    height:42px!important;
-    padding:7px 9px!important;
-    font-size:13px!important;
-    line-height:1.1!important;
-  }
-  #live3Prep .bpt-live3-step-actions #live3CreateStatus{display:none!important;}
-
-  /* Étape 2 : seule la liste peut défiler ; boutons toujours visibles. */
-  #live3PrepStep2 .bpt-live3-section-title{
-    flex:0 0 auto!important;
-    font-size:13px!important;
-    margin:0 0 5px!important;
-  }
-  #live3PrepStep2 .bpt-live3-player-picker{
-    flex:1 1 auto!important;
-    min-height:0!important;
-    max-height:none!important;
-    overflow-y:auto!important;
-    overscroll-behavior:contain!important;
-    -webkit-overflow-scrolling:touch!important;
-    display:grid!important;
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    align-content:start!important;
-    gap:6px!important;
-    padding:0 2px 2px 0!important;
-  }
-  #live3PrepStep2 .bpt-live3-player-check{
-    min-height:40px!important;
-    padding:6px 7px!important;
-    font-size:11px!important;
-    line-height:1.1!important;
-  }
-  #live3PrepStep2 .bpt-live3-new-player{
-    flex:0 0 auto!important;
-    display:grid!important;
-    grid-template-columns:minmax(0,1fr) auto!important;
-    gap:6px!important;
-    margin-top:6px!important;
-  }
-  #live3PrepStep2 .bpt-live3-new-player input,
-  #live3PrepStep2 #live3AddNewPlayerBtn{
-    min-height:38px!important;
-    height:38px!important;
-    font-size:11px!important;
-  }
-  #live3PrepStep2 .bpt-live3-new-player-hint{display:none!important;}
-
-  /* Étape 3 : l'écran de paris tient dans la hauteur utile, footer en bas. */
-  .bpt484-live.is-pregame > .bpt-pregame{
-    height:calc(100dvh - 116px)!important;
-    max-height:calc(100dvh - 116px)!important;
-    min-height:0!important;
-    overflow:hidden!important;
-    padding:8px 12px max(8px,env(safe-area-inset-bottom))!important;
-  }
-  .bpt-pregame-inner{
-    height:100%!important;
-    min-height:0!important;
-    display:flex!important;
-    flex-direction:column!important;
-    overflow:hidden!important;
-  }
-  .bpt-pregame header{padding-bottom:4px!important;min-height:0!important;}
-  .bpt-pregame header b{font-size:20px!important;}
-  .bpt-pregame-bets-heading{padding:4px 0!important;}
-  .bpt-pregame-bets-heading h2{font-size:21px!important;margin:2px 0!important;}
-  .bpt-pregame-bets-heading p{font-size:11px!important;line-height:1.2!important;margin:2px 0!important;}
-  .bpt-pregame .bpt-predictions{
-    flex:1 1 auto!important;
-    min-height:0!important;
-    overflow-y:auto!important;
-    padding:6px!important;
-    margin-top:4px!important;
-  }
-  .bpt-pregame .bpt-prediction-card{padding:5px 0!important;}
-  .bpt-pregame .bpt-prediction-select{min-height:38px!important;height:38px!important;padding:5px 32px 5px 9px!important;}
-  .bpt-pregame .bpt-prediction-footer{margin-top:5px!important;padding:6px!important;}
-  .bpt-pregame > .bpt-pregame-inner > footer{
-    flex:0 0 auto!important;
-    position:sticky!important;
-    bottom:0!important;
-    margin:4px 0 0!important;
-    padding:6px 0 0!important;
-    background:#071d19!important;
-    border-top:1px solid #24493f!important;
-  }
-  .bpt-pregame footer>span{font-size:11px!important;text-align:center!important;}
-  .bpt-pregame-buttons{
-    display:grid!important;
-    grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr)!important;
-    gap:7px!important;
-    flex-direction:initial!important;
-  }
-  .bpt-pregame footer button{
-    width:100%!important;
-    min-width:0!important;
-    min-height:42px!important;
-    height:42px!important;
-    padding:6px 8px!important;
-    font-size:12px!important;
-    line-height:1.15!important;
-  }
-
-  /* Étape 4 : carte bounty centrée, compacte, actions toujours visibles sans scroll de page. */
   .bpt484-live > .bpt-bounty-overlay:not([hidden]),
-  .bpt484-live.is-pregame > .bpt-bounty-overlay:not([hidden]){
-    overflow:hidden!important;
-    padding:8px!important;
-  }
-  .bpt-bounty-card{
-    width:min(560px,100%)!important;
-    max-height:calc(100dvh - 16px)!important;
-    height:auto!important;
-    overflow:hidden!important;
-    display:flex!important;
-    flex-direction:column!important;
-    padding:12px 14px max(10px,env(safe-area-inset-bottom))!important;
-  }
-  .bpt-bounty-card>.bpt-stage-chip{flex:0 0 auto!important;margin:0 auto 5px!important;}
-  .bpt-bounty-card h2{flex:0 0 auto!important;font-size:20px!important;margin:4px 0!important;}
-  .bpt-bounty-icon{flex:0 0 auto!important;font-size:30px!important;margin:2px 0!important;}
-  .bpt-bounty-name{flex:0 0 auto!important;font-size:clamp(24px,8vw,34px)!important;line-height:1.05!important;margin:4px 0!important;}
-  .bpt-bounty-card p,.bpt-bounty-card strong{font-size:13px!important;line-height:1.25!important;margin:5px 0!important;}
-  .bpt-bounty-card [data-bounty-close],
-  .bpt-bounty-card [data-bounty-back]{
-    flex:0 0 auto!important;
-    position:static!important;
-    width:100%!important;
-    min-height:42px!important;
-    margin:6px auto 0!important;
-    padding:7px 10px!important;
-    font-size:12px!important;
-  }
+  .bpt484-live.is-pregame > .bpt-bounty-overlay:not([hidden]){position:fixed!important;inset:0!important;width:100vw!important;height:var(--bpt-visual-height,100dvh)!important;max-width:none!important;max-height:none!important;overflow:hidden!important;display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;z-index:2147483000!important}
+  .bpt-bounty-card{max-height:calc(var(--bpt-visual-height,100dvh) - 12px)!important;overflow:hidden!important;box-sizing:border-box!important}
 }
 
-/* Paysage téléphone : utiliser la largeur, aucun bouton flottant au milieu. */
-@media (max-width:1000px) and (max-height:560px) and (orientation:landscape){
-  #live3:has(#live3Prep:not([hidden])) .bpt-live3-hero{display:none!important;}
-  #live3Prep .bpt-live3-prep-wizard{
-    height:calc(100dvh - 74px)!important;
-    max-height:calc(100dvh - 74px)!important;
-    padding:7px 10px 6px!important;
-  }
-  #live3Prep .bpt-live3-prep-head{margin-bottom:4px!important;}
-  #live3Prep .bpt-live3-prep-head .bpt-live3-title{font-size:17px!important;margin:1px 0!important;}
-  #live3Prep .bpt-live3-prep-head .muted{display:none!important;}
-  #live3Prep .bpt-live3-step-chip{min-height:20px!important;font-size:9px!important;padding:2px 7px!important;}
-  #live3PrepStep1 .bpt-live3-config-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px 7px!important;}
-  #live3PrepStep1 .bpt-live3-config-grid label{font-size:9px!important;gap:2px!important;}
-  #live3PrepStep1 .bpt-live3-config-grid input,
-  #live3PrepStep1 .bpt-live3-config-grid select{height:34px!important;min-height:34px!important;padding:4px 7px!important;font-size:11px!important;}
-  #live3PrepStep2 .bpt-live3-player-picker{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:4px 6px!important;}
-  #live3PrepStep2 .bpt-live3-player-check{min-height:34px!important;padding:4px 6px!important;font-size:10px!important;}
-  #live3PrepStep2 .bpt-live3-new-player{margin-top:4px!important;}
-  #live3PrepStep2 .bpt-live3-new-player input,
-  #live3PrepStep2 #live3AddNewPlayerBtn{height:34px!important;min-height:34px!important;}
-  #live3Prep .bpt-live3-step-actions,
-  #live3Prep .bpt-live3-step-actions.single{margin-top:4px!important;padding-top:4px!important;}
-  #live3Prep .bpt-live3-step-actions .btn{height:36px!important;min-height:36px!important;font-size:11px!important;}
-
-  .bpt484-live.is-pregame > .bpt-pregame{
-    height:calc(100dvh - 74px)!important;
-    max-height:calc(100dvh - 74px)!important;
-    padding:5px 10px!important;
-  }
-  .bpt-pregame-bets-heading{padding:2px 0!important;}
-  .bpt-pregame-bets-heading h2{font-size:17px!important;}
-  .bpt-pregame-bets-heading p{display:none!important;}
-  .bpt-pregame .bpt-predictions{padding:4px!important;margin-top:2px!important;overflow:hidden!important;}
-  .bpt-pregame .bpt-prediction-card{padding:3px 0!important;}
-  .bpt-pregame .bpt-prediction-select{height:34px!important;min-height:34px!important;}
-  .bpt-pregame .bpt-prediction-footer{margin-top:3px!important;padding:4px!important;}
-  .bpt-pregame > .bpt-pregame-inner > footer{padding-top:4px!important;margin-top:2px!important;}
-  .bpt-pregame footer>span{display:none!important;}
-  .bpt-pregame footer button{height:36px!important;min-height:36px!important;font-size:11px!important;}
-
-  .bpt-bounty-card{
-    max-height:calc(100dvh - 12px)!important;
-    width:min(760px,96vw)!important;
-    padding:8px 14px!important;
-  }
-  .bpt-bounty-card h2{font-size:17px!important;}
-  .bpt-bounty-icon{font-size:24px!important;}
-  .bpt-bounty-name{font-size:24px!important;}
-  .bpt-bounty-card p,.bpt-bounty-card strong{font-size:11px!important;margin:3px 0!important;}
-  .bpt-bounty-card [data-bounty-close],.bpt-bounty-card [data-bounty-back]{height:36px!important;min-height:36px!important;margin-top:4px!important;}
-}
-
-/* ===== BPT V9.0.42 — Paris portrait : bloc connexion/validation compact ===== */
 @media (max-width:600px) and (orientation:portrait){
-  .bpt-pregame .bpt-prediction-note{
-    margin:0 0 5px!important;
-    font-size:10.5px!important;
-    line-height:1.2!important;
-  }
-  .bpt-pregame .bpt-prediction-footer{
-    position:static!important;
-    display:grid!important;
-    grid-template-columns:minmax(0,1fr) auto!important;
-    align-items:center!important;
-    gap:6px!important;
-    margin-top:4px!important;
-    padding:4px 6px!important;
-    min-height:0!important;
-  }
-  .bpt-pregame .bpt-prediction-footer>div{
-    min-width:0!important;
-  }
-  .bpt-pregame .bpt-prediction-status,
-  .bpt-pregame .bpt-prediction-summary{
-    font-size:10px!important;
-    line-height:1.1!important;
-    margin-top:1px!important;
-    white-space:normal!important;
-  }
-  .bpt-pregame .bpt-prediction-confirm{
-    width:auto!important;
-    min-width:0!important;
-    min-height:32px!important;
-    height:32px!important;
-    padding:4px 8px!important;
-    font-size:10px!important;
-    line-height:1!important;
-    white-space:nowrap!important;
-    border-radius:8px!important;
-  }
-  .bpt-pregame .bpt-predictions{
-    padding-bottom:3px!important;
-  }
-  .bpt-pregame > .bpt-pregame-inner > footer{
-    margin-top:2px!important;
-    padding-top:4px!important;
-  }
-  .bpt-pregame-buttons > button{
-    min-height:38px!important;
-    height:38px!important;
-    padding:5px 7px!important;
-    font-size:11px!important;
-  }
+  #live3Prep .bpt-live3-prep-wizard{padding:8px 10px!important;gap:4px!important}
+  #live3Prep .bpt-live3-prep-head{margin:0 0 4px!important}
+  #live3Prep .bpt-live3-step-chip{min-height:20px!important;padding:2px 7px!important;font-size:9px!important}
+  #live3Prep .bpt-live3-prep-head .bpt-live3-title{font-size:18px!important;line-height:1!important;margin:3px 0!important}
+  #live3Prep .bpt-live3-prep-head .muted{font-size:9px!important;line-height:1.08!important;margin:0!important}
+  #live3PrepStep1 .bpt-live3-config-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:5px 7px!important}
+  #live3PrepStep1 .bpt-live3-config-grid label{font-size:9px!important;gap:2px!important;line-height:1.05!important}
+  #live3PrepStep1 .bpt-live3-config-grid input,#live3PrepStep1 .bpt-live3-config-grid select{height:34px!important;min-height:34px!important;padding:4px 7px!important;font-size:11px!important;border-radius:8px!important}
+  #live3PrepStep2 .bpt-live3-section-title{font-size:13px!important;margin:0 0 3px!important}
+  #live3PrepStep2 .bpt-live3-player-picker{gap:4px 5px!important}
+  #live3PrepStep2 .bpt-live3-player-check{padding:3px 5px!important;font-size:9.5px!important;line-height:1!important;border-radius:8px!important}
+  #live3PrepStep2 .bpt-live3-new-player{margin-top:4px!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:5px!important}
+  #live3PrepStep2 .bpt-live3-new-player input,#live3PrepStep2 #live3AddNewPlayerBtn{height:30px!important;min-height:30px!important;padding:3px 6px!important;font-size:9.5px!important}
+  #live3PrepStep2 .bpt-live3-new-player-hint{display:none!important}
+  #live3Prep .bpt-live3-step-actions,#live3Prep .bpt-live3-step-actions.single{margin:4px 0 0!important;padding:0!important;display:grid!important;grid-template-columns:1fr 1.25fr!important;gap:6px!important;justify-content:stretch!important}
+  #live3Prep .bpt-live3-step-actions.single{grid-template-columns:1fr!important}
+  #live3Prep .bpt-live3-step-actions .btn{height:38px!important;min-height:38px!important;padding:4px 7px!important;font-size:10.5px!important;line-height:1.05!important;border-radius:9px!important}
+
+  .bpt484-live.is-pregame>.bpt-pregame{padding:6px 10px max(5px,env(safe-area-inset-bottom))!important}
+  .bpt-pregame-inner{display:grid!important;grid-template-rows:auto minmax(0,1fr) auto!important;gap:4px!important}
+  .bpt-pregame-bets-heading{padding:0!important;min-height:0!important}
+  .bpt-pregame-bets-heading small{display:block!important;font-size:8.5px!important;line-height:1!important;letter-spacing:1.2px!important;margin:0 0 2px!important}
+  .bpt-pregame-bets-heading h2{font-size:19px!important;line-height:1!important;margin:0!important}
+  .bpt-pregame-bets-heading p{display:none!important}
+  .bpt-pregame .bpt-predictions{align-self:start!important;margin:0!important;padding:5px 7px!important;display:grid!important;grid-template-columns:1fr!important;gap:0!important;align-content:start!important}
+  .bpt-pregame .bpt-prediction-note{font-size:10px!important;line-height:1.1!important;margin:0 0 3px!important}
+  .bpt-pregame .bpt-prediction-card{padding:3px 0!important}
+  .bpt-pregame .bpt-prediction-head{margin:0 0 2px!important}
+  .bpt-pregame .bpt-prediction-head strong,.bpt-pregame .bpt-prediction-head span{font-size:13px!important;line-height:1!important}
+  .bpt-pregame .bpt-prediction-select{height:36px!important;min-height:36px!important;padding:4px 30px 4px 8px!important;font-size:12px!important;border-radius:9px!important}
+  .bpt-pregame .bpt-prediction-gain{min-height:0!important;margin:1px 0 0!important;font-size:8.5px!important;line-height:1!important}
+  .bpt-pregame .bpt-prediction-gain:empty{display:none!important}
+  .bpt-pregame .bpt-prediction-footer{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:5px!important;margin:3px 0 0!important;padding:4px 5px!important;align-items:center!important}
+  .bpt-pregame .bpt-prediction-status,.bpt-pregame .bpt-prediction-summary{font-size:9px!important;line-height:1.05!important;margin:0!important}
+  .bpt-pregame .bpt-prediction-confirm{height:30px!important;min-height:30px!important;padding:3px 7px!important;font-size:9px!important;line-height:1!important;white-space:nowrap!important;border-radius:8px!important}
+  .bpt-pregame > .bpt-pregame-inner > footer{align-self:end!important;margin:0!important;padding:4px 0 0!important}
+  .bpt-pregame footer>span{display:block!important;font-size:8.5px!important;line-height:1!important;text-align:center!important;margin:0 0 3px!important}
+  .bpt-pregame-buttons{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr)!important;gap:6px!important}
+  .bpt-pregame-buttons>button{height:38px!important;min-height:38px!important;padding:4px 6px!important;font-size:10px!important;line-height:1.05!important;white-space:normal!important;border-radius:9px!important}
+
+  .bpt-bounty-overlay{padding:6px!important}
+  .bpt-bounty-card{width:min(96vw,560px)!important;padding:9px 12px!important;border-radius:14px!important}
+  .bpt-bounty-card>.bpt-stage-chip{margin:0 auto 3px!important}
+  .bpt-bounty-icon{font-size:30px!important;line-height:1!important}
+  .bpt-bounty-card h2{font-size:18px!important;line-height:1!important;margin:3px 0!important}
+  .bpt-bounty-name{font-size:22px!important;line-height:1!important;margin:3px 0!important}
+  .bpt-bounty-card p,.bpt-bounty-card strong{font-size:11px!important;line-height:1.12!important;margin:3px 0!important}
+  .bpt-bounty-card [data-bounty-close],.bpt-bounty-card [data-bounty-back]{height:36px!important;min-height:36px!important;margin-top:4px!important;padding:4px 8px!important;font-size:10px!important}
 }
 
+@media (max-width:1000px) and (orientation:landscape){
+  #live3Prep .bpt-live3-prep-wizard{padding:5px 9px!important;gap:3px!important}
+  #live3Prep .bpt-live3-prep-head{margin:0 0 2px!important}
+  #live3Prep .bpt-live3-step-chip{min-height:18px!important;padding:1px 6px!important;font-size:8px!important}
+  #live3Prep .bpt-live3-prep-head .bpt-live3-title{font-size:15px!important;line-height:1!important;margin:2px 0!important}
+  #live3Prep .bpt-live3-prep-head .muted{font-size:8px!important;line-height:1!important;margin:0!important}
+  #live3PrepStep1 .bpt-live3-config-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:3px 6px!important}
+  #live3PrepStep1 .bpt-live3-config-grid label{font-size:8px!important;gap:1px!important;line-height:1!important}
+  #live3PrepStep1 .bpt-live3-config-grid input,#live3PrepStep1 .bpt-live3-config-grid select{height:28px!important;min-height:28px!important;padding:2px 6px!important;font-size:9px!important;border-radius:7px!important}
+  #live3PrepStep2 .bpt-live3-section-title{font-size:11px!important;margin:0 0 2px!important}
+  #live3PrepStep2 .bpt-live3-player-picker{gap:3px 5px!important}
+  #live3PrepStep2 .bpt-live3-player-check{padding:2px 4px!important;font-size:8.5px!important;line-height:1!important;border-radius:7px!important}
+  #live3PrepStep2 .bpt-live3-new-player{margin-top:3px!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:4px!important}
+  #live3PrepStep2 .bpt-live3-new-player input,#live3PrepStep2 #live3AddNewPlayerBtn{height:27px!important;min-height:27px!important;padding:2px 5px!important;font-size:8.5px!important}
+  #live3PrepStep2 .bpt-live3-new-player-hint{display:none!important}
+  #live3Prep .bpt-live3-step-actions,#live3Prep .bpt-live3-step-actions.single{margin:3px 0 0!important;padding:0!important;display:grid!important;grid-template-columns:1fr 1.35fr!important;gap:6px!important;justify-content:stretch!important}
+  #live3Prep .bpt-live3-step-actions.single{grid-template-columns:minmax(180px,32%)!important;justify-content:end!important}
+  #live3Prep .bpt-live3-step-actions .btn{height:30px!important;min-height:30px!important;padding:2px 7px!important;font-size:9px!important;line-height:1!important;border-radius:8px!important}
 
-/* ===== BPT V9.0.42 — Pré-Live mobile : zone utile réelle + actions non recouvrantes ===== */
-@media (max-width:600px) and (orientation:portrait){
-  /* La navigation mobile réelle occupe ~190–205 px avec la barre système. */
-  .bpt484-live.is-pregame{
-    height:calc(100svh - 198px)!important;
-    max-height:calc(100svh - 198px)!important;
-    min-height:0!important;
-    overflow:hidden!important;
-  }
-  .bpt484-live.is-pregame > .bpt-pregame{
-    height:100%!important;
-    max-height:100%!important;
-    min-height:0!important;
-    padding:6px 10px max(6px,env(safe-area-inset-bottom))!important;
-    overflow:hidden!important;
-  }
-  .bpt-pregame-inner{height:100%!important;min-height:0!important;overflow:hidden!important;}
-  .bpt-pregame header{display:none!important;}
-  .bpt-pregame-bets-heading{flex:0 0 auto!important;padding:2px 0 4px!important;}
-  .bpt-pregame-bets-heading h2{font-size:19px!important;line-height:1.05!important;margin:1px 0!important;}
-  .bpt-pregame-bets-heading p{display:none!important;}
-  .bpt-pregame .bpt-predictions{
-    flex:1 1 auto!important;
-    min-height:0!important;
-    overflow-y:auto!important;
-    overscroll-behavior:contain!important;
-    -webkit-overflow-scrolling:touch!important;
-    margin:2px 0!important;
-    padding:4px 6px!important;
-  }
-  .bpt-pregame .bpt-prediction-note{font-size:10px!important;line-height:1.12!important;margin:0 0 3px!important;}
-  .bpt-pregame .bpt-prediction-card{padding:3px 0!important;}
-  .bpt-pregame .bpt-prediction-head{margin-bottom:2px!important;}
-  .bpt-pregame .bpt-prediction-head strong,.bpt-pregame .bpt-prediction-head span{font-size:12px!important;}
-  .bpt-pregame .bpt-prediction-select{height:34px!important;min-height:34px!important;font-size:12px!important;padding:4px 30px 4px 8px!important;}
-  .bpt-pregame .bpt-prediction-gain{font-size:9px!important;min-height:10px!important;}
-  .bpt-pregame .bpt-prediction-footer{margin-top:3px!important;padding:3px 5px!important;grid-template-columns:minmax(0,1fr) auto!important;gap:5px!important;}
-  .bpt-pregame .bpt-prediction-status,.bpt-pregame .bpt-prediction-summary{font-size:9.5px!important;line-height:1.05!important;}
-  .bpt-pregame .bpt-prediction-confirm{height:30px!important;min-height:30px!important;font-size:9.5px!important;padding:3px 7px!important;}
-  .bpt-pregame > .bpt-pregame-inner > footer{
-    flex:0 0 auto!important;
-    position:static!important;
-    margin:0!important;
-    padding:5px 0 0!important;
-    background:#071d19!important;
-    border-top:1px solid #24493f!important;
-  }
-  .bpt-pregame footer>span{font-size:9.5px!important;line-height:1!important;margin-bottom:3px!important;}
-  .bpt-pregame-buttons{display:grid!important;grid-template-columns:1fr 1fr!important;gap:6px!important;width:100%!important;}
-  .bpt-pregame-buttons > button{
-    width:100%!important;min-width:0!important;max-width:100%!important;
-    height:42px!important;min-height:42px!important;
-    margin:0!important;padding:5px 6px!important;
-    font-size:10.5px!important;line-height:1.08!important;
-    white-space:normal!important;overflow-wrap:anywhere!important;
-    box-sizing:border-box!important;border-radius:10px!important;
-  }
-}
+  .bpt484-live.is-pregame>.bpt-pregame{padding:4px 8px max(3px,env(safe-area-inset-bottom))!important}
+  .bpt-pregame-inner{display:grid!important;grid-template-columns:minmax(150px,.42fr) minmax(0,1.58fr)!important;grid-template-rows:minmax(0,1fr) auto!important;gap:5px 10px!important}
+  .bpt-pregame-bets-heading{grid-column:1!important;grid-row:1!important;align-self:start!important;padding:0!important;min-height:0!important}
+  .bpt-pregame-bets-heading small{display:block!important;font-size:8px!important;line-height:1!important;letter-spacing:1px!important;margin:0 0 2px!important}
+  .bpt-pregame-bets-heading h2{font-size:16px!important;line-height:1!important;margin:0 0 4px!important}
+  .bpt-pregame-bets-heading p{display:block!important;font-size:8px!important;line-height:1.1!important;margin:0!important;color:#a7c3b9!important}
+  .bpt-pregame .bpt-predictions{grid-column:2!important;grid-row:1!important;align-self:stretch!important;margin:0!important;padding:3px 6px!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:auto minmax(0,1fr)!important;gap:0 10px!important;align-content:start!important}
+  .bpt-pregame .bpt-prediction-note{grid-column:1/-1!important;font-size:8px!important;line-height:1!important;margin:0 0 2px!important;white-space:normal!important}
+  .bpt-pregame .bpt-prediction-card{padding:2px 0!important;min-width:0!important}
+  .bpt-pregame .bpt-prediction-head{margin:0 0 1px!important}
+  .bpt-pregame .bpt-prediction-head strong,.bpt-pregame .bpt-prediction-head span{font-size:10px!important;line-height:1!important}
+  .bpt-pregame .bpt-prediction-select{height:29px!important;min-height:29px!important;padding:2px 26px 2px 6px!important;font-size:9px!important;border-radius:7px!important}
+  .bpt-pregame .bpt-prediction-gain{min-height:0!important;margin:1px 0 0!important;font-size:7px!important;line-height:1!important}
+  .bpt-pregame .bpt-prediction-gain:empty{display:none!important}
+  .bpt-pregame .bpt-prediction-footer{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:4px!important;margin:2px 0 0!important;padding:2px 4px!important;align-items:center!important}
+  .bpt-pregame .bpt-prediction-status,.bpt-pregame .bpt-prediction-summary{font-size:7.5px!important;line-height:1!important;margin:0!important}
+  .bpt-pregame .bpt-prediction-confirm{height:25px!important;min-height:25px!important;padding:2px 5px!important;font-size:7.5px!important;line-height:1!important;white-space:nowrap!important;border-radius:6px!important}
+  .bpt-pregame > .bpt-pregame-inner > footer{grid-column:1/-1!important;grid-row:2!important;align-self:end!important;margin:0!important;padding:3px 0 0!important}
+  .bpt-pregame footer>span{display:none!important}
+  .bpt-pregame-buttons{display:grid!important;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)!important;gap:7px!important}
+  .bpt-pregame-buttons>button{height:32px!important;min-height:32px!important;padding:2px 7px!important;font-size:9px!important;line-height:1!important;white-space:normal!important;border-radius:8px!important}
 
-@media (max-width:1000px) and (max-height:600px) and (orientation:landscape){
-  .bpt484-live.is-pregame{
-    height:calc(100svh - 198px)!important;
-    max-height:calc(100svh - 198px)!important;
-    min-height:0!important;
-    overflow:hidden!important;
-  }
-  .bpt484-live.is-pregame > .bpt-pregame{
-    height:100%!important;max-height:100%!important;min-height:0!important;
-    padding:4px 10px max(4px,env(safe-area-inset-bottom))!important;
-    overflow:hidden!important;
-  }
-  .bpt-pregame-inner{height:100%!important;min-height:0!important;overflow:hidden!important;}
-  .bpt-pregame header{display:none!important;}
-  .bpt-pregame-bets-heading{flex:0 0 auto!important;padding:0 0 2px!important;}
-  .bpt-pregame-bets-heading h2{font-size:15px!important;line-height:1!important;margin:0!important;}
-  .bpt-pregame-bets-heading p{display:none!important;}
-  .bpt-pregame .bpt-predictions{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;margin:0!important;padding:2px 4px!important;}
-  .bpt-pregame .bpt-prediction-note{font-size:9px!important;margin:0 0 2px!important;line-height:1!important;}
-  .bpt-pregame .bpt-prediction-card{padding:2px 0!important;}
-  .bpt-pregame .bpt-prediction-select{height:30px!important;min-height:30px!important;font-size:10px!important;padding:2px 28px 2px 7px!important;}
-  .bpt-pregame .bpt-prediction-gain{font-size:8px!important;min-height:8px!important;}
-  .bpt-pregame .bpt-prediction-footer{margin-top:2px!important;padding:2px 4px!important;}
-  .bpt-pregame .bpt-prediction-confirm{height:28px!important;min-height:28px!important;font-size:9px!important;padding:2px 6px!important;}
-  .bpt-pregame > .bpt-pregame-inner > footer{position:static!important;flex:0 0 auto!important;margin:0!important;padding:4px 0 0!important;background:#071d19!important;border-top:1px solid #24493f!important;}
-  .bpt-pregame footer>span{display:none!important;}
-  .bpt-pregame-buttons{display:grid!important;grid-template-columns:.8fr 1.2fr!important;gap:8px!important;width:100%!important;}
-  .bpt-pregame-buttons > button{width:100%!important;min-width:0!important;max-width:100%!important;height:36px!important;min-height:36px!important;padding:3px 8px!important;font-size:10px!important;line-height:1!important;box-sizing:border-box!important;margin:0!important;}
+  .bpt-bounty-overlay{padding:4px!important}
+  .bpt-bounty-card{width:min(760px,96vw)!important;padding:6px 12px!important;border-radius:12px!important}
+  .bpt-bounty-card>.bpt-stage-chip{margin:0 auto 2px!important}
+  .bpt-bounty-icon{font-size:24px!important;line-height:1!important}
+  .bpt-bounty-card h2{font-size:15px!important;line-height:1!important;margin:2px 0!important}
+  .bpt-bounty-name{font-size:20px!important;line-height:1!important;margin:2px 0!important}
+  .bpt-bounty-card p,.bpt-bounty-card strong{font-size:9px!important;line-height:1.05!important;margin:2px 0!important}
+  .bpt-bounty-card [data-bounty-close],.bpt-bounty-card [data-bounty-back]{height:30px!important;min-height:30px!important;margin-top:3px!important;padding:2px 7px!important;font-size:9px!important}
 }

@@ -1,4 +1,4 @@
-BPT V9.0.42 — Pré-Live en 4 étapes
+BPT V9.0.44 — Pré-Live en 4 étapes
 
 Cette version conserve la logique métier existante et ne modifie pas l'écran de partie en cours.
 
@@ -37,16 +37,16 @@ Correctif login :
 
 - V9.0.34 : écran Saisons trié de la saison la plus récente à la plus ancienne ; tuile « Cumul toutes saisons » placée en dernier.
 
-V9.0.42
+V9.0.44
 - Records & accomplissements : sélecteur autonome Saison actuelle / Saison précédente / Cumul toutes saisons.
 - Saisons précédentes : la saison en cours n'est plus affichée dans les archives ; cumul conservé en dernier.
 - Classements : un clic sur l'onglet revient toujours à la saison 2026-2027.
 
-V9.0.42 — Correctif affichage Live mobile : actions avant-partie et révélation bounty toujours visibles.
+V9.0.44 — Correctif affichage Live mobile : actions avant-partie et révélation bounty toujours visibles.
 
 
-V9.0.42 : Classements regroupe saison en cours, archives et cumul. L'onglet Saisons précédentes est retiré.
+V9.0.44 : Classements regroupe saison en cours, archives et cumul. L'onglet Saisons précédentes est retiré.
 
-V9.0.42 — Référentiel joueur : fusion automatique de l’ancienne entrée « Elen » vers « Elen Miron ». Connexion et Paramètres utilisent toujours db.players comme source unique.
+V9.0.44 — Référentiel joueur : fusion automatique de l’ancienne entrée « Elen » vers « Elen Miron ». Connexion et Paramètres utilisent toujours db.players comme source unique.
 
-V9.0.42 — Pré-Live mobile : hauteur utile corrigée en portrait/paysage, actions compactes toujours visibles. Diagnostic de cohérence manuel dans Paramètres (plus de lancement automatique).
+V9.0.44 — Pré-Live mobile : hauteur utile corrigée en portrait/paysage, actions compactes toujours visibles. Diagnostic de cohérence manuel dans Paramètres (plus de lancement automatique).
