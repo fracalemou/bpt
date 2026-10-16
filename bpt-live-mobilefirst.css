@@ -358,3 +358,15 @@ body.bpt-live-landscape-open nav#nav{
   max-height:100% !important;
   min-height:0 !important;
 }
+
+/* V10.4.8 — Live réellement plein écran.
+   Neutralise explicitement les anciennes règles app.css qui forçaient le header
+   et la navigation à rester visibles pendant le Live. */
+body.bpt-live-landscape-open:not(.spectator-live-open) header.bpt-header,
+body.bpt-live-landscape-open.b466-live-active:not(.spectator-live-open):has(#live3.active) > header.bpt-header{
+  display:none !important;
+}
+body.bpt-live-landscape-open:not(.spectator-live-open) nav#nav,
+body.bpt-live-landscape-open.b466-live-active:not(.spectator-live-open):has(#live3.active) > nav#nav{
+  display:none !important;
+}

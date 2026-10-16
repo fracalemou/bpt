@@ -42,11 +42,15 @@
     // La liste des joueurs gère sa propre zone scrollable ; aucun recalcul de grille nécessaire.
   }
 
-  function show(v){
-    ensure().classList.toggle('is-visible',!!v);
-    $('bptLandscapeRotate')?.classList.toggle('is-visible',!!v);
+  function setLiveFullscreen(v){
     document.documentElement.classList.toggle('bpt-live-landscape-open',!!v);
     document.body.classList.toggle('bpt-live-landscape-open',!!v);
+  }
+
+  function show(v,{fullscreen=v}={}){
+    ensure().classList.toggle('is-visible',!!v);
+    $('bptLandscapeRotate')?.classList.toggle('is-visible',!!v);
+    setLiveFullscreen(fullscreen);
     requestAnimationFrame(fitViewport);
   }
   function title(kicker,label,n){$('bptllKicker').textContent=kicker;$('bptllTitle').textContent=label;$('bptllStep').textContent='Étape '+n+' / 4'}
@@ -286,13 +290,13 @@
 
   function render(force=false){
     ensure();fitViewport();
-    if(!activeView()){show(false);return}
+    if(!activeView()){show(false,{fullscreen:false});return}
     const st=state();let mode;
     if(st?.active&&!st.startedAt&&st.bountyModeRevealPending)mode='4';
     else if(st?.active&&!st.startedAt&&st.preGamePending)mode='3';
     else if(st?.active)mode='game';
     else mode=String(step);
-    if(mode==='game'){show(false);return}
+    if(mode==='game'){show(false,{fullscreen:true});return}
     show(true);
     const sig=mode+'|'+JSON.stringify(st?{sid:st.sessionId,pre:st.preGamePending,b:st.bountyModeRevealPending,at:st.bountyModeRevealAt,bets:st.betting?.bets,players:(st.players||[]).map(p=>p.name)}:{step});
     if(!force&&sig===lastSig)return;lastSig=sig;
