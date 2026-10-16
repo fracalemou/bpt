@@ -7259,16 +7259,29 @@ body.bpt-mobile-device.bpt-mobile-landscape .tablewrap{
 
 /* ===== V193 — vraie version mobile allégée ===== */
 
-/* La version téléphone n'est plus la version PC simplement réduite. */
-html.bpt-mobile-device #dashboard .premium-hero-copy p,
-body.bpt-mobile-device #dashboard .premium-hero-copy p,
-html.bpt-mobile-device #dashboard .premium-hero-metrics .premium-hero-metric:nth-child(3),
-body.bpt-mobile-device #dashboard .premium-hero-metrics .premium-hero-metric:nth-child(3),
-html.bpt-mobile-device #dashboard .premium-bottom-grid,
-body.bpt-mobile-device #dashboard .premium-bottom-grid,
-html.bpt-mobile-device #dashboard .premium-story-item:nth-child(2),
-body.bpt-mobile-device #dashboard .premium-story-item:nth-child(2){
-  display:none !important;
+/* Accueil : mêmes informations que sur PC, disposées pour le téléphone (10.4.18). */
+html.bpt-mobile-device #dashboard .premium-hero-copy p{
+  display:block !important;
+  font-size:13px !important;
+  line-height:1.35 !important;
+  opacity:.8;
+  margin:4px 0 0 !important;
+}
+html.bpt-mobile-device #dashboard .premium-hero-metrics .premium-hero-metric:nth-child(3){
+  display:block !important;
+}
+html.bpt-mobile-device #dashboard .premium-story-item:nth-child(2){
+  display:grid !important;
+}
+html.bpt-mobile-device #dashboard .premium-bottom-grid{
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  gap:8px !important;
+}
+html.bpt-mobile-device #dashboard .premium-eyebrow,
+html.bpt-mobile-device #dashboard .premium-panel-note{
+  display:block !important;
+  font-size:11px !important;
 }
 
 html.bpt-mobile-device #dashboard .premium-main-grid,
@@ -7277,22 +7290,16 @@ body.bpt-mobile-device #dashboard .premium-main-grid{
   gap:8px !important;
 }
 
+/* 3 tuiles côte à côte : Parties · Joueurs actifs · Participations cumulées */
 html.bpt-mobile-device #dashboard .premium-hero-metrics,
 body.bpt-mobile-device #dashboard .premium-hero-metrics{
-  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
   gap:6px !important;
 }
 
 html.bpt-mobile-device #dashboard .premium-panel,
 body.bpt-mobile-device #dashboard .premium-panel{
   padding:9px !important;
-}
-
-html.bpt-mobile-device #dashboard .premium-panel-note,
-body.bpt-mobile-device #dashboard .premium-panel-note,
-html.bpt-mobile-device #dashboard .premium-eyebrow,
-body.bpt-mobile-device #dashboard .premium-eyebrow{
-  display:none !important;
 }
 
 html.bpt-mobile-device #dashboard .premium-panel h2,
@@ -14192,6 +14199,14 @@ body.b466-live-active #live3>.hero{display:none!important}
  #live3Fullscreen .bpt484-actions button{height:auto;min-height:0;font-size:9px;line-height:1.05;border-radius:7px;padding:3px 4px;white-space:normal}
 
  #live3Fullscreen .bpt484-special-hud{max-width:calc(100% - 12px)}
+
+ /* 10.4.18 — Live en portrait : tout tient dans l'écran (chrono, infos et boutons visibles sans défiler) */
+ #live3Game .bpt484-live{height:100dvh;min-height:0;max-height:100dvh;overflow:hidden;padding:6px;gap:6px;border-radius:0}
+ #live3Game .bpt484-main{display:grid;grid-template-columns:1fr;grid-template-rows:minmax(0,1.35fr) minmax(0,.6fr) minmax(0,.9fr);gap:6px;min-height:0;overflow:hidden}
+ #live3Game .bpt484-stage{height:auto;min-height:0;padding:8px 10px 10px}
+ #live3Game .bpt484-kpis{min-height:0}
+ #live3Game .bpt484-card{min-height:0;height:auto;padding:8px 10px}
+ #live3Game .bpt484-info{min-height:0;height:auto;padding:8px 10px;gap:5px;align-content:space-evenly}
 }
 
 /* Téléphone paysage */
@@ -14513,3 +14528,7 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only{
   .bpt-bounty-card [data-bounty-close],
 .bpt-bounty-card [data-bounty-back]{height:30px!important;min-height:30px!important;margin-top:3px!important;padding:2px 7px!important;font-size:9px!important}
 }
+
+
+/* 10.4.18 — Pendant le Live, le bouton « Installer l'application » ne recouvre plus l'en-tête ni le Chat */
+body:has(#live3.active) #bptAppAction{display:none!important}

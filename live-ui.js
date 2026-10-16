@@ -468,9 +468,10 @@
     bar.style.gridTemplateColumns='repeat('+columns+',minmax(0,1fr))';
     bar.style.gridTemplateRows='repeat('+rows+','+rowHeight+'px)';
     bar.style.height=(rows*rowHeight+(rows-1)*gap)+'px';
+    buttons.forEach((b,i)=>{b.style.gridColumn=(columns===2&&buttons.length%2===1&&i===buttons.length-1)?'1 / -1':'';});
     for(const button of buttons){button.style.height='100%';button.style.minHeight='44px';button.style.padding='6px 8px';button.style.whiteSpace='normal';button.style.lineHeight='1.15';}
     const head=root.querySelector('.bpt484-head');
-    root.style.gridTemplateRows=(head?.offsetHeight||54)+'px '+(!fullscreen&&portrait?'auto':'minmax(0,1fr)')+' '+bar.style.height;
+    root.style.gridTemplateRows=(head?.offsetHeight||54)+'px '+'minmax(0,1fr)'+' '+bar.style.height;
   }
   function fitLiveTexts(){
     document.querySelectorAll('.bpt484-live').forEach(root=>{

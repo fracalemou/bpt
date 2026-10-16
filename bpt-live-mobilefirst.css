@@ -278,7 +278,7 @@
 .bptll-bounty-name{font-size:clamp(19px,6.5cqh,38px);line-height:1;font-weight:950;color:#f5d36f}
 .bptll-bounty p{max-width:760px;margin:0;font-size:var(--fs-sm);line-height:1.08;color:#c7d8d2}
 
-/* Téléphone portrait : pas de second layout, juste l'instruction de tourner. */
+/* Ancien écran « Tournez le téléphone » : n'est plus affiché (10.4.18). */
 #bptLandscapeRotate{
   position:fixed; inset:0; z-index:9600; display:none;
   align-items:center; justify-content:center; text-align:center;
@@ -289,10 +289,7 @@
 #bptLandscapeRotate .icon{font-size:50px;line-height:1;margin-bottom:10px}
 #bptLandscapeRotate strong{display:block;font-size:21px;margin-bottom:6px}
 #bptLandscapeRotate span{font-size:13px;color:#b9d2c9}
-@media (max-width:900px) and (orientation:portrait){
-  #bptLandscapeRotate.is-visible{display:flex}
-  #live3.active #bptLandscapeLive.is-visible{visibility:hidden}
-}
+/* 10.4.18 : le Live s'utilise aussi en portrait (disposition dédiée dans app-tel.css). */
 
 /* V10.4.3 — Pendant Pré-Live / Live, toute la surface appartient au jeu.
    Le bandeau BPT ET la navigation hôte sont masqués sur tous les écrans.
@@ -418,3 +415,23 @@ body.bpt-live-landscape-open.b466-live-active:not(.spectator-live-open):has(#liv
 #bptLandscapeLive .bptll-foot:empty{display:none!important;padding:0!important;border:0!important}
 #bptLandscapeLive .bptll-shell.is-spectator-step{grid-template-rows:auto minmax(0,1fr)}
 #bptLandscapeLive .bptll-shell.is-spectator-step .bptll-body{padding-bottom:max(var(--py),env(safe-area-inset-bottom))}
+
+
+/* 10.4.18 — Préparation de partie en portrait (téléphone tenu droit).
+   Les valeurs « cqh » pensées pour le paysage deviennent trop grandes : tailles fixes lisibles. */
+@media (max-width:760px) and (orientation:portrait){
+  #bptLandscapeLive{--gap:8px;--px:12px;--py:8px;--radius:10px;--control:44px;--fs-xs:12px;--fs-sm:13px;--fs-md:15px;--fs-lg:20px}
+  #bptLandscapeLive .bptll-head{display:flex;height:auto;flex-wrap:nowrap;align-items:center;padding:8px 12px}
+  #bptLandscapeLive .bptll-head-left{flex:1 1 auto}
+  #bptLandscapeLive .bptll-step{flex:0 0 auto;align-self:center}
+  #bptLandscapeLive .bptll-head-left{flex-direction:column;align-items:flex-start;gap:3px}
+  #bptLandscapeLive .bptll-title{white-space:normal}
+  #bptLandscapeLive .bptll-body{overflow:auto;align-content:start;-webkit-overflow-scrolling:touch}
+  #bptLandscapeLive .bptll-form{height:auto;grid-template-columns:1fr 1fr;grid-template-rows:none;grid-auto-rows:auto;align-content:start;gap:14px 10px}
+  #bptLandscapeLive .bptll-field{grid-template-rows:auto auto;gap:5px}
+  #bptLandscapeLive .bptll-field input,#bptLandscapeLive .bptll-field select{height:var(--control);max-height:none}
+  #bptLandscapeLive .bptll-playerselect{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr)}
+  #bptLandscapeLive .bptll-player-tools{grid-template-columns:1fr}
+  #bptLandscapeLive .bptll-player-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #bptLandscapeLive .bptll-foot.one{grid-template-columns:1fr}
+}

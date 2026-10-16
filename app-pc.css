@@ -10189,3 +10189,7 @@ body.b466-live-active #live3>.hero{display:none!important}
   .bpt-bounty-card [data-bounty-close],
 .bpt-bounty-card [data-bounty-back]{height:30px!important;min-height:30px!important;margin-top:3px!important;padding:2px 7px!important;font-size:9px!important}
 }
+
+
+/* 10.4.18 — Pendant le Live, le bouton « Installer l'application » ne recouvre plus l'en-tête ni le Chat */
+body:has(#live3.active) #bptAppAction{display:none!important}
