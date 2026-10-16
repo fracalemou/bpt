@@ -7308,16 +7308,26 @@ body.bpt-mobile-device #dashboard .premium-panel h2{
   margin:0 0 6px !important;
 }
 
-/* Parties : uniquement navigation, vainqueur, podium et résultat. */
-html.bpt-mobile-device #latestgame .latestgame-photo-placeholder,
-body.bpt-mobile-device #latestgame .latestgame-photo-placeholder,
+/* Parties : mêmes informations que sur PC (10.4.21), disposées pour le téléphone. */
+html.bpt-mobile-device #latestgame .latestgame-photo-placeholder{display:none !important}
 html.bpt-mobile-device #latestgame .latestgame-detail:nth-child(2),
-body.bpt-mobile-device #latestgame .latestgame-detail:nth-child(2),
-html.bpt-mobile-device #latestgame .latestgame-full-history,
-body.bpt-mobile-device #latestgame .latestgame-full-history,
-html.bpt-mobile-device #latestgame .latestgame-summary-line,
-body.bpt-mobile-device #latestgame .latestgame-summary-line{
-  display:none !important;
+html.bpt-mobile-device #latestgame .latestgame-full-history{display:block !important}
+html.bpt-mobile-device #latestgame .latestgame-summary-line{
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+  gap:6px !important;
+}
+html.bpt-mobile-device #latestgame .latestgame-summary-item + .latestgame-summary-item::before{display:none !important}
+html.bpt-mobile-device #latestgame #latestGameMeta,
+html.bpt-mobile-device #latestgame .tab-premium-hero p{
+  display:block !important;
+  font-size:12px !important;
+  opacity:.85;
+}
+html.bpt-mobile-device #latestgame #historySummary,
+html.bpt-mobile-device #latestgame .combined-block-content > .muted{
+  display:block !important;
+  font-size:12px !important;
 }
 
 html.bpt-mobile-device #latestgame .latestgame-photo-area:not(:has(.game-photo-thumb-btn[style*="display: none"])),
@@ -7326,12 +7336,11 @@ body.bpt-mobile-device #latestgame .latestgame-photo-area:not(:has(.game-photo-t
 }
 
 html.bpt-mobile-device #latestgame .latestgame-detail > summary small,
-body.bpt-mobile-device #latestgame .latestgame-detail > summary small,
 html.bpt-mobile-device #latestgame .dashboard-section-label,
-body.bpt-mobile-device #latestgame .dashboard-section-label,
-html.bpt-mobile-device #latestgame #latestGameHistorySummary,
-body.bpt-mobile-device #latestgame #latestGameHistorySummary{
-  display:none !important;
+html.bpt-mobile-device #latestgame #latestGameHistorySummary{
+  display:block !important;
+  font-size:11px !important;
+  opacity:.8;
 }
 
 html.bpt-mobile-device #latestgame .latestgame-detail,
@@ -14605,3 +14614,28 @@ html.bpt-mobile-device #profile .versus-table th:nth-child(3),
 html.bpt-mobile-device #profile .versus-table td:nth-child(3){width:31% !important}
 html.bpt-mobile-device #profile .versus-value{font-size:16px !important}
 html.bpt-mobile-device #profile .versus-criterion{font-size:11px !important;line-height:1.2 !important}
+
+/* 10.4.21 — Parties : podium sur 3 colonnes et tableaux lisibles (défilement horizontal si besoin) */
+html.bpt-mobile-device #latestgame #latestGamePodium{
+  display:grid !important;
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+  gap:6px !important;
+  align-items:end !important;
+}
+html.bpt-mobile-device #latestgame .podium-medal-item{
+  min-width:0 !important;
+  padding:8px 4px !important;
+  margin:0 !important;
+  text-align:center !important;
+}
+html.bpt-mobile-device #latestgame .podium-medal-item .podium-real-name{font-size:13px !important;line-height:1.15 !important;overflow-wrap:anywhere !important}
+html.bpt-mobile-device #latestgame .podium-medal-item .podium-nickname{font-size:10px !important;margin:2px 0 !important}
+html.bpt-mobile-device #latestgame .podium-medal-item .medal-badge{width:54px !important;height:54px !important;margin:6px auto !important;font-size:26px !important}
+html.bpt-mobile-device #latestgame .podium-medal-item .medal-badge img,
+html.bpt-mobile-device #latestgame .podium-medal-item .medal-badge svg{width:30px !important;height:30px !important}
+html.bpt-mobile-device #latestgame .podium-medal-item small{font-size:11px !important}
+html.bpt-mobile-device #latestgame .tablewrap,
+html.bpt-mobile-device #latestgame #latestGameResults{overflow-x:auto !important;-webkit-overflow-scrolling:touch}
+html.bpt-mobile-device #latestgame table th{white-space:nowrap !important}
+html.bpt-mobile-device #latestgame table th,
+html.bpt-mobile-device #latestgame table td{font-size:13px !important;padding:8px 7px !important}
