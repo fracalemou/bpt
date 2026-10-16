@@ -7353,45 +7353,7 @@ body.bpt-mobile-device #latestgame .latestgame-detail > summary{
   padding:7px 9px !important;
 }
 
-/* Classement : seulement les colonnes réellement utiles sur téléphone. */
-html.bpt-mobile-device #ranking th:nth-child(4),
-html.bpt-mobile-device #ranking td:nth-child(4),
-html.bpt-mobile-device #ranking th:nth-child(5),
-html.bpt-mobile-device #ranking td:nth-child(5),
-html.bpt-mobile-device #ranking th:nth-child(6),
-html.bpt-mobile-device #ranking td:nth-child(6),
-html.bpt-mobile-device #ranking th:nth-child(8),
-html.bpt-mobile-device #ranking td:nth-child(8),
-html.bpt-mobile-device #ranking th:nth-child(9),
-html.bpt-mobile-device #ranking td:nth-child(9),
-html.bpt-mobile-device #ranking th:nth-child(11),
-html.bpt-mobile-device #ranking td:nth-child(11),
-html.bpt-mobile-device #ranking th:nth-child(12),
-html.bpt-mobile-device #ranking td:nth-child(12),
-html.bpt-mobile-device #ranking th:nth-child(13),
-html.bpt-mobile-device #ranking td:nth-child(13),
-html.bpt-mobile-device #ranking th:nth-child(14),
-html.bpt-mobile-device #ranking td:nth-child(14),
-body.bpt-mobile-device #ranking th:nth-child(4),
-body.bpt-mobile-device #ranking td:nth-child(4),
-body.bpt-mobile-device #ranking th:nth-child(5),
-body.bpt-mobile-device #ranking td:nth-child(5),
-body.bpt-mobile-device #ranking th:nth-child(6),
-body.bpt-mobile-device #ranking td:nth-child(6),
-body.bpt-mobile-device #ranking th:nth-child(8),
-body.bpt-mobile-device #ranking td:nth-child(8),
-body.bpt-mobile-device #ranking th:nth-child(9),
-body.bpt-mobile-device #ranking td:nth-child(9),
-body.bpt-mobile-device #ranking th:nth-child(11),
-body.bpt-mobile-device #ranking td:nth-child(11),
-body.bpt-mobile-device #ranking th:nth-child(12),
-body.bpt-mobile-device #ranking td:nth-child(12),
-body.bpt-mobile-device #ranking th:nth-child(13),
-body.bpt-mobile-device #ranking td:nth-child(13),
-body.bpt-mobile-device #ranking th:nth-child(14),
-body.bpt-mobile-device #ranking td:nth-child(14){
-  display:none !important;
-}
+/* Classement : toutes les colonnes, comme sur PC (10.4.22) — voir fin de fichier. */
 
 /* L’évolution reste visible sur téléphone : c’est l’information clé du classement. */
 html.bpt-mobile-device #ranking th:nth-child(4),
@@ -7450,9 +7412,8 @@ body.bpt-mobile-device #ranking td{
   font-size:11px !important;
 }
 
-html.bpt-mobile-device #ranking .combined-block > summary,
-body.bpt-mobile-device #ranking .combined-block > summary{
-  display:none !important;
+html.bpt-mobile-device #ranking .combined-block > summary{
+  display:list-item !important;
 }
 
 html.bpt-mobile-device #ranking .combined-block-content,
@@ -14639,3 +14600,19 @@ html.bpt-mobile-device #latestgame #latestGameResults{overflow-x:auto !important
 html.bpt-mobile-device #latestgame table th{white-space:nowrap !important}
 html.bpt-mobile-device #latestgame table th,
 html.bpt-mobile-device #latestgame table td{font-size:13px !important;padding:8px 7px !important}
+
+
+/* 10.4.22 — Classements : toutes les colonnes et tous les détails, comme sur PC.
+   Le tableau défile horizontalement ; Place et Joueur restent figés à gauche. */
+html.bpt-mobile-device #ranking tr > th:nth-child(n),
+html.bpt-mobile-device #ranking tr > td:nth-child(n){display:table-cell !important}
+html.bpt-mobile-device #ranking .tablewrap{overflow-x:auto !important;-webkit-overflow-scrolling:touch}
+html.bpt-mobile-device #ranking table th{white-space:nowrap !important}
+html.bpt-mobile-device #ranking table th,
+html.bpt-mobile-device #ranking table td{font-size:13px !important;padding:8px 7px !important}
+html.bpt-mobile-device #ranking .tablewrap table tr > :nth-child(1){position:sticky !important;left:0 !important;z-index:2 !important;background:#141c2b !important}
+html.bpt-mobile-device #ranking .tablewrap table tr > :nth-child(2){position:sticky !important;left:52px !important;z-index:2 !important;background:#141c2b !important;box-shadow:4px 0 6px -4px rgba(0,0,0,.6) !important}
+html.bpt-mobile-device #ranking .tablewrap table tr > :nth-child(1){min-width:52px !important;width:52px !important;max-width:52px !important;box-sizing:border-box !important;padding-left:4px !important;padding-right:4px !important}
+html.bpt-mobile-device #ranking .tab-premium-hero p,
+html.bpt-mobile-device #ranking #rankingSortHint{display:block !important;font-size:12px !important;opacity:.8}
+html.bpt-mobile-device #ranking span.muted{display:inline !important}
