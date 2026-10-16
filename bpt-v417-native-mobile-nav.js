@@ -3,7 +3,7 @@
   function mobileMode(){
     return document.documentElement.classList.contains("bpt-mobile-device") ||
            document.body?.classList.contains("bpt-mobile-device") ||
-           window.matchMedia("(max-width:900px) and (pointer:coarse)").matches;
+           window.matchMedia("(max-width:900px)").matches;
   }
 
   function menu(){

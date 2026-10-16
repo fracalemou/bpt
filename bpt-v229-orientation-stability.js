@@ -4,14 +4,13 @@
     const root=document.documentElement;
     const body=document.body;
     if(!body)return;
-    const isMobile=root.classList.contains('bpt-mobile-device') || body.classList.contains('bpt-mobile-device') || (typeof isBptMobileDevice==='function' && isBptMobileDevice());
+    const isMobile=root.classList.contains('bpt-mobile-device');
     if(!isMobile)return;
     const vv=window.visualViewport;
     const w=(vv && vv.width) || window.innerWidth || root.clientWidth;
     const h=(vv && vv.height) || window.innerHeight || root.clientHeight;
     const portrait=h>=w;
     for(const el of [root,body]){
-      el.classList.add('bpt-mobile-device');
       el.classList.toggle('bpt-mobile-portrait',portrait);
       el.classList.toggle('bpt-mobile-landscape',!portrait);
     }
