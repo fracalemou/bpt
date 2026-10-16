@@ -3858,9 +3858,7 @@ async function requestTakeover(){
     $3("live3ChatToast")?.addEventListener("click",e=>{
       if(e.target?.closest?.("#live3ChatToastClose"))return;
       const toast=$3("live3ChatToast");
-      const mode=toast?.dataset?.chatMode||"live3";
-      if(mode==="legacy" && typeof bptChatOpen==="function")bptChatOpen();
-      else openChat();
+      openChat();
       if(toast)delete toast.dataset.chatMode;
     });
     $3("live3ChatToastClose")?.addEventListener("click",e=>{

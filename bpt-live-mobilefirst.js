@@ -314,7 +314,7 @@
 
     shell.append(mine,others);body.replaceChildren(shell);
     const owner=!!api()?.isOwner?.();
-    const spectator=(typeof window.liveIsSpectator==='function'&&window.liveIsSpectator())||!owner;
+    const spectator=!owner;
     ensure().querySelector('.bptll-shell')?.classList.toggle('is-spectator-step',spectator);
     footer(spectator
       ? []

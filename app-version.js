@@ -43,18 +43,21 @@ function updateFirebaseDiagnostic(){
   const gameEl=document.getElementById("firebaseDiagnosticLastGame");
   const versionEl=document.getElementById("firebaseDiagnosticVersion");
 
+  const live3=window.BPTLive3?.getState?.()||null;
+  const live3Active=!!(live3?.active && !live3?.finishedAt);
+
   if(modeEl){
     let mode="Organisateur";
     try{
-      if(typeof liveIsSpectator==="function" && liveIsSpectator())mode="Spectateur";
+      if(live3Active && window.BPTLive3?.isOwner && !window.BPTLive3.isOwner())mode="Spectateur";
     }catch(_e){}
     modeEl.textContent=mode;
   }
 
   if(liveEl){
-    const live=db?.liveState;
-    liveEl.textContent=live && live.active!==false
-      ? `Partie #${live.gameNo||"—"} · actif`
+    const no=Number(live3?.gameNo||live3?.partNo||0)||((typeof db!=="undefined" && Array.isArray(db?.history))?Math.max(0,...db.history.map(r=>Number(r.game)||0))+1:0);
+    liveEl.textContent=live3Active
+      ? `Partie #${no||"—"} · ${live3.running?"en cours":"en pause"}`
       : "Aucun Live actif";
   }
 

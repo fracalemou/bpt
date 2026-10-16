@@ -1,7 +1,6 @@
 
 (function(){
   const desktopLabels = {
-    live:'Live',
     dashboard:'⌂ Accueil',
     latestgame:'◷ Parties',
     ranking:'♛ Classements',
@@ -11,7 +10,6 @@
     settings:'⚙ Paramètres'
   };
   const mobileLabels = {
-    live:'Live',
     dashboard:'⌂ Accueil',
     latestgame:'◷ Parties',
     ranking:'♛ Classements',
@@ -31,18 +29,9 @@
 
     document.querySelectorAll('nav#nav button[data-view]').forEach(btn=>{
       const key = btn.getAttribute('data-view') || '';
-      let label=(isMobile ? mobileLabels[key] : desktopLabels[key]) || btn.textContent;
-      if(key==='live' && typeof liveIsSpectator==='function' && liveIsSpectator()){
-        label='Live';
-      }
+      const label=(isMobile ? mobileLabels[key] : desktopLabels[key]) || btn.textContent;
       btn.textContent = label;
     });
-    if(typeof window.bptUpdateLiveNavIndicator==='function')window.bptUpdateLiveNavIndicator();
-
-    const title = document.getElementById('liveHeroTitle');
-    if(title){ title.textContent = isMobile ? 'Live BPT' : 'Gestion de la partie en direct'; }
-    const subtitle = document.getElementById('liveHeroSubtitle');
-    if(subtitle){ subtitle.style.display = isMobile ? 'none' : ''; }
   }
 
   if(document.readyState === 'loading'){
