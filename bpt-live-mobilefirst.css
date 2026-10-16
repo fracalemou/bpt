@@ -1,4 +1,4 @@
-/* BPT 10.4.4 — Pré-Live mobile-first.
+/* BPT 10.4.6 — Pré-Live mobile-first.
    UNE structure HTML. UNE grille horizontale. Le téléphone paysage est la référence.
    Le PC utilise exactement la même structure avec des dimensions qui grandissent.
    Aucun correctif historique n'est repris dans ce fichier. */
@@ -341,3 +341,20 @@ body.bpt-live-landscape-open nav#nav{
 .bptll-player-scroll::-webkit-scrollbar-track{background:#08251f;border-radius:999px}
 .bptll-player-scroll::-webkit-scrollbar-thumb{background:#2f7667;border-radius:999px}
 .bptll-player-scroll{scrollbar-width:thin;scrollbar-color:#2f7667 #08251f}
+
+/* BPT 10.4.6 — Correctif structurel testé :
+   app.css force `main { display:block !important }`, ce qui faisait déborder
+   la zone centrale hors du viewport et empêchait tout overflow interne.
+   Le corps du Pré-Live doit rester strictement borné par sa ligne de grille. */
+#bptLandscapeLive .bptll-body{
+  display:grid !important;
+  height:100% !important;
+  max-height:100% !important;
+  min-height:0 !important;
+  align-self:stretch !important;
+}
+#bptLandscapeLive .bptll-playerselect{
+  height:100% !important;
+  max-height:100% !important;
+  min-height:0 !important;
+}

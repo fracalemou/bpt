@@ -129,10 +129,37 @@
     return out.sort((a,b)=>b.participations-a.participations||a.name.localeCompare(b.name,'fr',{sensitivity:'base'}));
   }
 
-  function useLegacyAdd(name){
-    const clean=String(name||'').trim().replace(/\s+/g,' ');if(!clean)return;
-    const input=$('live3NewPlayerName'),add=$('live3AddNewPlayerBtn');if(!input||!add)return;
-    input.value=clean;add.click();setTimeout(()=>render(true),120);
+  function addPlayerDirect(name){
+    const clean=String(name||'').trim().replace(/\s+/g,' ');if(!clean)return null;
+    let rec=null;
+    try{
+      rec=(db?.players||[]).find(p=>norm(p?.name)===norm(clean))||null;
+      if(rec){
+        rec.active=true;
+      }else{
+        rec={name:clean,nickname:'',active:true};
+        if(!Array.isArray(db.players))db.players=[];
+        db.players.push(rec);
+      }
+      if(typeof saveDB==='function')saveDB();
+      try{window.renderAll?.()}catch(_e){}
+      try{window.bptNotifySettingsPlayers?.()}catch(_e){}
+    }catch(_e){return null}
+
+    const canonical=String(rec?.name||clean).trim();
+    const picker=$('live3PlayerPicker');
+    if(picker){
+      let cb=[...picker.querySelectorAll('input[type="checkbox"]')].find(x=>norm(x.value)===norm(canonical));
+      if(!cb){
+        const label=document.createElement('label');label.className='bpt-live3-player-check';
+        cb=document.createElement('input');cb.type='checkbox';cb.value=canonical;
+        const span=document.createElement('span');span.textContent=canonical;
+        label.append(cb,span);picker.append(label);
+      }
+      cb.checked=true;
+      cb.dispatchEvent(new Event('change',{bubbles:true}));
+    }
+    return canonical;
   }
 
   let playerQuery='';
@@ -149,7 +176,7 @@
     const addBox=document.createElement('div');addBox.className='bptll-player-add';
     const addLabel=document.createElement('strong');addLabel.textContent='Ajouter un joueur';
     const addInput=document.createElement('input');addInput.type='text';addInput.placeholder='Nom du joueur…';addInput.autocomplete='off';
-    const addBtn=button('Ajouter',true,()=>{const name=addInput.value.trim();if(!name){addInput.focus();return;}useLegacyAdd(name);addInput.value=''});
+    const addBtn=button('Ajouter',true,()=>{const name=addInput.value.trim();if(!name){addInput.focus();return;}const added=addPlayerDirect(name);if(added){addInput.value='';playerQuery='';render(true)}});
     addInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addBtn.click()}});
     addBox.append(addLabel,addInput,addBtn);tools.append(search,addBox);
 
@@ -185,7 +212,7 @@
           lab.classList.toggle('is-selected',cb.checked);
           updateSelected();
         }else if(cb.checked){
-          useLegacyAdd(p.name);
+          const added=addPlayerDirect(p.name);if(added){p.checked=true;render(true);}
         }
       });
       lab.append(cb,avatar,copy);return lab;
@@ -274,7 +301,13 @@
 
   function boot(){
     ensure();fitViewport();render(true);
-    const rerender=()=>{fitViewport();render(true)};
+    const rerender=()=>{
+      fitViewport();
+      const ae=document.activeElement;
+      const editing=!!(ae&&ae.closest?.('#bptLandscapeLive')&&/^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName));
+      if(editing)return;
+      render(true);
+    };
     window.addEventListener('resize',rerender,{passive:true});
     window.visualViewport?.addEventListener('resize',rerender,{passive:true});
     window.visualViewport?.addEventListener('scroll',fitViewport,{passive:true});
