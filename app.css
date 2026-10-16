@@ -14531,7 +14531,6 @@ body.b466-live-active #live3>.hero{display:none!important}
 .bpt484-actions .bpt484-action-menu button{display:block;width:100%;min-height:44px;padding:12px;text-align:left;white-space:normal;font-size:15px;line-height:1.25;background:transparent;color:#f5f8f7;border-radius:8px}
 .bpt484-action-menu button:hover,.bpt484-action-menu button:focus-visible{background:#17483d;outline:2px solid #2ac9c2;outline-offset:-2px}
 .bpt484-actions .bpt484-action-menu .bpt484-end{color:#ff9995}
-.bpt484-live.is-spectator [data-menu-panel="tools"]{display:none!important}
 .bpt484-head-tools .bpt484-full{border:1px solid #1e6157;border-radius:10px;background:#08241f;color:#f5f8f7;min-width:44px;min-height:44px;font-size:24px;cursor:pointer}
 .bpt484-clock-settings{position:absolute;right:3%;top:50%;transform:translateY(-50%);color:#2ac9c2;font-size:24px;border:1px solid #1e6157;border-radius:10px;padding:6px;line-height:1;pointer-events:none}
 .bpt484-live.is-spectator .bpt484-clock-settings{display:none}
@@ -14568,7 +14567,7 @@ body.b466-live-active #live3>.hero{display:none!important}
 .bpt484-enjeux{color:#fff}
 .bpt-objective-row{padding:14px 0;border-bottom:1px solid #28584f}.bpt-objective-row strong{display:block;font-size:16px}.bpt-objective-row p{font-size:14px;line-height:1.5;margin:8px 0}.bpt-objective-status{display:inline-block;margin-top:8px;padding:4px 8px;border-radius:7px;background:#173e35;color:#bed7cd;font-size:12px;font-weight:800}.bpt-objective-row.is-completed .bpt-objective-status{background:#26c6ba;color:#06201d}
 .bpt484-takeover{display:none;background:#cc650e;color:#fff}
-.bpt484-live.is-spectator .bpt484-actions>button:not(.bpt484-takeover):not(.bpt484-follow){display:none!important}
+.bpt484-live.is-spectator .bpt484-actions>button:not(.bpt484-takeover):not(.bpt484-follow):not(.bpt484-tools){display:none!important}
 .bpt484-live.is-spectator .bpt484-takeover{display:block}
 
 .bpt484-live.is-spectator .bpt484-takeover:disabled{opacity:.72;cursor:default}

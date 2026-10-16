@@ -1,0 +1,59 @@
+BPT V10.4.14 — AUDIT DE COHERENCE
+Date : 16/10/2026
+
+RESULTAT GLOBAL
+- 51 contrôles PASS
+- 1 WARNING d'architecture
+- 0 FAIL après corrections
+
+CORRECTIONS ISSUES DE L'AUDIT
+1. Temps écoulé Live
+   - conservation de elapsedSec lors d'un +/- 1 minute ;
+   - conservation lors d'un changement de durée de blinds ;
+   - conservation lors d'une réparation/normalisation de structure.
+   Le temps restant reste calculé sur une deadline absolue.
+
+2. Référentiel joueurs / connexion mobile
+   - la connexion utilise toute la liste Paramètres > Joueurs ;
+   - le statut actif reste un critère de sélection de partie, pas d'identité ;
+   - les noms longs peuvent revenir à la ligne sur mobile.
+
+3. Plein écran
+   - aucun bouton Plein écran dans l'UI Live active ;
+   - ancien bouton legacy supprimé du HTML ;
+   - ancien lancement automatique du plein écran neutralisé.
+
+CONTROLES PASS PRINCIPAUX
+- Masquer le Live présent dans Outils actif.
+- Masquer le Live ne modifie pas l'état du Live.
+- Le ticker continue lorsque le Live est masqué.
+- Retour via l'onglet Live = rendu de l'état serveur courant.
+- Spectateur : chat, cotes, paris, bounty, classement et masquer Live autorisés en lecture.
+- Spectateur : pause, sortie joueur, fin Live, timer de réflexion et navigation d'étape interdits.
+- Aucun bouton Retour aux paris / Révéler bounty / Lancer partie en spectateur.
+- Paris validés : compteur global incluant le joueur connecté.
+- Choix des autres joueurs révélés uniquement après validation.
+- Validation "pas de pari" autorisée.
+- Codes personnels stockés dans la fiche joueur Firebase et création transactionnelle.
+- Reconnexion : listener Live recharge l'état serveur.
+- Multi-appareils : même référentiel auth Firebase.
+- PWA : cache versionné, skipWaiting, clientsClaim, suppression des anciens caches, réseau d'abord.
+- Aucun ID HTML dupliqué.
+- Aucune ressource locale manquante.
+- Tous les JS passent node --check individuellement et concaténés dans l'ordre de chargement.
+- Fin de partie : vainqueur unique + classement complet exigés avant publication.
+- Règlement des paris effectué à la finalisation.
+- Archive ZIP testée sans erreur.
+
+WARNING
+- Deux générations de logique Live subsistent dans le projet :
+  * Live V3 actif : bpt/live_v3/current
+  * ancien moteur : liveState/liveWire
+  L'onglet V10 utilise Live V3 et l'ancien chemin est neutralisé dans l'usage courant.
+  Recommandation : prévoir plus tard une version de nettoyage dédiée pour supprimer le moteur historique,
+  après tests de non-régression ciblés. Ne pas le supprimer au milieu des évolutions fonctionnelles actuelles.
+
+LIMITATION DU TEST NAVIGATEUR
+- Chromium headless présent dans l'environnement mais ne termine pas le chargement de cette application
+  (dépendances externes/Firebase/DBus de l'environnement). Les contrôles réalisés sont donc des tests
+  statiques, syntaxiques, de cohérence et des simulations de logique de timer.

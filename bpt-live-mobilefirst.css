@@ -221,7 +221,7 @@
   color:#fff; font-size:var(--fs-sm); font-weight:900;
 }
 .bptll-player-copy{min-width:0;display:flex;flex-direction:column;gap:1px;line-height:1.02}
-.bptll-player-copy strong{min-width:0;font-size:var(--fs-sm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bptll-player-copy strong{min-width:0;font-size:var(--fs-sm);white-space:normal;overflow:visible;text-overflow:clip;line-height:1.15;overflow-wrap:anywhere}
 .bptll-player-copy small{font-size:var(--fs-xs);color:#afc8bf;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bptll-player-copy em{font-size:var(--fs-xs);color:#77d8ca;font-style:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bptll-player-empty{grid-column:1/-1;padding:18px;text-align:center;color:#a9c6bc;font-size:var(--fs-sm)}

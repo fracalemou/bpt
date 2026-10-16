@@ -627,6 +627,7 @@
     out.remainingSec=Math.min(Math.max(0,Number(out.remainingSec)||maxDur),maxDur);
     if(out.running && out.deadline){
       const now=Date.now();
+      if(out.runStartedAt)out.elapsedSec=Number(out.elapsedSec||0)+Math.max(0,Math.floor((now-Number(out.runStartedAt))/1000));
       out.deadline=now+out.remainingSec*1000;
       out.runStartedAt=now;
     }
@@ -1243,7 +1244,7 @@ function connectionDeviceLabel(){
   function normalizeLoginPlayers(playersRaw){
     const players=Array.isArray(playersRaw)?playersRaw:Object.values(playersRaw||{});
     const rows=players
-      .filter(p=>p && p.active===true && String(p.name||"").trim())
+      .filter(p=>p && String(p.name||"").trim())
       .map(p=>({name:String(p.name||"").trim()}))
       .sort((a,b)=>a.name.localeCompare(b.name,"fr",{sensitivity:"base"}));
     const seen=new Set();
@@ -1498,7 +1499,7 @@ function connectionDeviceLabel(){
     const activeProfiles=await fetchAuthoritativeLoginPlayers();
 
     if(!activeProfiles.some(profile=>profile.name===clean)){
-      alert("Ce joueur n’est plus actif. La liste vient d’être actualisée.");
+      alert("Ce joueur n’est plus présent dans Paramètres > Joueurs. La liste vient d’être actualisée.");
       renderSpectatorNameOptions(activeProfiles);
       input?.focus();
       return;
@@ -2224,6 +2225,7 @@ function connectionDeviceLabel(){
       s.remainingSec=newRemaining;
 
       if(s.running){
+        if(s.runStartedAt)s.elapsedSec=Number(s.elapsedSec||0)+Math.max(0,Math.floor((now-Number(s.runStartedAt))/1000));
         s.runStartedAt=now;
         s.deadline=now+newRemaining*1000;
       }else{
@@ -2241,6 +2243,7 @@ function connectionDeviceLabel(){
       const now=Date.now();
       if(s.running){
         const rem=Math.max(0,Math.ceil((Number(s.deadline||now)-now)/1000)+delta);
+        if(s.runStartedAt)s.elapsedSec=Number(s.elapsedSec||0)+Math.max(0,Math.floor((now-Number(s.runStartedAt))/1000));
         s.deadline=now+rem*1000;
         s.runStartedAt=now;
       }else{
@@ -3308,7 +3311,7 @@ async function requestTakeover(){
     );
 
     const activePlayers=(db?.players||[])
-      .filter(p=>p && p.active===true && String(p.name||"").trim())
+      .filter(p=>p && String(p.name||"").trim())
       .map(p=>String(p.name).trim());
 
     const knownMap=new Map(
@@ -4096,7 +4099,7 @@ async function requestTakeover(){
         s.levelIndex=Math.max(0,Math.min(levels.length-1,Number(s.levelIndex)||0));
         const dur=Math.max(120,Number(levels[s.levelIndex]?.durationSec)||fallback);
         if(!Number.isFinite(Number(s.remainingSec)) || Number(s.remainingSec)>dur*2)s.remainingSec=dur;
-        if(s.running){const now=Date.now();s.runStartedAt=now;s.deadline=now+Math.max(0,Number(s.remainingSec)||dur)*1000;}
+        if(s.running){const now=Date.now();if(s.runStartedAt)s.elapsedSec=Number(s.elapsedSec||0)+Math.max(0,Math.floor((now-Number(s.runStartedAt))/1000));s.runStartedAt=now;s.deadline=now+Math.max(0,Number(s.remainingSec)||dur)*1000;}
         s.updatedAt=Date.now();
         return s;
       });

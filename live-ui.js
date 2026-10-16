@@ -29,7 +29,7 @@
   function makeMarkup(fs=false){return `<div class="bpt484-live" data-fs="${fs?'1':'0'}">
 
     <div class="bpt-bounty-overlay" data-role="bounty" hidden><section class="bpt-bounty-card" role="dialog" aria-modal="true" aria-label="Révélation du bounty mystère" tabindex="-1"><div class="bpt-stage-chip" data-role="bountystage" hidden>Étape 4 / 4</div><div class="bpt-bounty-icon">🎯</div><h2 data-role="bountytitle"></h2><div class="bpt-bounty-name" data-role="bountyname"></div><p data-role="bountytext"></p><strong data-role="bountyhunter"></strong><button type="button" data-bounty-close disabled>Continuer</button><button type="button" data-bounty-back hidden>← Retour aux paramètres</button></section></div>
-    <div class="bpt484-head"><div class="bpt484-brand">BPT</div><div class="bpt484-owner" data-role="owner">Organisateur · —</div><div class="bpt484-head-tools"><button class="bpt484-chat" data-do="chat">Chat</button><button class="bpt484-full" data-do="full" aria-label="${fs?'Quitter le plein écran':'Plein écran'}" title="${fs?'Quitter le plein écran':'Plein écran'}">⛶</button><div class="bpt484-part" data-role="part">Partie n°—</div></div></div>
+    <div class="bpt484-head"><div class="bpt484-brand">BPT</div><div class="bpt484-owner" data-role="owner">Organisateur · —</div><div class="bpt484-head-tools"><button class="bpt484-chat" data-do="chat">Chat</button><div class="bpt484-part" data-role="part">Partie n°—</div></div></div>
     <section class="bpt-pregame" data-role="pregame" hidden aria-label="Paris avant la partie"><div class="bpt-pregame-inner"><header><b>BPT</b><span data-role="pregamecount"></span></header><div class="bpt-pregame-heading bpt-pregame-bets-heading"><div class="bpt-stage-chip">Étape 3 / 4</div><small>AVANT LE LANCEMENT</small><h2>Placez vos paris</h2><p>Choisissez éventuellement un vainqueur et un 1er éliminé, puis validez votre pari.</p></div><section class="bpt-predictions" data-role="predictions" aria-label="Pronostics"></section><footer><span data-role="pregamestatus"></span><div class="bpt-pregame-buttons"><button type="button" data-do="back-pregame">← Retour aux paramètres</button><button type="button" data-do="launch-pregame">▶ Révéler le type de bounty</button></div></footer></div></section>
     <section class="bpt484-takeover-request" data-role="takeoverrequest" role="alert" hidden><strong>DEMANDE DE REPRISE</strong><p data-role="takeoverrequesttext"></p><div><button type="button" data-do="approve-takeover">Accepter</button><button type="button" data-do="reject-takeover">Refuser</button></div></section>
     <div class="bpt484-special-hud" data-role="specialhud"><div class="bpt484-timebank-player" data-role="timebankplayer"></div><div class="bpt484-timebank-count" data-role="timebankcount"></div><div class="bpt484-timebank-meta" data-role="timebankmeta"></div><button data-timebank-stop>Décision prise</button></div>
@@ -55,7 +55,7 @@
     <div class="bpt484-actions">
       <button class="bpt484-pause" data-do="pause">Pause</button><button class="bpt484-out" data-do="out">Sortir un joueur</button><button class="bpt484-follow" data-menu-toggle="follow" aria-expanded="false">Suivi de partie</button><button class="bpt484-tools" data-menu-toggle="tools" aria-expanded="false">Outils</button><button class="bpt484-takeover" data-do="takeover">Demander la reprise</button>
       <div class="bpt484-action-menu" data-menu-panel="follow" hidden><button class="bpt484-enjeux" data-do="enjeux">🏆 Enjeux de la partie</button><button class="bpt484-bets" data-do="bets">🎲 Paris de la table</button><button class="bpt484-personal" data-do="personal-bounty">🎯 Bounty</button><button class="bpt484-live-ranking" data-do="live-ranking">📊 Classement en direct</button></div>
-      <div class="bpt484-action-menu" data-menu-panel="tools" hidden><button data-do="timer">⏱ Timer de réflexion</button><button data-do="odds">Calcul de cotes</button><button class="bpt484-end" data-do="end">Terminer le live</button></div>
+      <div class="bpt484-action-menu" data-menu-panel="tools" hidden><button data-do="timer">⏱ Timer de réflexion</button><button data-do="odds">Calcul de cotes</button><button data-do="hide-live">Masquer le Live</button><button class="bpt484-end" data-do="end">Terminer le live</button></div>
     </div>
   </div>`}
   function install(){
@@ -74,7 +74,7 @@
         const a=e.target.closest('[data-action]');if(a){closeActionMenus();info(a.dataset.action);return;}
         const bet=e.target.closest('[data-bet-action]');if(bet&&bet.tagName!=='SELECT'){handleBetAction(bet);return;}
         const b=e.target.closest('[data-do]');if(b){
-          if(spectator&&!['takeover','full','chat','enjeux','personal-bounty','live-ranking','odds'].includes(b.dataset.do))return;
+          if(spectator&&!['takeover','chat','enjeux','personal-bounty','live-ranking','odds','bets','hide-live'].includes(b.dataset.do))return;
           closeActionMenus();doit(b.dataset.do,root.dataset.fs==='1');
         }
       });
@@ -261,7 +261,7 @@
       else if(a==='personal-bounty')openPersonalBounty();
       else if(a==='chat')$('live3ChatBtn')?.click();
       else if(a==='odds')$('live3OddsBtn')?.click();
-      else if(a==='full'){if(fs)x?.closeFullscreen?.();else x?.openFullscreen?.()}
+      else if(a==='hide-live'){$('live3QuitViewBtn')?.click();}
       else if(a==='takeover')await x?.requestTakeover?.();
       else if(a==='approve-takeover')await x?.approveTakeover?.();
       else if(a==='reject-takeover')await x?.rejectTakeover?.();
@@ -313,11 +313,11 @@
       const winner=ps.filter(p=>p.status==='winner');
       const outs=ps.filter(p=>p.status==='out').sort((a,b)=>Number(b.outAt||0)-Number(a.outAt||0));
       const other=ps.filter(p=>!['in','out','winner'].includes(String(p.status||'')));
-      const lastOut=outs[0]||null;
+      const lastOut=outs[0]||null,canManage=!!api()?.isOwner?.();
       const ordered=[...winner,...alive,...other,...outs];
       const rows=ordered.map(p=>{
         const out=p.status==='out',win=p.status==='winner',lv=Number(p.outLevel)||0;
-        const isLast=!!(lastOut&&p.name===lastOut.name&&Number(p.outAt||0)===Number(lastOut.outAt||0));
+        const isLast=!!(canManage&&lastOut&&p.name===lastOut.name&&Number(p.outAt||0)===Number(lastOut.outAt||0));
         const status=win?'Vainqueur':out?(lv?`Éliminé · niveau ${lv}`:'Éliminé'):'En jeu';
         const detail=out&&p.killer?` · par ${esc(p.killer)}`:'';
         return `<div class="bpt484-row${isLast?' bpt484-last-out':''}" ${isLast?'data-last-out="1" tabindex="0" role="button" title="Corriger ou annuler cette élimination"':''}><span>${esc(p.name||'—')}${isLast?' <small>· dernière élimination</small>':''}</span><b>${status}${detail}</b></div>`;
@@ -326,7 +326,7 @@
       const dlg=$('bpt484Dialog');
       const lastRow=dlg?.querySelector('[data-last-out="1"]');
       const openCorrection=()=>{
-        if(!lastOut)return;
+        if(!canManage||!lastOut)return;
         const killers=ps.filter(p=>p.name!==lastOut.name).map(p=>`<option value="${esc(p.name)}" ${p.name===lastOut.killer?'selected':''}>${esc(p.name)}</option>`).join('');
         dlg.innerHTML=`<button class="bpt484-close" data-modal-close>×</button><h2>${esc(lastOut.name)} · dernière élimination</h2><p style="color:#9fb4af;margin-top:-4px">Choisissez l’action à effectuer sur cette élimination.</p><div class="bpt484-row"><span>Éliminé par</span><b>${esc(lastOut.killer||'—')}</b></div><div class="bpt484-row"><span>Niveau</span><b>${Number(lastOut.outLevel)||'—'}</b></div><div class="bpt484-btnrow"><button data-correct-elim>Corriger l’élimination</button><button class="bpt484-danger-action" data-undo-elim>Annuler l’élimination</button></div>`;
         dlg.querySelector('[data-modal-close]')?.addEventListener('click',closeModal);
@@ -356,21 +356,22 @@
     }
     if(type==='blinds'){
       const idx=Math.max(0,Number(st?.levelIndex)||0),cur=blindAt(idx),nx=blindAt(idx+1);
-      open('Blinds',`<div class="bpt484-row"><span>Actuelles</span><b>${fmt(cur.sb)} / ${fmt(cur.bb)}</b></div><div class="bpt484-row"><span>Prochain niveau</span><b>${fmt(nx.sb)} / ${fmt(nx.bb)}</b></div><div class="bpt484-btnrow"><button data-cmd="prev">◀ Niveau précédent</button><button data-cmd="next">Niveau suivant ▶</button></div>`);
-      $('bpt484Dialog').onclick=e=>{const c=e.target.closest('[data-cmd]')?.dataset.cmd;if(c)actionDirect(c)};return;
+      const controls=api()?.isOwner?.()?'<div class="bpt484-btnrow"><button data-cmd="prev">◀ Niveau précédent</button><button data-cmd="next">Niveau suivant ▶</button></div>':'';
+      open('Blinds',`<div class="bpt484-row"><span>Actuelles</span><b>${fmt(cur.sb)} / ${fmt(cur.bb)}</b></div><div class="bpt484-row"><span>Prochain niveau</span><b>${fmt(nx.sb)} / ${fmt(nx.bb)}</b></div>${controls}`);
+      if(api()?.isOwner?.())$('bpt484Dialog').onclick=e=>{const c=e.target.closest('[data-cmd]')?.dataset.cmd;if(c)actionDirect(c)};return;
     }
     if(type==='timing'){
       const adaptive=st?.paceAdaptive===true;
       const elapsed=$('live3Elapsed')?.textContent||'—',finish=$('live3EstimatedFinish')?.textContent||'—',delta=$('live3FinishDelta')?.textContent||'—';
-      const advice=api()?.getPaceAdvice?.()||null;
-      if(adaptive){
+      const canManage=!!api()?.isOwner?.(),advice=canManage?(api()?.getPaceAdvice?.()||null):null;
+      if(adaptive&&canManage){
         const last=st?.lastPaceAdjustment||{};
         const canReadapt=!!advice && (!Number.isFinite(Number(last.levelIndex)) || (Number(st?.levelIndex)||0)>Number(last.levelIndex));
         const readapt=canReadapt?`<button data-readapt>Nouvelle adaptation</button>`:'';
         const explain=canReadapt?`<p style="margin:14px 0 4px;color:#f4f7f6;line-height:1.45">L’écart reste significatif malgré l’adaptation. BPT propose de passer les prochains niveaux de <b>${advice.currentMin} à ${advice.proposedMin} min</b>.</p>`:'';
         open('Rythme de la partie',`<div class="bpt484-row"><span>Temps écoulé</span><b>${esc(elapsed)}</b></div><div class="bpt484-row"><span>Fin estimée</span><b>${esc(finish)}</b></div><div class="bpt484-row"><span>Écart</span><b>${esc(delta)}</b></div>${explain}<div class="bpt484-btnrow">${readapt}<button data-mode-toggle>Revenir en classique</button></div>`);
         $('bpt484Dialog').querySelector('[data-readapt]')?.addEventListener('click',()=>{closeModal();live3ShowPaceAdvice(advice,{readapt:true});});
-      }else if(advice){
+      }else if(advice&&canManage){
         const direction=advice.type==='accelerate'?'retard':'avance';
         const verb=advice.type==='accelerate'?'raccourcir':'allonger';
         open('Rythme de la partie',`<div class="bpt484-row"><span>Temps écoulé</span><b>${esc(elapsed)}</b></div><div class="bpt484-row"><span>Fin estimée</span><b>${esc(finish)}</b></div><div class="bpt484-row"><span>Écart</span><b>${esc(delta)}</b></div><p style="margin:14px 0 4px;color:#f4f7f6;line-height:1.45">La partie prend trop d’${direction}. Pour essayer de respecter l’heure de fin prévue, BPT propose de <b>${verb} les prochains niveaux de ${advice.currentMin} à ${advice.proposedMin} min</b>.</p><div class="bpt484-btnrow"><button data-mode-toggle>Passer en adaptatif</button></div>`);

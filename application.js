@@ -1166,10 +1166,16 @@ async function applySpectatorLiveState(row,{fromDirectPoll=false}={}){
 
   if(!remoteActive || !remoteCreator || remoteCreator===thisDevice)return false;
 
-  // Spectateur = lecture seule. On ne remplace PAS le reste de db :
-  // classement, historique, paramètres locaux restent disponibles normalement.
-  // En revanche, les avatarId des profils sont légers et doivent rester synchronisés.
-  mergeRemotePlayerAvatars(row.data?.players||[]);
+  // Spectateur = lecture seule pour le Live, mais Paramètres > Joueurs reste le
+  // référentiel unique de connexion sur tous les appareils. La liste distante
+  // doit donc remplacer la copie locale (noms, actif, surnom, avatar, auth...).
+  // Sans cela un téléphone peut conserver une ancienne liste et proposer à tort
+  // de recréer le code d'un joueur déjà enregistré.
+  if(Array.isArray(row.data?.players)){
+    db.players=JSON.parse(JSON.stringify(row.data.players));
+    bptMigrateLegacyElenPlayerDirectory();
+    try{ bptNotifySettingsPlayers(); }catch(_e){}
+  }
   db.liveState=JSON.parse(JSON.stringify(remoteLive));
   cloudLastRevision=Number(row.revision||cloudLastRevision||0);
   cloudLocalDirty=false;
@@ -7877,10 +7883,7 @@ async function liveLaunch(){
   liveRenderAll();
   liveRenderFullscreen();
 
-  // Le clic sur « Lancer la partie » ouvre immédiatement le bon plein écran :
-  // applicatif sur téléphone, natif navigateur sur PC.
-  // Le chrono reste arrêté jusqu'au bouton « Démarrer » du plein écran.
-  await toggleLiveFullscreen();
+  // Le Live reste dans son affichage applicatif courant : aucun passage plein écran automatique.
 
   await livePushStateNow();
   startLiveCloudHeartbeat();
