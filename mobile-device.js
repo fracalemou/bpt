@@ -1,20 +1,16 @@
-
 (function(){
+  // La détection est définie dans <head> (script bpt-device-css) ; ici on la réapplique
+  // au redimensionnement et on change de feuille de style si l'appareil « bascule »
+  // (fenêtre PC réduite sous 700 px ou réélargie).
   function applyBptMobileClass(){
-    const coarse = window.matchMedia && window.matchMedia("(pointer:coarse)").matches;
-    const touch = navigator.maxTouchPoints > 0 || "ontouchstart" in window;
-    const shortSide = Math.min(window.innerWidth, window.innerHeight);
-    const longSide = Math.max(window.innerWidth, window.innerHeight);
-    const ua = navigator.userAgent || "";
-    // Tablette (iPad, iPad « bureau », Android sans « Mobile ») : affichage PC
-    const tablet = /iPad|Tablet/i.test(ua) || (/Android/i.test(ua) && !/Mobile/i.test(ua)) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
-    const phoneUA = /iPhone|iPod|Android|Mobile/i.test(ua);
-    const compactTouchDevice = touch && coarse && shortSide <= 600 && longSide <= 1000;
-    // Fenêtre PC très étroite : on bascule (réversiblement) sur l'affichage téléphone
-    const narrowWindow = window.innerWidth <= 700;
-    const isMobile = !tablet && (phoneUA || compactTouchDevice || narrowWindow);
+    const isMobile = typeof window.bptDetectPhone === "function" ? window.bptDetectPhone() : window.innerWidth <= 700;
     document.documentElement.classList.toggle("bpt-mobile-device", !!isMobile);
     document.body?.classList.toggle("bpt-mobile-device", !!isMobile);
+    const link = document.getElementById("bptDeviceCss");
+    if (link && typeof window.bptDeviceCssHref === "function") {
+      const href = window.bptDeviceCssHref(!!isMobile);
+      if (link.getAttribute("href") !== href) link.setAttribute("href", href);
+    }
   }
   applyBptMobileClass();
   window.addEventListener("resize", applyBptMobileClass, {passive:true});
