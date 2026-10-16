@@ -498,30 +498,7 @@
   const bountySeenAt=new Map(),bountyDismissed=new Set();
   let bountyLaunchBusy=false;
   function predictionOdds(st,type,name){return Number(st?.betting?.odds?.[type]?.[name])||3;}
-  function predictionLabel(type){return type==='winner'?'Vainqueur':'Premier éliminé';}
   function predictionNames(st){return (st?.players||[]).map(p=>String(p.name||'').trim()).filter(Boolean);}
-  function renderPredictions(root,st,owner){
-    const host=root.querySelector('[data-role="predictions"]');if(!host)return;
-    const players=predictionNames(st),rawIdentity=String(api()?.getIdentityName?.()||'').trim(),normName=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('fr').trim(),identity=players.find(p=>normName(p)===normName(rawIdentity))||rawIdentity,me=st?.betting?.bets?.[identity]||{},odds=st?.betting?.odds||{};
-    const allBets=st?.betting?.bets||{},confirmed=Object.values(allBets).filter(b=>b?.confirmed).length;
-    const key=JSON.stringify([players,identity,me,odds,confirmed,owner]);if(host.dataset.content===key)return;host.dataset.content=key;host.replaceChildren();
-    const title=document.createElement('h3');title.textContent=`Pronostics de ${identity||'joueur connecté'} · 0,50 € par pari`;host.append(title);
-    const note=document.createElement('p');note.className='bpt-prediction-note';note.textContent='Deux paris maximum : un vainqueur et un premier éliminé. Vous pouvez aussi confirmer « Pas de pari ».';host.append(note);
-    const canConfirm=!!identity&&players.some(p=>normName(p)===normName(identity));
-    if(!canConfirm){const p=document.createElement('p');p.className='bpt-prediction-wait';p.textContent='Liste des joueurs et cotes ci-dessous. Connectez-vous avec une identité de joueur pour valider votre pari.';host.append(p);}
-    for(const type of ['winner','firstEliminated']){
-      const card=document.createElement('div');card.className='bpt-prediction-card';
-      const head=document.createElement('div');head.className='bpt-prediction-head';const strong=document.createElement('strong');strong.textContent=type==='winner'?'Vainqueur — choisissez un joueur':'1er éliminé — choisissez un joueur';const stake=document.createElement('span');stake.textContent='0,50 €';head.append(strong,stake);card.append(head);
-      const choices=document.createElement('div');choices.className='bpt-prediction-choices';
-      const select=document.createElement('select');select.className='bpt-prediction-select';select.dataset.betAction='pick';select.dataset.betType=type;
-      const none=document.createElement('option');none.value='';none.textContent='Pas de pari';select.append(none);
-      [...players].sort((a,b)=>predictionOdds(st,type,a)-predictionOdds(st,type,b)).forEach(name=>{const option=document.createElement('option');option.value=name;option.textContent=`${name} · Cote ${predictionOdds(st,type,name).toFixed(2).replace('.',',')}`;select.append(option)});
-      select.value=me[type]||'';choices.append(select);
-      card.append(choices);host.append(card);
-    }
-    const selectedCount=(me.winner?1:0)+(me.firstEliminated?1:0);const footer=document.createElement('div');footer.className='bpt-prediction-footer';const status=document.createElement('span');status.className='bpt-prediction-status';status.textContent=me.confirmed?'✓ Pari enregistré':(canConfirm?'1. Choisissez vos paris · 2. Validez ci-dessous':'Validation disponible après connexion');const btn=document.createElement('button');btn.type='button';btn.dataset.betAction='confirm';btn.className='bpt-prediction-confirm';btn.disabled=!!me.confirmed||!canConfirm;btn.textContent=me.confirmed?'Pari validé':(selectedCount?'Valider le pari':'Valider pas de pari');footer.append(status,btn);host.append(footer);
-    const progress=document.createElement('small');progress.className='bpt-prediction-progress';progress.textContent=`${confirmed} / ${players.length} joueur${players.length>1?'s':''} a${confirmed>1?'nt':''} validé`;host.append(progress);
-  }
   async function handleBetAction(button){
     const x=api();if(!x)return;
     try{

@@ -1219,17 +1219,6 @@ function connectionDeviceLabel(){
 
 
 
-  function requireIdentityOnSiteEntry(){
-    // L’appareil reste approuvé pendant 30 jours après validation du code.
-    liveIdentityConfirmed=false;verifiedProfileName='';
-    try{sessionStorage.removeItem(LIVE_IDENTITY_SESSION_KEY);}catch(_e){}
-
-    if(restoreTrustedDevice())return;
-
-    setTimeout(()=>{
-      try{ openSpectatorIdentity(true); }catch(e){ console.warn("Identification BPT :",e); }
-    },120);
-  }
 
   // CONTRAT D’ARCHITECTURE BPT : Paramètres > Joueurs est l’unique référentiel.
   // Le login consomme exactement db.players via l’API partagée de application.js.
@@ -2863,14 +2852,6 @@ function live3OwnerDisplayName(){
   return "l’organisateur actuel";
 }
 
-function updateLive3TakeoverRequestButtonLabel(){
-  const btn=$3("live3TakeoverBtn") || $3("live3TakeoverRequestBtn");
-  if(!btn)return;
-
-  if(isActive() && !isOwner()){
-    btn.textContent=`Demander la reprise de gestion à ${live3OwnerDisplayName()}`;
-  }
-}
 
 function live3MyTakeoverRequest(){
   const req=current?.takeoverRequest;
@@ -2937,46 +2918,6 @@ async function forceLive3Takeover(){
   }
 }
 
-function updateLive3TakeoverTimeoutUI(){
-  const btn=$3("live3ForceTakeoverBtn");
-  const status=$3("live3TakeoverStatus");
-  const countdown=$3("live3TakeoverCountdown");
-
-  updateLive3TakeoverRequestButtonLabel();
-
-  if(!btn)return;
-
-  if(!isActive() || isOwner()){
-    btn.style.display="none";
-    if(countdown)countdown.style.display="none";
-    return;
-  }
-
-  const req=live3MyTakeoverRequest();
-  if(!req){
-    btn.style.display="none";
-    if(countdown)countdown.style.display="none";
-    return;
-  }
-
-  const remaining=live3TakeoverRemainingSec();
-
-  if(live3TakeoverExpired()){
-    btn.style.display="inline-flex";
-    if(status)status.textContent="Aucune réponse de l’organisateur depuis 30 s";
-    if(countdown){
-      countdown.style.display="block";
-      countdown.textContent="Délai expiré · reprise forcée disponible";
-    }
-  }else{
-    btn.style.display="none";
-    if(status)status.textContent=`Demande envoyée à ${live3OwnerDisplayName()}`;
-    if(countdown){
-      countdown.style.display="block";
-      countdown.textContent=`Réponse attendue : ${remaining} s`;
-    }
-  }
-}
 
 
 async function requestTakeover(){
@@ -3072,20 +3013,6 @@ async function requestTakeover(){
     toast.setAttribute("aria-hidden","true");
   }
 
-  function showChatToast(message){
-    if(!message || $3("live3ChatModal")?.classList.contains("open"))return;
-    const toast=$3("live3ChatToast");
-    if(!toast)return;
-    toast.dataset.chatMode="live3";
-    const from=$3("live3ChatToastFrom");
-    const text=$3("live3ChatToastText");
-    if(from)from.textContent=String(message.from||"Utilisateur").trim()||"Utilisateur";
-    if(text)text.textContent=String(message.text||"");
-    toast.classList.add("open");
-    toast.setAttribute("aria-hidden","false");
-    if(chatToastTimer)clearTimeout(chatToastTimer);
-    chatToastTimer=setTimeout(hideChatToast,6500);
-  }
 
   function updateUnreadBadges(){
     const count=Math.max(0,Number(unreadChatCount)||0);
@@ -3683,11 +3610,6 @@ async function requestTakeover(){
     }catch(_e){}
   }
 
-  function resetBlindSoundState(){
-    blindSoundSessionId=String(current?.sessionId||"");
-    blindSoundLevelIndex=Number(current?.levelIndex)||0;
-    blindSoundLastSecond=null;
-  }
 
   function handleBlindSoundAlerts(){
     if(!current?.active || !current?.running){

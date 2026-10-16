@@ -509,12 +509,6 @@ function cloudGameCount(state){
   return new Set(state.history.map(r=>Number(r.game))).size;
 }
 
-function comparableState(state){
-  if(!state)return "";
-  const copy=JSON.parse(JSON.stringify(state));
-  // liveState contains volatile timer fields; keep it, but normalize undefined-like values via JSON.
-  return JSON.stringify(copy);
-}
 
 let cloudHistoryReplaceOnce=false;
 
@@ -544,24 +538,6 @@ function historyGameSignature(rows){
   });
 }
 
-function mergeHistories(remoteHistory,localHistory){
-  const result=[];
-  const signatures=new Set();
-
-  const appendUnique=(rows)=>{
-    const sig=historyGameSignature(rows);
-    if(signatures.has(sig))return;
-    signatures.add(sig);
-    result.push(rows);
-  };
-
-  // La base distante est prioritaire, puis on ajoute uniquement les nouvelles parties locales.
-  historyGroups(remoteHistory).forEach(([,rows])=>appendUnique(rows));
-  historyGroups(localHistory).forEach(([,rows])=>appendUnique(rows));
-
-  // Renumérotation continue pour éviter deux "Partie 2" créées sur deux postes.
-  return result.flatMap((rows,i)=>rows.map(r=>({...r,game:i+1})));
-}
 
 
 function saveLocalOnly(){
@@ -1041,22 +1017,7 @@ function scheduleCloudSave(){
   cloudSaveTimer=setTimeout(cloudPushNow,250);
 }
 
-function remoteLiveIsSpectatorForThisDevice(row){
-  const wire=row?.data?.liveWire||null;
-  const remote=(wire?.prepared && !wire?.synced) ? wire : row?.data?.liveState;
-  const creator=String(remote?.creatorDeviceId||"");
-  return !!(
-    remote?.prepared &&
-    !remote?.synced &&
-    creator &&
-    creator!==liveDeviceId()
-  );
-}
 
-function spectatorWireFromRow(row){
-  const wire=row?.data?.liveWire||null;
-  return (wire?.prepared && !wire?.synced) ? wire : null;
-}
 
 function spectatorOverlayIsOpen(){
   return $("spectatorServerOverlay")?.style.display==="block";
@@ -1074,106 +1035,11 @@ function closeSpectatorServerOverlay(target="ranking"){
   showView(target);
 }
 
-function renderSpectatorServerOverlay(wire){
-  if(!wire?.prepared || wire?.synced)return false;
-
-  spectatorServerLiveState=JSON.parse(JSON.stringify(wire));
-
-  const levels=Array.isArray(wire.levels)?wire.levels:[];
-  const levelIndex=Math.max(0,Number(wire.levelIndex||0));
-  const level=levels[levelIndex]||{};
-  const next=levels[levelIndex+1]||null;
-  const players=Array.isArray(wire.players)?wire.players:[];
-
-  const winner=players.filter(p=>p && (p.status==="Vainqueur" || Number(p.place)===1));
-  const alive=players.filter(p=>p && p.status!=="Sorti" && p.status!=="Vainqueur" && Number(p.place)!==1);
-  const eliminated=players
-    .filter(p=>p && p.status==="Sorti" && Number(p.place)>1)
-    .sort((a,b)=>Number(a.place)-Number(b.place));
-
-  const ordered=[...winner,...alive,...eliminated];
-  const remaining=winner.length?1:alive.length;
-
-  $("spectatorServerGameMeta").textContent=
-    `Partie #${wire.gameNo||"—"} · ${wire.date||""}${wire.location?" · "+wire.location:""}`;
-  $("spectatorServerReceivedAt").textContent=
-    new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
-  $("spectatorServerLevel").textContent=`Niveau ${Number(level.level||levelIndex+1)}`;
-  $("spectatorServerBlinds").textContent=
-    `${liveFmt(level.sb||0)} / ${liveFmt(level.bb||0)}`;
-  $("spectatorServerAnte").textContent=
-    Number(level.ante)>0?`Ante ${liveFmt(level.ante)}`:"";
-  $("spectatorServerNext").textContent=next
-    ? `${liveFmt(next.sb||0)} / ${liveFmt(next.bb||0)}${Number(next.ante)>0?" · ante "+liveFmt(next.ante):""}`
-    : "—";
-  $("spectatorServerRemaining").textContent=String(remaining);
-  $("spectatorServerCount").textContent=
-    `${players.length} inscrit${players.length>1?"s":""}`;
-
-  let remainingSeconds=Number(wire.remainingSeconds||0);
-  if(wire.running && wire.endAt){
-    remainingSeconds=Math.max(0,Math.ceil((Number(wire.endAt)-Date.now())/1000));
-  }
-  $("spectatorServerTimer").textContent=liveTime(remainingSeconds);
-  if($("spectatorServerElapsed"))$("spectatorServerElapsed").textContent=liveTime(liveElapsedSeconds(wire));
-
-  $("spectatorServerPlayers").innerHTML=ordered.map(p=>{
-    const out=p.status==="Sorti";
-    const won=p.status==="Vainqueur" || Number(p.place)===1;
-    const status=won
-      ? "Vainqueur"
-      : out
-        ? `Éliminé${p.killer?` par ${p.killer}`:""}`
-        : "En jeu";
-    return `
-      <div class="spectator-server-player ${out?"is-out":""} ${won?"is-winner":""}">
-        <div class="spectator-server-place">${out?(p.place||"—"):"•"}</div>
-        <div class="spectator-server-name">${playerNameHtml(p.name)}</div>
-        <div class="spectator-server-status">${esc(status)}</div>
-      </div>`;
-  }).join("");
-
-  if($("spectatorTakeoverBtn")){
-    const mine=wire?.handoverRequest?.requesterDeviceId===liveDeviceId();
-    $("spectatorTakeoverBtn").disabled=!!mine;
-    $("spectatorTakeoverBtn").textContent=mine?"Demande envoyée…":"Reprendre la gestion";
-  }
-
-  $("spectatorServerOverlay").style.display="block";
-    document.body.classList.add("spectator-live-open");
-  document.body.style.overflow="hidden";
-  return true;
-}
 
 let spectatorOverlayTicker=null;
-function startSpectatorOverlayTicker(){
-  if(spectatorOverlayTicker)clearInterval(spectatorOverlayTicker);
-  spectatorOverlayTicker=setInterval(()=>{
-    if(!spectatorOverlayIsOpen() || !spectatorServerLiveState)return;
-    const w=spectatorServerLiveState;
-    let remaining=Number(w.remainingSeconds||0);
-    if(w.running && w.endAt){
-      remaining=Math.max(0,Math.ceil((Number(w.endAt)-Date.now())/1000));
-    }
-    if($("spectatorServerTimer"))$("spectatorServerTimer").textContent=liveTime(remaining);
-    if($("spectatorServerElapsed"))$("spectatorServerElapsed").textContent=liveTime(liveElapsedSeconds(w));
-  },250);
-}
 
 async function renderSpectatorFromServer(){return false;}
 
-function mergeRemotePlayerAvatars(remotePlayers){
-  if(!Array.isArray(remotePlayers) || !Array.isArray(db?.players))return false;
-  const byName=new Map(remotePlayers.map(p=>[String(p?.name||""),p]));
-  let changed=false;
-  for(const local of db.players){
-    const remote=byName.get(String(local?.name||""));
-    if(!remote)continue;
-    const rid=String(remote.avatarId||"");
-    if(rid && rid!==String(local.avatarId||"")){ local.avatarId=rid; changed=true; }
-  }
-  return changed;
-}
 
 async function applySpectatorLiveState(row,{fromDirectPoll=false}={}){
   if(!row || !isValidBptState(row.data))return false;
@@ -1775,7 +1641,6 @@ function bptSettingsPlayersSnapshot(){
   if(bptMigrateLegacyElenPlayerDirectory())saveLocalOnly();
   return JSON.parse(JSON.stringify(Array.isArray(db?.players)?db.players:[]));
 }
-window.bptGetSettingsPlayers=()=>bptSettingsPlayersSnapshot();
 window.bptWaitForSettingsPlayers=async (timeoutMs=10000)=>{
   const started=Date.now();
   while((!cloudReady || cloudApplying) && Date.now()-started<timeoutMs){
@@ -1815,17 +1680,6 @@ function saveDB(){
   scheduleCloudSave();
 }
 
-function ensureLiveFirebaseClient(){
-  if(firebaseStore)return true;
-  if(!window.BPTFirebaseStore)return false;
-  try{
-    firebaseStore=window.BPTFirebaseStore;
-    return true;
-  }catch(e){
-    console.error("BPT live Firebase client:",e);
-    return false;
-  }
-}
 
 function chooseRemoteLiveForSpectator(data){
   const wire=data?.liveWire||null;
@@ -1849,49 +1703,6 @@ function chooseRemoteLiveForSpectator(data){
 
 let spectatorLiveSource="—";
 
-async function fetchLiveStateDirect(){
-  if(!ensureLiveFirebaseClient())return null;
-
-  const {data,error}=await firebaseStore
-    .from("bpt_state")
-    .select("data,revision,updated_at")
-    .eq("id",CLOUD_ROW_ID)
-    .maybeSingle();
-
-  if(error)throw error;
-
-  const row=data||null;
-  const wire=row?.data?.liveWire||null;
-  const legacy=row?.data?.liveState||null;
-  const remote=(wire?.prepared && !wire?.synced) ? wire : legacy;
-  const creator=String(remote?.creatorDeviceId||"");
-
-  if($("spectatorServerSource")){
-    const rawPlayers=Array.isArray(remote?.players)?remote.players.length:0;
-    const rawLevel=Number(remote?.levelIndex||0)+1;
-    $("spectatorServerSource").textContent=
-      `${wire?"main.liveWire":"main.liveState"} · niveau ${rawLevel} · ${rawPlayers} joueur${rawPlayers>1?"s":""}`;
-  }
-
-  const isRemoteActive=!!(
-    remote?.prepared &&
-    !remote?.synced &&
-    creator &&
-    creator!==liveDeviceId()
-  );
-
-  if(isRemoteActive){
-    spectatorLiveSource=wire?"main.liveWire":"main.liveState";
-    spectatorServerLiveState=JSON.parse(JSON.stringify(remote));
-    spectatorServerLiveRevision=Number(row?.revision||0);
-  }else{
-    spectatorLiveSource="aucun";
-    spectatorServerLiveState=null;
-    spectatorServerLiveRevision=0;
-  }
-
-  return row;
-}
 
 async function livePushStateNow(){return false;}
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
@@ -2055,22 +1866,6 @@ function medalForRank(rank){
   return rank===1?"🥇":rank===2?"🥈":rank===3?"🥉":"";
 }
 
-function rankSnapshotUntil(maxGame){
-  const old=db.history;
-  const rows=old.filter(r=>Number(r.game)<=Number(maxGame));
-  const by={};
-  for(const r of rows){
-    const n=canonicalPlayerName(r.player);
-    if(!by[n])by[n]={name:n,points:0,games:0};
-    by[n].points+=Number(r.points||0);
-  }
-  const seen={};
-  for(const r of rows){
-    const k=canonicalPlayerName(r.player)+"|"+r.game;
-    if(!seen[k]){seen[k]=1;by[canonicalPlayerName(r.player)].games++;}
-  }
-  return Object.values(by).sort((a,b)=>b.points-a.points||a.name.localeCompare(b.name,"fr")).map((x,i)=>({...x,rank:i+1}));
-}
 
 function longestPlayerStreak(name,predicate){
   const rows=(db.history||[]).filter(r=>r.player===name).sort((a,b)=>Number(a.game)-Number(b.game));
@@ -2353,10 +2148,6 @@ function bptHeadsUpPlayers(rec){
   return rec?.finalists?.length>=2?`${rec.finalists[0]} / ${rec.finalists[1]}`:'—';
 }
 
-function recordsScopeTitle(key=recordsScopeKey){
-  if(key==="all")return "toutes saisons";
-  return `de la saison ${seasonDisplayName(key)}`;
-}
 
 function updateRecordsScopeSelector(){
   const key=recordsScopeKey||CURRENT_SEASON_KEY;
@@ -2779,22 +2570,6 @@ function playerAvatarId(name){
   const id=String(p?.avatarId||"");
   return BPT_AVATARS.some(a=>a.id===id)?id:"";
 }
-function avatarHairSvg(a){
-  const h=a.hair;
-  switch(Number(a.style)||1){
-    case 2:return `<path d="M52 95c4-34 26-55 62-55 38 0 61 20 64 55-17-18-33-23-52-18-24 7-47 8-74 18z" fill="${h}"/><path d="M58 92c9-29 32-43 64-43 17 0 31 4 44 13-15-1-28 3-39 10-19 12-42 14-69 20z" fill="${h}"/>`;
-    case 3:return `<path d="M51 95c5-38 28-59 64-59 37 0 61 22 64 59-12-13-20-21-30-26-8 11-24 15-44 10-20-5-37 0-54 16z" fill="${h}"/><circle cx="64" cy="58" r="20" fill="${h}"/><circle cx="91" cy="48" r="21" fill="${h}"/><circle cx="119" cy="45" r="22" fill="${h}"/><circle cx="148" cy="53" r="20" fill="${h}"/>`;
-    case 4:return `<path d="M49 102c2-43 24-66 66-66 41 0 64 25 64 67-15-24-31-34-50-31-22 3-43 14-80 30z" fill="${h}"/><path d="M47 89c-8 18-6 54 3 76l18-8-2-71zM181 90c8 23 5 51-4 73l-18-8 3-69z" fill="${h}"/>`;
-    case 5:return `<path d="M48 102c1-45 25-68 67-68 43 0 66 26 65 69-10-15-22-25-36-31-13 15-31 19-54 11-14-5-28 2-42 19z" fill="${h}"/><path d="M52 88c-14 31-10 68 2 86l20-11-5-76zM177 88c14 30 10 67-1 86l-20-11 5-78z" fill="${h}"/>`;
-    case 6:return `<path d="M50 98c3-39 25-61 65-61 37 0 61 21 65 60-18-11-32-20-40-38-15 16-36 25-63 25-10 0-19 5-27 14z" fill="${h}"/>`;
-    default:return `<path d="M50 98c4-37 27-59 64-59 39 0 63 22 66 61-14-15-27-24-42-27-9 11-27 16-49 12-15-3-28 1-39 13z" fill="${h}"/>`;
-  }
-}
-function avatarFaceDetailsSvg(a){
-  const beard=a.beard?`<path d="M76 139c7 31 24 44 40 44 17 0 34-14 41-44-12 13-25 18-41 18s-29-5-40-18z" fill="${a.hair}" opacity=".92"/><path d="M100 147q16 9 32 0" fill="none" stroke="#8b4d3a" stroke-width="3" stroke-linecap="round"/>`:`<path d="M101 149q15 10 30 0" fill="none" stroke="#a65f50" stroke-width="4" stroke-linecap="round"/>`;
-  const glasses=a.glasses?`<g fill="none" stroke="#171b20" stroke-width="6"><rect x="72" y="108" width="34" height="24" rx="10"/><rect x="126" y="108" width="34" height="24" rx="10"/><path d="M106 117h20M68 114l-11-4M164 114l11-4"/></g>`:`<g fill="#252525"><ellipse cx="91" cy="118" rx="5" ry="6"/><ellipse cx="143" cy="118" rx="5" ry="6"/></g>`;
-  return `${glasses}<path d="M115 120l-5 20h12" fill="none" stroke="#a7664f" stroke-width="3" stroke-linecap="round"/>${beard}`;
-}
 function playerAvatarDataUrl(id){
   const a=BPT_AVATARS.find(x=>x.id===id)||BPT_AVATARS[0];
   return a?.src||"";
@@ -3110,33 +2885,6 @@ function openPlayerProfile(name){
 
 let lastGameSummaryRows=[];
 
-function buildEndGameSummaryText(rows){
-  if(!Array.isArray(rows)||!rows.length)return "";
-  const sorted=rows.slice().sort((a,b)=>Number(a.place)-Number(b.place));
-  const first=sorted[0]||{};
-  const title=`BPT — Partie #${first.game||"—"}`;
-  const meta=[
-    first.date?shortDate(first.date):"",
-    first.location||"",
-    `${sorted.length} joueur${sorted.length>1?"s":""}`
-  ].filter(Boolean).join(" · ");
-  const lines=[title,meta,""];
-  const podium=sorted.slice(0,3);
-  if(podium.length){
-    lines.push("PODIUM");
-    podium.forEach(r=>{
-      const medal=Number(r.place)===1?"🥇":Number(r.place)===2?"🥈":"🥉";
-      lines.push(`${medal} ${r.player} — ${num(r.points,0)} pts — ${r.kills||0} kill${Number(r.kills||0)>1?"s":""}`);
-    });
-    lines.push("");
-  }
-  lines.push("CLASSEMENT COMPLET");
-  sorted.forEach(r=>{
-    const killer=Number(r.place)===1?"Vainqueur":(r.killer||"—");
-    lines.push(`${r.place}. ${r.player} — ${num(r.points,0)} pts — ${r.kills||0} kill${Number(r.kills||0)>1?"s":""} — Éliminé par : ${killer} — Net : ${euro(r.net)}`);
-  });
-  return lines.join("\n");
-}
 
 function buildLiveBettingRecap(state){
   const betting=state?.betting;if(!betting)return {rows:[],stakeCents:50,totalStakedCents:0,totalGrossWonCents:0,totalNetCents:0};
@@ -4299,9 +4047,6 @@ function ensurePlayerPhotos(){
   return db.playerPhotos;
 }
 
-function playerPhoto(name){
-  return String(ensurePlayerPhotos()[String(name||"").trim()]||"");
-}
 
 let latestGameSelectedKey=null;
 
@@ -4332,11 +4077,6 @@ function mergePhotoMaps(a,b){
   Object.entries(left).forEach(([k,v])=>{if(typeof v==="string"&&v)out[k]=v;});
   Object.entries(right).forEach(([k,v])=>{if(typeof v==="string"&&v)out[k]=v;}); return out;
 }
-function mergeSharedPhotosIntoLocal(remoteState){
-  if(!remoteState||typeof remoteState!=="object")return false;
-  // BPT 4.34 : jamais de photo dans l'état partagé. Compatibilité locale seulement.
-  db.gamePhotos=mergePhotoMaps({},ensureGamePhotos()); db.playerPhotos=mergePhotoMaps({},ensurePlayerPhotos()); return true;
-}
 async function ensureGamePhotoStorageClient(){
   if(!window.bptFirebaseEnsure)return false;
   try{ await window.bptFirebaseEnsure(); return true; }catch(e){ console.warn("BPT photo Firebase:",e); return false; }
@@ -4356,7 +4096,6 @@ async function fileToCompressedBlob(file){
 function dataUrlToBlob(dataUrl){
   try{const [head,body]=String(dataUrl||"").split(",",2);const mime=(head.match(/^data:([^;]+)/)||[])[1]||"image/jpeg";const bytes=atob(body||"");const arr=new Uint8Array(bytes.length);for(let i=0;i<bytes.length;i++)arr[i]=bytes.charCodeAt(i);return new Blob([arr],{type:mime});}catch(_e){return null;}
 }
-function blobToDataUrl(blob){ return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||""));r.onerror=()=>reject(new Error("Impossible de préparer l’image."));r.readAsDataURL(blob);}); }
 
 async function migrateLegacyGamePhotoToUrl(gameNo,seasonKey,legacyValue){
   const raw=String(legacyValue||"");
@@ -4474,9 +4213,7 @@ async function migrateLegacyLocalGamePhotosToStorage(){
   }
   if(migrated){saveLocalOnly();renderLatestGame();setCloudStatus("ok",`${migrated} photo${migrated>1?"s":""} migrée${migrated>1?"s":""}`,"Photos transférées dans Firebase Realtime Database.");} return true;
 }
-async function syncSharedPhotosOnly({silent=false}={}){saveLocalOnly();if(!silent)setCloudStatus("ok","Photothèque Firebase","Photos stockées séparément de l'état BPT.");return true;}
 async function syncSharedPhotosWithRetry(attempt=0){if(await ensureGamePhotoStorageClient()){await migrateLegacyLocalGamePhotosToStorage();return;}if(attempt<8)setTimeout(()=>syncSharedPhotosWithRetry(attempt+1),1000);}
-async function saveSharedMetadataOnly(){return await syncSharedPhotosOnly({silent:false});}
 async function saveGamePhoto(gameNo,file,seasonKey=null){
   if(!file)return; try{setCloudStatus("busy","Envoi de la photo…","Compression puis sauvegarde dans Firebase.");const blob=await fileToCompressedBlob(file);await uploadGamePhotoBlob(gameNo,seasonKey,blob,{silent:false});renderLatestGame();if(typeof renderHistory==="function")renderHistory();}
   catch(e){setCloudStatus("offline","Photo non sauvegardée",firebasePhotoErrorMessage(e));alert(firebasePhotoErrorMessage(e));}
@@ -4489,7 +4226,6 @@ async function deleteGamePhoto(gameNo,seasonKey=null){
 
 // V9.0.24 — les photos de parties sont conservées sans limite de numéro.
 // Ancienne fonction gardée en no-op pour compatibilité avec d'éventuels appels historiques.
-async function purgeGamePhotosAfter4(){ return true; }
 
 function latestGameEntries(){
   return groupedGames().map(([gameNo,rows])=>({
@@ -4498,11 +4234,6 @@ function latestGameEntries(){
     seasonKey:(rows?.[0]?.seasonKey)||currentGamePhotoSeasonKey()
   }));
 }
-window.bptOpenLatestGame=(gameNumber)=>{
-  const entry=latestGameEntries().find(g=>Number(g.gameNo)===Number(gameNumber));
-  if(entry)latestGameSelectedKey=latestGameEntryKey(entry);
-  showView('latestgame');
-};
 
 function latestGameEntryKey(entry){
   return `${entry.seasonKey||currentGamePhotoSeasonKey()}|${entry.gameNo}`;
@@ -4518,10 +4249,6 @@ function selectLatestGameOffset(delta){
   renderLatestGame();
 }
 
-function resetLatestGameToNewest(){
-  latestGameSelectedKey=null;
-  renderLatestGame();
-}
 
 function openGamePhotoModal(src,caption=""){
   if(!src)return;
@@ -4538,66 +4265,8 @@ function closeGamePhotoModal(){
 }
 
 
-async function fileToCompressedDataUrl(file){
-  return new Promise((resolve,reject)=>{
-    if(!file){resolve("");return;}
-    if(!String(file.type||"").startsWith("image/")){
-      reject(new Error("Le fichier sélectionné n’est pas une image."));
-      return;
-    }
-    const reader=new FileReader();
-    reader.onerror=()=>reject(new Error("Impossible de lire l’image."));
-    reader.onload=()=>{
-      const img=new Image();
-      img.onerror=()=>reject(new Error("Format d’image non reconnu."));
-      img.onload=()=>{
-        const max=480;
-        const ratio=Math.min(1,max/Math.max(img.width,img.height));
-        const w=Math.max(1,Math.round(img.width*ratio));
-        const h=Math.max(1,Math.round(img.height*ratio));
-        const canvas=document.createElement("canvas");
-        canvas.width=w;canvas.height=h;
-        const ctx=canvas.getContext("2d");
-        ctx.drawImage(img,0,0,w,h);
-        resolve(canvas.toDataURL("image/jpeg",0.72));
-      };
-      img.src=reader.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
 
-async function savePlayerPhoto(name,file){
-  const player=String(name||"").trim();
-  if(!player || !file)return;
-  try{
-    const dataUrl=await fileToCompressedDataUrl(file);
-    ensurePlayerPhotos()[player]=dataUrl;
-    saveLocalOnly();
 
-    const ok=await syncSharedPhotosOnly({silent:false});
-    if(!ok){
-      alert("La photo est conservée sur cet appareil mais n’a pas encore pu être synchronisée. Elle sera renvoyée automatiquement lors d’une prochaine connexion.");
-    }
-
-    renderPlayers();
-    if($("profilePlayerSelect")?.value===player)renderProfile(player);
-  }catch(e){
-    alert(e?.message||String(e));
-  }
-}
-
-function deletePlayerPhoto(name){
-  const player=String(name||"").trim();
-  if(!player)return;
-  const map=ensurePlayerPhotos();
-  if(!map[player])return;
-  if(!confirm(`Supprimer la photo de ${player} ?`))return;
-  delete map[player];
-  saveDB();
-  renderPlayers();
-  if($("profilePlayerSelect")?.value===player)renderProfile(player);
-}
 
 
 function playerDisplayWithRealName(name){
@@ -4869,12 +4538,6 @@ async function selectSeason(key){
   if(active && active!=="live" && active!=="settings")await showView(active);
 }
 
-function stepSeason(delta){
-  const order=["2020-2021","2022-2023","2023-2024","2025-2026","2026-2027","all"];
-  const i=order.indexOf(selectedSeasonKey);
-  const ni=Math.max(0,Math.min(order.length-1,i+delta));
-  if(ni!==i)selectSeason(order[ni]);
-}
 
 function seasonNavigationOrder(){
   return ["2020-2021","2022-2023","2023-2024","2025-2026","2026-2027"];
@@ -4892,21 +4555,6 @@ function seasonNeighbor(delta){
   return ni>=0 && ni<order.length ? order[ni] : null;
 }
 
-function changeSeasonFromToolbar(action){
-  latestGameSelectedKey=null;
-  if(action==="all"){
-    return selectSeason("all");
-  }
-  if(action==="prev"){
-    const target=seasonNeighbor(-1);
-    if(target)return selectSeason(target);
-    return;
-  }
-  if(action==="next"){
-    const target=seasonNeighbor(1);
-    if(target)return selectSeason(target);
-  }
-}
 
 function updateSeasonNavigationState(){
   const prev=seasonNeighbor(-1);
@@ -5650,7 +5298,6 @@ function renderDashboard(){
     : '<div class="muted">Aucun accomplissement débloqué sur la dernière partie.</div>';
 }
 
-function mostAvgFix(v){ return Number.isFinite(Number(v)) ? Number(v) : 0; }
 
 
 document.addEventListener("DOMContentLoaded",()=>{
@@ -5679,51 +5326,9 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 let bptHeadUpPromptShownForGame=null;
 
-function bptIsPhoneLike(){
-  return window.matchMedia("(max-width: 700px)").matches ||
-         /android|iphone|ipad|ipod/i.test(navigator.userAgent);
-}
 
 
-function scheduleHeadUpPhotoPromptAfterGameEnd(){
-  const state=window.BPTLive3?.getState?.();
-  if(!state?.finishedAt||(state.players||[]).filter(p=>p.status==='winner'&&Number(p.place)===1).length!==1)return;
-  if(!bptIsPhoneLike())return;
 
-  let tries=0;
-  const timer=setInterval(()=>{
-    tries++;
-
-    const main=document.getElementById("latestGamePhotoInput");
-    const gameNo=Number(main?.dataset?.game||0);
-
-    if(gameNo){
-      clearInterval(timer);
-      setTimeout(()=>{
-        try{ showHeadUpPhotoPromptForLatestGame(); }catch(_e){}
-      },250);
-      return;
-    }
-
-    if(tries>=20){
-      clearInterval(timer);
-    }
-  },250);
-}
-
-function showHeadUpPhotoPromptForLatestGame(){
-  if(!bptIsPhoneLike())return;
-
-  const main=document.getElementById("latestGamePhotoInput");
-  const gameNo=Number(main?.dataset?.game||0);
-  if(!gameNo)return;
-
-  if(bptHeadUpPromptShownForGame===gameNo)return;
-  bptHeadUpPromptShownForGame=gameNo;
-
-  const promptEl=document.getElementById("headUpPhotoPrompt");
-  if(promptEl)promptEl.style.display="flex";
-}
 
 function hideHeadUpPhotoPrompt(){
   const promptEl=document.getElementById("headUpPhotoPrompt");
@@ -7306,14 +6911,8 @@ function handoverDeviceLabel(id){
   return s ? `Appareil ${s.slice(-6).toUpperCase()}` : "Autre appareil";
 }
 
-function showLiveHandoverRequest(req){
-  // V174 : la demande de reprise est affichée uniquement par le bandeau global.
-  return;
-}
 
-async function fetchMainStateRow(){return null;}
 
-async function updateMainStateHandover(){return null;}
 
 
 function showGlobalHandoverRequest(message){
@@ -7331,7 +6930,6 @@ function hideGlobalHandoverRequest(){
   if(box)box.style.display="none";
 }
 
-async function masterCheckHandoverRequest(){return;}
 
 async function requestLiveTakeover(){return false;}
 
@@ -7339,32 +6937,6 @@ async function rejectLiveTakeover(){return false;}
 
 async function approveLiveTakeover(){return false;}
 
-function activateTransferredLive(wire){
-  if(!wire?.prepared || wire.creatorDeviceId!==liveDeviceId())return false;
-
-  spectatorServerLiveState=null;
-  spectatorServerLiveRevision=0;
-  db.liveState=JSON.parse(JSON.stringify(wire));
-  db.liveState.handoverRequest=null;
-  saveLocalOnly();
-
-  if($("spectatorServerOverlay"))$("spectatorServerOverlay").style.display="none";
-  document.body.classList.remove("spectator-live-open");
-  document.body.style.overflow="";
-
-  currentViewId="live";
-  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id==="live"));
-  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.view==="live"));
-
-  liveShowScreen("game");
-  applyLiveAccessMode();
-  liveRenderAll();
-  if(db.liveState.running && db.liveState.endAt)liveRunTicker();
-
-  stopSpectatorLivePolling();
-  startLiveCloudHeartbeat();
-  return true;
-}
 
 
 function startGlobalHandoverPolling(){return;}
@@ -7490,39 +7062,7 @@ let spectatorAutoOpenInProgress=false;
 let spectatorAutoOpenSuppressed=true;
 let spectatorFullscreenGestureArmed=false;
 
-async function spectatorTryFullscreen(){
-  const target=$("spectatorServerOverlay") || document.documentElement;
-  if(!target || document.fullscreenElement)return true;
 
-  try{
-    if(target.requestFullscreen){
-      await target.requestFullscreen();
-    }else if(target.webkitRequestFullscreen){
-      target.webkitRequestFullscreen();
-    }
-    try{
-      if(screen.orientation?.lock)await screen.orientation.lock("landscape");
-    }catch(_){ }
-    return !!(document.fullscreenElement || document.webkitFullscreenElement);
-  }catch(e){
-    // Les navigateurs imposent souvent un geste utilisateur pour le vrai plein écran.
-    // L'overlay spectateur reste malgré tout en plein écran visuel (100 % du viewport).
-    return false;
-  }
-}
-
-function armSpectatorFullscreenOnFirstGesture(){
-  if(spectatorFullscreenGestureArmed)return;
-  spectatorFullscreenGestureArmed=true;
-  const enter=async()=>{
-    if(!spectatorOverlayIsOpen())return;
-    await spectatorTryFullscreen();
-    spectatorFullscreenGestureArmed=false;
-  };
-  document.addEventListener("pointerdown",enter,{once:true,capture:true});
-  document.addEventListener("touchstart",enter,{once:true,capture:true,passive:true});
-  document.addEventListener("keydown",enter,{once:true,capture:true});
-}
 
 async function liveMaybeAutoOpenSpectator(){
   if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
@@ -8616,44 +8156,7 @@ async function liveCancelCurrentGame({ask=true,showMessage=true}={}){
   return true;
 }
 
-function liveInterruptedState(){
-  const s=db.liveState;
-  if(!s || !s.prepared || s.synced)return null;
 
-  const hasProgress=
-    !!s.startedAt ||
-    !!s.running ||
-    Number(s.levelIndex||0)>0 ||
-    (Array.isArray(s.players) && s.players.some(p=>p.place || p.status==="Sorti" || p.status==="Vainqueur"));
-
-  return hasProgress?s:null;
-}
-
-function showLiveResumePrompt(){
-  const s=liveInterruptedState();
-  if(!s)return false;
-
-  // À la fermeture du navigateur, le ticker disparaît. On considère donc la partie comme interrompue.
-  s.running=false;
-  s.runStartedAt=null;
-  s.endAt=null;
-  saveLocalOnly();
-
-  const winner=s.players?.find(p=>p.status==="Vainqueur" || Number(p.place)===1);
-  const remaining=s.players?.filter(p=>p.status==="En jeu").length || (winner?1:0);
-  const level=s.levels?.[s.levelIndex];
-
-  if($("liveResumeMessage")){
-    $("liveResumeMessage").innerHTML=
-      `<strong>Partie #${s.gameNo||"—"}</strong><br>`+
-      `${esc(shortDate(s.date||""))}${s.location?" · "+esc(s.location):""}<br>`+
-      `${s.players?.length||0} joueurs au départ · ${remaining} restant${remaining>1?"s":""}<br>`+
-      `${level?`Niveau ${level.level} · ${liveFmt(level.sb)} / ${liveFmt(level.bb)} · ${liveTime(s.remainingSeconds)}`:""}`;
-  }
-
-  $("liveResumeBackdrop").style.display="flex";
-  return true;
-}
 
 async function liveResetForNew(){
   const remote=await liveFetchServerActiveState();
@@ -9357,24 +8860,6 @@ async function resolveLiveEntryMode(){
   }
 }
 
-async function openSpectatorLive(){
-  try{
-    const row=await fetchLiveStateDirect();
-    if(row && remoteLiveIsSpectatorForThisDevice(row)){
-      await renderSpectatorFromServer(row);
-      startSpectatorLivePolling();
-      return true;
-    }
-
-    spectatorServerLiveState=null;
-    spectatorServerLiveRevision=0;
-    alert("Aucun Live distant actif n'est disponible sur le serveur.");
-  }catch(e){
-    console.error("BPT open spectator live:",e);
-    setCloudStatus("offline","Erreur Live spectateur",e?.message||String(e));
-  }
-  return false;
-}
 
 async function showView(id){
   if(id==="live")id="dashboard";
@@ -9888,183 +9373,14 @@ function bindMobileHandoverControls(){
 
 
 // ===== BPT 2.1.9 — commandes Live mobile directes =====
-function mobileLiveCanControlDirect(){
-  if(!isBptMobileDevice())return false;
-  const s=ensureLiveState();
-  if(!s?.prepared || s.synced)return false;
-  const creator=String(s.creatorDeviceId||"");
-  if(creator && creator!==liveDeviceId()){
-    alert("Ce téléphone n'est pas l’organisateur du Live.");
-    return false;
-  }
-  return true;
-}
 
-async function mobileLiveToggleDirect(){
-  if(!mobileLiveCanControlDirect())return;
-  const s=ensureLiveState();
 
-  if(s.running){
-    s.remainingSeconds=Math.max(0,Math.ceil(((s.endAt||Date.now())-Date.now())/1000));
-    s.elapsedBeforeMs=(s.elapsedBeforeMs||0)+(Date.now()-(s.runStartedAt||Date.now()));
-    s.running=false;
-    s.runStartedAt=null;
-    s.endAt=null;
-  }else{
-    s.running=true;
-    if(!s.startedAt)s.startedAt=Date.now();
-    s.runStartedAt=Date.now();
-    s.endAt=Date.now()+Math.max(0,Number(s.remainingSeconds)||0)*1000;
-  }
-  saveLocalOnly();
-  liveRunTicker();
-  liveRenderAll();
-  liveRenderFullscreen();
-  await livePushStateNow();
-  startLiveCloudHeartbeat();
-}
 
-async function mobileLiveAdjustTimerDirect(deltaSeconds){
-  if(!mobileLiveCanControlDirect())return;
-  const s=ensureLiveState();
-  let current=Number(s.remainingSeconds)||0;
-  if(s.running && s.endAt)current=Math.max(0,Math.ceil((s.endAt-Date.now())/1000));
-  s.remainingSeconds=Math.max(0,Math.min(3*60*60,current+Number(deltaSeconds||0)));
-  if(s.running)s.endAt=Date.now()+s.remainingSeconds*1000;
-  saveLocalOnly();
-  liveRenderTimerOnly();
-  liveRenderFullscreen();
-  await livePushStateNow();
-}
 
-async function mobileLiveChangeLevelDirect(delta){
-  if(!mobileLiveCanControlDirect())return;
-  const s=ensureLiveState();
-  if(!Array.isArray(s.levels)||!s.levels.length)return;
 
-  const oldIndex=Number(s.levelIndex)||0;
-  if(s.running){
-    s.elapsedBeforeMs=(s.elapsedBeforeMs||0)+(Date.now()-(s.runStartedAt||Date.now()));
-    s.runStartedAt=Date.now();
-  }
-  s.levelIndex=Math.max(0,Math.min(s.levels.length-1,oldIndex+Number(delta||0)));
-  const currentLevel=s.levels[s.levelIndex]||{};
-  s.levelSeconds=Math.max(60,Number(currentLevel.durationMin||0)*60||Number(s.levelSeconds)||60);
-  s.remainingSeconds=s.levelSeconds;
-  liveTenSecondWarningKey="";
-  liveThirtySecondWarningKey="";
-  if(s.running)s.endAt=Date.now()+s.remainingSeconds*1000;
-  saveLocalOnly();
-  liveRenderAll();
-  liveRenderFullscreen();
-  await livePushStateNow();
-  if(s.levelIndex!==oldIndex){
 
-    liveFlashLevel();
 
-  }
-}
 
-function mobileLiveOpenElimDirect(){
-  if(!mobileLiveCanControlDirect())return;
-  if(liveAlive().length<=1)return;
-  liveFsRefreshElimLists(true);
-  const pop=$("liveFsElimPopup");
-  if(pop)pop.style.display="flex";
-}
-
-async function mobileLiveEliminateDirect(){
-  if(!mobileLiveCanControlDirect())return;
-  const s=ensureLiveState();
-  const out=$("liveFsOutPlayer")?.value||"";
-  const killer=$("liveFsKiller")?.value||"";
-  if(!out){alert("Choisissez le joueur sortant.");return;}
-  if(!killer){alert("Renseignez obligatoirement le joueur qui a éliminé ce joueur.");return;}
-  const alive=liveAlive();
-  if(alive.length<=1)return;
-  if(killer===out){alert("Un joueur ne peut pas s'éliminer lui-même.");return;}
-  if(!alive.some(p=>p.name===killer)){alert("L'éliminateur doit être encore en jeu.");return;}
-  const player=s.players.find(x=>x.name===out&&x.status==="En jeu");
-  if(!player)return;
-  player.status="Sorti";
-  player.place=alive.length;
-  player.killer=killer;
-  player.outLevel=s.levelIndex+1;
-  player.outTime=new Date().toLocaleTimeString("fr-FR");
-  const left=liveAlive();
-  if(left.length===1){
-    left[0].status="Vainqueur";
-    left[0].place=1;
-    left[0].killer="";
-    if(s.running){
-      s.remainingSeconds=Math.max(0,Math.ceil(((s.endAt||Date.now())-Date.now())/1000));
-      s.elapsedBeforeMs=(s.elapsedBeforeMs||0)+(Date.now()-(s.runStartedAt||Date.now()));
-      s.running=false;s.runStartedAt=null;s.endAt=null;
-    }
-    saveLocalOnly();
-    await livePushStateNow();
-  }else{
-    saveLocalOnly();
-    await livePushStateNow();
-  }
-  closeLiveFsElimPopup();
-  liveRenderAll();
-  liveRenderFullscreen();
-}
-
-function mobileLiveOpenDurationDirect(){
-  if(!mobileLiveCanControlDirect())return;
-  const s=ensureLiveState();
-  const level=s.levels?.[s.levelIndex];
-  const input=$("liveFsBlindDurationInput");
-  if(input)input.value=String(Math.max(5,Number(level?.durationMin||15)));
-  const pop=$("liveFsDurationPopup");
-  if(pop)pop.style.display="flex";
-}
-
-async function mobileLiveApplyDurationDirect(){
-  if(!mobileLiveCanControlDirect())return;
-  const s=ensureLiveState();
-  const input=$("liveFsBlindDurationInput");
-  const minutes=Math.max(5,Math.min(60,Math.round(Number(input?.value)||0)));
-  const old=s.levels?.[s.levelIndex]||{};
-  const oldSec=Math.max(1,Number(old.durationMin||0)*60||Number(s.levelSeconds)||1);
-  let remaining=Math.max(0,Number(s.remainingSeconds)||0);
-  if(s.running&&s.endAt)remaining=Math.max(0,Math.ceil((s.endAt-Date.now())/1000));
-  const elapsed=Math.max(0,oldSec-remaining);
-  for(let i=s.levelIndex;i<s.levels.length;i++)s.levels[i].durationMin=minutes;
-  s.levelSeconds=minutes*60;
-  s.remainingSeconds=Math.max(0,minutes*60-elapsed);
-  if(s.running)s.endAt=Date.now()+s.remainingSeconds*1000;
-  saveLocalOnly();
-  liveFsCloseDurationPopup();
-  liveRenderAll();liveRenderFullscreen();
-  await livePushStateNow();
-}
-
-function bindMobileLiveFullscreenControls(){
-  const bind=(id,handler)=>{
-    const el=$(id);
-    if(!el)return;
-    el.addEventListener("click",async e=>{
-      if(!isBptMobileDevice())return;
-      e.preventDefault();
-      e.stopPropagation();
-      await handler();
-    },true);
-  };
-  bind("liveFsPauseResumeBtn",liveFsTogglePauseResume);
-  bind("liveFsMinusMinuteBtn",()=>liveFsAdjustTimer(-60));
-  bind("liveFsPlusMinuteBtn",()=>liveFsAdjustTimer(60));
-  bind("liveFsPrevLevelBtn",()=>liveChangeLevel(-1,false));
-  bind("liveFsNextLevelBtn",()=>liveChangeLevel(1,false));
-  bind("liveFsDurationBtn",liveFsOpenDurationPopup);
-  bind("liveFsEliminateOpenBtn",openLiveFsElimPopup);
-  bind("liveFsDurationApplyBtn",liveFsApplyDuration);
-  bind("liveFsDurationCancelBtn",liveFsCloseDurationPopup);
-  bind("liveFsEliminateBtn",liveFsEliminate);
-  bind("liveFsElimCancelBtn",closeLiveFsElimPopup);
-}
 
 // BPT 2.1.8 : un seul système de clic pour le Live mobile (délégation ci-dessous).
 renderAll();
@@ -10097,44 +9413,7 @@ let bptDirectLiveRef=null;
 let bptDirectLivePollTimer=null;
 let bptDirectLastRevision=-1;
 
-async function bptHandleDirectFirebaseLiveSnapshot(){return false;}
 
-async function bptInstallDirectFirebaseLiveReceiver(){
-  try{
-    const env=await window.bptFirebaseEnsure?.();
-    const rtdb=env?.rtdb || window.bptFirebaseDb?.();
-    if(!rtdb)return false;
-
-    if(bptDirectLiveRef){ try{bptDirectLiveRef.off("value");}catch(_e){} }
-    bptDirectLiveRef=rtdb.ref("bpt/state/main");
-
-    const onValue=snap=>{
-      const row=snap.val();
-      const rev=Number(row?.revision||0);
-      bptDirectLastRevision=rev;
-      bptHandleDirectFirebaseLiveSnapshot(row);
-    };
-    bptDirectLiveRef.on("value",onValue);
-
-    // Lecture immédiate : couvre le cas où le Live était déjà lancé avant l'ouverture du téléphone/PC.
-    const first=await bptDirectLiveRef.once("value");
-    await bptHandleDirectFirebaseLiveSnapshot(first.val());
-
-    // Filet de sécurité : relire Firebase toutes les 5 s, même si le canal temps réel se croit connecté.
-    if(bptDirectLivePollTimer)clearInterval(bptDirectLivePollTimer);
-    bptDirectLivePollTimer=setInterval(async()=>{
-      try{
-        const snap=await bptDirectLiveRef.once("value");
-        await bptHandleDirectFirebaseLiveSnapshot(snap.val());
-      }catch(e){ console.warn("BPT direct Firebase poll:",e); }
-    },isBptMobileDevice()?15000:5000);
-
-    return true;
-  }catch(e){
-    console.error("BPT installation récepteur Firebase direct:",e);
-    return false;
-  }
-}
 
 let bptDirectReceiverInstallTimer=null;
 let bptDirectReceiverInstallBusy=false;
