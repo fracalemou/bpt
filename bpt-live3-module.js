@@ -2279,6 +2279,10 @@ function connectionDeviceLabel(){
 
   async function autoAdvanceIfNeeded(){
     if(advancing||!isOwner()||!current?.running||remainingSeconds()>0)return;
+    // Le passage de niveau est toujours calé sur le deadline absolu (et non sur l'heure du
+    // ticker) : après une veille, tous les niveaux écoulés sont rattrapés, chacun avec sa
+    // propre durée (durée des blinds modifiée, mode adaptatif, niveaux ajoutés).
+    if(Number(current.deadline)>0)return catchUpTimerAfterWake();
     advancing=true;
     try{await changeLevel(1,true);}finally{advancing=false;}
   }
@@ -2304,7 +2308,7 @@ function connectionDeviceLabel(){
           s.deadline=transition+s.remainingSec*1000;
           guard++;
         }
-        return s;
+        return guard?s:null; // déjà à jour côté serveur : aucune écriture
       });
     }finally{advancing=false;}
   }
