@@ -370,3 +370,44 @@ body.bpt-live-landscape-open:not(.spectator-live-open) nav#nav,
 body.bpt-live-landscape-open.b466-live-active:not(.spectator-live-open):has(#live3.active) > nav#nav{
   display:none !important;
 }
+
+
+/* V10.4.9 — Étape 3 : Mon pari / Paris des autres joueurs, charte BPT existante. */
+.bptll-bets-split{
+  width:100%;height:100%;min-height:0;
+  display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);
+  gap:var(--gap);overflow:hidden;
+}
+.bptll-my-bet,.bptll-other-bets{
+  min-width:0;min-height:0;
+  border:1px solid #294d42;border-radius:var(--radius);
+  background:#0b2a23;overflow:hidden;
+}
+.bptll-my-bet{display:grid;grid-template-rows:auto minmax(0,1fr) auto;padding:clamp(5px,1cqh,10px);gap:var(--gap)}
+.bptll-other-bets{display:grid;grid-template-rows:auto minmax(0,1fr)}
+.bptll-panel-title{min-width:0;display:flex;flex-direction:column;gap:2px;padding:1px 2px}
+.bptll-panel-title strong{font-size:clamp(14px,3.8cqh,22px);line-height:1;color:#f4f8f6}
+.bptll-panel-title small{font-size:var(--fs-xs);color:#9fc0b5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bptll-panel-title-row{flex-direction:row;align-items:center;justify-content:space-between;gap:8px;padding:clamp(5px,1cqh,10px);border-bottom:1px solid #294d42;background:#10362d}
+.bptll-panel-title-row>div{min-width:0;display:flex;flex-direction:column;gap:2px}
+.bptll-panel-title-row em{flex:0 0 auto;font-style:normal;font-size:var(--fs-xs);font-weight:900;color:#f0cf79;white-space:nowrap}
+.bptll-my-bet-grid{min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)}
+.bptll-my-bet .bptll-bet-card{height:100%}
+.bptll-my-bet .bptll-confirm{grid-column:auto}
+.bptll-other-bets-list{min-height:0;overflow:auto;overscroll-behavior:contain;padding:clamp(3px,.7cqh,7px)}
+.bptll-other-bet-row{min-width:0;display:grid;grid-template-columns:minmax(80px,.42fr) minmax(0,1fr);align-items:center;gap:8px;padding:clamp(4px,.85cqh,8px) clamp(6px,1cqw,12px);border-bottom:1px solid rgba(55,107,92,.42);font-size:var(--fs-xs)}
+.bptll-other-bet-row:last-child{border-bottom:0}
+.bptll-other-bet-row>strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:var(--fs-sm)}
+.bptll-other-bet-row>div{min-width:0;display:flex;align-items:center;flex-wrap:wrap;gap:4px 7px;color:#dce8e3}
+.bptll-other-bet-row>div span{white-space:nowrap}
+.bptll-other-bet-row>div i{font-style:normal;color:#6e9688}
+.bptll-other-bet-row.is-confirmed{background:rgba(20,76,64,.38)}
+.bptll-other-bet-row b{color:#f0cf79}
+.bptll-waiting{color:#89a79d;font-style:italic}
+.bptll-no-bet{color:#b8cbc4}
+.bptll-other-empty{padding:14px;text-align:center;color:#9fc0b5;font-size:var(--fs-sm)}
+@media (max-width:760px) and (orientation:portrait){
+  .bptll-bets-split{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) minmax(0,1fr)}
+  .bptll-my-bet-grid{grid-template-columns:1fr 1fr}
+  .bptll-other-bet-row{grid-template-columns:minmax(72px,.38fr) minmax(0,1fr)}
+}

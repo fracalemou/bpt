@@ -250,22 +250,67 @@
     title('AVANT LE LANCEMENT','Placez vos paris',3);
     const body=$('bptllBody'),players=(st.players||[]).map(p=>p.name),raw=String(api()?.getIdentityName?.()||'').trim();
     const identity=players.find(p=>norm(p)===norm(raw))||raw,me=st?.betting?.bets?.[identity]||{},can=!!identity&&players.some(p=>norm(p)===norm(identity));
-    const wrap=document.createElement('div');wrap.className='bptll-bets';
-    const note=document.createElement('p');note.className='bptll-bet-note';note.textContent='Un pari vainqueur et/ou un pari 1er éliminé. Vous pouvez aussi choisir « Pas de pari ».';wrap.append(note);
+    const allBets=st?.betting?.bets||{};
+
+    const shell=document.createElement('div');shell.className='bptll-bets-split';
+
+    /* Colonne gauche : pari du joueur connecté. */
+    const mine=document.createElement('section');mine.className='bptll-my-bet';
+    const mineTitle=document.createElement('div');mineTitle.className='bptll-panel-title';
+    mineTitle.innerHTML='<strong>Mon pari</strong><small>'+(identity?'Connecté : '+identity:'Connexion joueur requise')+'</small>';
+    mine.append(mineTitle);
+
+    const mineGrid=document.createElement('div');mineGrid.className='bptll-my-bet-grid';
     ['winner','firstEliminated'].forEach(type=>{
       const card=document.createElement('div');card.className='bptll-bet-card';
-      const head=document.createElement('div');head.className='bptll-bet-head';head.innerHTML='<strong>'+(type==='winner'?'Vainqueur':'1er éliminé')+'</strong><span>0,50 €</span>';
-      const sel=document.createElement('select');sel.className='bptll-select';
+      const head=document.createElement('div');head.className='bptll-bet-head';
+      head.innerHTML='<strong>'+(type==='winner'?'Vainqueur':'1er éliminé')+'</strong><span>0,50 €</span>';
+      const sel=document.createElement('select');sel.className='bptll-select';sel.disabled=!!me.confirmed||!can;
       const none=document.createElement('option');none.value='';none.textContent='Pas de pari';sel.append(none);
-      players.slice().sort((a,b)=>oddsFor(st,type,a)-oddsFor(st,type,b)).forEach(name=>{const o=document.createElement('option');o.value=name;o.textContent=name+' · Cote '+oddsFor(st,type,name).toFixed(2).replace('.',',');o.selected=me[type]===name;sel.append(o)});
-      sel.addEventListener('change',async()=>{await api()?.setLivePrediction?.(type,sel.value);render(true)});card.append(head,sel);wrap.append(card);
+      players.slice().sort((a,b)=>oddsFor(st,type,a)-oddsFor(st,type,b)).forEach(name=>{
+        const o=document.createElement('option');o.value=name;o.textContent=name+' · Cote '+oddsFor(st,type,name).toFixed(2).replace('.',',');o.selected=me[type]===name;sel.append(o)
+      });
+      sel.addEventListener('change',async()=>{await api()?.setLivePrediction?.(type,sel.value);render(true)});
+      card.append(head,sel);mineGrid.append(card);
     });
+    mine.append(mineGrid);
+
     const confirm=document.createElement('div');confirm.className='bptll-confirm';
     const copy=document.createElement('div');copy.className='bptll-confirm-copy';
     const strong=document.createElement('strong');strong.textContent=me.confirmed?'✓ Pari enregistré':'Sélectionnez puis validez';
     const small=document.createElement('small');small.textContent=me.confirmed?'Votre pari est validé.':can?'0,50 € par pari sélectionné':'Connexion joueur requise';copy.append(strong,small);
     const validate=button(me.confirmed?'Pari validé':can?'Valider le pari':'Connexion joueur requise',true,async()=>{if(!can||me.confirmed)return;await api()?.confirmLivePredictions?.();render(true)},!can||me.confirmed);
-    confirm.append(copy,validate);wrap.append(confirm);body.replaceChildren(wrap);
+    confirm.append(copy,validate);mine.append(confirm);
+
+    /* Colonne droite : uniquement les choix validés sont dévoilés. */
+    const others=document.createElement('section');others.className='bptll-other-bets';
+    const otherPlayers=players.filter(name=>norm(name)!==norm(identity));
+    const confirmedCount=otherPlayers.filter(name=>allBets[name]?.confirmed===true).length;
+    const othersTitle=document.createElement('div');othersTitle.className='bptll-panel-title bptll-panel-title-row';
+    othersTitle.innerHTML='<div><strong>Paris des autres joueurs</strong><small>Mise à jour en temps réel</small></div><em>'+confirmedCount+' / '+otherPlayers.length+' validé'+(confirmedCount>1?'s':'')+'</em>';
+    others.append(othersTitle);
+
+    const list=document.createElement('div');list.className='bptll-other-bets-list';
+    const choiceText=(bet)=>{
+      if(!bet?.confirmed)return '<span class="bptll-waiting">En attente</span>';
+      const w=String(bet.winner||'').trim(),f=String(bet.firstEliminated||'').trim();
+      if(!w&&!f)return '<span class="bptll-no-bet">Pas de pari</span>';
+      const parts=[];
+      if(w)parts.push('<span><b>'+esc(w)+'</b> vainqueur</span>');
+      else parts.push('<span class="bptll-no-bet">Pas de pari vainqueur</span>');
+      if(f)parts.push('<span><b>'+esc(f)+'</b> éliminé en premier</span>');
+      else parts.push('<span class="bptll-no-bet">Pas de pari 1er éliminé</span>');
+      return parts.join('<i>·</i>');
+    };
+    otherPlayers.forEach(name=>{
+      const row=document.createElement('div');row.className='bptll-other-bet-row'+(allBets[name]?.confirmed===true?' is-confirmed':'');
+      row.innerHTML='<strong>'+esc(name)+'</strong><div>'+choiceText(allBets[name])+'</div>';
+      list.append(row);
+    });
+    if(!otherPlayers.length){const empty=document.createElement('div');empty.className='bptll-other-empty';empty.textContent='Aucun autre participant.';list.append(empty)}
+    others.append(list);
+
+    shell.append(mine,others);body.replaceChildren(shell);
     const owner=!!api()?.isOwner?.();
     const spectator=(typeof window.liveIsSpectator==='function'&&window.liveIsSpectator())||!owner;
     footer(spectator
