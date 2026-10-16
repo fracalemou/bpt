@@ -5,7 +5,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="10.4.18";
+const BPT_APP_VERSION="10.4.19";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -81,8 +81,9 @@ document.addEventListener("DOMContentLoaded",()=>{updateFirebaseDiagnostic();set
 window.addEventListener("online",updateFirebaseDiagnostic);
 window.addEventListener("offline",updateFirebaseDiagnostic);
 
+// 10.4.19 : le téléphone affiche le même texte que le PC (saison, n° de partie…)
 function simplifyRecordTextForMobile(text){
-  if(!isBptMobileDevice())return String(text||"");
+  return String(text||"");
   let s=String(text||"").trim();
   s=s.replace(/\s*[·•]\s*saison\s*\d{4}\s*[–-]\s*\d{4}/gi, "");
   s=s.replace(/\s*[·•]\s*partie\s*#?\d+/gi, "");

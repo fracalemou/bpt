@@ -7457,16 +7457,35 @@ body.bpt-mobile-device #ranking .tablewrap{
   max-height:none !important;
 }
 
-/* Records : pas de portée, pas d'accomplissements sur mobile. */
-html.bpt-mobile-device #records .records-scope-summary,
-body.bpt-mobile-device #records .records-scope-summary,
-html.bpt-mobile-device #records > details:nth-of-type(2),
-body.bpt-mobile-device #records > details:nth-of-type(2),
-html.bpt-mobile-device #records > details:first-of-type > summary,
-body.bpt-mobile-device #records > details:first-of-type > summary,
-html.bpt-mobile-device #records .combined-block-content > h2,
-body.bpt-mobile-device #records .combined-block-content > h2{
-  display:none !important;
+/* Records : mêmes informations que sur PC (10.4.19) — portée, records carrière / saison / partie,
+   accomplissements — empilées sur une colonne pour le téléphone. */
+html.bpt-mobile-device #records .records-scope-summary{
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  gap:8px !important;
+  margin:8px 0 !important;
+}
+html.bpt-mobile-device #records .records-scope-card{padding:10px 12px !important}
+html.bpt-mobile-device #records .records-scope-title{font-size:15px !important}
+html.bpt-mobile-device #records .records-scope-subtitle{font-size:11px !important;margin:2px 0 8px !important}
+html.bpt-mobile-device #records .records-scope-row{font-size:12px !important;gap:6px !important}
+html.bpt-mobile-device #records > details:nth-of-type(2){display:block !important}
+html.bpt-mobile-device #records > details:first-of-type > summary{display:list-item !important}
+html.bpt-mobile-device #records .combined-block-content > h2{
+  display:block !important;
+  font-size:17px !important;
+  margin:12px 0 6px !important;
+}
+html.bpt-mobile-device #records .tab-premium-hero p,
+html.bpt-mobile-device #records .combined-block-content .muted{
+  display:block !important;
+  font-size:12px !important;
+  opacity:.8;
+}
+html.bpt-mobile-device #records .record-card small{
+  display:block !important;
+  font-size:10px !important;
+  opacity:.75;
 }
 
 html.bpt-mobile-device #records .combined-block-content,
@@ -11297,7 +11316,8 @@ body.bpt-mobile-device.bpt-mobile-portrait #dashboard .premium-hero h1{
   margin:4px 0 8px !important;
 }
 body.bpt-mobile-device.bpt-mobile-portrait #dashboard .premium-hero-metrics{
-  grid-template-columns:1fr !important;
+  /* 10.4.19 : Parties · Joueurs actifs · Participations côte à côte */
+  grid-template-columns:repeat(3,minmax(0,1fr)) !important;
   gap:8px !important;
   width:100% !important;
 }
@@ -14532,3 +14552,26 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only{
 
 /* 10.4.18 — Pendant le Live, le bouton « Installer l'application » ne recouvre plus l'en-tête ni le Chat */
 body:has(#live3.active) #bptAppAction{display:none!important}
+
+/* 10.4.19 — Records : cartes d'accomplissements compactes (icône à gauche, même contenu que sur PC) */
+html.bpt-mobile-device #records .achievement-card{
+  display:grid !important;
+  grid-template-columns:40px minmax(0,1fr) !important;
+  grid-template-areas:"ico titre" "ico desc" "statut statut" "joueurs joueurs" !important;
+  column-gap:10px !important;
+  row-gap:3px !important;
+  padding:10px 12px !important;
+  min-height:0 !important;
+}
+html.bpt-mobile-device #records .achievement-icon{grid-area:ico !important;font-size:28px !important;line-height:1 !important;margin:0 !important;align-self:center !important}
+html.bpt-mobile-device #records .achievement-card h3{grid-area:titre !important;font-size:15px !important;margin:0 !important}
+html.bpt-mobile-device #records .achievement-desc{grid-area:desc !important;font-size:12px !important;margin:0 !important}
+html.bpt-mobile-device #records .achievement-status{grid-area:statut !important;font-size:10px !important;margin:6px 0 2px !important}
+html.bpt-mobile-device #records .achievement-players,
+html.bpt-mobile-device #records .achievement-locked{grid-area:joueurs !important;gap:5px !important;font-size:13px !important}
+html.bpt-mobile-device #records .achievement-player{padding:4px 9px !important}
+
+/* 10.4.19 — Accueil : tuiles compactes pour tenir à trois sur une ligne */
+html.bpt-mobile-device #dashboard .premium-hero-metric{padding:8px 6px !important}
+html.bpt-mobile-device #dashboard .premium-hero-metric span,html.bpt-mobile-device #dashboard .premium-hero-metric small{font-size:11px !important;line-height:1.15 !important}
+html.bpt-mobile-device #dashboard .premium-hero-metric strong,html.bpt-mobile-device #dashboard .premium-hero-metric b{font-size:24px !important}
