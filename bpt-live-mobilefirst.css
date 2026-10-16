@@ -411,3 +411,10 @@ body.bpt-live-landscape-open.b466-live-active:not(.spectator-live-open):has(#liv
   .bptll-my-bet-grid{grid-template-columns:1fr 1fr}
   .bptll-other-bet-row{grid-template-columns:minmax(72px,.38fr) minmax(0,1fr)}
 }
+
+
+/* V10.4.10 — Spectateur passif : aucune commande de changement d'étape.
+   L'espace du footer supprimé est rendu au contenu central. */
+#bptLandscapeLive .bptll-foot:empty{display:none!important;padding:0!important;border:0!important}
+#bptLandscapeLive .bptll-shell.is-spectator-step{grid-template-rows:auto minmax(0,1fr)}
+#bptLandscapeLive .bptll-shell.is-spectator-step .bptll-body{padding-bottom:max(var(--py),env(safe-area-inset-bottom))}

@@ -58,6 +58,7 @@
   function footer(buttons){const f=$('bptllFoot');f.className='bptll-foot'+(buttons.length===1?' one':'');f.replaceChildren(...buttons)}
 
   function renderStep1(){
+    ensure().querySelector('.bptll-shell')?.classList.remove('is-spectator-step');
     title('PRÉPARATION','Paramètres de la partie',1);
     const l=legacy(),body=$('bptllBody');
     const defs=[['Nom / lieu','text',l.location],['Date','date',l.date],['Tapis de départ','number',l.stack],['Buy-in (€)','number',l.buyIn],['Durée souhaitée','select',l.hours],['Structure','select',l.structure]];
@@ -169,6 +170,7 @@
   let playerQuery='';
 
   function renderStep2(){
+    ensure().querySelector('.bptll-shell')?.classList.remove('is-spectator-step');
     title('PRÉPARATION','Sélection des joueurs',2);
     const body=$('bptllBody');
     const all=allPlayerData();
@@ -285,9 +287,9 @@
     /* Colonne droite : uniquement les choix validés sont dévoilés. */
     const others=document.createElement('section');others.className='bptll-other-bets';
     const otherPlayers=players.filter(name=>norm(name)!==norm(identity));
-    const confirmedCount=otherPlayers.filter(name=>allBets[name]?.confirmed===true).length;
+    const confirmedCount=players.filter(name=>allBets[name]?.confirmed===true).length;
     const othersTitle=document.createElement('div');othersTitle.className='bptll-panel-title bptll-panel-title-row';
-    othersTitle.innerHTML='<div><strong>Paris des autres joueurs</strong><small>Mise à jour en temps réel</small></div><em>'+confirmedCount+' / '+otherPlayers.length+' validé'+(confirmedCount>1?'s':'')+'</em>';
+    othersTitle.innerHTML='<div><strong>Paris des autres joueurs</strong><small>Mise à jour en temps réel</small></div><em>'+confirmedCount+' / '+players.length+' validé'+(confirmedCount>1?'s':'')+'</em>';
     others.append(othersTitle);
 
     const list=document.createElement('div');list.className='bptll-other-bets-list';
@@ -313,8 +315,9 @@
     shell.append(mine,others);body.replaceChildren(shell);
     const owner=!!api()?.isOwner?.();
     const spectator=(typeof window.liveIsSpectator==='function'&&window.liveIsSpectator())||!owner;
+    ensure().querySelector('.bptll-shell')?.classList.toggle('is-spectator-step',spectator);
     footer(spectator
-      ? [button('← Retour aux paramètres',false,()=>api()?.returnToPreGameSettings?.())]
+      ? []
       : [button('← Retour aux paramètres',false,()=>api()?.returnToPreGameSettings?.()),button('▶ Révéler le type de bounty',true,()=>api()?.launchPreGame?.())]
     );
   }
@@ -329,7 +332,11 @@
     const p=document.createElement('p');p.textContent=drawing?'Tirage en cours…':individual?'Chaque joueur reçoit sa propre mission secrète.':'Une même cible secrète pour toute la table.';
     wrap.append(icon,lab,name,p);body.replaceChildren(wrap);
     const owner=!!api()?.isOwner?.();
-    footer([button('← Retour aux paris',false,()=>api()?.returnToBetting?.(),!owner),button(drawing?'Tirage en cours…':'▶ Lancer la partie',true,()=>api()?.startAfterBountyReveal?.(),!owner||drawing)]);
+    ensure().querySelector('.bptll-shell')?.classList.toggle('is-spectator-step',!owner);
+    footer(owner
+      ? [button('← Retour aux paris',false,()=>api()?.returnToBetting?.()),button(drawing?'Tirage en cours…':'▶ Lancer la partie',true,()=>api()?.startAfterBountyReveal?.(),drawing)]
+      : []
+    );
     if(drawing)setTimeout(()=>render(true),1700);
   }
 
