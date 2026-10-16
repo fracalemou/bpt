@@ -7521,27 +7521,35 @@ body.bpt-mobile-device #records .record-player-holder{grid-area:player !importan
 html.bpt-mobile-device #records .record-card > small,
 body.bpt-mobile-device #records .record-card > small{grid-area:value !important;display:block !important;font-size:13px !important;color:#fff !important;font-weight:900 !important;margin:0 !important;text-align:right !important}
 
-/* Profil : identité + KPI essentiels uniquement. */
-html.bpt-mobile-device #profile > .grid,
-body.bpt-mobile-device #profile > .grid,
-html.bpt-mobile-device #profile .profile-versus-block,
-body.bpt-mobile-device #profile .profile-versus-block,
-html.bpt-mobile-device #profile #playerProfileOtherNicknames,
-body.bpt-mobile-device #profile #playerProfileOtherNicknames,
-html.bpt-mobile-device #profile #playerProfileMeta,
-body.bpt-mobile-device #profile #playerProfileMeta{
-  display:none !important;
+/* Profil : mêmes informations que sur PC (10.4.20), empilées pour le téléphone. */
+html.bpt-mobile-device #profile > .grid{
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  gap:10px !important;
+  margin-top:10px !important;
 }
+html.bpt-mobile-device #profile > .grid > *{grid-column:1 / -1 !important;width:auto !important}
+html.bpt-mobile-device #profile .profile-versus-block{display:block !important}
+html.bpt-mobile-device #profile #playerProfileOtherNicknames,
+html.bpt-mobile-device #profile #playerProfileMeta{
+  display:block !important;
+  font-size:12px !important;
+  line-height:1.35 !important;
+}
+html.bpt-mobile-device #profile .tab-premium-hero p,
+html.bpt-mobile-device #profile .muted{
+  display:block !important;
+  font-size:12px !important;
+  opacity:.8;
+}
+html.bpt-mobile-device #profile span.muted{display:inline !important}
 
 html.bpt-mobile-device #profile .profile-kpis,
 body.bpt-mobile-device #profile .profile-kpis{
   grid-template-columns:repeat(3,minmax(0,1fr)) !important;
   gap:6px !important;
 }
-html.bpt-mobile-device #profile .profile-kpi:nth-child(n+7),
-body.bpt-mobile-device #profile .profile-kpi:nth-child(n+7){
-  display:none !important;
-}
+html.bpt-mobile-device #profile .profile-kpi:nth-child(n+7){display:block !important}
 
 /* Live mobile : masquer tout texte explicatif/diagnostic non indispensable. */
 html.bpt-mobile-device #live .live-head .muted,
@@ -14575,3 +14583,25 @@ html.bpt-mobile-device #records .achievement-player{padding:4px 9px !important}
 html.bpt-mobile-device #dashboard .premium-hero-metric{padding:8px 6px !important}
 html.bpt-mobile-device #dashboard .premium-hero-metric span,html.bpt-mobile-device #dashboard .premium-hero-metric small{font-size:11px !important;line-height:1.15 !important}
 html.bpt-mobile-device #dashboard .premium-hero-metric strong,html.bpt-mobile-device #dashboard .premium-hero-metric b{font-size:24px !important}
+
+/* 10.4.20 — Profil > Versus : les 3 colonnes (joueur 1 · critère · joueur 2) tiennent dans l'écran */
+html.bpt-mobile-device #profile .versus-table{
+  min-width:0 !important;
+  width:100% !important;
+  table-layout:fixed !important;
+}
+html.bpt-mobile-device #profile .versus-table th,
+html.bpt-mobile-device #profile .versus-table td{
+  padding:7px 4px !important;
+  font-size:12px !important;
+  white-space:normal !important;
+  overflow-wrap:anywhere !important;
+}
+html.bpt-mobile-device #profile .versus-table th:nth-child(2),
+html.bpt-mobile-device #profile .versus-table td:nth-child(2){width:38% !important}
+html.bpt-mobile-device #profile .versus-table th:nth-child(1),
+html.bpt-mobile-device #profile .versus-table td:nth-child(1),
+html.bpt-mobile-device #profile .versus-table th:nth-child(3),
+html.bpt-mobile-device #profile .versus-table td:nth-child(3){width:31% !important}
+html.bpt-mobile-device #profile .versus-value{font-size:16px !important}
+html.bpt-mobile-device #profile .versus-criterion{font-size:11px !important;line-height:1.2 !important}
