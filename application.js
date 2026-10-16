@@ -472,7 +472,26 @@ function setCloudStatus(state,label,details=""){
   if(typeof updateFirebaseDiagnostic==="function")updateFirebaseDiagnostic();
 }
 
+// Firebase réécrit les formes de données : un tableau vide disparaît (history:[] revient
+// absent), un objet à clés numériques revient en tableau à trous (points {"6":{"1":18}}
+// revient [null,…,[null,18,…]]) et un tableau à trous peut revenir en objet (players).
+// Sans cette reconstitution, l'état distant était jugé invalide et chaque ouverture de
+// l'appli réécrivait bpt/state/main avec la copie locale de l'appareil (joueurs, codes, réglages).
+function bptRestoreFirebaseArrays(x){
+  if(!x || typeof x!=="object")return x;
+  const toObject=v=>Array.isArray(v)?Object.fromEntries(v.map((item,i)=>[String(i),item]).filter(([,item])=>item!=null)):v;
+  if(x.history==null)x.history=[];
+  if(x.players && typeof x.players==="object" && !Array.isArray(x.players))x.players=Object.values(x.players).filter(Boolean);
+  if(Array.isArray(x.points)){
+    x.points=toObject(x.points);
+    for(const n of Object.keys(x.points))x.points[n]=toObject(x.points[n]);
+  }
+  if(x.playerAliases==null)x.playerAliases={};
+  return x;
+}
+
 function isValidBptState(x){
+  bptRestoreFirebaseArrays(x);
   return !!(
     x &&
     Array.isArray(x.players) &&
@@ -1246,7 +1265,6 @@ async function applyCloudState(row){
     db=remoteState;
     bptMigrateLegacyElenPlayerDirectory();
     saveLocalOnly();
-    if(remoteActive && !thisDeviceOwnsRemoteLive)cloudLocalDirty=false;
 
     const displayedArchiveRows=archiveRowsForSeason(liveSeasonKey);
     if(Array.isArray(displayedArchiveRows)){
@@ -1261,15 +1279,8 @@ async function applyCloudState(row){
     }
 
     cloudLastRevision=rev;
-    liveSetLastSyncNow();
     renderAll();
-    if(typeof liveRenderAll==="function" && liveSeasonKey===CURRENT_SEASON_KEY){
-      liveRenderAll();
-      if(db.liveState?.running && db.liveState?.endAt)liveRunTicker();
-      if(liveIsCreator() && !db.liveState?.synced)startLiveCloudHeartbeat();
-      else stopLiveCloudHeartbeat();
-      if(currentViewId==="live")liveMaybeAutoOpenSpectator(); else if(typeof window.bptUpdateLiveNavIndicator==="function")window.bptUpdateLiveNavIndicator();
-    }
+    try{ bptNotifySettingsPlayers(); }catch(_e){}
 
     const hh=new Date().toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
     const games=new Set(serverHistory.map(r=>Number(r.game))).size;
