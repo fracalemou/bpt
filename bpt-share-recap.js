@@ -207,9 +207,10 @@
     const copied=await copyImage(blob);
     if(!copied)downloadBlob(blob,name);
     window.open('https://web.whatsapp.com/','_blank','noopener');
-    toast(copied
+    const tip=/firefox/i.test(navigator.userAgent||'')?' Astuce : avec Chrome ou Edge, il suffit de choisir le groupe (pas de Ctrl + V).':'';
+    toast((copied
       ?'Visuel du bilan copié. Dans WhatsApp, ouvrez le groupe BPT puis faites Ctrl + V et Envoyer.'
-      :'Visuel téléchargé. Dans WhatsApp, ouvrez le groupe BPT et joignez l’image téléchargée.');
+      :'Visuel téléchargé. Dans WhatsApp, ouvrez le groupe BPT et joignez l’image téléchargée.')+tip);
   }
 
   // ---------- Barre de partage ----------
