@@ -508,3 +508,15 @@ body.bpt-live-landscape-open.b466-live-active:not(.spectator-live-open):has(#liv
   #bptLandscapeLive .bptll-foot .bptll-btn{white-space:normal;line-height:1.1;height:auto;min-height:var(--control);padding:6px 10px;text-overflow:clip}
   #bptLandscapeLive .bptll-body:has(.bptll-bounty){align-content:center}
 }
+
+#bptLandscapeLive .bptll-player-avatar{overflow:hidden;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+#bptLandscapeLive .bptll-player-avatar img{width:100%;height:100%;object-fit:cover}
+
+/* 10.4.33 — préparation aux couleurs unifiées */
+#bptLandscapeLive .bptll-player-card{background:#172042;border-color:#2c3a63}
+#bptLandscapeLive .bptll-player-card.is-selected{background:#173a46;border-color:#35d8c5}
+#bptLandscapeLive .bptll-btn:not(.primary){background:#1f2a50;border-color:#33416b}
+#bptLandscapeLive .bptll-field input,#bptLandscapeLive .bptll-field select,#bptLandscapeLive .bptll-player-search,#bptLandscapeLive .bptll-player-add input{background:#0f1530;border-color:#33416b}
+#bptLandscapeLive .bptll-form,#bptLandscapeLive .bptll-my-bet,#bptLandscapeLive .bptll-other-bets,#bptLandscapeLive .bptll-bet-card{background:#151d38;border-color:#2c3a63}
+#bptLandscapeLive .bptll-player-add{background:#151d38;border-color:#2a8f88}
+#bptLandscapeLive .bptll-panel-title-row{background:#1a2347;border-color:#2c3a63}

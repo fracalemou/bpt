@@ -3135,16 +3135,32 @@ function gameUnlockedAchievements(gameNo){
   return unlocked;
 }
 
-function playerNameHtml(name,{button=false,buttonClass="",onclick="",breakName=false}={}){
+// 10.4.33 — Avatar d'un joueur : avatar choisi, sinon initiales sur une couleur propre au joueur.
+const BPT_AVATAR_COLORS=["#e4572e","#f3a712","#29bf12","#00a5cf","#7b4fd6","#d81e5b","#1b998b","#ff6f59","#3d5a80","#c17c74","#6a994e","#bc4b51","#5e60ce","#2a9d8f","#e76f51","#8338ec"];
+function bptAvatarColor(name){
+  let h=0;for(const ch of String(name||""))h=(h*31+ch.charCodeAt(0))>>>0;
+  return BPT_AVATAR_COLORS[h%BPT_AVATAR_COLORS.length];
+}
+function bptAvatarHtml(name,size="sm"){
+  const real=String(name||"").trim();if(!real)return "";
+  const id=playerAvatarId(real);
+  if(id)return `<span class="bpt-av bpt-av-${size}"><img src="${playerAvatarDataUrl(id)}" alt="" loading="lazy"></span>`;
+  const init=real.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase();
+  return `<span class="bpt-av bpt-av-${size}" style="--av:${bptAvatarColor(real)}" aria-hidden="true">${esc(init)}</span>`;
+}
+function playerNameHtml(name,{button=false,buttonClass="",onclick="",breakName=false,avatar=true,avatarSize="sm"}={}){
   const real=String(name||"").trim();
   const nick=playerNicknameInfo(real).primary;
   const nameParts=real.split(/\s+/);
   const official=breakName&&nameParts.length>1?`${esc(nameParts[0])}<br>${esc(nameParts.slice(1).join(" "))}`:esc(real);
   const inner=`<span class="player-primary-name">${official}</span>${nick?`<span class="player-secondary-nickname">(${esc(nick)})</span>`:""}`;
+  const av=avatar&&real?bptAvatarHtml(real,avatarSize):"";
+  const body=av?`${av}<span class="bpt-av-text">${inner}</span>`:inner;
+  const cls=av?" has-avatar":"";
   if(button){
-    return `<button class="player-link player-name-stack ${buttonClass}" ${onclick?`onclick="${onclick}"`:""}>${inner}</button>`;
+    return `<button class="player-link player-name-stack${cls} ${buttonClass}" ${onclick?`onclick="${onclick}"`:""}>${body}</button>`;
   }
-  return `<span class="player-name-stack">${inner}</span>`;
+  return `<span class="player-name-stack${cls}">${body}</span>`;
 }
 
 function ensurePlayerPhotos(){
@@ -4870,10 +4886,10 @@ function renderRanking(){
   if($("rankingSortHint"))$("rankingSortHint").textContent=labels[rankingSortKey]||labels.points;
   document.querySelectorAll("[data-ranking-filter]").forEach(btn=>btn.classList.toggle("active",btn.dataset.rankingFilter===rankingFilterKey));
   $("rankingBody").innerHTML=rankingRowsForDisplay().map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}">
-    <td>${medalForRank(s.rank)} ${s.rank}</td>
-    <td>${playerNameHtml(s.name,{button:true,buttonClass:"ranking-player-link",breakName:true,onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(s.name)}'))`})}</td>
-    <td><b>${num(s.points,0)}</b></td>
-    <td>${s.progress===null
+    <td data-label="Clt">${medalForRank(s.rank)} ${s.rank}</td>
+    <td data-label="Joueur">${playerNameHtml(s.name,{button:true,buttonClass:"ranking-player-link",breakName:true,avatarSize:"md",onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(s.name)}'))`})}</td>
+    <td data-label="Points"><b>${num(s.points,0)}</b></td>
+    <td data-label="Évolution">${s.progress===null
       ? (isArchiveSeason()?"—":'<span class="progress-new">Nouveau</span>')
       : s.progress>0
         ? `<span class="progress-indicator progress-up" title="Progression de ${s.progress} place${s.progress>1?"s":""}"><span class="progress-arrow">▲</span><strong>+${s.progress}</strong></span>`
@@ -4881,19 +4897,26 @@ function renderRanking(){
           ? `<span class="progress-indicator progress-down" title="Recul de ${Math.abs(s.progress)} place${Math.abs(s.progress)>1?"s":""}"><span class="progress-arrow">▼</span><strong>${s.progress}</strong></span>`
           : '<span class="progress-indicator progress-flat" title="Position inchangée"><span class="progress-arrow">●</span><strong>0</strong></span>'
     }</td>
-    <td>${recentFormHtml(s.name,3)}</td>
-    <td>${num(s.avgPoints,1)}</td>
-    <td>${s.gamesCount}</td>
-    <td>${s.wins}</td>
-    <td>${num(s.winRate,1)} %</td>
-    <td>${s.podiums}</td>
-    <td>${num(s.podiumRate,1)} %</td>
-    <td>${s.tabliers}</td>
-    <td>${s.kills}</td>
-    <td>${num(s.kpg,2)}</td>
-    <td>${euro(s.net)}</td>
-    <td>${(()=>{const e=ks.mainKillerEntry(s.name);return e?`${playerNameHtml(e.name)} <span class="muted">· ${e.count} élimination${e.count>1?"s":""}</span>`:"—";})()}</td>
-    <td>${(()=>{const e=ks.mainVictimEntry(s.name);return e?`${playerNameHtml(e.name)} <span class="muted">· ${e.count} kill${e.count>1?"s":""}</span>`:"—";})()}</td>
+    <td data-label="3 dernières">${recentFormHtml(s.name,3)}</td>
+    <td data-label="Moy. pts">${num(s.avgPoints,1)}</td>
+    <td data-label="Participations">${s.gamesCount}</td>
+    <td data-label="Victoires">${s.wins}</td>
+    <td data-label="Victoires %">${num(s.winRate,1)} %</td>
+    <td data-label="Podiums">${s.podiums}</td>
+    <td data-label="Podiums %">${num(s.podiumRate,1)} %</td>
+    <td data-label="Tabliers">${s.tabliers}</td>
+    <td data-label="Kills">${s.kills}</td>
+    <td data-label="Kills/partie">${num(s.kpg,2)}</td>
+    <td data-label="Solde net">${euro(s.net)}</td>
+    <td data-label="Bourreau">${(()=>{const e=ks.mainKillerEntry(s.name);return e?`${playerNameHtml(e.name)} <span class="muted">· ${e.count} élimination${e.count>1?"s":""}</span>`:"—";})()}</td>
+    <td data-label="Victime">${(()=>{const e=ks.mainVictimEntry(s.name);return e?`${playerNameHtml(e.name)} <span class="muted">· ${e.count} kill${e.count>1?"s":""}</span>`:"—";})()}</td>
+    <td class="bpt-rk-stats">${(()=>{
+      const st=(lab,val,wide)=>`<span class="bpt-rk-stat${wide?" is-wide":""}"><span>${lab}</span><b>${val}</b></span>`;
+      const k=ks.mainKillerEntry(s.name),v=ks.mainVictimEntry(s.name);
+      return [st("Moy.",num(s.avgPoints,1)),st("Parties",s.gamesCount),st("Victoires",`${s.wins} · ${num(s.winRate,0)} %`),st("Podiums",`${s.podiums} · ${num(s.podiumRate,0)} %`),
+        st("Tabliers",s.tabliers),st("Kills",`${s.kills} · ${num(s.kpg,1)}/p`),st("Solde",euro(s.net)),st("",""),
+        st("Bourreau",k?`${playerNameHtml(k.name,{avatarSize:"xs"})} · ${k.count}`:"—",true),st("Victime",v?`${playerNameHtml(v.name,{avatarSize:"xs"})} · ${v.count}`:"—",true)].join("");
+    })()}</td>
   </tr>`).join("");
 }
 

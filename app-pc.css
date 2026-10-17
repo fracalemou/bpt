@@ -6942,3 +6942,69 @@ body:has(#live3.active) #bptAppAction{display:none!important}
 .bpt-ag-home-links{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px}
 .bpt-ag-link{background:none;border:0;padding:0;color:#2ac9c2;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap}
 .bpt-ag-home .bpt-ag-form{margin-top:12px}
+
+/* ===== 10.4.33 — Identité visuelle unifiée : avatars, palette, icônes, animations ===== */
+:root{
+  --bpt-bg:#0f1426;--bpt-bg2:#121a33;--bpt-card:#161d36;--bpt-card2:#1b2442;--bpt-line:#2a3560;
+  --bpt-gold:#f2c853;--bpt-teal:#2ac9c2;--bpt-text:#eef2fb;--bpt-muted:#9aa6c8;
+}
+
+/* --- Palette : un seul fond bleu nuit partout (Accueil, Live, préparation, bilan) --- */
+html,body{background:var(--bpt-bg) !important}
+header.bpt-header{background:linear-gradient(90deg,#141b35,#1c2650) !important;border-bottom:1px solid var(--bpt-line) !important}
+nav#nav{background:var(--bpt-bg2) !important}
+.card,#latestgame details,#ranking details,#records details,#profile details,.premium-panel{background-color:var(--bpt-card) !important;border-color:var(--bpt-line) !important}
+.bpt484-live{background:var(--bpt-bg) !important}
+#bptLandscapeLive{background:linear-gradient(180deg,#10162c 0%,#141c38 100%) !important}
+#bptLandscapeLive .bptll-head,#bptLandscapeLive .bptll-foot{background:#0d1328 !important;border-color:var(--bpt-line) !important}
+.bpt-summary-modal{background:var(--bpt-bg2) !important;border-color:rgba(242,200,83,.55) !important}
+
+/* --- Avatars --- */
+.bpt-av{--av:#3d5a80;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;
+  background:var(--av);color:#fff;font-weight:900;letter-spacing:.02em;overflow:hidden;
+  box-shadow:0 0 0 2px rgba(255,255,255,.14),0 2px 6px rgba(0,0,0,.35);text-shadow:0 1px 2px rgba(0,0,0,.35);vertical-align:middle}
+.bpt-av img{width:100%;height:100%;object-fit:cover;display:block}
+.bpt-av-xs{width:20px;height:20px;font-size:8px}
+.bpt-av-sm{width:26px;height:26px;font-size:10px}
+.bpt-av-md{width:36px;height:36px;font-size:13px}
+.bpt-av-lg{width:54px;height:54px;font-size:19px}
+.player-name-stack.has-avatar{display:inline-flex !important;flex-direction:row !important;align-items:center !important;gap:8px !important;text-align:left !important}
+.player-name-stack.has-avatar .bpt-av-text{display:inline-flex;flex-direction:column;align-items:flex-start;min-width:0;line-height:1.15}
+.rank1 .bpt-av{box-shadow:0 0 0 2px var(--bpt-gold),0 2px 8px rgba(242,200,83,.35)}
+.rank2 .bpt-av{box-shadow:0 0 0 2px #cfd6e4}
+.rank3 .bpt-av{box-shadow:0 0 0 2px #d58a52}
+
+/* --- Icônes de navigation (SVG, même trait partout) --- */
+.bpt-ico{width:18px;height:18px;flex:0 0 auto;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px}
+nav#nav button .bpt-ico{margin-right:6px}
+#live3NavBtn.live3-active .bpt-ico{color:#ff5a5a}
+
+/* --- Animations (désactivées si l'utilisateur limite les animations) --- */
+@media (prefers-reduced-motion:no-preference){
+  main > .view.active{animation:bptViewIn .28s ease-out both}
+  @keyframes bptViewIn{from{opacity:0}to{opacity:1}}
+  .summary-place,.premium-podium-card,.podium-medal-item{animation:bptPop .45s cubic-bezier(.2,1.4,.4,1) both}
+  .summary-place:nth-child(2),.premium-podium-card:nth-child(2),.podium-medal-item:nth-child(2){animation-delay:.08s}
+  .summary-place:nth-child(3),.premium-podium-card:nth-child(3),.podium-medal-item:nth-child(3){animation-delay:.16s}
+  @keyframes bptPop{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}
+  #rankingBody tr{animation:bptRowIn .3s ease-out both}
+  #rankingBody tr:nth-child(2){animation-delay:.03s}#rankingBody tr:nth-child(3){animation-delay:.06s}
+  #rankingBody tr:nth-child(4){animation-delay:.09s}#rankingBody tr:nth-child(5){animation-delay:.12s}
+  #rankingBody tr:nth-child(n+6){animation-delay:.15s}
+  @keyframes bptRowIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .bpt-ag-choice,.btn,nav#nav button{transition:transform .12s ease,background-color .15s ease,box-shadow .15s ease}
+  .bpt-ag-choice:active,.btn:active,nav#nav button:active{transform:scale(.96)}
+}
+#ranking td.bpt-rk-stats{display:none !important}
+nav#nav button{display:inline-flex;align-items:center;justify-content:center}
+
+/* 10.4.33 — finitions palette / icônes */
+nav#nav button:not(.active){background:var(--bpt-card) !important;border-color:var(--bpt-line) !important;color:var(--bpt-text) !important}
+#live3NavBtn::before{display:none !important;content:none !important}
+.ranking-season-scope-btn:not(.active),.ranking-mode-btn:not(.active){background:var(--bpt-card2) !important;border-color:var(--bpt-line) !important}
+.bpt-av-xs{width:22px;height:22px;font-size:9px}
+
+/* 10.4.33 — Live aux couleurs unifiées (bleu nuit + turquoise + doré) */
+.bpt484-head,.bpt484-stage,.bpt484-card,.bpt484-info{background:radial-gradient(circle at 50% -30%,#1f2b52 0,#18213f 40%,#141b33 75%,#121830 100%) !important;border-color:#2c3a63 !important}
+.bpt484-stage:after{background:linear-gradient(90deg,transparent,rgba(42,201,194,.35),transparent) !important}
+

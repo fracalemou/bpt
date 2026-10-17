@@ -205,6 +205,8 @@
       const cb=document.createElement('input');cb.type='checkbox';cb.checked=p.checked;
       const avatar=document.createElement('span');avatar.className='bptll-player-avatar';
       avatar.textContent=p.name.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();
+      // 10.4.33 : avatar choisi ou couleur propre au joueur (comme dans le reste de l'appli)
+      try{const id=typeof playerAvatarId==='function'?playerAvatarId(p.name):'';if(id){avatar.textContent='';const im=document.createElement('img');im.src=playerAvatarDataUrl(id);im.alt='';avatar.append(im);}else if(typeof bptAvatarColor==='function')avatar.style.background=bptAvatarColor(p.name);}catch(_e){}
       const copy=document.createElement('span');copy.className='bptll-player-copy';
       const name=document.createElement('strong');name.textContent=p.name;
       const stats=document.createElement('small');stats.textContent=p.participations+' participation'+(p.participations===1?'':'s');
