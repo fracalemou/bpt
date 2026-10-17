@@ -11,8 +11,9 @@
   };
   const mobileLabels = {
     dashboard:'⌂ Accueil',
+    live3:'● Live',
     latestgame:'◷ Parties',
-    ranking:'♛ Classements',
+    ranking:'♛ Classement',
     records:'★ Records',
     seasons:'▦ Saisons',
     profile:'♤ Profil',
@@ -29,9 +30,20 @@
 
     document.querySelectorAll('nav#nav button[data-view]').forEach(btn=>{
       const key = btn.getAttribute('data-view') || '';
-      const label=(isMobile ? mobileLabels[key] : desktopLabels[key]) || btn.textContent;
+      if(isMobile){
+        // 10.4.25 : barre du bas sur téléphone — icône au-dessus du libellé
+        const label=mobileLabels[key];
+        if(!label)return;
+        const i=label.indexOf(' ');
+        btn.innerHTML='<span class="bpt-nav-ico">'+label.slice(0,i)+'</span><span class="bpt-nav-txt">'+label.slice(i+1)+'</span>';
+        return;
+      }
+      if(key==='live3'){ if(btn.querySelector('.bpt-nav-ico'))btn.textContent='● Live'; return; }
+      const label=desktopLabels[key] || btn.textContent;
       btn.textContent = label;
     });
+    const more=document.getElementById('bptMobileMoreTopBtn');
+    if(more)more.innerHTML=isMobile?'<span class="bpt-nav-ico">☰</span><span class="bpt-nav-txt">Plus</span>':'☰ Plus';
   }
 
   if(document.readyState === 'loading'){

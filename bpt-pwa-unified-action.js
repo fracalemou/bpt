@@ -19,20 +19,38 @@
     return document.getElementById("bptAppActionBtn");
   }
 
+  // 10.4.25 : sur téléphone, « Installer » passe dans le menu Plus (plus de bouton en haut d'écran).
+  function menuInstallBtn(){
+    const menu=document.getElementById("bptMobileMoreTopMenu");
+    if(!menu)return null;
+    let b=document.getElementById("bptMenuInstallBtn");
+    if(!b){
+      b=document.createElement("button");
+      b.type="button";b.id="bptMenuInstallBtn";b.hidden=true;
+      b.textContent="📲 Installer l’application";
+      b.addEventListener("click",()=>{menu.hidden=true;actionBtn()?.click();});
+      menu.appendChild(b);
+    }
+    return b;
+  }
+
   function showAction(label,mode){
     const box=actionBox();
     const btn=actionBtn();
     if(!box||!btn)return;
     btn.textContent=label;
     btn.dataset.mode=mode;
+    box.dataset.mode=mode;
     box.style.display="block";
+    const m=menuInstallBtn();if(m)m.hidden=mode!=="install";
   }
 
   function hideAction(){
     const box=actionBox();
     const btn=actionBtn();
-    if(box)box.style.display="none";
+    if(box){box.style.display="none";delete box.dataset.mode;}
     if(btn)delete btn.dataset.mode;
+    const m=menuInstallBtn();if(m)m.hidden=true;
   }
 
   function syncActionState(){

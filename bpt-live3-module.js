@@ -731,7 +731,12 @@
     const logoutBtn=document.getElementById("bptLogoutBtn");
     const name=String(liveIdentityName()||"").trim();
     if(el){
-      el.textContent=name?`Connecté : ${name}`:"";
+      el.replaceChildren();
+      if(name){
+        const lbl=document.createElement("span");lbl.className="bpt-identity-label";lbl.textContent="Connecté : ";
+        const nm=document.createElement("span");nm.className="bpt-identity-name";nm.textContent=name;
+        el.append(lbl,nm);
+      }
       el.title=name?`Profil connecté : ${name}`:"";
     }
     if(logoutBtn)logoutBtn.hidden=!(name&&liveIdentityConfirmed);
