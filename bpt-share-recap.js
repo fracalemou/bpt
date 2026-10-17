@@ -188,8 +188,8 @@
     const file=new File([blob],name,{type:'image/png'});
     if(navigator.canShare&&navigator.canShare({files:[file]})){
       try{
-        // Sur PC, WhatsApp n'accepte qu'un seul contenu : on envoie l'image seule.
-        await navigator.share(isPhone()?{files:[file],text}:{files:[file]});
+        // Le visuel contient déjà tout le classement : on envoie l'image seule.
+        await navigator.share({files:[file]});
         return;
       }catch(e){if(e&&e.name==='AbortError')return;}
     }
