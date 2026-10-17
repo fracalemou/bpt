@@ -79,7 +79,10 @@
       wrap.append(lab,el);form.append(wrap);
     });
     body.replaceChildren(form);
-    footer([button('Continuer →',true,()=>{if(!String(l.location?.value||'').trim()){alert('Indiquez le nom / lieu de la partie.');return;}step=2;render(true)})]);
+    footer([
+      button('← Retour',false,()=>{if(typeof window.showView==='function')window.showView('dashboard');}), // 10.4.33 : quitter la préparation
+      button('Continuer →',true,()=>{if(!String(l.location?.value||'').trim()){alert('Indiquez le nom / lieu de la partie.');return;}step=2;render(true)})
+    ]);
   }
 
   function playerData(){

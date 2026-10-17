@@ -10421,11 +10421,6 @@ nav#nav button .bpt-ico{margin-right:6px}
   .summary-place:nth-child(2),.premium-podium-card:nth-child(2),.podium-medal-item:nth-child(2){animation-delay:.08s}
   .summary-place:nth-child(3),.premium-podium-card:nth-child(3),.podium-medal-item:nth-child(3){animation-delay:.16s}
   @keyframes bptPop{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}
-  #rankingBody tr{animation:bptRowIn .3s ease-out both}
-  #rankingBody tr:nth-child(2){animation-delay:.03s}#rankingBody tr:nth-child(3){animation-delay:.06s}
-  #rankingBody tr:nth-child(4){animation-delay:.09s}#rankingBody tr:nth-child(5){animation-delay:.12s}
-  #rankingBody tr:nth-child(n+6){animation-delay:.15s}
-  @keyframes bptRowIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
   .bpt-ag-choice,.btn,nav#nav button{transition:transform .12s ease,background-color .15s ease,box-shadow .15s ease}
   .bpt-ag-choice:active,.btn:active,nav#nav button:active{transform:scale(.96)}
 }
@@ -10477,3 +10472,29 @@ html:not(.bpt-mobile-device) nav#nav button:not(.active){background:var(--bpt-ca
 .bpt484-head,.bpt484-stage,.bpt484-card,.bpt484-info{background:radial-gradient(circle at 50% -30%,#1f2b52 0,#18213f 40%,#141b33 75%,#121830 100%) !important;border-color:#2c3a63 !important}
 .bpt484-stage:after{background:linear-gradient(90deg,transparent,rgba(42,201,194,.35),transparent) !important}
 
+
+/* 10.4.33 — avatars et noms alignés à gauche, sur une même colonne */
+td .player-name-stack.has-avatar{display:flex !important;width:100%;justify-content:flex-start !important;text-align:left !important}
+td .player-name-stack.has-avatar .bpt-av-text{align-items:flex-start !important;text-align:left !important}
+td .player-name-stack.has-avatar .player-primary-name,td .player-name-stack.has-avatar .player-secondary-nickname{text-align:left !important}
+#ranking td:nth-child(2),#ranking th:nth-child(2),#latestgame td:nth-child(2),#latestgame th:nth-child(2),.summary-table td:nth-child(2),.summary-table th:nth-child(2),#ranking td:nth-child(16),#ranking td:nth-child(17),#ranking th:nth-child(16),#ranking th:nth-child(17){text-align:left !important}
+#ranking td:nth-child(2) .player-name-stack.has-avatar{padding-left:4px}
+
+html.bpt-mobile-device #ranking #rankingBody td:nth-child(2) .player-name-stack.has-avatar{justify-content:flex-start !important}
+html.bpt-mobile-device #ranking .bpt-rk-stat.is-wide b{display:block;white-space:nowrap}
+html.bpt-mobile-device #ranking .bpt-rk-stat.is-wide b .player-name-stack{display:inline-flex !important;width:auto !important;vertical-align:middle}
+
+/* 10.4.33 — noms alignés à gauche à côté de l’avatar (prioritaire sur les anciennes règles de centrage) */
+:is(#ranking,#latestgame,#records,#profile,#dashboard,#gameSummaryContent,#settings) .player-name-stack.has-avatar .player-primary-name,
+:is(#ranking,#latestgame,#records,#profile,#dashboard,#gameSummaryContent,#settings) .player-name-stack.has-avatar .player-secondary-nickname{text-align:left !important;margin-left:0 !important;margin-right:0 !important}
+:is(#ranking,#latestgame,#records,#profile,#dashboard,#gameSummaryContent,#settings) td .player-name-stack.has-avatar{justify-content:flex-start !important;text-align:left !important}
+
+
+/* 10.4.33 — noms du classement alignés à gauche */
+#ranking #rankingBody td:nth-child(2){text-align:left !important}
+#ranking #rankingBody td:nth-child(2) .player-name-stack{display:inline-flex !important;flex-direction:column !important;align-items:flex-start !important;text-align:left !important}
+#ranking #rankingBody td:nth-child(2) .player-primary-name,#ranking #rankingBody td:nth-child(2) .player-secondary-nickname{text-align:left !important}
+#ranking #rankingBody td:nth-child(16),#ranking #rankingBody td:nth-child(17){text-align:left !important}
+#ranking #rankingBody td:nth-child(16) .player-name-stack,#ranking #rankingBody td:nth-child(17) .player-name-stack{align-items:flex-start !important;text-align:left !important}
+html.bpt-mobile-device #ranking #rankingBody td:nth-child(2){justify-self:start !important}
+html.bpt-mobile-device #ranking #rankingBody td:nth-child(2) .player-primary-name br{display:block}

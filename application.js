@@ -4887,7 +4887,7 @@ function renderRanking(){
   document.querySelectorAll("[data-ranking-filter]").forEach(btn=>btn.classList.toggle("active",btn.dataset.rankingFilter===rankingFilterKey));
   $("rankingBody").innerHTML=rankingRowsForDisplay().map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}">
     <td data-label="Clt">${medalForRank(s.rank)} ${s.rank}</td>
-    <td data-label="Joueur">${playerNameHtml(s.name,{button:true,buttonClass:"ranking-player-link",breakName:true,avatarSize:"md",onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(s.name)}'))`})}</td>
+    <td data-label="Joueur">${playerNameHtml(s.name,{button:true,buttonClass:"ranking-player-link",breakName:true,avatar:false,onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(s.name)}'))`})}</td>
     <td data-label="Points"><b>${num(s.points,0)}</b></td>
     <td data-label="Évolution">${s.progress===null
       ? (isArchiveSeason()?"—":'<span class="progress-new">Nouveau</span>')
@@ -4908,14 +4908,14 @@ function renderRanking(){
     <td data-label="Kills">${s.kills}</td>
     <td data-label="Kills/partie">${num(s.kpg,2)}</td>
     <td data-label="Solde net">${euro(s.net)}</td>
-    <td data-label="Bourreau">${(()=>{const e=ks.mainKillerEntry(s.name);return e?`${playerNameHtml(e.name)} <span class="muted">· ${e.count} élimination${e.count>1?"s":""}</span>`:"—";})()}</td>
-    <td data-label="Victime">${(()=>{const e=ks.mainVictimEntry(s.name);return e?`${playerNameHtml(e.name)} <span class="muted">· ${e.count} kill${e.count>1?"s":""}</span>`:"—";})()}</td>
+    <td data-label="Bourreau">${(()=>{const e=ks.mainKillerEntry(s.name);return e?`${playerNameHtml(e.name,{avatar:false})} <span class="muted">· ${e.count} élimination${e.count>1?"s":""}</span>`:"—";})()}</td>
+    <td data-label="Victime">${(()=>{const e=ks.mainVictimEntry(s.name);return e?`${playerNameHtml(e.name,{avatar:false})} <span class="muted">· ${e.count} kill${e.count>1?"s":""}</span>`:"—";})()}</td>
     <td class="bpt-rk-stats">${(()=>{
       const st=(lab,val,wide)=>`<span class="bpt-rk-stat${wide?" is-wide":""}"><span>${lab}</span><b>${val}</b></span>`;
       const k=ks.mainKillerEntry(s.name),v=ks.mainVictimEntry(s.name);
       return [st("Moy.",num(s.avgPoints,1)),st("Parties",s.gamesCount),st("Victoires",`${s.wins} · ${num(s.winRate,0)} %`),st("Podiums",`${s.podiums} · ${num(s.podiumRate,0)} %`),
         st("Tabliers",s.tabliers),st("Kills",`${s.kills} · ${num(s.kpg,1)}/p`),st("Solde",euro(s.net)),st("",""),
-        st("Bourreau",k?`${playerNameHtml(k.name,{avatarSize:"xs"})} · ${k.count}`:"—",true),st("Victime",v?`${playerNameHtml(v.name,{avatarSize:"xs"})} · ${v.count}`:"—",true)].join("");
+        st("Bourreau",k?`${playerNameHtml(k.name,{avatar:false})} · ${k.count}`:"—",true),st("Victime",v?`${playerNameHtml(v.name,{avatar:false})} · ${v.count}`:"—",true)].join("");
     })()}</td>
   </tr>`).join("");
 }
