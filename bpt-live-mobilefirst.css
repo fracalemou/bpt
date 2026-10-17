@@ -466,3 +466,45 @@ body.bpt-live-landscape-open.b466-live-active:not(.spectator-live-open):has(#liv
   #bptLandscapeLive .bptll-foot.one{grid-template-columns:minmax(220px,320px);justify-content:end}
   #bptLandscapeLive .bptll-foot .bptll-btn{height:48px;font-size:16px}
 }
+
+
+/* 10.4.24 — Préparation, étapes 3 (paris) et 4 (bounty) sur PC et tablette en paysage :
+   panneaux de hauteur naturelle, centrés, textes lisibles. */
+@media (min-width:900px) and (min-height:560px){
+  #bptLandscapeLive .bptll-body:has(.bptll-bets-split),
+  #bptLandscapeLive .bptll-body:has(.bptll-bounty){overflow:auto;padding:clamp(18px,4vh,48px) 28px}
+  #bptLandscapeLive .bptll-bets-split{
+    width:min(1200px,100%);height:auto;margin:0 auto;align-items:start;
+    grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:22px;overflow:visible;
+  }
+  #bptLandscapeLive .bptll-my-bet,
+  #bptLandscapeLive .bptll-other-bets{height:auto;grid-template-rows:auto;align-content:start;border-radius:16px}
+  #bptLandscapeLive .bptll-my-bet{padding:20px 22px;gap:18px}
+  #bptLandscapeLive .bptll-panel-title strong{font-size:24px}
+  #bptLandscapeLive .bptll-panel-title small{font-size:13px}
+  #bptLandscapeLive .bptll-panel-title-row{padding:18px 22px}
+  #bptLandscapeLive .bptll-panel-title-row em{font-size:14px}
+  #bptLandscapeLive .bptll-my-bet .bptll-bet-card{height:auto;padding:14px 16px;gap:10px;grid-template-rows:auto auto}
+  #bptLandscapeLive .bptll-bet-head strong{font-size:19px}
+  #bptLandscapeLive .bptll-bet-head span{font-size:17px}
+  #bptLandscapeLive .bptll-bet-card .bptll-select{height:48px;max-height:none;font-size:16px}
+  #bptLandscapeLive .bptll-confirm{padding:14px 16px}
+  #bptLandscapeLive .bptll-confirm-copy strong{font-size:15px}
+  #bptLandscapeLive .bptll-confirm-copy small{font-size:13px}
+  #bptLandscapeLive .bptll-confirm .bptll-btn{height:46px;font-size:16px;padding:0 22px}
+  #bptLandscapeLive .bptll-other-bets-list{max-height:60vh;padding:6px 10px}
+  #bptLandscapeLive .bptll-other-bet-row{padding:12px 12px;font-size:15px;grid-template-columns:minmax(170px,.42fr) minmax(0,1fr)}
+  #bptLandscapeLive .bptll-other-bet-row>strong{font-size:16px}
+  #bptLandscapeLive .bptll-bounty{gap:14px}
+  #bptLandscapeLive .bptll-bounty-icon{font-size:96px}
+  #bptLandscapeLive .bptll-bounty-label{font-size:16px}
+  #bptLandscapeLive .bptll-bounty-name{font-size:clamp(40px,4.4vw,64px)}
+  #bptLandscapeLive .bptll-bounty p{font-size:20px}
+  #bptLandscapeLive .bptll-foot .bptll-btn{height:48px;font-size:16px}
+}
+
+/* 10.4.24 — Téléphone portrait : libellés des boutons du bas sur deux lignes plutôt que coupés. */
+@media (max-width:760px) and (orientation:portrait){
+  #bptLandscapeLive .bptll-foot .bptll-btn{white-space:normal;line-height:1.1;height:auto;min-height:var(--control);padding:6px 10px;text-overflow:clip}
+  #bptLandscapeLive .bptll-body:has(.bptll-bounty){align-content:center}
+}
