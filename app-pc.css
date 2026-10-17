@@ -6910,3 +6910,17 @@ body:has(#live3.active) #bptAppAction{display:none!important}
 .bpt-ag-invite-btns{display:flex;flex-wrap:wrap;gap:6px}
 .bpt-ag-invite-btns .bpt-ag-choice{min-height:40px;padding:0 12px;font-size:14px}
 .bpt-ag-invite-more{min-height:40px;padding:0 12px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff;font-weight:800;cursor:pointer}
+
+/* 10.4.28 — Agenda sur un seul écran (PC) : la page ne défile pas, seul le panneau défile. */
+#agenda .tab-premium-hero{padding:10px 18px !important;margin:0 0 10px !important;min-height:0 !important}
+#agenda .tab-premium-hero h1{font-size:22px !important;margin:0 !important}
+#agenda .tab-premium-hero p{display:none !important}
+#agenda .bpt-ag-layout{height:calc(100dvh - var(--bpt-ag-top,230px) - 38px);min-height:430px;grid-template-rows:minmax(0,1fr)}
+#agenda .bpt-ag-calendar{display:flex;flex-direction:column;height:100%;min-height:0;box-sizing:border-box;margin:0}
+#agenda .bpt-ag-days{flex:1 1 auto;min-height:0;grid-auto-rows:minmax(0,1fr)}
+#agenda .bpt-ag-day{aspect-ratio:auto;min-height:0;height:auto}
+#agenda .bpt-ag-legend{margin-top:8px}
+#agenda .bpt-ag-panel{height:100%;min-height:0;overflow:auto;box-sizing:border-box;margin:0}
+#agenda .bpt-ag-col ul{max-height:none}
+.bpt-ag-back{background:none;border:0;color:#2ac9c2;font-weight:800;cursor:pointer;padding:0 0 6px;font-size:13px}
+.bpt-ag-hint{margin-top:10px}

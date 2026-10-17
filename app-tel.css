@@ -10333,3 +10333,25 @@ html.bpt-mobile-device .bpt-ag-form{grid-template-columns:1fr 1fr}
 html.bpt-mobile-device .bpt-ag-invite{margin:8px 8px 0;flex-direction:column;align-items:stretch}
 html.bpt-mobile-device .bpt-ag-invite-btns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto}
 html.bpt-mobile-device .bpt-ag-today{display:none}
+
+/* 10.4.28 — Agenda sur un seul écran (téléphone) : calendrier compact + panneau qui défile en dessous. */
+html.bpt-mobile-device #agenda .tab-premium-hero{display:none !important}
+html.bpt-mobile-device #agenda .bpt-ag-layout{
+  height:calc(100dvh - var(--bpt-ag-top,130px) - 80px - env(safe-area-inset-bottom));min-height:360px;
+  grid-template-rows:auto minmax(0,1fr);gap:8px}
+html.bpt-mobile-device #agenda .bpt-ag-calendar{margin:0;padding:8px 10px !important}
+html.bpt-mobile-device #agenda .bpt-ag-head{margin-bottom:4px}
+html.bpt-mobile-device #agenda .bpt-ag-head strong{font-size:17px}
+html.bpt-mobile-device #agenda .bpt-ag-head .btn{min-height:34px;min-width:40px;padding:2px 10px}
+html.bpt-mobile-device #agenda .bpt-ag-weekdays span{padding:1px 0;font-size:11px}
+html.bpt-mobile-device #agenda .bpt-ag-days{grid-auto-rows:34px;gap:3px}
+html.bpt-mobile-device #agenda .bpt-ag-day{aspect-ratio:auto;min-height:0;height:34px;border-radius:8px;flex-direction:row;gap:3px}
+html.bpt-mobile-device #agenda .bpt-ag-num{font-size:14px}
+html.bpt-mobile-device #agenda .bpt-ag-tag{font-size:9px}
+html.bpt-mobile-device #agenda .bpt-ag-mine{top:3px;right:3px;width:6px;height:6px}
+html.bpt-mobile-device #agenda .bpt-ag-legend{display:none}
+html.bpt-mobile-device #agenda .bpt-ag-panel{min-height:0;overflow:auto;margin:0;padding:12px !important}
+html.bpt-mobile-device #agenda .bpt-ag-panel h3{font-size:17px}
+html.bpt-mobile-device #agenda .bpt-ag-choice{min-height:42px;font-size:14px}
+.bpt-ag-back{background:none;border:0;color:#2ac9c2;font-weight:800;cursor:pointer;padding:0 0 6px;font-size:13px}
+.bpt-ag-hint{margin-top:10px}

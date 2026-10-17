@@ -154,7 +154,7 @@
   function renderPanel(){
     const box=$('bptAgendaPanel');if(!box)return;
     const t=todayIso();
-    if(!selectedIso){box.innerHTML='<p class="muted">Touchez une date : une date future pour proposer une partie, une partie jouée (♠) pour revoir son détail.</p>';return;}
+    if(!selectedIso){box.innerHTML='<h3>Prochaines parties</h3><div id="bptAgendaUpcoming"></div><p class="muted bpt-ag-hint">Touchez une date future pour proposer une partie, ou une partie jouée (♠) pour revoir son détail.</p>';renderUpcoming();return;}
     const iso=selectedIso,e=eventFor(iso),g=playedGames().find(x=>x.date===iso);
     if(g){
       box.innerHTML=`<h3>♠ Partie n°${g.game} · ${esc(longDate(iso))}</h3>
@@ -164,13 +164,14 @@
       return;
     }
     if(e&&!editing){
-      box.innerHTML=`<h3>📅 ${esc(longDate(iso))}</h3>
+      box.innerHTML=`<button type="button" class="bpt-ag-back" data-ag-back>‹ Prochaines parties</button><h3>📅 ${esc(longDate(iso))}</h3>
         <p class="bpt-ag-meta">🕘 ${esc(e.time||'21:15')} · 📍 ${esc(e.location||'Lieu à définir')} · ⏱ ${esc(String(e.targetHours||4).replace('.5',' h 30'))} h · 🪙 ${Number(e.startStack||20000).toLocaleString('fr-FR')}</p>
         <p class="muted">Proposée par ${esc(e.createdBy||'—')}</p>
         ${iso>=t?`<div class="bpt-ag-myline">Votre réponse :</div>${choiceButtons(e)}`:''}
         ${responsesHtml(e)}
         ${canEdit(e)?`<div class="bpt-ag-actions"><button type="button" class="btn ghost" id="bptAgEdit">✏️ Modifier</button><button type="button" class="btn ghost" id="bptAgDelete">🗑 Supprimer</button></div>`:''}`;
       box.querySelectorAll('[data-ag-choice]').forEach(b=>b.onclick=()=>respond(e,b.dataset.agChoice));
+      box.querySelector('[data-ag-back]')?.addEventListener('click',()=>{selectedIso='';render();});
       $('bptAgEdit')?.addEventListener('click',()=>{editing=true;renderPanel();});
       $('bptAgDelete')?.addEventListener('click',()=>{if(confirm('Supprimer cette partie de l’agenda ? Les réponses seront perdues.'))removeEvent(e);});
       return;
@@ -207,7 +208,7 @@
   function renderInvite(){
     const box=$('bptAgendaInvite');if(!box)return;
     const e=nextInvite();
-    if(!e||document.querySelector('#live3.active')){box.hidden=true;return;}
+    if(!e||document.querySelector('#live3.active, #agenda.active')){box.hidden=true;return;}
     box.hidden=false;
     box.innerHTML=`<div class="bpt-ag-invite-text"><b>📅 Partie proposée ${esc(longDate(e.date))} à ${esc(e.time||'21:15')}</b><span>📍 ${esc(e.location||'Lieu à définir')} · ${grouped(e).present.length} présent(s) pour l’instant</span></div>
       <div class="bpt-ag-invite-btns">${CHOICES.map(([k,t])=>`<button type="button" class="bpt-ag-choice is-${k}" data-ag-invite="${k}">${t}</button>`).join('')}
@@ -220,10 +221,20 @@
     if(!cursor){const n=new Date();cursor=new Date(n.getFullYear(),n.getMonth(),1);}
     renderInvite();
     if(!$('agenda')?.classList.contains('active'))return;
-    renderCalendar();renderPanel();renderUpcoming();
+    fitHeight();renderCalendar();renderPanel();
+  }
+  function fitHeight(){
+    const lay=document.querySelector('#agenda .bpt-ag-layout');if(!lay)return;
+    const top=Math.max(0,Math.round(lay.getBoundingClientRect().top+window.scrollY));
+    lay.style.setProperty('--bpt-ag-top',top+'px');
   }
 
   // ---------- Navigation ----------
+  function autoSelect(){
+    if(selectedIso)return;
+    const t=todayIso(),next=events.find(e=>e.date>=t);
+    if(next){selectedIso=next.date;const d=new Date(`${next.date}T12:00:00`);cursor=new Date(d.getFullYear(),d.getMonth(),1);}
+  }
   async function openAgenda(){
     if(typeof window.showView==='function')await window.showView('agenda');
     render();
@@ -236,7 +247,7 @@
   function hookShowView(){
     const orig=window.showView;
     if(typeof orig!=='function'||orig.__bptAgenda)return false;
-    const wrapped=async function(id){const r=await orig.apply(this,arguments);if(id==='agenda')render();else renderInvite();return r;};
+    const wrapped=async function(id){const r=await orig.apply(this,arguments);if(id==='agenda'){autoSelect();window.scrollTo(0,0);render();}else renderInvite();return r;};
     wrapped.__bptAgenda=true;window.showView=wrapped;return true;
   }
 
@@ -268,6 +279,7 @@
     $('bptAgendaNext')?.addEventListener('click',()=>{cursor.setMonth(cursor.getMonth()+1);render();});
     $('bptAgendaToday')?.addEventListener('click',()=>{const n=new Date();cursor=new Date(n.getFullYear(),n.getMonth(),1);selectedIso=todayIso();editing=false;render();});
     setInterval(()=>{renderInvite();prefillLive();},1500);
+    window.addEventListener('resize',()=>{if($('agenda')?.classList.contains('active'))fitHeight();},{passive:true});
     connect();
   }
 
