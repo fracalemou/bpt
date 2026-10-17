@@ -194,6 +194,12 @@
       }catch(e){if(e&&e.name==='AbortError')return;}
     }
     if(isPhone()&&navigator.share){try{await navigator.share({text});return;}catch(e){if(e&&e.name==='AbortError')return;}}
+    if(isPhone()){
+      // Secours téléphone (adresse non sécurisée, vieux navigateur) : l'application WhatsApp
+      // s'ouvre avec le classement en texte, il ne reste qu'à choisir le groupe.
+      location.href='https://wa.me/?text='+encodeURIComponent(text);
+      return;
+    }
     await sharePC(rows,{blob,d});
   }
   async function sharePC(rows,pre){
