@@ -1,4 +1,4 @@
-/* BPT 10.4.28 — Agenda des parties.
+/* BPT 10.4.31 — Agenda des parties (encart sur l'Accueil + calendrier).
    - Onglet « Agenda » : calendrier mensuel avec les parties proposées (à venir) et jouées (passées).
    - Tout joueur connecté peut proposer une partie (date, heure, lieu, durée, tapis) ;
      seul son auteur (ou le Dealer) peut la modifier / supprimer.
@@ -79,7 +79,7 @@
   async function respond(e,choice){
     const n=me();if(!n){alert('Connectez-vous avec votre nom de joueur pour répondre.');return;}
     e.responses={...(e.responses||{}),[n]:choice};
-    const ib=$('bptAgendaInvite');if(ib)delete ib.dataset.sig;
+    const hb=$('bptAgendaHome');if(hb)delete hb.dataset.sig;
     const ref=fbRef();saveCache();render();
     if(ref)await ref.child(e.id).child('responses').child(n).set(choice);
   }
@@ -189,17 +189,20 @@
     if(!me()){box.innerHTML=`<h3>${esc(longDate(iso))}</h3><p class="muted">Connectez-vous avec votre nom de joueur pour proposer une partie.</p>`;return;}
     box.innerHTML=formHtml(iso,editing?e:null);
     $('bptAgCancel').onclick=()=>{editing=false;if(!e)selectedIso='';render();};
-    $('bptAgSave').onclick=async()=>{
-      const date=$('bptAgDate').value;if(!date){alert('Choisissez une date.');return;}
-      if(date<t){alert('Choisissez une date à venir.');return;}
-      const other=eventFor(date);if(other&&other.id!==e?.id){alert('Une partie est déjà proposée à cette date.');return;}
-      const n=me();
-      const ev={...(editing&&e?e:{}),id:(editing&&e?.id)||`agenda_${Date.now()}`,date,time:$('bptAgTime').value||'21:15',
-        location:$('bptAgLoc').value.trim()||`Chez ${n}`,targetHours:Number($('bptAgHours').value)||4,
-        startStack:Math.max(1000,Number($('bptAgStack').value)||20000),createdBy:(editing&&e?.createdBy)||n,
-        createdAt:(editing&&e?.createdAt)||Date.now(),responses:(editing&&e?.responses)||{[n]:'present'}};
-      editing=false;selectedIso=date;await saveEvent(ev);
-    };
+    $('bptAgSave').onclick=()=>saveFromForm(editing?e:null,()=>{editing=false;});
+  }
+
+  async function saveFromForm(e,done){
+    const t=todayIso(),date=$('bptAgDate').value;
+    if(!date){alert('Choisissez une date.');return;}
+    if(date<t){alert('Choisissez une date à venir.');return;}
+    const other=eventFor(date);if(other&&other.id!==e?.id){alert('Une partie est déjà proposée à cette date.');return;}
+    const n=me();
+    const ev={...(e||{}),id:e?.id||`agenda_${Date.now()}`,date,time:$('bptAgTime').value||'21:15',
+      location:$('bptAgLoc').value.trim()||`Chez ${n}`,targetHours:Number($('bptAgHours').value)||4,
+      startStack:Math.max(1000,Number($('bptAgStack').value)||20000),createdBy:e?.createdBy||n,
+      createdAt:e?.createdAt||Date.now(),responses:e?.responses||{[n]:'present'}};
+    selectedIso=date;done&&done();await saveEvent(ev);
   }
 
   // ---------- Rendu : liste des prochaines parties ----------
@@ -213,37 +216,51 @@
     host.querySelectorAll('[data-ag-date]').forEach(b=>b.onclick=()=>{selectedIso=b.dataset.agDate;const d=new Date(`${selectedIso}T12:00:00`);cursor=new Date(d.getFullYear(),d.getMonth(),1);editing=false;render();});
   }
 
-  // ---------- Bandeau d'invitation ----------
-  function renderInvite(){
-    const box=$('bptAgendaInvite');if(!box)return;
-    const pending=nextInvite();
-    const e=pending||(me()?nextEvent():null);
-    const onHome=!!document.querySelector('#dashboard.active');
-    if(!e||document.querySelector('#live3.active, #agenda.active')||(!pending&&!onHome)){box.hidden=true;return;}
-    box.hidden=false;
-    if(!pending){
-      const mine=myChoice(e),lbl={present:'✓ Présent',maybe:'? Peut-être',absent:'✕ Absent'}[mine]||'';
-      const sig='done|'+e.id+'|'+mine+'|'+grouped(e).present.length;
-      if(box.dataset.sig===sig)return;box.dataset.sig=sig;
-      box.classList.add('is-answered');
-      box.innerHTML=`<div class="bpt-ag-invite-text"><b>📅 Prochaine partie ${esc(whenLabel(e.date))} à ${esc(e.time||'21:15')}</b><span>📍 ${esc(e.location||'Lieu à définir')} · ${grouped(e).present.length} présent(s) · votre réponse : <strong class="is-${mine}">${lbl}</strong></span></div>
-        <div class="bpt-ag-invite-btns"><button type="button" class="bpt-ag-invite-more" id="bptAgInviteMore">Voir / changer</button></div>`;
-      $('bptAgInviteMore').onclick=()=>{selectedIso=e.date;const d=new Date(`${e.date}T12:00:00`);cursor=new Date(d.getFullYear(),d.getMonth(),1);openAgenda();};
+  // ---------- Encart « Prochaine partie » de l'Accueil (10.4.31) ----------
+  let homeMode='view',homeShowAll=false;
+  function nextFriday(){
+    const d=new Date();const add=(5-d.getDay()+7)%7;d.setDate(d.getDate()+add);return isoOf(d);
+  }
+  function renderHome(force){
+    const box=$('bptAgendaHome');if(!box)return;
+    const e=nextEvent(),n=me();
+    const sig=[homeMode,homeShowAll,n,e?JSON.stringify([e.id,e.date,e.time,e.location,e.responses]):'none'].join('|');
+    if(!force&&box.dataset.sig===sig)return;
+    if(homeMode==='form'&&box.contains(document.activeElement))return; // saisie en cours
+    box.dataset.sig=sig;box.hidden=false;
+    const calLink='<button type="button" class="bpt-ag-link" data-ag-cal>📅 Calendrier</button>';
+    if(homeMode==='form'){
+      const iso=e&&canEdit(e)?e.date:nextFriday();
+      box.innerHTML=formHtml(iso,e&&canEdit(e)?e:null);
+      $('bptAgCancel').onclick=()=>{homeMode='view';renderHome(true);};
+      $('bptAgSave').onclick=()=>saveFromForm(e&&canEdit(e)?e:null,()=>{homeMode='view';renderHome(true);});
       return;
     }
-    box.classList.remove('is-answered');
-    const sig='todo|'+e.id+'|'+grouped(e).present.length;
-    if(box.dataset.sig===sig)return;box.dataset.sig=sig;
-    box.innerHTML=`<div class="bpt-ag-invite-text"><b>📅 Partie proposée ${esc(whenLabel(e.date))} à ${esc(e.time||'21:15')}</b><span>📍 ${esc(e.location||'Lieu à définir')} · ${grouped(e).present.length} présent(s) pour l’instant</span></div>
-      <div class="bpt-ag-invite-btns">${CHOICES.map(([k,t])=>`<button type="button" class="bpt-ag-choice is-${k}" data-ag-invite="${k}">${t}</button>`).join('')}
-      <button type="button" class="bpt-ag-invite-more" id="bptAgInviteMore">Voir</button></div>`;
-    box.querySelectorAll('[data-ag-invite]').forEach(b=>b.onclick=()=>respond(e,b.dataset.agInvite));
-    $('bptAgInviteMore').onclick=()=>{selectedIso=e.date;const d=new Date(`${e.date}T12:00:00`);cursor=new Date(d.getFullYear(),d.getMonth(),1);openAgenda();};
+    if(!e){
+      box.innerHTML=`<div class="bpt-ag-home-head"><div><div class="bpt-ag-kicker">Prochaine partie</div><h3>Aucune partie prévue</h3></div>${calLink}</div>
+        ${n?'<div class="bpt-ag-actions"><button type="button" class="btn bpt-ag-primary" data-ag-propose>📅 Proposer une partie</button></div>':'<p class="muted">Connectez-vous avec votre nom de joueur pour proposer une partie.</p>'}`;
+    }else{
+      const g=grouped(e),mine=myChoice(e);
+      box.innerHTML=`<div class="bpt-ag-home-head"><div><div class="bpt-ag-kicker">${mine?'Prochaine partie':'Partie proposée · à vous de répondre'}</div>
+          <h3>📅 ${esc(whenLabel(e.date))} à ${esc(e.time||'21:15')}</h3>
+          <p class="bpt-ag-meta">📍 ${esc(e.location||'Lieu à définir')} · proposée par ${esc(e.createdBy||'—')}</p></div>${calLink}</div>
+        ${n?choiceButtons(e):'<p class="muted">Connectez-vous pour répondre.</p>'}
+        <p class="bpt-ag-present"><b>${g.present.length} présent${g.present.length>1?'s':''}</b>${g.present.length?' : '+g.present.map(esc).join(', '):''}${g.maybe.length?` · <span class="is-maybe">${g.maybe.length} peut-être</span>`:''}${g.absent.length?` · <span class="is-absent">${g.absent.length} absent${g.absent.length>1?'s':''}</span>`:''}</p>
+        ${homeShowAll?responsesHtml(e):''}
+        <div class="bpt-ag-home-links"><button type="button" class="bpt-ag-link" data-ag-all>${homeShowAll?'Masquer les réponses':'Voir toutes les réponses'}</button>
+        ${canEdit(e)?'<button type="button" class="bpt-ag-link" data-ag-edit>✏️ Modifier</button><button type="button" class="bpt-ag-link" data-ag-del>🗑 Supprimer</button>':''}</div>`;
+      box.querySelectorAll('[data-ag-choice]').forEach(b=>b.onclick=()=>respond(e,b.dataset.agChoice));
+      box.querySelector('[data-ag-all]').onclick=()=>{homeShowAll=!homeShowAll;renderHome(true);};
+      box.querySelector('[data-ag-edit]')?.addEventListener('click',()=>{homeMode='form';renderHome(true);});
+      box.querySelector('[data-ag-del]')?.addEventListener('click',()=>{if(confirm('Supprimer cette partie ? Les réponses seront perdues.'))removeEvent(e);});
+    }
+    box.querySelector('[data-ag-propose]')?.addEventListener('click',()=>{homeMode='form';renderHome(true);});
+    box.querySelector('[data-ag-cal]').onclick=()=>{selectedIso=e?.date||'';if(e){const d=new Date(`${e.date}T12:00:00`);cursor=new Date(d.getFullYear(),d.getMonth(),1);}openAgenda();};
   }
 
   function render(){
     if(!cursor){const n=new Date();cursor=new Date(n.getFullYear(),n.getMonth(),1);}
-    renderInvite();
+    renderHome();
     if(!$('agenda')?.classList.contains('active'))return;
     fitHeight();renderCalendar();renderPanel();
   }
@@ -271,7 +288,7 @@
   function hookShowView(){
     const orig=window.showView;
     if(typeof orig!=='function'||orig.__bptAgenda)return false;
-    const wrapped=async function(id){const r=await orig.apply(this,arguments);if(id==='agenda'){autoSelect();window.scrollTo(0,0);render();}else renderInvite();return r;};
+    const wrapped=async function(id){const r=await orig.apply(this,arguments);if(id==='agenda'){autoSelect();window.scrollTo(0,0);render();}else renderHome(true);return r;};
     wrapped.__bptAgenda=true;window.showView=wrapped;return true;
   }
 
@@ -302,11 +319,12 @@
     $('bptAgendaPrev')?.addEventListener('click',()=>{cursor.setMonth(cursor.getMonth()-1);render();});
     $('bptAgendaNext')?.addEventListener('click',()=>{cursor.setMonth(cursor.getMonth()+1);render();});
     $('bptAgendaToday')?.addEventListener('click',()=>{const n=new Date();cursor=new Date(n.getFullYear(),n.getMonth(),1);selectedIso=todayIso();editing=false;render();});
-    setInterval(()=>{renderInvite();prefillLive();},1500);
+    $('bptAgendaHomeBack')?.addEventListener('click',()=>window.showView?.('dashboard'));
+    setInterval(()=>{renderHome();prefillLive();},1500);
     window.addEventListener('resize',()=>{if($('agenda')?.classList.contains('active'))fitHeight();},{passive:true});
     connect();
   }
 
-  window.BPTAgenda={render,openAgenda,events:()=>events.slice(),grouped,nextInvite,liveTodayEvent};
+  window.BPTAgenda={render,openAgenda,events:()=>events.slice(),grouped,nextInvite,nextEvent,liveTodayEvent};
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',bind,{once:true}):bind();
 })();

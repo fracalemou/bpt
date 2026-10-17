@@ -10360,3 +10360,19 @@ html.bpt-mobile-device #agenda .bpt-ag-choice{min-height:42px;font-size:14px}
 .bpt-ag-invite.is-answered{border-color:rgba(42,201,194,.55);background:linear-gradient(90deg,rgba(42,201,194,.12),rgba(242,200,83,.08))}
 .bpt-ag-invite.is-answered strong.is-present{color:#3ecf7a}.bpt-ag-invite.is-answered strong.is-maybe{color:#f2c853}.bpt-ag-invite.is-answered strong.is-absent{color:#e05252}
 html.bpt-mobile-device .bpt-ag-invite.is-answered .bpt-ag-invite-btns{grid-template-columns:1fr}
+
+/* 10.4.31 — Encart « Prochaine partie » en tête de l'Accueil */
+.bpt-ag-home{margin:0 0 14px !important;padding:16px 18px !important;border:1px solid rgba(242,200,83,.5) !important;background:linear-gradient(120deg,rgba(242,200,83,.13),rgba(42,201,194,.08)) !important;border-radius:18px !important}
+.bpt-ag-home[hidden]{display:none !important}
+.bpt-ag-home-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.bpt-ag-home h3{margin:2px 0 4px;font-size:22px}
+.bpt-ag-home h3::first-letter{text-transform:uppercase}
+.bpt-ag-kicker{font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#f2c853}
+.bpt-ag-home .bpt-ag-choices{margin-top:10px}
+.bpt-ag-present{margin:10px 0 0;font-size:14px;line-height:1.45}
+.bpt-ag-present b{color:#3ecf7a}.bpt-ag-present .is-maybe{color:#f2c853}.bpt-ag-present .is-absent{color:#e05252}
+.bpt-ag-home-links{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px}
+.bpt-ag-link{background:none;border:0;padding:0;color:#2ac9c2;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap}
+.bpt-ag-home .bpt-ag-form{margin-top:12px}
+html.bpt-mobile-device .bpt-ag-home{margin:8px 0 12px !important;padding:14px !important}
+html.bpt-mobile-device .bpt-ag-home h3{font-size:19px}
