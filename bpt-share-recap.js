@@ -3,7 +3,7 @@
    1. « Photo des vainqueurs » : prise de vue (téléphone) ou choix d'un fichier (PC) ;
    2. « Partager » : visuel du bilan (photo + classement complet avec éliminations)
       - téléphone : menu de partage natif (visuel + texte) ;
-      - PC : visuel copié dans le presse-papiers + WhatsApp ouvert → Ctrl + V dans le groupe.
+      - PC : visuel copié dans le presse-papiers (ou téléchargé) + WhatsApp ouvert → Ctrl + V dans le groupe.
    L'appli n'envoie rien elle-même : l'utilisateur choisit le groupe. */
 (function(){
   'use strict';
@@ -213,7 +213,7 @@
     const input=document.createElement('input');input.type='file';input.accept='image/*';input.hidden=true;
     if(isPhone())input.setAttribute('capture','environment');
     const photoBtn=document.createElement('button');photoBtn.type='button';photoBtn.className='btn ghost bpt-share-photo';
-    photoBtn.textContent=isPhone()?'📷 Photo des vainqueurs':'📷 Ajouter la photo des vainqueurs';
+    photoBtn.textContent='📷 Photo des vainqueurs';
     const thumb=document.createElement('img');thumb.className='bpt-share-thumb';thumb.hidden=true;thumb.alt='Photo des vainqueurs';
     photoBtn.addEventListener('click',()=>input.click());
     input.addEventListener('change',async()=>{
@@ -225,17 +225,10 @@
     });
 
     const main=document.createElement('button');main.type='button';main.className='btn bpt-share-main';
-    main.textContent=isPhone()?'📤 Partager sur WhatsApp':'📤 Envoyer sur WhatsApp (copier le visuel)';
+    main.textContent='📤 Envoyer sur WhatsApp';
     main.addEventListener('click',async()=>{main.disabled=true;try{await (isPhone()?sharePhone(rows):sharePC(rows));}finally{main.disabled=false;}});
 
     steps.append(input,photoBtn,thumb,main);
-    if(!isPhone()){
-      const dl=document.createElement('button');dl.type='button';dl.className='btn ghost';dl.textContent='🖼 Télécharger le visuel';
-      dl.addEventListener('click',async()=>{const {blob,name}=await buildImage(rows);downloadBlob(blob,name);});
-      const tx=document.createElement('button');tx.type='button';tx.className='btn ghost';tx.textContent='📋 Copier le texte';
-      tx.addEventListener('click',async()=>{const ok=await copyText(recapText(recapData(rows)));toast(ok?'Texte du bilan copié.':'Copie impossible.');});
-      steps.append(dl,tx);
-    }
     bar.append(steps);
     content.prepend(bar);
   }
