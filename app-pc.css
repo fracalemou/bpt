@@ -6924,3 +6924,7 @@ body:has(#live3.active) #bptAppAction{display:none!important}
 #agenda .bpt-ag-col ul{max-height:none}
 .bpt-ag-back{background:none;border:0;color:#2ac9c2;font-weight:800;cursor:pointer;padding:0 0 6px;font-size:13px}
 .bpt-ag-hint{margin-top:10px}
+
+/* 10.4.29 — encart « Prochaine partie » (déjà répondu) */
+.bpt-ag-invite.is-answered{border-color:rgba(42,201,194,.55);background:linear-gradient(90deg,rgba(42,201,194,.12),rgba(242,200,83,.08))}
+.bpt-ag-invite.is-answered strong.is-present{color:#3ecf7a}.bpt-ag-invite.is-answered strong.is-maybe{color:#f2c853}.bpt-ag-invite.is-answered strong.is-absent{color:#e05252}

@@ -79,6 +79,7 @@
   async function respond(e,choice){
     const n=me();if(!n){alert('Connectez-vous avec votre nom de joueur pour répondre.');return;}
     e.responses={...(e.responses||{}),[n]:choice};
+    const ib=$('bptAgendaInvite');if(ib)delete ib.dataset.sig;
     const ref=fbRef();saveCache();render();
     if(ref)await ref.child(e.id).child('responses').child(n).set(choice);
   }
@@ -98,6 +99,14 @@
     return events.find(e=>e.date>=t&&e.date<=m&&!myChoice(e))||null;
   }
   function eventFor(iso){return events.find(e=>e.date===iso)||null;}
+  function nextEvent(){
+    const t=todayIso(),max=new Date();max.setDate(max.getDate()+INVITE_DAYS);const m=isoOf(max);
+    return events.find(e=>e.date>=t&&e.date<=m)||null;
+  }
+  function whenLabel(iso){
+    const t=todayIso(),tm=new Date();tm.setDate(tm.getDate()+1);
+    if(iso===t)return 'ce soir';if(iso===isoOf(tm))return 'demain';return longDate(iso);
+  }
 
   // ---------- Rendu : calendrier ----------
   function renderCalendar(){
@@ -207,10 +216,25 @@
   // ---------- Bandeau d'invitation ----------
   function renderInvite(){
     const box=$('bptAgendaInvite');if(!box)return;
-    const e=nextInvite();
-    if(!e||document.querySelector('#live3.active, #agenda.active')){box.hidden=true;return;}
+    const pending=nextInvite();
+    const e=pending||(me()?nextEvent():null);
+    const onHome=!!document.querySelector('#dashboard.active');
+    if(!e||document.querySelector('#live3.active, #agenda.active')||(!pending&&!onHome)){box.hidden=true;return;}
     box.hidden=false;
-    box.innerHTML=`<div class="bpt-ag-invite-text"><b>📅 Partie proposée ${esc(longDate(e.date))} à ${esc(e.time||'21:15')}</b><span>📍 ${esc(e.location||'Lieu à définir')} · ${grouped(e).present.length} présent(s) pour l’instant</span></div>
+    if(!pending){
+      const mine=myChoice(e),lbl={present:'✓ Présent',maybe:'? Peut-être',absent:'✕ Absent'}[mine]||'';
+      const sig='done|'+e.id+'|'+mine+'|'+grouped(e).present.length;
+      if(box.dataset.sig===sig)return;box.dataset.sig=sig;
+      box.classList.add('is-answered');
+      box.innerHTML=`<div class="bpt-ag-invite-text"><b>📅 Prochaine partie ${esc(whenLabel(e.date))} à ${esc(e.time||'21:15')}</b><span>📍 ${esc(e.location||'Lieu à définir')} · ${grouped(e).present.length} présent(s) · votre réponse : <strong class="is-${mine}">${lbl}</strong></span></div>
+        <div class="bpt-ag-invite-btns"><button type="button" class="bpt-ag-invite-more" id="bptAgInviteMore">Voir / changer</button></div>`;
+      $('bptAgInviteMore').onclick=()=>{selectedIso=e.date;const d=new Date(`${e.date}T12:00:00`);cursor=new Date(d.getFullYear(),d.getMonth(),1);openAgenda();};
+      return;
+    }
+    box.classList.remove('is-answered');
+    const sig='todo|'+e.id+'|'+grouped(e).present.length;
+    if(box.dataset.sig===sig)return;box.dataset.sig=sig;
+    box.innerHTML=`<div class="bpt-ag-invite-text"><b>📅 Partie proposée ${esc(whenLabel(e.date))} à ${esc(e.time||'21:15')}</b><span>📍 ${esc(e.location||'Lieu à définir')} · ${grouped(e).present.length} présent(s) pour l’instant</span></div>
       <div class="bpt-ag-invite-btns">${CHOICES.map(([k,t])=>`<button type="button" class="bpt-ag-choice is-${k}" data-ag-invite="${k}">${t}</button>`).join('')}
       <button type="button" class="bpt-ag-invite-more" id="bptAgInviteMore">Voir</button></div>`;
     box.querySelectorAll('[data-ag-invite]').forEach(b=>b.onclick=()=>respond(e,b.dataset.agInvite));
