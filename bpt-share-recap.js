@@ -181,13 +181,19 @@
     return {d,blob:await canvasBlob(drawRecap(d,photo)),name:`BPT-partie-${d.game||'bilan'}.png`};
   }
 
-  async function sharePhone(rows){
+  // Menu de partage natif (téléphone, et PC Windows avec l'application WhatsApp installée) :
+  // il ne reste qu'à choisir WhatsApp puis le groupe. Sinon : visuel copié + WhatsApp Web.
+  async function shareNative(rows){
     const {d,blob,name}=await buildImage(rows);const text=recapText(d);
     const file=new File([blob],name,{type:'image/png'});
-    try{
-      if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],text});return;}
-      if(navigator.share){await navigator.share({text});return;}
-    }catch(e){if(e&&e.name==='AbortError')return;}
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      try{
+        // Sur PC, WhatsApp n'accepte qu'un seul contenu : on envoie l'image seule.
+        await navigator.share(isPhone()?{files:[file],text}:{files:[file]});
+        return;
+      }catch(e){if(e&&e.name==='AbortError')return;}
+    }
+    if(isPhone()&&navigator.share){try{await navigator.share({text});return;}catch(e){if(e&&e.name==='AbortError')return;}}
     await sharePC(rows,{blob,d});
   }
   async function sharePC(rows,pre){
@@ -226,7 +232,7 @@
 
     const main=document.createElement('button');main.type='button';main.className='btn bpt-share-main';
     main.textContent='📤 Envoyer sur WhatsApp';
-    main.addEventListener('click',async()=>{main.disabled=true;try{await (isPhone()?sharePhone(rows):sharePC(rows));}finally{main.disabled=false;}});
+    main.addEventListener('click',async()=>{main.disabled=true;try{await shareNative(rows);}finally{main.disabled=false;}});
 
     steps.append(input,photoBtn,thumb,main);
     bar.append(steps);
@@ -241,5 +247,5 @@
   }
   if(!install())document.addEventListener('DOMContentLoaded',install);
 
-  window.BPTShareRecap={recapData,recapText,drawRecap,loadGamePhoto,buildImage};
+  window.BPTShareRecap={recapData,recapText,drawRecap,loadGamePhoto,buildImage,shareNative};
 })();
