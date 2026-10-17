@@ -229,11 +229,13 @@
     if(homeMode==='form'&&box.contains(document.activeElement))return; // saisie en cours
     box.dataset.sig=sig;box.hidden=false;
     const calLink='<button type="button" class="bpt-ag-link" data-ag-cal>📅 Calendrier</button>';
-    if(homeMode==='form'){
-      const iso=e&&canEdit(e)?e.date:nextFriday();
-      box.innerHTML=formHtml(iso,e&&canEdit(e)?e:null);
+    if(homeMode==='form'||homeMode==='new'){
+      const edit=homeMode==='form'&&e&&canEdit(e)?e:null;
+      let iso=edit?edit.date:nextFriday();
+      if(!edit&&e&&iso<=e.date){const d=new Date(`${e.date}T12:00:00`);d.setDate(d.getDate()+7);iso=isoOf(d);} // la semaine suivante
+      box.innerHTML=formHtml(iso,edit);
       $('bptAgCancel').onclick=()=>{homeMode='view';renderHome(true);};
-      $('bptAgSave').onclick=()=>saveFromForm(e&&canEdit(e)?e:null,()=>{homeMode='view';renderHome(true);});
+      $('bptAgSave').onclick=()=>saveFromForm(edit,()=>{homeMode='view';renderHome(true);});
       return;
     }
     if(!e){
@@ -248,13 +250,14 @@
         <p class="bpt-ag-present"><b>${g.present.length} présent${g.present.length>1?'s':''}</b>${g.present.length?' : '+g.present.map(esc).join(', '):''}${g.maybe.length?` · <span class="is-maybe">${g.maybe.length} peut-être</span>`:''}${g.absent.length?` · <span class="is-absent">${g.absent.length} absent${g.absent.length>1?'s':''}</span>`:''}</p>
         ${homeShowAll?responsesHtml(e):''}
         <div class="bpt-ag-home-links"><button type="button" class="bpt-ag-link" data-ag-all>${homeShowAll?'Masquer les réponses':'Voir toutes les réponses'}</button>
-        ${canEdit(e)?'<button type="button" class="bpt-ag-link" data-ag-edit>✏️ Modifier</button><button type="button" class="bpt-ag-link" data-ag-del>🗑 Supprimer</button>':''}</div>`;
+        ${canEdit(e)?'<button type="button" class="bpt-ag-link" data-ag-edit>✏️ Modifier</button><button type="button" class="bpt-ag-link" data-ag-del>🗑 Supprimer</button>':''}${n?'<button type="button" class="bpt-ag-link" data-ag-new>➕ Proposer une autre date</button>':''}</div>`;
       box.querySelectorAll('[data-ag-choice]').forEach(b=>b.onclick=()=>respond(e,b.dataset.agChoice));
       box.querySelector('[data-ag-all]').onclick=()=>{homeShowAll=!homeShowAll;renderHome(true);};
       box.querySelector('[data-ag-edit]')?.addEventListener('click',()=>{homeMode='form';renderHome(true);});
+      box.querySelector('[data-ag-new]')?.addEventListener('click',()=>{homeMode='new';renderHome(true);});
       box.querySelector('[data-ag-del]')?.addEventListener('click',()=>{if(confirm('Supprimer cette partie ? Les réponses seront perdues.'))removeEvent(e);});
     }
-    box.querySelector('[data-ag-propose]')?.addEventListener('click',()=>{homeMode='form';renderHome(true);});
+    box.querySelector('[data-ag-propose]')?.addEventListener('click',()=>{homeMode='new';renderHome(true);});
     box.querySelector('[data-ag-cal]').onclick=()=>{selectedIso=e?.date||'';if(e){const d=new Date(`${e.date}T12:00:00`);cursor=new Date(d.getFullYear(),d.getMonth(),1);}openAgenda();};
   }
 
