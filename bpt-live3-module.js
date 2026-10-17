@@ -252,7 +252,7 @@
 
   let live3PendingPaceAdvice=null;
   let live3PaceLastCheckAt=0;
-  const LIVE3_PACE_MIN_INTERVAL_MS=15*60*1000;
+  const LIVE3_PACE_MIN_INTERVAL_MS=10*60*1000;
 
   function live3PaceStorageKey(){
     return `bpt_pace_advice_${String(current?.sessionId||"none")}`;
@@ -343,7 +343,9 @@
       return;
     }
     const d=live3FormatProjectionDelta(p.deltaSec);
-    [normalFinish,fsFinish].forEach(el=>{if(el)el.textContent=live3FormatClock(p.projectedFinish);});
+    // 10.4.24 : on affiche aussi le niveau de fin prévu (ex. « 01:12 · niv. 16 »)
+    const finishText=live3FormatClock(p.projectedFinish)+(Number.isFinite(p.endIdx)?' · niv. '+(p.endIdx+1):'');
+    [normalFinish,fsFinish].forEach(el=>{if(el)el.textContent=finishText;});
     [normalDelta,fsDelta].forEach(el=>{if(el){el.textContent=d.text;el.className=d.cls;}});
   }
 
@@ -404,10 +406,20 @@
     modal?.setAttribute("aria-hidden","false");
   }
 
+  let live3PaceLevelShown=-1;
+  function live3AtLevelStart(){
+    const lv=level();
+    const dur=Math.max(60,Number(lv?.durationSec)||currentBlindDurationMinutes()*60);
+    return dur-remainingSeconds()<=90; // les 90 premières secondes du niveau
+  }
   function live3MaybeCheckPace({afterElimination=false}={}){
     if(!isOwner() || !isActive() || !current?.startedAt)return;
     const now=Date.now();
     if(!afterElimination && now-live3PaceLastCheckAt<60*1000)return;
+    // 10.4.24 : l'alerte n'est proposée qu'au changement de niveau (une fois par niveau),
+    // pour ne pas interrompre l'organisateur en pleine main. Le retard reste affiché en continu.
+    const lvIdx=Math.max(0,Number(current?.levelIndex)||0);
+    if(!live3AtLevelStart() || live3PaceLevelShown===lvIdx)return;
     live3PaceLastCheckAt=now;
     const advice=live3PaceAnalysis();
     if(!advice || advice.autoSuggest!==true)return;
@@ -428,9 +440,11 @@
       const adjustedLevel=Number(last.levelIndex);
       const currentLevel=Math.max(0,Number(current?.levelIndex)||0);
       if(Number.isFinite(adjustedLevel) && currentLevel<=adjustedLevel)return;
+      live3PaceLevelShown=lvIdx;
       live3WritePaceMemo({signature,at:now});
       live3ShowPaceAdvice(advice,{readapt:true});
     }else{
+      live3PaceLevelShown=lvIdx;
       live3WritePaceMemo({signature,at:now});
       live3ShowPaceAdvice(advice);
     }
@@ -569,11 +583,53 @@
     return document.querySelectorAll('#live3PlayerPicker input[type="checkbox"]:checked').length;
   }
 
-  // Fin de partie observée au BPT : jetons en jeu ≈ 40 grosses blinds.
-  const BPT_END_TOTAL_BB=40;
+  // Fin de partie au BPT : jetons en jeu ≈ N grosses blinds (40 par défaut).
+  // 10.4.24 — N est recalculé automatiquement sur les dernières parties Live
+  // de l'historique (niveau final atteint × joueurs × tapis de départ).
+  const BPT_END_TOTAL_BB_DEFAULT=40;
+  let bptEndCalibCache={key:"",value:null};
+  function bptEndCalibration(){
+    const history=(typeof db!=="undefined" && Array.isArray(db?.history))?db.history:[];
+    const key=history.length+":"+(history[history.length-1]?.game||"");
+    if(bptEndCalibCache.key===key && bptEndCalibCache.value)return bptEndCalibCache.value;
+    const games=new Map();
+    for(const r of history){
+      const k=String(r?.season||"")+"#"+String(r?.game||"")+"#"+String(r?.date||"");
+      if(!games.has(k))games.set(k,[]);
+      games.get(k).push(r);
+    }
+    const blinds=bptGetBlindLevels();
+    const samples=[];
+    for(const rows of games.values()){
+      const levels=rows.map(r=>Number(r.outLevel)||0).filter(x=>x>0);
+      const recordedEnd=Math.max(0,...rows.map(r=>Number(r.liveEndLevel)||0));
+      if(levels.length<2 && !recordedEnd)continue; // partie non suivie en Live
+      const endLevel=Math.max(recordedEnd,...levels);
+      if(endLevel<8)continue;
+      const bb=Number(blinds[Math.min(blinds.length,endLevel)-1]?.bb)||0;
+      if(!bb)continue;
+      const players=Math.max(2,Number(rows[0]?.n)||rows.length);
+      const stack=Math.max(100,Number(rows[0]?.startStack)||20000);
+      samples.push({date:String(rows[0]?.date||""),totalBB:players*stack/bb,endLevel,players});
+    }
+    samples.sort((a,b)=>b.date.localeCompare(a.date));
+    const recent=samples.slice(0,8);
+    let value=BPT_END_TOTAL_BB_DEFAULT;
+    if(recent.length){
+      const sorted=recent.map(x=>x.totalBB).sort((a,b)=>a-b);
+      const mid=Math.floor(sorted.length/2);
+      const median=sorted.length%2?sorted[mid]:(sorted[mid-1]+sorted[mid])/2;
+      // Peu de parties : on reste proche de la valeur par défaut.
+      const w=Math.min(1,recent.length/4);
+      value=Math.max(25,Math.min(70,BPT_END_TOTAL_BB_DEFAULT*(1-w)+median*w));
+    }
+    const result={totalBB:Math.round(value*10)/10,samples:recent.length,detail:recent};
+    bptEndCalibCache={key,value:result};
+    return result;
+  }
   function bptEndLevelIndexForChips(totalChips){
     const configuredLevels=bptGetBlindLevels();
-    const targetEndBB=Math.max(1,Number(totalChips)||0)/BPT_END_TOTAL_BB;
+    const targetEndBB=Math.max(1,Number(totalChips)||0)/bptEndCalibration().totalBB;
     let endIndex=0,bestDistance=Infinity;
     configuredLevels.forEach((blind,i)=>{
       const d=Math.abs(Number(blind.bb)-targetEndBB);
@@ -591,7 +647,7 @@
     // Les parties se terminent quand les jetons en jeu valent ~40 grosses blinds :
     // niveau 16 (BB 5 000) à 10 joueurs, niveau 17 (BB 6 000) à 12 joueurs.
     const configuredLevels=bptGetBlindLevels();
-    const targetEndBB=(n*stack)/BPT_END_TOTAL_BB;
+    const targetEndBB=(n*stack)/bptEndCalibration().totalBB;
     const endIndex=bptEndLevelIndexForChips(n*stack);
     const expectedLevelCount=endIndex+1;
 
@@ -2702,6 +2758,9 @@ function connectionDeviceLabel(){
           gameHeadsUpStartedAt:Number(state.headsUpStartedAt)||null,
           gameHeadsUpDurationSec:state.headsUpStartedAt?Math.max(0,Math.floor((Number(state.finishedAt)-Number(state.headsUpStartedAt))/1000)):null,
           gameTimingSource:'recorded',
+          startStack:Math.max(100,Number(state.startStack)||20000),
+          liveTargetHours:Number(state.targetHours)||null,
+          liveEndLevel:(Number(state.levelIndex)||0)+1,
           tablier:n>=Number(db?.settings?.tablierMinPlayers||10)&&place===1,
           n,
           points:pointsFor(place,n),
@@ -4019,6 +4078,12 @@ async function requestTakeover(){
       });
       if(!flag){try{showBptToast('Mode classique restauré · durées d’origine rétablies','ok');}catch(_e){}}
       return true;
+    },
+    showPaceAdvice:(advice,opts)=>{
+      try{live3ShowPaceAdvice(advice,opts||{});}catch(_e){}
+    },
+    getEndCalibration:()=>{
+      try{return bptEndCalibration();}catch(_e){return null;}
     },
     getFinishProjection:()=>{
       try{return live3FinishProjection();}catch(_e){return null;}

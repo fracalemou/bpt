@@ -435,3 +435,34 @@ body.bpt-live-landscape-open.b466-live-active:not(.spectator-live-open):has(#liv
   #bptLandscapeLive .bptll-player-list{grid-template-columns:repeat(2,minmax(0,1fr))}
   #bptLandscapeLive .bptll-foot.one{grid-template-columns:1fr}
 }
+
+
+/* 10.4.24 — En-tête de la préparation : une règle générique « header » (hauteur fixe,
+   display:initial) s'appliquait aussi ici et cassait l'en-tête sur tous les écrans. */
+#bptLandscapeLive .bptll-head{display:flex;height:auto;min-height:0}
+
+/* 10.4.24 — Préparation de partie sur PC et tablette en paysage :
+   panneau centré, champs lisibles, plus de lignes étirées sur toute la hauteur. */
+@media (min-width:900px) and (min-height:560px){
+  #bptLandscapeLive .bptll-head{padding:14px 28px;align-items:center}
+  #bptLandscapeLive .bptll-head-left{align-items:baseline;gap:14px}
+  #bptLandscapeLive .bptll-kicker{font-size:13px}
+  #bptLandscapeLive .bptll-title{font-size:26px}
+  #bptLandscapeLive .bptll-step{font-size:13px;padding:5px 14px}
+  #bptLandscapeLive .bptll-body:has(.bptll-form){align-content:start;justify-items:center;overflow:auto;padding:clamp(18px,5vh,56px) 28px}
+  #bptLandscapeLive .bptll-form{
+    width:min(1000px,100%);height:auto;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    grid-template-rows:auto auto;align-content:start;
+    gap:24px 22px;padding:28px 30px;box-sizing:border-box;
+    background:#0c2621;border:1px solid #21483e;border-radius:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+  }
+  #bptLandscapeLive .bptll-field{grid-template-rows:auto auto;gap:8px}
+  #bptLandscapeLive .bptll-field label{font-size:13px;letter-spacing:.02em}
+  #bptLandscapeLive .bptll-field input,
+  #bptLandscapeLive .bptll-field select{height:48px;max-height:none;font-size:16px;padding:0 14px;border-radius:10px}
+  #bptLandscapeLive .bptll-foot{padding:12px 28px max(12px,env(safe-area-inset-bottom))}
+  #bptLandscapeLive .bptll-foot.one{grid-template-columns:minmax(220px,320px);justify-content:end}
+  #bptLandscapeLive .bptll-foot .bptll-btn{height:48px;font-size:16px}
+}

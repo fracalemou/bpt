@@ -370,7 +370,7 @@
         const readapt=canReadapt?`<button data-readapt>Nouvelle adaptation</button>`:'';
         const explain=canReadapt?`<p style="margin:14px 0 4px;color:#f4f7f6;line-height:1.45">L’écart reste significatif malgré l’adaptation. BPT propose de passer les prochains niveaux de <b>${advice.currentMin} à ${advice.proposedMin} min</b>.</p>`:'';
         open('Rythme de la partie',`<div class="bpt484-row"><span>Temps écoulé</span><b>${esc(elapsed)}</b></div><div class="bpt484-row"><span>Fin estimée</span><b>${esc(finish)}</b></div><div class="bpt484-row"><span>Écart</span><b>${esc(delta)}</b></div>${explain}<div class="bpt484-btnrow">${readapt}<button data-mode-toggle>Revenir en classique</button></div>`);
-        $('bpt484Dialog').querySelector('[data-readapt]')?.addEventListener('click',()=>{closeModal();live3ShowPaceAdvice(advice,{readapt:true});});
+        $('bpt484Dialog').querySelector('[data-readapt]')?.addEventListener('click',()=>{closeModal();api()?.showPaceAdvice?.(advice,{readapt:true});});
       }else if(advice&&canManage){
         const direction=advice.type==='accelerate'?'retard':'avance';
         const verb=advice.type==='accelerate'?'raccourcir':'allonger';
