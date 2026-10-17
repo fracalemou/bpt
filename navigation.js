@@ -4,6 +4,7 @@
     dashboard:'⌂ Accueil',
     latestgame:'◷ Parties',
     ranking:'♛ Classements',
+    agenda:'📅 Agenda',
     records:'★ Records & accomplissements',
     seasons:'▦ Saisons',
     profile:'♤ Profil joueur',

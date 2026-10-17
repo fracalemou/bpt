@@ -232,7 +232,12 @@
     input.addEventListener('change',async()=>{
       const f=input.files&&input.files[0];if(!f)return;
       photoBtn.disabled=true;photoBtn.textContent='Préparation de la photo…';
-      try{chosenPhoto=await shrinkPhoto(f);thumb.src=URL.createObjectURL(chosenPhoto.blob);thumb.hidden=false;photoBtn.textContent='📷 Changer la photo';}
+      try{
+        chosenPhoto=await shrinkPhoto(f);thumb.src=URL.createObjectURL(chosenPhoto.blob);thumb.hidden=false;photoBtn.textContent='📷 Changer la photo';
+        // 10.4.28 : la même photo devient la photo de la partie (onglet Parties), en arrière-plan.
+        const r0=rows[0]||{};
+        if(typeof window.saveGamePhoto==='function'&&r0.game)window.saveGamePhoto(Number(r0.game),f,r0.season||null).catch?.(()=>{});
+      }
       catch(_e){toast('Photo illisible, essayez-en une autre.');photoBtn.textContent='📷 Photo des vainqueurs';}
       finally{photoBtn.disabled=false;input.value='';}
     });
