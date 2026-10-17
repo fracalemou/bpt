@@ -1166,7 +1166,12 @@ function connectionDeviceLabel(){
     });
   }
 
+  // 10.4.30 : « connecté » = appli ouverte en ce moment (signal toutes les 15 s).
+  // Une session restée ouverte sur un appareil inactif depuis plus de 2 min ne compte plus.
+  const APP_PRESENCE_ONLINE_MS=2*60*1000;
+  let appPresenceLastViewers={};
   function renderAppPresence(viewers){
+    appPresenceLastViewers=viewers||{};
     renderConnectedIdentityBadge();
     const countEl=document.getElementById("bptOnlineCount");
     const tipEl=document.getElementById("bptOnlineTooltip");
@@ -1180,6 +1185,7 @@ function connectionDeviceLabel(){
     Object.values(viewers||{}).forEach(v=>{
       const name=String(v?.name||"").trim();
       if(!name || v?.persistent!==true)return;
+      if(!(Date.now()-Number(v?.lastSeen||0)<APP_PRESENCE_ONLINE_MS))return;
       const key=name.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("fr").replace(/\s+/g," ").trim();
       const previous=byPlayer.get(key);
       if(!previous || Number(v.lastSeen||0)>Number(previous.lastSeen||0))byPlayer.set(key,v);
@@ -1297,6 +1303,8 @@ function connectionDeviceLabel(){
   function startAppPresence(){
     installAppPresenceListener();
     updateAppPresence();
+    clearInterval(window.__bptPresenceRefresh);
+    window.__bptPresenceRefresh=setInterval(()=>renderAppPresence(appPresenceLastViewers),30000);
 
     clearInterval(appPresenceTimer);
     appPresenceTimer=setInterval(updateAppPresence,APP_PRESENCE_HEARTBEAT_MS);
