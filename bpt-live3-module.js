@@ -1482,6 +1482,29 @@ function connectionDeviceLabel(){
       }
     };
   }
+  // 10.4.34 — « Mon profil » : le joueur connecté (code vérifié) change son propre surnom.
+  async function setMyNickname(nickname){
+    const name=liveIdentityConfirmed?String(verifiedProfileName||'').trim():'';
+    if(!name)throw new Error('Connectez-vous avec votre code pour modifier votre profil.');
+    const nick=String(nickname||'').trim().replace(/\s+/g,' ').slice(0,30);
+    const env=await window.bptFirebaseEnsure?.();if(!env?.rtdb)throw new Error('Connexion indisponible.');
+    const target=normalizeIdentityKey(name);
+    const res=await env.rtdb.ref("bpt/state/main/data/players").transaction(current=>{
+      const players=Array.isArray(current)?current:Object.values(current||{});
+      const idx=players.findIndex(p=>normalizeIdentityKey(p?.name)===target);
+      if(idx<0)return;
+      players[idx]={...players[idx],nickname:nick};
+      return players;
+    });
+    if(!res?.committed)throw new Error('Profil introuvable.');
+    try{
+      const p=(db?.players||[]).find(x=>normalizeIdentityKey(x?.name)===target);
+      if(p)p.nickname=nick;
+      if(typeof saveLocalOnly==='function')saveLocalOnly();
+      if(typeof renderAll==='function')renderAll();
+    }catch(_e){}
+    return nick;
+  }
   async function loadProfileCodeState(force=false){
     const name=String($3('live3SpectatorNameInput')?.value||'').trim();
     if(!force&&profileCodeLoadingName===name)return;
@@ -4062,6 +4085,8 @@ async function requestTakeover(){
     getIdentityName:()=>liveIdentityName(),
     logoutIdentity,
     getVerifiedIdentityName:()=>liveIdentityConfirmed?verifiedProfileName:"",
+    setMyNickname:(n)=>setMyNickname(n),
+    openProfileCodeChange:()=>openProfileCodeChange(),
     openFullscreen,
     closeFullscreen,
     endLive,

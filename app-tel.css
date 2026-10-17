@@ -10381,16 +10381,17 @@ html.bpt-mobile-device .bpt-ag-home h3{font-size:19px}
 :root{
   --bpt-bg:#0f1426;--bpt-bg2:#121a33;--bpt-card:#161d36;--bpt-card2:#1b2442;--bpt-line:#2a3560;
   --bpt-gold:#f2c853;--bpt-teal:#2ac9c2;--bpt-text:#eef2fb;--bpt-muted:#9aa6c8;
+  --bpt-head1:#141b35;--bpt-head2:#1c2650;--bpt-live1:#10162c;--bpt-live2:#141c38;--bpt-deep:#0d1328;
 }
 
 /* --- Palette : un seul fond bleu nuit partout (Accueil, Live, préparation, bilan) --- */
 html,body{background:var(--bpt-bg) !important}
-header.bpt-header{background:linear-gradient(90deg,#141b35,#1c2650) !important;border-bottom:1px solid var(--bpt-line) !important}
+header.bpt-header{background:linear-gradient(90deg,var(--bpt-head1),var(--bpt-head2)) !important;border-bottom:1px solid var(--bpt-line) !important}
 nav#nav{background:var(--bpt-bg2) !important}
 .card,#latestgame details,#ranking details,#records details,#profile details,.premium-panel{background-color:var(--bpt-card) !important;border-color:var(--bpt-line) !important}
 .bpt484-live{background:var(--bpt-bg) !important}
-#bptLandscapeLive{background:linear-gradient(180deg,#10162c 0%,#141c38 100%) !important}
-#bptLandscapeLive .bptll-head,#bptLandscapeLive .bptll-foot{background:#0d1328 !important;border-color:var(--bpt-line) !important}
+#bptLandscapeLive{background:linear-gradient(180deg,var(--bpt-live1) 0%,var(--bpt-live2) 100%) !important}
+#bptLandscapeLive .bptll-head,#bptLandscapeLive .bptll-foot{background:var(--bpt-deep) !important;border-color:var(--bpt-line) !important}
 .bpt-summary-modal{background:var(--bpt-bg2) !important;border-color:rgba(242,200,83,.55) !important}
 
 /* --- Avatars --- */
@@ -10498,3 +10499,40 @@ html.bpt-mobile-device #ranking .bpt-rk-stat.is-wide b .player-name-stack{displa
 #ranking #rankingBody td:nth-child(16) .player-name-stack,#ranking #rankingBody td:nth-child(17) .player-name-stack{align-items:flex-start !important;text-align:left !important}
 html.bpt-mobile-device #ranking #rankingBody td:nth-child(2){justify-self:start !important}
 html.bpt-mobile-device #ranking #rankingBody td:nth-child(2) .player-primary-name br{display:block}
+
+/* 10.4.34 — Mon profil (Paramètres) */
+.bpt-my-profile{max-width:680px;margin:14px 0 0 !important;padding:16px 18px !important;border:1px solid rgba(42,201,194,.45) !important;border-radius:16px !important}
+.bpt-mp-head{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.bpt-mp-head h3{margin:2px 0;font-size:20px}
+.bpt-mp-kicker{font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--bpt-teal,#2ac9c2)}
+.bpt-mp-row{display:grid;gap:6px;margin-top:12px}
+.bpt-mp-row label{font-weight:800;font-size:13px}
+.bpt-mp-field{display:flex;gap:8px;flex-wrap:wrap}
+.bpt-mp-field input{flex:1 1 200px;min-height:44px;font-size:15px}
+.bpt-mp-field .btn{min-height:44px}
+.bpt-mp-save{background:var(--bpt-gold,#f2c853) !important;color:#1a1300 !important;border-color:#e1b957 !important;font-weight:900 !important}
+html.bpt-mobile-device .bpt-my-profile{margin:8px 0 0 !important}
+
+.bpt-mp-help{display:block !important;font-size:12px;color:var(--bpt-muted,#9aa6c8)}
+.bpt-mp-help b{color:var(--bpt-text,#eef2fb)}
+
+/* 10.4.34 — Thèmes au choix (Paramètres > Mon profil). « Bleu nuit » = valeurs par défaut ci-dessus. */
+html[data-bpt-theme="tapis"]{--bpt-bg:#0b1a13;--bpt-bg2:#0f2219;--bpt-card:#13291e;--bpt-card2:#183325;--bpt-line:#2b5140;--bpt-gold:#f2c853;--bpt-teal:#3ccf8e;--bpt-text:#eef7f1;--bpt-muted:#9dbcaa;--bpt-head1:#10261b;--bpt-head2:#1a3a2a;--bpt-live1:#0c1d15;--bpt-live2:#11271c;--bpt-deep:#08150f}
+html[data-bpt-theme="cognac"]{--bpt-bg:#16110c;--bpt-bg2:#1c1610;--bpt-card:#231b13;--bpt-card2:#2c2218;--bpt-line:#4e3b27;--bpt-gold:#f2c853;--bpt-teal:#f0a04b;--bpt-text:#f8f1e7;--bpt-muted:#c4ae93;--bpt-head1:#21190f;--bpt-head2:#3a2a18;--bpt-live1:#17110c;--bpt-live2:#201810;--bpt-deep:#100c08}
+html[data-bpt-theme="graphite"]{--bpt-bg:#111214;--bpt-bg2:#16181b;--bpt-card:#1c1e22;--bpt-card2:#24272c;--bpt-line:#383c44;--bpt-gold:#f2c853;--bpt-teal:#4fb3e8;--bpt-text:#f1f2f4;--bpt-muted:#a3a8b2;--bpt-head1:#18191c;--bpt-head2:#25282e;--bpt-live1:#121315;--bpt-live2:#191b1f;--bpt-deep:#0c0d0f}
+html[data-bpt-theme="royal"]{--bpt-bg:#150f26;--bpt-bg2:#1a1330;--bpt-card:#20173a;--bpt-card2:#281d47;--bpt-line:#43356e;--bpt-gold:#f2c853;--bpt-teal:#b38cf5;--bpt-text:#f3effc;--bpt-muted:#ad9fd0;--bpt-head1:#1e1538;--bpt-head2:#2e2156;--bpt-live1:#160f29;--bpt-live2:#1d1535;--bpt-deep:#100b1e}
+/* Surfaces historiques à couleurs figées : repeintes seulement quand un thème autre que Bleu nuit est actif */
+html[data-bpt-theme] header.bpt-header{background:linear-gradient(90deg,var(--bpt-head1),var(--bpt-head2)) !important;border-bottom-color:var(--bpt-line) !important}
+html[data-bpt-theme] nav#nav{background:var(--bpt-bg2) !important}
+html[data-bpt-theme] .hero,html[data-bpt-theme] .premium-hero,html[data-bpt-theme] .tab-premium-hero,html[data-bpt-theme] .premium-profile-identity{background:radial-gradient(circle at 86% 35%,rgba(200,161,92,.10),transparent 22%),linear-gradient(135deg,var(--bpt-head2),var(--bpt-card) 70%) !important;border-color:var(--bpt-line) !important}
+html[data-bpt-theme] .card,html[data-bpt-theme] .record-card,html[data-bpt-theme] .records-scope-card,html[data-bpt-theme] .achievement-card,html[data-bpt-theme] .profile-feat,html[data-bpt-theme] details.settings-block,html[data-bpt-theme] .correction-participants-box,html[data-bpt-theme] .game-browser-toolbar,html[data-bpt-theme] .premium-record-item,html[data-bpt-theme] .premium-podium-card:not(.rank-1){background:var(--bpt-card) !important;border-color:var(--bpt-line) !important}
+html[data-bpt-theme] summary,html[data-bpt-theme] th,html[data-bpt-theme] .records-scope-choice:not(.active){background:var(--bpt-card2) !important;border-color:var(--bpt-line) !important}
+html[data-bpt-theme] input:not([type=checkbox]):not([type=radio]):not([type=range]),html[data-bpt-theme] select,html[data-bpt-theme] textarea{background:var(--bpt-deep) !important;border-color:var(--bpt-line) !important}
+html[data-bpt-theme] .bpt484-head,html[data-bpt-theme] .bpt484-stage,html[data-bpt-theme] .bpt484-card,html[data-bpt-theme] .bpt484-info{background:radial-gradient(circle at 50% -30%,var(--bpt-head2) 0,var(--bpt-card2) 40%,var(--bpt-card) 100%) !important;border-color:var(--bpt-line) !important}
+html[data-bpt-theme].bpt-mobile-device:not(.bpt-live-landscape-open):not(:has(#live3.active)) nav#nav{background:var(--bpt-bg2) !important;border-top-color:var(--bpt-line) !important}
+html[data-bpt-theme].bpt-mobile-device body,html[data-bpt-theme] body.bpt-mobile-device{background:var(--bpt-bg) !important}
+html[data-bpt-theme] .bpt-my-profile .btn.ghost{background:var(--bpt-card2) !important;border-color:var(--bpt-line) !important;color:var(--bpt-text) !important}
+.bpt-mp-themes{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px}
+.bpt-mp-theme{display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 10px;border-radius:12px;border:1px solid var(--bpt-line);background:var(--bpt-card2);color:var(--bpt-text);font-weight:800;font-size:13px;cursor:pointer;text-align:left}
+.bpt-mp-theme.is-active{border-color:var(--bpt-gold);box-shadow:0 0 0 1px var(--bpt-gold)}
+.bpt-mp-swatch{flex:0 0 auto;width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,255,255,.25)}
