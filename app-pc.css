@@ -6839,3 +6839,9 @@ body:has(#live3.active) #bptAppAction{display:none!important}
 
 /* 10.4.25 — Compteur de connectés : bulle d'initiales au survol (PC) ou au toucher (téléphone). */
 .bpt-online-presence{cursor:pointer}
+
+
+/* 10.4.26 — Barre de partage du bilan */
+.bpt-share-bar{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px}
+.bpt-share-bar .btn{min-height:44px}
+.bpt-share-main{background:#25d366 !important;border-color:#1fae55 !important;color:#06240f !important;font-weight:900 !important}

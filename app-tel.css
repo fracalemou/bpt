@@ -10250,3 +10250,10 @@ html.bpt-mobile-device #ranking .ranking-archive-menu button{
   font-size:16px !important;font-weight:800 !important;border-radius:12px !important;
   background:#1c2848 !important;border:1px solid #33416b !important;color:#eef2ff !important;text-align:center !important;
 }
+
+
+/* 10.4.26 — Barre de partage du bilan */
+.bpt-share-bar{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 14px}
+.bpt-share-bar .btn{min-height:44px}
+.bpt-share-main{background:#25d366 !important;border-color:#1fae55 !important;color:#06240f !important;font-weight:900 !important}
+html.bpt-mobile-device .bpt-share-main{width:100% !important;font-size:16px !important;min-height:50px !important}

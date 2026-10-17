@@ -2399,7 +2399,9 @@ function queuePublishedLiveSummary(state){
   if(rows.length)queueFinishedGameSummary(rows,state);
 }
 function finishedRecapSections(rows){
-  const recap=rows.find(r=>r.endGameRecap)?.endGameRecap;
+  const rawRecap=rows.find(r=>r.endGameRecap)?.endGameRecap;
+  // 10.4.26 : les bilans enregistrés par d'anciennes versions n'ont pas toutes les listes.
+  const recap=rawRecap?{...rawRecap,missions:rawRecap.missions||[],objectives:rawRecap.objectives||[],highlights:rawRecap.highlights||[]}:null;
   const kills=Math.max(0,...rows.map(r=>Number(r.kills)||0)),hunters=rows.filter(r=>Number(r.kills)===kills).map(r=>r.player);
   const count=rows.filter(r=>r.killer).length,duration=bptGameTiming(rows).durationSec;
   const items=(list)=>list.map(e=>'<article><strong>'+esc((e.icon||'⭐')+' '+(e.name?e.name+' · ':'')+e.title)+'</strong><p>'+esc(e.text||'')+'</p></article>').join('');
