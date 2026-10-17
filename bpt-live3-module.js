@@ -266,6 +266,22 @@
     try{localStorage.setItem(live3PaceStorageKey(),JSON.stringify(data||{}));}catch(_e){}
   }
 
+  // 10.4.23 — Projection CONTINUE de la fin de partie, fondée sur les blinds.
+  // Constat sur les parties Live BPT : aucune sortie pendant les 2/3 de la partie,
+  // puis tout s'enchaîne ; la partie se termine quand les jetons en jeu valent
+  // environ BPT_END_TOTAL_BB grosses blinds (niveau 16 pour 10 × 20 000).
+  // Le retard se calcule donc à chaque instant à partir du niveau atteint, du temps
+  // restant dans le niveau et de la durée des niveaux jusqu'au niveau de fin.
+  // Les éliminations ne corrigent la projection qu'en fin de partie.
+  function live3TotalChips(state){
+    const s=state||current;
+    return Math.max(1,(s?.players||[]).length)*Math.max(100,Number(s?.startStack)||20000);
+  }
+
+  function live3ProjectedEndIndex(state){
+    return bptEndLevelIndexForChips(live3TotalChips(state));
+  }
+
   function live3FinishProjection(){
     if(!current?.startedAt)return null;
     const totalPlayers=Math.max(2,(current.players||[]).length);
@@ -274,22 +290,34 @@
     const elapsed=Math.max(0,elapsedSeconds());
     const eliminationProgress=(totalPlayers-remaining)/(totalPlayers-1);
     const timeProgress=elapsed/targetSec;
-    // Projection progressive : une seule élimination ne peut plus provoquer
-    // une heure de retard annoncée ni une chute brutale des blinds.
-    let projectedTotal=targetSec;
-    if(elapsed>0 && eliminationProgress>0){
-      const observedTotal=elapsed/Math.max(.01,eliminationProgress);
-      const eliminations=totalPlayers-remaining;
-      const weight=Math.min(.55,.08+.10*eliminations);
-      projectedTotal=targetSec+(observedTotal-targetSec)*weight;
-      const minFactor=eliminations===1?.92:.80;
-      const maxFactor=eliminations===1?1.08:1.30;
-      projectedTotal=Math.max(targetSec*minFactor,Math.min(targetSec*maxFactor,projectedTotal));
+    const levels=Array.isArray(current.levels)?current.levels:[];
+    const idx=Math.max(0,Number(current.levelIndex)||0);
+    const endIdx=live3ProjectedEndIndex(current);
+    const curDur=Math.max(60,Number(levels[idx]?.durationSec)||currentBlindDurationMinutes()*60);
+    const inLevelLeft=Math.min(curDur,remainingSeconds());
+
+    // Temps de jeu restant selon la structure actuelle (niveaux ajustés compris).
+    let scheduleLeft=inLevelLeft;
+    for(let i=idx+1;i<=endIdx;i++){
+      scheduleLeft+=Math.max(60,Number(levels[i]?.durationSec)||curDur);
     }
-    const projectedFinish=Number(current.startedAt)+projectedTotal*1000;
-    const targetFinish=Number(current.startedAt)+targetSec*1000;
-    const deltaSec=Math.round((projectedFinish-targetFinish)/1000);
-    return {projectedFinish,targetFinish,deltaSec,projectedTotal,targetSec,timeProgress,eliminationProgress,totalPlayers,remaining};
+
+    // Correction par les joueurs restants, seulement dans la zone de fin.
+    const levelProgress=Math.max(0,(idx+1-inLevelLeft/curDur)/(endIdx+1));
+    const expectedOutFrac=Math.pow(Math.min(1,levelProgress),4.5);
+    const expectedRemaining=totalPlayers-(totalPlayers-1)*expectedOutFrac;
+    const surplusPlayers=remaining-expectedRemaining; // + = plus de joueurs que prévu
+    const weight=Math.max(0,Math.min(1,(levelProgress-.55)/.30));
+    const playerCorrection=Math.max(-45*60,Math.min(45*60,surplusPlayers*8*60*weight));
+
+    const remainingPlay=Math.max(0,scheduleLeft+playerCorrection);
+    const projectedTotal=elapsed+remainingPlay;
+    const now=Date.now();
+    const projectedFinish=now+remainingPlay*1000;
+    const targetFinish=now+Math.max(0,targetSec-elapsed)*1000;
+    const deltaSec=Math.round(projectedTotal-targetSec);
+    return {projectedFinish,targetFinish,deltaSec,projectedTotal,targetSec,timeProgress,eliminationProgress,totalPlayers,remaining,
+      endIdx,levelIndex:idx,inLevelLeft,scheduleLeft,playerCorrection,levelProgress};
   }
 
   function live3FormatClock(ts){
@@ -333,14 +361,20 @@
     if(!upcoming)return null;
     const currentMin=Math.max(1,Math.round(Number(upcoming.durationSec||0)/60)||currentBlindDurationMinutes());
 
-    // L’adaptation commence tôt, mais reste progressive et mesurée.
+    // 10.4.23 — Durée des prochains niveaux calculée pour retomber sur la durée cible,
+    // limitée à ±30 % par ajustement pour rester progressive.
     const deltaMin=Math.round(Number(projection.deltaSec||0)/60); // + = retard, - = avance
     const absDeltaMin=Math.abs(deltaMin);
     if(absDeltaMin<8)return null;
     const type=deltaMin>0?"accelerate":"slow";
-    const change=Math.max(1,Math.min(2,Math.round(absDeltaMin/20)))*(type==="accelerate"?-1:1);
-    const proposedMin=Math.max(2,Math.min(40,currentMin+change));
-    if(proposedMin===currentMin)return null;
+    const upcomingCount=Math.max(0,projection.endIdx-projection.levelIndex);
+    if(upcomingCount<1)return null; // déjà dans la zone de fin : plus rien à ajuster
+    const available=targetSec-elapsed-projection.inLevelLeft-projection.playerCorrection;
+    const idealMin=available/upcomingCount/60;
+    let proposedMin=Math.round(Math.max(currentMin*.7,Math.min(currentMin*1.3,idealMin)));
+    proposedMin=Math.max(3,Math.min(40,proposedMin));
+    if(type==="accelerate" && proposedMin>=currentMin)return null;
+    if(type==="slow" && proposedMin<=currentMin)return null;
     const targetRemaining=Math.max(0,targetSec-elapsed);
     return {type,deltaMin,deltaSec:projection.deltaSec,currentMin,proposedMin,totalPlayers,remaining,elapsed,targetRemaining,timeProgress,eliminationProgress,autoSuggest:absDeltaMin>=10};
   }
@@ -535,37 +569,30 @@
     return document.querySelectorAll('#live3PlayerPicker input[type="checkbox"]:checked').length;
   }
 
+  // Fin de partie observée au BPT : jetons en jeu ≈ 40 grosses blinds.
+  const BPT_END_TOTAL_BB=40;
+  function bptEndLevelIndexForChips(totalChips){
+    const configuredLevels=bptGetBlindLevels();
+    const targetEndBB=Math.max(1,Number(totalChips)||0)/BPT_END_TOTAL_BB;
+    let endIndex=0,bestDistance=Infinity;
+    configuredLevels.forEach((blind,i)=>{
+      const d=Math.abs(Number(blind.bb)-targetEndBB);
+      if(d<bestDistance){bestDistance=d;endIndex=i;}
+    });
+    return Math.max(0,Math.min(configuredLevels.length-1,endIndex));
+  }
+
   function computeStructure(targetHours,playerCount,startStack){
     const n=Math.max(2,Number(playerCount)||2);
     const stack=Math.max(100,Number(startStack)||20000);
 
-    // Calibration empirique BPT :
-    // 10 à 12 joueurs, stack 20 000, départ vers 21 h 15,
-    // fin généralement vers 1 h 30, soit environ 4 h 15 de jeu ; la durée cible proposée par défaut reste 4 h 00.
-    // Avec des niveaux proches de 18 min, cela correspond à une fin
-    // autour du niveau 14 (BB 3 000) dans la structure actuelle.
-    //
-    // On fait donc évoluer le niveau de fin estimé avec la masse totale
-    // de jetons, au lieu d'imposer un nombre de minutes fixe.
-    const referencePlayers=11;
-    const referenceStack=20000;
-    const referenceEndBB=3000;
-
-    const chipMassRatio=(n*stack)/(referencePlayers*referenceStack);
-    const targetEndBB=referenceEndBB*chipMassRatio;
-
-    let endIndex=0;
-    let bestDistance=Infinity;
+    // Calibration empirique BPT (recalée en 10.4.23 sur les parties Live réelles) :
+    // 10 à 12 joueurs, stack 20 000, départ vers 21 h 15, durée visée 4 h 00.
+    // Les parties se terminent quand les jetons en jeu valent ~40 grosses blinds :
+    // niveau 16 (BB 5 000) à 10 joueurs, niveau 17 (BB 6 000) à 12 joueurs.
     const configuredLevels=bptGetBlindLevels();
-    configuredLevels.forEach((blind,i)=>{
-      const d=Math.abs(Number(blind.bb)-targetEndBB);
-      if(d<bestDistance){
-        bestDistance=d;
-        endIndex=i;
-      }
-    });
-
-    endIndex=Math.max(0,Math.min(configuredLevels.length-1,endIndex));
+    const targetEndBB=(n*stack)/BPT_END_TOTAL_BB;
+    const endIndex=bptEndLevelIndexForChips(n*stack);
     const expectedLevelCount=endIndex+1;
 
     // La durée cible sert à calibrer le moment où le tournoi devrait arriver
@@ -3992,6 +4019,9 @@ async function requestTakeover(){
       });
       if(!flag){try{showBptToast('Mode classique restauré · durées d’origine rétablies','ok');}catch(_e){}}
       return true;
+    },
+    getFinishProjection:()=>{
+      try{return live3FinishProjection();}catch(_e){return null;}
     },
     getPaceAdvice:()=>{
       try{return live3PaceAnalysis();}catch(_e){return null;}
