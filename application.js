@@ -5080,14 +5080,23 @@ function renderRanking(){
   </tr>`).join("");
 }
 
-// 10.4.37 — Classement téléphone en liste compacte : un appui sur une ligne déplie / replie ses stats
-// (le nom du joueur garde son lien vers la fiche).
+// 10.4.37 — Classement téléphone en liste compacte : un appui sur une ligne déplie / replie ses stats.
+// 10.4.38 — Ligne repliée : l'appui sur le nom déplie aussi le détail (pas d'ouverture du profil).
+// Le profil ne s'ouvre qu'en touchant le nom une fois le détail affiché.
+// Écoute en phase de capture pour passer avant le onclick du nom.
 document.addEventListener("click",e=>{
   if(!document.documentElement.classList.contains("bpt-mobile-device"))return;
   const tr=e.target.closest?.("#rankingBody tr");
-  if(!tr||e.target.closest("button,a"))return;
+  if(!tr)return;
+  const onButton=e.target.closest("button,a");
+  if(onButton){
+    if(tr.classList.contains("is-open"))return; // détail affiché : le nom ouvre le profil
+    e.preventDefault();e.stopPropagation();
+    tr.classList.add("is-open");
+    return;
+  }
   tr.classList.toggle("is-open");
-});
+},true);
 
 
 function versusPlayerMetrics(name){
