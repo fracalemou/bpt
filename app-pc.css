@@ -7170,3 +7170,8 @@ html[data-bpt-theme] .bpt-my-profile .btn.ghost{background:var(--bpt-card2) !imp
 .bpt-ms-svg .d{fill:var(--bpt-card,#18223a);stroke:var(--bpt-teal,#2ac9c2);stroke-width:2.5}
 .bpt-ms-svg .d.last{fill:var(--bpt-teal,#2ac9c2)}
 .bpt-ms-svg .v{fill:var(--bpt-text,#fff);font-size:13px;font-weight:800}
+/* 10.4.37 — Chiffres 1/2/3 des marches entièrement visibles (plus tronqués) */
+.bpt-home-step-block i{bottom:6px !important;font-size:30px !important;opacity:.28 !important}
+.bpt-home-step.place-1 .bpt-home-step-block{height:130px}
+.bpt-home-step.place-2 .bpt-home-step-block{height:100px}
+.bpt-home-step.place-3 .bpt-home-step-block{height:80px}

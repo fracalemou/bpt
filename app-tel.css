@@ -10684,3 +10684,11 @@ html.bpt-mobile-device #ranking #rankingBody td:nth-child(5){grid-area:form !imp
 html.bpt-mobile-device #ranking #rankingBody td.bpt-rk-stats{display:none !important}
 html.bpt-mobile-device #ranking #rankingBody tr.is-open td:nth-child(5){display:block !important}
 html.bpt-mobile-device #ranking #rankingBody tr.is-open td.bpt-rk-stats{display:grid !important;margin-top:8px}
+/* 10.4.37 — Chiffres 1/2/3 des marches entièrement visibles (plus tronqués) */
+.bpt-home-step-block i{bottom:6px !important;font-size:30px !important;opacity:.28 !important}
+.bpt-home-step.place-1 .bpt-home-step-block{height:130px}
+.bpt-home-step.place-2 .bpt-home-step-block{height:100px}
+.bpt-home-step.place-3 .bpt-home-step-block{height:80px}
+html.bpt-mobile-device .bpt-home-step.place-1 .bpt-home-step-block{height:112px}
+html.bpt-mobile-device .bpt-home-step.place-2 .bpt-home-step-block{height:88px}
+html.bpt-mobile-device .bpt-home-step.place-3 .bpt-home-step-block{height:72px}
