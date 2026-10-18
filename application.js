@@ -4166,6 +4166,11 @@ function bptDashboardFunnyVariant(category,gameKey,variants){
   return variants[idx];
 }
 
+// 10.4.38 — Réécrit un bloc de l'Accueil seulement si son contenu a changé.
+function bptSetHomeHtml(el,html){
+  if(!el||el.dataset.bptSig===html)return false;
+  el.dataset.bptSig=html;el.innerHTML=html;return true;
+}
 function renderDashboard(){
   const games=groupedGames();
   const rank=ranking();
@@ -4324,9 +4329,16 @@ function renderDashboard(){
       <span class="bpt-home-step-nick">${nickOf(p.name)?esc(nickOf(p.name)):"&nbsp;"}</span>
       <span class="bpt-home-step-block"><b>${num(p.points,0)}</b><small>pts</small><i>${place}</i></span>
     </button>`:`<div class="bpt-home-step place-${place} is-empty"><span class="bpt-home-step-block"><i>${place}</i></span></div>`;
-  $("dashPodium").innerHTML=podium.length
+  const podiumEl=$("dashPodium");
+  const podiumChanged=bptSetHomeHtml(podiumEl,podium.length
     ? step(podium[1],2)+step(podium[0],1)+step(podium[2],3)
-    : '<div class="muted bpt-home-empty">Le podium apparaîtra après la première partie classée.</div>';
+    : '<div class="muted bpt-home-empty">Le podium apparaîtra après la première partie classée.</div>');
+  // L'animation de montée des marches ne joue qu'au premier affichage de la page.
+  // Les réaffichages suivants (arrivée des données Firebase…) sont instantanés.
+  if(podiumChanged&&podiumEl){
+    if(podiumEl.dataset.bptAnimDone)podiumEl.classList.add("is-settled");
+    else podiumEl.dataset.bptAnimDone="1";
+  }
 
   // Ma saison : seulement pour le joueur connecté et classé.
   const meBox=$("dashMySeason");
@@ -4336,7 +4348,7 @@ function renderDashboard(){
     const norm=v=>String(v||"").trim().toLocaleLowerCase("fr");
     const idx=me?rank.findIndex(r=>norm(r.name)===norm(me)):-1;
     if(idx<0){
-      meBox.hidden=true;meBox.innerHTML="";
+      meBox.hidden=true;bptSetHomeHtml(meBox,"");
     }else{
       const mine=rank[idx],above=rank[idx-1],below=rank[idx+1];
       const pts=v=>`${num(v,0)} pt${Math.abs(Number(v))>1?"s":""}`;
@@ -4349,14 +4361,14 @@ function renderDashboard(){
       meBox.hidden=false;
       meBox.classList.add("actionable");
       meBox.onclick=()=>openMySeasonSheet(mine.name);
-      meBox.innerHTML=`
+      bptSetHomeHtml(meBox,`
         <div class="bpt-home-me-rank"><b>${idx+1}<sup>${idx===0?"er":"e"}</sup></b><small>sur ${rank.length}</small></div>
         <div class="bpt-home-me-copy">
           <div class="bpt-home-me-title">👤 Ma saison <span>· ${esc(String(mine.name).trim().split(" ")[0])}</span> ${trend}</div>
           <strong>${num(mine.points,0)} pts · ${Number(mine.gamesCount||0)} partie${Number(mine.gamesCount||0)>1?"s":""}</strong>
           <small>${chase}${lead?` · ${lead}`:""}</small>
         </div>
-        <span class="bpt-home-me-go"><small>Mes stats</small>›</span>`;
+        <span class="bpt-home-me-go"><small>Mes stats</small>›</span>`);
     }
   }
 
@@ -4366,13 +4378,13 @@ function renderDashboard(){
       const [gameNo,rows]=games[games.length-1];
       const sorted=rows.slice().sort((a,b)=>Number(a.place)-Number(b.place));
       const winner=sorted.find(r=>Number(r.place)===1);
-      lastBox.innerHTML=`
+      bptSetHomeHtml(lastBox,`
         <div class="bpt-home-kicker">Dernière partie · #${esc(gameNo)}</div>
         <div class="bpt-home-last-winner">${winner?bptAvatarHtml(winner.player,"md"):""}<div><strong>${esc(winner?.player||"—")}</strong><small>remporte la partie</small></div></div>
         <small class="bpt-home-last-meta">${esc(shortDate(sorted[0]?.date||""))}${sorted[0]?.location?` · ${esc(sorted[0].location)}`:""} · ${sorted.length} joueurs</small>
-        <span class="bpt-home-link">Voir la partie →</span>`;
+        <span class="bpt-home-link">Voir la partie →</span>`);
     }else{
-      lastBox.innerHTML='<div class="bpt-home-kicker">Dernière partie</div><small class="muted">Le résumé apparaîtra ici.</small>';
+      bptSetHomeHtml(lastBox,'<div class="bpt-home-kicker">Dernière partie</div><small class="muted">Le résumé apparaîtra ici.</small>');
     }
   }
 }

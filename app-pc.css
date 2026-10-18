@@ -7234,3 +7234,6 @@ header.bpt-header #bptConnectedIdentity:not(:empty){display:inline-flex !importa
 .bpt-t3-me-rank sup{font-size:10px}
 .bpt-t3-strength.is-me{background:rgba(42,201,194,.08)}
 .bpt-t3-name{overflow-wrap:normal;word-break:keep-all}
+
+/* 10.4.38 — Podium : plus de clignotement (animation jouée une seule fois) */
+.bpt-home-podium.is-settled .bpt-home-step{animation:none !important}

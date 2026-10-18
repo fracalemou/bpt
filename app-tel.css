@@ -10738,3 +10738,6 @@ html.bpt-mobile-device .bpt-t3-dot{width:18px;height:18px;font-size:10px;margin:
 html.bpt-mobile-device .bpt-t3-table thead th:first-child,html.bpt-mobile-device .bpt-t3-table tbody th{width:24% !important}
 html.bpt-mobile-device .bpt-t3-table thead th.bpt-t3-player{padding:4px 1px 6px !important}
 html.bpt-mobile-device .bpt-t3-name{font-size:11px !important;overflow-wrap:normal !important;word-break:keep-all !important;hyphens:none}
+
+/* 10.4.38 — Podium : plus de clignotement (animation jouée une seule fois) */
+.bpt-home-podium.is-settled .bpt-home-step{animation:none !important}
