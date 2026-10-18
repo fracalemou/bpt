@@ -7237,3 +7237,8 @@ header.bpt-header #bptConnectedIdentity:not(:empty){display:inline-flex !importa
 
 /* 10.4.38 — Podium : plus de clignotement (animation jouée une seule fois) */
 .bpt-home-podium.is-settled .bpt-home-step{animation:none !important}
+
+/* 10.4.42 — Valeur du tri : réservée au téléphone en portrait */
+.bpt-rk-sortval{display:none}
+
+.bpt-rk-sortpos{display:none}

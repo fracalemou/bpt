@@ -10766,3 +10766,21 @@ html.bpt-mobile-device .bpt-t3-name{font-size:11px !important;overflow-wrap:norm
   html.bpt-mobile-device #ranking #rankingBody td:nth-child(16) .player-secondary-nickname,html.bpt-mobile-device #ranking #rankingBody td:nth-child(17) .player-secondary-nickname{display:none !important}
   html.bpt-mobile-device #ranking #rankingBody td:nth-child(16) .muted,html.bpt-mobile-device #ranking #rankingBody td:nth-child(17) .muted{display:inline !important;position:static !important;white-space:nowrap !important;font-size:12px !important}
 }
+
+/* 10.4.42 — Valeur du tri : réservée au téléphone en portrait */
+.bpt-rk-sortval{display:none}
+@media (orientation:portrait){
+  html.bpt-mobile-device #ranking #rankingBody tr.has-sortval td:nth-child(3) > b{display:none !important}
+  html.bpt-mobile-device #ranking #rankingBody tr.has-sortval td:nth-child(3)::after{content:none !important}
+  html.bpt-mobile-device #ranking #rankingBody tr.has-sortval .bpt-rk-sortval{display:inline-flex !important;align-items:baseline;gap:4px;font-size:18px;font-weight:900;color:var(--bpt-gold,#f2c853);white-space:nowrap}
+  html.bpt-mobile-device #ranking #rankingBody tr.has-sortval .bpt-rk-sortval small{font-size:10px;font-weight:700;color:var(--bpt-muted,#aeb9c9)}
+}
+
+.bpt-rk-sortpos{display:none}
+/* 10.4.42 — Portrait trié (kills, victoires…) : position dans le tri, sans médailles ni évolution aux points */
+@media (orientation:portrait){
+  html.bpt-mobile-device #ranking #rankingBody tr.has-sortval .bpt-rk-clt{display:none !important}
+  html.bpt-mobile-device #ranking #rankingBody tr.has-sortval .bpt-rk-sortpos{display:inline !important;font-weight:900}
+  html.bpt-mobile-device #ranking #rankingBody tr.has-sortval td:nth-child(4){visibility:hidden !important}
+  html.bpt-mobile-device #ranking #rankingBody tr.has-sortval.rank1,html.bpt-mobile-device #ranking #rankingBody tr.has-sortval.rank2,html.bpt-mobile-device #ranking #rankingBody tr.has-sortval.rank3{background:transparent !important;box-shadow:none !important}
+}

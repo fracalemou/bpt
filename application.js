@@ -5037,6 +5037,23 @@ function rankingRowsForDisplay(){
   });
 }
 
+// 10.4.42 — Valeur affichée à droite de la ligne (téléphone portrait) quand le tri n'est pas « points » :
+// trié par kills → on montre les kills, etc. (en paysage et sur PC, chaque stat a déjà sa colonne).
+const BPT_RANKING_SORT_VALUE={
+  avgPoints:s=>[num(s.avgPoints,1),"moy."],
+  gamesCount:s=>[s.gamesCount,Number(s.gamesCount)>1?"parties":"partie"],
+  wins:s=>[s.wins,Number(s.wins)>1?"victoires":"victoire"],
+  podiums:s=>[s.podiums,Number(s.podiums)>1?"podiums":"podium"],
+  tabliers:s=>[s.tabliers,Number(s.tabliers)>1?"tabliers":"tablier"],
+  kills:s=>[s.kills,Number(s.kills)>1?"kills":"kill"],
+  kpg:s=>[num(s.kpg,2),"kills/p"],
+  net:s=>[euro(s.net),"solde"]
+};
+function bptRankingSortValueHtml(s){
+  const f=BPT_RANKING_SORT_VALUE[rankingSortKey];if(!f)return "";
+  const [v,unit]=f(s);
+  return `<span class="bpt-rk-sortval">${esc(String(v))}<small>${esc(unit)}</small></span>`;
+}
 function renderRanking(){
   renderCareerRatioSummary();
   const ks=killerStats();
@@ -5045,10 +5062,18 @@ function renderRanking(){
   const labels={points:"Tri par points",progress:"Tri par progression",avgPoints:"Tri par moyenne de points",gamesCount:"Tri par participations",wins:"Tri par victoires",podiums:"Tri par podiums",tabliers:"Tri par tabliers",kills:"Tri par kills",kpg:"Tri par kills / partie",net:"Tri par solde net"};
   if($("rankingSortHint"))$("rankingSortHint").textContent=labels[rankingSortKey]||labels.points;
   document.querySelectorAll("[data-ranking-filter]").forEach(btn=>btn.classList.toggle("active",btn.dataset.rankingFilter===rankingFilterKey));
-  $("rankingBody").innerHTML=rankingRowsForDisplay().map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}">
-    <td data-label="Clt">${medalForRank(s.rank)} ${s.rank}</td>
+  const sortVal=!!BPT_RANKING_SORT_VALUE[rankingSortKey];
+  const displayRows=rankingRowsForDisplay();
+  // Position dans le tri choisi (ex æquo = même position), affichée en portrait à la place du rang aux points.
+  const sortPos=new Map();
+  if(sortVal){
+    let prev=null,pos=0;
+    displayRows.forEach((r,i)=>{const v=Number(r?.[rankingSortKey]||0);if(prev===null||v!==prev){pos=i+1;prev=v;}sortPos.set(r.name,pos);});
+  }
+  $("rankingBody").innerHTML=displayRows.map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}${sortVal?" has-sortval":""}">
+    <td data-label="Clt"><span class="bpt-rk-clt">${medalForRank(s.rank)} ${s.rank}</span>${sortVal?`<span class="bpt-rk-sortpos">${sortPos.get(s.name)}</span>`:""}</td>
     <td data-label="Joueur">${playerNameHtml(s.name,{button:true,buttonClass:"ranking-player-link",breakName:!document.documentElement.classList.contains("bpt-mobile-device"),avatar:false,onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(s.name)}'))`})}</td>
-    <td data-label="Points"><b>${num(s.points,0)}</b></td>
+    <td data-label="Points"><b>${num(s.points,0)}</b>${sortVal?bptRankingSortValueHtml(s):""}</td>
     <td data-label="Évolution">${s.progress===null
       ? (isArchiveSeason()?"—":'<span class="progress-new">Nouveau</span>')
       : s.progress>0
