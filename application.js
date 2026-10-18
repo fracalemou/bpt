@@ -4507,7 +4507,7 @@ function openTop3Compare(withMe=false){
     {label:"Meilleure place",get:p=>p.bestPlace,fmt:v=>v==null?"—":`${v}<sup>${v===1?"re":"e"}</sup>`,better:"low",strong:"la meilleure place"},
     {label:"Kills",get:p=>Number(p.kills||0),fmt:v=>v,better:"high",strong:"le plus de kills"},
     {label:"Kills / partie",get:p=>Number(p.kpg||0),fmt:v=>num(v,1),better:"high",strong:"le plus agressif"},
-    {label:"Tabliers",get:p=>Number(p.tabliers||0),fmt:v=>v,better:"low",strong:"le moins de tabliers"},
+    {label:"Tabliers",get:p=>Number(p.tabliers||0),fmt:v=>v,better:"high",strong:"le plus de tabliers"},
   ];
   const strengths=data.map(()=>[]);
   const rows=STATS.map(st=>{
