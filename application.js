@@ -4458,7 +4458,7 @@ function openMySeasonSheet(name){
 // 10.4.37 — Comparatif du top 3 (lien sous « Classement complet » du podium de l'Accueil) :
 // tableau stat par stat avec la meilleure valeur mise en évidence, points forts de chacun,
 // courbe du rang des 3 joueurs depuis le début de la saison.
-const BPT_TOP3_COLORS=["#f2c853","#cfd6e2","#d58a52"];
+const BPT_TOP3_COLORS=["#f2c853","#cfd6e2","#d58a52","#2ac9c2"]; // 4e couleur : « moi »
 function bptTop3RankChart(series,total){
   const games=[...new Set(series.flatMap(s=>s.values.map(v=>v.x)))].sort((a,b)=>a-b);
   if(games.length<2)return '<div class="muted" style="padding:12px">La courbe apparaîtra après la 2<sup>e</sup> partie.</div>';
@@ -4479,16 +4479,22 @@ function bptTop3RankChart(series,total){
   return `<svg viewBox="0 0 ${W} ${H}" class="bpt-ms-svg" role="img" aria-label="Évolution du classement du top 3">${guides}${xl}${lines}</svg>
     <div class="bpt-t3-legend">${series.map(s=>`<span><i style="background:${BPT_TOP3_COLORS[s.idx]}"></i>${esc(s.name)}</span>`).join("")}</div>`;
 }
-function openTop3Compare(){
+// withMe : ajoute la colonne du joueur connecté quand il n'est pas dans le top 3.
+function openTop3Compare(withMe=false){
   const rank=ranking();const top=rank.slice(0,3);
   if(top.length<2)return;
   const norm=v=>String(v||"").trim().toLocaleLowerCase("fr");
+  let meName="";try{meName=String(window.BPTLive3?.getVerifiedIdentityName?.()||"").trim();}catch(_e){}
+  const meIdx=meName?rank.findIndex(r=>norm(r.name)===norm(meName)):-1;
+  const meOutside=meIdx>=3;
+  const showMe=withMe&&meOutside;
+  const list=showMe?top.concat(rank[meIdx]):top;
   const hist=Array.isArray(db.history)?db.history:[];
   const placesOf=name=>hist.filter(r=>norm(canonicalPlayerName(r.player))===norm(name)&&Number(r.game)>0)
     .sort((a,b)=>Number(a.game)-Number(b.game)).map(r=>Number(r.place)).filter(n=>n>0);
-  const data=top.map((p,i)=>{
+  const data=list.map((p,i)=>{
     const pl=placesOf(p.name);
-    return {...p,idx:i,avgPlace:pl.length?pl.reduce((a,b)=>a+b,0)/pl.length:null,bestPlace:pl.length?Math.min(...pl):null,last3:pl.slice(-3)};
+    return {...p,idx:i,rankPos:rank.indexOf(p)+1,isMe:showMe&&i===3,avgPlace:pl.length?pl.reduce((a,b)=>a+b,0)/pl.length:null,bestPlace:pl.length?Math.min(...pl):null,last3:pl.slice(-3)};
   });
   // better : "high" = la plus grande valeur gagne, "low" = la plus petite.
   const STATS=[
@@ -4524,19 +4530,22 @@ function openTop3Compare(){
     <div class="bpt-ms-sheet bpt-t3-sheet" role="dialog" aria-modal="true" aria-label="Comparatif du top 3">
       <button type="button" class="bpt-ms-close" aria-label="Fermer">×</button>
       <div class="bpt-home-kicker">Comparatif · ${esc(isAllSeasons()?"toutes saisons":seasonDisplayName(selectedSeasonKey))}</div>
-      <h2>⚔️ Le duel du podium</h2>
+      <h2>${showMe?"⚔️ Moi face au podium":"⚔️ Le duel du podium"}</h2>
+      ${meOutside?`<button type="button" class="bpt-t3-toggle${showMe?" is-on":""}">${showMe?"✕ Retirer ma colonne":"➕ Me comparer au top 3"}</button>`
+        :meIdx>=0?'<div class="bpt-t3-note">👑 Tu fais partie du top 3.</div>':""}
       <div class="bpt-t3-tablewrap"><table class="bpt-t3-table">
-        <thead><tr><th></th>${data.map(p=>`<th class="bpt-t3-player" style="--c:${BPT_TOP3_COLORS[p.idx]}"><span class="bpt-t3-medal">${medalForRank(p.idx+1)}</span><button type="button" class="bpt-t3-name" data-player="${encodeURIComponent(p.name)}">${esc(p.name)}</button></th>`).join("")}</tr></thead>
+        <thead><tr><th></th>${data.map(p=>`<th class="bpt-t3-player" style="--c:${BPT_TOP3_COLORS[p.idx]}"><span class="bpt-t3-medal">${p.isMe?`<span class="bpt-t3-me-rank">${p.rankPos}<sup>e</sup></span>`:medalForRank(p.idx+1)}</span><button type="button" class="bpt-t3-name" data-player="${encodeURIComponent(p.name)}">${p.isMe?"Moi":esc(p.name)}</button></th>`).join("")}</tr></thead>
         <tbody>${rows}${formRow}</tbody>
       </table></div>
       <h3>💪 Points forts</h3>
-      <div class="bpt-t3-strengths">${data.map((p,i)=>`<div class="bpt-t3-strength" style="--c:${BPT_TOP3_COLORS[p.idx]}"><b>${esc(p.name)}</b><span>${strengths[i].length?esc(strengths[i].join(" · ")):"Aucune stat en tête : la régularité avant tout"}</span></div>`).join("")}</div>
+      <div class="bpt-t3-strengths">${data.map((p,i)=>`<div class="bpt-t3-strength${p.isMe?" is-me":""}" style="--c:${BPT_TOP3_COLORS[p.idx]}"><b>${p.isMe?"Moi · ":""}${esc(p.name)}</b><span>${strengths[i].length?esc(strengths[i].join(" · ")):(p.isMe?"Aucune stat en tête face au podium… pour l’instant 😉":"Aucune stat en tête : la régularité avant tout")}</span></div>`).join("")}</div>
       <h3>📈 Classement depuis le début de la saison</h3>
       <div class="bpt-ms-chart">${bptTop3RankChart(series,rank.length)}</div>
       <button type="button" class="btn bpt-ms-full bpt-t3-full">Voir le classement complet →</button>
     </div>`;
   document.body.appendChild(sheet);
   sheet.addEventListener("click",e=>{
+    if(e.target.closest(".bpt-t3-toggle")){document.removeEventListener("keydown",bptMySeasonEsc);openTop3Compare(!showMe);return;}
     const n=e.target.closest(".bpt-t3-name");
     if(n){bptCloseMySeasonSheet();openPlayerProfile(decodeURIComponent(n.dataset.player));return;}
     if(e.target.closest(".bpt-t3-full")){bptCloseMySeasonSheet();showView("ranking");return;}
