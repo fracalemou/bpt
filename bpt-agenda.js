@@ -181,7 +181,9 @@
     ];
     return lines.filter(l=>l!==null).join('\n');
   }
-  function appUrl(){return location.origin+location.pathname.replace(/index\.html$/,'');}
+  // Toujours l'adresse publique du site BPT (même depuis la version de test locale).
+  const BPT_PUBLIC_URL='https://fracalemou.github.io/bpt/';
+  function appUrl(){return BPT_PUBLIC_URL;}
   function shareWhatsApp(e){
     const url='https://wa.me/?text='+encodeURIComponent(inviteText(e));
     const w=window.open(url,'_blank','noopener');
