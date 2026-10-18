@@ -173,36 +173,12 @@
       `👤 Proposée par ${e.createdBy||'—'}`,
       g.present.length?`👥 Déjà partants (${g.present.length}) : ${g.present.join(', ')}`:null,
       '',
-      'Réponds en un clic :',
-      `✅ Je viens : ${rsvpUrl(e,'present')}`,
-      `🤔 Peut-être : ${rsvpUrl(e,'maybe')}`,
-      `❌ Absent : ${rsvpUrl(e,'absent')}`
+      '⚠️ *Ne réponds pas ici* : indique « Présent / Peut-être / Absent » dans l’appli BPT, ta réponse y est visible par tous.',
+      `👉 ${appUrl()}`
     ];
     return lines.filter(l=>l!==null).join('\n');
   }
-  // Lien qui ouvre l'appli et enregistre directement la réponse du joueur.
   function appUrl(){return location.origin+location.pathname.replace(/index\.html$/,'');}
-  function rsvpUrl(e,choice){return `${appUrl()}?ag=${encodeURIComponent(e.id)}&r=${choice}`;}
-  // À l'ouverture via un de ces liens : attend les données et l'identité, enregistre la réponse, nettoie l'adresse.
-  function rsvpFromLink(){
-    let p;try{p=new URLSearchParams(location.search);}catch(_e){return;}
-    const id=p.get('ag'),choice=p.get('r');
-    if(!id||!CHOICES.some(c=>c[0]===choice))return;
-    const clean=()=>{try{history.replaceState(null,'',location.pathname+location.hash);}catch(_e){}};
-    const toast=(m,k)=>{try{showBptToast(m,k||'ok');}catch(_e){alert(m);}};
-    let tries=0;
-    const timer=setInterval(async()=>{
-      tries++;
-      const e=events.find(x=>x.id===id),n=me();
-      if(!e&&live&&tries>20){clearInterval(timer);clean();toast('Cette partie n’est plus dans l’agenda.','warn');return;}
-      if(!e||!n){if(tries>240){clearInterval(timer);clean();}return;} // jusqu'à 2 min (identification du joueur)
-      clearInterval(timer);clean();
-      await respond(e,choice);
-      const label={present:'présent',maybe:'peut-être',absent:'absent'}[choice];
-      toast(`Réponse enregistrée : ${label} · ${longDate(e.date)}`);
-      window.showView?.('dashboard');
-    },500);
-  }
   function shareWhatsApp(e){
     const url='https://wa.me/?text='+encodeURIComponent(inviteText(e));
     const w=window.open(url,'_blank','noopener');
@@ -382,7 +358,6 @@
     setInterval(()=>{renderHome();prefillLive();},1500);
     window.addEventListener('resize',()=>{if($('agenda')?.classList.contains('active'))fitHeight();},{passive:true});
     connect();
-    rsvpFromLink();
   }
 
   window.BPTAgenda={render,openAgenda,events:()=>events.slice(),grouped,nextInvite,nextEvent,liveTodayEvent};
