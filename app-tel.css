@@ -10757,3 +10757,12 @@ html.bpt-mobile-device .bpt-t3-name{font-size:11px !important;overflow-wrap:norm
   html.bpt-mobile-device #ranking #rankingBody td:nth-child(2) .player-primary-name{white-space:nowrap !important}
   html.bpt-mobile-device #ranking #rankingBody td:nth-child(3){padding-left:12px !important}
 }
+/* 10.4.40 — Paysage : colonnes Bourreau / Victime sur une ligne (nom · nombre), sans surnom ni chevauchement */
+@media (orientation:landscape){
+  html.bpt-mobile-device #ranking #rankingBody td:nth-child(16),html.bpt-mobile-device #ranking #rankingBody td:nth-child(17){white-space:nowrap !important;min-width:0 !important;text-align:left !important;vertical-align:middle !important;font-size:13px !important}
+  html.bpt-mobile-device #ranking #rankingBody td:nth-child(16) .player-name-stack,html.bpt-mobile-device #ranking #rankingBody td:nth-child(17) .player-name-stack{display:inline !important;position:static !important;width:auto !important;min-width:0 !important;padding:0 !important}
+  html.bpt-mobile-device #ranking #rankingBody td:nth-child(16) .player-primary-name,html.bpt-mobile-device #ranking #rankingBody td:nth-child(17) .player-primary-name{display:inline !important;white-space:nowrap !important;font-size:13px !important;position:static !important}
+  html.bpt-mobile-device #ranking #rankingBody td:nth-child(16) .player-primary-name br,html.bpt-mobile-device #ranking #rankingBody td:nth-child(17) .player-primary-name br{display:none !important}
+  html.bpt-mobile-device #ranking #rankingBody td:nth-child(16) .player-secondary-nickname,html.bpt-mobile-device #ranking #rankingBody td:nth-child(17) .player-secondary-nickname{display:none !important}
+  html.bpt-mobile-device #ranking #rankingBody td:nth-child(16) .muted,html.bpt-mobile-device #ranking #rankingBody td:nth-child(17) .muted{display:inline !important;position:static !important;white-space:nowrap !important;font-size:12px !important}
+}
