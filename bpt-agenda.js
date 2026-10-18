@@ -147,15 +147,12 @@
   function formHtml(iso,e){
     const n=me();const locs=activePlayers();
     const loc=e?.location||(n?`Chez ${n}`:'');
-    const hours=[3,3.5,4,4.5,5].map(h=>`<option value="${h}" ${Number(e?.targetHours||4)===h?'selected':''}>${String(h).replace('.5',' h 30').replace(/^(\d)$/,'$1 h 00')}</option>`).join('');
+    // 10.4.47 — Proposition réduite à l'essentiel : date et lieu (heure, durée et tapis se règlent au lancement du Live).
     return `<h3>${e?'Modifier la partie':'Proposer une partie'} · ${esc(longDate(iso))}</h3>
       <div class="bpt-ag-form">
         <label>Date<input id="bptAgDate" type="date" value="${esc(iso)}" min="${todayIso()}"></label>
-        <label>Heure<input id="bptAgTime" type="time" value="${esc(e?.time||'21:15')}"></label>
         <label class="is-wide">Lieu<input id="bptAgLoc" list="bptAgLocList" value="${esc(loc)}" placeholder="Chez …"></label>
         <datalist id="bptAgLocList">${locs.map(p=>`<option value="Chez ${esc(p)}">`).join('')}</datalist>
-        <label>Durée visée<select id="bptAgHours">${hours}</select></label>
-        <label>Tapis de départ<input id="bptAgStack" type="number" min="1000" step="1000" value="${esc(e?.startStack||20000)}"></label>
       </div>
       <div class="bpt-ag-actions"><button type="button" class="btn bpt-ag-primary" id="bptAgSave">${e?'Enregistrer':'📅 Proposer cette partie'}</button>
       <button type="button" class="btn ghost" id="bptAgCancel">Annuler</button></div>`;
@@ -163,18 +160,24 @@
   // 10.4.46 — Invitation WhatsApp : message prêt à envoyer (le joueur choisit le groupe dans WhatsApp).
   let justCreatedId='';
   function inviteText(e){
+    // 10.4.47 — Uniquement des symboles « simples » (♠ ♥ ♦ ♣ ★ ➜) : WhatsApp Web abîme les emojis récents
+    // transmis par un lien wa.me (ils s'affichent « � »).
     const g=grouped(e);
-    const hours=String(e.targetHours||4).replace('.5',' h 30');
+    const where=e.location||'Lieu à définir';
+    const host=String(where).toLocaleLowerCase('fr').includes(String(e.createdBy||'').toLocaleLowerCase('fr'))?'':`Proposée par ${e.createdBy}`;
     const lines=[
-      '♠️ *BPT — Partie de poker*',
-      `📅 ${longDate(e.date).replace(/^./,c=>c.toUpperCase())} à ${(e.time||'21:15').replace(':','h')}`,
-      `📍 ${e.location||'Lieu à définir'}`,
-      `⏱ ${hours} h · 🪙 ${Number(e.startStack||20000).toLocaleString('fr-FR')} jetons`,
-      `👤 Proposée par ${e.createdBy||'—'}`,
-      g.present.length?`👥 Déjà partants (${g.present.length}) : ${g.present.join(', ')}`:null,
+      '♠ ♥  *SOIRÉE POKER BPT*  ♦ ♣',
       '',
-      '⚠️ *Ne réponds pas ici* : indique « Présent / Peut-être / Absent » dans l’appli BPT, ta réponse y est visible par tous.',
-      `👉 ${appUrl()}`
+      `★ *${longDate(e.date).replace(/^./,c=>c.toUpperCase())}*`,
+      `★ ${where}`,
+      host&&e.createdBy?`★ ${host}`:null,
+      '',
+      '_Les cartes sont mélangées, les jetons empilés…_',
+      '_il ne manque plus que toi !_',
+      g.present.length?`\nDéjà à table (${g.present.length}) : ${g.present.join(', ')}`:null,
+      '',
+      '➜ *Réponds dans l’appli BPT* (pas ici) :',
+      appUrl()
     ];
     return lines.filter(l=>l!==null).join('\n');
   }
@@ -200,7 +203,7 @@
     }
     if(e&&!editing){
       box.innerHTML=`<button type="button" class="bpt-ag-back" data-ag-back>‹ Prochaines parties</button><h3>📅 ${esc(longDate(iso))}</h3>
-        <p class="bpt-ag-meta">🕘 ${esc(e.time||'21:15')} · 📍 ${esc(e.location||'Lieu à définir')} · ⏱ ${esc(String(e.targetHours||4).replace('.5',' h 30'))} h · 🪙 ${Number(e.startStack||20000).toLocaleString('fr-FR')}</p>
+        <p class="bpt-ag-meta">📍 ${esc(e.location||'Lieu à définir')}</p>
         <p class="muted">Proposée par ${esc(e.createdBy||'—')}</p>
         ${iso>=t?`<div class="bpt-ag-myline">Votre réponse :</div>${choiceButtons(e)}`:''}
         ${responsesHtml(e)}
@@ -226,9 +229,9 @@
     if(date<t){alert('Choisissez une date à venir.');return;}
     const other=eventFor(date);if(other&&other.id!==e?.id){alert('Une partie est déjà proposée à cette date.');return;}
     const n=me();
-    const ev={...(e||{}),id:e?.id||`agenda_${Date.now()}`,date,time:$('bptAgTime').value||'21:15',
-      location:$('bptAgLoc').value.trim()||`Chez ${n}`,targetHours:Number($('bptAgHours').value)||4,
-      startStack:Math.max(1000,Number($('bptAgStack').value)||20000),createdBy:e?.createdBy||n,
+    // Heure, durée et tapis ne sont plus demandés : on conserve ceux d'une partie existante, sinon rien.
+    const ev={...(e||{}),id:e?.id||`agenda_${Date.now()}`,date,
+      location:$('bptAgLoc').value.trim()||`Chez ${n}`,createdBy:e?.createdBy||n,
       createdAt:e?.createdAt||Date.now(),responses:e?.responses||{[n]:'present'}};
     if(!e)justCreatedId=ev.id;
     selectedIso=date;done&&done();await saveEvent(ev);
@@ -239,7 +242,7 @@
     const host=$('bptAgendaUpcoming');if(!host)return;
     const t=todayIso(),up=events.filter(e=>e.date>=t).slice(0,6);
     host.innerHTML=up.length?up.map(e=>{const g=grouped(e),mine=myChoice(e);return `<button type="button" class="bpt-ag-item" data-ag-date="${esc(e.date)}">
-      <strong>${esc(shortDay(e.date))} · ${esc(e.time||'21:15')}</strong><small>📍 ${esc(e.location||'Lieu à définir')}</small>
+      <strong>${esc(shortDay(e.date))}</strong><small>📍 ${esc(e.location||'Lieu à définir')}</small>
       <span class="bpt-ag-counts"><b class="is-present">${g.present.length} ✓</b> <b class="is-maybe">${g.maybe.length} ?</b> <b class="is-absent">${g.absent.length} ✕</b>${mine?'':' <em>· à vous de répondre</em>'}</span></button>`;}).join('')
       :'<p class="muted">Aucune partie programmée. Touchez une date du calendrier pour en proposer une.</p>';
     host.querySelectorAll('[data-ag-date]').forEach(b=>b.onclick=()=>{selectedIso=b.dataset.agDate;const d=new Date(`${selectedIso}T12:00:00`);cursor=new Date(d.getFullYear(),d.getMonth(),1);editing=false;render();});
@@ -273,7 +276,7 @@
     }else{
       const g=grouped(e),mine=myChoice(e);
       box.innerHTML=`<div class="bpt-ag-home-head"><div><div class="bpt-ag-kicker">${mine?'Prochaine partie':'Partie proposée · à vous de répondre'}</div>
-          <h3>📅 ${esc(whenLabel(e.date))} à ${esc(e.time||'21:15')}</h3>
+          <h3>📅 ${esc(whenLabel(e.date))}</h3>
           <p class="bpt-ag-meta">📍 ${esc(e.location||'Lieu à définir')} · proposée par ${esc(e.createdBy||'—')}</p></div>${calLink}</div>
         ${n?choiceButtons(e):'<p class="muted">Connectez-vous pour répondre.</p>'}
         <p class="bpt-ag-present"><b>${g.present.length} présent${g.present.length>1?'s':''}</b>${g.present.length?' : '+g.present.map(esc).join(', '):''}${g.maybe.length?` · <span class="is-maybe">${g.maybe.length} peut-être</span>`:''}${g.absent.length?` · <span class="is-absent">${g.absent.length} absent${g.absent.length>1?'s':''}</span>`:''}</p>
