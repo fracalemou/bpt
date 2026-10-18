@@ -4935,7 +4935,7 @@ function renderRanking(){
   document.querySelectorAll("[data-ranking-filter]").forEach(btn=>btn.classList.toggle("active",btn.dataset.rankingFilter===rankingFilterKey));
   $("rankingBody").innerHTML=rankingRowsForDisplay().map(s=>`<tr class="${s.rank===1?"rank1":s.rank===2?"rank2":s.rank===3?"rank3":""}">
     <td data-label="Clt">${medalForRank(s.rank)} ${s.rank}</td>
-    <td data-label="Joueur">${playerNameHtml(s.name,{button:true,buttonClass:"ranking-player-link",breakName:true,avatar:false,onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(s.name)}'))`})}</td>
+    <td data-label="Joueur">${playerNameHtml(s.name,{button:true,buttonClass:"ranking-player-link",breakName:!document.documentElement.classList.contains("bpt-mobile-device"),avatar:false,onclick:`openPlayerProfile(decodeURIComponent('${encodeURIComponent(s.name)}'))`})}</td>
     <td data-label="Points"><b>${num(s.points,0)}</b></td>
     <td data-label="Évolution">${s.progress===null
       ? (isArchiveSeason()?"—":'<span class="progress-new">Nouveau</span>')
@@ -4967,6 +4967,15 @@ function renderRanking(){
     })()}</td>
   </tr>`).join("");
 }
+
+// 10.4.37 — Classement téléphone en liste compacte : un appui sur une ligne déplie / replie ses stats
+// (le nom du joueur garde son lien vers la fiche).
+document.addEventListener("click",e=>{
+  if(!document.documentElement.classList.contains("bpt-mobile-device"))return;
+  const tr=e.target.closest?.("#rankingBody tr");
+  if(!tr||e.target.closest("button,a"))return;
+  tr.classList.toggle("is-open");
+});
 
 
 function versusPlayerMetrics(name){
