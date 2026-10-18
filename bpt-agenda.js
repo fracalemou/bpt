@@ -199,7 +199,6 @@
   function inviteText(e){
     // 10.4.47 — Uniquement des symboles « simples » (♠ ♥ ♦ ♣ ★ ➜) : WhatsApp Web abîme les emojis récents
     // transmis par un lien wa.me (ils s'affichent « � »).
-    const g=grouped(e);
     const where=e.location||'Lieu à définir';
     const host=String(where).toLocaleLowerCase('fr').includes(String(e.createdBy||'').toLocaleLowerCase('fr'))?'':`Proposée par ${e.createdBy}`;
     const lines=[
@@ -211,7 +210,6 @@
       '',
       '_Les cartes sont mélangées, les jetons empilés…_',
       '_il ne manque plus que toi !_',
-      g.present.length?`\nDéjà à table (${g.present.length}) : ${g.present.join(', ')}`:null,
       '',
       '➜ *Réponds dans l’appli BPT* (pas ici) :',
       appUrl()
