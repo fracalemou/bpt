@@ -5086,6 +5086,7 @@ function renderRanking(){
 // Écoute en phase de capture pour passer avant le onclick du nom.
 document.addEventListener("click",e=>{
   if(!document.documentElement.classList.contains("bpt-mobile-device"))return;
+  if(!window.matchMedia("(orientation: portrait)").matches)return; // paysage : tableau classique
   const tr=e.target.closest?.("#rankingBody tr");
   if(!tr)return;
   const onButton=e.target.closest("button,a");

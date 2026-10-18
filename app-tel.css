@@ -10427,6 +10427,7 @@ nav#nav button .bpt-ico{margin-right:6px}
 }
 
 /* ===== 10.4.33 — Classement en cartes sur téléphone ===== */
+@media (orientation:portrait){ /* 10.4.39 — liste compacte en portrait seulement */
 html.bpt-mobile-device #ranking .tablewrap{overflow:visible !important;border:0 !important;background:transparent !important}
 html.bpt-mobile-device #ranking .tablewrap table{display:block !important;width:100% !important;min-width:0 !important;border:0 !important;background:transparent !important}
 html.bpt-mobile-device #ranking .tablewrap thead{display:none !important}
@@ -10459,6 +10460,7 @@ html.bpt-mobile-device #ranking .bpt-rk-stat.is-wide{grid-column:span 2}
 html.bpt-mobile-device #ranking .bpt-rk-stat.is-wide b{white-space:normal;font-size:12px;font-weight:700}
 html.bpt-mobile-device #ranking .bpt-rk-stat.is-wide .player-name-stack{display:inline-flex !important}
 html.bpt-mobile-device #ranking .bpt-rk-stat.is-wide .player-secondary-nickname{display:none}
+}
 html.bpt-mobile-device nav#nav .bpt-nav-ico .bpt-ico{width:23px;height:23px;margin:0;vertical-align:0}
 html.bpt-mobile-device #bptMobileMoreTopMenu button{display:flex !important;align-items:center;gap:10px}
 html:not(.bpt-mobile-device) #ranking td.bpt-rk-stats{display:none !important}
@@ -10481,9 +10483,11 @@ td .player-name-stack.has-avatar .player-primary-name,td .player-name-stack.has-
 #ranking td:nth-child(2),#ranking th:nth-child(2),#latestgame td:nth-child(2),#latestgame th:nth-child(2),.summary-table td:nth-child(2),.summary-table th:nth-child(2),#ranking td:nth-child(16),#ranking td:nth-child(17),#ranking th:nth-child(16),#ranking th:nth-child(17){text-align:left !important}
 #ranking td:nth-child(2) .player-name-stack.has-avatar{padding-left:4px}
 
+@media (orientation:portrait){ /* 10.4.39 — liste compacte en portrait seulement */
 html.bpt-mobile-device #ranking #rankingBody td:nth-child(2) .player-name-stack.has-avatar{justify-content:flex-start !important}
 html.bpt-mobile-device #ranking .bpt-rk-stat.is-wide b{display:block;white-space:nowrap}
 html.bpt-mobile-device #ranking .bpt-rk-stat.is-wide b .player-name-stack{display:inline-flex !important;width:auto !important;vertical-align:middle}
+}
 
 /* 10.4.33 — noms alignés à gauche à côté de l’avatar (prioritaire sur les anciennes règles de centrage) */
 :is(#ranking,#latestgame,#records,#profile,#dashboard,#gameSummaryContent,#settings) .player-name-stack.has-avatar .player-primary-name,
@@ -10497,8 +10501,10 @@ html.bpt-mobile-device #ranking .bpt-rk-stat.is-wide b .player-name-stack{displa
 #ranking #rankingBody td:nth-child(2) .player-primary-name,#ranking #rankingBody td:nth-child(2) .player-secondary-nickname{text-align:left !important}
 #ranking #rankingBody td:nth-child(16),#ranking #rankingBody td:nth-child(17){text-align:left !important}
 #ranking #rankingBody td:nth-child(16) .player-name-stack,#ranking #rankingBody td:nth-child(17) .player-name-stack{align-items:flex-start !important;text-align:left !important}
+@media (orientation:portrait){ /* 10.4.39 — liste compacte en portrait seulement */
 html.bpt-mobile-device #ranking #rankingBody td:nth-child(2){justify-self:start !important}
 html.bpt-mobile-device #ranking #rankingBody td:nth-child(2) .player-primary-name br{display:block}
+}
 
 /* 10.4.34 — Mon profil (Paramètres) */
 .bpt-my-profile{max-width:680px;margin:14px 0 0 !important;padding:16px 18px !important;border:1px solid rgba(42,201,194,.45) !important;border-radius:16px !important}
@@ -10661,6 +10667,7 @@ html.bpt-mobile-device .bpt-ms-kpi b{font-size:19px}
 .bpt-ms-svg .v{fill:var(--bpt-text,#fff);font-size:13px;font-weight:800}
 
 /* ===== 10.4.37 — Classement en liste compacte sur téléphone (remplace les cartes 10.4.33) =====
+@media (orientation:portrait){ /* 10.4.39 — liste compacte en portrait seulement */
    Une ligne par joueur : rang · nom · points · évolution. Un appui sur la ligne déplie ses stats. */
 html.bpt-mobile-device #ranking .tablewrap tbody{display:block !important;gap:0 !important;background:var(--bpt-card);border:1px solid var(--bpt-line);border-radius:16px;overflow:hidden}
 html.bpt-mobile-device #ranking #rankingBody tr{
@@ -10684,6 +10691,7 @@ html.bpt-mobile-device #ranking #rankingBody td:nth-child(5){grid-area:form !imp
 html.bpt-mobile-device #ranking #rankingBody td.bpt-rk-stats{display:none !important}
 html.bpt-mobile-device #ranking #rankingBody tr.is-open td:nth-child(5){display:block !important}
 html.bpt-mobile-device #ranking #rankingBody tr.is-open td.bpt-rk-stats{display:grid !important;margin-top:8px}
+}
 /* 10.4.37 — Chiffres 1/2/3 des marches entièrement visibles (plus tronqués) */
 .bpt-home-step-block i{bottom:6px !important;font-size:30px !important;opacity:.28 !important}
 .bpt-home-step.place-1 .bpt-home-step-block{height:130px}
@@ -10741,3 +10749,11 @@ html.bpt-mobile-device .bpt-t3-name{font-size:11px !important;overflow-wrap:norm
 
 /* 10.4.38 — Podium : plus de clignotement (animation jouée une seule fois) */
 .bpt-home-podium.is-settled .bpt-home-step{animation:none !important}
+
+/* 10.4.39 — Téléphone en paysage : tableau de classement classique (comme sur PC) */
+@media (orientation:landscape){html.bpt-mobile-device #ranking td.bpt-rk-stats{display:none !important}}
+@media (orientation:landscape){
+  html.bpt-mobile-device #ranking #rankingBody td:nth-child(2),html.bpt-mobile-device #ranking thead th:nth-child(2){min-width:210px !important;width:210px !important;white-space:nowrap !important}
+  html.bpt-mobile-device #ranking #rankingBody td:nth-child(2) .player-primary-name{white-space:nowrap !important}
+  html.bpt-mobile-device #ranking #rankingBody td:nth-child(3){padding-left:12px !important}
+}
