@@ -4518,7 +4518,7 @@ function openTop3Compare(withMe=false){
     // Pas de mise en évidence si tout le monde est à égalité.
     const distinct=winners.filter(Boolean).length<data.length;
     if(distinct)winners.forEach((w,i)=>{if(w)strengths[i].push(st.strong);});
-    return `<tr><th>${esc(st.label)}</th>${vals.map((v,i)=>`<td class="${distinct&&winners[i]?"is-best":""}">${st.fmt(v)}${distinct&&winners[i]?' <span class="bpt-t3-star">★</span>':""}</td>`).join("")}</tr>`;
+    return `<tr><th>${esc(st.label)}</th>${vals.map((v,i)=>`<td class="${distinct&&winners[i]?"is-best":""}">${st.fmt(v)}</td>`).join("")}</tr>`;
   }).join("");
   const formRow=`<tr><th>3 dernières places</th>${data.map(p=>`<td>${p.last3.length?p.last3.map(n=>`<span class="bpt-t3-dot${n<=3?" p"+n:""}">${n}</span>`).join(""):"—"}</td>`).join("")}</tr>`;
   const snaps=rankingSnapshotByGame();
