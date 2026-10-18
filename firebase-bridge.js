@@ -13,7 +13,7 @@ window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
 
 (function(){
   const ROOT="bpt";
-  let app=null, rtdb=null, auth=null, readyPromise=null;
+  let app=null, rtdb=null, auth=null, readyPromise=null, authSettled=false, authUid=null, authError=null;
 
   function configured(){
     const c=window.BPT_FIREBASE_CONFIG||{};
@@ -26,17 +26,44 @@ window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
     if(!app){
       app=(firebase.apps&&firebase.apps.length)?firebase.app():firebase.initializeApp(window.BPT_FIREBASE_CONFIG);
       rtdb=firebase.database(app);
-      // L'authentification n'est pas requise pour la phase de migration.
-      // La Realtime Database peut fonctionner avec les règles de test Firebase.
+      // 10.4.35 — Connexion anonyme avant tout accès à la base : les règles
+      // exigent « auth != null ». Une requête envoyée avant la connexion serait
+      // refusée et un écouteur .on() annulé définitivement, d'où l'attente.
       try{ auth=firebase.auth(app); }catch(_e){ auth=null; }
-      readyPromise=Promise.resolve(null);
+      readyPromise=signInAnonymous().finally(()=>{ authSettled=true; });
     }
     await readyPromise;
     return {rtdb,auth};
   }
+  // Ne rejette jamais : en cas d'échec (hors connexion au tout premier lancement,
+  // fournisseur Anonyme désactivé), l'appli continue sans authentification.
+  async function signInAnonymous(){
+    if(!auth) return null;
+    const attempt=(async()=>{
+      // Session déjà mémorisée sur l'appareil (restaurée sans réseau).
+      const restored=await new Promise(resolve=>{
+        const stop=auth.onAuthStateChanged(user=>{ try{stop&&stop();}catch(_e){} resolve(user||null); });
+      });
+      const user=restored||(await auth.signInAnonymously()).user;
+      authUid=user?.uid||null;
+      return user;
+    })();
+    const timeout=new Promise(resolve=>setTimeout(()=>resolve(null),10000));
+    try{
+      const user=await Promise.race([attempt,timeout]);
+      if(!user) authError="Connexion anonyme trop longue";
+      return user;
+    }catch(e){
+      authError=e?.code||e?.message||String(e);
+      console.warn("BPT Firebase : connexion anonyme impossible —",authError);
+      return null;
+    }
+  }
   window.bptFirebaseEnsure=ensureFirebase;
   window.bptFirebaseConfigured=configured;
-  window.bptFirebaseDb=()=>rtdb;
+  // Base exposée seulement une fois la connexion anonyme réglée (réussie ou non).
+  window.bptFirebaseDb=()=>authSettled?rtdb:null;
+  window.bptFirebaseAuthState=()=>({settled:authSettled,uid:authUid,error:authError});
 
   function cleanKey(v){ return String(v||"").replace(/[.#$\[\]\/]/g,"_"); }
   function hashString(str){

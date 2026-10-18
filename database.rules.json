@@ -1,0 +1,47 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "bpt": {
+      ".read": "auth != null",
+      "state": {
+        "main": {
+          ".write": "auth != null && newData.exists()"
+        }
+      },
+      "games": {
+        ".write": "auth != null"
+      },
+      "chat": {
+        ".write": "auth != null"
+      },
+      "agenda_v2": {
+        ".write": "auth != null"
+      },
+      "live_v3": {
+        ".write": "auth != null"
+      },
+      "config": {
+        ".write": "auth != null"
+      },
+      "photos": {
+        ".write": "auth != null"
+      },
+      "bettingLedger": {
+        ".write": "auth != null"
+      },
+      "app_presence": {
+        ".write": "auth != null"
+      },
+      "connection_history": {
+        ".write": "auth != null"
+      },
+      "backups": {
+        ".write": "auth != null"
+      },
+      "backup_meta": {
+        ".write": "auth != null"
+      }
+    }
+  }
+}

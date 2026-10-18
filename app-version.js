@@ -5,7 +5,7 @@ function isBptMobileDevice(){
     || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
 }
 
-const BPT_APP_VERSION="10.4.34";
+const BPT_APP_VERSION="10.4.35";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;
@@ -29,7 +29,9 @@ function updateFirebaseDiagnostic(){
   if(!navigator.onLine){
     stateEl.textContent="Hors connexion";
   }else if(typeof cloudReady!=="undefined" && cloudReady){
-    stateEl.textContent="Connecté";
+    const authState=window.bptFirebaseAuthState?.()||{};
+    stateEl.textContent=authState.uid?"Connecté · sécurisé":"Connecté · sans authentification";
+    stateEl.title=authState.error?String(authState.error):"";
   }else if(typeof cloudLastError!=="undefined" && cloudLastError){
     stateEl.textContent="Erreur";
     stateEl.title=String(cloudLastError);
