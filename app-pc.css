@@ -7127,3 +7127,4 @@ html[data-bpt-theme] .bpt-my-profile .btn.ghost{background:var(--bpt-card2) !imp
 .bpt-mp-logout{margin-top:6px;padding-top:12px;border-top:1px solid var(--bpt-line,#2c3a5a)}
 .bpt-home-step-block{flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:baseline;align-content:flex-start;gap:3px}
 .bpt-home-step-block i{font-size:40px;bottom:-8px}
+.bpt484-hint{margin:12px 0 0;font-size:13px;color:var(--bpt-muted,#9fb3c8)}

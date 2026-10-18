@@ -2348,17 +2348,25 @@ function connectionDeviceLabel(){
     });
   }
 
+  // 10.4.36 — ±1 min ne change jamais de niveau : le chrono ne descend pas sous
+  // 10 s (sinon le passage automatique au niveau suivant se déclencherait).
+  // Le changement de niveau se fait uniquement depuis les blinds.
+  const ADJUST_MIN_LEFT_SEC=10;
+  function clampAdjusted(before,delta){
+    const after=before+delta;
+    return delta<0?Math.max(Math.min(before,ADJUST_MIN_LEFT_SEC),after):Math.max(0,after);
+  }
   async function adjustMinute(delta){
     if(!isOwner())return;
     await ownerTransaction(s=>{
       const now=Date.now();
       if(s.running){
-        const rem=Math.max(0,Math.ceil((Number(s.deadline||now)-now)/1000)+delta);
+        const rem=clampAdjusted(Math.max(0,Math.ceil((Number(s.deadline||now)-now)/1000)),delta);
         if(s.runStartedAt)s.elapsedSec=Number(s.elapsedSec||0)+Math.max(0,Math.floor((now-Number(s.runStartedAt))/1000));
         s.deadline=now+rem*1000;
         s.runStartedAt=now;
       }else{
-        s.remainingSec=Math.max(0,Number(s.remainingSec||0)+delta);
+        s.remainingSec=clampAdjusted(Math.max(0,Number(s.remainingSec||0)),delta);
       }
       return s;
     });

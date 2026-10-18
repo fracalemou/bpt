@@ -351,7 +351,7 @@
     }
     if(type==='chrono'){
       if(!api()?.isOwner?.())return;
-      open('Chrono',`<div class="bpt484-btnrow"><button data-cmd="minus">−1 min</button><button data-cmd="pause">Pause / Reprendre</button><button data-cmd="plus">+1 min</button><button data-cmd="prev">◀ Niveau précédent</button><button data-cmd="next">Niveau suivant ▶</button></div>`);
+      open('Chrono',`<div class="bpt484-btnrow"><button data-cmd="minus">−1 min</button><button data-cmd="pause">Pause / Reprendre</button><button data-cmd="plus">+1 min</button></div><p class="bpt484-hint">Changer de niveau : touchez les blinds.</p>`);
       $('bpt484Dialog').onclick=e=>{const c=e.target.closest('[data-cmd]')?.dataset.cmd;if(c)actionDirect(c)};return;
     }
     if(type==='blinds'){
