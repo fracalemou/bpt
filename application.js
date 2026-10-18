@@ -4740,15 +4740,16 @@ function renderLatestGame(){
 
   const gameTiming=bptGameTiming(rows),gameDurationSec=gameTiming.durationSec;
 
+  // 10.4.44 — Chiffres clés en pastilles (date et lieu figurent déjà dans l'en-tête).
+  const finalLevelChip=Math.max(0,...rows.map(r=>Number(r.outLevel)||0));
   $("latestGameSummary").innerHTML=[
-    ["Date",shortDate(first.date||"")],
-    ["Lieu",first.location||"—"],
-    ["Participants",`${rows.length}`],
-    ["Début",gameTiming.startedAt?new Date(gameTiming.startedAt).toLocaleTimeString("fr-FR",{timeZone:"Europe/Paris",hour:"2-digit",minute:"2-digit"}):"—"],
-    ["Durée",formatGameDuration(gameDurationSec)],
-    ["Heads-up",formatGameDuration(gameTiming.headsUpDurationSec)],
-    ["Cagnotte",euro(pot)]
-  ].map(([label,value])=>`<div class="latestgame-summary-item"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join("");
+    ["👥",`${rows.length}`,"joueurs"],
+    ["🕘",gameTiming.startedAt?new Date(gameTiming.startedAt).toLocaleTimeString("fr-FR",{timeZone:"Europe/Paris",hour:"2-digit",minute:"2-digit"}):"—","début"],
+    ["⏱",formatGameDuration(gameDurationSec),"durée"],
+    ["⚔️",formatGameDuration(gameTiming.headsUpDurationSec),"heads-up"],
+    ["🎯",finalLevelChip>0?`niv. ${finalLevelChip}`:"—","niveau final"],
+    ["💰",euro(pot),"cagnotte"]
+  ].map(([ico,value,label])=>`<div class="lg-chip"><span class="lg-chip-ico">${ico}</span><b>${esc(value)}</b><small>${esc(label)}</small></div>`).join("");
 
   const killerRanking=rows.slice().sort((a,b)=>Number(b.kills||0)-Number(a.kills||0));
   const killerTop=killerRanking[0]||null;
@@ -4761,25 +4762,19 @@ function renderLatestGame(){
     ...rows.map(r=>Number(r.outLevel)||0)
   );
 
+  // 10.4.44 — Faits marquants en cartes homogènes (le niveau final est passé dans les pastilles).
   if($("latestGameHighlights")){
+    const card=(ico,label,main,sub)=>`<div class="lg-hl"><span class="lg-hl-ico">${ico}</span><div class="lg-hl-copy"><small>${esc(label)}</small><strong>${main}</strong>${sub?`<em>${sub}</em>`:""}</div></div>`;
+    const unlocked=gameUnlockedAchievements(gameNo);
     $("latestGameHighlights").innerHTML=[
-      ["🔥 Killer de la partie",killerTop&&Number(killerTop.kills||0)>0
-        ? `${killerTop.player} · ${killerTop.kills} kill${Number(killerTop.kills)>1?"s":""}`
-        : "—"],
-      ["🫧 La bulle",bubble
-        ? `${bubble.player} · 4e`
-        : "Pas de bulle sur cette partie"],
-      ["⏱ Niveau final",finalLevel>0
-        ? `Niveau ${finalLevel}`
-        : "Non renseigné"],
-      ["🏅 Accomplissements",(()=>{
-        const unlocked=gameUnlockedAchievements(gameNo);
-        if(!unlocked.length)return "Aucun nouveau";
-        return unlocked.slice(0,3)
-          .map(a=>`${a.icon} ${a.name} — ${(a.players||[]).map(funPlayerLabel).join(", ")}`)
-          .join(" · ")+(unlocked.length>3?` · +${unlocked.length-3}`:"");
-      })()]
-    ].map(([label,value])=>`<div class="latestgame-highlight"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`).join("");
+      card("🔥","Killer de la partie",
+        killerTop&&Number(killerTop.kills||0)>0?esc(killerTop.player):"—",
+        killerTop&&Number(killerTop.kills||0)>0?`${killerTop.kills} kill${Number(killerTop.kills)>1?"s":""}`:""),
+      card("🫧","La bulle",bubble?esc(bubble.player):"—",bubble?"sorti 4e, aux portes du podium":"pas de bulle sur cette partie"),
+      `<div class="lg-hl lg-hl-wide"><span class="lg-hl-ico">🏅</span><div class="lg-hl-copy"><small>Accomplissements débloqués</small>${unlocked.length
+        ? `<div class="lg-badges">${unlocked.map(a=>`<span class="lg-badge" title="${esc(a.desc||"")}">${a.icon} ${esc(a.name)}<i>${esc((a.players||[]).map(funPlayerLabel).join(", "))}</i></span>`).join("")}</div>`
+        : "<strong>Aucun nouveau</strong>"}</div></div>`
+    ].join("");
   }
   if($("latestGameCorrectionBtn")){
     $("latestGameCorrectionBtn").onclick=()=>openCorrectionForGame(gameNo);
@@ -4792,15 +4787,30 @@ function renderLatestGame(){
       : '<div class="impact-item muted">Cette partie ne modifie pas significativement le classement général.</div>';
   }
 
-  $("latestGamePodium").innerHTML=rows.slice(0,3).map((r,i)=>`
-    <div class="podium-medal-item rank-${i+1}">
-      <button class="player-link podium-real-name" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(r.player)}</button>
-      <div class="podium-nickname">${playerNicknameInfo(r.player).primary?`(${esc(playerNicknameInfo(r.player).primary)})`:""}</div>
-      <div class="medal-badge">${medalForRank(i+1)}</div>
-      <small>${num(r.points||0,0)} pts · ${euro(r.gross||0)}</small>
-    </div>`).join("");
+  // 10.4.44 — Podium de la partie en marches (même rendu que le podium de l'Accueil).
+  const lgStep=(r,place)=>r?`
+    <button type="button" class="bpt-home-step place-${place}" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">
+      <span class="bpt-home-step-medal">${medalForRank(place)}</span>
+      <span class="bpt-home-step-name">${esc(r.player)}</span>
+      <span class="bpt-home-step-nick">${esc(Number(r.gross||0)>0?euro(r.gross):(playerNicknameInfo(r.player).primary||""))||"&nbsp;"}</span>
+      <span class="bpt-home-step-block"><b>${num(r.points||0,0)}</b><small>pts</small><i>${place}</i></span>
+    </button>`:`<div class="bpt-home-step place-${place} is-empty"><span class="bpt-home-step-block"><i>${place}</i></span></div>`;
+  $("latestGamePodium").innerHTML=lgStep(rows[1],2)+lgStep(rows[0],1)+lgStep(rows[2],3);
 
-  $("latestGameResults").innerHTML=`<table>
+  // 10.4.44 — Liste compacte pour le téléphone en portrait ; le tableau reste pour le PC et le paysage.
+  const lgList=`<div class="lg-results">${rows.map(r=>{
+    const place=Number(r.place);
+    const by=place===1?"vainqueur 🏆":(r.killer?`éliminé par <b>${esc(r.killer)}</b>${r.outLevel?` · niv. ${Number(r.outLevel)}`:""}`:"");
+    const money=Number(r.gross||0)>0?` · <b class="lg-gain">+${euro(r.gross)}</b>`:"";
+    return `<div class="lg-res${place<=3?" p"+place:""}">
+      <span class="lg-res-place">${place<=3?medalForRank(place):place}</span>
+      <div class="lg-res-main">
+        <button type="button" class="lg-res-name" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(r.player)}'))">${esc(r.player)}</button>
+        <small>${Number(r.kills)>0?`${num(r.kills,0)} kill${Number(r.kills)>1?"s":""} · `:""}${by}${money}</small>
+      </div>
+      <span class="lg-res-pts">${num(r.points||0,0)}<small>pts</small></span>
+    </div>`;}).join("")}</div>`;
+  $("latestGameResults").innerHTML=lgList+`<div class="tablewrap lg-table"><table>
     <thead><tr><th>Place</th><th>Joueur</th><th>Points</th><th>Kills</th><th>Éliminé par</th><th>Niveau</th><th>Temps de jeu</th><th>Gain</th><th>Net</th></tr></thead>
     <tbody>${rows.map(r=>`<tr>
       <td>${r.place}</td>
@@ -4813,7 +4823,7 @@ function renderLatestGame(){
       <td>${euro(r.gross||0)}</td>
       <td>${euro(r.net||0)}</td>
     </tr>`).join("")}</tbody>
-  </table>`;
+  </table></div>`;
 
   // Accomplissements réellement débloqués lors de la partie affichée.
   const unlockedThisGame=gameUnlockedAchievements(gameNo);
@@ -4828,11 +4838,9 @@ function renderLatestGame(){
   $("latestGameAchievementsByPlayer").innerHTML=byPlayer.size
     ? [...byPlayer.entries()]
         .sort((a,b)=>a[0].localeCompare(b[0],"fr"))
-        .map(([player,items])=>`<div class="latest-achievement-player">
-          <button class="latest-achievement-player-name" type="button" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(player)}'))">${esc(funPlayerLabel(player))}</button>
-          <div class="latest-achievement-list">
-            ${items.map(a=>`<span class="latest-achievement-pill" title="${esc(a.desc)}">${a.icon} ${esc(a.name)}</span>`).join("")}
-          </div>
+        .map(([player,items])=>`<div class="lg-ach">
+          <button class="lg-ach-name" type="button" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(player)}'))">${esc(player)}<small>${esc(playerNicknameInfo(player).primary||"")}</small></button>
+          <div class="lg-badges">${items.map(a=>`<span class="lg-badge" title="${esc(a.desc)}">${a.icon} ${esc(a.name)}</span>`).join("")}</div>
         </div>`).join("")
     : '<span class="muted">Aucun nouvel accomplissement débloqué sur cette partie.</span>';
 }

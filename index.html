@@ -30,7 +30,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
     var narrowWindow=w<=700; // fenêtre PC très étroite : affichage téléphone (réversible)
     return !tablet&&(phoneUA||compactTouch||narrowWindow);
   };
-  window.bptDeviceCssHref=function(phone){return "./app-"+(phone?"tel":"pc")+".css?v=10.4.43";};
+  window.bptDeviceCssHref=function(phone){return "./app-"+(phone?"tel":"pc")+".css?v=10.4.44";};
   var phone=window.bptDetectPhone();
   document.documentElement.classList.toggle("bpt-mobile-device",phone);
   document.write('<link rel="stylesheet" id="bptDeviceCss" href="'+window.bptDeviceCssHref(phone)+'">');
@@ -38,7 +38,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
   try{var th=localStorage.getItem("bpt-theme");if(th&&th!=="nuit")document.documentElement.setAttribute("data-bpt-theme",th);}catch(_e){}
 })();
 </script>
-<noscript><link rel="stylesheet" href="./app-pc.css?v=10.4.43"></noscript>
+<noscript><link rel="stylesheet" href="./app-pc.css?v=10.4.44"></noscript>
 
 
 
@@ -114,7 +114,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 
 
 
-<link rel="stylesheet" href="./bpt-live-mobilefirst.css?v=10.4.43">
+<link rel="stylesheet" href="./bpt-live-mobilefirst.css?v=10.4.44">
 </head>
 <body>
 <div id="headUpPhotoPrompt" style="
@@ -152,9 +152,9 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 <button class="btn ghost" id="bptIosInstallClose" type="button">Fermer</button>
 </div>
 </div>
-<script src="./mobile-device.js?v=10.4.43"></script>
+<script src="./mobile-device.js?v=10.4.44"></script>
 
-<script src="./app-version.js?v=10.4.43"></script>
+<script src="./app-version.js?v=10.4.44"></script>
 <header class="bpt-header">
 <div class="bpt-brand-wrap">
 <div aria-label="BPT" class="bpt-logo">
@@ -530,89 +530,60 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 <section class="bpt-home-card bpt-home-fact" id="dashFact"><div class="bpt-home-kicker">🗞 La gazette du BPT</div><p id="dashDynamicsText">Les petites histoires du championnat apparaîtront ici.</p></section>
 </div>
 </section>
-<section class="view" id="latestgame">
-<div class="hero latestgame-hero tab-premium-hero latestgame-photo-hero">
-<div class="latestgame-hero-main">
-<div class="home-kicker">BPT · Parties</div>
-<h1 id="latestGameTitle">Dernière partie</h1>
-<p id="latestGameMeta">Aucune partie enregistrée.</p>
-<button class="btn ghost" id="latestGameRecapBtn" type="button" hidden>🏆 Revoir le bilan</button>
+<section class="view lg-view" id="latestgame">
+<!-- 10.4.44 — Écran Parties refondu : navigation, en-tête (photo en bandeau), podium en marches, chiffres clés, faits marquants, résultat. -->
+<div class="lg-nav">
+<button class="lg-nav-btn" id="latestPrevGameBtn" type="button" aria-label="Partie précédente">‹</button>
+<div class="lg-nav-pos"><strong id="latestGamePosition">—</strong><small id="latestGameHistorySummary">Historique des parties</small></div>
+<button class="lg-nav-btn" id="latestNextGameBtn" type="button" aria-label="Partie suivante">›</button>
 </div>
-<div class="latestgame-photo-area" id="latestGamePhotoArea">
+<div class="lg-hero">
+<div class="lg-photo" id="latestGamePhotoArea">
 <button class="game-photo-thumb-btn" id="latestGamePhotoThumbBtn" style="display:none" title="Agrandir la photo" type="button">
 <img alt="Photo de la partie" class="game-photo-thumb" id="latestGamePhotoThumb"/>
 </button>
-<div class="game-photo-placeholder" id="latestGamePhotoPlaceholder">
-<span>♠</span>
-<small>Photo de la partie</small>
-</div>
-<div class="game-photo-actions">
-<label class="btn ghost game-photo-upload-label" for="latestGamePhotoInput" id="latestGamePhotoAddBtn">
-<span id="latestGamePhotoUploadLabel">Ajouter</span>
-</label>
+<label class="game-photo-placeholder" for="latestGamePhotoInput" id="latestGamePhotoPlaceholder"><span>📷</span><small>Ajouter la photo de la partie</small></label>
+<button aria-label="Options de la photo" class="lg-photo-menu-btn" type="button" onclick="this.parentNode.classList.toggle('menu-open')">⋯</button>
+<div class="lg-photo-menu game-photo-actions">
+<label class="game-photo-upload-label" for="latestGamePhotoInput" id="latestGamePhotoAddBtn">🖼 <span id="latestGamePhotoUploadLabel">Ajouter</span> la photo</label>
 <input accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif" class="bpt-photo-file-input" hidden="" id="latestGamePhotoInput" type="file"/>
 <input accept="image/*" capture="environment" hidden="" id="latestGameHeadUpCameraInput" type="file"/>
-<button class="btn ghost game-photo-delete-btn" id="latestGamePhotoDeleteBtn" style="display:none" type="button">Retirer</button>
-<label class="btn ghost game-photo-headup-camera-btn" for="latestGameHeadUpCameraInput" id="latestGameHeadUpCameraBtn">
-          📸 Photo Head-Up
-        </label>
+<button class="game-photo-delete-btn" id="latestGamePhotoDeleteBtn" style="display:none" type="button">🗑 Retirer la photo</button>
+<label class="game-photo-headup-camera-btn" for="latestGameHeadUpCameraInput" id="latestGameHeadUpCameraBtn">📸 Photo Head-Up</label>
 </div>
 </div>
-<div class="latestgame-winner">
-<span>Vainqueur</span>
-<strong id="latestGameWinner">—</strong>
-<small class="winner-nickname" id="latestGameWinnerNickname"></small>
-<small id="latestGameWinnerMeta">—</small>
+<div class="lg-hero-copy">
+<div class="home-kicker">BPT · Parties</div>
+<h1 id="latestGameTitle">Dernière partie</h1>
+<p id="latestGameMeta">Aucune partie enregistrée.</p>
+<button class="lg-recap" id="latestGameRecapBtn" type="button" hidden>🏆 Revoir le bilan</button>
 </div>
-</div>
-<div class="game-browser-toolbar">
-<button class="btn secondary" id="latestPrevGameBtn" type="button">← Partie précédente</button>
-<div class="game-browser-position">
-<strong id="latestGamePosition">—</strong>
-<small id="latestGameHistorySummary">Historique des parties</small>
-</div>
-<button class="btn secondary" id="latestNextGameBtn" type="button">Partie suivante →</button>
+<div class="lg-winner-data" hidden><strong id="latestGameWinner">—</strong><small class="winner-nickname" id="latestGameWinnerNickname"></small><small id="latestGameWinnerMeta">—</small></div>
 </div>
 <div class="card muted" id="latestGameEmpty" style="display:none;margin-top:12px">
     Aucune partie enregistrée.
   </div>
 <div id="latestGameContent" style="display:none">
-<div class="latestgame-summary-line" id="latestGameSummary"></div>
-<div class="latestgame-highlights" id="latestGameHighlights"></div>
-<details class="collapsible-block">
-<summary>
-<span><strong>Ce que cette partie change</strong><small>Impact sur le classement général</small></span>
-</summary>
-<div class="collapsible-block-content">
-<div class="impact-list" id="latestGameImpact"></div>
-</div>
+<section class="lg-card">
+<div class="lg-card-head"><h2>🏆 Podium de la partie</h2></div>
+<div class="bpt-home-podium lg-podium" id="latestGamePodium"></div>
+</section>
+<div class="lg-chips" id="latestGameSummary"></div>
+<div class="lg-highlights" id="latestGameHighlights"></div>
+<section class="lg-card">
+<div class="lg-card-head"><h2>📋 Résultat complet</h2></div>
+<div id="latestGameResults"></div>
+</section>
+<details class="lg-card lg-fold">
+<summary><span>📈 Ce que cette partie change</span><small>Impact sur le classement général</small></summary>
+<div class="lg-impact" id="latestGameImpact"></div>
 </details>
-<div class="latestgame-actions">
-<button class="btn ghost" id="latestGameCorrectionBtn" type="button">Corriger cette partie</button>
-</div>
-<div class="latestgame-podium-wrap">
-<div class="dashboard-section-label">Podium de la partie</div>
-<div class="podium-medals" id="latestGamePodium"></div>
-</div>
-<div class="latestgame-details">
-<details class="latestgame-detail" open="">
-<summary>
-<span>Résultat complet</span>
-<small>Classement, points, kills et gains</small>
-</summary>
-<div class="latestgame-detail-body">
-<div class="tablewrap" id="latestGameResults"></div>
-</div>
-</details>
-<details class="latestgame-detail">
-<summary>
-<span>Accomplissements débloqués</span>
-<small>Regroupés par joueur</small>
-</summary>
-<div class="latestgame-detail-body">
+<details class="lg-card lg-fold">
+<summary><span>🏅 Accomplissements débloqués</span><small>Regroupés par joueur</small></summary>
 <div id="latestGameAchievementsByPlayer"></div>
-</div>
 </details>
+<div class="lg-actions">
+<button class="btn ghost" id="latestGameCorrectionBtn" type="button">✏️ Corriger cette partie</button>
 </div>
 <details class="combined-block latestgame-full-history">
 <summary>
@@ -1210,7 +1181,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
-<script src="./firebase-bridge.js?v=10.4.43"></script>
+<script src="./firebase-bridge.js?v=10.4.44"></script>
 <div id="cloudStatus" style="cursor:pointer" title="État de la synchronisation partagée — cliquer pour recharger depuis Firebase">
 <span id="cloudStatusDot">●</span>
 <span id="cloudStatusText">Connexion…</span>
@@ -1222,12 +1193,12 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
   border:1px solid #4f7e63;color:#fff;font-weight:800;
   box-shadow:0 12px 34px rgba(0,0,0,.35);text-align:center">
 </div>
-<script src="./application.js?v=10.4.43"></script>
-<script src="./navigation.js?v=10.4.43"></script>
-<script id="bpt-share-recap" src="./bpt-share-recap.js?v=10.4.43"></script>
-<script id="bpt-agenda" src="./bpt-agenda.js?v=10.4.43"></script>
-<script id="bpt-my-profile" src="./bpt-my-profile.js?v=10.4.43"></script>
-<script id="bpt-v229-orientation-stability" src="./bpt-v229-orientation-stability.js?v=10.4.43"></script>
+<script src="./application.js?v=10.4.44"></script>
+<script src="./navigation.js?v=10.4.44"></script>
+<script id="bpt-share-recap" src="./bpt-share-recap.js?v=10.4.44"></script>
+<script id="bpt-agenda" src="./bpt-agenda.js?v=10.4.44"></script>
+<script id="bpt-my-profile" src="./bpt-my-profile.js?v=10.4.44"></script>
+<script id="bpt-v229-orientation-stability" src="./bpt-v229-orientation-stability.js?v=10.4.44"></script>
 <div class="avatar-picker-backdrop" id="playerAvatarPickerBackdrop" style="display:none">
 <div class="avatar-picker-card">
 <div class="avatar-picker-head">
@@ -1241,23 +1212,23 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 </div>
 </div>
 </div>
-<script id="bpt-v260-avatar-modal-bindings" src="./bpt-v260-avatar-modal-bindings.js?v=10.4.43"></script>
-<script id="bpt-live3-module" src="./bpt-live3-module.js?v=10.4.43"></script>
-<script id="bpt-identity-entry-gate" src="./bpt-identity-entry-gate.js?v=10.4.43"></script>
-<script id="bpt-photo-url-migration-launcher" src="./bpt-photo-url-migration-launcher.js?v=10.4.43"></script>
-<script id="bpt-app-presence-launcher" src="./bpt-app-presence-launcher.js?v=10.4.43"></script>
-<script id="bpt-shared-photo-config-bootstrap" src="./bpt-shared-photo-config-bootstrap.js?v=10.4.43"></script>
+<script id="bpt-v260-avatar-modal-bindings" src="./bpt-v260-avatar-modal-bindings.js?v=10.4.44"></script>
+<script id="bpt-live3-module" src="./bpt-live3-module.js?v=10.4.44"></script>
+<script id="bpt-identity-entry-gate" src="./bpt-identity-entry-gate.js?v=10.4.44"></script>
+<script id="bpt-photo-url-migration-launcher" src="./bpt-photo-url-migration-launcher.js?v=10.4.44"></script>
+<script id="bpt-app-presence-launcher" src="./bpt-app-presence-launcher.js?v=10.4.44"></script>
+<script id="bpt-shared-photo-config-bootstrap" src="./bpt-shared-photo-config-bootstrap.js?v=10.4.44"></script>
 <div class="bpt-app-action" id="bptAppAction" style="display:none">
 <button class="btn secondary" id="bptAppActionBtn" type="button">
     📲 Installer BPT sur cet appareil
   </button>
 <button aria-label="Ne plus proposer" class="bpt-app-action-close" id="bptAppActionClose" title="Ne plus proposer ici (reste disponible dans Paramètres)" type="button">×</button>
 </div>
-<script id="bpt-pwa-unified-action" src="./bpt-pwa-unified-action.js?v=10.4.43"></script>
-<script id="bpt-v408-config-ui" src="./bpt-v408-config-ui.js?v=10.4.43"></script>
-<script id="bpt-v400-headup-summary" src="./bpt-v400-headup-summary.js?v=10.4.43"></script>
-<script id="bpt-v404-latestgame-layout" src="./bpt-v404-latestgame-layout.js?v=10.4.43"></script>
-<script id="bpt-v417-native-mobile-nav" src="./bpt-v417-native-mobile-nav.js?v=10.4.43"></script>
+<script id="bpt-pwa-unified-action" src="./bpt-pwa-unified-action.js?v=10.4.44"></script>
+<script id="bpt-v408-config-ui" src="./bpt-v408-config-ui.js?v=10.4.44"></script>
+<script id="bpt-v400-headup-summary" src="./bpt-v400-headup-summary.js?v=10.4.44"></script>
+<script id="bpt-v404-latestgame-layout" src="./bpt-v404-latestgame-layout.js?v=10.4.44"></script>
+<script id="bpt-v417-native-mobile-nav" src="./bpt-v417-native-mobile-nav.js?v=10.4.44"></script>
 <div aria-hidden="true" class="bpt-odds-modal" id="bptOddsModal">
 <div aria-labelledby="bptOddsTitle" aria-modal="true" class="bpt-odds-card" role="dialog">
 <div class="bpt-odds-head"><h2 id="bptOddsTitle">Calcul de côtes · Texas Hold'em</h2><button class="bpt-odds-close" id="bptOddsClose" type="button">×</button></div>
@@ -1279,25 +1250,25 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 </div>
 </div>
 </div>
-<script id="bpt-v453-odds-script" src="./bpt-v453-odds-script.js?v=10.4.43"></script>
-<script id="bpt-v463-settings-script" src="./bpt-v463-settings-script.js?v=10.4.43"></script>
+<script id="bpt-v453-odds-script" src="./bpt-v453-odds-script.js?v=10.4.44"></script>
+<script id="bpt-v463-settings-script" src="./bpt-v463-settings-script.js?v=10.4.44"></script>
 
 
 
 
-<script id="bpt-live-betting" src="./live-betting.js?v=10.4.43"></script>
-<script id="bpt-live-ui" src="./live-ui.js?v=10.4.43"></script>
-
-
-
-
-
+<script id="bpt-live-betting" src="./live-betting.js?v=10.4.44"></script>
+<script id="bpt-live-ui" src="./live-ui.js?v=10.4.44"></script>
 
 
 
 
 
-<script src="./bpt-live-mobilefirst.js?v=10.4.43"></script>
+
+
+
+
+
+<script src="./bpt-live-mobilefirst.js?v=10.4.44"></script>
 </body>
 </html>
 
