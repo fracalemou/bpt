@@ -211,7 +211,7 @@
       '_Les cartes sont mélangées, les jetons empilés…_',
       '_il ne manque plus que toi !_',
       '',
-      '➜ *Réponds dans l’appli BPT* (pas ici) :',
+      '➜ *Réponds dans l’appli BPT* :',
       appUrl()
     ];
     return lines.filter(l=>l!==null).join('\n');
