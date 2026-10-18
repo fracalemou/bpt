@@ -2233,22 +2233,19 @@ function renderProfile(preferredName=null){
     `${s.wins} victoire${s.wins>1?"s":""} · ${s.podiums} podium${s.podiums>1?"s":""} · `+
     `${s.kills} kill${s.kills>1?"s":""}`;
 
+  // 10.4.50 — Chiffres clés : les 4 essentiels en tête, puis le détail en plus petit.
   const kpis=[
-    ["Points",num(s.points,0)],
-    ["Moy. pts",num(s.avgPoints,1)],
-    ["Classement",s.rank?`#${s.rank}`:"—"],
-    ["Victoires",s.wins],
-    ["Podiums",s.podiums],
+    ["Points",num(s.points,0),true],
+    ["Moyenne / partie",num(s.avgPoints,1),true],
+    ["Victoires",`${s.wins} · ${num(s.winRate,0)} %`,true],
+    ["Podiums",`${s.podiums} · ${num(s.podiumRate,0)} %`,true],
+    ["Place moyenne",d.avgPlace?num(d.avgPlace,1):"—"],
+    ["Kills",`${s.kills} · ${num(s.kpg,1)}/p`],
     ["Tabliers",s.tabliers],
-    ["Kills",s.kills],
-    ["Kills / partie",num(s.kpg,2)],
-    ["Place moyenne",d.avgPlace?num(d.avgPlace,2):"—"],
-    ["Solde",euro(s.net)],
-    ["Taux victoire",num(s.winRate,1)+" %"],
-    ["Taux podium",num(s.podiumRate,1)+" %"]
+    ["Solde",euro(s.net)]
   ];
   $("playerProfileKpis").innerHTML=kpis
-    .map(([l,v])=>`<div class="profile-kpi"><b>${esc(v)}</b><span>${esc(l)}</span></div>`)
+    .map(([l,v,main])=>`<div class="pf-kpi${main?" is-main":""}"><b>${esc(v)}</b><span>${esc(l)}</span></div>`)
     .join("");
 
   const feats=[
@@ -2262,12 +2259,13 @@ function renderProfile(preferredName=null){
     ["Victime favorite",d.favoriteVictim?`${d.favoriteVictim[0]}${playerNicknameSecondary(d.favoriteVictim[0])?" "+playerNicknameSecondary(d.favoriteVictim[0]):""} · ${d.favoriteVictim[1]} fois`:"—"],
     ["Bourreau principal",d.nemesis?`${d.nemesis[0]}${playerNicknameSecondary(d.nemesis[0])?" "+playerNicknameSecondary(d.nemesis[0]):""} · ${d.nemesis[1]} fois`:"—"]
   ];
+  const FEAT_ICON={"Meilleure place":"🏅","Meilleure partie en kills":"🎯","Meilleur résultat financier":"💶","Série de victoires":"⚡","Série de podiums":"🥉","4e places":"💔","Dernières places":"🐢","Victime favorite":"😈","Bourreau principal":"☠️"};
   $("playerProfileFeats").innerHTML=feats
-    .map(([l,v])=>`<div class="profile-feat"><span>${esc(l)}</span><strong>${esc(v)}</strong></div>`)
+    .map(([l,v])=>`<div class="pf-feat"><span class="pf-feat-ico">${FEAT_ICON[l]||"★"}</span><div><small>${esc(l)}</small><strong>${esc(v)}</strong></div></div>`)
     .join("");
 
   $("playerProfileAchievements").innerHTML=d.achievements.length
-    ? d.achievements.map(a=>`<div class="profile-achievement ${a.dynamic?"dynamic":""}" title="${esc(a.desc)}"><span class="ico">${a.icon}</span><span>${esc(a.name)}</span></div>`).join("")
+    ? d.achievements.map(a=>`<span class="pf-badge" title="${esc(a.desc)}">${a.icon} ${esc(a.name)}</span>`).join("")
     : '<span class="profile-no-achievement">Aucun accomplissement débloqué pour le moment.</span>';
 
   $("playerProfilePlaces").innerHTML=rows
@@ -2275,13 +2273,11 @@ function renderProfile(preferredName=null){
     .join("") || '<span class="muted">Aucune partie.</span>';
 
   if($("playerProfileRecentForm")){
-    const recentRows=rows.slice().sort((a,b)=>Number(b.game)-Number(a.game)).slice(0,5);
+    const recentRows=rows.slice().sort((a,b)=>Number(b.game)-Number(a.game)).slice(0,6);
     $("playerProfileRecentForm").innerHTML=recentRows.length
-      ? recentRows.map(r=>`<div class="profile-form-card">
-          <strong>${Number(r.place)===1?"🏆 "+r.place:r.place+"e"}</strong>
-          <small>Partie #${r.game}</small>
-          <small>${num(r.points||0,0)} pts</small>
-        </div>`).join("")
+      ? recentRows.map(r=>{const p=Number(r.place);return `<div class="pf-form-item${p<=3?" p"+p:""}" title="Partie #${r.game}">
+          <b>${p}<sup>${p===1?"er":"e"}</sup></b><small>#${r.game} · ${num(r.points||0,0)} pts</small>
+        </div>`;}).join("")
       : '<span class="muted">Aucune partie.</span>';
   }
 
@@ -2289,7 +2285,7 @@ function renderProfile(preferredName=null){
   if($("playerProfileRankChart")){
     const snaps=rankingSnapshotByGame();
     const vals=snaps.map(s=>({x:s.game,y:s.ranks[name]})).filter(v=>Number.isFinite(v.y));
-    renderLineChart("playerProfileRankChart",[{name,values:vals}],{reverseY:true,label:`Évolution du classement de ${name}`});
+    $("playerProfileRankChart").innerHTML=bptMySeasonRankChart(vals,ranking().length);
   }
 
   if($("playerProfileMainRivalry")){
@@ -3712,7 +3708,7 @@ function updateSeasonContextTitles(){
   set("rankingSeasonTitle","Classements BPT");
   const recordsSeasonTitle=document.getElementById("recordsSeasonTitle");
   if(recordsSeasonTitle)recordsSeasonTitle.textContent="Records & accomplissements";
-  set("profileSeasonTitle","Profil joueur BPT");
+  set("profileSeasonTitle","Fiche joueur ·");
   const recordsContextTitle=document.getElementById("recordsContextTitle");
   if(recordsContextTitle){
     recordsContextTitle.textContent=isAllSeasons()

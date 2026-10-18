@@ -6901,3 +6901,61 @@ header.bpt-header #bptConnectedIdentity:not(:empty){display:inline-flex !importa
 .bpt-ag-day.is-taken{opacity:.45;cursor:not-allowed;text-decoration:line-through;background:rgba(255,107,107,.12)}
 .bpt-ag-day.is-past.is-fri{box-shadow:none}
 .bpt-ag-wa-btns{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.bpt-ag-wa-later{padding:9px 14px;border-radius:999px;border:1px solid var(--bpt-line,#2c3a5a);background:transparent;color:var(--bpt-muted,#aeb9c9);font:inherit;font-weight:800;font-size:13.5px;cursor:pointer}
+
+/* ===== 10.4.50 — Fiche joueur refondue (préfixe pf-) ===== */
+#profile .pf-head{background:linear-gradient(135deg,var(--bpt-card2,#1f2b47),var(--bpt-card,#18223a));border:1px solid var(--bpt-line,#2c3a5a);border-radius:20px;padding:16px 18px;margin:0 0 14px;color:var(--bpt-text,#fff)}
+#profile .pf-id{display:flex;align-items:center;gap:14px}
+#profile .pf-avatar{flex:0 0 auto;width:72px !important;height:72px !important;min-width:0 !important;border-radius:50% !important;padding:0 !important;margin:0 !important;overflow:hidden;border:3px solid var(--bpt-gold,#f2c853) !important;background:var(--bpt-deep,#0b1020) !important;display:flex !important;align-items:center;justify-content:center;cursor:pointer;box-shadow:none !important}
+#profile .pf-avatar .profile-avatar{width:100% !important;height:100% !important;object-fit:cover;border-radius:50% !important;border:0 !important;max-width:none !important}
+#profile .pf-avatar .profile-avatar-placeholder{width:100% !important;height:100% !important;font-size:30px !important;display:flex;align-items:center;justify-content:center;color:var(--bpt-gold,#f2c853);background:none !important;border:0 !important}
+#profile .pf-id-copy{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+#profile .pf-id-copy h1{margin:2px 0 0;font-size:24px;line-height:1.15;color:var(--bpt-text,#fff)}
+#profile .pf-nick{font-size:14px;font-style:italic;color:var(--bpt-muted,#aeb9c9)}
+#profile .pf-nick strong{font-weight:700}
+#profile .pf-meta{margin:2px 0 0;font-size:13px;color:var(--bpt-muted,#aeb9c9)}
+#profile .pf-rank{flex:0 0 auto;min-width:64px;height:64px;padding:0 10px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:var(--bpt-gold,#f2c853);background:rgba(242,200,83,.1);border:1px solid rgba(242,200,83,.45)}
+#profile .pf-other-nicks{margin:10px 0 0;font-size:12px;color:var(--bpt-muted,#aeb9c9)}
+#profile .pf-other-nicks:empty{display:none}
+#profile .pf-tools{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08)}
+#profile .pf-select{display:flex;flex-direction:column;gap:4px;flex:1 1 240px;max-width:420px}
+#profile .pf-select span{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--bpt-muted,#aeb9c9)}
+#profile .pf-select select{width:100%}
+#profile .pf-avatar-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#profile .pf-avatar-actions .profile-avatar-name{font-size:12px;color:var(--bpt-muted,#aeb9c9)}
+#profile .pf-avatar-actions button{padding:7px 12px !important;border-radius:999px !important;font-size:12.5px !important;font-weight:800;min-height:0 !important;width:auto !important}
+
+#profile .pf-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 14px}
+#profile .pf-kpi{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:14px;background:var(--bpt-card,#18223a);border:1px solid var(--bpt-line,#2c3a5a);min-width:0}
+#profile .pf-kpi b{font-size:16px;color:var(--bpt-text,#fff);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#profile .pf-kpi span{font-size:11px;font-weight:700;color:var(--bpt-muted,#aeb9c9);text-transform:uppercase;letter-spacing:.04em}
+#profile .pf-kpi.is-main b{font-size:22px;color:var(--bpt-gold,#f2c853)}
+
+#profile .pf-card{background:var(--bpt-card,#18223a);border:1px solid var(--bpt-line,#2c3a5a);border-radius:18px;padding:14px 16px;margin:0 0 14px;color:var(--bpt-text,#fff)}
+#profile .pf-card > h2{margin:0 0 10px;font-size:17px}
+#profile .pf-sub{margin:10px 0 6px;font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--bpt-muted,#aeb9c9)}
+#profile .pf-feats{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+#profile .pf-feat{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);min-width:0}
+#profile .pf-feat-ico{font-size:18px;line-height:1.2}
+#profile .pf-feat > div{display:flex;flex-direction:column;gap:2px;min-width:0}
+#profile .pf-feat small{font-size:11px;font-weight:700;color:var(--bpt-muted,#aeb9c9);text-transform:uppercase;letter-spacing:.04em}
+#profile .pf-feat strong{font-size:14.5px;color:var(--bpt-text,#fff)}
+#profile .pf-form{display:flex;gap:8px;flex-wrap:wrap}
+#profile .pf-form-item{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:70px;padding:8px 10px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--bpt-line,#2c3a5a)}
+#profile .pf-form-item b{font-size:18px;font-weight:900}
+#profile .pf-form-item b sup{font-size:10px}
+#profile .pf-form-item small{font-size:11px;color:var(--bpt-muted,#aeb9c9);white-space:nowrap}
+#profile .pf-form-item.p1{border-color:#f2c853;background:rgba(242,200,83,.12)}#profile .pf-form-item.p1 b{color:#f2c853}
+#profile .pf-form-item.p2{border-color:#cfd6e2}#profile .pf-form-item.p2 b{color:#cfd6e2}
+#profile .pf-form-item.p3{border-color:#d58a52}#profile .pf-form-item.p3 b{color:#d58a52}
+#profile .pf-chart{margin-top:4px}
+#profile .pf-achievements{display:flex;flex-wrap:wrap;gap:6px}
+#profile .pf-badge{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:999px;background:rgba(242,200,83,.1);border:1px solid rgba(242,200,83,.35);font-size:13px;font-weight:700;color:var(--bpt-text,#fff)}
+#profile .pf-fold{padding:0;overflow:hidden}
+#profile .pf-fold > summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;flex-direction:column;gap:2px}
+#profile .pf-fold > summary::-webkit-details-marker{display:none}
+#profile .pf-fold > summary span{font-size:16px;font-weight:800}
+#profile .pf-fold > summary span::after{content:" ›";color:var(--bpt-teal,#2ac9c2)}
+#profile .pf-fold[open] > summary span::after{content:" ⌄"}
+#profile .pf-fold > summary small{font-size:12px;color:var(--bpt-muted,#aeb9c9)}
+#profile .pf-fold-body{padding:0 16px 14px}
+#profile .pf-chart{max-width:620px}

@@ -30,7 +30,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
     var narrowWindow=w<=700; // fenêtre PC très étroite : affichage téléphone (réversible)
     return !tablet&&(phoneUA||compactTouch||narrowWindow);
   };
-  window.bptDeviceCssHref=function(phone){return "./app-"+(phone?"tel":"pc")+".css?v=10.4.49";};
+  window.bptDeviceCssHref=function(phone){return "./app-"+(phone?"tel":"pc")+".css?v=10.4.50";};
   var phone=window.bptDetectPhone();
   document.documentElement.classList.toggle("bpt-mobile-device",phone);
   document.write('<link rel="stylesheet" id="bptDeviceCss" href="'+window.bptDeviceCssHref(phone)+'">');
@@ -38,7 +38,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
   try{var th=localStorage.getItem("bpt-theme");if(th&&th!=="nuit")document.documentElement.setAttribute("data-bpt-theme",th);}catch(_e){}
 })();
 </script>
-<noscript><link rel="stylesheet" href="./app-pc.css?v=10.4.49"></noscript>
+<noscript><link rel="stylesheet" href="./app-pc.css?v=10.4.50"></noscript>
 
 
 
@@ -114,7 +114,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 
 
 
-<link rel="stylesheet" href="./bpt-live-mobilefirst.css?v=10.4.49">
+<link rel="stylesheet" href="./bpt-live-mobilefirst.css?v=10.4.50">
 </head>
 <body>
 <div id="headUpPhotoPrompt" style="
@@ -152,9 +152,9 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 <button class="btn ghost" id="bptIosInstallClose" type="button">Fermer</button>
 </div>
 </div>
-<script src="./mobile-device.js?v=10.4.49"></script>
+<script src="./mobile-device.js?v=10.4.50"></script>
 
-<script src="./app-version.js?v=10.4.49"></script>
+<script src="./app-version.js?v=10.4.50"></script>
 <header class="bpt-header">
 <div class="bpt-brand-wrap">
 <div aria-label="BPT" class="bpt-logo">
@@ -740,92 +740,67 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 </div>
 </details>
 </section>
-<section class="view" id="profile">
-<div class="hero tab-premium-hero">
-<div class="profile-topbar">
-<div>
-<h1 id="profileSeasonTitle">Profil joueur</h1>
-<p>Statistiques, faits d’armes et accomplissements individuels.</p>
+<section class="view pf-view" id="profile">
+<!-- 10.4.50 — Fiche joueur refondue : identité compacte, chiffres clés, faits d'armes en tuiles, forme + courbe, blocs repliables. -->
+<div class="pf-head">
+<div class="pf-id">
+<button class="profile-avatar-wrap pf-avatar" id="playerProfileAvatarWrap" title="Choisir ou modifier l’avatar" type="button">
+<div class="profile-avatar-placeholder" id="playerProfileAvatarPlaceholder">♠</div>
+<img alt="Avatar du joueur" class="profile-avatar" id="playerProfileAvatar" style="display:none"/>
+</button>
+<div class="pf-id-copy">
+<div class="home-kicker" id="profileSeasonTitle">Fiche joueur</div>
+<h1 id="playerProfileName">—</h1>
+<div class="pf-nick" id="playerProfileNickname"></div>
+<p class="pf-meta" id="playerProfileMeta"></p>
 </div>
-<div class="field profile-selector-field">
-<label>Joueur</label>
-<select id="profilePlayerSelect"></select>
+<div class="pf-rank" id="playerProfileRank">#—</div>
+</div>
+<div class="pf-other-nicks" id="playerProfileOtherNicknames"></div>
+<div class="pf-tools">
+<label class="pf-select"><span>Joueur</span><select id="profilePlayerSelect"></select></label>
+<div class="pf-avatar-actions">
+<span class="profile-avatar-name" id="playerProfileAvatarName"></span>
+<button class="profile-avatar-btn" id="playerProfileAvatarBtn" type="button">Choisir un avatar</button>
+<button class="profile-avatar-delete-btn" id="playerProfileAvatarDeleteBtn" style="display:none" type="button">Supprimer l’avatar</button>
 <button id="bptChangeProfileCodeBtn" type="button" hidden>🔑 Changer mon code</button>
 </div>
 </div>
 </div>
-<div class="hero player-profile-hero profile-identity premium-profile-identity">
-<div class="profile-avatar-column">
-<button class="profile-avatar-wrap" id="playerProfileAvatarWrap" title="Choisir ou modifier l’avatar" type="button">
-<div class="profile-avatar-placeholder" id="playerProfileAvatarPlaceholder">♠</div>
-<img alt="Avatar du joueur" class="profile-avatar" id="playerProfileAvatar" style="display:none"/>
-</button>
-<div class="profile-avatar-name" id="playerProfileAvatarName"></div>
-<button class="profile-avatar-btn" id="playerProfileAvatarBtn" type="button">Choisir un avatar</button>
-<button class="profile-avatar-delete-btn" id="playerProfileAvatarDeleteBtn" style="display:none" type="button">Supprimer l’avatar</button>
-</div>
-<div>
-<div class="muted">Fiche joueur BPT</div>
-<h1 id="playerProfileName">—</h1>
-<div class="profile-nickname" id="playerProfileNickname"></div>
-<div class="profile-other-nicknames" id="playerProfileOtherNicknames"></div>
-<p id="playerProfileMeta"></p>
-</div>
-<div class="profile-rank" id="playerProfileRank">#—</div>
-</div>
-<div class="profile-kpis" id="playerProfileKpis"></div>
-<div class="grid" style="margin-top:12px">
-<details class="collapsible-block span6">
-<summary><span><strong>Faits d’armes principaux</strong><small>Performances marquantes du joueur</small></span></summary>
-<div class="collapsible-block-content"><div class="profile-feats" id="playerProfileFeats"></div></div>
-</details>
-<details class="collapsible-block span6">
-<summary><span><strong>Accomplissements débloqués</strong><small>Badges et accomplissements du joueur</small></span></summary>
-<div class="collapsible-block-content"><div class="profile-achievements" id="playerProfileAchievements"></div></div>
-</details>
-<details class="collapsible-block span7">
-<summary><span><strong>Forme &amp; évolution</strong><small>5 dernières participations et courbe de classement</small></span></summary>
-<div class="collapsible-block-content">
-<div class="muted" style="margin-bottom:8px">Les 5 dernières participations du joueur.</div>
-<div class="profile-form-strip" id="playerProfileRecentForm"></div>
-<div class="chart-card">
-<h2 style="margin-top:18px">Évolution du classement</h2>
-<div class="muted">Rang général du joueur au fil des parties.</div>
-<div class="chart-wrap" id="playerProfileRankChart"></div>
-</div>
-<h2 style="margin-top:18px">Historique des places en partie</h2>
-<div id="playerProfilePlaces"></div>
-</div>
-</details>
-<details class="collapsible-block span5">
-<summary><span><strong>Rivalités</strong><small>Rival principal et confrontations directes</small></span></summary>
-<div class="collapsible-block-content">
-<h2>Rivalité principale</h2>
+<div class="pf-kpis" id="playerProfileKpis"></div>
+<section class="pf-card">
+<h2>⚡ Faits d’armes</h2>
+<div class="pf-feats" id="playerProfileFeats"></div>
+</section>
+<section class="pf-card">
+<h2>📈 Forme &amp; évolution</h2>
+<div class="pf-sub">Dernières parties</div>
+<div class="pf-form" id="playerProfileRecentForm"></div>
+<div class="pf-sub">Rang au classement après chaque partie</div>
+<div class="bpt-ms-chart pf-chart" id="playerProfileRankChart"></div>
+<div id="playerProfilePlaces" hidden></div>
+<div id="playerProfileRankHistory" hidden></div>
+</section>
+<section class="pf-card">
+<h2>🏅 Accomplissements</h2>
+<div class="pf-achievements" id="playerProfileAchievements"></div>
+</section>
+<details class="pf-card pf-fold">
+<summary><span>⚔️ Rivalités</span><small>Adversaire le plus marquant et confrontations directes</small></summary>
+<div class="pf-fold-body">
 <div class="profile-rivalry-main" id="playerProfileMainRivalry"></div>
-<h2 style="margin-top:18px">Confrontations directes — Kills</h2>
-<div class="muted" style="margin-bottom:8px">Bilan des éliminations entre ce joueur et ses adversaires.</div>
+<div class="pf-sub">Bilan des éliminations (+ = tu l’élimines plus souvent qu’il ne t’élimine)</div>
 <div id="playerProfileRivals"></div>
 </div>
 </details>
-<details class="collapsible-block span12">
-<summary><span><strong>Historique du classement</strong><small>Rang général après chaque partie</small></span></summary>
-<div class="collapsible-block-content">
-<div id="playerProfileRankHistory"></div>
-</div>
+<details class="pf-card pf-fold">
+<summary><span>📊 Statistiques par saison</span><small>Comparaison sur toutes les saisons disponibles</small></summary>
+<div class="pf-fold-body"><div class="tablewrap" id="playerProfileSeasons"></div></div>
 </details>
-<details class="collapsible-block span12">
-<summary><span><strong>Statistiques par saison</strong><small>Comparaison sur toutes les saisons disponibles</small></span></summary>
-<div class="collapsible-block-content">
-<div class="tablewrap" id="playerProfileSeasons"></div>
-</div>
+<details class="pf-card pf-fold">
+<summary><span>🃏 Parties du joueur</span><small>Historique complet des participations</small></summary>
+<div class="pf-fold-body"><div class="tablewrap" id="playerProfileHistory"></div></div>
 </details>
-<details class="collapsible-block span12">
-<summary><span><strong>Parties du joueur</strong><small>Historique complet des participations</small></span></summary>
-<div class="collapsible-block-content">
-<div class="tablewrap" id="playerProfileHistory"></div>
-</div>
-</details>
-</div>
 <details class="combined-block profile-versus-block">
 <summary>
 <span><strong>⚔ Versus</strong><small>Comparer ce joueur à un autre joueur du BPT</small></span>
@@ -1181,7 +1156,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
-<script src="./firebase-bridge.js?v=10.4.49"></script>
+<script src="./firebase-bridge.js?v=10.4.50"></script>
 <div id="cloudStatus" style="cursor:pointer" title="État de la synchronisation partagée — cliquer pour recharger depuis Firebase">
 <span id="cloudStatusDot">●</span>
 <span id="cloudStatusText">Connexion…</span>
@@ -1193,12 +1168,12 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
   border:1px solid #4f7e63;color:#fff;font-weight:800;
   box-shadow:0 12px 34px rgba(0,0,0,.35);text-align:center">
 </div>
-<script src="./application.js?v=10.4.49"></script>
-<script src="./navigation.js?v=10.4.49"></script>
-<script id="bpt-share-recap" src="./bpt-share-recap.js?v=10.4.49"></script>
-<script id="bpt-agenda" src="./bpt-agenda.js?v=10.4.49"></script>
-<script id="bpt-my-profile" src="./bpt-my-profile.js?v=10.4.49"></script>
-<script id="bpt-v229-orientation-stability" src="./bpt-v229-orientation-stability.js?v=10.4.49"></script>
+<script src="./application.js?v=10.4.50"></script>
+<script src="./navigation.js?v=10.4.50"></script>
+<script id="bpt-share-recap" src="./bpt-share-recap.js?v=10.4.50"></script>
+<script id="bpt-agenda" src="./bpt-agenda.js?v=10.4.50"></script>
+<script id="bpt-my-profile" src="./bpt-my-profile.js?v=10.4.50"></script>
+<script id="bpt-v229-orientation-stability" src="./bpt-v229-orientation-stability.js?v=10.4.50"></script>
 <div class="avatar-picker-backdrop" id="playerAvatarPickerBackdrop" style="display:none">
 <div class="avatar-picker-card">
 <div class="avatar-picker-head">
@@ -1212,23 +1187,23 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 </div>
 </div>
 </div>
-<script id="bpt-v260-avatar-modal-bindings" src="./bpt-v260-avatar-modal-bindings.js?v=10.4.49"></script>
-<script id="bpt-live3-module" src="./bpt-live3-module.js?v=10.4.49"></script>
-<script id="bpt-identity-entry-gate" src="./bpt-identity-entry-gate.js?v=10.4.49"></script>
-<script id="bpt-photo-url-migration-launcher" src="./bpt-photo-url-migration-launcher.js?v=10.4.49"></script>
-<script id="bpt-app-presence-launcher" src="./bpt-app-presence-launcher.js?v=10.4.49"></script>
-<script id="bpt-shared-photo-config-bootstrap" src="./bpt-shared-photo-config-bootstrap.js?v=10.4.49"></script>
+<script id="bpt-v260-avatar-modal-bindings" src="./bpt-v260-avatar-modal-bindings.js?v=10.4.50"></script>
+<script id="bpt-live3-module" src="./bpt-live3-module.js?v=10.4.50"></script>
+<script id="bpt-identity-entry-gate" src="./bpt-identity-entry-gate.js?v=10.4.50"></script>
+<script id="bpt-photo-url-migration-launcher" src="./bpt-photo-url-migration-launcher.js?v=10.4.50"></script>
+<script id="bpt-app-presence-launcher" src="./bpt-app-presence-launcher.js?v=10.4.50"></script>
+<script id="bpt-shared-photo-config-bootstrap" src="./bpt-shared-photo-config-bootstrap.js?v=10.4.50"></script>
 <div class="bpt-app-action" id="bptAppAction" style="display:none">
 <button class="btn secondary" id="bptAppActionBtn" type="button">
     📲 Installer BPT sur cet appareil
   </button>
 <button aria-label="Ne plus proposer" class="bpt-app-action-close" id="bptAppActionClose" title="Ne plus proposer ici (reste disponible dans Paramètres)" type="button">×</button>
 </div>
-<script id="bpt-pwa-unified-action" src="./bpt-pwa-unified-action.js?v=10.4.49"></script>
-<script id="bpt-v408-config-ui" src="./bpt-v408-config-ui.js?v=10.4.49"></script>
-<script id="bpt-v400-headup-summary" src="./bpt-v400-headup-summary.js?v=10.4.49"></script>
-<script id="bpt-v404-latestgame-layout" src="./bpt-v404-latestgame-layout.js?v=10.4.49"></script>
-<script id="bpt-v417-native-mobile-nav" src="./bpt-v417-native-mobile-nav.js?v=10.4.49"></script>
+<script id="bpt-pwa-unified-action" src="./bpt-pwa-unified-action.js?v=10.4.50"></script>
+<script id="bpt-v408-config-ui" src="./bpt-v408-config-ui.js?v=10.4.50"></script>
+<script id="bpt-v400-headup-summary" src="./bpt-v400-headup-summary.js?v=10.4.50"></script>
+<script id="bpt-v404-latestgame-layout" src="./bpt-v404-latestgame-layout.js?v=10.4.50"></script>
+<script id="bpt-v417-native-mobile-nav" src="./bpt-v417-native-mobile-nav.js?v=10.4.50"></script>
 <div aria-hidden="true" class="bpt-odds-modal" id="bptOddsModal">
 <div aria-labelledby="bptOddsTitle" aria-modal="true" class="bpt-odds-card" role="dialog">
 <div class="bpt-odds-head"><h2 id="bptOddsTitle">Calcul de côtes · Texas Hold'em</h2><button class="bpt-odds-close" id="bptOddsClose" type="button">×</button></div>
@@ -1250,25 +1225,25 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 </div>
 </div>
 </div>
-<script id="bpt-v453-odds-script" src="./bpt-v453-odds-script.js?v=10.4.49"></script>
-<script id="bpt-v463-settings-script" src="./bpt-v463-settings-script.js?v=10.4.49"></script>
+<script id="bpt-v453-odds-script" src="./bpt-v453-odds-script.js?v=10.4.50"></script>
+<script id="bpt-v463-settings-script" src="./bpt-v463-settings-script.js?v=10.4.50"></script>
 
 
 
 
-<script id="bpt-live-betting" src="./live-betting.js?v=10.4.49"></script>
-<script id="bpt-live-ui" src="./live-ui.js?v=10.4.49"></script>
-
-
-
-
-
+<script id="bpt-live-betting" src="./live-betting.js?v=10.4.50"></script>
+<script id="bpt-live-ui" src="./live-ui.js?v=10.4.50"></script>
 
 
 
 
 
-<script src="./bpt-live-mobilefirst.js?v=10.4.49"></script>
+
+
+
+
+
+<script src="./bpt-live-mobilefirst.js?v=10.4.50"></script>
 </body>
 </html>
 
