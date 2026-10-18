@@ -253,6 +253,7 @@
   let live3PendingPaceAdvice=null;
   let live3PaceLastCheckAt=0;
   const LIVE3_PACE_MIN_INTERVAL_MS=10*60*1000;
+  const LIVE3_ADAPTIVE_MIN_DELTA_MIN=3;
 
   function live3PaceStorageKey(){
     return `bpt_pace_advice_${String(current?.sessionId||"none")}`;
@@ -349,7 +350,9 @@
     [normalDelta,fsDelta].forEach(el=>{if(el){el.textContent=d.text;el.className=d.cls;}});
   }
 
-  function live3PaceAnalysis(){
+  // 10.4.36 — minDeltaMin : seuil d’écart (en min) en dessous duquel rien n’est proposé.
+  // 8 min pour une suggestion en mode classique, 3 min pour l’ajustement automatique en adaptatif.
+  function live3PaceAnalysis({minDeltaMin=8}={}){
     if(!isOwner() || !isActive() || !current?.startedAt)return null;
     const projection=live3FinishProjection();
     if(!projection)return null;
@@ -367,7 +370,7 @@
     // limitée à ±30 % par ajustement pour rester progressive.
     const deltaMin=Math.round(Number(projection.deltaSec||0)/60); // + = retard, - = avance
     const absDeltaMin=Math.abs(deltaMin);
-    if(absDeltaMin<8)return null;
+    if(absDeltaMin<minDeltaMin)return null;
     const type=deltaMin>0?"accelerate":"slow";
     const upcomingCount=Math.max(0,projection.endIdx-projection.levelIndex);
     if(upcomingCount<1)return null; // déjà dans la zone de fin : plus rien à ajuster
@@ -421,6 +424,18 @@
     const lvIdx=Math.max(0,Number(current?.levelIndex)||0);
     if(!live3AtLevelStart() || live3PaceLevelShown===lvIdx)return;
     live3PaceLastCheckAt=now;
+
+    // 10.4.36 — En adaptatif : réajustement automatique des niveaux suivants à chaque
+    // changement de niveau dès que l’écart atteint 3 min (sans fenêtre de confirmation).
+    if(current?.paceAdaptive===true){
+      live3PaceLevelShown=lvIdx;
+      const last=current?.lastPaceAdjustment||{};
+      if(Number(last.levelIndex)===lvIdx && last.automatic===true)return; // déjà ajusté à ce niveau
+      const auto=live3PaceAnalysis({minDeltaMin:LIVE3_ADAPTIVE_MIN_DELTA_MIN});
+      if(auto)live3AutoApplyPaceAdvice(auto).catch(e=>console.warn("BPT adaptatif :",e));
+      return;
+    }
+
     const advice=live3PaceAnalysis();
     if(!advice || advice.autoSuggest!==true)return;
 
@@ -484,7 +499,8 @@
       s.lastPaceAdjustment={at:Date.now(),type:advice.type,minutes:advice.proposedMin,remainingPlayers:advice.remaining,levelIndex:Number(s.levelIndex)||0,automatic:true};
       return s;
     });
-    try{showBptToast(`BPT adaptatif : prochains niveaux à ${advice.proposedMin} min`,'ok');}catch(_e){}
+    const why=advice.type==="accelerate"?`${advice.deltaMin} min de retard`:`${Math.abs(advice.deltaMin)} min d’avance`;
+    try{showBptToast(`Adaptatif (${why}) · prochains niveaux : ${advice.currentMin} → ${advice.proposedMin} min`,'ok');}catch(_e){}
   }
 
   async function live3ApplyPaceAdvice(){
