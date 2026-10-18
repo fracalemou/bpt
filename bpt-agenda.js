@@ -148,14 +148,51 @@
     const n=me();const locs=activePlayers();
     const loc=e?.location||(n?`Chez ${n}`:'');
     // 10.4.47 — Proposition réduite à l'essentiel : date et lieu (heure, durée et tapis se règlent au lancement du Live).
-    return `<h3>${e?'Modifier la partie':'Proposer une partie'} · ${esc(longDate(iso))}</h3>
+    return `<h3>${e?'Modifier la partie':'Proposer une partie'} · <span data-ag-pick-label>${esc(longDate(iso))}</span></h3>
       <div class="bpt-ag-form">
-        <label>Date<input id="bptAgDate" type="date" value="${esc(iso)}" min="${todayIso()}"></label>
+        <div class="is-wide bpt-ag-pickwrap"><span class="bpt-ag-picktitle">Date</span>
+          <input id="bptAgDate" type="hidden" value="${esc(iso)}">
+          <div class="bpt-ag-pick" data-ag-pick data-edit-id="${esc(e?.id||'')}" data-month="${esc(iso.slice(0,7))}"></div>
+        </div>
         <label class="is-wide">Lieu<input id="bptAgLoc" list="bptAgLocList" value="${esc(loc)}" placeholder="Chez …"></label>
         <datalist id="bptAgLocList">${locs.map(p=>`<option value="Chez ${esc(p)}">`).join('')}</datalist>
       </div>
       <div class="bpt-ag-actions"><button type="button" class="btn bpt-ag-primary" id="bptAgSave">${e?'Enregistrer':'📅 Proposer cette partie'}</button>
       <button type="button" class="btn ghost" id="bptAgCancel">Annuler</button></div>`;
+  }
+  // 10.4.48 — Choix de la date par un petit calendrier (plutôt qu'une saisie) : jours passés grisés,
+  // dates déjà prises par une autre partie barrées, vendredis (soir de BPT) soulignés.
+  function mountPicker(root){
+    const el=root?.querySelector('[data-ag-pick]');if(!el)return;
+    const input=root.querySelector('#bptAgDate'),label=root.querySelector('[data-ag-pick-label]');
+    const editId=el.dataset.editId||'';
+    const draw=()=>{
+      const [y,m]=el.dataset.month.split('-').map(Number);
+      const first=new Date(y,m-1,1),days=new Date(y,m,0).getDate();
+      const lead=(first.getDay()+6)%7; // lundi en premier
+      const t=todayIso(),sel=input.value;
+      const now=new Date(),minMonth=`${now.getFullYear()}-${pad(now.getMonth()+1)}`;
+      const title=first.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+      let cells='';
+      for(let i=0;i<lead;i++)cells+='<span></span>';
+      for(let d=1;d<=days;d++){
+        const iso=`${y}-${pad(m)}-${pad(d)}`;
+        const other=events.find(x=>x.date===iso&&x.id!==editId);
+        const past=iso<t,fri=new Date(y,m-1,d).getDay()===5;
+        const cls=['bpt-ag-day',past?'is-past':'',other?'is-taken':'',fri?'is-fri':'',iso===sel?'is-sel':'',iso===t?'is-today':''].filter(Boolean).join(' ');
+        cells+=`<button type="button" class="${cls}" data-day="${iso}" ${past||other?'disabled':''} title="${other?'Partie déjà proposée ce jour-là':''}">${d}</button>`;
+      }
+      el.innerHTML=`<div class="bpt-ag-pick-head"><button type="button" data-pick-nav="-1" ${el.dataset.month<=minMonth?'disabled':''} aria-label="Mois précédent">‹</button><strong>${esc(title.replace(/^./,c=>c.toUpperCase()))}</strong><button type="button" data-pick-nav="1" aria-label="Mois suivant">›</button></div>
+        <div class="bpt-ag-pick-week">${['L','M','M','J','V','S','D'].map(x=>`<span>${x}</span>`).join('')}</div>
+        <div class="bpt-ag-pick-grid">${cells}</div>`;
+    };
+    el.onclick=ev=>{
+      const nav=ev.target.closest('[data-pick-nav]');
+      if(nav&&!nav.disabled){const [y,m]=el.dataset.month.split('-').map(Number);const d=new Date(y,m-1+Number(nav.dataset.pickNav),1);el.dataset.month=`${d.getFullYear()}-${pad(d.getMonth()+1)}`;draw();return;}
+      const day=ev.target.closest('[data-day]');
+      if(day&&!day.disabled){input.value=day.dataset.day;if(label)label.textContent=longDate(day.dataset.day);draw();}
+    };
+    draw();
   }
   // 10.4.46 — Invitation WhatsApp : message prêt à envoyer (le joueur choisit le groupe dans WhatsApp).
   let justCreatedId='';
@@ -220,7 +257,7 @@
     }
     if(iso<t&&!e){box.innerHTML=`<h3>${esc(longDate(iso))}</h3><p class="muted">Aucune partie ce jour-là.</p>`;return;}
     if(!me()){box.innerHTML=`<h3>${esc(longDate(iso))}</h3><p class="muted">Connectez-vous avec votre nom de joueur pour proposer une partie.</p>`;return;}
-    box.innerHTML=formHtml(iso,editing?e:null);
+    box.innerHTML=formHtml(iso,editing?e:null);mountPicker(box);
     $('bptAgCancel').onclick=()=>{editing=false;if(!e)selectedIso='';render();};
     $('bptAgSave').onclick=()=>saveFromForm(editing?e:null,()=>{editing=false;});
   }
@@ -267,7 +304,7 @@
       const edit=homeMode==='form'&&e&&canEdit(e)?e:null;
       let iso=edit?edit.date:nextFriday();
       if(!edit&&e&&iso<=e.date){const d=new Date(`${e.date}T12:00:00`);d.setDate(d.getDate()+7);iso=isoOf(d);} // la semaine suivante
-      box.innerHTML=formHtml(iso,edit);
+      box.innerHTML=formHtml(iso,edit);mountPicker(box);
       $('bptAgCancel').onclick=()=>{homeMode='view';renderHome(true);};
       $('bptAgSave').onclick=()=>saveFromForm(edit,()=>{homeMode='view';renderHome(true);});
       return;

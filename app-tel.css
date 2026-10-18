@@ -9898,3 +9898,21 @@ html.bpt-mobile-device .rec-name{font-size:14.5px}
 .bpt-ag-wa-close{position:absolute;top:6px;right:8px;background:none;border:0;color:var(--bpt-muted,#aeb9c9);font-size:20px;cursor:pointer;line-height:1}
 .bpt-ag-link-wa{color:#4ade80 !important}
 html.bpt-mobile-device .bpt-ag-wa-box .bpt-ag-wa{width:100%;justify-content:center}
+/* 10.4.48 — Calendrier de choix de la date (proposition / modification de partie) */
+.bpt-ag-pickwrap{display:flex;flex-direction:column;gap:6px}
+.bpt-ag-picktitle{font-size:13px;font-weight:800;color:var(--bpt-muted,#aeb9c9)}
+.bpt-ag-pick{max-width:340px;padding:10px;border-radius:14px;background:var(--bpt-deep,#0b1020);border:1px solid var(--bpt-line,#2c3a5a)}
+.bpt-ag-pick-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px}
+.bpt-ag-pick-head strong{font-size:14.5px;color:var(--bpt-text,#fff)}
+.bpt-ag-pick-head button{width:34px;height:34px;border-radius:50%;border:1px solid var(--bpt-line,#2c3a5a);background:transparent;color:var(--bpt-text,#fff);font-size:20px;line-height:1;cursor:pointer;padding:0 0 2px}
+.bpt-ag-pick-head button:disabled{opacity:.25;cursor:default}
+.bpt-ag-pick-week,.bpt-ag-pick-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.bpt-ag-pick-week span{font-size:11px;font-weight:800;color:var(--bpt-muted,#aeb9c9);padding:2px 0}
+.bpt-ag-day{height:38px;border-radius:10px;border:1px solid transparent;background:rgba(255,255,255,.04);color:var(--bpt-text,#fff);font:inherit;font-weight:700;font-size:14px;cursor:pointer;padding:0}
+.bpt-ag-day:hover:not(:disabled){border-color:var(--bpt-teal,#2ac9c2)}
+.bpt-ag-day.is-fri{box-shadow:inset 0 -3px 0 rgba(242,200,83,.55)}
+.bpt-ag-day.is-today{border-color:rgba(255,255,255,.3)}
+.bpt-ag-day.is-sel{background:var(--bpt-gold,#f2c853);color:#1a1408;box-shadow:none;border-color:var(--bpt-gold,#f2c853)}
+.bpt-ag-day.is-past{opacity:.25;cursor:default;background:transparent}
+.bpt-ag-day.is-taken{opacity:.45;cursor:not-allowed;text-decoration:line-through;background:rgba(255,107,107,.12)}
+.bpt-ag-day.is-past.is-fri{box-shadow:none}
