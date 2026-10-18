@@ -10723,3 +10723,7 @@ html.bpt-mobile-device .bpt-t3-name{font-size:12px}
 html.bpt-mobile-device .bpt-t3-table{border-spacing:3px 3px}
 html.bpt-mobile-device .bpt-t3-table th,html.bpt-mobile-device .bpt-t3-table td{padding:7px 3px !important;font-size:12.5px !important}
 html.bpt-mobile-device .bpt-t3-dot{width:18px;height:18px;font-size:10px;margin:0}
+
+/* 10.4.37 — Proposition d'installation (PC) : bouton en bas à droite, refermable */
+.bpt-app-action-close{background:none;border:0;color:var(--bpt-muted,#aeb9c9);font-size:18px;line-height:1;cursor:pointer;padding:2px 6px}
+.bpt-app-action-close:hover{color:var(--bpt-text,#fff)}

@@ -45,19 +45,29 @@
       box.querySelectorAll('[data-bpt-theme-pick]').forEach(b=>{const on=b===btn;b.classList.toggle('is-active',on);b.setAttribute('aria-checked',String(on));});
     });
   }
+  // 10.4.37 — Proposition d'installation (si l'appli n'est pas encore installée sur l'appareil).
+  function installRow(){
+    if(!window.BPTInstall?.available?.())return '';
+    return `<div class="bpt-mp-row">
+        <label>Application</label>
+        <div class="bpt-mp-field"><button type="button" class="btn ghost" id="bptMyInstallBtn">📲 Installer BPT sur cet appareil</button></div>
+        <small class="bpt-mp-help">Icône sur l’écran d’accueil ou le Bureau, ouverture en plein écran. Les mises à jour se font toutes seules à l’ouverture.</small>
+      </div>`;
+  }
+  function bindInstall(){const b=$('bptMyInstallBtn');if(b)b.onclick=()=>window.BPTInstall?.prompt?.();}
   function avatar(name){try{return typeof bptAvatarHtml==='function'?bptAvatarHtml(name,'lg'):'';}catch(_e){return '';}}
 
   function render(force){
     const box=$('bptMyProfile');if(!box)return;
     const name=me();
-    const sig=name+'|'+(name?myNickname(name):'');
+    const sig=name+'|'+(name?myNickname(name):'')+'|'+(window.BPTInstall?.available?.()?1:0);
     if(!force&&sig===lastSig)return;
     if(box.contains(document.activeElement)&&document.activeElement.tagName==='INPUT')return; // saisie en cours
     lastSig=sig;
     if(!name){
       box.innerHTML=`<h3>👤 Mon profil</h3><p class="bpt-mp-help">Connectez-vous avec votre nom et votre code pour modifier votre surnom ou votre code.</p>
-        <div class="bpt-mp-row"><button type="button" class="btn" id="bptMyLoginBtn">👤 Se connecter</button></div>${themeRow()}`;
-      bindThemes(box);
+        <div class="bpt-mp-row"><button type="button" class="btn" id="bptMyLoginBtn">👤 Se connecter</button></div>${themeRow()}${installRow()}`;
+      bindThemes(box);bindInstall();
       $('bptMyLoginBtn').onclick=()=>api()?.openIdentity?.();
       return;
     }
@@ -76,9 +86,10 @@
         <small class="bpt-mp-help">Votre ancien code vous sera demandé.</small>
       </div>
       ${themeRow()}
+      ${installRow()}
       <div class="bpt-mp-row bpt-mp-logout"><button type="button" class="btn ghost" id="bptMyLogoutBtn">⏻ Se déconnecter</button>
         <small class="bpt-mp-help">Votre code sera redemandé à la prochaine connexion sur cet appareil.</small></div>`;
-    bindThemes(box);
+    bindThemes(box);bindInstall();
     $('bptMyLogoutBtn').onclick=async()=>{if(!confirm('Se déconnecter de BPT sur cet appareil ?'))return;await api()?.logoutIdentity?.();lastSig='';render(true);};
     $('bptMyNickSave').onclick=async()=>{
       const btn=$('bptMyNickSave'),st=$('bptMyNickStatus'),val=$('bptMyNick').value;
@@ -96,6 +107,7 @@
     if(typeof showView==='function')showView('settings');
     setTimeout(()=>{render(true);$('bptMyProfile')?.scrollIntoView({behavior:'smooth',block:'start'});},120);
   }
+  document.addEventListener('bpt-install-change',()=>render(true));
   function boot(){
     applyTheme(currentTheme());
     render(true);

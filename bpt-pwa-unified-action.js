@@ -53,19 +53,31 @@
     const m=menuInstallBtn();if(m)m.hidden=true;
   }
 
+  // 10.4.37 — Plus de bouton « Mettre à jour » : le service worker est en « réseau d'abord »
+  // et s'active aussitôt, la nouvelle version est donc prise à chaque ouverture.
+  // Reste la proposition d'installation, tant que l'appli n'est pas installée sur l'appareil.
+  const INSTALL_DISMISS_KEY="bpt-install-dismissed";
+  function installDismissed(){try{return localStorage.getItem(INSTALL_DISMISS_KEY)==="1";}catch(_e){return false;}}
+  function installAvailable(){return !isStandalone() && (!!deferredPrompt || isIos());}
+  function notifyInstallChange(){try{document.dispatchEvent(new CustomEvent("bpt-install-change"));}catch(_e){}}
+
   function syncActionState(){
     if(waitingWorker){
-      showAction("Mettre à jour","update");
-      return;
+      // Nouvelle version prête : on l'active tout de suite (rechargement automatique).
+      try{waitingWorker.postMessage({type:"SKIP_WAITING"});}catch(_e){}
+      waitingWorker=null;
     }
 
     if(isStandalone()){
       hideAction();
+      notifyInstallChange();
       return;
     }
 
     if(deferredPrompt || isIos()){
-      showAction("Installer l’application","install");
+      showAction(installDismissed()?"":"📲 Installer BPT sur cet appareil","install");
+      if(installDismissed()){const box=actionBox();if(box)box.style.display="none";}
+      notifyInstallChange();
       return;
     }
 
@@ -74,7 +86,24 @@
     // On ne montre donc pas un faux bouton Installer tant que le navigateur
     // n'a pas confirmé que l'installation est possible.
     hideAction();
+    notifyInstallChange();
   }
+
+  async function promptInstall(){
+    if(isIos()){
+      const help=document.getElementById("bptIosInstallHelp");
+      if(help)help.style.display="flex";
+      return;
+    }
+    if(!deferredPrompt){syncActionState();return;}
+    try{
+      await deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+    }catch(_e){}
+    deferredPrompt=null;
+    syncActionState();
+  }
+  window.BPTInstall={available:installAvailable,prompt:promptInstall};
 
   async function registerServiceWorker(){
     if(!("serviceWorker" in navigator)){
@@ -136,6 +165,12 @@
       return;
     }
 
+    if(e.target?.closest?.("#bptAppActionClose")){
+      try{localStorage.setItem(INSTALL_DISMISS_KEY,"1");}catch(_e){}
+      const box=actionBox();if(box)box.style.display="none";
+      return;
+    }
+
     const btn=e.target?.closest?.("#bptAppActionBtn");
     if(!btn)return;
 
@@ -155,26 +190,7 @@
       return;
     }
 
-    if(mode==="install"){
-      if(isIos()){
-        const help=document.getElementById("bptIosInstallHelp");
-        if(help)help.style.display="flex";
-        return;
-      }
-
-      if(!deferredPrompt){
-        syncActionState();
-        return;
-      }
-
-      try{
-        await deferredPrompt.prompt();
-        await deferredPrompt.userChoice;
-      }catch(_e){}
-
-      deferredPrompt=null;
-      syncActionState();
-    }
+    if(mode==="install")await promptInstall();
   });
 
   document.addEventListener("DOMContentLoaded",()=>{

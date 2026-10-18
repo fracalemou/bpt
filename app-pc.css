@@ -7221,3 +7221,7 @@ header.bpt-header .bpt-online-presence{right:20px !important;height:36px !import
 header.bpt-header .bpt-online-presence #bptOnlineCount::after{content:" en ligne";font-weight:600;font-size:12.5px;color:var(--bpt-muted,#aeb9c9)}
 .bpt-app-action{top:auto !important;bottom:18px !important;right:18px !important}
 header.bpt-header #bptConnectedIdentity:not(:empty){display:inline-flex !important;flex-direction:row !important;align-items:center !important;white-space:nowrap !important;width:auto !important;min-height:0 !important;height:auto !important}
+
+/* 10.4.37 — Proposition d'installation (PC) : bouton en bas à droite, refermable */
+.bpt-app-action-close{background:none;border:0;color:var(--bpt-muted,#aeb9c9);font-size:18px;line-height:1;cursor:pointer;padding:2px 6px}
+.bpt-app-action-close:hover{color:var(--bpt-text,#fff)}
