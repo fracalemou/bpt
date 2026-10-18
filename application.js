@@ -4320,7 +4320,6 @@ function renderDashboard(){
   const step=(p,place)=>p?`
     <button type="button" class="bpt-home-step place-${place}" onclick="${openProfileAttr(p.name)}">
       <span class="bpt-home-step-medal">${medalForRank(place)}</span>
-      ${bptAvatarHtml(p.name,place===1?"xl":"lg")}
       <span class="bpt-home-step-name">${esc(p.name)}</span>
       <span class="bpt-home-step-nick">${nickOf(p.name)?esc(nickOf(p.name)):"&nbsp;"}</span>
       <span class="bpt-home-step-block"><b>${num(p.points,0)}</b><small>pts</small><i>${place}</i></span>
