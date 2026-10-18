@@ -4347,13 +4347,16 @@ function renderDashboard(){
       const trend=Number(mine.progress)>0?`<span class="bpt-home-trend up">▲ ${mine.progress}</span>`
         :Number(mine.progress)<0?`<span class="bpt-home-trend down">▼ ${Math.abs(mine.progress)}</span>`:"";
       meBox.hidden=false;
+      meBox.classList.add("actionable");
+      meBox.onclick=()=>openMySeasonSheet(mine.name);
       meBox.innerHTML=`
         <div class="bpt-home-me-rank"><b>${idx+1}<sup>${idx===0?"er":"e"}</sup></b><small>sur ${rank.length}</small></div>
         <div class="bpt-home-me-copy">
-          <div class="bpt-home-kicker">Ma saison ${trend}</div>
+          <div class="bpt-home-me-title">👤 Ma saison <span>· ${esc(String(mine.name).trim().split(" ")[0])}</span> ${trend}</div>
           <strong>${num(mine.points,0)} pts · ${Number(mine.gamesCount||0)} partie${Number(mine.gamesCount||0)>1?"s":""}</strong>
           <small>${chase}${lead?` · ${lead}`:""}</small>
-        </div>`;
+        </div>
+        <span class="bpt-home-me-go"><small>Mes stats</small>›</span>`;
     }
   }
 
@@ -4372,6 +4375,84 @@ function renderDashboard(){
       lastBox.innerHTML='<div class="bpt-home-kicker">Dernière partie</div><small class="muted">Le résumé apparaîtra ici.</small>';
     }
   }
+}
+
+// 10.4.37 — Fenêtre « Ma saison » (clic sur l'encart perso de l'Accueil) :
+// chiffres clés, courbe du rang au classement, parties de la saison, accès à la fiche complète.
+function bptCloseMySeasonSheet(){
+  const el=document.getElementById("bptMySeasonSheet");
+  if(el){el.classList.remove("open");setTimeout(()=>el.remove(),200);}
+  document.removeEventListener("keydown",bptMySeasonEsc);
+}
+function bptMySeasonEsc(e){if(e.key==="Escape")bptCloseMySeasonSheet();}
+function bptMySeasonRankChart(points,total){
+  if(points.length<2)return '<div class="muted" style="padding:12px">La courbe apparaîtra après ta 2<sup>e</sup> partie.</div>';
+  const W=360,H=190,pl=30,pr=22,pt=22,pb=30;
+  const maxR=Math.max(3,total||0,...points.map(p=>p.y));
+  const x=i=>pl+i*(W-pl-pr)/(points.length-1);
+  const y=r=>pt+(r-1)*(H-pt-pb)/Math.max(1,maxR-1);
+  const line=points.map((p,i)=>`${i?"L":"M"}${x(i).toFixed(1)},${y(p.y).toFixed(1)}`).join(" ");
+  const area=`${line} L${x(points.length-1).toFixed(1)},${H-pb} L${x(0).toFixed(1)},${H-pb} Z`;
+  const guides=[1,Math.ceil(maxR/2),maxR].filter((v,i,a)=>a.indexOf(v)===i)
+    .map(r=>`<line x1="${pl}" x2="${W-pr}" y1="${y(r)}" y2="${y(r)}" class="g"/><text x="${pl-6}" y="${y(r)+4}" text-anchor="end" class="ax">${r}</text>`).join("");
+  const dots=points.map((p,i)=>`<circle cx="${x(i)}" cy="${y(p.y)}" r="${i===points.length-1?5.5:4}" class="d${i===points.length-1?" last":""}"/>
+    <text x="${x(i)}" y="${y(p.y)-10}" text-anchor="middle" class="v">${p.y}<tspan dy="-5" font-size="8">${p.y===1?"er":"e"}</tspan></text>
+    <text x="${x(i)}" y="${H-10}" text-anchor="middle" class="ax">#${p.x}</text>`).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" class="bpt-ms-svg" role="img" aria-label="Évolution de mon rang au classement">
+    <defs><linearGradient id="bptMsFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--bpt-teal,#2ac9c2)" stop-opacity=".35"/><stop offset="1" stop-color="var(--bpt-teal,#2ac9c2)" stop-opacity="0"/></linearGradient></defs>
+    ${guides}<path d="${area}" fill="url(#bptMsFill)"/><path d="${line}" class="l"/>${dots}</svg>`;
+}
+function openMySeasonSheet(name){
+  const real=String(name||"").trim();if(!real)return;
+  const norm=v=>String(v||"").trim().toLocaleLowerCase("fr");
+  const rank=ranking();
+  const idx=rank.findIndex(r=>norm(r.name)===norm(real));
+  if(idx<0)return;
+  const me=rank[idx];
+  const myRows=(Array.isArray(db.history)?db.history:[])
+    .filter(r=>norm(canonicalPlayerName(r.player))===norm(me.name)&&Number(r.game)>0)
+    .sort((a,b)=>Number(a.game)-Number(b.game));
+  const snaps=rankingSnapshotByGame();
+  const rankSeries=snaps.map(s=>({x:s.game,y:s.ranks[me.name]})).filter(v=>Number.isFinite(v.y));
+  const bestRank=rankSeries.length?Math.min(...rankSeries.map(v=>v.y)):idx+1;
+  const places=myRows.map(r=>Number(r.place)).filter(n=>n>0);
+  const bestPlace=places.length?Math.min(...places):null;
+  const avgPlace=places.length?places.reduce((a,b)=>a+b,0)/places.length:null;
+  const kpi=(label,value,sub="")=>`<div class="bpt-ms-kpi"><span>${esc(label)}</span><b>${value}</b>${sub?`<small>${sub}</small>`:""}</div>`;
+  const placeCls=p=>p===1?"gold":p===2?"silver":p===3?"bronze":"";
+  const gamesHtml=myRows.length?myRows.slice().reverse().map(r=>`
+      <div class="bpt-ms-game">
+        <span class="bpt-ms-place ${placeCls(Number(r.place))}">${Number(r.place)||"—"}<sup>${Number(r.place)===1?"er":"e"}</sup></span>
+        <span class="bpt-ms-game-copy"><b>Partie #${esc(r.game)}</b><small>${esc(shortDate(r.date||""))}${r.location?` · ${esc(r.location)}`:""}</small></span>
+        <span class="bpt-ms-game-pts">${num(Number(r.points||0),0)} pt${Math.abs(Number(r.points||0))>1?"s":""}${Number(r.kills)>0?`<small>${Number(r.kills)} kill${Number(r.kills)>1?"s":""}</small>`:""}</span>
+      </div>`).join(""):'<div class="muted">Aucune partie cette saison.</div>';
+  document.getElementById("bptMySeasonSheet")?.remove();
+  const sheet=document.createElement("div");
+  sheet.id="bptMySeasonSheet";sheet.className="bpt-ms-overlay";
+  sheet.innerHTML=`
+    <div class="bpt-ms-sheet" role="dialog" aria-modal="true" aria-label="Ma saison">
+      <button type="button" class="bpt-ms-close" aria-label="Fermer">×</button>
+      <div class="bpt-home-kicker">Ma saison · ${esc(isAllSeasons()?"toutes saisons":seasonDisplayName(selectedSeasonKey))}</div>
+      <h2>${esc(me.name)}</h2>
+      <div class="bpt-ms-kpis">
+        ${kpi("Rang",`${idx+1}<sup>${idx===0?"er":"e"}</sup>`,`meilleur : ${bestRank}<sup>${bestRank===1?"er":"e"}</sup>`)}
+        ${kpi("Points",num(me.points,0),`${num(me.avgPoints||0,1)} / partie`)}
+        ${kpi("Parties",Number(me.gamesCount||0))}
+        ${kpi("Victoires",Number(me.wins||0),`${Number(me.podiums||0)} podium${Number(me.podiums||0)>1?"s":""}`)}
+        ${kpi("Place moyenne",avgPlace?num(avgPlace,1):"—",bestPlace?`meilleure : ${bestPlace}<sup>${bestPlace===1?"re":"e"}</sup>`:"")}
+        ${kpi("Kills",Number(me.kills||0),`${num(me.kpg||0,1)} / partie`)}
+      </div>
+      <h3>📈 Ma progression au classement</h3>
+      <div class="bpt-ms-chart" id="bptMySeasonChart">${bptMySeasonRankChart(rankSeries,rank.length)}</div>
+      <h3>🃏 Mes parties</h3>
+      <div class="bpt-ms-games">${gamesHtml}</div>
+      <button type="button" class="btn bpt-ms-full">Voir ma fiche complète →</button>
+    </div>`;
+  document.body.appendChild(sheet);
+  sheet.addEventListener("click",e=>{if(e.target===sheet||e.target.closest(".bpt-ms-close"))bptCloseMySeasonSheet();});
+  sheet.querySelector(".bpt-ms-full").onclick=()=>{bptCloseMySeasonSheet();openPlayerProfile(me.name);};
+  document.addEventListener("keydown",bptMySeasonEsc);
+  requestAnimationFrame(()=>sheet.classList.add("open"));
 }
 
 
