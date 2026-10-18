@@ -9989,3 +9989,6 @@ html.bpt-mobile-device #profile .pf-form-item{min-width:0;flex:1 1 calc(33% - 8p
 #latestgame .lg-photo:has(.game-photo-thumb-btn[style*="none"])::before{display:none}
 #latestgame .lg-photo .game-photo-thumb{object-fit:contain !important;object-position:center !important}
 html.bpt-mobile-device #latestgame .lg-photo:not(:has(.game-photo-thumb-btn[style*="none"])){aspect-ratio:4/3;max-height:420px}
+/* 10.4.51 (révisé) — Pas de fond flou : la photo remplit le cadre, recadrage calé sur le haut (les visages) */
+#latestgame .lg-photo::before{display:none !important}
+#latestgame .lg-photo .game-photo-thumb{object-fit:cover !important;object-position:center 18% !important}
