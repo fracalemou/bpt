@@ -9983,3 +9983,9 @@ html.bpt-mobile-device #profile .pf-id-copy h1{font-size:20px}
 html.bpt-mobile-device #profile .pf-avatar{width:60px !important;height:60px !important}
 html.bpt-mobile-device #profile .pf-rank{min-width:54px;height:54px;font-size:21px}
 html.bpt-mobile-device #profile .pf-form-item{min-width:0;flex:1 1 calc(33% - 8px)}
+/* 10.4.51 — Photo de partie affichée entière (plus de têtes coupées), fond flou issu de la photo */
+#latestgame .lg-photo{overflow:hidden;isolation:isolate}
+#latestgame .lg-photo::before{content:"";position:absolute;inset:-20px;z-index:-1;background:var(--lg-photo-bg) center/cover no-repeat;filter:blur(18px) brightness(.55);transform:scale(1.1)}
+#latestgame .lg-photo:has(.game-photo-thumb-btn[style*="none"])::before{display:none}
+#latestgame .lg-photo .game-photo-thumb{object-fit:contain !important;object-position:center !important}
+html.bpt-mobile-device #latestgame .lg-photo:not(:has(.game-photo-thumb-btn[style*="none"])){aspect-ratio:4/3;max-height:420px}

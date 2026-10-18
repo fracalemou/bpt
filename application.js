@@ -4725,6 +4725,8 @@ function renderLatestGame(){
     thumb.dataset.photoKey=photoRenderKey;
     thumb.onload=()=>{
       if(thumb.dataset.photoKey!==photoRenderKey)return;
+      // 10.4.51 — Fond flou tiré de la photo, pour l'afficher entière (sans recadrage) sans bandes noires.
+      $("latestGamePhotoArea")?.style.setProperty("--lg-photo-bg",`url("${String(thumb.currentSrc||thumb.src).replace(/"/g,'%22')}")`);
       if(thumbBtn)thumbBtn.style.display="block";
       if(placeholder)placeholder.style.display="none";
       if(deleteBtn)deleteBtn.style.display="inline-flex";

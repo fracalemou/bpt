@@ -6959,3 +6959,8 @@ header.bpt-header #bptConnectedIdentity:not(:empty){display:inline-flex !importa
 #profile .pf-fold > summary small{font-size:12px;color:var(--bpt-muted,#aeb9c9)}
 #profile .pf-fold-body{padding:0 16px 14px}
 #profile .pf-chart{max-width:620px}
+/* 10.4.51 — Photo de partie affichée entière (plus de têtes coupées), fond flou issu de la photo */
+#latestgame .lg-photo{overflow:hidden;isolation:isolate}
+#latestgame .lg-photo::before{content:"";position:absolute;inset:-20px;z-index:-1;background:var(--lg-photo-bg) center/cover no-repeat;filter:blur(18px) brightness(.55);transform:scale(1.1)}
+#latestgame .lg-photo:has(.game-photo-thumb-btn[style*="none"])::before{display:none}
+#latestgame .lg-photo .game-photo-thumb{object-fit:contain !important;object-position:center !important}
