@@ -55,8 +55,10 @@
     if(box.contains(document.activeElement)&&document.activeElement.tagName==='INPUT')return; // saisie en cours
     lastSig=sig;
     if(!name){
-      box.innerHTML=`<h3>👤 Mon profil</h3><p class="bpt-mp-help">Connectez-vous avec votre nom et votre code pour modifier votre surnom ou votre code.</p>${themeRow()}`;
+      box.innerHTML=`<h3>👤 Mon profil</h3><p class="bpt-mp-help">Connectez-vous avec votre nom et votre code pour modifier votre surnom ou votre code.</p>
+        <div class="bpt-mp-row"><button type="button" class="btn" id="bptMyLoginBtn">👤 Se connecter</button></div>${themeRow()}`;
       bindThemes(box);
+      $('bptMyLoginBtn').onclick=()=>api()?.openIdentity?.();
       return;
     }
     const nick=myNickname(name);
@@ -73,8 +75,11 @@
         <div class="bpt-mp-field"><button type="button" class="btn ghost" id="bptMyCodeBtn">🔒 Changer mon code</button></div>
         <small class="bpt-mp-help">Votre ancien code vous sera demandé.</small>
       </div>
-      ${themeRow()}`;
+      ${themeRow()}
+      <div class="bpt-mp-row bpt-mp-logout"><button type="button" class="btn ghost" id="bptMyLogoutBtn">⏻ Se déconnecter</button>
+        <small class="bpt-mp-help">Votre code sera redemandé à la prochaine connexion sur cet appareil.</small></div>`;
     bindThemes(box);
+    $('bptMyLogoutBtn').onclick=async()=>{if(!confirm('Se déconnecter de BPT sur cet appareil ?'))return;await api()?.logoutIdentity?.();lastSig='';render(true);};
     $('bptMyNickSave').onclick=async()=>{
       const btn=$('bptMyNickSave'),st=$('bptMyNickStatus'),val=$('bptMyNick').value;
       btn.disabled=true;st.textContent='Enregistrement…';
@@ -86,9 +91,17 @@
     $('bptMyCodeBtn').onclick=()=>api()?.openProfileCodeChange?.();
   }
 
+  // 10.4.36 — Clic sur le nom connecté (en-tête) : ouvre Paramètres > Mon profil.
+  function openMyProfile(){
+    if(typeof showView==='function')showView('settings');
+    setTimeout(()=>{render(true);$('bptMyProfile')?.scrollIntoView({behavior:'smooth',block:'start'});},120);
+  }
   function boot(){
     applyTheme(currentTheme());
     render(true);
+    const idEl=$('bptConnectedIdentity');
+    idEl?.addEventListener('click',()=>{if(idEl.textContent.trim())openMyProfile();});
+    idEl?.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&idEl.textContent.trim()){e.preventDefault();openMyProfile();}});
     setInterval(()=>{if(document.querySelector('#settings.active'))render(false);},1500);
     document.addEventListener('click',e=>{if(e.target?.closest?.('[data-view="settings"],[data-mobile-nav-view="settings"]'))setTimeout(()=>render(true),200);});
   }

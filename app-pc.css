@@ -7059,3 +7059,71 @@ html[data-bpt-theme] .bpt-my-profile .btn.ghost{background:var(--bpt-card2) !imp
 .bpt-mp-theme{display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 10px;border-radius:12px;border:1px solid var(--bpt-line);background:var(--bpt-card2);color:var(--bpt-text);font-weight:800;font-size:13px;cursor:pointer;text-align:left}
 .bpt-mp-theme.is-active{border-color:var(--bpt-gold);box-shadow:0 0 0 1px var(--bpt-gold)}
 .bpt-mp-swatch{flex:0 0 auto;width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,255,255,.25)}
+
+/* ===== 10.4.36 — Accueil épuré : podium à marches, Ma saison, dernière partie, gazette ===== */
+#dashboard .bpt-home-hero{margin:4px 0 14px;padding:0 2px}
+#dashboard .bpt-home-hero h1{margin:2px 0 4px;font-size:clamp(22px,3.2vw,30px);line-height:1.15;color:var(--bpt-text,#fff)}
+#dashboard .bpt-home-hero p{margin:0;color:var(--bpt-muted,#aeb9c9);font-size:14px}
+.bpt-home-card{background:var(--bpt-card,#18223a);border:1px solid var(--bpt-line,#2c3a5a);border-radius:18px;padding:16px 18px;margin:0 0 14px;color:var(--bpt-text,#fff)}
+.bpt-home-card[hidden]{display:none !important}
+.bpt-home-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.bpt-home-card-head h2{margin:0;font-size:18px}
+.bpt-home-link{background:none;border:0;padding:0;color:var(--bpt-teal,#2ac9c2);font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
+.bpt-home-kicker{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--bpt-muted,#aeb9c9);display:flex;align-items:center;gap:8px}
+.bpt-home-empty{padding:18px 0;text-align:center}
+
+/* Podium : 2e · 1er · 3e, marches de hauteurs différentes */
+.bpt-home-podium{display:grid;grid-template-columns:1fr 1.15fr 1fr;align-items:end;gap:10px;max-width:620px;margin:8px auto 0}
+.bpt-home-step{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;background:none;border:0;padding:0;color:inherit;font:inherit;cursor:pointer;animation:bptHomeRise .55s ease-out both}
+.bpt-home-step.place-1{animation-delay:.15s}.bpt-home-step.place-3{animation-delay:.3s}
+.bpt-home-step-medal{font-size:22px;line-height:1}
+.bpt-home-step.place-1 .bpt-home-step-medal{font-size:28px}
+.bpt-home-step .bpt-av{box-shadow:0 0 0 3px var(--bpt-card,#18223a),0 0 0 5px rgba(255,255,255,.18)}
+.bpt-home-step.place-1 .bpt-av{box-shadow:0 0 0 3px var(--bpt-card,#18223a),0 0 0 6px var(--bpt-gold,#f2c853),0 6px 22px rgba(242,200,83,.35)}
+.bpt-av-xl{width:72px;height:72px;font-size:25px}
+.bpt-home-step-name{font-weight:800;font-size:14px;text-align:center;line-height:1.2;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bpt-home-step-nick{font-size:12px;color:var(--bpt-muted,#aeb9c9);font-style:italic;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bpt-home-step-block{position:relative;width:100%;margin-top:6px;border-radius:12px 12px 4px 4px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:10px;overflow:hidden;
+  background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.12);border-bottom:0}
+.bpt-home-step-block b{font-size:20px;line-height:1}
+.bpt-home-step-block small{font-size:11px;color:var(--bpt-muted,#aeb9c9)}
+.bpt-home-step-block i{position:absolute;bottom:-6px;font-style:normal;font-weight:900;font-size:46px;opacity:.12;line-height:1}
+.bpt-home-step.place-1 .bpt-home-step-block{height:118px;background:linear-gradient(180deg,rgba(242,200,83,.38),rgba(242,200,83,.08));border-color:rgba(242,200,83,.55)}
+.bpt-home-step.place-2 .bpt-home-step-block{height:88px;background:linear-gradient(180deg,rgba(205,214,228,.28),rgba(205,214,228,.06))}
+.bpt-home-step.place-3 .bpt-home-step-block{height:66px;background:linear-gradient(180deg,rgba(214,145,90,.32),rgba(214,145,90,.06))}
+.bpt-home-step.is-empty{opacity:.35;cursor:default}
+.bpt-home-step:hover .bpt-home-step-name{color:var(--bpt-teal,#2ac9c2)}
+@keyframes bptHomeRise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.bpt-home-step{animation:none}}
+
+/* Ma saison */
+.bpt-home-me{display:flex;align-items:center;gap:16px;border-color:var(--bpt-teal,#2ac9c2);background:linear-gradient(120deg,rgba(42,201,194,.13),var(--bpt-card,#18223a) 60%)}
+.bpt-home-me-rank{display:flex;flex-direction:column;align-items:center;min-width:64px}
+.bpt-home-me-rank b{font-size:34px;line-height:1;color:var(--bpt-teal,#2ac9c2)}
+.bpt-home-me-rank sup{font-size:14px}
+.bpt-home-me-rank small{font-size:11px;color:var(--bpt-muted,#aeb9c9)}
+.bpt-home-me-copy{display:flex;flex-direction:column;gap:3px;min-width:0}
+.bpt-home-me-copy strong{font-size:16px}
+.bpt-home-me-copy small{font-size:13px;color:var(--bpt-muted,#aeb9c9);line-height:1.35}
+.bpt-home-me-copy small b{color:var(--bpt-text,#fff)}
+.bpt-home-trend{font-size:11px;letter-spacing:0;padding:1px 6px;border-radius:999px}
+.bpt-home-trend.up{color:#62d889;background:rgba(98,216,137,.14)}
+.bpt-home-trend.down{color:#ff8b7b;background:rgba(255,139,123,.14)}
+
+/* Dernière partie + gazette */
+.bpt-home-duo{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.bpt-home-duo .bpt-home-card{margin:0 0 14px}
+.bpt-home-last{cursor:pointer;display:flex;flex-direction:column;gap:8px}
+.bpt-home-last:hover{border-color:var(--bpt-teal,#2ac9c2)}
+.bpt-home-last-winner{display:flex;align-items:center;gap:10px}
+.bpt-home-last-winner strong{display:block;font-size:17px}
+.bpt-home-last-winner small,.bpt-home-last-meta{color:var(--bpt-muted,#aeb9c9);font-size:13px}
+.bpt-home-fact p{margin:8px 0 0;font-size:14px;line-height:1.5;color:var(--bpt-text,#fff)}
+/* 10.4.36 — Nom connecté cliquable (ouvre Mon profil), plus de bouton de déconnexion dans l'en-tête */
+#bptConnectedIdentity.is-clickable{cursor:pointer;border-radius:8px;transition:background .15s}
+#bptConnectedIdentity.is-clickable:hover,#bptConnectedIdentity.is-clickable:focus-visible{background:rgba(255,255,255,.08);outline:none}
+#bptConnectedIdentity.is-clickable .bpt-identity-name{text-decoration:underline dotted;text-underline-offset:3px}
+#bptLogoutBtn,html.bpt-mobile-device .bpt-header #bptLogoutBtn:not([hidden]){display:none !important}
+.bpt-mp-logout{margin-top:6px;padding-top:12px;border-top:1px solid var(--bpt-line,#2c3a5a)}
+.bpt-home-step-block{flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:baseline;align-content:flex-start;gap:3px}
+.bpt-home-step-block i{font-size:40px;bottom:-8px}

@@ -734,12 +734,15 @@
       el.replaceChildren();
       if(name){
         const lbl=document.createElement("span");lbl.className="bpt-identity-label";lbl.textContent="Connecté : ";
+        // 10.4.36 — Le nom ouvre « Mon profil » (thème, surnom, code, déconnexion).
         const nm=document.createElement("span");nm.className="bpt-identity-name";nm.textContent=name;
         el.append(lbl,nm);
       }
-      el.title=name?`Profil connecté : ${name}`:"";
+      el.title=name?`Mon profil : ${name}`:"";
+      el.classList.toggle("is-clickable",!!name);
+      if(name){el.setAttribute("role","button");el.tabIndex=0;}else{el.removeAttribute("role");el.removeAttribute("tabindex");}
     }
-    if(logoutBtn)logoutBtn.hidden=!(name&&liveIdentityConfirmed);
+    if(logoutBtn)logoutBtn.hidden=true; // 10.4.36 — déconnexion déplacée dans « Mon profil »
   }
 
   async function logoutIdentity(){
@@ -4084,6 +4087,7 @@ async function requestTakeover(){
     getUnreadChatCount:()=>unreadChatCount,
     getIdentityName:()=>liveIdentityName(),
     logoutIdentity,
+    openIdentity:()=>openSpectatorIdentity(true),
     getVerifiedIdentityName:()=>liveIdentityConfirmed?verifiedProfileName:"",
     setMyNickname:(n)=>setMyNickname(n),
     openProfileCodeChange:()=>openProfileCodeChange(),

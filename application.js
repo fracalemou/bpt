@@ -4194,26 +4194,11 @@ function renderDashboard(){
     ? `Cumul des 3 saisons disponibles · ${playedPlayers.size} joueurs différents`
     : isArchiveSeason()
       ? `${seasonDisplayName(selectedSeasonKey)} · saison archivée · consultation historique`
-      : `${db.settings.season} · ${playedPlayers.size} joueurs actifs · championnat partagé`;
-  $("heroGames").textContent=totalGames;
-  $("heroActivePlayers").textContent=playedPlayers.size;
-  $("heroTotalParticipations").textContent=totalParticipations;
-
-
+      : `${totalGames} partie${totalGames>1?"s":""} jouée${totalGames>1?"s":""} · ${playedPlayers.size} joueurs en lice`;
   const lastGroupedGame=games.length?games[games.length-1][1].slice().sort((a,b)=>Number(a.place)-Number(b.place)):[];
   const lastWinner=lastGroupedGame.find(r=>Number(r.place)===1);
-  $("dashLastWinner").textContent=lastWinner?.player||"—";
-  $("dashLastWinnerMeta").textContent=lastWinner
-    ? `${shortDate(lastWinner.date)}${lastWinner.location?" · "+lastWinner.location:""}`
-    : "Aucune partie";
-
   const allAchievements=achievementPlayers();
   const onFire=allAchievements.find(a=>a.name==="On Fire");
-  $("dashOnFire").textContent=onFire?.players?.length?onFire.players.join(", "):"—";
-  $("dashOnFireMeta").textContent=onFire?.players?.length
-    ? "Meilleur total de points sur les 3 dernières parties"
-    : "Pas encore disponible";
-
   if($("dashDynamicsText")){
     if(!rank.length){
       $("dashDynamicsText").textContent="Le championnat chauffe à peine. Encore quelques parties et les premières tendances commenceront à se dessiner.";
@@ -4323,88 +4308,71 @@ function renderDashboard(){
         if(names)parts.push(`${names} débloque aussi l’accomplissement « ${ach.name} », histoire de repartir avec autre chose que des souvenirs.`);
       }
 
-      $("dashDynamicsText").textContent=parts.slice(0,3).join(' ');
+      $("dashDynamicsText").textContent=parts.slice(0,2).join(' ');
     }
   }
 
 
-  // Records
-  if($("dashboardRecords")){
-    $("dashboardRecords").innerHTML=championshipRecords()
-      .map(([label,value])=>`<div class="record-card"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>`)
-      .join("");
-  }
-
-  // Top 5 evolution chart
-  const snapshots=rankingSnapshotByGame();
-  const currentTop5=rank.slice(0,5).map(r=>r.name);
-  const series=currentTop5.map(name=>({
-    name,
-    values:snapshots.map(s=>({x:s.game,y:s.ranks[name]})).filter(v=>Number.isFinite(v.y))
-  })).filter(s=>s.values.length);
-  renderLineChart("dashboardTop5Chart",series,{reverseY:true,label:"Évolution du Top 5"});
-  if($("dashboardTop5Legend")){
-    const colors=["#f1c86a","#62d889","#6fb7ff","#ff8b7b","#c89cff"];
-    $("dashboardTop5Legend").innerHTML=series.map((s,i)=>`<span class="chart-legend-item" style="color:${colors[i%colors.length]}"><span class="chart-dot"></span>${esc(s.name)}</span>`).join("");
-  }
-
+  // 10.4.36 — Accueil épuré : podium à marches, « Ma saison », dernière partie, gazette.
+  const nickOf=name=>playerNicknameInfo(name).primary||"";
+  const openProfileAttr=name=>`openPlayerProfile(decodeURIComponent('${encodeURIComponent(name)}'))`;
   const podium=rank.slice(0,3);
-  $("dashPodium").innerHTML=podium.length ? podium.map((p,i)=>`
-    <div class="premium-podium-card rank-${i+1}">
-      <button class="player-link premium-podium-name" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(p.name)}'))">${esc(p.name)}</button>
-      <div class="podium-nickname">${playerNicknameInfo(p.name).primary?`(${esc(playerNicknameInfo(p.name).primary)})`:""}</div>
-      <div class="premium-podium-medal">${medalForRank(i+1)}</div>
-      <div class="premium-podium-points">${num(p.points,0)} pts</div>
-    </div>`).join("")
-    : '<div class="muted" style="padding:18px 0">Le podium apparaîtra après la première partie classée.</div>';
+  const step=(p,place)=>p?`
+    <button type="button" class="bpt-home-step place-${place}" onclick="${openProfileAttr(p.name)}">
+      <span class="bpt-home-step-medal">${medalForRank(place)}</span>
+      ${bptAvatarHtml(p.name,place===1?"xl":"lg")}
+      <span class="bpt-home-step-name">${esc(p.name)}</span>
+      <span class="bpt-home-step-nick">${nickOf(p.name)?esc(nickOf(p.name)):"&nbsp;"}</span>
+      <span class="bpt-home-step-block"><b>${num(p.points,0)}</b><small>pts</small><i>${place}</i></span>
+    </button>`:`<div class="bpt-home-step place-${place} is-empty"><span class="bpt-home-step-block"><i>${place}</i></span></div>`;
+  $("dashPodium").innerHTML=podium.length
+    ? step(podium[1],2)+step(podium[0],1)+step(podium[2],3)
+    : '<div class="muted bpt-home-empty">Le podium apparaîtra après la première partie classée.</div>';
 
-
-  if(games.length){
-    const [gameNo,rows]=games[games.length-1];
-    const sorted=rows.slice().sort((a,b)=>Number(a.place)-Number(b.place));
-    const winner=sorted.find(r=>Number(r.place)===1);
-    $("dashLatestGameLabel").textContent=`Partie #${gameNo}`;
-    $("dashLatestGameTeaser").textContent=`${shortDate(sorted[0]?.date||"")}${sorted[0]?.location?` · ${sorted[0].location}`:''} · ${winner?.player||'—'}`;
-  }else{
-    $("dashLatestGameLabel").textContent="Aucune partie";
-    $("dashLatestGameTeaser").textContent="Le résumé apparaîtra ici.";
-  }
-
-  const recordPool=buildDashboardRecordPool(games,rank,db.history||[]);
-  const latestRecordBreaks=latestBrokenDashboardRecords();
-  const latestRecordIds=new Set(latestRecordBreaks.map(r=>r.id));
-  const decoratedRecordPool=recordPool.map(r=>({
-    ...r,
-    isNew:latestRecordIds.has(r.id)
-  }));
-  const forcedRecords=decoratedRecordPool.filter(r=>r.isNew);
-  const records=randomDashboardRecords(decoratedRecordPool,9,forcedRecords);
-  $("dashQuickRecords").innerHTML=records.map(r=>`
-    <div class="premium-record-item${r.isNew?' is-new':''}">
-      ${r.isNew?'<div class="premium-record-badge">NEW</div>':''}
-      <div class="premium-record-icon">${r.icon}</div>
-      <div class="premium-record-copy">
-        <span>${esc(r.label)}</span>
-        <strong>${esc(displayPlayerName(r.player))}</strong>
-      </div>
-      <b>${esc(simplifyRecordTextForMobile(r.value))}</b>
-    </div>`).join('');
-
-  const unlocked=latestGameUnlockedAchievements();
-  const byPlayer=new Map();
-  for(const a of unlocked){
-    for(const player of a.players){
-      if(!byPlayer.has(player))byPlayer.set(player,[]);
-      byPlayer.get(player).push(a);
+  // Ma saison : seulement pour le joueur connecté et classé.
+  const meBox=$("dashMySeason");
+  if(meBox){
+    let me="";
+    try{me=String(window.BPTLive3?.getVerifiedIdentityName?.()||"").trim();}catch(_e){}
+    const norm=v=>String(v||"").trim().toLocaleLowerCase("fr");
+    const idx=me?rank.findIndex(r=>norm(r.name)===norm(me)):-1;
+    if(idx<0){
+      meBox.hidden=true;meBox.innerHTML="";
+    }else{
+      const mine=rank[idx],above=rank[idx-1],below=rank[idx+1];
+      const pts=v=>`${num(v,0)} pt${Math.abs(Number(v))>1?"s":""}`;
+      const chase=above
+        ? `À <b>${pts(Number(above.points||0)-Number(mine.points||0))}</b> de ${esc(above.name)} (${idx}<sup>e</sup>)`
+        : "Vous menez le championnat 👑";
+      const lead=below?`<b>${pts(Number(mine.points||0)-Number(below.points||0))}</b> d’avance sur ${esc(below.name)}`:"";
+      const trend=Number(mine.progress)>0?`<span class="bpt-home-trend up">▲ ${mine.progress}</span>`
+        :Number(mine.progress)<0?`<span class="bpt-home-trend down">▼ ${Math.abs(mine.progress)}</span>`:"";
+      meBox.hidden=false;
+      meBox.innerHTML=`
+        <div class="bpt-home-me-rank"><b>${idx+1}<sup>${idx===0?"er":"e"}</sup></b><small>sur ${rank.length}</small></div>
+        <div class="bpt-home-me-copy">
+          <div class="bpt-home-kicker">Ma saison ${trend}</div>
+          <strong>${num(mine.points,0)} pts · ${Number(mine.gamesCount||0)} partie${Number(mine.gamesCount||0)>1?"s":""}</strong>
+          <small>${chase}${lead?` · ${lead}`:""}</small>
+        </div>`;
     }
   }
-  $("dashLatestAchievements").innerHTML=byPlayer.size
-    ? [...byPlayer.entries()].sort((a,b)=>a[0].localeCompare(b[0],'fr')).map(([player,items])=>`
-      <div class="premium-achievement-player">
-        <button class="player-link premium-achievement-name" onclick="openPlayerProfile(decodeURIComponent('${encodeURIComponent(player)}'))">${esc(player)}</button>
-        <div class="premium-achievement-badges">${items.map(a=>`<span class="premium-achievement-badge" title="${esc(a.desc)}">${a.icon} ${esc(a.name)}</span>`).join('')}</div>
-      </div>`).join('')
-    : '<div class="muted">Aucun accomplissement débloqué sur la dernière partie.</div>';
+
+  const lastBox=$("dashLatestGame");
+  if(lastBox){
+    if(games.length){
+      const [gameNo,rows]=games[games.length-1];
+      const sorted=rows.slice().sort((a,b)=>Number(a.place)-Number(b.place));
+      const winner=sorted.find(r=>Number(r.place)===1);
+      lastBox.innerHTML=`
+        <div class="bpt-home-kicker">Dernière partie · #${esc(gameNo)}</div>
+        <div class="bpt-home-last-winner">${winner?bptAvatarHtml(winner.player,"md"):""}<div><strong>${esc(winner?.player||"—")}</strong><small>remporte la partie</small></div></div>
+        <small class="bpt-home-last-meta">${esc(shortDate(sorted[0]?.date||""))}${sorted[0]?.location?` · ${esc(sorted[0].location)}`:""} · ${sorted.length} joueurs</small>
+        <span class="bpt-home-link">Voir la partie →</span>`;
+    }else{
+      lastBox.innerHTML='<div class="bpt-home-kicker">Dernière partie</div><small class="muted">Le résumé apparaîtra ici.</small>';
+    }
+  }
 }
 
 
