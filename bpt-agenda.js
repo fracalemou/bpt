@@ -295,7 +295,9 @@
     const e=nextEvent(),n=me();
     const sig=[homeMode,homeShowAll,n,justCreatedId,e?JSON.stringify([e.id,e.date,e.time,e.location,e.responses]):'none'].join('|');
     if(!force&&box.dataset.sig===sig)return;
-    if(homeMode==='form'&&box.contains(document.activeElement))return; // saisie en cours
+    // 10.4.48 — Saisie en cours dans le formulaire : seuls les rafraîchissements automatiques sont bloqués.
+    // Avant, un appui (qui donne le focus au bouton touché) empêchait aussi l'ouverture du formulaire « Modifier ».
+    if(!force&&(homeMode==='form'||homeMode==='new')&&box.contains(document.activeElement))return;
     box.dataset.sig=sig;box.hidden=false;
     const calLink='<button type="button" class="bpt-ag-link" data-ag-cal>📅 Calendrier</button>';
     if(homeMode==='form'||homeMode==='new'){
