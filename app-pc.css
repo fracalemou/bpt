@@ -7128,3 +7128,7 @@ html[data-bpt-theme] .bpt-my-profile .btn.ghost{background:var(--bpt-card2) !imp
 .bpt-home-step-block{flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:baseline;align-content:flex-start;gap:3px}
 .bpt-home-step-block i{font-size:40px;bottom:-8px}
 .bpt484-hint{margin:12px 0 0;font-size:13px;color:var(--bpt-muted,#9fb3c8)}
+/* 10.4.37 — Podium sans avatars : la médaille porte la place */
+.bpt-home-step-medal{font-size:34px;margin-bottom:2px}
+.bpt-home-step.place-1 .bpt-home-step-medal{font-size:46px;filter:drop-shadow(0 4px 14px rgba(242,200,83,.45))}
+.bpt-home-step.place-1 .bpt-home-step-name{font-size:16px}
