@@ -160,6 +160,56 @@
       <div class="bpt-ag-actions"><button type="button" class="btn bpt-ag-primary" id="bptAgSave">${e?'Enregistrer':'📅 Proposer cette partie'}</button>
       <button type="button" class="btn ghost" id="bptAgCancel">Annuler</button></div>`;
   }
+  // 10.4.46 — Invitation WhatsApp : message prêt à envoyer (le joueur choisit le groupe dans WhatsApp).
+  let justCreatedId='';
+  function inviteText(e){
+    const g=grouped(e);
+    const hours=String(e.targetHours||4).replace('.5',' h 30');
+    const lines=[
+      '♠️ *BPT — Partie de poker*',
+      `📅 ${longDate(e.date).replace(/^./,c=>c.toUpperCase())} à ${(e.time||'21:15').replace(':','h')}`,
+      `📍 ${e.location||'Lieu à définir'}`,
+      `⏱ ${hours} h · 🪙 ${Number(e.startStack||20000).toLocaleString('fr-FR')} jetons`,
+      `👤 Proposée par ${e.createdBy||'—'}`,
+      g.present.length?`👥 Déjà partants (${g.present.length}) : ${g.present.join(', ')}`:null,
+      '',
+      'Réponds en un clic :',
+      `✅ Je viens : ${rsvpUrl(e,'present')}`,
+      `🤔 Peut-être : ${rsvpUrl(e,'maybe')}`,
+      `❌ Absent : ${rsvpUrl(e,'absent')}`
+    ];
+    return lines.filter(l=>l!==null).join('\n');
+  }
+  // Lien qui ouvre l'appli et enregistre directement la réponse du joueur.
+  function appUrl(){return location.origin+location.pathname.replace(/index\.html$/,'');}
+  function rsvpUrl(e,choice){return `${appUrl()}?ag=${encodeURIComponent(e.id)}&r=${choice}`;}
+  // À l'ouverture via un de ces liens : attend les données et l'identité, enregistre la réponse, nettoie l'adresse.
+  function rsvpFromLink(){
+    let p;try{p=new URLSearchParams(location.search);}catch(_e){return;}
+    const id=p.get('ag'),choice=p.get('r');
+    if(!id||!CHOICES.some(c=>c[0]===choice))return;
+    const clean=()=>{try{history.replaceState(null,'',location.pathname+location.hash);}catch(_e){}};
+    const toast=(m,k)=>{try{showBptToast(m,k||'ok');}catch(_e){alert(m);}};
+    let tries=0;
+    const timer=setInterval(async()=>{
+      tries++;
+      const e=events.find(x=>x.id===id),n=me();
+      if(!e&&live&&tries>20){clearInterval(timer);clean();toast('Cette partie n’est plus dans l’agenda.','warn');return;}
+      if(!e||!n){if(tries>240){clearInterval(timer);clean();}return;} // jusqu'à 2 min (identification du joueur)
+      clearInterval(timer);clean();
+      await respond(e,choice);
+      const label={present:'présent',maybe:'peut-être',absent:'absent'}[choice];
+      toast(`Réponse enregistrée : ${label} · ${longDate(e.date)}`);
+      window.showView?.('dashboard');
+    },500);
+  }
+  function shareWhatsApp(e){
+    const url='https://wa.me/?text='+encodeURIComponent(inviteText(e));
+    const w=window.open(url,'_blank','noopener');
+    if(!w)location.href=url; // bloqueur de fenêtres : ouverture dans la page
+  }
+  const waButton=(cls='')=>`<button type="button" class="bpt-ag-wa${cls?' '+cls:''}" data-ag-wa><span class="bpt-ag-wa-ico" aria-hidden="true">💬</span>Inviter sur WhatsApp</button>`;
+
   function renderPanel(){
     const box=$('bptAgendaPanel');if(!box)return;
     const t=todayIso();
@@ -178,7 +228,9 @@
         <p class="muted">Proposée par ${esc(e.createdBy||'—')}</p>
         ${iso>=t?`<div class="bpt-ag-myline">Votre réponse :</div>${choiceButtons(e)}`:''}
         ${responsesHtml(e)}
+        ${iso>=t?`<div class="bpt-ag-actions">${waButton()}</div>`:''}
         ${canEdit(e)?`<div class="bpt-ag-actions"><button type="button" class="btn ghost" id="bptAgEdit">✏️ Modifier</button><button type="button" class="btn ghost" id="bptAgDelete">🗑 Supprimer</button></div>`:''}`;
+      box.querySelector('[data-ag-wa]')?.addEventListener('click',()=>shareWhatsApp(e));
       box.querySelectorAll('[data-ag-choice]').forEach(b=>b.onclick=()=>respond(e,b.dataset.agChoice));
       box.querySelector('[data-ag-back]')?.addEventListener('click',()=>{selectedIso='';render();});
       $('bptAgEdit')?.addEventListener('click',()=>{editing=true;renderPanel();});
@@ -202,6 +254,7 @@
       location:$('bptAgLoc').value.trim()||`Chez ${n}`,targetHours:Number($('bptAgHours').value)||4,
       startStack:Math.max(1000,Number($('bptAgStack').value)||20000),createdBy:e?.createdBy||n,
       createdAt:e?.createdAt||Date.now(),responses:e?.responses||{[n]:'present'}};
+    if(!e)justCreatedId=ev.id;
     selectedIso=date;done&&done();await saveEvent(ev);
   }
 
@@ -224,7 +277,7 @@
   function renderHome(force){
     const box=$('bptAgendaHome');if(!box)return;
     const e=nextEvent(),n=me();
-    const sig=[homeMode,homeShowAll,n,e?JSON.stringify([e.id,e.date,e.time,e.location,e.responses]):'none'].join('|');
+    const sig=[homeMode,homeShowAll,n,justCreatedId,e?JSON.stringify([e.id,e.date,e.time,e.location,e.responses]):'none'].join('|');
     if(!force&&box.dataset.sig===sig)return;
     if(homeMode==='form'&&box.contains(document.activeElement))return; // saisie en cours
     box.dataset.sig=sig;box.hidden=false;
@@ -249,8 +302,11 @@
         ${n?choiceButtons(e):'<p class="muted">Connectez-vous pour répondre.</p>'}
         <p class="bpt-ag-present"><b>${g.present.length} présent${g.present.length>1?'s':''}</b>${g.present.length?' : '+g.present.map(esc).join(', '):''}${g.maybe.length?` · <span class="is-maybe">${g.maybe.length} peut-être</span>`:''}${g.absent.length?` · <span class="is-absent">${g.absent.length} absent${g.absent.length>1?'s':''}</span>`:''}</p>
         ${homeShowAll?responsesHtml(e):''}
+        ${justCreatedId&&justCreatedId===e.id?`<div class="bpt-ag-wa-box"><div><b>Partie proposée ✓</b><small>Préviens le groupe : le message est prêt, il n'y a plus qu'à choisir la conversation.</small></div>${waButton('is-big')}<button type="button" class="bpt-ag-wa-close" data-ag-wa-close aria-label="Fermer">×</button></div>`:''}
         <div class="bpt-ag-home-links"><button type="button" class="bpt-ag-link" data-ag-all>${homeShowAll?'Masquer les réponses':'Voir toutes les réponses'}</button>
-        ${canEdit(e)?'<button type="button" class="bpt-ag-link" data-ag-edit>✏️ Modifier</button><button type="button" class="bpt-ag-link" data-ag-del>🗑 Supprimer</button>':''}${n?'<button type="button" class="bpt-ag-link" data-ag-new>➕ Proposer une autre date</button>':''}</div>`;
+        ${canEdit(e)?'<button type="button" class="bpt-ag-link" data-ag-edit>✏️ Modifier</button><button type="button" class="bpt-ag-link" data-ag-del>🗑 Supprimer</button>':''}${n?'<button type="button" class="bpt-ag-link" data-ag-new>➕ Proposer une autre date</button>':''}${n&&!(justCreatedId&&justCreatedId===e.id)?'<button type="button" class="bpt-ag-link bpt-ag-link-wa" data-ag-wa>💬 Inviter sur WhatsApp</button>':''}</div>`;
+      box.querySelectorAll('[data-ag-wa]').forEach(b=>b.onclick=()=>{shareWhatsApp(e);if(justCreatedId){justCreatedId='';renderHome(true);}});
+      box.querySelector('[data-ag-wa-close]')?.addEventListener('click',()=>{justCreatedId='';renderHome(true);});
       box.querySelectorAll('[data-ag-choice]').forEach(b=>b.onclick=()=>respond(e,b.dataset.agChoice));
       box.querySelector('[data-ag-all]').onclick=()=>{homeShowAll=!homeShowAll;renderHome(true);};
       box.querySelector('[data-ag-edit]')?.addEventListener('click',()=>{homeMode='form';renderHome(true);});
@@ -326,6 +382,7 @@
     setInterval(()=>{renderHome();prefillLive();},1500);
     window.addEventListener('resize',()=>{if($('agenda')?.classList.contains('active'))fitHeight();},{passive:true});
     connect();
+    rsvpFromLink();
   }
 
   window.BPTAgenda={render,openAgenda,events:()=>events.slice(),grouped,nextInvite,nextEvent,liveTodayEvent};

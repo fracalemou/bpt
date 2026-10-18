@@ -6870,3 +6870,15 @@ header.bpt-header #bptConnectedIdentity:not(:empty){display:inline-flex !importa
 #records #recordsGrid.records-grid,#records #achievementsGrid.achievements-grid{display:block !important;grid-template-columns:none !important;columns:auto !important;column-count:auto !important}
 #records #recordsGrid .rec-group{width:100% !important;break-inside:avoid}
 #records .rec-grid{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+
+/* 10.4.46 — Invitation WhatsApp (agenda) */
+.bpt-ag-wa{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;border:0;background:#25d366;color:#06331b;font:inherit;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 4px 14px rgba(37,211,102,.25)}
+.bpt-ag-wa:hover{filter:brightness(1.05)}
+.bpt-ag-wa-ico{font-size:16px;line-height:1}
+.bpt-ag-wa.is-big{padding:11px 18px;font-size:15px}
+.bpt-ag-wa-box{position:relative;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px 14px;margin:12px 0 4px;padding:12px 40px 12px 14px;border-radius:14px;background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.45)}
+.bpt-ag-wa-box > div{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 220px}
+.bpt-ag-wa-box b{color:#62e39a;font-size:15px}
+.bpt-ag-wa-box small{color:var(--bpt-muted,#aeb9c9);font-size:12.5px;line-height:1.35}
+.bpt-ag-wa-close{position:absolute;top:6px;right:8px;background:none;border:0;color:var(--bpt-muted,#aeb9c9);font-size:20px;cursor:pointer;line-height:1}
+.bpt-ag-link-wa{color:#4ade80 !important}
