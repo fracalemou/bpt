@@ -10667,8 +10667,8 @@ html.bpt-mobile-device .bpt-ms-kpi b{font-size:19px}
 .bpt-ms-svg .v{fill:var(--bpt-text,#fff);font-size:13px;font-weight:800}
 
 /* ===== 10.4.37 — Classement en liste compacte sur téléphone (remplace les cartes 10.4.33) =====
-@media (orientation:portrait){ /* 10.4.39 — liste compacte en portrait seulement */
    Une ligne par joueur : rang · nom · points · évolution. Un appui sur la ligne déplie ses stats. */
+@media (orientation:portrait){ /* 10.4.39 — liste compacte en portrait seulement */
 html.bpt-mobile-device #ranking .tablewrap tbody{display:block !important;gap:0 !important;background:var(--bpt-card);border:1px solid var(--bpt-line);border-radius:16px;overflow:hidden}
 html.bpt-mobile-device #ranking #rankingBody tr{
   grid-template-columns:40px minmax(0,1fr) auto 46px !important;grid-template-areas:"rank player pts evo" "form form form form" "stats stats stats stats" !important;
@@ -10751,7 +10751,7 @@ html.bpt-mobile-device .bpt-t3-name{font-size:11px !important;overflow-wrap:norm
 .bpt-home-podium.is-settled .bpt-home-step{animation:none !important}
 
 /* 10.4.39 — Téléphone en paysage : tableau de classement classique (comme sur PC) */
-@media (orientation:landscape){html.bpt-mobile-device #ranking td.bpt-rk-stats{display:none !important}}
+@media (orientation:landscape){html.bpt-mobile-device #ranking #rankingBody tr > td.bpt-rk-stats{display:none !important}}
 @media (orientation:landscape){
   html.bpt-mobile-device #ranking #rankingBody td:nth-child(2),html.bpt-mobile-device #ranking thead th:nth-child(2){min-width:210px !important;width:210px !important;white-space:nowrap !important}
   html.bpt-mobile-device #ranking #rankingBody td:nth-child(2) .player-primary-name{white-space:nowrap !important}
