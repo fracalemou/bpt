@@ -9826,3 +9826,62 @@ html.bpt-mobile-device #historyTableWrap td,html.bpt-mobile-device #historyTable
 #latestgame .lg-photo .game-photo-thumb-btn:not([style*="none"]){display:block !important;width:100% !important;height:100% !important;max-width:none !important;max-height:none !important;min-width:0 !important;aspect-ratio:auto !important;border-radius:0 !important;box-shadow:none !important}
 #historyTableWrap table{width:max-content !important;min-width:100% !important;table-layout:auto !important}
 #historyTableWrap td,#historyTableWrap th,#historyTableWrap .player-name-stack,#historyTableWrap .player-primary-name,#historyTableWrap .player-secondary-nickname{white-space:nowrap !important;word-break:keep-all !important;overflow-wrap:normal !important;width:auto !important;max-width:none !important;min-width:0 !important}
+
+/* ===== 10.4.45 — Records & accomplissements refondus (préfixes rec- / ach-) ===== */
+#recordsGrid{display:block !important;grid-template-columns:none !important}
+.rec-group{margin:0 0 18px}
+.rec-group h3{margin:0 0 10px;font-size:15px;color:var(--bpt-text,#fff)}
+.rec-group-new h3{color:var(--bpt-gold,#f2c853)}
+.rec-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.rec-tile{position:relative;display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:16px;background:var(--bpt-card,#18223a);border:1px solid var(--bpt-line,#2c3a5a);min-width:0}
+.rec-tile.is-new{border-color:rgba(242,200,83,.7);background:linear-gradient(135deg,rgba(242,200,83,.12),var(--bpt-card,#18223a) 70%)}
+.rec-new{position:absolute;top:10px;right:10px;padding:2px 7px;border-radius:999px;background:var(--bpt-gold,#f2c853);color:#1a1408;font-size:10px;font-weight:900;letter-spacing:.06em}
+.rec-top{display:flex;align-items:center;gap:8px;padding-right:44px}
+.rec-ico{font-size:18px;line-height:1}
+.rec-label{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--bpt-muted,#aeb9c9)}
+.rec-who{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 6px;min-width:0}
+.rec-name{background:none !important;border:0 !important;padding:0 !important;margin:0;font:inherit;font-weight:800;font-size:15px;color:var(--bpt-text,#fff) !important;cursor:pointer;text-align:left;box-shadow:none !important;width:auto !important;min-height:0 !important}
+.rec-name:hover{color:var(--bpt-teal,#2ac9c2) !important}
+.rec-name.is-plain{cursor:default}
+.rec-nick{font-size:12px;font-style:italic;color:var(--bpt-muted,#aeb9c9)}
+.rec-sep{font-size:12.5px;color:var(--bpt-muted,#aeb9c9)}
+.rec-value{font-size:14px;font-weight:800;color:var(--bpt-gold,#f2c853)}
+
+.ach-filter{display:flex;gap:8px;margin:0 0 12px;flex-wrap:wrap}
+.ach-filter-btn{padding:7px 14px;border-radius:999px;border:1px solid var(--bpt-line,#2c3a5a);background:transparent;color:var(--bpt-muted,#aeb9c9);font:inherit;font-weight:800;font-size:13px;cursor:pointer}
+.ach-filter-btn.is-on{border-color:var(--bpt-teal,#2ac9c2);background:rgba(42,201,194,.12);color:var(--bpt-teal,#2ac9c2)}
+#achievementsGrid{display:block !important;grid-template-columns:none !important}
+.ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.ach-tile{display:flex;flex-direction:column;gap:10px;padding:12px 14px;border-radius:16px;background:var(--bpt-card,#18223a);border:1px solid var(--bpt-line,#2c3a5a);min-width:0}
+.ach-tile.is-mine{border-color:rgba(42,201,194,.65);box-shadow:inset 3px 0 0 var(--bpt-teal,#2ac9c2)}
+.ach-head{display:flex;align-items:flex-start;gap:10px}
+.ach-head > div{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.ach-head strong{font-size:15px;color:var(--bpt-text,#fff)}
+.ach-head small{font-size:12.5px;color:var(--bpt-muted,#aeb9c9);line-height:1.35}
+.ach-ico{font-size:24px;line-height:1}
+.ach-count{min-width:26px;height:26px;padding:0 7px;border-radius:999px;background:rgba(242,200,83,.15);color:var(--bpt-gold,#f2c853);font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center}
+.ach-chips{display:flex;flex-wrap:wrap;gap:6px}
+.ach-chip{padding:4px 10px;border-radius:999px;border:1px solid var(--bpt-line,#2c3a5a);background:rgba(255,255,255,.04);color:var(--bpt-text,#fff);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+.ach-chip.is-me{border-color:var(--bpt-teal,#2ac9c2);background:rgba(42,201,194,.15);color:var(--bpt-teal,#2ac9c2)}
+.ach-locked{margin-top:14px;border-radius:16px;border:1px dashed var(--bpt-line,#2c3a5a);padding:0 14px}
+.ach-locked > summary{cursor:pointer;padding:12px 0;font-weight:800;color:var(--bpt-muted,#aeb9c9);list-style:none}
+.ach-locked > summary::-webkit-details-marker{display:none}
+.ach-locked > summary::after{content:" ›";color:var(--bpt-teal,#2ac9c2)}
+.ach-locked[open] > summary::after{content:" ⌄"}
+.ach-locked-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;padding:0 0 14px}
+.ach-locked-row{display:flex;gap:10px;align-items:flex-start;opacity:.65}
+.ach-locked-row .ach-ico{filter:grayscale(1);font-size:20px}
+.ach-locked-row div{display:flex;flex-direction:column;gap:1px}
+.ach-locked-row strong{font-size:14px;color:var(--bpt-text,#fff)}
+.ach-locked-row small{font-size:12px;color:var(--bpt-muted,#aeb9c9)}
+html.bpt-mobile-device .rec-grid,html.bpt-mobile-device .ach-grid,html.bpt-mobile-device .ach-locked-list{grid-template-columns:1fr}
+html.bpt-mobile-device .rec-tile{padding:10px 12px}
+#records #recordsGrid.records-grid,#records #achievementsGrid.achievements-grid{display:block !important;grid-template-columns:none !important;columns:auto !important;column-count:auto !important}
+#records #recordsGrid .rec-group{width:100% !important;break-inside:avoid}
+html.bpt-mobile-device .rec-tile{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"top val" "who val";gap:3px 10px;align-items:center}
+html.bpt-mobile-device .rec-top{grid-area:top;padding-right:0}
+html.bpt-mobile-device .rec-who{grid-area:who}
+html.bpt-mobile-device .rec-value{grid-area:val;text-align:right;max-width:42vw;font-size:13.5px;line-height:1.25}
+html.bpt-mobile-device .rec-tile.is-new .rec-new{position:static;grid-area:auto;justify-self:start}
+html.bpt-mobile-device .rec-tile.is-new{grid-template-areas:"top val" "who val"}
+html.bpt-mobile-device .rec-name{font-size:14.5px}

@@ -1786,31 +1786,40 @@ function renderRecords(){
     ["🥈","Le Poulidor",poulidor.name,poulidor.value?`${poulidor.value} deuxième${poulidor.value>1?"s":""} place${poulidor.value>1?"s":""}`:"Aucune 2e place enregistrée"],
     ["🎯","Kill le plus fréquent",pairData?`${pairData.names[0]} a éliminé ${pairData.names[1]}`:"—",pairData?`${pairData.value} fois`:"—"]
   ];
-  const mobileRecords=isBptMobileDevice();
-  holder.innerHTML=cards.map(c=>{
-    let holderHtml="";
-    if(c[1]==="Kill le plus fréquent" && pairData){
-      holderHtml=`<span class="record-mobile-player-pair">
-        <span class="record-mobile-player-name" style="color:#42D5E8 !important">${esc(pairData.names[0])}</span>
-        <span class="record-action">a éliminé</span>
-        <span class="record-mobile-player-name" style="color:#42D5E8 !important">${esc(pairData.names[1])}</span>
-      </span>`;
-    }else if(c[2] && c[2]!=="—"){
-      const nick=playerNicknameInfo(c[2]).primary;
-      holderHtml=`<span class="record-mobile-player-name" style="color:#42D5E8 !important">${esc(c[2])}${nick?` <span class="record-mobile-nickname" style="color:#9FE8F1 !important">(${esc(nick)})</span>`:""}</span>`;
-    }else{
-      holderHtml='<span class="record-mobile-player-name" style="color:#42D5E8 !important">—</span>';
-    }
-
-    if(mobileRecords){
-      return `<div class="record-mobile-card">
-        <div class="record-mobile-title"><span class="record-mobile-icon">${c[0]}</span><span class="record-mobile-label">${esc(c[1])}</span></div>
-        <div class="record-mobile-meta"><span class="record-mobile-player">${holderHtml}</span><span class="record-mobile-value-inline">${esc(simplifyRecordTextForMobile(c[3]))}</span></div>
-      </div>`;
-    }
-
-    return `<div class="record-card"><div class="record-icon">${c[0]}</div><div class="record-headline"><span class="record-label">${esc(c[1])}</span><span class="record-separator"> :</span><strong class="record-player-holder">${holderHtml}</strong></div><small>${esc(simplifyRecordTextForMobile(c[3]))}</small></div>`;
-  }).join("");
+  // 10.4.45 — Records en tuiles compactes, regroupées par thème ; « NEW » = battu lors de la dernière partie.
+  const RECORD_META={
+    "Plus de victoires":["wins","win"],"Série de victoires":["winStreak","win"],"Plus de tabliers":["tablierCount","win"],"Série de tabliers":["tablierStreak","win"],
+    "Plus de podiums":["podiums","win"],"Série de podiums":["podiumStreak","win"],"Le Poulidor":[null,"win"],
+    "Plus de kills":["kills","kill"],"Kills sur une partie":["bestGameKill","kill"],"Kill le plus fréquent":["killPair","kill"],
+    "Plus gros gains":["net","money"],"Plus grosse perte d’argent":["worstNet","money"],
+    "Meilleure moyenne":["avg","form"],"Série de participations":["participationStreak","form"],"On Fire":["onFire","form"],
+    "Bad Beat":["badBeat","odd"],"Loser":["lastPlaces","odd"],"Heads-up le plus long":[null,"odd"],"Heads-up le plus court":[null,"odd"]
+  };
+  const GROUPS=[["win","🏆 Victoires, podiums & tabliers"],["kill","⚔️ Kills"],["money","💰 Argent"],["form","📈 Forme & régularité"],["odd","🎲 Insolites"]];
+  let newIds=new Set();
+  try{if(recordsScopeKey===CURRENT_SEASON_KEY)newIds=new Set(latestBrokenDashboardRecords().map(r=>r.id));}catch(_e){}
+  const tile=c=>{
+    const [icon,label,name,value]=c;const meta=RECORD_META[label]||[null,"odd"];
+    const isNew=!!(meta[0]&&newIds.has(meta[0]));
+    let who;
+    if(label==="Kill le plus fréquent"&&pairData){
+      who=`<button type="button" class="rec-name" data-player="${encodeURIComponent(pairData.names[0])}">${esc(pairData.names[0])}</button><span class="rec-sep">a éliminé</span><button type="button" class="rec-name" data-player="${encodeURIComponent(pairData.names[1])}">${esc(pairData.names[1])}</button>`;
+    }else if(name&&name!=="—"&&name!=="BPT"){
+      const nick=playerNicknameInfo(name).primary;
+      who=`<button type="button" class="rec-name" data-player="${encodeURIComponent(name)}">${esc(name)}</button>${nick?`<small class="rec-nick">${esc(nick)}</small>`:""}`;
+    }else who=`<span class="rec-name is-plain">${name==="BPT"?"":"—"}</span>`;
+    return {group:meta[1],isNew,html:`<div class="rec-tile${isNew?" is-new":""}">
+      ${isNew?'<span class="rec-new">NEW</span>':""}
+      <div class="rec-top"><span class="rec-ico">${icon}</span><span class="rec-label">${esc(label)}</span></div>
+      <div class="rec-who">${who}</div>
+      <div class="rec-value">${esc(simplifyRecordTextForMobile(value))}</div>
+    </div>`};
+  };
+  const tiles=cards.map(tile);
+  const fresh=tiles.filter(t=>t.isNew);
+  holder.innerHTML=(fresh.length?`<section class="rec-group rec-group-new"><h3>✨ Battus lors de la dernière partie</h3><div class="rec-grid">${fresh.map(t=>t.html).join("")}</div></section>`:"")
+    +GROUPS.map(([g,title])=>{const list=tiles.filter(t=>t.group===g&&!t.isNew);return list.length?`<section class="rec-group"><h3>${title}</h3><div class="rec-grid">${list.map(t=>t.html).join("")}</div></section>`:"";}).join("");
+  holder.onclick=e=>{const b=e.target.closest(".rec-name[data-player]");if(b)openPlayerProfile(decodeURIComponent(b.dataset.player));};
 }
 
 
@@ -2725,6 +2734,7 @@ function latestGameUnlockedAchievements(){
   return unlocked;
 }
 
+let achievementsMineOnly=false;
 function renderAchievements(){
   updateRecordsScopeSelector();
   const holder=$("achievementsGrid");
@@ -2734,18 +2744,27 @@ function renderAchievements(){
   const unlocked=items.filter(a=>a.players.length>0).length;
   if($("achievementUnlockedCount"))$("achievementUnlockedCount").textContent=String(unlocked);
 
-  holder.innerHTML=items.map(a=>{
-    const unlocked=a.players.length>0;
-    return `<div class="achievement-card ${unlocked?"":"locked"}">
-      <div class="achievement-icon">${a.icon}</div>
-      <h3>${esc(a.name)}</h3>
-      <div class="achievement-desc">${esc(a.desc)}</div>
-      <div class="achievement-status">${a.dynamic?"Accomplissement dynamique":unlocked?"Débloqué":"À débloquer"}</div>
-      ${unlocked
-        ? `<div class="achievement-players">${a.players.map(n=>`<span class="achievement-player">${playerNameHtml(n)}</span>`).join("")}</div>`
-        : `<div class="achievement-locked">🔒 Aucun joueur</div>`}
-    </div>`;
-  }).join("");
+  // 10.4.45 — Débloqués en tuiles (le joueur connecté mis en évidence), verrouillés regroupés et repliés.
+  const norm=v=>String(v||"").trim().toLocaleLowerCase("fr");
+  let me="";try{me=String(window.BPTLive3?.getVerifiedIdentityName?.()||"").trim();}catch(_e){}
+  const mine=a=>!!me&&a.players.some(n=>norm(n)===norm(me));
+  const open=items.filter(a=>a.players.length>0);
+  const shown=achievementsMineOnly&&me?open.filter(mine):open;
+  const locked=items.filter(a=>!a.players.length);
+  const chip=n=>`<button type="button" class="ach-chip${norm(n)===norm(me)?" is-me":""}" data-player="${encodeURIComponent(n)}">${esc(n)}</button>`;
+  holder.innerHTML=`
+    ${me?`<div class="ach-filter"><button type="button" class="ach-filter-btn${achievementsMineOnly?"":" is-on"}" data-ach-filter="all">Tous (${open.length})</button><button type="button" class="ach-filter-btn${achievementsMineOnly?" is-on":""}" data-ach-filter="mine">⭐ Les miens (${open.filter(mine).length})</button></div>`:""}
+    <div class="ach-grid">${shown.map(a=>`<div class="ach-tile${mine(a)?" is-mine":""}">
+      <div class="ach-head"><span class="ach-ico">${a.icon}</span><div><strong>${esc(a.name)}</strong><small>${esc(a.desc)}</small></div><span class="ach-count">${a.players.length}</span></div>
+      <div class="ach-chips">${a.players.map(chip).join("")}</div>
+    </div>`).join("")||'<div class="muted">Aucun accomplissement pour le moment.</div>'}</div>
+    ${locked.length?`<details class="ach-locked"><summary>🔒 ${locked.length} à débloquer</summary><div class="ach-locked-list">${locked.map(a=>`<div class="ach-locked-row"><span class="ach-ico">${a.icon}</span><div><strong>${esc(a.name)}</strong><small>${esc(a.desc)}</small></div></div>`).join("")}</div></details>`:""}`;
+  holder.onclick=e=>{
+    const f=e.target.closest("[data-ach-filter]");
+    if(f){achievementsMineOnly=f.dataset.achFilter==="mine";renderAchievements();return;}
+    const c=e.target.closest(".ach-chip[data-player]");
+    if(c)openPlayerProfile(decodeURIComponent(c.dataset.player));
+  };
 }
 
 
