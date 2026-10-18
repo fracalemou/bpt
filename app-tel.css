@@ -9916,3 +9916,5 @@ html.bpt-mobile-device .bpt-ag-wa-box .bpt-ag-wa{width:100%;justify-content:cent
 .bpt-ag-day.is-past{opacity:.25;cursor:default;background:transparent}
 .bpt-ag-day.is-taken{opacity:.45;cursor:not-allowed;text-decoration:line-through;background:rgba(255,107,107,.12)}
 .bpt-ag-day.is-past.is-fri{box-shadow:none}
+.bpt-ag-wa-btns{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.bpt-ag-wa-later{padding:9px 14px;border-radius:999px;border:1px solid var(--bpt-line,#2c3a5a);background:transparent;color:var(--bpt-muted,#aeb9c9);font:inherit;font-weight:800;font-size:13.5px;cursor:pointer}
+html.bpt-mobile-device .bpt-ag-wa-btns{width:100%}html.bpt-mobile-device .bpt-ag-wa-btns .bpt-ag-wa{flex:1;justify-content:center}

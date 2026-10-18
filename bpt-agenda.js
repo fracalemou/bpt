@@ -271,7 +271,7 @@
       location:$('bptAgLoc').value.trim()||`Chez ${n}`,createdBy:e?.createdBy||n,
       createdAt:e?.createdAt||Date.now(),responses:e?.responses||{[n]:'present'}};
     if(!e)justCreatedId=ev.id;
-    selectedIso=date;done&&done();await saveEvent(ev);
+    selectedIso=date;const saving=saveEvent(ev);done&&done();await saving; // ajout local immédiat, puis fermeture du formulaire (l’encadré WhatsApp trouve la partie)
   }
 
   // ---------- Rendu : liste des prochaines parties ----------
@@ -310,21 +310,23 @@
       return;
     }
     if(!e){
-      box.innerHTML=`<div class="bpt-ag-home-head"><div><div class="bpt-ag-kicker">Prochaine partie</div><h3>Aucune partie prévue</h3></div>${calLink}</div>
+      box.innerHTML=`<div class="bpt-ag-home-head"><div><div class="bpt-ag-kicker">Prochaine partie</div><h3>Aucune partie prévue</h3></div></div>
         ${n?'<div class="bpt-ag-actions"><button type="button" class="btn bpt-ag-primary" data-ag-propose>📅 Proposer une partie</button></div>':'<p class="muted">Connectez-vous avec votre nom de joueur pour proposer une partie.</p>'}`;
     }else{
       const g=grouped(e),mine=myChoice(e);
+      // Partie qu'on vient de proposer (peut être une date plus lointaine que la prochaine partie).
+      const created=justCreatedId?events.find(x=>x.id===justCreatedId)||null:null;
       box.innerHTML=`<div class="bpt-ag-home-head"><div><div class="bpt-ag-kicker">${mine?'Prochaine partie':'Partie proposée · à vous de répondre'}</div>
           <h3>📅 ${esc(whenLabel(e.date))}</h3>
           <p class="bpt-ag-meta">📍 ${esc(e.location||'Lieu à définir')} · proposée par ${esc(e.createdBy||'—')}</p></div>${calLink}</div>
         ${n?choiceButtons(e):'<p class="muted">Connectez-vous pour répondre.</p>'}
         <p class="bpt-ag-present"><b>${g.present.length} présent${g.present.length>1?'s':''}</b>${g.present.length?' : '+g.present.map(esc).join(', '):''}${g.maybe.length?` · <span class="is-maybe">${g.maybe.length} peut-être</span>`:''}${g.absent.length?` · <span class="is-absent">${g.absent.length} absent${g.absent.length>1?'s':''}</span>`:''}</p>
         ${homeShowAll?responsesHtml(e):''}
-        ${justCreatedId&&justCreatedId===e.id?`<div class="bpt-ag-wa-box"><div><b>Partie proposée ✓</b><small>Préviens le groupe : le message est prêt, il n'y a plus qu'à choisir la conversation.</small></div>${waButton('is-big')}<button type="button" class="bpt-ag-wa-close" data-ag-wa-close aria-label="Fermer">×</button></div>`:''}
+        ${created?`<div class="bpt-ag-wa-box"><div><b>Partie ${created.id===e.id?'':`du ${esc(longDate(created.date))} `}proposée ✓</b><small>Préviens le groupe : le message est prêt, il n'y a plus qu'à choisir la conversation.</small></div><div class="bpt-ag-wa-btns">${waButton('is-big')}<button type="button" class="bpt-ag-wa-later" data-ag-wa-close>Plus tard</button></div><button type="button" class="bpt-ag-wa-close" data-ag-wa-close aria-label="Fermer">×</button></div>`:''}
         <div class="bpt-ag-home-links"><button type="button" class="bpt-ag-link" data-ag-all>${homeShowAll?'Masquer les réponses':'Voir toutes les réponses'}</button>
-        ${canEdit(e)?'<button type="button" class="bpt-ag-link" data-ag-edit>✏️ Modifier</button><button type="button" class="bpt-ag-link" data-ag-del>🗑 Supprimer</button>':''}${n?'<button type="button" class="bpt-ag-link" data-ag-new>➕ Proposer une autre date</button>':''}${n&&!(justCreatedId&&justCreatedId===e.id)?'<button type="button" class="bpt-ag-link bpt-ag-link-wa" data-ag-wa>💬 Inviter sur WhatsApp</button>':''}</div>`;
-      box.querySelectorAll('[data-ag-wa]').forEach(b=>b.onclick=()=>{shareWhatsApp(e);if(justCreatedId){justCreatedId='';renderHome(true);}});
-      box.querySelector('[data-ag-wa-close]')?.addEventListener('click',()=>{justCreatedId='';renderHome(true);});
+        ${canEdit(e)?'<button type="button" class="bpt-ag-link" data-ag-edit>✏️ Modifier</button><button type="button" class="bpt-ag-link" data-ag-del>🗑 Supprimer</button>':''}${n?'<button type="button" class="bpt-ag-link" data-ag-new>➕ Proposer une autre date</button>':''}${n&&!created?'<button type="button" class="bpt-ag-link bpt-ag-link-wa" data-ag-wa>💬 Inviter sur WhatsApp</button>':''}</div>`;
+      box.querySelectorAll('[data-ag-wa]').forEach(b=>b.onclick=()=>{shareWhatsApp(created&&b.closest('.bpt-ag-wa-box')?created:e);if(justCreatedId){justCreatedId='';renderHome(true);}});
+      box.querySelectorAll('[data-ag-wa-close]').forEach(b=>b.addEventListener('click',()=>{justCreatedId='';renderHome(true);}));
       box.querySelectorAll('[data-ag-choice]').forEach(b=>b.onclick=()=>respond(e,b.dataset.agChoice));
       box.querySelector('[data-ag-all]').onclick=()=>{homeShowAll=!homeShowAll;renderHome(true);};
       box.querySelector('[data-ag-edit]')?.addEventListener('click',()=>{homeMode='form';renderHome(true);});
@@ -332,7 +334,7 @@
       box.querySelector('[data-ag-del]')?.addEventListener('click',()=>{if(confirm('Supprimer cette partie ? Les réponses seront perdues.'))removeEvent(e);});
     }
     box.querySelector('[data-ag-propose]')?.addEventListener('click',()=>{homeMode='new';renderHome(true);});
-    box.querySelector('[data-ag-cal]').onclick=()=>{selectedIso=e?.date||'';if(e){const d=new Date(`${e.date}T12:00:00`);cursor=new Date(d.getFullYear(),d.getMonth(),1);}openAgenda();};
+    const calBtn=box.querySelector('[data-ag-cal]');if(calBtn)calBtn.onclick=()=>{selectedIso=e?.date||'';if(e){const d=new Date(`${e.date}T12:00:00`);cursor=new Date(d.getFullYear(),d.getMonth(),1);}openAgenda();};
   }
 
   function render(){
