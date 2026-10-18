@@ -7200,3 +7200,24 @@ html[data-bpt-theme] .bpt-my-profile .btn.ghost{background:var(--bpt-card2) !imp
 .bpt-t3-table th,.bpt-t3-table td{min-width:0 !important;width:auto !important;max-width:none !important;white-space:normal !important;overflow-wrap:anywhere;position:static !important;left:auto !important}
 .bpt-t3-table thead th:first-child,.bpt-t3-table tbody th{width:28% !important;background:transparent !important;box-shadow:none !important;border:0 !important}
 .bpt-t3-table thead th.bpt-t3-player{background:transparent !important;border:0 !important;border-bottom:3px solid var(--c) !important;border-radius:0 !important}
+
+/* ===== 10.4.37 — Bandeau du haut (PC) réorganisé =====
+   Gauche : logo + titre + saison. Droite : joueur connecté (ouvre Mon profil) + pastille « en ligne ».
+   La version reste visible dans Paramètres ; « Installer l'application » passe en bas à droite. */
+header.bpt-header{display:flex !important;align-items:center !important;gap:16px !important;height:auto !important;min-height:72px !important;padding:10px 20px !important;position:relative !important}
+header.bpt-header .bpt-brand-wrap{display:flex !important;align-items:center !important;gap:14px !important;min-width:0 !important}
+header.bpt-header .brand{display:flex !important;flex-direction:column !important;justify-content:center !important;gap:2px !important;min-width:0 !important;padding-right:0 !important}
+header.bpt-header .brand > b{font-size:20px !important;line-height:1.15 !important}
+header.bpt-header #headerSeasonLabel{font-size:12.5px !important;color:var(--bpt-muted,#aeb9c9) !important;margin:0 !important}
+header.bpt-header .app-version{display:none !important}
+header.bpt-header .bpt-identity-session{position:absolute !important;right:118px !important;top:50% !important;transform:translateY(-50%) !important;margin:0 !important}
+header.bpt-header #bptConnectedIdentity{margin:0 !important;padding:7px 14px !important;border-radius:999px !important;border:1px solid var(--bpt-line,#2c3a5a) !important;background:rgba(255,255,255,.05) !important;font-size:13.5px !important;gap:8px !important;max-width:none !important}
+header.bpt-header #bptConnectedIdentity .bpt-identity-label{display:none !important}
+header.bpt-header #bptConnectedIdentity::before{content:"👤";font-size:14px}
+header.bpt-header #bptConnectedIdentity::after{content:"›";font-size:18px;line-height:1;color:var(--bpt-teal,#2ac9c2);margin-left:2px}
+header.bpt-header #bptConnectedIdentity .bpt-identity-name{text-decoration:none !important;font-weight:800;color:var(--bpt-text,#fff)}
+header.bpt-header #bptConnectedIdentity.is-clickable:hover{border-color:var(--bpt-teal,#2ac9c2) !important;background:rgba(42,201,194,.1) !important}
+header.bpt-header .bpt-online-presence{right:20px !important;height:36px !important;padding:0 12px !important;border-color:rgba(98,216,137,.45) !important;background:rgba(98,216,137,.08) !important;cursor:pointer}
+header.bpt-header .bpt-online-presence #bptOnlineCount::after{content:" en ligne";font-weight:600;font-size:12.5px;color:var(--bpt-muted,#aeb9c9)}
+.bpt-app-action{top:auto !important;bottom:18px !important;right:18px !important}
+header.bpt-header #bptConnectedIdentity:not(:empty){display:inline-flex !important;flex-direction:row !important;align-items:center !important;white-space:nowrap !important;width:auto !important;min-height:0 !important;height:auto !important}
