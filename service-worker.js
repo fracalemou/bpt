@@ -1,15 +1,15 @@
-const CACHE='bpt-pwa-10.4.54';
+const CACHE='bpt-pwa-10.4.55';
 // Avatars (10.4.53) : fichiers fixes, cache à part conservé d'une version à l'autre.
 // Un avatar modifié doit changer de nom de fichier (ou AVATAR_CACHE de numéro).
 const AVATAR_CACHE='bpt-avatars-v1';
-const ASSETS=['./', './index.html', './app-pc.css?v=10.4.54', './app-tel.css?v=10.4.54', './app-version.js?v=10.4.54', './application.js?v=10.4.54', './bpt-app-presence-launcher.js?v=10.4.54', './bpt-identity-entry-gate.js?v=10.4.54', './bpt-live-mobilefirst.css?v=10.4.54', './bpt-live-mobilefirst.js?v=10.4.54', './bpt-live3-module.js?v=10.4.54', './bpt-photo-url-migration-launcher.js?v=10.4.54', './bpt-pwa-unified-action.js?v=10.4.54', './bpt-shared-photo-config-bootstrap.js?v=10.4.54', './bpt-v229-orientation-stability.js?v=10.4.54', './bpt-v260-avatar-modal-bindings.js?v=10.4.54', './bpt-v400-headup-summary.js?v=10.4.54', './bpt-v404-latestgame-layout.js?v=10.4.54', './bpt-v408-config-ui.js?v=10.4.54', './bpt-v417-native-mobile-nav.js?v=10.4.54', './bpt-v453-odds-script.js?v=10.4.54', './bpt-v463-settings-script.js?v=10.4.54', './firebase-bridge.js?v=10.4.54', './live-betting.js?v=10.4.54', './live-ui.js?v=10.4.54', './mobile-device.js?v=10.4.54', './navigation.js?v=10.4.54', './bpt-share-recap.js?v=10.4.54', './bpt-agenda.js?v=10.4.54', './bpt-my-profile.js?v=10.4.54', './manifest.webmanifest', './icon-192.png', './icon-512.png', './partie-5.jpg'];
+const ASSETS=['./', './index.html', './app-pc.css?v=10.4.55', './app-tel.css?v=10.4.55', './app-version.js?v=10.4.55', './application.js?v=10.4.55', './bpt-live-mobilefirst.css?v=10.4.55', './bpt-live-mobilefirst.js?v=10.4.55', './bpt-live3-module.js?v=10.4.55', './bpt-pwa-unified-action.js?v=10.4.55', './bpt-config-ui.js?v=10.4.55', './bpt-odds.js?v=10.4.55', './firebase-bridge.js?v=10.4.55', './live-betting.js?v=10.4.55', './live-ui.js?v=10.4.55', './mobile-device.js?v=10.4.55', './navigation.js?v=10.4.55', './bpt-share-recap.js?v=10.4.55', './bpt-agenda.js?v=10.4.55', './bpt-my-profile.js?v=10.4.55', './manifest.webmanifest', './icon-192.png', './icon-512.png', './partie-5.jpg'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
 self.addEventListener('activate',event=>{
   event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE&&k!==AVATAR_CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
 });
-// 10.4.54 — Stratégies :
+// 10.4.55 — Stratégies :
 // - page (index.html) : réseau d'abord, c'est elle qui porte les numéros ?v= et déclenche les mises à jour ;
 // - fichiers de l'appli avec ?v= : cache d'abord (contenu figé pour un numéro donné) → ouverture immédiate ;
 // - bibliothèques Firebase (version dans l'adresse) : cache d'abord ;
