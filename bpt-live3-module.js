@@ -823,6 +823,7 @@ function buildBptBackupPayload(){
       db:JSON.parse(JSON.stringify(typeof db!=="undefined"?db:{}))
     }
   };
+  if(window.bptWithoutSecuredDigests)payload.data.db=window.bptWithoutSecuredDigests(payload.data.db);
 
   try{
     if(typeof currentSeasonHistoryCache!=="undefined"){
@@ -1469,6 +1470,39 @@ function connectionDeviceLabel(){
   }
 
   let profileCodeState=null,profileCodeLoadingName='',verifiedProfileName='';
+  // 10.4.52 — L'empreinte du code n'est plus lisible dans la fiche joueur (bpt/state, sauvegardes) :
+  // elle sert de nom de clé sous bpt_codes/<sel>/<empreinte>. Les règles autorisent la lecture
+  // d'une clé précise mais pas la liste : on vérifie un code sans pouvoir récupérer l'empreinte.
+  // La fiche ne garde que le sel et « secured ». Un ancien digest encore présent (avant migration)
+  // est vérifié comme avant puis déplacé.
+  const hasProfileCode=record=>!!(record?.salt&&(record?.secured||record?.digest));
+  async function profileCodeSecretRef(salt,digest){
+    const env=await window.bptFirebaseEnsure?.();if(!env?.rtdb)throw new Error('Connexion indisponible.');
+    return env.rtdb.ref(digest?`bpt_codes/${salt}/${digest}`:`bpt_codes/${salt}`);
+  }
+  async function profileCodeMatches(record,pin){
+    if(!record?.salt)return false;
+    const digest=await profileCodeDigest(record.salt+':'+pin);
+    // Un digest encore présent (fiche ancien format, ou réécrite par un appareil resté sur une
+    // ancienne version) fait foi ; il sera déplacé par migrateLegacyProfileCode.
+    if(record.digest)return digest===record.digest;
+    if(!record.secured)return false;
+    const snap=await (await profileCodeSecretRef(record.salt,digest)).once('value');
+    return snap.val()===true;
+  }
+  function withoutDigest(auth,extra){const next={...(auth||{}),...(extra||{})};delete next.digest;return next;}
+  // Code ancien format vérifié : empreinte copiée dans bpt_codes, puis retirée de la fiche.
+  async function migrateLegacyProfileCode(ref,record){
+    if(!record?.salt||!record?.digest)return record;
+    try{
+      await (await profileCodeSecretRef(record.salt)).set({[record.digest]:true});
+      const result=await ref.transaction(server=>{
+        if(server?.salt!==record.salt||server?.digest!==record.digest)return;
+        return withoutDigest(server,{secured:true});
+      });
+      return result.committed?result.snapshot.val():record;
+    }catch(e){console.warn('Migration du code personnel :',e);return record;}
+  }
   async function profileCodeRef(name){
     const env=await window.bptFirebaseEnsure?.();if(!env?.rtdb)throw new Error('Connexion indisponible.');
     const dbx=env.rtdb,clean=String(name||'').trim(),target=normalizeIdentityKey(clean),playersRef=dbx.ref("bpt/state/main/data/players");
@@ -1537,7 +1571,7 @@ function connectionDeviceLabel(){
       const ref=await profileCodeRef(name),snap=await ref.once('value');
       if(profileCodeLoadingName!==name)return;
       profileCodeState={name,ref,record:snap.val()};
-      const exists=!!(profileCodeState.record?.salt&&profileCodeState.record?.digest);
+      const exists=hasProfileCode(profileCodeState.record);
       $3('bptProfileCodeInput').maxLength=4;
       $3('bptProfileCodeInput').minLength=4;
       $3('bptProfileCodeInput').placeholder='Votre code à 4 chiffres';
@@ -1552,9 +1586,11 @@ function connectionDeviceLabel(){
     if(!settingsUnlocked)throw new Error('Déverrouillez les paramètres administrateur.');
     const codeRef=await profileCodeRef(name);
     const snap=await codeRef.once('value');
-    if(!snap.val())throw new Error('Aucun code à réinitialiser pour ce joueur.');
+    const previous=snap.val();
+    if(!previous)throw new Error('Aucun code à réinitialiser pour ce joueur.');
     if(!settingsUnlocked)throw new Error('Les paramètres ont été verrouillés.');
-    await codeRef.update({salt:null,digest:null,codeLength:null,createdAt:null,updatedAt:Date.now()});
+    await codeRef.update({salt:null,digest:null,secured:null,codeLength:null,createdAt:null,updatedAt:Date.now()});
+    if(previous.salt)try{await (await profileCodeSecretRef(previous.salt)).remove();}catch(e){console.warn('Effacement du code :',e);}
     if(profileCodeState?.name===name||profileCodeLoadingName===name){profileCodeState=null;profileCodeLoadingName='';}
     if($3('live3SpectatorIdentityModal')?.classList.contains('open')&&$3('live3SpectatorNameInput')?.value===name)await loadProfileCodeState(true);
     return true;
@@ -1565,17 +1601,21 @@ function connectionDeviceLabel(){
     if(!profileCodeState||profileCodeState.name!==name){error.textContent='Attendez la vérification du profil, puis réessayez.';await loadProfileCodeState(true);return false;}
     if(!/^[0-9]{4}$/.test(pin)){error.textContent='Saisissez un code de 4 chiffres.';return false;}
     const {ref}=profileCodeState;let record=(await ref.once('value')).val();
-    if(!record?.salt||!record?.digest){
+    if(!hasProfileCode(record)){
       if(pin!==String($3('bptProfileCodeConfirm').value||'')){error.textContent='Les deux codes ne correspondent pas.';return false;}
       const salt=Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('');
       const digest=await profileCodeDigest(salt+':'+pin);
+      // Empreinte écrite d'abord (sel neuf, aucune collision) ; si un autre appareil
+      // crée le code au même moment, la fiche garde le sien et celle-ci reste orpheline.
+      await (await profileCodeSecretRef(salt,digest)).set(true);
       const result=await ref.transaction(server=>{
-        if(server?.salt&&server?.digest)return;
-        return {...(server||{}),salt,digest,codeLength:4,createdAt:Date.now(),updatedAt:Date.now()};
+        if(hasProfileCode(server))return;
+        return withoutDigest(server,{salt,secured:true,codeLength:4,createdAt:Date.now(),updatedAt:Date.now()});
       });
       record=result.snapshot.val()||(await ref.once('value')).val();
     }
-    if(!record?.salt||!record?.digest||await profileCodeDigest(record.salt+':'+pin)!==record.digest){error.textContent='Code incorrect pour ce profil.';return false;}
+    if(!await profileCodeMatches(record,pin)){error.textContent='Code incorrect pour ce profil.';return false;}
+    record=await migrateLegacyProfileCode(ref,record);
     profileCodeState.record=record;verifiedProfileName=name;return true;
   }
 
@@ -1597,12 +1637,13 @@ function connectionDeviceLabel(){
     button.disabled=true;
     try{
       const ref=await profileCodeRef(name),record=(await ref.once('value')).val();
-      if(!record||await profileCodeDigest(record.salt+':'+oldPin)!==record.digest){status.textContent='Le code actuel est incorrect.';return;}
+      if(!record||!await profileCodeMatches(record,oldPin)){status.textContent='Le code actuel est incorrect.';return;}
       const digest=await profileCodeDigest(record.salt+':'+newPin);
+      // Remplacement complet sous le sel : l'ancien code cesse aussitôt d'être valable.
+      await (await profileCodeSecretRef(record.salt)).set({[digest]:true});
       const result=await ref.transaction(server=>{
-        if(!server)return {...record,digest,codeLength:4,updatedAt:Date.now()};
-        if(server.digest===digest&&server.codeLength===4)return server;
-        return server.digest===record.digest?{...server,digest,codeLength:4,updatedAt:Date.now()}:undefined;
+        if(server&&server.salt!==record.salt)return;
+        return withoutDigest(server||record,{secured:true,codeLength:4,updatedAt:Date.now()});
       });
       if(!result.committed){status.textContent='Le code a changé entre-temps. Réessayez.';return;}
       if(profileCodeState?.name===name)profileCodeState.record=result.snapshot.val();

@@ -5644,7 +5644,8 @@ async function mergePlayersByName(){
     if(dst && src){
       dst.active=dst.active||src.active;
       if(!String(dst.nickname||"").trim() && String(src.nickname||"").trim())dst.nickname=src.nickname;
-      if(!(dst.auth?.salt&&dst.auth?.digest) && src.auth?.salt&&src.auth?.digest)dst.auth=clone(src.auth);
+      const hasCode=a=>!!(a?.salt&&(a?.secured||a?.digest));
+      if(!hasCode(dst.auth) && hasCode(src.auth))dst.auth=clone(src.auth);
     }
     db.players=(db.players||[]).filter(p=>p.name!==source);
 

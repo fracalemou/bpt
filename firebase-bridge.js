@@ -71,6 +71,15 @@ window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
     for(let i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,16777619); }
     return (h>>>0).toString(36);
   }
+  // 10.4.52 — Un code « secured » est vérifié dans bpt_codes : son ancien digest, resté dans la
+  // copie locale d'un appareil, ne doit pas revenir dans la fiche partagée (lisible par tous).
+  function withoutSecuredDigests(data){
+    const players=data&&data.players;
+    if(!players||typeof players!=="object")return data;
+    const strip=p=>(p&&p.auth&&p.auth.secured&&p.auth.digest)?{...p,auth:(({digest,...rest})=>rest)(p.auth)}:p;
+    return {...data,players:Array.isArray(players)?players.map(strip):Object.fromEntries(Object.entries(players).map(([k,p])=>[k,strip(p)]))};
+  }
+  window.bptWithoutSecuredDigests=withoutSecuredDigests;
   function mapSnapToRows(snap){
     const val=snap.val()||{};
     return Object.entries(val).map(([id,row])=>({id,...(row||{})}));
@@ -104,7 +113,8 @@ window.BPT_FIREBASE_CONFIG = window.BPT_FIREBASE_CONFIG || {
         return {data:row||null,error:null};
       }
       if(this.op==="upsert" || this.op==="update"){
-        const incoming=this.payload||{};
+        const incoming={...(this.payload||{})};
+        if(incoming.data)incoming.data=withoutSecuredDigests(incoming.data);
         const snap=await ref.once("value");
         const prev=snap.val()||{};
         const row={

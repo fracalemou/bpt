@@ -6,11 +6,15 @@
       ".read": "auth != null",
       "state": {
         "main": {
-          ".write": "auth != null && newData.exists()"
+          ".write": "auth != null && newData.exists()",
+          ".validate": "newData.hasChild('data') && newData.child('data').hasChildren(['players', 'settings'])"
         }
       },
       "games": {
-        ".write": "auth != null"
+        ".write": "auth != null",
+        "$gameId": {
+          ".validate": "newData.hasChildren(['game_key', 'game_data'])"
+        }
       },
       "chat": {
         ".write": "auth != null"
@@ -37,10 +41,22 @@
         ".write": "auth != null"
       },
       "backups": {
-        ".write": "auth != null"
+        "$backupKey": {
+          ".write": "auth != null && (!data.exists() || (!newData.exists() && data.child('createdAt').val() < now - 1209600000))",
+          ".validate": "newData.hasChildren(['createdAt', 'data']) && newData.child('createdAt').isNumber()"
+        }
       },
       "backup_meta": {
         ".write": "auth != null"
+      }
+    },
+    "bpt_codes": {
+      "$salt": {
+        ".write": "auth != null && $salt.matches(/^[0-9a-f]{32}$/)",
+        "$digest": {
+          ".read": "auth != null",
+          ".validate": "$digest.matches(/^[0-9a-f]{64}$/) && newData.val() === true"
+        }
       }
     }
   }
