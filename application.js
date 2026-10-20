@@ -1412,7 +1412,7 @@ function renderCareerRatioSummary(){
   const holder=document.getElementById('careerRatioSummary');
   if(!holder)return;
   if(!isAllSeasons()){holder.hidden=true;holder.innerHTML='';return;}
-  holder.hidden=false;
+  holder.hidden=rankingMode==='bets';
   const rows=[...ranking()].sort((a,b)=>Number(b.points||0)-Number(a.points||0));
   const leader=rows[0];
   const bestWin=[...rows].filter(r=>r.gamesCount>=5).sort((a,b)=>Number(b.winRate||0)-Number(a.winRate||0)||Number(b.wins||0)-Number(a.wins||0))[0];
@@ -3717,6 +3717,8 @@ function setRankingMode(mode){
   const points=document.getElementById('rankingPointsContent'),bets=document.getElementById('bptBettingRankingPanel');
   if(points)points.hidden=rankingMode==='bets';
   if(bets)bets.hidden=rankingMode!=='bets';
+  const career=document.getElementById('careerRatioSummary');
+  if(career)career.hidden=rankingMode==='bets'||!isAllSeasons();
   document.getElementById('rankingPointsModeBtn')?.classList.toggle('active',rankingMode==='points');
   document.getElementById('rankingBetsModeBtn')?.classList.toggle('active',rankingMode==='bets');
   if(rankingMode==='bets')renderBettingRanking();
