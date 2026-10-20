@@ -35,7 +35,7 @@
     <div class="bpt484-special-hud" data-role="specialhud"><div class="bpt484-timebank-player" data-role="timebankplayer"></div><div class="bpt484-timebank-count" data-role="timebankcount"></div><div class="bpt484-timebank-meta" data-role="timebankmeta"></div><button data-timebank-stop>Décision prise</button></div>
     <div class="bpt484-main">
       <section class="bpt484-stage">
-        <div class="bpt484-clock" data-action="chrono" role="button" tabindex="0" aria-label="Réglages du chrono"><span class="bpt484-clock-settings" aria-hidden="true">☷</span><div class="bpt484-value" data-role="timer">00:00</div></div>
+        <div class="bpt484-clock" data-action="chrono" role="button" tabindex="0" aria-label="Réglages du chrono"><span class="bpt484-clock-settings" aria-hidden="true">☷</span><div class="bpt484-pause-badge" data-role="pausebadge" hidden>⏸ EN PAUSE</div><div class="bpt484-value" data-role="timer">00:00</div><div class="bpt484-progress" aria-hidden="true"><span data-role="progressfill"></span></div></div>
         <div class="bpt484-blinds" data-action="blinds"><div class="bpt484-value" data-role="blinds">—</div></div>
         <div class="bpt484-next">Prochain · <strong data-role="next">—</strong></div>
       </section>
@@ -456,6 +456,16 @@
     }
     el.style.fontSize=Math.floor(best*10)/10+'px';
   }
+  /* Le bouton remplit sa rangée : on vérifie le débordement dans le bouton lui-même, pas dans la barre. */
+  function fitButtonText(btn,max,min){
+    if(!btn||!btn.clientWidth||!btn.clientHeight)return;
+    let lo=min,hi=max,best=min;
+    for(let i=0;i<8;i++){
+      const mid=(lo+hi)/2;btn.style.fontSize=mid+'px';
+      if(btn.scrollWidth<=btn.clientWidth+1&&btn.scrollHeight<=btn.clientHeight+1){best=mid;lo=mid}else hi=mid;
+    }
+    btn.style.fontSize=Math.floor(best*10)/10+'px';
+  }
   function layoutLiveActions(root){
     const bar=root.querySelector('.bpt484-actions');if(!bar||!bar.clientWidth||root.classList.contains('is-pregame'))return;
     const buttons=Array.from(bar.children).filter(b=>b.tagName==='BUTTON'&&getComputedStyle(b).display!=='none');
@@ -476,20 +486,24 @@
   function fitLiveTexts(){
     document.querySelectorAll('.bpt484-live').forEach(root=>{
       if(!root.clientWidth||root.classList.contains('is-pregame'))return;
-      const signature=JSON.stringify([root.clientWidth,root.clientHeight,root.classList.contains('is-spectator'),Array.from(root.querySelectorAll('[data-role],.bpt484-actions>button')).filter(el=>!el.closest('.bpt-bounty-overlay,.bpt-pregame')).map(el=>el.textContent)]);
+      if(root.dataset.fs==='0'&&!document.documentElement.classList.contains('bpt-mobile-device')){
+        const top=root.getBoundingClientRect().top+window.scrollY;
+        root.style.setProperty('--bpt-live-h',Math.max(420,Math.floor(window.innerHeight-top-8))+'px');
+      }
+      const signature=JSON.stringify([root.clientWidth,root.clientHeight,root.classList.contains('is-spectator'),root.classList.contains('is-paused'),Array.from(root.querySelectorAll('[data-role],.bpt484-actions>button')).filter(el=>!el.closest('.bpt-bounty-overlay,.bpt-pregame')).map(el=>el.textContent)]);
       if(root.dataset.fitSignature===signature)return;
       root.dataset.fitSignature=signature;
       layoutLiveActions(root);
       const portrait=matchMedia('(max-width:760px) and (orientation:portrait)').matches;
       const landscapePhone=matchMedia('(max-width:1000px) and (max-height:560px) and (orientation:landscape)').matches;
       /* Hiérarchie validée : Timer > Blinds > Joueurs = Tapis moyen = Prochaines blinds = Temps écoulé. */
-      fitText(root.querySelector('.bpt484-clock .bpt484-value'),{max:portrait?148:(landscapePhone?100:210),min:portrait?72:(landscapePhone?46:74),widthRatio:.92,heightRatio:.78});
+      fitText(root.querySelector('.bpt484-clock .bpt484-value'),{max:portrait?148:(landscapePhone?100:210),min:portrait?72:(landscapePhone?46:74),widthRatio:.92,heightRatio:.74});
       fitText(root.querySelector('.bpt484-blinds .bpt484-value'),{max:portrait?102:(landscapePhone?88:170),min:portrait?42:(landscapePhone?38:56),widthRatio:.96,heightRatio:.92});
       fitText(root.querySelector('.bpt484-players .bpt484-value'),{max:portrait?78:(landscapePhone?56:98),min:portrait?44:(landscapePhone?30:52),widthRatio:.88,heightRatio:.76});
       fitText(root.querySelector('.bpt484-stack [data-role="avgchips"]'),{max:portrait?42:(landscapePhone?30:48),min:portrait?22:(landscapePhone?17:26),widthRatio:.88,heightRatio:.48});
       fitText(root.querySelector('.bpt484-timing .bpt484-value'),{max:portrait?42:(landscapePhone?26:50),min:portrait?24:(landscapePhone?16:24),widthRatio:.92,heightRatio:.56});
       fitText(root.querySelector('.bpt484-next strong'),{max:portrait?27:(landscapePhone?19:30),min:portrait?16:(landscapePhone?12:16),widthRatio:.90,heightRatio:.42});
-      root.querySelectorAll('.bpt484-actions>button').forEach(btn=>fitText(btn,{max:portrait?16:(landscapePhone?14:20),min:12,wrap:true,widthRatio:.98,heightRatio:.98}));
+      root.querySelectorAll('.bpt484-actions>button').forEach(btn=>fitButtonText(btn,portrait?16:(landscapePhone?14:20),12));
     });
   }
   function scheduleFitLiveTexts(){
@@ -705,7 +719,16 @@
       de?.classList.toggle('is-ahead',/avance/i.test(dt));
       set('mode',st.paceAdaptive===true?'Adaptatif':'Classique');
       set('level',idx<25?`${idx+1} / 25`:String(idx+1));
-      const pb=r.querySelector('[data-do="pause"]');setText(pb,st.running?'Pause':(st.startedAt?'Reprendre':'Démarrer'))});
+      const pb=r.querySelector('[data-do="pause"]');setText(pb,st.running?'Pause':(st.startedAt?'Reprendre':'Démarrer'));
+      const paused=!!st.startedAt&&!st.running&&!st.finishedAt;
+      r.classList.toggle('is-paused',paused);
+      const badge=r.querySelector('[data-role="pausebadge"]');if(badge)badge.hidden=!paused;
+      const levelSec=Math.max(1,Number(st.levels?.[idx]?.durationSec)||curDur*60);
+      const remainSec=st.running&&st.deadline?Math.max(0,(Number(st.deadline)-Date.now())/1000):Math.max(0,Number(st.remainingSec)||0);
+      const fill=r.querySelector('[data-role="progressfill"]');
+      if(fill){const done=st.startedAt?Math.min(1,Math.max(0,1-remainSec/levelSec)):0;fill.style.transform='scaleX('+done.toFixed(4)+')';}
+      r.classList.toggle('is-level-ending',!!st.running&&remainSec<=60);
+    });
     if(ownerRole && st.activeReflectionTimer && Number(st.activeReflectionTimer.endsAt||0)<=Date.now() && !window.__bptStoppingExpiredTimer){window.__bptStoppingExpiredTimer=true;api()?.stopReflectionTimer?.().finally(()=>{window.__bptStoppingExpiredTimer=false})}
     refreshPersonalBounty();refreshLiveObjectives();refreshLiveRanking();scheduleFitLiveTexts();
     if(!repairTried){const bad=(st.levels||[]).slice(0,Math.min(25,(st.levels||[]).length)).some((lv,i)=>{const b=blindAt(i);return Number(lv?.sb)!==b.sb||Number(lv?.bb)!==b.bb});if(bad&&api()?.isOwner?.()){repairTried=true;api()?.repairStandardBlinds?.().catch(console.warn)}}

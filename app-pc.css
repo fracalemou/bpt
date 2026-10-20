@@ -6480,3 +6480,28 @@ header.bpt-header #bptConnectedIdentity:not(:empty){display:inline-flex !importa
 #latestgame .lg-photo .game-photo-thumb-btn:not([style*="none"])::after{content:"🔍 Agrandir";position:absolute;left:8px;bottom:8px;padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.6);color:#fff;font-size:11.5px;font-weight:700;opacity:0;transition:opacity .15s}
 #latestgame .lg-photo .game-photo-thumb-btn:hover::after{opacity:1}
 #latestgame .lg-photo:not(:has(.game-photo-thumb-btn[style*="none"])) .lg-photo-menu-btn{top:22px;right:24px}
+
+/* Live · lot design 1 (10.4.59) : pause visible, progression du niveau, retard coloré, boutons secondaires en contour */
+.bpt484-live .bpt484-clock-settings{top:8px;right:8px;transform:none;font-size:18px;padding:4px}
+.bpt484-pause-badge{position:absolute;top:6px;left:50%;transform:translateX(-50%);z-index:2;padding:5px 14px;border-radius:999px;background:rgba(242,193,78,.16);border:1px solid rgba(242,193,78,.75);color:#f2c14e;font-size:14px;font-weight:900;letter-spacing:.12em;white-space:nowrap;pointer-events:none}
+.bpt484-pause-badge[hidden]{display:none}
+.bpt484-live.is-paused .bpt484-clock .bpt484-value{opacity:.5}
+.bpt484-live.is-paused .bpt484-clock{padding-top:42px}
+@media (prefers-reduced-motion:no-preference){
+ .bpt484-live.is-paused .bpt484-clock .bpt484-value{animation:bpt484PausePulse 2.4s ease-in-out infinite}
+ .bpt484-live.is-level-ending .bpt484-progress span{animation:bpt484PausePulse 1s ease-in-out infinite}
+}
+@keyframes bpt484PausePulse{0%,100%{opacity:.5}50%{opacity:.85}}
+.bpt484-live .bpt484-stage:after{opacity:0!important}
+.bpt484-progress{position:absolute;left:8%;right:8%;bottom:2px;height:6px;border-radius:999px;background:rgba(255,255,255,.09);overflow:hidden;pointer-events:none}
+.bpt484-progress span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#2ac9c2,#e0ad38);transform:scaleX(0);transform-origin:left center;transition:transform 1s linear}
+.bpt484-live.is-level-ending .bpt484-progress span{background:linear-gradient(90deg,#e0ad38,#dc5a57)}
+.bpt484-live.is-paused .bpt484-progress span{background:#a6bbb6}
+.bpt484-delta.is-delay:not(.is-alert),.bpt484-delta.is-ahead:not(.is-alert){display:inline-block;padding:2px 7px;border-radius:8px}
+.bpt484-delta.is-delay:not(.is-alert){background:rgba(240,140,50,.18);color:#ffb067}
+.bpt484-delta.is-ahead:not(.is-alert){background:rgba(39,198,192,.16);color:#54e1da}
+.bpt484-live .bpt484-actions>.bpt484-follow{background:transparent;color:#8fd0f5;box-shadow:inset 0 0 0 2px #287cac}
+.bpt484-live .bpt484-actions>.bpt484-tools{background:transparent;color:#7fe0da;box-shadow:inset 0 0 0 2px #367585}
+.bpt484-live .bpt484-actions>.bpt484-follow[aria-expanded="true"]{background:rgba(40,124,172,.25)}
+.bpt484-live .bpt484-actions>.bpt484-tools[aria-expanded="true"]{background:rgba(54,117,133,.3)}
+#live3Game .bpt484-live[data-fs="0"]:not(.is-pregame){height:var(--bpt-live-h,calc(100dvh - 128px))}
