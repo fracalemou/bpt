@@ -115,8 +115,9 @@
   font-size:var(--fs-xs); color:#a8c4ba; font-weight:750;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
-.bptll-field input,.bptll-field select,
-.bptll-select,.bptll-add-select,.bptll-add-input{
+.bptll-field input,
+.bptll-field select,
+.bptll-select{
   width:100%; min-width:0; box-sizing:border-box;
   height:100%; min-height:28px; max-height:var(--control);
   border:1px solid #36574d; border-radius:var(--radius);
@@ -227,19 +228,8 @@
 .bptll-player-empty{grid-column:1/-1;padding:18px;text-align:center;color:#a9c6bc;font-size:var(--fs-sm)}
 
 /* Étape 3 — toujours deux paris côte à côte. */
-.bptll-bets{
-  width:100%; height:100%; min-height:0;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  grid-template-rows:auto minmax(0,1fr) auto;
-  gap:var(--gap);
-  overflow:hidden;
-}
-.bptll-bet-note{
-  grid-column:1/-1; margin:0;
-  font-size:var(--fs-xs); color:#bdd1ca; text-align:center;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-}
+
+
 .bptll-bet-card{
   min-width:0; min-height:0;
   display:grid; grid-template-rows:auto minmax(0,1fr);
