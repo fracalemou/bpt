@@ -3012,7 +3012,7 @@ function connectionDeviceLabel(){
           sessionRows.push({player,type,pick,actual,odds:odd,stakeCents:stake,grossWonCents:gross,netCents:net});
         }
       });
-      root.sessions[session]={session,season:String(db?.settings?.season||CURRENT_SEASON_KEY),gameNo:Number(state?.gameNo)||Number(db?.liveState?.gameNo)||null,settledAt:Date.now(),winner,firstEliminated:first,rows:sessionRows};return root;
+      root.sessions[session]={session,season:String(db?.settings?.season||CURRENT_SEASON_KEY),gameNo:Number(state?.gameNo)||null,settledAt:Date.now(),winner,firstEliminated:first,rows:sessionRows};return root;
     });
   }
 

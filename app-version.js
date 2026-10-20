@@ -1,11 +1,6 @@
 
-function isBptMobileDevice(){
-  return document.documentElement.classList.contains("bpt-mobile-device")
-    || document.body.classList.contains("bpt-mobile-device")
-    || (window.matchMedia && window.matchMedia("(max-width:700px)").matches);
-}
 
-const BPT_APP_VERSION="10.4.55";
+const BPT_APP_VERSION="10.4.56";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;

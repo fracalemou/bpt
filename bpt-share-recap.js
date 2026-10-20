@@ -12,7 +12,6 @@
   const FONT='"Segoe UI",system-ui,-apple-system,Roboto,sans-serif';
   let chosenPhoto=null; // {img, blob} choisie pour ce partage
 
-  const nick=name=>{try{return g('playerNicknameInfo')?.(name)?.primary||'';}catch(_e){return '';}};
   const euroTxt=v=>{try{return g('euro')?g('euro')(v):`${Number(v||0)} €`;}catch(_e){return `${Number(v||0)} €`;}};
   const dateTxt=v=>{try{return g('shortDate')?g('shortDate')(v):String(v||'');}catch(_e){return String(v||'');}};
   const durationTxt=rows=>{try{const s=g('bptGameTiming')?.(rows)?.durationSec;return s&&g('formatGameDuration')?g('formatGameDuration')(s):'';}catch(_e){return '';}};
@@ -89,9 +88,7 @@
   // ---------- Visuel ----------
   function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
   function setFont(ctx,w,s){ctx.font=`${w} ${s}px ${FONT}`;}
-  function fitText(ctx,text,maxW,size,weight,min){let s=size;do{setFont(ctx,weight,s);if(ctx.measureText(text).width<=maxW)break;s-=1;}while(s>min);return s;}
   function ellipsis(ctx,text,maxW){if(ctx.measureText(text).width<=maxW)return text;let t=text;while(t.length>1&&ctx.measureText(t+'…').width>maxW)t=t.slice(0,-1);return t+'…';}
-  function wrap(ctx,text,maxW){const out=[];let cur='';for(const w of String(text).split(/\s+/)){const t=cur?cur+' '+w:w;if(ctx.measureText(t).width>maxW&&cur){out.push(cur);cur=w;}else cur=t;}if(cur)out.push(cur);return out;}
 
   function drawRecap(d,photo){
     const W=1080,M=56;
@@ -163,10 +160,6 @@
     const t=document.createElement('div');t.textContent=msg;
     t.style.cssText='position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:2147483000;max-width:min(92vw,560px);text-align:center;background:#163d33;color:#fff;padding:12px 18px;border-radius:14px;font:700 15px system-ui;box-shadow:0 8px 24px rgba(0,0,0,.45)';
     document.body.appendChild(t);setTimeout(()=>t.remove(),5200);
-  }
-  async function copyText(text){
-    try{await navigator.clipboard.writeText(text);return true;}catch(_e){}
-    try{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();const ok=document.execCommand('copy');ta.remove();return ok;}catch(_e){return false;}
   }
   async function copyImage(blob){
     try{if(window.ClipboardItem&&navigator.clipboard?.write){await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);return true;}}catch(_e){}

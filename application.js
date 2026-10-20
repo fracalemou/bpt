@@ -297,8 +297,6 @@ function cloudBuildLeanPayload(){
     points:clone(db?.points||{}),
     settings:clone(db?.settings||{}),
     playerAliases:clone(db?.playerAliases||{}),
-    liveState:null,
-    liveWire:null,
     gamePhotos:{},
     playerPhotos:{}
   };
@@ -741,8 +739,6 @@ async function applyCloudState(row){
 
   const rev=Number(row.revision||0);
   const remoteState=JSON.parse(JSON.stringify(row.data));
-  remoteState.liveState=null;
-  remoteState.liveWire=null;
 
   // La photothèque est additive : une photo déjà connue localement ne doit jamais
   // disparaître parce qu'un autre appareil possède un état plus ancien.
@@ -2956,9 +2952,6 @@ function playerNicknameInfo(name){
   return {primary,others,source:configured?"joueur":(annales.length?"annales":"")};
 }
 
-function displayPlayerName(name){
-  return String(name||"").trim();
-}
 
 function playerNicknameSecondary(name){
   const nick=playerNicknameInfo(name).primary;
@@ -3885,14 +3878,6 @@ function renderAll(){
 
 let dashboardRecordSelection=null;
 
-function shuffleCopy(list){
-  const a=[...list];
-  for(let i=a.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [a[i],a[j]]=[a[j],a[i]];
-  }
-  return a;
-}
 
 function groupedGamesFromRows(rows){
   const m=new Map();
@@ -4129,34 +4114,6 @@ function latestBrokenDashboardRecords(){
   }).map(r=>({...r,isNew:true}));
 }
 
-function randomDashboardRecords(pool,count=9,forcedRecords=[]){
-  const available=pool.filter(r=>r && r.label);
-  const byId=new Map(available.map(r=>[(r.id||r.label),r]));
-  const wanted=Math.min(count,available.length);
-
-  const forcedIds=[];
-  for(const r of (forcedRecords||[])){
-    const id=r && (r.id||r.label);
-    if(id && byId.has(id) && !forcedIds.includes(id))forcedIds.push(id);
-  }
-
-  const remaining=available.filter(r=>!forcedIds.includes(r.id||r.label));
-  const remainingIds=new Set(remaining.map(r=>r.id||r.label));
-  const targetExtra=Math.max(0,wanted-forcedIds.length);
-  const currentExtra=Array.isArray(dashboardRecordSelection)
-    ? dashboardRecordSelection.filter(id=>!forcedIds.includes(id) && remainingIds.has(id))
-    : [];
-
-  if(currentExtra.length!==targetExtra){
-    dashboardRecordSelection=forcedIds.concat(
-      shuffleCopy(remaining).slice(0,targetExtra).map(r=>r.id||r.label)
-    );
-  }else{
-    dashboardRecordSelection=forcedIds.concat(currentExtra.slice(0,targetExtra));
-  }
-
-  return dashboardRecordSelection.map(id=>byId.get(id)).filter(Boolean);
-}
 
 function bptDashboardFunnyVariant(category,gameKey,variants){
   if(!Array.isArray(variants)||!variants.length)return "";
@@ -4878,54 +4835,7 @@ function setRankingFilter(key){
 }
 
 
-function chartEscape(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 
-function renderLineChart(containerId,series,options={}){
-  const el=$(containerId);
-  if(!el)return;
-  if(!Array.isArray(series)||!series.length){
-    el.innerHTML='<div class="muted" style="padding:14px 0">Pas encore assez de données.</div>';
-    return;
-  }
-  const width=760,height=250,padL=42,padR=20,padT=18,padB=34;
-  const allPts=series.flatMap(s=>s.values||[]).filter(v=>v&&Number.isFinite(v.y));
-  if(!allPts.length){
-    el.innerHTML='<div class="muted" style="padding:14px 0">Pas encore assez de données.</div>';
-    return;
-  }
-  const xs=allPts.map(v=>v.x), ys=allPts.map(v=>v.y);
-  const minX=Math.min(...xs),maxX=Math.max(...xs);
-  let minY=Math.min(...ys),maxY=Math.max(...ys);
-  if(options.reverseY){ minY=Math.min(1,minY); }
-  if(minY===maxY){maxY=minY+1}
-  const sx=x=>padL+((x-minX)/Math.max(1,maxX-minX))*(width-padL-padR);
-  const sy=y=>{
-    const t=(y-minY)/(maxY-minY);
-    return options.reverseY
-      ? padT+t*(height-padT-padB)
-      : height-padB-t*(height-padT-padB);
-  };
-  const grid=[];
-  const ticks=5;
-  for(let i=0;i<=ticks;i++){
-    const yv=minY+(maxY-minY)*(i/ticks);
-    const yy=sy(yv);
-    grid.push(`<line x1="${padL}" y1="${yy}" x2="${width-padR}" y2="${yy}" stroke="rgba(255,255,255,.08)" stroke-width="1"/>`);
-    grid.push(`<text x="${padL-8}" y="${yy+4}" fill="rgba(255,255,255,.45)" font-size="11" text-anchor="end">${Math.round(yv)}</text>`);
-  }
-  const palette=["#f1c86a","#62d889","#6fb7ff","#ff8b7b","#c89cff"];
-  const paths=series.map((s,idx)=>{
-    const vals=(s.values||[]).filter(v=>v&&Number.isFinite(v.y));
-    const pts=vals.map(v=>`${sx(v.x)},${sy(v.y)}`).join(" ");
-    const color=palette[idx%palette.length];
-    const circles=vals.map(v=>`<circle cx="${sx(v.x)}" cy="${sy(v.y)}" r="3.2" fill="${color}"><title>${chartEscape(s.name)} — partie #${v.x} : ${v.y}</title></circle>`).join("");
-    return `<polyline fill="none" stroke="${color}" stroke-width="2.5" points="${pts}" stroke-linecap="round" stroke-linejoin="round"/>${circles}`;
-  }).join("");
-  const minGame=Math.round(minX),maxGame=Math.round(maxX);
-  const labels=`<text x="${padL}" y="${height-8}" fill="rgba(255,255,255,.45)" font-size="11">#${minGame}</text>
-  <text x="${width-padR}" y="${height-8}" fill="rgba(255,255,255,.45)" font-size="11" text-anchor="end">#${maxGame}</text>`;
-  el.innerHTML=`<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="${chartEscape(options.label||"Graphique")}">${grid.join("")}${paths}${labels}</svg>`;
-}
 
 function rankingSnapshotByGame(){
   const groups=groupedGames().slice().sort((a,b)=>Number(a[0])-Number(b[0]));
@@ -4948,48 +4858,6 @@ function rankingSnapshotByGame(){
   return snapshots;
 }
 
-function championshipRecords(){
-  const rank=ranking();
-  const hist=db.history||[];
-  if(!rank.length)return [];
-  const bestBy=(key)=>rank.slice().sort((a,b)=>Number(b[key]||0)-Number(a[key]||0))[0];
-  const wins=bestBy("wins"), podiums=bestBy("podiums"), kills=bestBy("kills"), avg=bestBy("avgPoints"), net=bestBy("net");
-
-  let bestProgress=null;
-  rank.forEach(r=>{
-    if(r.progress!==null && Number(r.progress)>0 && (!bestProgress || Number(r.progress)>Number(bestProgress.progress))) bestProgress=r;
-  });
-
-  let bestStreak={name:"",value:0};
-  for(const p of (db.players||[])){
-    const rows=hist.filter(r=>r.player===p.name).slice().sort((a,b)=>Number(a.game)-Number(b.game));
-    let cur=0,max=0;
-    rows.forEach(r=>{cur=Number(r.place)<=3?cur+1:0;max=Math.max(max,cur)});
-    if(max>bestStreak.value)bestStreak={name:p.name,value:max};
-  }
-
-  const durationRecords=bptDurationRecords();
-  const secondPlaceCounts={};
-  for(const r of hist){
-    const player=String(r.player||"");
-    if(player && Number(r.place)===2) secondPlaceCounts[player]=(secondPlaceCounts[player]||0)+1;
-  }
-  const bestSecond=Object.entries(secondPlaceCounts)
-    .sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],"fr"))[0];
-  const poulidor=bestSecond?{name:bestSecond[0],value:bestSecond[1]}:null;
-  return [
-    ["Plus de victoires",wins?`${wins.name} · ${wins.wins}`:"—"],
-    ["Plus de podiums",podiums?`${podiums.name} · ${podiums.podiums}`:"—"],
-    ["Plus de kills",kills?`${kills.name} · ${kills.kills}`:"—"],
-    ["Meilleure moyenne",avg?`${avg.name} · ${num(avg.avgPoints,1)} pts`:"—"],
-    ["Plus forte progression",bestProgress?`${bestProgress.name} · +${bestProgress.progress}`:"—"],
-    ["Plus gros solde net",net?`${net.name} · ${euro(net.net||0)}`:"—"],
-    ["Série de podiums",bestStreak.value?`${bestStreak.name} · ${bestStreak.value}`:"—"],
-    ["Heads-up le plus long",durationRecords.longestHu?`${bptHeadsUpPlayers(durationRecords.longestHu)} · ${formatGameDuration(durationRecords.longestHu.huDuration)}`:"—"],
-    ["Heads-up le plus court",durationRecords.shortestHu?`${bptHeadsUpPlayers(durationRecords.shortestHu)} · ${formatGameDuration(durationRecords.shortestHu.huDuration)}`:"—"],
-    ["Le Poulidor",poulidor?`${poulidor.name} · ${poulidor.value} deuxième${poulidor.value>1?"s":""} place${poulidor.value>1?"s":""}`:"—"]
-  ];
-}
 
 function latestGameImpactItems(gameNo){
   const snapshots=rankingSnapshotByGame();
@@ -6172,8 +6040,6 @@ function renderPoints(){
 
 
 /* ==================== LIVE BPT INTÉGRÉ ==================== */
-const LIVE_CLOUD_HEARTBEAT_MS=120000;
-let spectatorSyncDeadline=Date.now()+LIVE_CLOUD_HEARTBEAT_MS;
 
 
 
