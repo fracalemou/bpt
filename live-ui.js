@@ -41,12 +41,12 @@
       </section>
       <div class="bpt484-right">
         <div class="bpt484-kpis">
-          <section class="bpt484-card bpt484-players" data-action="players"><div class="bpt484-card-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="24" cy="15" r="7"/><circle cx="11" cy="19" r="5"/><circle cx="37" cy="19" r="5"/><path d="M13 38v-5c0-7 5-11 11-11s11 4 11 11v5"/><path d="M3 37v-5c0-5 3-8 8-8 2 0 4 .6 5.5 1.8"/><path d="M45 37v-5c0-5-3-8-8-8-2 0-4 .6-5.5 1.8"/></svg></div><div class="bpt484-label">Joueurs</div><div class="bpt484-value" data-role="players">0</div><div class="bpt484-sub">restants</div></section>
+          <section class="bpt484-card bpt484-players" data-action="players"><div class="bpt484-card-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="24" cy="15" r="7"/><circle cx="11" cy="19" r="5"/><circle cx="37" cy="19" r="5"/><path d="M13 38v-5c0-7 5-11 11-11s11 4 11 11v5"/><path d="M3 37v-5c0-5 3-8 8-8 2 0 4 .6 5.5 1.8"/><path d="M45 37v-5c0-5-3-8-8-8-2 0-4 .6-5.5 1.8"/></svg></div><div class="bpt484-label">Joueurs</div><div class="bpt484-value" data-role="players">0</div><div class="bpt484-sub" data-role="playerssub">restants</div></section>
           <section class="bpt484-card bpt484-stack" data-action="stack"><div class="bpt484-card-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><ellipse cx="24" cy="12" rx="14" ry="6"/><path d="M10 12v7c0 3 6 6 14 6s14-3 14-6v-7"/><path d="M10 20v7c0 3 6 6 14 6s14-3 14-6v-7"/><path d="M10 28v7c0 3 6 6 14 6s14-3 14-6v-7"/></svg></div><div class="bpt484-label">Tapis moyen</div><div class="bpt484-value bpt484-stack-values"><span data-role="avgchips">0</span><small data-role="avgbb">0 BB</small></div></section>
         </div>
         <section class="bpt484-info" data-action="timing">
           <div class="bpt484-info-line"><div class="bpt484-info-icon">⚙</div><div class="bpt484-info-copy">Structure · <strong class="bpt484-teal" data-role="mode">Classique</strong></div><div></div></div>
-          <div class="bpt484-info-line"><div class="bpt484-info-icon">◷</div><div class="bpt484-info-copy">BLINDS <strong data-role="blinddur">· — min</strong></div><div class="bpt484-level-inline">Niveau <span data-role="level">— / 25</span></div></div>
+          <div class="bpt484-info-line"><div class="bpt484-info-icon">◷</div><div class="bpt484-info-copy">Niveaux de <strong data-role="blinddur">— min</strong></div><div class="bpt484-level-inline">Niveau <span data-role="level">— / 25</span></div></div>
           <div class="bpt484-sep"></div>
           <div class="bpt484-timing"><div class="bpt484-info-icon">◴</div><div class="bpt484-timing-copy"><div class="bpt484-label">Temps écoulé</div><div class="bpt484-value" data-role="elapsed">0 min</div><div class="bpt484-pace-line">Fin estimée · <strong class="bpt484-teal" data-role="finish">—</strong> · <strong class="bpt484-delta" data-role="delta">—</strong></div></div></div>
         </section>
@@ -686,7 +686,7 @@
         if(end)end.hidden=!ownerRole;
         if(odds)odds.hidden=false;
       }
-      const chatButton=r.querySelector('.bpt484-head-tools .bpt484-chat');if(chatButton){const unread=Math.max(0,Number(api()?.getUnreadChatCount?.())||0);setText(chatButton,unread?'Chat ('+unread+')':'Chat');chatButton.setAttribute('aria-label',unread?'Chat · '+unread+' messages non lus':'Chat');}
+      const chatButton=r.querySelector('.bpt484-head-tools .bpt484-chat');if(chatButton){const unread=Math.max(0,Number(api()?.getUnreadChatCount?.())||0),label=unread>99?'99+':String(unread);chatButton.classList.toggle('has-unread',unread>0);if(chatButton.dataset.unread!==label){chatButton.dataset.unread=label;const count=document.createElement('span');count.className='bpt484-chat-count';count.textContent=label;chatButton.replaceChildren('Chat',...(unread?[count]:[]));}chatButton.setAttribute('aria-label',unread?'Chat · '+unread+' messages non lus':'Chat');}
       renderPreGame(r,st,ownerRole);
       renderBounty(r,st);
       const set=(role,val)=>{const e=r.querySelector(`[data-role="${role}"]`);setText(e,val)};
@@ -695,9 +695,10 @@
       set('part',`Partie n°${gameNo(st)}`);
       set('blinds',`${fmt(cur.sb)} / ${fmt(cur.bb)}`);
       const curDur=Math.max(1,Math.round(Number(st.levels?.[idx]?.durationSec||0)/60)||Math.round(Number(st.levels?.[idx]?.durationMin||0))||15);
-      set('blinddur',`· ${curDur} min`);
+      set('blinddur',`${curDur} min`);
       set('timer',$('live3Timer')?.textContent||'00:00');
       set('players',String(alive));
+      set('playerssub',players.length>alive?`restants sur ${players.length}`:'restants');
       set('avgchips',fmt(avg));
       set('avgbb',`${avgBB} BB`);
       set('next',`${fmt(nx.sb)} / ${fmt(nx.bb)}`);

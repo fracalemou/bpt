@@ -6505,3 +6505,9 @@ header.bpt-header #bptConnectedIdentity:not(:empty){display:inline-flex !importa
 .bpt484-live .bpt484-actions>.bpt484-follow[aria-expanded="true"]{background:rgba(40,124,172,.25)}
 .bpt484-live .bpt484-actions>.bpt484-tools[aria-expanded="true"]{background:rgba(54,117,133,.3)}
 #live3Game .bpt484-live[data-fs="0"]:not(.is-pregame){height:var(--bpt-live-h,calc(100dvh - 128px))}
+
+/* Live · lot design 2 (10.4.60) : chat dans la palette avec pastille de non-lus, numéro de partie lisible */
+.bpt484-live .bpt484-head-tools .bpt484-chat{position:relative;background:transparent;color:#7fe0da;box-shadow:inset 0 0 0 2px #2a8f88}
+.bpt484-live .bpt484-head-tools .bpt484-chat.has-unread{background:#2ac9c2;color:#06201d;box-shadow:none}
+.bpt484-chat-count{display:inline-block;min-width:1.5em;margin-left:6px;padding:1px 5px;border-radius:999px;background:#dc5a57;color:#fff;font-size:.8em;line-height:1.35;text-align:center}
+.bpt484-live .bpt484-part{color:#f5f8f7}

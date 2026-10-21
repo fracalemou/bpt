@@ -294,7 +294,7 @@
     const otherPlayers=players.filter(name=>norm(name)!==norm(identity));
     const confirmedCount=players.filter(name=>allBets[name]?.confirmed===true).length;
     const othersTitle=document.createElement('div');othersTitle.className='bptll-panel-title bptll-panel-title-row';
-    othersTitle.innerHTML='<div><strong>Paris des autres joueurs</strong><small>Mise à jour en temps réel</small></div><em>'+confirmedCount+' / '+players.length+' validé'+(confirmedCount>1?'s':'')+'</em>';
+    othersTitle.innerHTML='<div><strong>Paris des autres joueurs</strong><small>Mise à jour en temps réel</small></div><em>'+confirmedCount+' / '+players.length+' validé'+(players.length>1?'s':'')+'</em>';
     others.append(othersTitle);
 
     const list=document.createElement('div');list.className='bptll-other-bets-list';
@@ -323,7 +323,7 @@
     ensure().querySelector('.bptll-shell')?.classList.toggle('is-spectator-step',spectator);
     footer(spectator
       ? []
-      : [button('← Retour aux paramètres',false,()=>api()?.returnToPreGameSettings?.()),button('▶ Révéler le type de bounty',true,()=>api()?.launchPreGame?.())]
+      : [button('← Retour aux paramètres',false,()=>api()?.returnToPreGameSettings?.()),button('▶ Révéler le bounty',true,()=>api()?.launchPreGame?.())]
     );
   }
 
