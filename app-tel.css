@@ -8960,10 +8960,10 @@ html.bpt-mobile-device #latestgame .lg-photo:not(:has(.game-photo-thumb-btn[styl
 .bpt484-delta.is-delay:not(.is-alert),.bpt484-delta.is-ahead:not(.is-alert){display:inline-block;padding:2px 7px;border-radius:8px}
 .bpt484-delta.is-delay:not(.is-alert){background:rgba(240,140,50,.18);color:#ffb067}
 .bpt484-delta.is-ahead:not(.is-alert){background:rgba(39,198,192,.16);color:#54e1da}
-.bpt484-live .bpt484-actions>.bpt484-follow{background:transparent;color:#8fd0f5;box-shadow:inset 0 0 0 2px #287cac}
-.bpt484-live .bpt484-actions>.bpt484-tools{background:transparent;color:#7fe0da;box-shadow:inset 0 0 0 2px #367585}
-.bpt484-live .bpt484-actions>.bpt484-follow[aria-expanded="true"]{background:rgba(40,124,172,.25)}
-.bpt484-live .bpt484-actions>.bpt484-tools[aria-expanded="true"]{background:rgba(54,117,133,.3)}
+.bpt484-live .bpt484-actions>.bpt484-follow{background:transparent;color:#eef2fb;box-shadow:inset 0 0 0 2px #3a4a7d}
+.bpt484-live .bpt484-actions>.bpt484-tools{background:transparent;color:#eef2fb;box-shadow:inset 0 0 0 2px #3a4a7d}
+.bpt484-live .bpt484-actions>.bpt484-follow[aria-expanded="true"]{background:rgba(58,74,125,.4)}
+.bpt484-live .bpt484-actions>.bpt484-tools[aria-expanded="true"]{background:rgba(58,74,125,.4)}
 
 /* Live · lot design 2 (10.4.60) : chat dans la palette avec pastille de non-lus, numéro de partie lisible */
 .bpt484-live .bpt484-head-tools .bpt484-chat{position:relative;background:transparent;color:#7fe0da;box-shadow:inset 0 0 0 2px #2a8f88}
