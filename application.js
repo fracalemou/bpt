@@ -3719,6 +3719,9 @@ function setRankingMode(mode){
   if(bets)bets.hidden=rankingMode!=='bets';
   const career=document.getElementById('careerRatioSummary');
   if(career)career.hidden=rankingMode==='bets'||!isAllSeasons();
+  const race=document.getElementById('rankingRaceBlock');
+  if(race)race.hidden=rankingMode==='bets';
+  if(rankingMode==='points')renderRankingRace();
   document.getElementById('rankingPointsModeBtn')?.classList.toggle('active',rankingMode==='points');
   document.getElementById('rankingBetsModeBtn')?.classList.toggle('active',rankingMode==='bets');
   if(rankingMode==='bets')renderBettingRanking();
@@ -4752,6 +4755,7 @@ function renderLatestGame(){
         : "<strong>Aucun nouveau</strong>"}</div></div>`
     ].join("");
   }
+  renderLatestGameMomentum(rows,gameTiming);
   if($("latestGameCorrectionBtn")){
     $("latestGameCorrectionBtn").onclick=()=>openCorrectionForGame(gameNo);
   }
@@ -4949,8 +4953,182 @@ function bptRankingSortValueHtml(s){
   const [v,unit]=f(s);
   return `<span class="bpt-rk-sortval">${esc(String(v))}<small>${esc(unit)}</small></span>`;
 }
+// ===== 10.4.62 — Momentum de la partie : frise des éliminations successives =====
+function bptMomentumData(rows,timing){
+  const n=rows.length;
+  const realElapsed=r=>{const d=Number(r.outElapsedSec);if(Number.isFinite(d)&&d>0)return d;const l=legacyElapsedFromOutTime(r.outTime);return l>0?l:null;};
+  const outs=rows.filter(r=>Number(r.place)>1);
+  const timed=outs.length>0&&outs.every(r=>realElapsed(r)!=null);
+  outs.sort((a,b)=>timed?(realElapsed(a)-realElapsed(b))||(Number(b.place)-Number(a.place)):Number(b.place)-Number(a.place));
+  const winner=rows.find(r=>Number(r.place)===1)||null;
+  const lastOut=timed&&outs.length?realElapsed(outs[outs.length-1]):0;
+  const end=timed?Math.max(Number(timing?.durationSec)||0,lastOut):0;
+  const kills={};
+  const events=outs.map((r,i)=>{
+    const killer=String(r.killer||"").trim();
+    if(killer)kills[killer]=(kills[killer]||0)+1;
+    const t=timed?realElapsed(r):null,prev=i>0&&timed?realElapsed(outs[i-1]):null;
+    const tags=[];
+    if(i===0)tags.push("🩸 Premier sang");
+    if(timed&&prev!=null&&t-prev<=120)tags.push("⚡ Coup double");
+    if(Number(r.place)===4)tags.push("🫧 La bulle");
+    if(Number(r.place)===3&&n>2)tags.push("⚔️ Début du heads-up");
+    return {row:r,player:r.player,place:Number(r.place),killer,killNo:killer?kills[killer]:0,level:Number(r.outLevel)||0,t,remaining:n-(i+1),tags};
+  });
+  let gap=null;
+  if(timed&&events.length){
+    let from=0,fromLabel="";
+    for(const e of events){if(!gap||e.t-from>gap.sec)gap={sec:e.t-from,from:fromLabel,to:e.player};from=e.t;fromLabel=e.player;}
+  }
+  let burst=null;
+  if(timed){
+    for(let i=0;i<events.length;i++){let j=i;while(j+1<events.length&&events[j+1].t-events[i].t<=900)j++;const c=j-i+1;if(c>=3&&(!burst||c>burst.count))burst={count:c,sec:events[j].t-events[i].t};}
+  }
+  return {n,timed,end,events,winner,gap,burst,firstOut:timed&&events.length?events[0].t:null,headsUpSec:Number(timing?.headsUpDurationSec)||null};
+}
+
+function renderLatestGameMomentum(rows,timing){
+  const host=$("latestGameMomentum");if(!host)return;
+  const d=bptMomentumData(rows,timing);
+  if(d.n<3||!d.events.length){host.innerHTML='<p class="lg-mom-note">Pas assez de joueurs pour tracer la partie.</p>';return;}
+  const n=d.n,count=d.events.length;
+  const xOf=(e,i)=>d.timed?(d.end?e.t/d.end*100:0):((i+1)/(count+1))*100;
+  const yOf=k=>n>1?(n-k)/(n-1)*100:0;
+  // Courbe en escalier du nombre de joueurs restants (repère 1000 × 100, traits non déformés).
+  let path=`M0 ${yOf(n)}`;
+  d.events.forEach((e,i)=>{path+=` H${(xOf(e,i)*10).toFixed(1)} V${yOf(e.remaining).toFixed(2)}`;});
+  path+=" H1000";
+  const area=path+" V100 H0 Z";
+  const huEvent=d.events.find(e=>e.place===3);
+  const huStart=huEvent?xOf(huEvent,d.events.indexOf(huEvent)):null;
+  const ticks=[];
+  if(d.timed&&d.end){const step=d.end<=2.5*3600?1800:3600;for(let s=step;s<d.end-step*.4;s+=step)ticks.push(s);}
+  const dur=s=>formatElapsedElimination(s)||"0 min";
+  const eventText=e=>`${e.player} sort ${e.place}e${e.killer?` · éliminé par ${e.killer}`:""}${d.timed?` · ${dur(e.t)}`:""}${e.level?` · niv. ${e.level}`:""}`;
+  const chips=[];
+  if(d.firstOut!=null)chips.push(["🩸",dur(d.firstOut),"avant la 1re sortie"]);
+  if(d.gap&&d.gap.from)chips.push(["⏸",dur(d.gap.sec),`plus long temps mort (${esc(d.gap.from)} → ${esc(d.gap.to)})`]);
+  if(d.burst)chips.push(["⚡",`${d.burst.count} sorties`,`en ${dur(Math.max(60,d.burst.sec))}`]);
+  if(d.headsUpSec)chips.push(["⚔️",dur(d.headsUpSec),"de heads-up"]);
+  host.innerHTML=`
+    <div class="lg-mom-chart" role="img" aria-label="Joueurs restants au fil de la partie : ${n} au départ, ${count} éliminations">
+      <div class="lg-mom-ylab lg-mom-ylab-top">${n} joueurs</div><div class="lg-mom-ylab lg-mom-ylab-bot">1</div>
+      <div class="lg-mom-plot">
+        ${huStart!=null?`<div class="lg-mom-hu" style="left:${huStart}%"><span>heads-up</span></div>`:""}
+        ${ticks.map(s=>`<div class="lg-mom-tick" style="left:${s/d.end*100}%"><span>${dur(s)}</span></div>`).join("")}
+        <svg viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true"><path class="lg-mom-area" d="${area}"/><path class="lg-mom-line" d="${path}" vector-effect="non-scaling-stroke"/></svg>
+        ${d.events.map((e,i)=>`<button type="button" class="lg-mom-dot${e.tags.length?" is-key":""}" data-mom="${i}" style="left:${xOf(e,i)}%;top:${yOf(e.remaining)}%" aria-label="${esc(eventText(e))}"></button>`).join("")}
+        <span class="lg-mom-win" style="left:100%;top:100%" title="${esc(d.winner?.player||"")}">🏆</span>
+      </div>
+      <div class="lg-mom-xlab">${d.timed?`<span>début</span><span>${dur(d.end)}</span>`:"<span>1re sortie</span><span>victoire</span>"}</div>
+    </div>
+    <div class="lg-mom-tip" aria-live="polite">${d.timed?"Touchez un point pour voir l’élimination.":"Heures non enregistrées pour cette partie : les sorties sont présentées dans l’ordre, à intervalles réguliers."}</div>
+    ${chips.length?`<div class="lg-mom-chips">${chips.map(([i,v,l])=>`<div class="lg-mom-chip"><span>${i}</span><b>${esc(v)}</b><small>${l}</small></div>`).join("")}</div>`:""}
+    <ol class="lg-mom-list">
+      ${d.events.map((e,i)=>`<li data-mom-row="${i}"><span class="lg-mom-when">${d.timed?esc(dur(e.t)):`#${i+1}`}${e.level?`<small>niv. ${e.level}</small>`:""}</span><span class="lg-mom-node"></span><div class="lg-mom-what"><strong>${esc(e.player)}</strong> sort <b>${e.place}e</b>${e.killer?`<em>éliminé par ${esc(e.killer)}${e.killNo>1?` · ${e.killNo}e kill`:""}</em>`:""}${e.tags.length?`<span class="lg-mom-tags">${e.tags.map(t=>`<i>${esc(t)}</i>`).join("")}</span>`:""}</div></li>`).join("")}
+      ${d.winner?`<li class="is-win"><span class="lg-mom-when">${d.timed?esc(dur(d.end)):"fin"}</span><span class="lg-mom-node"></span><div class="lg-mom-what"><strong>🏆 ${esc(d.winner.player)}</strong> remporte la partie${Number(d.winner.kills)>0?`<em>${d.winner.kills} kill${Number(d.winner.kills)>1?"s":""}</em>`:""}</div></li>`:""}
+    </ol>`;
+  const tip=host.querySelector(".lg-mom-tip");
+  const show=i=>{
+    const e=d.events[i];if(!e)return;
+    host.querySelectorAll(".is-active").forEach(x=>x.classList.remove("is-active"));
+    host.querySelector(`[data-mom="${i}"]`)?.classList.add("is-active");host.querySelector(`[data-mom-row="${i}"]`)?.classList.add("is-active");
+    tip.textContent=eventText(e)+(e.tags.length?" · "+e.tags.join(" · "):"");
+  };
+  host.querySelectorAll(".lg-mom-dot").forEach(b=>{const i=Number(b.dataset.mom);b.addEventListener("click",()=>show(i));b.addEventListener("mouseenter",()=>show(i));b.addEventListener("focus",()=>show(i));});
+  host.querySelectorAll("[data-mom-row]").forEach(li=>li.addEventListener("click",()=>show(Number(li.dataset.momRow))));
+}
+
+// ===== 10.4.62 — Course au classement : points cumulés de chaque joueur après chaque partie =====
+const BPT_RACE_COLORS=["#3987e5","#d95926","#199e70"];
+let bptRaceSelection=null;
+function bptRankingRaceData(){
+  const totals=new Map(),snaps=[];
+  for(const [gameNo,rows] of groupedGames()){
+    for(const r of rows){const name=canonicalPlayerName(r.player);const t=totals.get(name)||{points:0,games:0};t.points+=Number(r.points||0);t.games++;totals.set(name,t);}
+    // Même départage que le classement : points, puis moyenne, puis nom.
+    const order=[...totals.entries()].map(([name,t])=>({name,points:t.points,avg:t.games?t.points/t.games:0})).sort((a,b)=>b.points-a.points||b.avg-a.avg||a.name.localeCompare(b.name,"fr"));
+    snaps.push({game:Number(gameNo),date:rows[0]?.date||"",ranks:new Map(order.map((o,i)=>[o.name,i+1])),points:new Map(order.map(o=>[o.name,o.points]))});
+  }
+  const last=snaps[snaps.length-1];
+  const players=last?[...last.ranks.entries()].sort((a,b)=>a[1]-b[1]).map(([name])=>name):[];
+  return {snaps,players};
+}
+function renderRankingRace(){
+  const host=$("rankingRace");if(!host)return;
+  if(typeof isAllSeasons==="function"&&isAllSeasons()){host.innerHTML='<p class="rk-race-note">La course au classement se lit saison par saison : choisissez la saison en cours ou une archive.</p>';return;}
+  const {snaps,players}=bptRankingRaceData();
+  if(snaps.length<2){host.innerHTML='<p class="rk-race-note">La course apparaîtra après la 2e partie de la saison.</p>';return;}
+  const known=new Set(players);
+  if(!Array.isArray(bptRaceSelection))bptRaceSelection=players.slice(0,3);
+  bptRaceSelection=bptRaceSelection.filter(n=>known.has(n)).slice(0,3);
+  // La couleur suit le joueur tant qu'il reste sélectionné (3 emplacements fixes, palette validée sur fond sombre).
+  const colorOf=new Map(bptRaceSelection.map((name,i)=>[name,BPT_RACE_COLORS[i]]));
+  const phone=document.documentElement.classList.contains("bpt-mobile-device");
+  const W=Math.max(300,Math.floor(host.clientWidth||(phone?340:900)));
+  const G=snaps.length;
+  const maxPts=Math.max(1,...snaps.map(sn=>Math.max(0,...sn.points.values())));
+  const rawStep=maxPts/5,mag=Math.pow(10,Math.floor(Math.log10(rawStep))),step=[1,2,2.5,5,10].map(k=>k*mag).find(v=>v>=rawStep)||10*mag;
+  const top=Math.ceil(maxPts/step)*step;
+  const padL=38,padR=phone?92:170,padT=12,padB=26,plotH=phone?240:320;
+  const H=padT+padB+plotH,span=W-padL-padR,colW=G>1?span/(G-1):40;
+  const x=i=>padL+(G>1?i*colW:0),y=p=>padT+plotH-(p/top)*plotH;
+  const short=name=>{const parts=String(name).split(/\s+/);return phone&&parts.length>1?parts[0]+" "+parts[1][0]+".":name;};
+  const lineFor=name=>{let out="",open=false;snaps.forEach((sn,i)=>{const p=sn.points.get(name);if(p==null){open=false;return;}out+=(open?" L":" M")+x(i).toFixed(1)+" "+y(p).toFixed(1);open=true;});return out.trim();};
+  const ordered=players.filter(n=>!colorOf.has(n)).concat(bptRaceSelection);
+  const lastSnap=snaps[G-1];
+  const ord=r=>r===1?"1er":r+"e";
+  // Étiquettes de fin : écartées d'au moins 14 px pour ne pas se chevaucher.
+  const ends=bptRaceSelection.filter(n=>lastSnap.points.has(n)).map(n=>({name:n,y:y(lastSnap.points.get(n))})).sort((a,b)=>a.y-b.y);
+  ends.forEach((e,i)=>{if(i>0&&e.y-ends[i-1].y<14)e.y=ends[i-1].y+14;});
+  const yTicks=[];for(let v=0;v<=top+1e-9;v+=step)yTicks.push(v);
+  // Peloton : moitié centrale des joueurs classés (entre 1er et 3e quartile des points) et joueur médian.
+  const quant=(arr,q)=>{const a=arr.slice().sort((m,n)=>m-n),pos=(a.length-1)*q,lo=Math.floor(pos),hi=Math.ceil(pos);return a[lo]+(a[hi]-a[lo])*(pos-lo);};
+  const pack=snaps.map(sn=>{const v=[...sn.points.values()];return {q1:quant(v,.25),med:quant(v,.5),q3:quant(v,.75)};});
+  const packArea=pack.map((p,i)=>`${i?"L":"M"}${x(i).toFixed(1)} ${y(p.q3).toFixed(1)}`).join(" ")+" "+pack.slice().reverse().map((p,k)=>`L${x(G-1-k).toFixed(1)} ${y(p.q1).toFixed(1)}`).join(" ")+" Z";
+  const packMed=pack.map((p,i)=>`${i?"L":"M"}${x(i).toFixed(1)} ${y(p.med).toFixed(1)}`).join(" ");
+  const svg=`<svg class="rk-race-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Points cumulés de chaque joueur partie après partie">
+    ${yTicks.map(v=>`<line class="rk-race-grid rk-race-hgrid" x1="${padL}" x2="${x(G-1)}" y1="${y(v)}" y2="${y(v)}"/><text class="rk-race-rank" x="${padL-8}" y="${y(v)+4}" text-anchor="end">${num(v,0)}</text>`).join("")}
+    ${snaps.map((sn,i)=>`<text class="rk-race-game" x="${x(i)}" y="${H-6}" text-anchor="middle">${phone&&G>10&&i%2?"":"#"+sn.game}</text>`).join("")}
+    <path class="rk-race-pack" d="${packArea}"/><path class="rk-race-med" d="${packMed}"/>
+    <text class="rk-race-packlab" x="${x(G-1)+10}" y="${y(pack[G-1].med)+4}">peloton</text>
+    ${ordered.map(name=>{const c=colorOf.get(name);return `<path class="rk-race-line${c?" is-sel":""}" d="${lineFor(name)}"${c?` style="stroke:${c}"`:""}><title>${esc(name)}</title></path>`;}).join("")}
+    ${bptRaceSelection.map(name=>snaps.map((sn,i)=>{const p=sn.points.get(name);return p==null?"":`<circle class="rk-race-dot" cx="${x(i)}" cy="${y(p)}" r="4.5" style="fill:${colorOf.get(name)}"/>`;}).join("")).join("")}
+    ${ends.map(e=>`<text class="rk-race-end" x="${x(G-1)+10}" y="${e.y+4}">${esc(short(e.name))} · ${num(lastSnap.points.get(e.name),0)}</text>`).join("")}
+    ${snaps.map((sn,i)=>`<rect class="rk-race-hit" data-race-game="${i}" x="${x(i)-colW/2}" y="0" width="${colW}" height="${H}"/>`).join("")}
+  </svg>`;
+  const route=name=>snaps.filter(sn=>sn.points.has(name)).map(sn=>`${num(sn.points.get(name),0)} (${ord(sn.ranks.get(name))})`).join(" → ");
+  host.innerHTML=`
+    <div class="rk-race-legend" role="group" aria-label="Joueurs suivis (3 au maximum)">
+      ${players.map(name=>{const c=colorOf.get(name);return `<button type="button" class="rk-race-chip${c?" is-sel":""}" data-race-player="${esc(name)}" aria-pressed="${c?"true":"false"}">${c?`<i style="background:${c}"></i>`:""}${lastSnap.ranks.get(name)}. ${esc(name)}</button>`;}).join("")}
+    </div>
+    <div class="rk-race-key"><span><i class="rk-race-key-pack"></i>peloton : moitié centrale des joueurs</span><span><i class="rk-race-key-med"></i>joueur médian</span></div>
+    <div class="rk-race-tip" aria-live="polite">Touchez une colonne pour voir le classement après cette partie · 3 joueurs suivis au maximum.</div>
+    <div class="rk-race-scroll">${svg}</div>
+    <ul class="rk-race-paths">${bptRaceSelection.map(name=>`<li><i style="background:${colorOf.get(name)}"></i><strong>${esc(name)}</strong><span>${route(name)}</span></li>`).join("")}</ul>`;
+  host.querySelectorAll("[data-race-player]").forEach(b=>b.addEventListener("click",()=>{
+    const name=b.dataset.racePlayer,sel=bptRaceSelection.slice(),at=sel.indexOf(name);
+    if(at>=0)sel.splice(at,1);else{if(sel.length>=3)sel.shift();sel.push(name);}
+    bptRaceSelection=sel;renderRankingRace();
+  }));
+  const tip=host.querySelector(".rk-race-tip");
+  host.querySelectorAll("[data-race-game]").forEach(rect=>{
+    const show=()=>{
+      const s=snaps[Number(rect.dataset.raceGame)];
+      host.querySelectorAll(".rk-race-hit.is-active").forEach(r=>r.classList.remove("is-active"));rect.classList.add("is-active");
+      const top=[...s.ranks.entries()].sort((a,b)=>a[1]-b[1]).slice(0,3);
+      const pk=pack[Number(rect.dataset.raceGame)];const followed=bptRaceSelection.map(n=>s.ranks.has(n)?`${n} ${num(s.points.get(n),0)} pts (${ord(s.ranks.get(n))})`:`${n} pas encore classé`);
+      tip.textContent=`Après la partie #${s.game}${s.date?" ("+shortDate(s.date)+")":""} : ${top.map(([n,r])=>`${r}. ${n} ${num(s.points.get(n),0)} pts`).join(", ")}${followed.length?" · Suivis : "+followed.join(", "):""} · Peloton : ${num(pk.q1,0)} à ${num(pk.q3,0)} pts`;
+    };
+    rect.addEventListener("mouseenter",show);rect.addEventListener("click",show);
+  });
+}
+let bptRaceResizeTimer=null;
+window.addEventListener("resize",()=>{clearTimeout(bptRaceResizeTimer);bptRaceResizeTimer=setTimeout(()=>{if($("rankingRace")?.offsetParent)renderRankingRace();},200);},{passive:true});
+
 function renderRanking(){
   renderCareerRatioSummary();
+  renderRankingRace();
   const ks=killerStats();
   const select=$("rankingSortSelect");
   if(select && select.value!==rankingSortKey)select.value=rankingSortKey;
