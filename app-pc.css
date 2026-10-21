@@ -5463,7 +5463,7 @@ body.b466-live-active #live3>.hero{display:none!important}
 .bpt-prediction-gain,
 .bpt-prediction-summary{display:block;margin-top:5px;color:#f0cf79;font-size:12px;font-weight:700}.bpt-prediction-summary{color:#d7e8df;font-weight:600}
 .bpt484-takeover-request[hidden]{display:none!important}
-.bpt484-takeover-request{position:absolute;z-index:70;top:90px;left:50%;transform:translateX(-50%);width:min(580px,calc(100% - 24px));box-sizing:border-box;padding:18px;border:2px solid #f2c14e;border-radius:16px;background:#09241f;color:#fff;box-shadow:0 16px 45px #0009;text-align:center}
+.bpt484-takeover-request{position:absolute;z-index:70;top:90px;left:50%;transform:translateX(-50%);width:min(580px,calc(100% - 24px));box-sizing:border-box;padding:18px;border:2px solid #f2c14e;border-radius:16px;background:#18213f;color:#fff;box-shadow:0 16px 45px #0009;text-align:center}
 .bpt484-takeover-request strong{color:#f2c14e;font-size:18px}.bpt484-takeover-request p{font-size:16px;overflow-wrap:anywhere;margin:12px 0}.bpt484-takeover-request>div{display:flex;justify-content:center;gap:12px}.bpt484-takeover-request button{min-height:44px;padding:10px 20px;border:0;border-radius:10px;font-size:16px;font-weight:800;cursor:pointer;background:#26c6ba;color:#06201d}.bpt484-takeover-request button[data-do="reject-takeover"]{background:#b83a45;color:#fff}
 @media(max-width:760px){.bpt484-takeover-request{top:64px;padding:14px}}
 .bpt-personal-code-input{display:block;width:100%;box-sizing:border-box;min-height:44px;font-size:18px;padding:10px;margin:8px 0;background:#0c1122;color:#fff;border:1px solid #34447a;border-radius:10px}
@@ -5471,7 +5471,7 @@ body.b466-live-active #live3>.hero{display:none!important}
 .bpt484-personal{color:#fff}
 .bpt484-enjeux{color:#fff}
 .bpt-objective-row{padding:14px 0;border-bottom:1px solid #28584f}.bpt-objective-row strong{display:block;font-size:16px}.bpt-objective-row p{font-size:14px;line-height:1.5;margin:8px 0}.bpt-objective-status{display:inline-block;margin-top:8px;padding:4px 8px;border-radius:7px;background:#173e35;color:#bed7cd;font-size:12px;font-weight:800}.bpt-objective-row.is-completed .bpt-objective-status{background:#26c6ba;color:#06201d}
-.bpt484-takeover{display:none;background:#cc650e;color:#fff}
+.bpt484-takeover{display:none;background:#f2c14e;color:#171007}
 .bpt484-live.is-spectator .bpt484-actions>button:not(.bpt484-takeover):not(.bpt484-follow):not(.bpt484-tools){display:none!important}
 .bpt484-live.is-spectator .bpt484-takeover{display:block}
 
