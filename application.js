@@ -5039,88 +5039,68 @@ function renderLatestGameMomentum(rows,timing){
   host.querySelectorAll("[data-mom-row]").forEach(li=>li.addEventListener("click",()=>show(Number(li.dataset.momRow))));
 }
 
-// ===== 10.4.62 — Course au classement : points cumulés de chaque joueur après chaque partie =====
-const BPT_RACE_COLORS=["#3987e5","#d95926","#199e70"];
-let bptRaceSelection=null;
-function bptRankingRaceData(){
-  const totals=new Map(),snaps=[];
-  for(const [gameNo,rows] of groupedGames()){
-    for(const r of rows){const name=canonicalPlayerName(r.player);const t=totals.get(name)||{points:0,games:0};t.points+=Number(r.points||0);t.games++;totals.set(name,t);}
-    // Même départage que le classement : points, puis moyenne, puis nom.
-    const order=[...totals.entries()].map(([name,t])=>({name,points:t.points,avg:t.games?t.points/t.games:0})).sort((a,b)=>b.points-a.points||b.avg-a.avg||a.name.localeCompare(b.name,"fr"));
-    snaps.push({game:Number(gameNo),date:rows[0]?.date||"",ranks:new Map(order.map((o,i)=>[o.name,i+1])),points:new Map(order.map(o=>[o.name,o.points]))});
+// ===== 10.4.62 — Écarts au classement : chaque joueur placé sur l'axe des points, groupes détectés par les écarts =====
+function bptRankingLadderData(){
+  const games=groupedGames(),totals=new Map();
+  const lastGame=games.length?games[games.length-1][0]:null,lastGain=new Map();
+  for(const [gameNo,rows] of games)for(const r of rows){
+    const name=canonicalPlayerName(r.player),t=totals.get(name)||{points:0,games:0};
+    t.points+=Number(r.points||0);t.games++;totals.set(name,t);
+    if(gameNo===lastGame)lastGain.set(name,(lastGain.get(name)||0)+Number(r.points||0));
   }
-  const last=snaps[snaps.length-1];
-  const players=last?[...last.ranks.entries()].sort((a,b)=>a[1]-b[1]).map(([name])=>name):[];
-  return {snaps,players};
+  // Même départage que le classement : points, puis moyenne, puis nom.
+  const players=[...totals.entries()].map(([name,t])=>({name,points:t.points,avg:t.games?t.points/t.games:0,gain:lastGain.get(name)||0}))
+    .sort((a,b)=>b.points-a.points||b.avg-a.avg||a.name.localeCompare(b.name,"fr"));
+  players.forEach((p,i)=>p.rank=i+1);
+  // Un écart de plus de 10 % des points du leader (5 au minimum) sépare deux groupes.
+  const cut=Math.max(5,(players[0]?.points||0)*.1),groups=[];
+  players.forEach((p,i)=>{if(!i||players[i-1].points-p.points>cut)groups.push([]);groups[groups.length-1].push(p);});
+  const names=groups.length===1?["Peloton groupé"]:groups.map((g,i)=>i===0?"Groupe de tête":i===groups.length-1&&groups.length>2?"Queue de peloton":groups.length>3?`Peloton ${i}`:"Peloton");
+  groups.forEach((g,i)=>g.forEach(p=>p.group=names[i]));
+  return {players,groups:groups.map((g,i)=>({name:names[i],players:g})),lastGame};
 }
 function renderRankingRace(){
   const host=$("rankingRace");if(!host)return;
-  if(typeof isAllSeasons==="function"&&isAllSeasons()){host.innerHTML='<p class="rk-race-note">La course au classement se lit saison par saison : choisissez la saison en cours ou une archive.</p>';return;}
-  const {snaps,players}=bptRankingRaceData();
-  if(snaps.length<2){host.innerHTML='<p class="rk-race-note">La course apparaîtra après la 2e partie de la saison.</p>';return;}
-  const known=new Set(players);
-  if(!Array.isArray(bptRaceSelection))bptRaceSelection=players.slice(0,3);
-  bptRaceSelection=bptRaceSelection.filter(n=>known.has(n)).slice(0,3);
-  // La couleur suit le joueur tant qu'il reste sélectionné (3 emplacements fixes, palette validée sur fond sombre).
-  const colorOf=new Map(bptRaceSelection.map((name,i)=>[name,BPT_RACE_COLORS[i]]));
+  const {players,groups,lastGame}=bptRankingLadderData();
+  if(players.length<2){host.innerHTML='<p class="rk-race-note">Les écarts apparaîtront dès que deux joueurs auront marqué des points.</p>';return;}
   const phone=document.documentElement.classList.contains("bpt-mobile-device");
-  const W=Math.max(300,Math.floor(host.clientWidth||(phone?340:900)));
-  const G=snaps.length;
-  const maxPts=Math.max(1,...snaps.map(sn=>Math.max(0,...sn.points.values())));
-  const rawStep=maxPts/5,mag=Math.pow(10,Math.floor(Math.log10(rawStep))),step=[1,2,2.5,5,10].map(k=>k*mag).find(v=>v>=rawStep)||10*mag;
-  const top=Math.ceil(maxPts/step)*step;
-  const padL=38,padR=phone?92:170,padT=12,padB=26,plotH=phone?240:320;
-  const H=padT+padB+plotH,span=W-padL-padR,colW=G>1?span/(G-1):40;
-  const x=i=>padL+(G>1?i*colW:0),y=p=>padT+plotH-(p/top)*plotH;
-  const short=name=>{const parts=String(name).split(/\s+/);return phone&&parts.length>1?parts[0]+" "+parts[1][0]+".":name;};
-  const lineFor=name=>{let out="",open=false;snaps.forEach((sn,i)=>{const p=sn.points.get(name);if(p==null){open=false;return;}out+=(open?" L":" M")+x(i).toFixed(1)+" "+y(p).toFixed(1);open=true;});return out.trim();};
-  const ordered=players.filter(n=>!colorOf.has(n)).concat(bptRaceSelection);
-  const lastSnap=snaps[G-1];
-  const ord=r=>r===1?"1er":r+"e";
-  // Étiquettes de fin : écartées d'au moins 14 px pour ne pas se chevaucher.
-  const ends=bptRaceSelection.filter(n=>lastSnap.points.has(n)).map(n=>({name:n,y:y(lastSnap.points.get(n))})).sort((a,b)=>a.y-b.y);
-  ends.forEach((e,i)=>{if(i>0&&e.y-ends[i-1].y<14)e.y=ends[i-1].y+14;});
+  const full=Math.floor(host.clientWidth||(phone?340:900)),W=phone?Math.max(300,full):Math.max(360,Math.min(560,Math.floor(full*.5)));
+  const P=players.length,max=Math.max(1,players[0].points);
+  const rawStep=max/5,mag=Math.pow(10,Math.floor(Math.log10(rawStep))),step=[1,2,2.5,5,10].map(k=>k*mag).find(v=>v>=rawStep)||10*mag;
+  const top=Math.ceil(max/step)*step;
+  const lineH=phone?19:21,padT=14,padB=14,plotH=Math.max(phone?300:340,P*lineH);
+  let H=padT+padB+plotH;const axisX=phone?44:56,labelX=axisX+(phone?44:70);
+  const y=p=>padT+plotH-(p/top)*plotH;
+  // Étiquettes rapprochées de leur point puis écartées pour ne jamais se chevaucher.
+  const labels=players.map(p=>({p,y:y(p.points)}));
+  for(let i=1;i<labels.length;i++)if(labels[i].y-labels[i-1].y<lineH)labels[i].y=labels[i-1].y+lineH;
+  H=Math.max(H,Math.ceil(labels[labels.length-1].y+lineH/2+padB));
   const yTicks=[];for(let v=0;v<=top+1e-9;v+=step)yTicks.push(v);
-  // Peloton : moitié centrale des joueurs classés (entre 1er et 3e quartile des points) et joueur médian.
-  const quant=(arr,q)=>{const a=arr.slice().sort((m,n)=>m-n),pos=(a.length-1)*q,lo=Math.floor(pos),hi=Math.ceil(pos);return a[lo]+(a[hi]-a[lo])*(pos-lo);};
-  const pack=snaps.map(sn=>{const v=[...sn.points.values()];return {q1:quant(v,.25),med:quant(v,.5),q3:quant(v,.75)};});
-  const packArea=pack.map((p,i)=>`${i?"L":"M"}${x(i).toFixed(1)} ${y(p.q3).toFixed(1)}`).join(" ")+" "+pack.slice().reverse().map((p,k)=>`L${x(G-1-k).toFixed(1)} ${y(p.q1).toFixed(1)}`).join(" ")+" Z";
-  const packMed=pack.map((p,i)=>`${i?"L":"M"}${x(i).toFixed(1)} ${y(p.med).toFixed(1)}`).join(" ");
-  const svg=`<svg class="rk-race-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Points cumulés de chaque joueur partie après partie">
-    ${yTicks.map(v=>`<line class="rk-race-grid rk-race-hgrid" x1="${padL}" x2="${x(G-1)}" y1="${y(v)}" y2="${y(v)}"/><text class="rk-race-rank" x="${padL-8}" y="${y(v)+4}" text-anchor="end">${num(v,0)}</text>`).join("")}
-    ${snaps.map((sn,i)=>`<text class="rk-race-game" x="${x(i)}" y="${H-6}" text-anchor="middle">${phone&&G>10&&i%2?"":"#"+sn.game}</text>`).join("")}
-    <path class="rk-race-pack" d="${packArea}"/><path class="rk-race-med" d="${packMed}"/>
-    <text class="rk-race-packlab" x="${x(G-1)+10}" y="${y(pack[G-1].med)+4}">peloton</text>
-    ${ordered.map(name=>{const c=colorOf.get(name);return `<path class="rk-race-line${c?" is-sel":""}" d="${lineFor(name)}"${c?` style="stroke:${c}"`:""}><title>${esc(name)}</title></path>`;}).join("")}
-    ${bptRaceSelection.map(name=>snaps.map((sn,i)=>{const p=sn.points.get(name);return p==null?"":`<circle class="rk-race-dot" cx="${x(i)}" cy="${y(p)}" r="4.5" style="fill:${colorOf.get(name)}"/>`;}).join("")).join("")}
-    ${ends.map(e=>`<text class="rk-race-end" x="${x(G-1)+10}" y="${e.y+4}">${esc(short(e.name))} · ${num(lastSnap.points.get(e.name),0)}</text>`).join("")}
-    ${snaps.map((sn,i)=>`<rect class="rk-race-hit" data-race-game="${i}" x="${x(i)-colW/2}" y="0" width="${colW}" height="${H}"/>`).join("")}
+  const bands=groups.map((g,i)=>{const hi=y(g.players[0].points),lo=y(g.players[g.players.length-1].points);return {g,i,y1:hi-7,y2:lo+7};});
+  const svg=`<svg class="rk-race-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Points actuels de chaque joueur et groupes au classement">
+    ${yTicks.map(v=>`<line class="rk-race-grid" x1="${axisX-6}" x2="${axisX}" y1="${y(v)}" y2="${y(v)}"/><text class="rk-race-rank" x="${axisX-10}" y="${y(v)+4}" text-anchor="end">${num(v,0)}</text>`).join("")}
+    ${bands.map(b=>`<rect class="rk-lad-band rk-lad-band-${b.i%2}" x="${axisX-14}" y="${b.y1}" width="28" height="${Math.max(14,b.y2-b.y1)}" rx="10"/>`).join("")}
+    <line class="rk-lad-axis" x1="${axisX}" x2="${axisX}" y1="${padT}" y2="${padT+plotH}"/>
+    ${labels.map(({p,y:ly})=>`<path class="rk-lad-link" d="M${axisX+6} ${y(p.points)} L${labelX-24} ${ly} L${labelX-6} ${ly}"/>`).join("")}
+    ${players.map(p=>`<circle class="rk-lad-dot${p.rank<=3?" is-top":""}" cx="${axisX}" cy="${y(p.points)}" r="5"/>`).join("")}
+    ${labels.map(({p,y:ly})=>`<g class="rk-lad-row" data-lad="${p.rank-1}" tabindex="0"><rect class="rk-lad-hit" x="${labelX-8}" y="${ly-lineH/2}" width="${W-labelX}" height="${lineH}"/><text class="rk-lad-label" x="${labelX}" y="${ly+4}"><tspan class="rk-lad-rk">${p.rank}.</tspan> ${esc(p.name)} <tspan class="rk-lad-pts">${num(p.points,0)}</tspan>${p.gain?`<tspan class="rk-lad-gain"> +${num(p.gain,0)}</tspan>`:""}</text></g>`).join("")}
   </svg>`;
-  const route=name=>snaps.filter(sn=>sn.points.has(name)).map(sn=>`${num(sn.points.get(name),0)} (${ord(sn.ranks.get(name))})`).join(" → ");
-  host.innerHTML=`
-    <div class="rk-race-legend" role="group" aria-label="Joueurs suivis (3 au maximum)">
-      ${players.map(name=>{const c=colorOf.get(name);return `<button type="button" class="rk-race-chip${c?" is-sel":""}" data-race-player="${esc(name)}" aria-pressed="${c?"true":"false"}">${c?`<i style="background:${c}"></i>`:""}${lastSnap.ranks.get(name)}. ${esc(name)}</button>`;}).join("")}
-    </div>
-    <div class="rk-race-key"><span><i class="rk-race-key-pack"></i>peloton : moitié centrale des joueurs</span><span><i class="rk-race-key-med"></i>joueur médian</span></div>
-    <div class="rk-race-tip" aria-live="polite">Touchez une colonne pour voir le classement après cette partie · 3 joueurs suivis au maximum.</div>
-    <div class="rk-race-scroll">${svg}</div>
-    <ul class="rk-race-paths">${bptRaceSelection.map(name=>`<li><i style="background:${colorOf.get(name)}"></i><strong>${esc(name)}</strong><span>${route(name)}</span></li>`).join("")}</ul>`;
-  host.querySelectorAll("[data-race-player]").forEach(b=>b.addEventListener("click",()=>{
-    const name=b.dataset.racePlayer,sel=bptRaceSelection.slice(),at=sel.indexOf(name);
-    if(at>=0)sel.splice(at,1);else{if(sel.length>=3)sel.shift();sel.push(name);}
-    bptRaceSelection=sel;renderRankingRace();
-  }));
-  const tip=host.querySelector(".rk-race-tip");
-  host.querySelectorAll("[data-race-game]").forEach(rect=>{
+  host.innerHTML=`<div class="rk-lad-wrap"><div class="rk-lad-side">
+    <div class="rk-lad-groups">${groups.map((g,i)=>`<div class="rk-lad-group rk-lad-group-${i%2}"><b>${esc(g.name)}</b><span>${g.players.length} joueur${g.players.length>1?"s":""} · ${num(g.players[g.players.length-1].points,0)} à ${num(g.players[0].points,0)} pts</span></div>`).join("")}</div>
+    <div class="rk-race-tip" aria-live="polite">Touchez un joueur pour voir ses écarts${lastGame!=null?` · « +N » = points marqués à la dernière partie (#${lastGame})`:""}.</div>
+    </div><div class="rk-race-scroll">${svg}</div></div>`;
+  const tip=host.querySelector(".rk-race-tip"),leader=players[0];
+  host.querySelectorAll("[data-lad]").forEach(row=>{
     const show=()=>{
-      const s=snaps[Number(rect.dataset.raceGame)];
-      host.querySelectorAll(".rk-race-hit.is-active").forEach(r=>r.classList.remove("is-active"));rect.classList.add("is-active");
-      const top=[...s.ranks.entries()].sort((a,b)=>a[1]-b[1]).slice(0,3);
-      const pk=pack[Number(rect.dataset.raceGame)];const followed=bptRaceSelection.map(n=>s.ranks.has(n)?`${n} ${num(s.points.get(n),0)} pts (${ord(s.ranks.get(n))})`:`${n} pas encore classé`);
-      tip.textContent=`Après la partie #${s.game}${s.date?" ("+shortDate(s.date)+")":""} : ${top.map(([n,r])=>`${r}. ${n} ${num(s.points.get(n),0)} pts`).join(", ")}${followed.length?" · Suivis : "+followed.join(", "):""} · Peloton : ${num(pk.q1,0)} à ${num(pk.q3,0)} pts`;
+      const i=Number(row.dataset.lad),p=players[i],above=players[i-1],below=players[i+1];
+      host.querySelectorAll(".rk-lad-row.is-active").forEach(r=>r.classList.remove("is-active"));row.classList.add("is-active");
+      const parts=[`${p.rank}. ${p.name} · ${num(p.points,0)} pts · ${p.group}`];
+      parts.push(i?`à ${num(leader.points-p.points,0)} pts du leader`:above===undefined&&below?`${num(p.points-below.points,0)} pts d’avance sur ${below.name}`:"leader");
+      if(i&&above)parts.push(`${num(above.points-p.points,0)} pts derrière ${above.name}`);
+      if(i&&below)parts.push(`${num(p.points-below.points,0)} pts devant ${below.name}`);
+      tip.textContent=parts.join(" · ");
     };
-    rect.addEventListener("mouseenter",show);rect.addEventListener("click",show);
+    row.addEventListener("mouseenter",show);row.addEventListener("click",show);row.addEventListener("focus",show);
   });
 }
 let bptRaceResizeTimer=null;
