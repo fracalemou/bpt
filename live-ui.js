@@ -26,6 +26,8 @@
     try{if(typeof db!=='undefined'&&Array.isArray(db.history)){return Math.max(0,...db.history.map(r=>Number(r.game)||0))+1}}catch(_e){}
     return '—';
   }
+  // Réduit la police du tapis moyen (jetons + BB) tant qu'elle déborde de la tuile, jusqu'à 55 % de sa taille.
+  function fitStackValues(root){const box=root?.querySelector('.bpt484-stack-values');if(!box)return;box.style.fontSize='';const base=parseFloat(getComputedStyle(box).fontSize)||0;if(!base||!box.clientWidth)return;let k=1;while(k>.55&&box.scrollWidth>box.clientWidth+1){k-=.05;box.style.fontSize=(base*k).toFixed(1)+'px'}}
   function makeMarkup(fs=false){return `<div class="bpt484-live" data-fs="${fs?'1':'0'}">
 
     <div class="bpt-bounty-overlay" data-role="bounty" hidden><section class="bpt-bounty-card" role="dialog" aria-modal="true" aria-label="Révélation du bounty mystère" tabindex="-1"><div class="bpt-stage-chip" data-role="bountystage" hidden>Étape 4 / 4</div><div class="bpt-bounty-icon">🎯</div><h2 data-role="bountytitle"></h2><div class="bpt-bounty-name" data-role="bountyname"></div><p data-role="bountytext"></p><strong data-role="bountyhunter"></strong><button type="button" data-bounty-close disabled>Continuer</button><button type="button" data-bounty-back hidden>← Retour aux paramètres</button></section></div>
@@ -399,7 +401,7 @@
       const avg=alive?total/alive:0;
       const idx=Math.max(0,Number(st?.levelIndex)||0);
       const bb=blindAt(idx).bb;
-      const bbVal=n=>bb?Math.round((Number(n)||0)/bb*10)/10:0;
+      const bbVal=n=>bb?Math.round((Number(n)||0)/bb):0;
       const chip=n=>fmt(Math.max(0,Math.round(n)));
       const display=n=>`${chip(n)} <small>(${bbVal(n)} BB)</small>`;
       const zoneRange=(minBB,maxBB)=>{
@@ -645,7 +647,7 @@
     const st=state();queuePublishedLiveSummary(st);if(!st?.active)return;
     const idx=Math.max(0,Math.min(200,Number(st.levelIndex)||0)),cur=blindAt(idx),nx=blindAt(idx+1);
     const players=Array.isArray(st.players)?st.players:[],alive=players.filter(p=>p.status==='in').length+(players.some(p=>p.status==='winner')?1:0);
-    const total=players.length*Number(st.startStack||0),avg=alive?total/alive:0,avgBB=cur.bb?Math.round(avg/cur.bb*10)/10:0;
+    const total=players.length*Number(st.startStack||0),avg=alive?total/alive:0,avgBB=cur.bb?Math.round(avg/cur.bb):0;
     const x=api();
     const ownerRole=!!x?.isOwner?.()||!!(st.ownerId&&String(st.ownerId)===String(x?.deviceId?.()));
     const duelPair=players.filter(p=>p.status==='in').map(p=>p.name).sort();
@@ -701,6 +703,7 @@
       set('playerssub',players.length>alive?`restants sur ${players.length}`:'restants');
       set('avgchips',fmt(avg));
       set('avgbb',`${avgBB} BB`);
+      fitStackValues(r);
       set('next',`${fmt(nx.sb)} / ${fmt(nx.bb)}`);
       set('elapsed',$('live3Elapsed')?.textContent||'0 min');
       set('finish',$('live3EstimatedFinish')?.textContent||'—');
