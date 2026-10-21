@@ -510,6 +510,10 @@ body.bpt-live-landscape-open.b466-live-active:not(.spectator-live-open):has(#liv
 #bptLandscapeLive .bptll-form,#bptLandscapeLive .bptll-my-bet,#bptLandscapeLive .bptll-other-bets,#bptLandscapeLive .bptll-bet-card{background:#151d38;border-color:#2c3a63}
 #bptLandscapeLive .bptll-player-add{background:#151d38;border-color:#2a8f88}
 #bptLandscapeLive .bptll-panel-title-row{background:#1a2347;border-color:#2c3a63}
+#bptLandscapeLive .bptll-confirm{background:#1d2850;border-color:#9c8442}
+#bptLandscapeLive .bptll-player-scroll{scrollbar-color:#34447a #0f1530}
+#bptLandscapeLive .bptll-player-scroll::-webkit-scrollbar-track{background:#0f1530}
+#bptLandscapeLive .bptll-player-scroll::-webkit-scrollbar-thumb{background:#34447a}
 
 /* Avant-partie · lot design 2 (10.4.60) : même police que le Live, mise en pastille, noms moins tronqués */
 #bptLandscapeLive{font-family:Arial,Helvetica,sans-serif}

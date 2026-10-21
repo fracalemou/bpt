@@ -7520,7 +7520,7 @@ body.b466-live-active #live3>.hero{display:none!important}
 .bpt484-live.is-pregame>.bpt-pregame{position:relative;inset:auto;height:100%;max-height:none;border-radius:inherit}
 #live3Fullscreen .bpt484-live.is-pregame{height:100%!important}
 .bpt-pregame[hidden]{display:none!important}
-.bpt-pregame{position:absolute;inset:0;z-index:65;background:#071d19;color:#edf6f2;border-radius:inherit;overflow:hidden;overscroll-behavior:contain;padding:clamp(12px,2vw,28px);height:100%;max-height:calc(100dvh - 140px);box-sizing:border-box;display:flex;flex-direction:column}
+.bpt-pregame{position:absolute;inset:0;z-index:65;background:#0f1426;color:#edf6f2;border-radius:inherit;overflow:hidden;overscroll-behavior:contain;padding:clamp(12px,2vw,28px);height:100%;max-height:calc(100dvh - 140px);box-sizing:border-box;display:flex;flex-direction:column}
 .bpt-pregame-inner{max-width:1100px;margin:0 auto;width:100%;height:100%;min-height:0;display:flex;flex-direction:column}.bpt-pregame header,
 .bpt-pregame-heading,
 .bpt-pregame footer{flex-shrink:0}#live3Fullscreen .bpt-pregame{max-height:calc(100dvh - 24px)}.bpt-pregame header{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:1px solid #24493f;padding-bottom:16px}.bpt-pregame header b{color:#f2c14e;font-size:32px;font-weight:900}.bpt-pregame header span{color:#a7c3b9;font-size:12px;letter-spacing:1px}
@@ -7533,9 +7533,9 @@ body.b466-live-active #live3>.hero{display:none!important}
    ne prennent plus de place ici, ils restent accessibles dans Suivi de partie. */
 .bpt-pregame-bets-heading{padding:10px 0 6px}.bpt-pregame-bets-heading h2{margin:4px 0;font-size:clamp(22px,2.4vw,30px)}
 .bpt-pregame-bets-heading p{margin:4px 0;font-size:13px}.bpt-pregame .bpt-predictions{margin-top:8px;padding:10px}.bpt-pregame .bpt-prediction-card{padding:7px 0}.bpt-pregame .bpt-prediction-select{min-height:42px;padding:7px 36px 7px 11px}.bpt-pregame .bpt-prediction-footer{margin-top:8px;padding:8px}.bpt-pregame> .bpt-pregame-inner>footer{padding:8px 0 0}
-.bpt484-live.is-pregame{background:#071d19!important}
+.bpt484-live.is-pregame{background:#0f1426!important}
 .bpt484-live.is-pregame> *:not(.bpt-pregame):not(.bpt484-takeover-request):not(.bpt-bounty-overlay){visibility:hidden!important}
-.bpt484-live.is-pregame>.bpt-pregame{z-index:1000!important;visibility:visible!important;background:#071d19!important;opacity:1!important}
+.bpt484-live.is-pregame>.bpt-pregame{z-index:1000!important;visibility:visible!important;background:#0f1426!important;opacity:1!important}
 
 .bpt-prediction-gain,
 .bpt-prediction-summary{display:block;margin-top:5px;color:#f0cf79;font-size:12px;font-weight:700}.bpt-prediction-summary{color:#d7e8df;font-weight:600}
@@ -7543,7 +7543,7 @@ body.b466-live-active #live3>.hero{display:none!important}
 .bpt484-takeover-request{position:absolute;z-index:70;top:90px;left:50%;transform:translateX(-50%);width:min(580px,calc(100% - 24px));box-sizing:border-box;padding:18px;border:2px solid #f2c14e;border-radius:16px;background:#09241f;color:#fff;box-shadow:0 16px 45px #0009;text-align:center}
 .bpt484-takeover-request strong{color:#f2c14e;font-size:18px}.bpt484-takeover-request p{font-size:16px;overflow-wrap:anywhere;margin:12px 0}.bpt484-takeover-request>div{display:flex;justify-content:center;gap:12px}.bpt484-takeover-request button{min-height:44px;padding:10px 20px;border:0;border-radius:10px;font-size:16px;font-weight:800;cursor:pointer;background:#26c6ba;color:#06201d}.bpt484-takeover-request button[data-do="reject-takeover"]{background:#b83a45;color:#fff}
 @media(max-width:760px){.bpt484-takeover-request{top:64px;padding:14px}}
-.bpt-personal-code-input{display:block;width:100%;box-sizing:border-box;min-height:44px;font-size:18px;padding:10px;margin:8px 0;background:#071d19;color:#fff;border:1px solid #3f7062;border-radius:10px}
+.bpt-personal-code-input{display:block;width:100%;box-sizing:border-box;min-height:44px;font-size:18px;padding:10px;margin:8px 0;background:#0c1122;color:#fff;border:1px solid #34447a;border-radius:10px}
 .bpt484-personal[hidden]{display:none!important}
 .bpt484-personal{color:#fff}
 .bpt484-enjeux{color:#fff}
@@ -7825,7 +7825,7 @@ body.bpt-mobile-device #bptMobileMoreTopBtn.bpt-nav-mobile-only{
   .bpt-pregame-inner{height:100%!important;min-height:0!important;overflow:hidden!important}
   .bpt-pregame header{display:none!important}
   .bpt-pregame .bpt-predictions{overflow:hidden!important;min-height:0!important}
-  .bpt-pregame > .bpt-pregame-inner > footer{position:static!important;overflow:hidden!important;background:#071d19!important;border-top:1px solid #24493f!important}
+  .bpt-pregame > .bpt-pregame-inner > footer{position:static!important;overflow:hidden!important;background:#0f1426!important;border-top:1px solid #2c3a63!important}
   .bpt-pregame-buttons{width:100%!important}
   .bpt-pregame-buttons>button{min-width:0!important;max-width:100%!important;box-sizing:border-box!important;overflow:hidden!important}
 
