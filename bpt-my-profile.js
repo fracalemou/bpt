@@ -16,26 +16,27 @@
       return String(p?.nickname||'').trim();
     }catch(_e){return '';}
   }
+  // Chaque thème = 3 couleurs (règle 60-30-10) ; doivent rester identiques à --bpt-60/30/10 dans app-tel.css et app-pc.css.
   const THEMES=[
-    {id:'nuit',label:'Bleu nuit',bg:'#0f1426',accent:'#2ac9c2'},
-    {id:'tapis',label:'Tapis vert',bg:'#0b1a13',accent:'#3ccf8e'},
-    {id:'cognac',label:'Cognac',bg:'#16110c',accent:'#f0a04b'},
-    {id:'graphite',label:'Graphite',bg:'#111214',accent:'#4fb3e8'},
-    {id:'royal',label:'Violet royal',bg:'#150f26',accent:'#b38cf5'}
+    {id:'nuit',label:'Bleu nuit',c60:'#0f1426',c30:'#1f2b52',c10:'#f2c853'},
+    {id:'tapis',label:'Tapis vert',c60:'#0b1a13',c30:'#1d3a2b',c10:'#f2c853'},
+    {id:'cognac',label:'Cognac',c60:'#16110c',c30:'#3a2a18',c10:'#4fc3c8'},
+    {id:'graphite',label:'Graphite',c60:'#111214',c30:'#2a2d33',c10:'#ff7a59'},
+    {id:'royal',label:'Violet royal',c60:'#150f26',c30:'#2e2156',c10:'#f2c853'}
   ];
   function currentTheme(){try{const t=localStorage.getItem('bpt-theme');return THEMES.some(x=>x.id===t)?t:'nuit';}catch(_e){return 'nuit';}}
   function applyTheme(id){
     const t=THEMES.find(x=>x.id===id)||THEMES[0];
     if(t.id==='nuit')document.documentElement.removeAttribute('data-bpt-theme');
     else document.documentElement.setAttribute('data-bpt-theme',t.id);
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',t.bg);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',t.c60);
     try{localStorage.setItem('bpt-theme',t.id);}catch(_e){}
   }
   function themeRow(){
     const cur=currentTheme();
     return `<div class="bpt-mp-row">
         <label>Thème de couleurs</label>
-        <div class="bpt-mp-themes" role="radiogroup" aria-label="Thème de couleurs">${THEMES.map(t=>`<button type="button" class="bpt-mp-theme${t.id===cur?' is-active':''}" data-bpt-theme-pick="${t.id}" role="radio" aria-checked="${t.id===cur}"><span class="bpt-mp-swatch" style="background:linear-gradient(135deg,${t.bg} 50%,${t.accent} 50%)"></span>${esc(t.label)}</button>`).join('')}</div>
+        <div class="bpt-mp-themes" role="radiogroup" aria-label="Thème de couleurs">${THEMES.map(t=>`<button type="button" class="bpt-mp-theme${t.id===cur?' is-active':''}" data-bpt-theme-pick="${t.id}" role="radio" aria-checked="${t.id===cur}"><span class="bpt-mp-swatch" style="background:linear-gradient(90deg,${t.c60} 0 60%,${t.c30} 60% 90%,${t.c10} 90%)" title="60 % ${t.c60} · 30 % ${t.c30} · 10 % ${t.c10}"></span>${esc(t.label)}</button>`).join('')}</div>
         <small class="bpt-mp-help">S’applique à cet appareil uniquement.</small>
       </div>`;
   }

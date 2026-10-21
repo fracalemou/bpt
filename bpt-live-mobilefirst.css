@@ -10,12 +10,12 @@
   display:none;
   box-sizing:border-box;
   overflow:hidden;
-  background:linear-gradient(180deg,#061f1a 0%,#082a23 100%);
+  background:linear-gradient(180deg,var(--bpt-deep,#061f1a) 0%,var(--bpt-bg,#082a23) 100%);
   color:#f4f8f6;
   font-family:inherit;
   container-type:size;
 
-  /* Mobile paysage d'abord : valeurs petites par défaut, qui grandissent avec le viewport. */
+  /* Mobile paysage d'abord: valeurs petites par défaut, qui grandissent avec le viewport. */
   --gap:clamp(4px,1.1cqh,12px);
   --px:clamp(7px,1.5cqw,24px);
   --py:clamp(3px,.9cqh,10px);
@@ -43,8 +43,8 @@
   display:flex; align-items:center; justify-content:space-between;
   gap:var(--gap);
   padding:var(--py) var(--px);
-  border-bottom:1px solid #21483e;
-  background:#0a191d;
+  border-bottom:1px solid var(--bpt-card2,#21483e);
+  background:var(--bpt-bg,#0a191d);
 }
 .bptll-head-left{
   min-width:0;
@@ -79,23 +79,23 @@
   grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);
   gap:var(--gap);
   padding:var(--py) var(--px) max(var(--py),env(safe-area-inset-bottom));
-  border-top:1px solid #21483e;
-  background:#071f1a;
+  border-top:1px solid var(--bpt-card2,#21483e);
+  background:var(--bpt-deep,#071f1a);
 }
 .bptll-foot.one{grid-template-columns:minmax(180px,460px);justify-content:end}
 .bptll-btn{
   min-width:0;
   height:var(--control);
   box-sizing:border-box;
-  border:1px solid #376b5c;
+  border:1px solid var(--bpt-line,#376b5c);
   border-radius:var(--radius);
-  background:#144c40;
+  background:var(--bpt-card2,#144c40);
   color:#f4f7f5;
   padding:0 clamp(8px,1.4cqw,18px);
   font:inherit; font-size:var(--fs-md); font-weight:900;
   line-height:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
-.bptll-btn.primary{border-color:#e1b957;background:#f2c853;color:#172018}
+.bptll-btn.primary{border-color:var(--bpt-gold,#e1b957);background:var(--bpt-gold,#f2c853);color:#172018}
 .bptll-btn:disabled{opacity:.5}
 
 /* Étape 1 — même grille sur tous supports, plus dense sur petit écran. */
@@ -112,7 +112,7 @@
   gap:2px;
 }
 .bptll-field label{
-  font-size:var(--fs-xs); color:#a8c4ba; font-weight:750;
+  font-size:var(--fs-xs); color:var(--bpt-muted,#a8c4ba); font-weight:750;
   white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
 }
 .bptll-field input,
@@ -120,8 +120,8 @@
 .bptll-select{
   width:100%; min-width:0; box-sizing:border-box;
   height:100%; min-height:28px; max-height:var(--control);
-  border:1px solid #36574d; border-radius:var(--radius);
-  background:#101a22; color:#fff;
+  border:1px solid var(--bpt-line,#36574d); border-radius:var(--radius);
+  background:var(--bpt-bg,#101a22); color:#fff;
   padding:0 clamp(7px,1.1cqw,14px);
   font:inherit; font-size:var(--fs-md);
 }
@@ -145,8 +145,8 @@
 .bptll-player-add input{
   width:100%; min-width:0; box-sizing:border-box;
   height:var(--control);
-  border:1px solid #36574d; border-radius:var(--radius);
-  background:#101a22; color:#fff;
+  border:1px solid var(--bpt-line,#36574d); border-radius:var(--radius);
+  background:var(--bpt-bg,#101a22); color:#fff;
   padding:0 clamp(7px,1.1cqw,14px);
   font:inherit; font-size:var(--fs-sm);
 }
@@ -158,7 +158,7 @@
   align-items:center;
   padding:2px;
   border:1px solid #1aa89b; border-radius:var(--radius);
-  background:#0a3028;
+  background:var(--bpt-bg2,#0a3028);
 }
 .bptll-player-add strong{
   padding-left:5px;
@@ -169,10 +169,10 @@
 .bptll-player-meta{
   min-width:0;
   display:flex; align-items:center; justify-content:space-between; gap:10px;
-  color:#9fc1b6; font-size:var(--fs-xs);
+  color:var(--bpt-muted,#9fc1b6); font-size:var(--fs-xs);
   line-height:1;
 }
-.bptll-player-meta strong{color:#f0cf79;font-size:var(--fs-sm)}
+.bptll-player-meta strong{color:var(--bpt-gold,#f0cf79);font-size:var(--fs-sm)}
 .bptll-player-scroll{
   min-height:0;
   height:100%;
@@ -202,17 +202,17 @@
   align-items:center;
   gap:clamp(4px,.7cqw,8px);
   min-height:0; height:100%;
-  border:1px solid #31574c; border-radius:var(--radius);
-  background:#0d2f28;
+  border:1px solid var(--bpt-line,#31574c); border-radius:var(--radius);
+  background:var(--bpt-bg2,#0d2f28);
   padding:clamp(3px,.7cqh,7px);
   color:#eef5f2;
   overflow:hidden;
 }
 .bptll-player-card:hover{border-color:#3c8f7c}
-.bptll-player-card.is-selected{border-color:#35d8c5;background:#124438;box-shadow:inset 0 0 0 1px rgba(53,216,197,.22)}
+.bptll-player-card.is-selected{border-color:#35d8c5;background:var(--bpt-card2,#124438);box-shadow:inset 0 0 0 1px rgba(53,216,197,.22)}
 .bptll-player-card input{
   width:clamp(15px,3.4cqh,20px); height:clamp(15px,3.4cqh,20px);
-  margin:0; accent-color:#f2c853;
+  margin:0; accent-color:var(--bpt-gold,#f2c853);
 }
 .bptll-player-avatar{
   width:clamp(28px,7.8cqh,44px); aspect-ratio:1;
@@ -223,9 +223,9 @@
 }
 .bptll-player-copy{min-width:0;display:flex;flex-direction:column;gap:1px;line-height:1.02}
 .bptll-player-copy strong{min-width:0;font-size:var(--fs-sm);white-space:normal;overflow:visible;text-overflow:clip;line-height:1.15;overflow-wrap:anywhere}
-.bptll-player-copy small{font-size:var(--fs-xs);color:#afc8bf;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bptll-player-copy small{font-size:var(--fs-xs);color:var(--bpt-muted,#afc8bf);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bptll-player-copy em{font-size:var(--fs-xs);color:#77d8ca;font-style:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bptll-player-empty{grid-column:1/-1;padding:18px;text-align:center;color:#a9c6bc;font-size:var(--fs-sm)}
+.bptll-player-empty{grid-column:1/-1;padding:18px;text-align:center;color:var(--bpt-muted,#a9c6bc);font-size:var(--fs-sm)}
 
 /* Étape 3 — toujours deux paris côte à côte. */
 
@@ -235,19 +235,19 @@
   display:grid; grid-template-rows:auto minmax(0,1fr);
   gap:3px;
   padding:clamp(4px,.9cqh,9px);
-  border:1px solid #294d42; border-radius:var(--radius);
-  background:#0b2a23;
+  border:1px solid var(--bpt-line,#294d42); border-radius:var(--radius);
+  background:var(--bpt-bg,#0b2a23);
   overflow:hidden;
 }
 .bptll-bet-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:clamp(13px,3.5cqh,21px);font-weight:900;line-height:1}
-.bptll-bet-head span{color:#f0cf79}
+.bptll-bet-head span{color:var(--bpt-gold,#f0cf79)}
 .bptll-confirm{
   grid-column:1/-1;
   min-width:0;
   display:grid; grid-template-columns:minmax(0,1fr) auto;
   align-items:center; gap:var(--gap);
   padding:clamp(3px,.7cqh,7px) clamp(6px,1cqw,12px);
-  border:1px solid #9c8442; border-radius:var(--radius); background:#244338;
+  border:1px solid #9c8442; border-radius:var(--radius); background:var(--bpt-card2,#244338);
   overflow:hidden;
 }
 .bptll-confirm-copy{min-width:0}
@@ -265,7 +265,7 @@
 }
 .bptll-bounty-icon{font-size:clamp(28px,11cqh,64px);line-height:1}
 .bptll-bounty-label{font-size:var(--fs-xs);letter-spacing:.12em;color:#d5bb74;font-weight:800}
-.bptll-bounty-name{font-size:clamp(19px,6.5cqh,38px);line-height:1;font-weight:950;color:#f5d36f}
+.bptll-bounty-name{font-size:clamp(19px,6.5cqh,38px);line-height:1;font-weight:950;color:var(--bpt-gold,#f5d36f)}
 .bptll-bounty p{max-width:760px;margin:0;font-size:var(--fs-sm);line-height:1.08;color:#c7d8d2}
 
 /* Ancien écran « Tournez le téléphone » : n'est plus affiché (10.4.18). */
@@ -273,12 +273,12 @@
   position:fixed; inset:0; z-index:9600; display:none;
   align-items:center; justify-content:center; text-align:center;
   padding:24px; box-sizing:border-box;
-  background:#061f1a; color:#fff;
+  background:var(--bpt-deep,#061f1a); color:#fff;
 }
 #bptLandscapeRotate .inner{max-width:360px}
 #bptLandscapeRotate .icon{font-size:50px;line-height:1;margin-bottom:10px}
 #bptLandscapeRotate strong{display:block;font-size:21px;margin-bottom:6px}
-#bptLandscapeRotate span{font-size:13px;color:#b9d2c9}
+#bptLandscapeRotate span{font-size:13px;color:var(--bpt-muted,#b9d2c9)}
 /* 10.4.18 : le Live s'utilise aussi en portrait (disposition dédiée dans app-tel.css). */
 
 /* V10.4.3 — Pendant Pré-Live / Live, toute la surface appartient au jeu.
@@ -325,9 +325,9 @@ body.bpt-live-landscape-open nav#nav{
 /* V10.4.4 — Liste joueurs continue et scrollable.
    Le footer reste hors de la zone de scroll. */
 .bptll-player-scroll::-webkit-scrollbar{width:8px}
-.bptll-player-scroll::-webkit-scrollbar-track{background:#08251f;border-radius:999px}
+.bptll-player-scroll::-webkit-scrollbar-track{background:var(--bpt-bg,#08251f);border-radius:999px}
 .bptll-player-scroll::-webkit-scrollbar-thumb{background:#2f7667;border-radius:999px}
-.bptll-player-scroll{scrollbar-width:thin;scrollbar-color:#2f7667 #08251f}
+.bptll-player-scroll{scrollbar-width:thin;scrollbar-color:#2f7667 var(--bpt-bg,#08251f)}
 
 /* BPT 10.4.6 — Correctif structurel testé :
    app.css force `main { display:block !important }`, ce qui faisait déborder
@@ -367,17 +367,17 @@ body.bpt-live-landscape-open.b466-live-active:not(.spectator-live-open):has(#liv
 }
 .bptll-my-bet,.bptll-other-bets{
   min-width:0;min-height:0;
-  border:1px solid #294d42;border-radius:var(--radius);
-  background:#0b2a23;overflow:hidden;
+  border:1px solid var(--bpt-line,#294d42);border-radius:var(--radius);
+  background:var(--bpt-bg,#0b2a23);overflow:hidden;
 }
 .bptll-my-bet{display:grid;grid-template-rows:auto minmax(0,1fr) auto;padding:clamp(5px,1cqh,10px);gap:var(--gap)}
 .bptll-other-bets{display:grid;grid-template-rows:auto minmax(0,1fr)}
 .bptll-panel-title{min-width:0;display:flex;flex-direction:column;gap:2px;padding:1px 2px}
 .bptll-panel-title strong{font-size:clamp(14px,3.8cqh,22px);line-height:1;color:#f4f8f6}
-.bptll-panel-title small{font-size:var(--fs-xs);color:#9fc0b5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bptll-panel-title-row{flex-direction:row;align-items:center;justify-content:space-between;gap:8px;padding:clamp(5px,1cqh,10px);border-bottom:1px solid #294d42;background:#10362d}
+.bptll-panel-title small{font-size:var(--fs-xs);color:var(--bpt-muted,#9fc0b5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bptll-panel-title-row{flex-direction:row;align-items:center;justify-content:space-between;gap:8px;padding:clamp(5px,1cqh,10px);border-bottom:1px solid var(--bpt-line,#294d42);background:var(--bpt-card,#10362d)}
 .bptll-panel-title-row>div{min-width:0;display:flex;flex-direction:column;gap:2px}
-.bptll-panel-title-row em{flex:0 0 auto;font-style:normal;font-size:var(--fs-xs);font-weight:900;color:#f0cf79;white-space:nowrap}
+.bptll-panel-title-row em{flex:0 0 auto;font-style:normal;font-size:var(--fs-xs);font-weight:900;color:var(--bpt-gold,#f0cf79);white-space:nowrap}
 .bptll-my-bet-grid{min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)}
 .bptll-my-bet .bptll-bet-card{height:100%}
 .bptll-my-bet .bptll-confirm{grid-column:auto}
@@ -389,10 +389,10 @@ body.bpt-live-landscape-open.b466-live-active:not(.spectator-live-open):has(#liv
 .bptll-other-bet-row>div span{white-space:nowrap}
 .bptll-other-bet-row>div i{font-style:normal;color:#6e9688}
 .bptll-other-bet-row.is-confirmed{background:rgba(20,76,64,.38)}
-.bptll-other-bet-row b{color:#f0cf79}
-.bptll-waiting{color:#89a79d;font-style:italic}
-.bptll-no-bet{color:#b8cbc4}
-.bptll-other-empty{padding:14px;text-align:center;color:#9fc0b5;font-size:var(--fs-sm)}
+.bptll-other-bet-row b{color:var(--bpt-gold,#f0cf79)}
+.bptll-waiting{color:var(--bpt-muted,#89a79d);font-style:italic}
+.bptll-no-bet{color:var(--bpt-muted,#b8cbc4)}
+.bptll-other-empty{padding:14px;text-align:center;color:var(--bpt-muted,#9fc0b5);font-size:var(--fs-sm)}
 @media (max-width:760px) and (orientation:portrait){
   .bptll-bets-split{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) minmax(0,1fr)}
   .bptll-my-bet-grid{grid-template-columns:1fr 1fr}
@@ -445,7 +445,7 @@ body.bpt-live-landscape-open.b466-live-active:not(.spectator-live-open):has(#liv
     grid-template-columns:repeat(3,minmax(0,1fr));
     grid-template-rows:auto auto;align-content:start;
     gap:24px 22px;padding:28px 30px;box-sizing:border-box;
-    background:#0c2621;border:1px solid #21483e;border-radius:16px;
+    background:var(--bpt-bg,#0c2621);border:1px solid var(--bpt-card2,#21483e);border-radius:16px;
     box-shadow:0 10px 30px rgba(0,0,0,.25);
   }
   #bptLandscapeLive .bptll-field{grid-template-rows:auto auto;gap:8px}
@@ -503,16 +503,16 @@ body.bpt-live-landscape-open.b466-live-active:not(.spectator-live-open):has(#liv
 #bptLandscapeLive .bptll-player-avatar img{width:100%;height:100%;object-fit:cover}
 
 /* 10.4.33 — préparation aux couleurs unifiées */
-#bptLandscapeLive .bptll-player-card{background:#172042;border-color:#2c3a63}
-#bptLandscapeLive .bptll-player-card.is-selected{background:#173a46;border-color:#35d8c5}
-#bptLandscapeLive .bptll-btn:not(.primary){background:#1f2a50;border-color:#33416b}
-#bptLandscapeLive .bptll-field input,#bptLandscapeLive .bptll-field select,#bptLandscapeLive .bptll-player-search,#bptLandscapeLive .bptll-player-add input{background:#0f1530;border-color:#33416b}
-#bptLandscapeLive .bptll-form,#bptLandscapeLive .bptll-my-bet,#bptLandscapeLive .bptll-other-bets,#bptLandscapeLive .bptll-bet-card{background:#151d38;border-color:#2c3a63}
-#bptLandscapeLive .bptll-player-add{background:#151d38;border-color:#2a8f88}
-#bptLandscapeLive .bptll-panel-title-row{background:#1a2347;border-color:#2c3a63}
-#bptLandscapeLive .bptll-confirm{background:#1d2850;border-color:#9c8442}
-#bptLandscapeLive .bptll-player-scroll{scrollbar-color:#34447a #0f1530}
-#bptLandscapeLive .bptll-player-scroll::-webkit-scrollbar-track{background:#0f1530}
+#bptLandscapeLive .bptll-player-card{background:var(--bpt-card2,#172042);border-color:var(--bpt-line,#2c3a63)}
+#bptLandscapeLive .bptll-player-card.is-selected{background:var(--bpt-card2,#173a46);border-color:#35d8c5}
+#bptLandscapeLive .bptll-btn:not(.primary){background:var(--bpt-line,#1f2a50);border-color:var(--bpt-line,#33416b)}
+#bptLandscapeLive .bptll-field input,#bptLandscapeLive .bptll-field select,#bptLandscapeLive .bptll-player-search,#bptLandscapeLive .bptll-player-add input{background:var(--bpt-bg2,#0f1530);border-color:var(--bpt-line,#33416b)}
+#bptLandscapeLive .bptll-form,#bptLandscapeLive .bptll-my-bet,#bptLandscapeLive .bptll-other-bets,#bptLandscapeLive .bptll-bet-card{background:var(--bpt-card,#151d38);border-color:var(--bpt-line,#2c3a63)}
+#bptLandscapeLive .bptll-player-add{background:var(--bpt-card,#151d38);border-color:#2a8f88}
+#bptLandscapeLive .bptll-panel-title-row{background:var(--bpt-card2,#1a2347);border-color:var(--bpt-line,#2c3a63)}
+#bptLandscapeLive .bptll-confirm{background:var(--bpt-line,#1d2850);border-color:#9c8442}
+#bptLandscapeLive .bptll-player-scroll{scrollbar-color:#34447a var(--bpt-bg2,#0f1530)}
+#bptLandscapeLive .bptll-player-scroll::-webkit-scrollbar-track{background:var(--bpt-bg2,#0f1530)}
 #bptLandscapeLive .bptll-player-scroll::-webkit-scrollbar-thumb{background:#34447a}
 
 /* Avant-partie · lot design 2 (10.4.60) : même police que le Live, mise en pastille, noms moins tronqués */
