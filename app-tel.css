@@ -9091,3 +9091,13 @@ html.bpt-mobile-device #latestgame .lg-photo:not(:has(.game-photo-thumb-btn[styl
 .records-scope-choice.active strong,.ranking-season-scope-btn.active strong,.ranking-mode-btn.active{color:var(--bpt-gold,#f2c853) !important}
 .records-scope-choice.active small{color:var(--bpt-text,#eef2fb) !important}
 .ranking-season-scope{background:var(--bpt-bg,#0f1426) !important}
+
+/* Règle 60-30-10 · lot 4 : faire respirer le Profil et l'Accueil — moins de boîtes pleines, plus de fond visible, « Ma saison » sans turquoise (10.4.70) */
+#profile .pf-kpis{gap:0 !important;margin:8px 0 24px !important;padding:4px 0 !important;border-top:1px solid var(--bpt-line,#2a3560);border-bottom:1px solid var(--bpt-line,#2a3560)}
+#profile .pf-kpi{background:transparent !important;border:0 !important;border-radius:0 !important;padding:12px 14px !important}
+#profile .pf-feats{gap:6px 18px !important}
+#profile .pf-feat{background:transparent !important;border-radius:0 !important;border-left:2px solid var(--bpt-line,#2a3560);padding:6px 12px !important}
+.bpt-home-podium-card{background:transparent !important;border-color:transparent !important;padding-left:0 !important;padding-right:0 !important}
+.bpt-home-me{border-color:var(--bpt-line,#2a3560) !important;background:var(--bpt-card,#161d36) !important}
+.bpt-home-me-title,.bpt-home-me-go{color:var(--bpt-text,#eef2fb) !important}
+.bpt-home-me-rank b{color:var(--bpt-gold,#f2c853) !important}
