@@ -4696,11 +4696,6 @@ html.bpt-presence-detail-open #nav{
 #latestgame .card:has(h3){
   box-sizing:border-box;
 }
-#latestgame .bpt-accomplishments-full,
-#latestgame .bpt-ranking-changes-full{
-  grid-column:1 / -1 !important;
-  width:100%;
-}
 
 
 /* ===== BPT 4.34 — structure blinds reconstruite proprement ===== */
