@@ -1949,6 +1949,37 @@ function renderPlayerRankHistory(name){
     </div>`;
 }
 
+// 10.4.72 — Moment de sortie : chaque partie est classée en 5 paliers selon la place ramenée au nombre de joueurs
+// (le vainqueur compte comme le dernier sorti). À 10 joueurs : 9e-10e très précoce … 1er-2e très tardive.
+function exitPhase(r){
+  const place=Number(r.place)||0;
+  const n=Number(r.n)||(db.history||[]).filter(x=>Number(x.game)===Number(r.game)&&String(x.date||"")===String(r.date||"")).length;
+  if(!place||n<2)return null;
+  const k=(place-1)/(n-1);
+  return k<=.2?"vlate":k<=.4?"late":k<=.6?"mid":k<=.8?"early":"vearly";
+}
+const EXIT_PHASES=[["vearly","Très précoce"],["early","Précoce"],["mid","Moyenne"],["late","Tardive"],["vlate","Très tardive"]];
+function exitBreakdown(rows){
+  const out={total:0};EXIT_PHASES.forEach(([k])=>out[k]={n:0});
+  rows.forEach(r=>{const p=exitPhase(r);if(!p)return;out.total++;out[p].n++;});
+  return out;
+}
+function renderPlayerExitProfile(name,rows){
+  const box=$("playerProfileExit");if(!box)return;
+  const me=exitBreakdown(rows||[]);
+  if(me.total<3){box.innerHTML='<p class="pf-exit-empty">Pas assez de parties pour dégager une tendance (3 minimum).</p>';return;}
+  const pct=k=>me.total?Math.round(100*me[k].n/me.total):0;
+  const bar=EXIT_PHASES.map(([k,l])=>{const v=pct(k);return v?`<span class="pf-exit-seg is-${k}" style="width:${v}%" title="${l} · ${v} %"></span>`:"";}).join("");
+  const lines=EXIT_PHASES.map(([k,l])=>{const v=pct(k),n=me[k].n;
+    return `<div class="pf-exit-row is-${k}"><b>${v} %</b><span>${l}</span><small>${n} partie${n>1?"s":""}</small></div>`;}).join("");
+  const fin=pct("late")+pct("vlate"),deb=pct("early")+pct("vearly"),m=pct("mid");
+  const first=esc(String(name).trim().split(" ")[0]);
+  const read=fin>=50?`<b>Finisseur</b> : ${first} tient jusqu'au bout dans ${fin} % de ses parties (tardive ou très tardive).`
+    :deb>=50?`<b>Départs rapides</b> : ${deb} % de sorties précoces, le début de partie est le moment à passer.`
+    :m>=35?`<b>Régulier</b> : ${first} sort le plus souvent en milieu de partie (${m} %).`
+    :`<b>Profil équilibré</b> : précoce ${deb} %, moyenne ${m} %, tardive ${fin} %.`;
+  box.innerHTML=`<div class="pf-exit-bar">${bar}</div><div class="pf-exit-rows">${lines}</div><p class="pf-exit-read">${read}</p><p class="pf-exit-note">${me.total} parties · paliers par cinquième du classement de la partie (vainqueur = très tardive)</p>`;
+}
 function playerProfileData(name){
   const allStats=stats(false);
   const ranked=ranking();
@@ -2172,6 +2203,7 @@ function renderProfile(preferredName=null){
     $("playerProfileMeta").textContent="Aucune donnée disponible.";
     $("playerProfileKpis").innerHTML="";
     $("playerProfileFeats").innerHTML="";
+    if($("playerProfileExit"))$("playerProfileExit").innerHTML="";
     $("playerProfileAchievements").innerHTML='<span class="profile-no-achievement">Aucun accomplissement.</span>';
     $("playerProfilePlaces").innerHTML="";
     if($("playerProfileRecentForm"))$("playerProfileRecentForm").innerHTML="";
@@ -2259,6 +2291,7 @@ function renderProfile(preferredName=null){
   $("playerProfileFeats").innerHTML=feats
     .map(([l,v])=>`<div class="pf-feat"><span class="pf-feat-ico">${FEAT_ICON[l]||"★"}</span><div><small>${esc(l)}</small><strong>${esc(v)}</strong></div></div>`)
     .join("");
+  renderPlayerExitProfile(name,rows);
 
   $("playerProfileAchievements").innerHTML=d.achievements.length
     ? d.achievements.map(a=>`<span class="pf-badge" title="${esc(a.desc)}">${a.icon} ${esc(a.name)}</span>`).join("")
