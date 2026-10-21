@@ -55,7 +55,7 @@
     <div class="bpt484-actions">
       <button class="bpt484-pause" data-do="pause">Pause</button><button class="bpt484-out" data-do="out">Sortir un joueur</button><button class="bpt484-follow" data-menu-toggle="follow" aria-expanded="false">Suivi de partie</button><button class="bpt484-tools" data-menu-toggle="tools" aria-expanded="false">Outils</button><button class="bpt484-takeover" data-do="takeover">Demander la reprise</button>
       <div class="bpt484-action-menu" data-menu-panel="follow" hidden><button class="bpt484-enjeux" data-do="enjeux">🏆 Enjeux de la partie</button><button class="bpt484-bets" data-do="bets">🎲 Paris de la table</button><button class="bpt484-personal" data-do="personal-bounty">🎯 Bounty</button><button class="bpt484-live-ranking" data-do="live-ranking">📊 Classement en direct</button></div>
-      <div class="bpt484-action-menu" data-menu-panel="tools" hidden><button data-do="timer">⏱ Timer de réflexion</button><button data-do="odds">Calcul de cotes</button><button data-do="hide-live">Masquer le Live</button><button class="bpt484-end" data-do="end">Terminer le live</button></div>
+      <div class="bpt484-action-menu" data-menu-panel="tools" hidden><button data-do="timer">⏱ Timer de réflexion</button><button data-do="odds">🧮 Calcul de cotes</button><button data-do="hide-live">👁 Masquer le Live</button><button class="bpt484-end" data-do="end">⏹ Terminer le Live</button></div>
     </div>
   </div>`}
   function install(){
