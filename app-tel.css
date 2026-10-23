@@ -9310,3 +9310,40 @@ html.bpt-online-open #bptAppAction{display:none !important}
   .bpt-ol-table:has(.bpt-ol-mybar) .bpt-ol-presets{grid-template-columns:1fr 1fr}
   .bpt-ol-table:has(.bpt-ol-mybar) .bpt-ol-mybar>button{min-height:38px}
 }
+/* 10.4.77 — Table en ligne sans avatars : la plaque (prénom + tapis) porte le halo du tour de parole */
+.bpt-ol-plate{margin-top:0 !important;min-width:84px;padding:5px 10px !important;border-radius:12px !important}
+.bpt-ol-plate b{font-size:13.5px !important}
+.bpt-ol-plate span{font-size:13px !important}
+.bpt-ol-seat.is-turn .bpt-ol-plate{box-shadow:0 0 0 2px var(--bpt-gold,#f2c853),0 0 18px color-mix(in srgb,var(--bpt-gold,#f2c853) 55%,transparent) !important}
+.bpt-ol-seat.is-me .bpt-ol-plate{border-width:2px}
+.bpt-ol-seat.is-me .bpt-ol-cards.is-mine{transform:translate(-50%,calc(-50% - 62px))}
+/* 10.4.77 — Abattage : combinaison gagnante en évidence ; joueur à tapis bien signalé */
+.bpt-card{transition:transform .25s ease,opacity .25s ease,box-shadow .25s ease}
+.bpt-card.is-win{transform:translateY(-6px);box-shadow:0 0 0 2px var(--bpt-gold,#f2c853),0 0 16px color-mix(in srgb,var(--bpt-gold,#f2c853) 70%,transparent),0 4px 10px rgba(0,0,0,.5)}
+.bpt-card.is-dim{opacity:.38;filter:grayscale(.4)}
+.bpt-ol-seat.is-winner .bpt-ol-plate{border-color:var(--bpt-gold,#f2c853) !important;box-shadow:0 0 0 2px var(--bpt-gold,#f2c853),0 0 22px color-mix(in srgb,var(--bpt-gold,#f2c853) 60%,transparent) !important}
+.bpt-ol-seat.is-allin .bpt-ol-plate{border-color:#ff5a5a !important;box-shadow:0 0 0 2px #ff5a5a,0 0 18px rgba(255,90,90,.55) !important}
+.bpt-ol-seat i.is-allin{position:absolute;left:50%;top:0;transform:translate(-50%,-115%);z-index:4;padding:2px 9px;border-radius:999px;background:#e23b3b;color:#fff !important;font-size:11px !important;font-weight:950;letter-spacing:.08em;box-shadow:0 2px 8px rgba(0,0,0,.45)}
+@media (prefers-reduced-motion:no-preference){.bpt-ol-seat i.is-allin{animation:bptOlAllin 1.4s ease-in-out infinite}}
+@keyframes bptOlAllin{0%,100%{transform:translate(-50%,-115%) scale(1)}50%{transform:translate(-50%,-115%) scale(1.08)}}
+.bpt-ol-seat.is-me i.is-allin{top:100%;transform:translate(-50%,6px);animation-name:bptOlAllinMe}
+@keyframes bptOlAllinMe{0%,100%{transform:translate(-50%,6px) scale(1)}50%{transform:translate(-50%,6px) scale(1.08)}}
+/* 10.4.77 — Abattage animé : la combinaison gagnante sort au centre, carte par carte, puis s'efface */
+.bpt-ol-showcase{position:absolute;left:50%;top:50%;z-index:8;display:grid;justify-items:center;gap:8px;padding:12px 16px 10px;border-radius:16px;background:rgba(6,9,20,.86);border:1px solid var(--bpt-gold,#f2c853);box-shadow:0 18px 40px rgba(0,0,0,.6),0 0 30px color-mix(in srgb,var(--bpt-gold,#f2c853) 30%,transparent);transform:translate(-50%,-50%);pointer-events:none;white-space:nowrap}
+.bpt-ol-show-title{font-size:clamp(14px,2.8vmin,19px);color:var(--bpt-text,#eef2fb)}
+.bpt-ol-show-title b{color:var(--bpt-gold,#f2c853)}
+.bpt-ol-show-cards{display:flex;gap:clamp(4px,1vmin,8px);perspective:600px}
+.bpt-ol-show-slot{position:relative;display:inline-block}
+.bpt-ol-show-slot .bpt-card.is-show{width:clamp(42px,9vmin,66px);height:clamp(60px,12.6vmin,92px);box-shadow:0 0 0 2px var(--bpt-gold,#f2c853),0 6px 14px rgba(0,0,0,.5)}
+.bpt-ol-show-slot .bpt-card.is-show b,.bpt-ol-show-slot .bpt-card.is-show i{font-size:clamp(18px,3.9vmin,28px)}
+.bpt-ol-show-slot.is-hole::after{content:"";position:absolute;left:50%;bottom:-7px;width:60%;height:3px;border-radius:2px;background:var(--bpt-gold,#f2c853);transform:translateX(-50%)}
+.bpt-ol-show-legend{font-size:10.5px;color:var(--bpt-muted,#9aa6c8)}
+.bpt-ol-show-legend span{color:var(--bpt-muted,#9aa6c8)}.bpt-ol-show-legend span.is-hole{color:var(--bpt-gold,#f2c853)}
+@media (prefers-reduced-motion:no-preference){
+  .bpt-ol-showcase{animation:bptOlShowIn .35s ease both}
+  .bpt-ol-show-slot{animation:bptOlCardIn .55s cubic-bezier(.2,1.35,.4,1) both;animation-delay:calc(var(--k,0) * 140ms + .25s)}
+}
+
+@keyframes bptOlShowIn{from{opacity:0;transform:translate(-50%,-50%) scale(.85)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+@keyframes bptOlShowOut{to{opacity:0;visibility:hidden}}
+@keyframes bptOlCardIn{from{opacity:0;transform:translateY(34px) rotateY(90deg) scale(.6)}to{opacity:1;transform:none}}

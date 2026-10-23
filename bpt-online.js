@@ -108,7 +108,9 @@
      street : preflop → flop → turn → river → done. Mode confiance : le paquet est dans la base. */
   const RANKS="23456789TJQKA",SUITS="shdc";
   const K=i=>"p"+i;
-  const TURN_MS=45000, NEXT_HAND_MS=6000;
+  const TURN_MS=45000;
+  // Délai avant la main suivante : plus long après un abattage pour laisser voir les cartes de chacun.
+  const nextHandMs=h=>h?.showdown?12000:6000;
   function freshDeck(){
     const d=[];for(const s of SUITS)for(const r of RANKS)d.push(r+s);
     const rnd=n=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n;}catch(_e){return Math.floor(Math.random()*n);}};
@@ -206,10 +208,12 @@
     return [0,...r];
   }
   const cmp=(a,b)=>{for(let k=0;k<Math.max(a.length,b.length);k++){const d=(a[k]||0)-(b[k]||0);if(d)return d;}return 0;};
-  function best7(cards){
-    let best=null;const n=cards.length;
-    for(let a=0;a<n;a++)for(let b=a+1;b<n;b++){const five=cards.filter((_,k)=>k!==a&&k!==b);const v=eval5(five);if(!best||cmp(v,best)>0)best=v;}
-    return best;
+  function best7(cards){return bestCombo(cards).score;}
+  // Meilleure combinaison et ses 5 cartes (pour les mettre en évidence à l'abattage).
+  function bestCombo(cards){
+    let best=null,five=null;const n=cards.length;
+    for(let a=0;a<n;a++)for(let b=a+1;b<n;b++){const f=cards.filter((_,k)=>k!==a&&k!==b);const v=eval5(f);if(!best||cmp(v,best)>0){best=v;five=f;}}
+    return {score:best,five:five||[]};
   }
   // Pots : un pot principal puis des side pots selon les mises des joueurs à tapis.
   function buildPots(t){
@@ -224,7 +228,7 @@
   }
   function finishHand(t,showdown){
     const h=t.hand,board=split(h.board),pots=buildPots(t),list=handPlayers(t);
-    const score={};if(showdown)list.filter(i=>!folded(h,i)).forEach(i=>{score[i]=best7([...split(h.hole[i]),...board]);});
+    const score={},combo={};if(showdown)list.filter(i=>!folded(h,i)).forEach(i=>{const c=bestCombo([...split(h.hole[i]),...board]);score[i]=c.score;combo[i]=c.five.join(",");});
     h.result=pots.map(p=>{
       let w=p.elig;
       if(showdown&&w.length>1){const top=w.reduce((b,i)=>b===null||cmp(score[i],score[b])>0?i:b,null);/* b===null : la place n°0 est un gagnant possible */w=w.filter(i=>cmp(score[i],score[top])===0);}
@@ -232,7 +236,7 @@
       // Jeton indivisible : au premier gagnant à gauche du bouton.
       const ordered=[];let q=h.dealer;for(let k=0;k<list.length;k++){q=nextOf(list,q);if(w.includes(q))ordered.push(q);}
       ordered.forEach(i=>{t.seats[i].stack=stackOf(t,i)+share+(rest>0?1:0);if(rest>0)rest--;});
-      return {amount:p.amount,winners:ordered,hand:showdown&&score[ordered[0]]?HAND_NAMES[score[ordered[0]][0]]:null};
+      return {amount:p.amount,winners:ordered,hand:showdown&&score[ordered[0]]?HAND_NAMES[score[ordered[0]][0]]:null,cards:showdown?(combo[ordered[0]]||""):""};
     });
     h.showdown=!!showdown;h.street="done";h.toAct=null;h.at=Date.now();h.bets={};
     // Éliminations (détaillées au lot 4) : place = nombre de joueurs encore en jeu + 1.
@@ -286,7 +290,7 @@
     const h=t.hand;if(!h)return;
     const now=Date.now();
     if(h.street==="done"){
-      const key=`next:${h.no}`;if(autoKey!==key&&now-Number(h.at||0)>=NEXT_HAND_MS){autoKey=key;nextHand(t.id);}return;
+      const key=`next:${h.no}`;if(autoKey!==key&&now-Number(h.at||0)>=nextHandMs(h)){autoKey=key;nextHand(t.id);}return;
     }
     const i=h.toAct;if(i===null||i===undefined)return;
     const seat=t.seats[i];const key=`${h.no}:${h.street}:${i}:${h.actionAt}`;if(autoKey===key)return;
@@ -331,6 +335,7 @@
     const L=running?levelAt(t):{index:0,left:0},lv=t.levels?.[L.index]||{};
     const h=(running||t.status==="finished")?t.hand:null,board=split(h?.board),done=h?.street==="done";
     const N=Math.max(1,seats.length);
+    const winners=new Set(done?(h.result?.[0]?.winners||[]):[]);
     // La table « tourne » : le joueur connecté est toujours en bas, les autres dans l'ordre de jeu autour de lui.
     const meIdx=Math.max(0,seats.findIndex(x=>x.name===me()));
     const ring=seats.map((s,idx)=>{
@@ -343,11 +348,10 @@
       const won=done?(h.result||[]).filter(r=>r.winners.includes(s.i)).reduce((a,r)=>a+Math.floor(r.amount/r.winners.length),0):0;
       const chips=bet?`<em class="bpt-ol-bet">${fmt(bet)}</em>`:won?`<em class="bpt-ol-bet is-won">+${fmt(won)}</em>`:"";
       const turn=h&&!done&&h.toAct===s.i;
-      const tag=out?'<i class="is-out">éliminé</i>':allin?'<i class="is-allin">TAPIS</i>':fold?'<i>couché</i>':s.name===t.host?'<i class="is-host">★ hôte</i>':s.bot?'<i>virtuel</i>':"";
+      const tag=out?'<i class="is-out">éliminé</i>':allin?'<i class="is-allin">TAPIS</i>':fold?'<i>couché</i>':s.bot?'<i>virtuel</i>':"";
       const badge=!h||done?"":h.dealer===s.i?'<em class="bpt-ol-dealer">D</em>':"";
       const timer=turn?`<span class="bpt-ol-timer"><span data-ol-turn style="width:${Math.max(0,100-100*(Date.now()-Number(h.actionAt||0))/TURN_MS).toFixed(0)}%"></span></span>`:"";
-      return `<div class="bpt-ol-seat${isMe?" is-me":""}${turn?" is-turn":""}${fold?" is-folded":""}${out?" is-out":""}" data-pos="${pos}" data-n="${N}" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%">
-        <div class="bpt-ol-avatar">${avatar(s.name)}</div>
+      return `<div class="bpt-ol-seat${isMe?" is-me":""}${turn?" is-turn":""}${allin?" is-allin":""}${winners.has(s.i)?" is-winner":""}${fold?" is-folded":""}${out?" is-out":""}" data-pos="${pos}" data-n="${N}" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%">
         <div class="bpt-ol-plate"><b>${esc(s.name.split(" ")[0])}</b><span>${out?"—":fmt(s.stack)}</span>${timer}</div>${tag}${cards}${badge}${chips}</div>`;
     }).join("");
     // Pot : tout ce qui a été misé pendant la main, moins les mises encore devant les joueurs.
@@ -383,20 +387,31 @@
         <div class="bpt-ol-raise">${maxTotal>minTo?`<div class="bpt-ol-presets">${presets}</div><input type="range" data-ol-range min="${minTo}" max="${maxTotal}" step="${Math.max(1,Math.round((Number(lv.sb)||25)))}" value="${raiseTo}">`:""}</div>`:""}
       </div>`;
     }
+    // Abattage : la combinaison gagnante (cartes du joueur + tableau) sort au centre, carte par carte, avec le nom de la main.
+    let showcase="";
+    if(done&&h.showdown&&h.result?.[0]?.cards){
+      const r0=h.result[0],w=r0.winners[0],mineCards=new Set(split(h.hole?.[w]));
+      // Rangement lisible : d'abord les cartes groupées (carré, brelan, paires), puis par hauteur.
+      const raw=split(r0.cards),n=c=>raw.filter(x=>x[0]===c[0]).length;
+      const five=raw.sort((a,b)=>n(b)-n(a)||RV(b)-RV(a));
+      showcase=`<div class="bpt-ol-showcase" aria-live="polite"><div class="bpt-ol-show-title"><b>${r0.winners.map(i=>esc(firstName(t,i))).join(" et ")}</b> · ${esc(r0.hand||"")}</div>
+        <div class="bpt-ol-show-cards">${five.map((c,k)=>`<span class="bpt-ol-show-slot${mineCards.has(c)?" is-hole":""}" style="--k:${k}">${cardHtml(c," is-show")}</span>`).join("")}</div>
+        <div class="bpt-ol-show-legend"><span class="is-hole">■</span> cartes du joueur · <span>■</span> tableau</div></div>`;
+    }
     const center=h?`<div class="bpt-ol-board">${[0,1,2,3,4].map(k=>cardHtml(board[k])).join("")}</div><div class="bpt-ol-pot">${potLine}</div>`
       :`<strong>${fmt(lv.sb)} / ${fmt(lv.bb)}</strong>`;
     const centerSub=t.status==="finished"?`🏆 ${esc(t.winner||"")} remporte le tournoi`
       :t.status==="waiting"?`En attente des joueurs · ${seats.length} inscrit${seats.length>1?"s":""}`
       :`Main n°${h?.no||1} · ${STREET[h?.street]||""}`;
-    const last=h?.last?.txt?`<div class="bpt-ol-note">${esc(h.last.txt)}${done&&running?` · main suivante dans quelques secondes`:""}</div>`:"";
+    const last=h?.last?.txt?`<div class="bpt-ol-note">${esc(h.last.txt)}${done&&running?` · main suivante dans <span data-ol-next-in>${Math.max(1,Math.ceil((nextHandMs(h)-(Date.now()-Number(h.at||0)))/1000))}</span> s`:""}</div>`:"";
     return `<div class="bpt-ol-table">
       <div class="bpt-ol-bar"><button type="button" data-ol-back aria-label="Retour aux tables">‹</button>
-        <div class="bpt-ol-bar-title"><b>${esc(t.name)}</b><small>${t.countsForChampionship?"Compte au championnat":"Hors championnat"} · hôte ${esc(t.host.split(" ")[0])}</small></div>
+        <div class="bpt-ol-bar-title"><b>${esc(t.name)}</b><small>${t.countsForChampionship?"Compte au championnat":"Hors championnat"}</small></div>
         ${isHost&&t.status==="waiting"?`<label class="bpt-ol-check"><input type="checkbox" data-ol-counts${t.countsForChampionship?" checked":""}> Championnat</label>`:""}
         <div class="bpt-ol-bar-level"><small>Niveau ${L.index+1}${running?` · <span data-ol-clock>${clock(L.left)}</span>`:""}</small><b>${fmt(lv.sb)} / ${fmt(lv.bb)}</b></div></div>
       <div class="bpt-ol-stage"><div class="bpt-ol-rail"><div class="bpt-ol-felt">
         <div class="bpt-ol-center"><span class="bpt-ol-logo">♠ BPT</span>${center}<small>${centerSub}</small></div>
-      </div></div>${ring}</div>
+      </div></div>${ring}${showcase}</div>
       ${last}${myBar}<div class="bpt-ol-actions">${actions.join("")}</div></div>`;
   }
   // Table « stade » (rectangle aux bouts arrondis) : chaque joueur est posé sur le bord, à intervalles réguliers
@@ -423,6 +438,7 @@
     const t=openId&&tables[openId];if(!t||t.status!=="running"||!$("online")?.classList.contains("active"))return;
     const L=levelAt(t);if(L.index!==shownLevel){shownLevel=L.index;render();return;}
     const el=document.querySelector("#bptOnlineBody [data-ol-clock]");if(el)el.textContent=clock(L.left);
+    const nx=document.querySelector("#bptOnlineBody [data-ol-next-in]");if(nx&&t.hand)nx.textContent=Math.max(1,Math.ceil((nextHandMs(t.hand)-(Date.now()-Number(t.hand.at||0)))/1000));
     const bar=document.querySelector("#bptOnlineBody [data-ol-turn]");if(bar&&t.hand)bar.style.width=Math.max(0,100-100*(Date.now()-Number(t.hand.actionAt||0))/TURN_MS).toFixed(0)+"%";
   },1000);
   setInterval(()=>{try{autopilot();}catch(e){console.warn("BPT en ligne :",e);}},400);
