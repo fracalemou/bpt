@@ -1,4 +1,4 @@
-/* BPT 10.4.73 — Jouer en ligne · lot 1 : salon des tables et places autour de la table.
+/* BPT 10.4.74 — Jouer en ligne · lot 1 : salon et places · lot 2 : donne (bouton, blindes, cartes, flop/turn/river).
    Mode confiance (pas de serveur) : tout passe par Firebase, les écritures concurrentes par transaction.
    Données : bpt/online/tables/{id} = {id,name,host,createdAt,status,countsForChampionship,maxSeats,
    startStack,targetHours,levelSeconds,levels[],levelIndex,seats{index:{name,stack,joinedAt}}}. */
@@ -90,7 +90,8 @@
       t.seats={};players.forEach((p,i)=>{t.seats[i]={name:p.name,stack:Number(t.startStack)||20000,joinedAt:p.joinedAt||Date.now(),...(p.bot?{bot:true}:{})};});
       const st=structure(players.length,Number(t.targetHours)||2,Number(t.startStack)||20000);
       t.levels=st.levels;t.levelSeconds=st.levelSeconds;t.maxSeats=players.length;
-      t.status="running";t.startedAt=Date.now();t.levelIndex=0;
+      t.status="running";t.startedAt=Date.now();t.levelIndex=0;t.hand=null;
+      dealHand(t);
     });
   }
   async function removeTable(id){
@@ -98,6 +99,63 @@
     await (await db()).ref(`${ROOT}/${id}`).remove();openId=null;render();
   }
   async function toggleCounts(id,val){await tx(id,t=>{if(t.host!==me()||t.status!=="waiting")return false;t.countsForChampionship=!!val;});}
+
+  /* ---------- Donne (lot 2) ----------
+     t.hand = {no, level, dealer, sb, bb, deck:"Ah,Kd,…" (cartes restantes), hole:{indexPlace:"Ah,Kd"}, board:"Qs,Jc,…", street, at}
+     street : preflop → flop → turn → river → done (abattage : cartes retournées) → main suivante. Mode confiance :
+     le paquet est dans la base, l'écran ne montre à chacun que ses propres cartes. Les mises arrivent au lot 3. */
+  const RANKS="23456789TJQKA",SUITS="shdc";
+  function freshDeck(){
+    const d=[];for(const s of SUITS)for(const r of RANKS)d.push(r+s);
+    const rnd=n=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n;}catch(_e){return Math.floor(Math.random()*n);}};
+    for(let i=d.length-1;i>0;i--){const j=rnd(i+1);[d[i],d[j]]=[d[j],d[i]];}
+    return d;
+  }
+  const split=s=>String(s||"").split(",").filter(Boolean);
+  function inPlay(t){return seatsOf(t).filter(s=>Number(s.stack)>0).map(s=>s.i).sort((a,b)=>a-b);}
+  function nextOf(list,i){return list.find(x=>x>i)??list[0];}
+  // Niveau courant d'après le temps écoulé depuis le lancement (pas de pause en ligne).
+  function levelAt(t,now=Date.now()){
+    const lv=Array.isArray(t.levels)?t.levels:[];if(!t.startedAt||!lv.length)return {index:0,left:0};
+    let el=Math.max(0,(now-Number(t.startedAt))/1000);
+    for(let i=0;i<lv.length;i++){const d=Math.max(60,Number(lv[i].durationSec)||Number(t.levelSeconds)||600);if(el<d)return {index:i,left:Math.ceil(d-el)};el-=d;}
+    return {index:lv.length-1,left:0};
+  }
+  function dealHand(t){
+    const list=inPlay(t);if(list.length<2)return false;
+    const prev=t.hand?t.hand.dealer:null;
+    // Première main : bouton tiré au sort ; ensuite il passe au joueur suivant encore en jeu.
+    const dealer=prev===null||prev===undefined?list[Math.floor(Math.random()*list.length)]:nextOf(list,prev);
+    const headsUp=list.length===2;
+    const sb=headsUp?dealer:nextOf(list,dealer), bb=nextOf(list,sb);
+    const deck=freshDeck(), hole={};
+    const order=[];let p=sb;for(let k=0;k<list.length;k++){order.push(p);p=nextOf(list,p);}
+    for(let round=0;round<2;round++)order.forEach(i=>{hole[i]=(hole[i]?hole[i]+",":"")+deck.shift();});
+    t.hand={no:(Number(t.hand?.no)||0)+1,level:levelAt(t).index,dealer,sb,bb,deck:deck.join(","),hole,board:"",street:"preflop",at:Date.now()};
+    t.levelIndex=t.hand.level;
+  }
+  async function advance(id){
+    await tx(id,t=>{
+      if(t.status!=="running"||t.host!==me()||!t.hand)return false;
+      const h=t.hand,deck=split(h.deck),board=split(h.board);
+      const draw=n=>{deck.shift();for(let k=0;k<n;k++)board.push(deck.shift());}; // une carte brûlée avant chaque tirage
+      if(h.street==="preflop"){draw(3);h.street="flop";}
+      else if(h.street==="flop"){draw(1);h.street="turn";}
+      else if(h.street==="turn"){draw(1);h.street="river";}
+      else if(h.street==="river"){h.street="done";}
+      else {return dealHand(t);}
+      h.deck=deck.join(",");h.board=board.join(",");h.at=Date.now();
+    });
+  }
+  const SUIT={s:"♠",h:"♥",d:"♦",c:"♣"};
+  function cardHtml(c,cls=""){
+    if(!c)return `<span class="bpt-card is-empty${cls}"></span>`;
+    const r=c[0]==="T"?"10":c[0];
+    return `<span class="bpt-card${"hd".includes(c[1])?" is-red":""}${cls}"><b>${r}</b><i>${SUIT[c[1]]||""}</i></span>`;
+  }
+  const backHtml=(cls="")=>`<span class="bpt-card is-back${cls}"></span>`;
+  const STREET={preflop:"Pré-flop",flop:"Flop",turn:"Turn",river:"River",done:"Abattage"};
+
 
   /* ---------- Affichage ---------- */
   function lobbyHtml(){
@@ -114,7 +172,8 @@
     return `<span class="bpt-av bpt-av-lg">${esc(init)}</span>`;
   }
   function tableHtml(t){
-    const seats=seatsOf(t),mine=mySeat(t),isHost=t.host===me(),lv=t.levels?.[t.levelIndex||0]||{},nx=t.levels?.[(t.levelIndex||0)+1];
+    const seats=seatsOf(t),mine=mySeat(t),isHost=t.host===me(),L=t.status==="running"?levelAt(t):{index:0,left:0},lv=t.levels?.[L.index]||{},nx=t.levels?.[L.index+1];
+    const h=t.status==="running"?t.hand:null,board=split(h?.board);
     // Autant de places que de joueurs inscrits (ordre d'arrivée avant le lancement, tirage au sort ensuite).
     const N=Math.max(1,seats.length);
     // La table « tourne » : le joueur connecté est toujours en bas, les autres dans l'ordre de jeu autour de lui.
@@ -122,9 +181,13 @@
     const ring=seats.map((s,i)=>{
       const pos=(i-meIdx+N)%N, a=Math.PI/2+pos*2*Math.PI/N, x=50+47*Math.cos(a), y=50+46*Math.sin(a);
       const tag=s.name===t.host?'<i class="is-host">★ hôte</i>':s.bot?'<i>virtuel</i>':"";
+      const hole=split(h?.hole?.[s.i]), isMe=s.name===me(), show=isMe||h?.street==="done";
+      const cards=hole.length?`<div class="bpt-ol-cards${isMe?" is-mine":""}">${hole.map(c=>show?cardHtml(c):backHtml()).join("")}</div>`:"";
+      const badge=!h?"":h.dealer===s.i?'<em class="bpt-ol-dealer">D</em>':"";
+      const blind=!h?"":h.sb===s.i?'<em class="bpt-ol-blind">SB</em>':h.bb===s.i?'<em class="bpt-ol-blind is-bb">BB</em>':"";
       return `<div class="bpt-ol-seat${s.name===me()?" is-me":""}" data-pos="${pos}" data-n="${N}" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%">
         <div class="bpt-ol-avatar">${avatar(s.name)}</div>
-        <div class="bpt-ol-plate"><b>${esc(s.name.split(" ")[0])}</b><span>${fmt(s.stack)}</span></div>${tag}</div>`;
+        <div class="bpt-ol-plate"><b>${esc(s.name.split(" ")[0])}</b><span>${fmt(s.stack)}</span></div>${tag}${cards}${badge}${blind}</div>`;
     }).join("");
     const actions=[];
     if(t.status==="waiting"){
@@ -133,18 +196,20 @@
       if(isHost&&isLocalTest()&&seats.length<MAX_PLAYERS)actions.push(`<button type="button" data-ol-bots>+ 3 virtuels (test)</button>`);
       if(isHost)actions.push(`<button type="button" class="bpt-ol-primary" data-ol-start${seats.length<2?" disabled":""}>Lancer · ${seats.length} joueur${seats.length>1?"s":""}</button>`);
     }
+    if(isHost&&h){const next={preflop:"Flop",flop:"Turn",turn:"River",river:"Abattage",done:"Main suivante"}[h.street]||"Main suivante";
+      actions.push(`<button type="button" class="bpt-ol-primary" data-ol-advance>${next} →</button>`);}
     if(isHost)actions.push(`<button type="button" class="bpt-ol-danger" data-ol-remove>Supprimer</button>`);
     const centerSub=t.status==="waiting"
       ?`En attente des joueurs · ${seats.length} inscrit${seats.length>1?"s":""}`
-      :`Prochain ${fmt(nx?.sb)} / ${fmt(nx?.bb)} · ${Math.round((lv.durationSec||t.levelSeconds||0)/60)} min`;
-    const note=t.status==="running"?`<div class="bpt-ol-note">Partie lancée · la distribution des cartes arrive au lot 2</div>`:"";
+      :`Main n°${h?.no||1} · ${STREET[h?.street]||""}`;
+    const note=t.status==="running"?`<div class="bpt-ol-note">${isHost?"Vous faites avancer la main":"L'hôte fait avancer la main"} · les mises arrivent au lot 3</div>`:"";
     return `<div class="bpt-ol-table">
       <div class="bpt-ol-bar"><button type="button" data-ol-back aria-label="Retour aux tables">‹</button>
         <div class="bpt-ol-bar-title"><b>${esc(t.name)}</b><small>${t.countsForChampionship?"Compte au championnat":"Hors championnat"} · hôte ${esc(t.host.split(" ")[0])}</small></div>
         ${isHost&&t.status==="waiting"?`<label class="bpt-ol-check"><input type="checkbox" data-ol-counts${t.countsForChampionship?" checked":""}> Championnat</label>`:""}
-        <div class="bpt-ol-bar-level"><small>Niveau ${(t.levelIndex||0)+1}</small><b>${fmt(lv.sb)} / ${fmt(lv.bb)}</b></div></div>
+        <div class="bpt-ol-bar-level"><small>Niveau ${L.index+1}${t.status==="running"?` · <span data-ol-clock>${clock(L.left)}</span>`:""}</small><b>${fmt(lv.sb)} / ${fmt(lv.bb)}</b></div></div>
       <div class="bpt-ol-stage"><div class="bpt-ol-rail"><div class="bpt-ol-felt">
-        <div class="bpt-ol-center"><span class="bpt-ol-logo">♠ BPT</span><strong>${fmt(lv.sb)} / ${fmt(lv.bb)}</strong><small>${centerSub}</small></div>
+        <div class="bpt-ol-center"><span class="bpt-ol-logo">♠ BPT</span>${h?`<div class="bpt-ol-board">${[0,1,2,3,4].map(k=>cardHtml(board[k])).join("")}</div>`:`<strong>${fmt(lv.sb)} / ${fmt(lv.bb)}</strong>`}<small>${centerSub}</small></div>
       </div></div>${ring}</div>
       ${note}<div class="bpt-ol-actions">${actions.join("")}</div></div>`;
   }
@@ -160,9 +225,17 @@
     const P=segs.reduce((a,x)=>a+x[1],0);
     const at=d=>{for(let i=0;i<segs.length;i++){const [k,len,o,v]=segs[i];if(d<=len||i===segs.length-1){
       if(k==="l")return [o[0]+v[0]*d,o[1]+v[1]*d];const a=v[0]+(v[1]-v[0])*(len?Math.min(1,d/len):0);return [o[0]+r*Math.cos(a),o[1]+r*Math.sin(a)];}d-=len;}return [W/2,H];};
-    stage.querySelectorAll(".bpt-ol-seat[data-pos]").forEach(el=>{const n=Number(el.dataset.n)||1,p=Number(el.dataset.pos)||0;const [x,y]=at(P*p/n);el.style.left=x.toFixed(1)+"px";el.style.top=y.toFixed(1)+"px";});
+    stage.querySelectorAll(".bpt-ol-seat[data-pos]").forEach(el=>{const n=Number(el.dataset.n)||1,p=Number(el.dataset.pos)||0;const [x,y]=at(P*p/n);el.style.left=x.toFixed(1)+"px";el.style.top=y.toFixed(1)+"px";
+      const dx=W/2-x,dy=H/2-y,len=Math.hypot(dx,dy)||1;el.style.setProperty("--tx",(dx/len).toFixed(3));el.style.setProperty("--ty",(dy/len).toFixed(3));});
   }
   window.addEventListener("resize",()=>requestAnimationFrame(layoutSeats));
+  const clock=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+":"+String(s%60).padStart(2,"0");};
+  let shownLevel=-1;
+  setInterval(()=>{
+    const t=openId&&tables[openId];if(!t||t.status!=="running"||!$("online")?.classList.contains("active"))return;
+    const L=levelAt(t);if(L.index!==shownLevel){shownLevel=L.index;render();return;}
+    const el=document.querySelector("#bptOnlineBody [data-ol-clock]");if(el)el.textContent=clock(L.left);
+  },1000);
   function render(){
     const box=$("bptOnlineBody");if(!box)return;
     if(!me()){box.innerHTML=`<div class="bpt-ol-card"><p>Identifiez-vous d'abord (Paramètres › Mon profil) pour rejoindre une table.</p></div>`;return;}
@@ -198,6 +271,7 @@
       if(g("[data-ol-bots]")){addBots(openId,3);return;}
       if(g("[data-ol-leave]")){leave(openId);return;}
       if(g("[data-ol-start]")){start(openId);return;}
+      if(g("[data-ol-advance]")){advance(openId);return;}
       if(g("[data-ol-remove]")){removeTable(openId);return;}
     });
     view.addEventListener("change",e=>{const c=e.target.closest("[data-ol-counts]");if(c)toggleCounts(openId,c.checked);});
