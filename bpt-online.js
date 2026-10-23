@@ -75,6 +75,7 @@
       countsForChampionship:!!form.counts,adaptive:form.adaptive!==false,maxSeats,startStack,targetHours,levelSeconds:st.levelSeconds,levels:st.levels,levelIndex:0,
       seats:{0:{name,stack:startStack,joinedAt:Date.now()}}};
     await (await db()).ref(`${ROOT}/${id}`).set(table);
+    tables[id]=tables[id]||table;setWaiting(id);
     openId=id;render();
   }
   async function tx(id,mut){
@@ -92,7 +93,7 @@
       if(i>=MAX_PLAYERS)return false;
       t.seats[i]={name,stack:Number(t.startStack)||20000,joinedAt:Date.now()};
     });
-    if(!ok)alert("Table complète (10 joueurs) ou partie déjà commencée.");
+    if(!ok)alert("Table complète (10 joueurs) ou partie déjà commencée.");else setTimeout(()=>setWaiting(id),300);
   }
   // Mode test local uniquement (serveur du banc / raccourci Bureau) : ajoute des joueurs virtuels pour tester seul.
   function isLocalTest(){return !!document.getElementById("bptLocalTestStyle")||/^(localhost|127.0.0.1)$/.test(location.hostname);}
@@ -108,12 +109,17 @@
         t.seats[i]={name,stack:Number(t.startStack)||20000,joinedAt:Date.now(),bot:true};taken.add(name);added++;}
       if(!added)return false;
     });
+    setTimeout(()=>setWaiting(id),300);
   }
   async function leave(id){
     const name=me();
     await tx(id,t=>{if(t.status!=="waiting")return false;Object.keys(t.seats||{}).forEach(k=>{if(t.seats[k]?.name===name)delete t.seats[k];});});
+    setTimeout(()=>setWaiting(id),300);
   }
-  async function setRunning(id,on){try{const r=(await db()).ref(`${RUN_ROOT}/${id}`);on?await r.set({at:Date.now()}):await r.remove();}catch(_e){}}
+  async function setRunning(id,on){try{const r=(await db()).ref(`${RUN_ROOT}/${id}`);on?await r.set({state:"running",at:Date.now()}):await r.remove();}catch(_e){}}
+  // Tables en préparation : nom, hôte et nombre d'inscrits dans l'index léger (encart « Rejoindre » de l'accueil).
+  async function setWaiting(id){try{const t=tables[id];if(!t||t.status!=="waiting")return;
+    await (await db()).ref(`${RUN_ROOT}/${id}`).set({state:"waiting",name:t.name,host:t.host,n:seatsOf(t).length,players:seatsOf(t).map(x=>x.name).join("|"),at:Date.now()});}catch(_e){}}
   async function start(id){
     // Lancement : tirage au sort des places et structure calculée sur le nombre réel de joueurs.
     const started=await tx(id,t=>{
@@ -753,7 +759,33 @@
   let onlineRunning=0;
   function paintNavDot(){const b=$("live3NavBtn");if(b)b.classList.toggle("bpt-game-on",b.classList.contains("live3-active")||onlineRunning>0);}
   (async()=>{try{const r=await db();r.ref(RUN_ROOT).on("value",snap=>{const v=snap.val()||{};
-    onlineRunning=Object.values(v).filter(x=>x&&Date.now()-Number(x.at||0)<12*3600*1000).length;paintNavDot();});}catch(_e){}})();
+    const fresh=Object.entries(v).filter(([,x])=>x&&Date.now()-Number(x.at||0)<12*3600*1000);
+    onlineRunning=fresh.filter(([,x])=>x.state!=="waiting").length;paintNavDot();
+    waitingTables=fresh.filter(([,x])=>x.state==="waiting").map(([id,x])=>({id,...x}));paintHome();});}catch(_e){}})();
+  // Alerte « partie en ligne en préparation » : proposée à ceux qui ne sont pas encore inscrits, une fois par table
+  // (fermée = plus proposée), retirée au lancement. Pas affichée sur l'écran de la table elle-même.
+  let waitingTables=[];
+  const dismissed=()=>{try{return JSON.parse(localStorage.getItem("bpt_ol_dismissed")||"[]");}catch(_e){return [];}};
+  function paintHome(){
+    let box=$("bptOnlineInvite");
+    if(!box){box=document.createElement("div");box.id="bptOnlineInvite";box.className="bpt-ol-invite";box.hidden=true;document.body.append(box);
+      box.addEventListener("click",async e=>{
+        const x=e.target.closest("[data-ol-invite-close]");
+        if(x){try{localStorage.setItem("bpt_ol_dismissed",JSON.stringify([...dismissed(),x.dataset.olInviteClose].slice(-20)));}catch(_e){}box.hidden=true;return;}
+        const b=e.target.closest("[data-ol-invite-join]");if(!b)return;const id=b.dataset.olInviteJoin;box.hidden=true;
+        window.bptOnline.open(id);
+        for(let k=0;k<30&&!tables[id];k++)await new Promise(r=>setTimeout(r,150));
+        if(tables[id]&&!mySeat(tables[id]))join(id);});}
+    const who=me(),skip=dismissed();
+    const w=who&&!$("online")?.classList.contains("active")?waitingTables.find(x=>!skip.includes(x.id)&&!String(x.players||"").split("|").includes(who)):null;
+    if(!w){box.hidden=true;return;}
+    const n=Number(w.n)||0,key=w.id+":"+n;
+    if(box.dataset.key!==key){box.dataset.key=key;
+      box.innerHTML=`<span class="bpt-ol-invite-ico">💻</span><div><b>Partie en ligne</b><small>${esc(w.name||"Table")} · ${n} inscrit${n>1?"s":""}</small></div>
+        <button type="button" data-ol-invite-join="${esc(w.id)}">Rejoindre</button><button type="button" class="is-close" data-ol-invite-close="${esc(w.id)}" aria-label="Ignorer">✕</button>`;}
+    box.hidden=false;
+  }
+  setInterval(paintHome,2000);
   setInterval(paintNavDot,2000);
   // API utilisée par l'étape 1 du Live (bpt-live-mobilefirst.js).
   function openTables(){return Object.values(tables).filter(t=>t&&t.status!=="finished"&&Date.now()-Number(t.createdAt||0)<MAX_AGE_MS).sort((a,b)=>b.createdAt-a.createdAt);}

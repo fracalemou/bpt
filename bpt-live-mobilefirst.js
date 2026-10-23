@@ -57,7 +57,7 @@
   function button(label,primary,handler,disabled=false){const b=document.createElement('button');b.type='button';b.className='bptll-btn'+(primary?' primary':'');b.textContent=label;b.disabled=disabled;b.addEventListener('click',handler);return b}
   function footer(buttons){const f=$('bptllFoot');f.className='bptll-foot'+(buttons.length===1?' one':'');f.replaceChildren(...buttons)}
 
-  // 10.4.73 — Étape 1 : partie « À la table » (Live habituel) ou « En ligne » (cartes virtuelles, bpt-online.js).
+  // 10.4.73 — Étape 1 : partie « En live » (Live habituel) ou « En ligne » (cartes virtuelles, bpt-online.js).
   const MODE_KEY='bpt_live_mode';
   function liveMode(){try{return sessionStorage.getItem(MODE_KEY)==='online'?'online':'table'}catch(_e){return 'table'}}
   function setLiveMode(m){try{sessionStorage.setItem(MODE_KEY,m)}catch(_e){}
@@ -85,7 +85,7 @@
     const l=legacy(),body=$('bptllBody'),mode=liveMode(),online=mode==='online';
     const banner=document.createElement('div');banner.id='bptllOnlineBanner';banner.className='bptll-online-banner';banner.hidden=true;
     const modes=document.createElement('div');modes.className='bptll-mode';modes.setAttribute('role','radiogroup');modes.setAttribute('aria-label','Type de partie');
-    [['table','🃏 À la table','Cartes réelles, chrono et suivi'],['online','💻 En ligne','Chacun joue sur son appareil']].forEach(([id,label,sub])=>{
+    [['table','🃏 En live','Cartes réelles, chrono et suivi'],['online','💻 En ligne','Chacun joue sur son appareil']].forEach(([id,label,sub])=>{
       const b=document.createElement('button');b.type='button';b.className='bptll-mode-btn'+(mode===id?' is-active':'');
       b.setAttribute('role','radio');b.setAttribute('aria-checked',String(mode===id));
       b.innerHTML='<b></b><small></small>';b.querySelector('b').textContent=label;b.querySelector('small').textContent=sub;

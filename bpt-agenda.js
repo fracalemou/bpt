@@ -7,7 +7,7 @@
    - Le jour de la partie, la préparation du Live est préremplie (lieu, date, durée, tapis,
      joueurs « présents » cochés).
    - Clic sur une partie passée : ouverture de son détail dans l'onglet Parties.
-   Données : bpt/agenda_v2/{id} = {id,date,time,location,targetHours,startStack,createdBy,createdAt,responses:{nom:choix}} */
+   Données : bpt/agenda_v2/{id} = {id,date,time,location,mode:"table"|"online",targetHours,startStack,createdBy,createdAt,responses:{nom:choix}} */
 (function(){
   'use strict';
   const PATH='bpt/agenda_v2',CACHE='bpt_agenda_v2_cache',INVITE_DAYS=21;
@@ -144,9 +144,17 @@
     const mine=myChoice(e);
     return `<div class="bpt-ag-choices">${CHOICES.map(([k,t])=>`<button type="button" class="bpt-ag-choice is-${k}${mine===k?' is-active':''}" data-ag-choice="${k}">${t}</button>`).join('')}</div>`;
   }
+  // Choix « En live » / « En ligne » dans le formulaire (le lieu n'est demandé que pour une partie en live).
+  document.addEventListener('click',ev=>{const b=ev.target.closest('[data-ag-mode]');if(!b)return;
+    const form=b.closest('.bpt-ag-form');if(!form)return;const m=b.dataset.agMode;
+    form.querySelector('#bptAgMode').value=m;form.querySelectorAll('[data-ag-mode]').forEach(x=>x.classList.toggle('is-on',x===b));
+    const loc=form.querySelector('.bpt-ag-loc');if(loc)loc.hidden=m==='online';});
+  // Lieu affiché : « 💻 En ligne » pour une partie en ligne, sinon « 📍 lieu ».
+  function whereHtml(e){return e?.mode==='online'?'💻 En ligne':`📍 ${esc(e?.location||'Lieu à définir')}`;}
   function formHtml(iso,e){
     const n=me();const locs=activePlayers();
-    const loc=e?.location||(n?`Chez ${n}`:'');
+    const mode=e?.mode==='online'?'online':'table';
+    const loc=mode==='online'?'':(e?.location||(n?`Chez ${n}`:''));
     // 10.4.47 — Proposition réduite à l'essentiel : date et lieu (heure, durée et tapis se règlent au lancement du Live).
     return `<h3>${e?'Modifier la partie':'Proposer une partie'} · <span data-ag-pick-label>${esc(longDate(iso))}</span></h3>
       <div class="bpt-ag-form">
@@ -154,7 +162,10 @@
           <input id="bptAgDate" type="hidden" value="${esc(iso)}">
           <div class="bpt-ag-pick" data-ag-pick data-edit-id="${esc(e?.id||'')}" data-month="${esc(iso.slice(0,7))}"></div>
         </div>
-        <label class="is-wide">Lieu<input id="bptAgLoc" list="bptAgLocList" value="${esc(loc)}" placeholder="Chez …"></label>
+        <div class="is-wide bpt-ag-mode" role="radiogroup" aria-label="Type de partie"><input id="bptAgMode" type="hidden" value="${mode}">
+          <button type="button" data-ag-mode="table" class="${mode==='table'?'is-on':''}">🃏 En live</button>
+          <button type="button" data-ag-mode="online" class="${mode==='online'?'is-on':''}">💻 En ligne</button></div>
+        <label class="is-wide bpt-ag-loc"${mode==='online'?' hidden':''}>Lieu<input id="bptAgLoc" list="bptAgLocList" value="${esc(loc)}" placeholder="Chez …"></label>
         <datalist id="bptAgLocList">${locs.map(p=>`<option value="Chez ${esc(p)}">`).join('')}</datalist>
       </div>
       <div class="bpt-ag-actions"><button type="button" class="btn bpt-ag-primary" id="bptAgSave">${e?'Enregistrer':'📅 Proposer cette partie'}</button>
@@ -199,7 +210,7 @@
   function inviteText(e){
     // 10.4.47 — Uniquement des symboles « simples » (♠ ♥ ♦ ♣ ★ ➜) : WhatsApp Web abîme les emojis récents
     // transmis par un lien wa.me (ils s'affichent « � »).
-    const where=e.location||'Lieu à définir';
+    const where=e.mode==='online'?'En ligne, dans l’appli BPT':(e.location||'Lieu à définir');
     const host=String(where).toLocaleLowerCase('fr').includes(String(e.createdBy||'').toLocaleLowerCase('fr'))?'':`Proposée par ${e.createdBy}`;
     const lines=[
       '♠ ♥  *SOIRÉE POKER BPT*  ♦ ♣',
@@ -240,7 +251,7 @@
     }
     if(e&&!editing){
       box.innerHTML=`<button type="button" class="bpt-ag-back" data-ag-back>‹ Prochaines parties</button><h3>📅 ${esc(longDate(iso))}</h3>
-        <p class="bpt-ag-meta">📍 ${esc(e.location||'Lieu à définir')}</p>
+        <p class="bpt-ag-meta">${whereHtml(e)}</p>
         <p class="muted">Proposée par ${esc(e.createdBy||'—')}</p>
         ${iso>=t?`<div class="bpt-ag-myline">Votre réponse :</div>${choiceButtons(e)}`:''}
         ${responsesHtml(e)}
@@ -268,7 +279,8 @@
     const n=me();
     // Heure, durée et tapis ne sont plus demandés : on conserve ceux d'une partie existante, sinon rien.
     const ev={...(e||{}),id:e?.id||`agenda_${Date.now()}`,date,
-      location:$('bptAgLoc').value.trim()||`Chez ${n}`,createdBy:e?.createdBy||n,
+      mode:($('bptAgMode')?.value==='online')?'online':'table',
+      location:($('bptAgMode')?.value==='online')?'En ligne':($('bptAgLoc').value.trim()||`Chez ${n}`),createdBy:e?.createdBy||n,
       createdAt:e?.createdAt||Date.now(),responses:e?.responses||{[n]:'present'}};
     if(!e)justCreatedId=ev.id;
     selectedIso=date;const saving=saveEvent(ev);done&&done();await saving; // ajout local immédiat, puis fermeture du formulaire (l’encadré WhatsApp trouve la partie)
@@ -279,7 +291,7 @@
     const host=$('bptAgendaUpcoming');if(!host)return;
     const t=todayIso(),up=events.filter(e=>e.date>=t).slice(0,6);
     host.innerHTML=up.length?up.map(e=>{const g=grouped(e),mine=myChoice(e);return `<button type="button" class="bpt-ag-item" data-ag-date="${esc(e.date)}">
-      <strong>${esc(shortDay(e.date))}</strong><small>📍 ${esc(e.location||'Lieu à définir')}</small>
+      <strong>${esc(shortDay(e.date))}</strong><small>${whereHtml(e)}</small>
       <span class="bpt-ag-counts"><b class="is-present">${g.present.length} ✓</b> <b class="is-maybe">${g.maybe.length} ?</b> <b class="is-absent">${g.absent.length} ✕</b>${mine?'':' <em>· à vous de répondre</em>'}</span></button>`;}).join('')
       :'<p class="muted">Aucune partie programmée. Touchez une date du calendrier pour en proposer une.</p>';
     host.querySelectorAll('[data-ag-date]').forEach(b=>b.onclick=()=>{selectedIso=b.dataset.agDate;const d=new Date(`${selectedIso}T12:00:00`);cursor=new Date(d.getFullYear(),d.getMonth(),1);editing=false;render();});
@@ -293,7 +305,7 @@
   function renderHome(force){
     const box=$('bptAgendaHome');if(!box)return;
     const e=nextEvent(),n=me();
-    const sig=[homeMode,homeShowAll,n,justCreatedId,e?JSON.stringify([e.id,e.date,e.time,e.location,e.responses]):'none'].join('|');
+    const sig=[homeMode,homeShowAll,n,justCreatedId,e?JSON.stringify([e.id,e.date,e.time,e.location,e.mode,e.responses]):'none'].join('|');
     if(!force&&box.dataset.sig===sig)return;
     // 10.4.48 — Saisie en cours dans le formulaire : seuls les rafraîchissements automatiques sont bloqués.
     // Avant, un appui (qui donne le focus au bouton touché) empêchait aussi l'ouverture du formulaire « Modifier ».
@@ -318,7 +330,7 @@
       const created=justCreatedId?events.find(x=>x.id===justCreatedId)||null:null;
       box.innerHTML=`<div class="bpt-ag-home-head"><div><div class="bpt-ag-kicker">${mine?'Prochaine partie':'Partie proposée · à vous de répondre'}</div>
           <h3>📅 ${esc(whenLabel(e.date))}</h3>
-          <p class="bpt-ag-meta">📍 ${esc(e.location||'Lieu à définir')} · proposée par ${esc(e.createdBy||'—')}</p></div>${calLink}</div>
+          <p class="bpt-ag-meta">${whereHtml(e)} · proposée par ${esc(e.createdBy||'—')}</p></div>${calLink}</div>
         ${n?choiceButtons(e):'<p class="muted">Connectez-vous pour répondre.</p>'}
         <p class="bpt-ag-present"><b>${g.present.length} présent${g.present.length>1?'s':''}</b>${g.present.length?' : '+g.present.map(esc).join(', '):''}${g.maybe.length?` · <span class="is-maybe">${g.maybe.length} peut-être</span>`:''}${g.absent.length?` · <span class="is-absent">${g.absent.length} absent${g.absent.length>1?'s':''}</span>`:''}</p>
         ${homeShowAll?responsesHtml(e):''}
@@ -385,7 +397,9 @@
     try{if(sessionStorage.getItem(key))return;}catch(_e){}
     const boxes=[...document.querySelectorAll('#live3PlayerPicker input[type="checkbox"]')];
     if(!boxes.length)return; // liste pas encore prête
-    setValue('live3Location',e.location);setValue('live3Date',e.date);setValue('live3Stack',e.startStack);setValue('live3TargetHours',e.targetHours);
+    // Partie prévue en ligne : l'étape 1 du Live s'ouvre sur « En ligne ».
+    try{sessionStorage.setItem('bpt_live_mode',e.mode==='online'?'online':'table');}catch(_e){}
+    setValue('live3Location',e.mode==='online'?'':e.location);setValue('live3Date',e.date);setValue('live3Stack',e.startStack);setValue('live3TargetHours',e.targetHours);
     const present=new Set(grouped(e).present.map(norm));
     boxes.forEach(cb=>{const on=present.has(norm(cb.value));if(cb.checked!==on){cb.checked=on;cb.dispatchEvent(new Event('change',{bubbles:true}));}});
     try{sessionStorage.setItem(key,'1');}catch(_e){}
