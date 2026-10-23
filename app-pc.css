@@ -6798,3 +6798,44 @@ html.bpt-online-open #bptAppAction{display:none !important}
 .bpt-ol-cards{transform:translate(calc(-50% + var(--tx,0) * 74px),calc(-50% + var(--ty,0) * 66px)) rotate(calc(var(--tx,0) * 8deg))}
 .bpt-ol-cards:not(.is-mine) .bpt-card{width:clamp(30px,5.4vmin,40px);height:clamp(42px,7.6vmin,56px)}
 .bpt-ol-cards:not(.is-mine) .bpt-card b,.bpt-ol-cards:not(.is-mine) .bpt-card i{font-size:clamp(14px,2.6vmin,18px)}
+
+/* 10.4.76 — Partie en ligne · lot 3 : mises, pot, tour de parole et barre d'actions */
+.bpt-ol-bet{position:absolute;left:50%;top:50%;z-index:3;font-style:normal;white-space:nowrap;padding:2px 8px 2px 20px;border-radius:999px;font-size:12px;font-weight:900;color:var(--bpt-text,#eef2fb);background:rgba(0,0,0,.45);transform:translate(calc(-50% + var(--tx,0) * 118px),calc(-50% + var(--ty,0) * 104px))}
+.bpt-ol-bet::before{content:"";position:absolute;left:4px;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:var(--bpt-gold,#f2c853);box-shadow:inset 0 0 0 2px rgba(0,0,0,.25),0 0 0 1px rgba(255,255,255,.4)}
+.bpt-ol-bet.is-won{color:#54d68b}
+.bpt-ol-pot{font-size:clamp(13px,2.4vmin,17px);font-weight:900;color:var(--bpt-text,#eef2fb);margin-top:2px}
+.bpt-ol-pot small{font-size:11px;color:var(--bpt-muted,#9aa6c8);font-weight:700}
+.bpt-ol-seat.is-turn .bpt-av{box-shadow:0 0 0 3px var(--bpt-60,#0f1426),0 0 0 6px var(--bpt-gold,#f2c853),0 0 22px color-mix(in srgb,var(--bpt-gold,#f2c853) 60%,transparent) !important}
+.bpt-ol-seat.is-turn .bpt-ol-plate{border-color:var(--bpt-gold,#f2c853)}
+.bpt-ol-timer{display:block;width:100%;height:3px;margin-top:2px;border-radius:2px;background:rgba(255,255,255,.12);overflow:hidden}
+.bpt-ol-timer span{display:block;height:100%;background:var(--bpt-gold,#f2c853);transition:width 1s linear}
+.bpt-ol-seat.is-folded .bpt-ol-avatar,.bpt-ol-seat.is-folded .bpt-ol-plate{opacity:.45}
+.bpt-ol-seat.is-out{filter:grayscale(1);opacity:.4}
+.bpt-ol-seat i.is-allin{color:#ff8f8c;letter-spacing:.06em}
+.bpt-ol-seat i.is-out{color:var(--bpt-muted,#9aa6c8)}
+.bpt-ol-mybar{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:8px;align-items:stretch}
+.bpt-ol-mybar>button{min-height:48px;border-radius:12px;border:0;font-weight:900;font-size:15px;cursor:pointer;color:#fff}
+.bpt-ol-mybar .is-fold{background:#8f2f35}
+.bpt-ol-mybar .is-call{background:var(--bpt-card2,#1b2442);border:1px solid var(--bpt-line,#2a3560)}
+.bpt-ol-mybar .is-raise{background:var(--bpt-gold,#f2c853);color:#171007}
+.bpt-ol-raise{grid-column:1/-1;display:grid;gap:6px}
+.bpt-ol-raise:empty{display:none}
+.bpt-ol-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.bpt-ol-presets button{min-height:34px;border-radius:9px;border:1px solid var(--bpt-line,#2a3560);background:var(--bpt-card,#161d36);color:var(--bpt-text,#eef2fb);font-weight:800;cursor:pointer}
+.bpt-ol-raise input[type=range]{width:100%;accent-color:var(--bpt-gold,#f2c853)}
+@media (orientation:landscape) and (max-height:500px){.bpt-ol-mybar{grid-template-columns:1fr 1fr 1.2fr 2fr}.bpt-ol-raise{grid-column:auto}.bpt-ol-mybar>button{min-height:40px;font-size:13px}}
+.bpt-ol-seat.is-side .bpt-ol-cards{transform:translate(-50%,calc(-50% - 66px)) rotate(0deg)}
+.bpt-ol-seat.is-side .bpt-ol-bet{transform:translate(-50%,calc(-50% + 74px))}
+.bpt-ol-seat.is-me .bpt-ol-bet{transform:translate(calc(-50% + 96px),calc(-50% - 56px))}
+/* 10.4.76 — Téléphone en paysage : barre d'actions en colonne à droite, la table garde toute la hauteur */
+@media (orientation:landscape) and (max-height:500px){
+  .bpt-ol-table:has(.bpt-ol-mybar){grid-template-columns:minmax(0,1fr) 210px;grid-template-rows:auto minmax(0,1fr) auto auto;column-gap:10px}
+  .bpt-ol-table:has(.bpt-ol-mybar)>.bpt-ol-bar{grid-column:1/-1}
+  .bpt-ol-table:has(.bpt-ol-mybar)>.bpt-ol-stage{grid-column:1;grid-row:2/5}
+  .bpt-ol-table:has(.bpt-ol-mybar)>.bpt-ol-mybar{grid-column:2;grid-row:2;grid-template-columns:1fr 1fr;align-content:center;gap:6px}
+  .bpt-ol-table:has(.bpt-ol-mybar)>.bpt-ol-note{grid-column:2;grid-row:3;font-size:11px}
+  .bpt-ol-table:has(.bpt-ol-mybar)>.bpt-ol-actions{grid-column:2;grid-row:4}
+  .bpt-ol-table:has(.bpt-ol-mybar) .bpt-ol-mybar .is-raise,.bpt-ol-table:has(.bpt-ol-mybar) .bpt-ol-raise{grid-column:1/-1}
+  .bpt-ol-table:has(.bpt-ol-mybar) .bpt-ol-presets{grid-template-columns:1fr 1fr}
+  .bpt-ol-table:has(.bpt-ol-mybar) .bpt-ol-mybar>button{min-height:38px}
+}

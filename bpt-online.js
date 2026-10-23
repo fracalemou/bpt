@@ -1,4 +1,4 @@
-/* BPT 10.4.74 — Jouer en ligne · lot 1 : salon et places · lot 2 : donne (bouton, blindes, cartes, flop/turn/river).
+/* BPT 10.4.76 — Jouer en ligne · lot 1 : salon et places · lot 2 : donne · lot 3 : enchères, pots, abattage.
    Mode confiance (pas de serveur) : tout passe par Firebase, les écritures concurrentes par transaction.
    Données : bpt/online/tables/{id} = {id,name,host,createdAt,status,countsForChampionship,maxSeats,
    startStack,targetHours,levelSeconds,levels[],levelIndex,seats{index:{name,stack,joinedAt}}}. */
@@ -100,11 +100,15 @@
   }
   async function toggleCounts(id,val){await tx(id,t=>{if(t.host!==me()||t.status!=="waiting")return false;t.countsForChampionship=!!val;});}
 
-  /* ---------- Donne (lot 2) ----------
-     t.hand = {no, level, dealer, sb, bb, deck:"Ah,Kd,…" (cartes restantes), hole:{indexPlace:"Ah,Kd"}, board:"Qs,Jc,…", street, at}
-     street : preflop → flop → turn → river → done (abattage : cartes retournées) → main suivante. Mode confiance :
-     le paquet est dans la base, l'écran ne montre à chacun que ses propres cartes. Les mises arrivent au lot 3. */
+  /* ---------- Donne et enchères (lots 2 et 3) ----------
+     t.hand = {no, level, sb:i, bb:i, dealer:i, deck, hole:{i:"Ah,Kd"}, board, street, at,
+               bets:{p<i>:montant de ce tour}, contrib:{p<i>:total de la main}, folded:{p<i>:true}, allin:{p<i>:true},
+               acted:{p<i>:true}, currentBet, minRaise, toAct:i, actionAt, last:{i,txt}, result:[{amount,winners,hand}], showdown}
+     Clés « p<i> » (et non numériques) : Firebase transformerait sinon ces objets en tableaux.
+     street : preflop → flop → turn → river → done. Mode confiance : le paquet est dans la base. */
   const RANKS="23456789TJQKA",SUITS="shdc";
+  const K=i=>"p"+i;
+  const TURN_MS=45000, NEXT_HAND_MS=6000;
   function freshDeck(){
     const d=[];for(const s of SUITS)for(const r of RANKS)d.push(r+s);
     const rnd=n=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n;}catch(_e){return Math.floor(Math.random()*n);}};
@@ -121,8 +125,25 @@
     for(let i=0;i<lv.length;i++){const d=Math.max(60,Number(lv[i].durationSec)||Number(t.levelSeconds)||600);if(el<d)return {index:i,left:Math.ceil(d-el)};el-=d;}
     return {index:lv.length-1,left:0};
   }
+  const stackOf=(t,i)=>Number(t.seats?.[i]?.stack)||0;
+  const betOf=(h,i)=>Number(h.bets?.[K(i)])||0;
+  const handPlayers=t=>Object.keys(t.hand?.hole||{}).map(Number).filter(i=>!Number.isNaN(i)&&split(t.hand.hole[i]).length).sort((a,b)=>a-b);
+  const folded=(h,i)=>!!h.folded?.[K(i)];
+  const canAct=(t,i)=>!folded(t.hand,i)&&!t.hand.allin?.[K(i)]&&stackOf(t,i)>0;
+  const firstName=(t,i)=>String(t.seats?.[i]?.name||"?").split(" ")[0];
+  function commit(t,i,amt){
+    const h=t.hand;amt=Math.max(0,Math.min(Math.round(amt),stackOf(t,i)));
+    t.seats[i].stack=stackOf(t,i)-amt;
+    h.bets=h.bets||{};h.contrib=h.contrib||{};h.allin=h.allin||{};
+    h.bets[K(i)]=betOf(h,i)+amt;h.contrib[K(i)]=(Number(h.contrib[K(i)])||0)+amt;
+    if(stackOf(t,i)===0)h.allin[K(i)]=true;
+    return amt;
+  }
+  function nextToAct(t,from){const list=handPlayers(t);let p=from;for(let k=0;k<list.length;k++){p=nextOf(list,p);if(canAct(t,p))return p;}return null;}
+
   function dealHand(t){
-    const list=inPlay(t);if(list.length<2)return false;
+    const list=inPlay(t);
+    if(list.length<2){t.status="finished";t.finishedAt=Date.now();t.winner=list.length?t.seats[list[0]].name:null;return;}
     const prev=t.hand?t.hand.dealer:null;
     // Première main : bouton tiré au sort ; ensuite il passe au joueur suivant encore en jeu.
     const dealer=prev===null||prev===undefined?list[Math.floor(Math.random()*list.length)]:nextOf(list,prev);
@@ -131,21 +152,154 @@
     const deck=freshDeck(), hole={};
     const order=[];let p=sb;for(let k=0;k<list.length;k++){order.push(p);p=nextOf(list,p);}
     for(let round=0;round<2;round++)order.forEach(i=>{hole[i]=(hole[i]?hole[i]+",":"")+deck.shift();});
-    t.hand={no:(Number(t.hand?.no)||0)+1,level:levelAt(t).index,dealer,sb,bb,deck:deck.join(","),hole,board:"",street:"preflop",at:Date.now()};
-    t.levelIndex=t.hand.level;
+    const level=levelAt(t).index, lv=t.levels?.[level]||{sb:25,bb:50};
+    t.hand={no:(Number(t.hand?.no)||0)+1,level,dealer,sb,bb,deck:deck.join(","),hole,board:"",street:"preflop",at:Date.now(),
+      bets:{},contrib:{},folded:{},allin:{},acted:{},currentBet:Number(lv.bb)||50,minRaise:Number(lv.bb)||50,result:null,showdown:false};
+    t.levelIndex=level;
+    commit(t,sb,Number(lv.sb)||25);commit(t,bb,Number(lv.bb)||50);
+    t.hand.last={i:bb,txt:`Blindes ${fmt(lv.sb)} / ${fmt(lv.bb)}`};
+    t.hand.toAct=nextToAct(t,bb);t.hand.actionAt=Date.now();
+    settle(t);
   }
-  async function advance(id){
-    await tx(id,t=>{
-      if(t.status!=="running"||t.host!==me()||!t.hand)return false;
-      const h=t.hand,deck=split(h.deck),board=split(h.board);
-      const draw=n=>{deck.shift();for(let k=0;k<n;k++)board.push(deck.shift());}; // une carte brûlée avant chaque tirage
-      if(h.street==="preflop"){draw(3);h.street="flop";}
-      else if(h.street==="flop"){draw(1);h.street="turn";}
-      else if(h.street==="turn"){draw(1);h.street="river";}
-      else if(h.street==="river"){h.street="done";}
-      else {return dealHand(t);}
-      h.deck=deck.join(",");h.board=board.join(",");h.at=Date.now();
+  // Fin du tour d'enchères : tous ceux qui peuvent encore parler ont parlé depuis la dernière relance et sont alignés.
+  function streetDone(t){
+    const h=t.hand,actors=handPlayers(t).filter(i=>canAct(t,i));
+    if(!actors.length)return true;
+    // Un seul joueur peut encore miser (les autres sont à tapis) : rien à jouer s'il a déjà égalé la mise.
+    if(actors.length===1&&betOf(h,actors[0])>=h.currentBet)return true;
+    return actors.every(i=>h.acted?.[K(i)]&&betOf(h,i)===h.currentBet);
+  }
+  function settle(t){
+    const h=t.hand;
+    const alive=handPlayers(t).filter(i=>!folded(h,i));
+    if(alive.length===1){finishHand(t,false);return;}
+    if(!streetDone(t)){if(h.toAct===null||h.toAct===undefined||!canAct(t,h.toAct))h.toAct=nextToAct(t,h.toAct??h.dealer);return;}
+    // Tour suivant (une carte brûlée avant chaque tirage) ; si plus personne ne peut miser, le tableau se déroule jusqu'à la river.
+    const deck=split(h.deck),board=split(h.board);
+    const draw=n=>{deck.shift();for(let k=0;k<n;k++)board.push(deck.shift());};
+    do{
+      if(h.street==="river"){h.deck=deck.join(",");h.board=board.join(",");finishHand(t,true);return;}
+      if(h.street==="preflop"){draw(3);h.street="flop";}else if(h.street==="flop"){draw(1);h.street="turn";}else{draw(1);h.street="river";}
+      h.bets={};h.currentBet=0;h.minRaise=Number(t.levels?.[h.level]?.bb)||50;h.acted={};
+    }while(handPlayers(t).filter(i=>canAct(t,i)).length<2);
+    h.deck=deck.join(",");h.board=board.join(",");
+    h.toAct=nextToAct(t,h.dealer);h.actionAt=Date.now();
+  }
+
+  /* Évaluation : meilleure main de 5 cartes parmi 7 → [catégorie, départages…] comparable. */
+  const HAND_NAMES=["Hauteur","Paire","Double paire","Brelan","Quinte","Couleur","Full","Carré","Quinte flush"];
+  const RV=c=>RANKS.indexOf(c[0])+2;
+  function eval5(cs){
+    const r=cs.map(RV).sort((a,b)=>b-a),fl=cs.every(c=>c[1]===cs[0][1]);
+    const u=[...new Set(r)];let st=0;
+    if(u.length===5){if(u[0]-u[4]===4)st=u[0];else if(u.join()==="14,5,4,3,2")st=5;}
+    const cnt={};r.forEach(x=>cnt[x]=(cnt[x]||0)+1);
+    const g=Object.entries(cnt).map(([v,n])=>[n,+v]).sort((a,b)=>b[0]-a[0]||b[1]-a[1]);
+    if(st&&fl)return [8,st];
+    if(g[0][0]===4)return [7,g[0][1],g[1][1]];
+    if(g[0][0]===3&&g[1][0]===2)return [6,g[0][1],g[1][1]];
+    if(fl)return [5,...r];
+    if(st)return [4,st];
+    if(g[0][0]===3)return [3,g[0][1],...g.slice(1).map(x=>x[1])];
+    if(g[0][0]===2&&g[1][0]===2)return [2,g[0][1],g[1][1],g[2][1]];
+    if(g[0][0]===2)return [1,g[0][1],...g.slice(1).map(x=>x[1])];
+    return [0,...r];
+  }
+  const cmp=(a,b)=>{for(let k=0;k<Math.max(a.length,b.length);k++){const d=(a[k]||0)-(b[k]||0);if(d)return d;}return 0;};
+  function best7(cards){
+    let best=null;const n=cards.length;
+    for(let a=0;a<n;a++)for(let b=a+1;b<n;b++){const five=cards.filter((_,k)=>k!==a&&k!==b);const v=eval5(five);if(!best||cmp(v,best)>0)best=v;}
+    return best;
+  }
+  // Pots : un pot principal puis des side pots selon les mises des joueurs à tapis.
+  function buildPots(t){
+    const h=t.hand,players=handPlayers(t),c=i=>Number(h.contrib?.[K(i)])||0;
+    const caps=[...new Set(players.filter(i=>!folded(h,i)).map(c))].sort((a,b)=>a-b);
+    const pots=[];let prev=0;
+    for(const cap of caps){if(cap<=prev)continue;let amt=0;players.forEach(i=>{amt+=Math.max(0,Math.min(c(i),cap)-prev);});
+      pots.push({amount:amt,elig:players.filter(i=>!folded(h,i)&&c(i)>=cap)});prev=cap;}
+    const total=players.reduce((a,i)=>a+c(i),0),used=pots.reduce((a,p)=>a+p.amount,0);
+    if(pots.length&&total>used)pots[pots.length-1].amount+=total-used;
+    return pots.filter(p=>p.amount>0);
+  }
+  function finishHand(t,showdown){
+    const h=t.hand,board=split(h.board),pots=buildPots(t),list=handPlayers(t);
+    const score={};if(showdown)list.filter(i=>!folded(h,i)).forEach(i=>{score[i]=best7([...split(h.hole[i]),...board]);});
+    h.result=pots.map(p=>{
+      let w=p.elig;
+      if(showdown&&w.length>1){const top=w.reduce((b,i)=>b===null||cmp(score[i],score[b])>0?i:b,null);/* b===null : la place n°0 est un gagnant possible */w=w.filter(i=>cmp(score[i],score[top])===0);}
+      const share=Math.floor(p.amount/w.length);let rest=p.amount-share*w.length;
+      // Jeton indivisible : au premier gagnant à gauche du bouton.
+      const ordered=[];let q=h.dealer;for(let k=0;k<list.length;k++){q=nextOf(list,q);if(w.includes(q))ordered.push(q);}
+      ordered.forEach(i=>{t.seats[i].stack=stackOf(t,i)+share+(rest>0?1:0);if(rest>0)rest--;});
+      return {amount:p.amount,winners:ordered,hand:showdown&&score[ordered[0]]?HAND_NAMES[score[ordered[0]][0]]:null};
     });
+    h.showdown=!!showdown;h.street="done";h.toAct=null;h.at=Date.now();h.bets={};
+    // Éliminations (détaillées au lot 4) : place = nombre de joueurs encore en jeu + 1.
+    t.out=t.out||{};const still=inPlay(t).length;
+    list.filter(i=>stackOf(t,i)===0&&!t.out[K(i)]).forEach(i=>{t.out[K(i)]={name:t.seats[i].name,place:still+1,hand:h.no,by:h.result[h.result.length-1]?.winners?.map(w=>t.seats[w].name)[0]||null};});
+    const w0=h.result[0]?.winners||[];
+    h.last={i:w0[0],txt:w0.length?`${w0.map(i=>firstName(t,i)).join(" et ")} remporte${w0.length>1?"nt":""} ${fmt(h.result.reduce((a,r)=>a+r.amount,0))}${h.result[0]?.hand?` · ${h.result[0].hand}`:""}`:""};
+  }
+
+  /* Actions d'un joueur (ou d'un joueur virtuel piloté par l'appareil de l'hôte en test local). */
+  async function act(id,action,amount,asBot=false){return tx(id,t=>applyAction(t,action,amount,asBot));}
+  // Règle d'une action, sans accès à la base (testable seule). Renvoie false si l'action est refusée.
+  function applyAction(t,action,amount,asBot=false){
+    {
+      const h=t.hand;if(t.status!=="running"||!h||h.street==="done")return false;
+      const i=h.toAct,seat=t.seats?.[i];if(seat===undefined||seat===null||i===null)return false;
+      if(asBot?!(seat.bot&&t.host===me()):seat.name!==me()){
+        if(!(action==="timeout"&&t.host===me()&&Date.now()-Number(h.actionAt||0)>=TURN_MS))return false;
+      }
+      const toCall=Math.max(0,h.currentBet-betOf(h,i)),stack=stackOf(t,i),name=firstName(t,i);
+      h.acted=h.acted||{};h.folded=h.folded||{};
+      if(action==="timeout")action=toCall?"fold":"check";
+      if(action==="fold"){h.folded[K(i)]=true;h.last={i,txt:`${name} se couche`};}
+      else if(action==="check"){if(toCall)return false;h.last={i,txt:`${name} checke`};}
+      else if(action==="call"){const paid=commit(t,i,toCall);h.last={i,txt:paid<toCall?`${name} suit à tapis (${fmt(paid)})`:`${name} suit ${fmt(paid)}`};}
+      else if(action==="raise"||action==="allin"){
+        const maxTotal=betOf(h,i)+stack;
+        let target=action==="allin"?maxTotal:Math.min(Math.round(Number(amount)||0),maxTotal);
+        if(target<=h.currentBet){if(action!=="allin")return false;commit(t,i,toCall);h.last={i,txt:`${name} suit à tapis`};}
+        else{
+          const size=target-h.currentBet;
+          if(size<h.minRaise&&target<maxTotal)return false;
+          const wasBet=h.currentBet;commit(t,i,target-betOf(h,i));
+          if(size>=h.minRaise){h.minRaise=size;h.acted={};}
+          h.currentBet=target;
+          h.last={i,txt:target===maxTotal?`${name} fait tapis (${fmt(target)})`:wasBet?`${name} relance à ${fmt(target)}`:`${name} mise ${fmt(target)}`};
+        }
+      } else return false;
+      h.acted[K(i)]=true;
+      h.toAct=nextToAct(t,i);h.actionAt=Date.now();
+      settle(t);
+    }
+  }
+  async function nextHand(id){await tx(id,t=>{if(t.status!=="running"||t.hand?.street!=="done")return false;dealHand(t);});}
+
+  /* Automatismes, exécutés par l'appareil de l'hôte uniquement : joueurs virtuels (test local), délai de décision
+     dépassé, main suivante. Un seul déclenchement par situation. */
+  let autoKey="";
+  function autopilot(){
+    const t=openId&&tables[openId];if(!t||t.status!=="running"||t.host!==me())return;
+    const h=t.hand;if(!h)return;
+    const now=Date.now();
+    if(h.street==="done"){
+      const key=`next:${h.no}`;if(autoKey!==key&&now-Number(h.at||0)>=NEXT_HAND_MS){autoKey=key;nextHand(t.id);}return;
+    }
+    const i=h.toAct;if(i===null||i===undefined)return;
+    const seat=t.seats[i];const key=`${h.no}:${h.street}:${i}:${h.actionAt}`;if(autoKey===key)return;
+    if(seat?.bot&&isLocalTest()&&now-Number(h.actionAt||0)>=900){autoKey=key;const d=botDecision(t,i);act(t.id,d.action,d.amount,true);return;}
+    if(now-Number(h.actionAt||0)>=TURN_MS){autoKey=key;act(t.id,"timeout");}
+  }
+  // Joueur virtuel prudent : parole ou mise légère, suit les petites mises, se couche face aux grosses.
+  function botDecision(t,i){
+    const h=t.hand,toCall=Math.max(0,h.currentBet-betOf(h,i)),stack=stackOf(t,i),bb=Number(t.levels?.[h.level]?.bb)||50;
+    const pot=Object.values(h.contrib||{}).reduce((a,x)=>a+(Number(x)||0),0),r=Math.random();
+    if(!toCall)return r<0.18?{action:"raise",amount:Math.max(bb,Math.round(pot/2))}:{action:"check"};
+    if(toCall<=Math.max(bb*3,stack*0.08))return r<0.1?{action:"raise",amount:h.currentBet+Math.max(h.minRaise,bb)}:{action:"call"};
+    return r<0.25?{action:"call"}:{action:"fold"};
   }
   const SUIT={s:"♠",h:"♥",d:"♦",c:"♣"};
   function cardHtml(c,cls=""){
@@ -154,7 +308,7 @@
     return `<span class="bpt-card${"hd".includes(c[1])?" is-red":""}${cls}"><b>${r}</b><i>${SUIT[c[1]]||""}</i></span>`;
   }
   const backHtml=(cls="")=>`<span class="bpt-card is-back${cls}"></span>`;
-  const STREET={preflop:"Pré-flop",flop:"Flop",turn:"Turn",river:"River",done:"Abattage"};
+  const STREET={preflop:"Pré-flop",flop:"Flop",turn:"Turn",river:"River",done:"Fin de la main"};
 
 
   /* ---------- Affichage ---------- */
@@ -171,24 +325,38 @@
     const init=String(name||"?").trim().split(/\s+/).slice(0,2).map(w=>w[0]||"").join("").toUpperCase();
     return `<span class="bpt-av bpt-av-lg">${esc(init)}</span>`;
   }
+  let raiseTo=0, raiseKey="";
   function tableHtml(t){
-    const seats=seatsOf(t),mine=mySeat(t),isHost=t.host===me(),L=t.status==="running"?levelAt(t):{index:0,left:0},lv=t.levels?.[L.index]||{},nx=t.levels?.[L.index+1];
-    const h=t.status==="running"?t.hand:null,board=split(h?.board);
-    // Autant de places que de joueurs inscrits (ordre d'arrivée avant le lancement, tirage au sort ensuite).
+    const seats=seatsOf(t),mine=mySeat(t),isHost=t.host===me(),running=t.status==="running";
+    const L=running?levelAt(t):{index:0,left:0},lv=t.levels?.[L.index]||{};
+    const h=(running||t.status==="finished")?t.hand:null,board=split(h?.board),done=h?.street==="done";
     const N=Math.max(1,seats.length);
     // La table « tourne » : le joueur connecté est toujours en bas, les autres dans l'ordre de jeu autour de lui.
     const meIdx=Math.max(0,seats.findIndex(x=>x.name===me()));
-    const ring=seats.map((s,i)=>{
-      const pos=(i-meIdx+N)%N, a=Math.PI/2+pos*2*Math.PI/N, x=50+47*Math.cos(a), y=50+46*Math.sin(a);
-      const tag=s.name===t.host?'<i class="is-host">★ hôte</i>':s.bot?'<i>virtuel</i>':"";
-      const hole=split(h?.hole?.[s.i]), isMe=s.name===me(), show=isMe||h?.street==="done";
-      const cards=hole.length?`<div class="bpt-ol-cards${isMe?" is-mine":""}">${hole.map(c=>show?cardHtml(c):backHtml()).join("")}</div>`:"";
-      const badge=!h?"":h.dealer===s.i?'<em class="bpt-ol-dealer">D</em>':"";
-      const blind=!h?"":h.sb===s.i?'<em class="bpt-ol-blind">SB</em>':h.bb===s.i?'<em class="bpt-ol-blind is-bb">BB</em>':"";
-      return `<div class="bpt-ol-seat${s.name===me()?" is-me":""}" data-pos="${pos}" data-n="${N}" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%">
+    const ring=seats.map((s,idx)=>{
+      const pos=(idx-meIdx+N)%N, a=Math.PI/2+pos*2*Math.PI/N, x=50+47*Math.cos(a), y=50+46*Math.sin(a);
+      const isMe=s.name===me(), out=!!t.out?.[K(s.i)]&&Number(s.stack)<=0;
+      const hole=split(h?.hole?.[s.i]), fold=h&&folded(h,s.i), allin=h&&h.allin?.[K(s.i)]&&!done;
+      const show=isMe||(done&&h.showdown&&!fold);
+      const cards=hole.length&&!fold?`<div class="bpt-ol-cards${isMe?" is-mine":""}">${hole.map(c=>show?cardHtml(c):backHtml()).join("")}</div>`:"";
+      const bet=h&&!done?betOf(h,s.i):0;
+      const won=done?(h.result||[]).filter(r=>r.winners.includes(s.i)).reduce((a,r)=>a+Math.floor(r.amount/r.winners.length),0):0;
+      const chips=bet?`<em class="bpt-ol-bet">${fmt(bet)}</em>`:won?`<em class="bpt-ol-bet is-won">+${fmt(won)}</em>`:"";
+      const turn=h&&!done&&h.toAct===s.i;
+      const tag=out?'<i class="is-out">éliminé</i>':allin?'<i class="is-allin">TAPIS</i>':fold?'<i>couché</i>':s.name===t.host?'<i class="is-host">★ hôte</i>':s.bot?'<i>virtuel</i>':"";
+      const badge=!h||done?"":h.dealer===s.i?'<em class="bpt-ol-dealer">D</em>':"";
+      const timer=turn?`<span class="bpt-ol-timer"><span data-ol-turn style="width:${Math.max(0,100-100*(Date.now()-Number(h.actionAt||0))/TURN_MS).toFixed(0)}%"></span></span>`:"";
+      return `<div class="bpt-ol-seat${isMe?" is-me":""}${turn?" is-turn":""}${fold?" is-folded":""}${out?" is-out":""}" data-pos="${pos}" data-n="${N}" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%">
         <div class="bpt-ol-avatar">${avatar(s.name)}</div>
-        <div class="bpt-ol-plate"><b>${esc(s.name.split(" ")[0])}</b><span>${fmt(s.stack)}</span></div>${tag}${cards}${badge}${blind}</div>`;
+        <div class="bpt-ol-plate"><b>${esc(s.name.split(" ")[0])}</b><span>${out?"—":fmt(s.stack)}</span>${timer}</div>${tag}${cards}${badge}${chips}</div>`;
     }).join("");
+    // Pot : tout ce qui a été misé pendant la main, moins les mises encore devant les joueurs.
+    const potTotal=h?Object.values(h.contrib||{}).reduce((a,x)=>a+(Number(x)||0),0):0;
+    const onTable=h&&!done?Object.values(h.bets||{}).reduce((a,x)=>a+(Number(x)||0),0):0;
+    // Pots annexes : seulement quand un joueur est à tapis (sinon les mises en cours ne créent pas de pot séparé).
+    const pots=h&&!done&&Object.keys(h.allin||{}).length?buildPots(t):[];
+    const potLine=h?(done?(h.result||[]).map((r,k)=>`${k?"Pot annexe":"Pot"} ${fmt(r.amount)} → ${r.winners.map(i=>esc(firstName(t,i))).join(" / ")}`).join(" · ")
+      :`Pot ${fmt(potTotal)}${pots.length>1?` <small>(${pots.length-1} pot${pots.length>2?"s":""} annexe${pots.length>2?"s":""})</small>`:""}`):"";
     const actions=[];
     if(t.status==="waiting"){
       if(mine)actions.push(`<button type="button" data-ol-leave>Me retirer</button>`);
@@ -196,22 +364,40 @@
       if(isHost&&isLocalTest()&&seats.length<MAX_PLAYERS)actions.push(`<button type="button" data-ol-bots>+ 3 virtuels (test)</button>`);
       if(isHost)actions.push(`<button type="button" class="bpt-ol-primary" data-ol-start${seats.length<2?" disabled":""}>Lancer · ${seats.length} joueur${seats.length>1?"s":""}</button>`);
     }
-    if(isHost&&h){const next={preflop:"Flop",flop:"Turn",turn:"River",river:"Abattage",done:"Main suivante"}[h.street]||"Main suivante";
-      actions.push(`<button type="button" class="bpt-ol-primary" data-ol-advance>${next} →</button>`);}
+    if(isHost&&done&&running)actions.push(`<button type="button" class="bpt-ol-primary" data-ol-next>Main suivante →</button>`);
     if(isHost)actions.push(`<button type="button" class="bpt-ol-danger" data-ol-remove>Supprimer</button>`);
-    const centerSub=t.status==="waiting"
-      ?`En attente des joueurs · ${seats.length} inscrit${seats.length>1?"s":""}`
+    // Barre d'actions du joueur dont c'est le tour.
+    let myBar="";
+    if(h&&!done&&mine&&h.toAct===mine.i){
+      const i=mine.i,toCall=Math.max(0,h.currentBet-betOf(h,i)),stack=stackOf(t,i),maxTotal=betOf(h,i)+stack;
+      const minTo=Math.min(maxTotal,h.currentBet+Math.max(h.minRaise,Number(lv.bb)||50)),pot=potTotal+toCall;
+      const key=`${h.no}:${h.street}:${h.actionAt}`;if(raiseKey!==key){raiseKey=key;raiseTo=minTo;}
+      raiseTo=Math.max(minTo,Math.min(maxTotal,raiseTo));
+      const canRaise=maxTotal>h.currentBet;
+      const presets=[["Min",minTo],["½ pot",h.currentBet+Math.round(pot/2)],["Pot",h.currentBet+pot],["Tapis",maxTotal]]
+        .map(([l,v])=>`<button type="button" data-ol-preset="${Math.max(minTo,Math.min(maxTotal,v))}">${l}</button>`).join("");
+      myBar=`<div class="bpt-ol-mybar">
+        <button type="button" class="is-fold" data-ol-act="fold">Se coucher</button>
+        ${toCall?`<button type="button" class="is-call" data-ol-act="call">${toCall>=stack?"Suivre à tapis":"Suivre "+fmt(toCall)}</button>`:`<button type="button" class="is-call" data-ol-act="check">Check</button>`}
+        ${canRaise?`<button type="button" class="is-raise" data-ol-act="raise">${raiseTo>=maxTotal?"Tapis "+fmt(maxTotal):(h.currentBet?"Relancer à ":"Miser ")+fmt(raiseTo)}</button>
+        <div class="bpt-ol-raise">${maxTotal>minTo?`<div class="bpt-ol-presets">${presets}</div><input type="range" data-ol-range min="${minTo}" max="${maxTotal}" step="${Math.max(1,Math.round((Number(lv.sb)||25)))}" value="${raiseTo}">`:""}</div>`:""}
+      </div>`;
+    }
+    const center=h?`<div class="bpt-ol-board">${[0,1,2,3,4].map(k=>cardHtml(board[k])).join("")}</div><div class="bpt-ol-pot">${potLine}</div>`
+      :`<strong>${fmt(lv.sb)} / ${fmt(lv.bb)}</strong>`;
+    const centerSub=t.status==="finished"?`🏆 ${esc(t.winner||"")} remporte le tournoi`
+      :t.status==="waiting"?`En attente des joueurs · ${seats.length} inscrit${seats.length>1?"s":""}`
       :`Main n°${h?.no||1} · ${STREET[h?.street]||""}`;
-    const note=t.status==="running"?`<div class="bpt-ol-note">${isHost?"Vous faites avancer la main":"L'hôte fait avancer la main"} · les mises arrivent au lot 3</div>`:"";
+    const last=h?.last?.txt?`<div class="bpt-ol-note">${esc(h.last.txt)}${done&&running?` · main suivante dans quelques secondes`:""}</div>`:"";
     return `<div class="bpt-ol-table">
       <div class="bpt-ol-bar"><button type="button" data-ol-back aria-label="Retour aux tables">‹</button>
         <div class="bpt-ol-bar-title"><b>${esc(t.name)}</b><small>${t.countsForChampionship?"Compte au championnat":"Hors championnat"} · hôte ${esc(t.host.split(" ")[0])}</small></div>
         ${isHost&&t.status==="waiting"?`<label class="bpt-ol-check"><input type="checkbox" data-ol-counts${t.countsForChampionship?" checked":""}> Championnat</label>`:""}
-        <div class="bpt-ol-bar-level"><small>Niveau ${L.index+1}${t.status==="running"?` · <span data-ol-clock>${clock(L.left)}</span>`:""}</small><b>${fmt(lv.sb)} / ${fmt(lv.bb)}</b></div></div>
+        <div class="bpt-ol-bar-level"><small>Niveau ${L.index+1}${running?` · <span data-ol-clock>${clock(L.left)}</span>`:""}</small><b>${fmt(lv.sb)} / ${fmt(lv.bb)}</b></div></div>
       <div class="bpt-ol-stage"><div class="bpt-ol-rail"><div class="bpt-ol-felt">
-        <div class="bpt-ol-center"><span class="bpt-ol-logo">♠ BPT</span>${h?`<div class="bpt-ol-board">${[0,1,2,3,4].map(k=>cardHtml(board[k])).join("")}</div>`:`<strong>${fmt(lv.sb)} / ${fmt(lv.bb)}</strong>`}<small>${centerSub}</small></div>
+        <div class="bpt-ol-center"><span class="bpt-ol-logo">♠ BPT</span>${center}<small>${centerSub}</small></div>
       </div></div>${ring}</div>
-      ${note}<div class="bpt-ol-actions">${actions.join("")}</div></div>`;
+      ${last}${myBar}<div class="bpt-ol-actions">${actions.join("")}</div></div>`;
   }
   // Table « stade » (rectangle aux bouts arrondis) : chaque joueur est posé sur le bord, à intervalles réguliers
   // le long du contour, en partant du bas (soi) puis vers la gauche. Recalculé à chaque affichage et redimensionnement.
@@ -226,7 +412,9 @@
     const at=d=>{for(let i=0;i<segs.length;i++){const [k,len,o,v]=segs[i];if(d<=len||i===segs.length-1){
       if(k==="l")return [o[0]+v[0]*d,o[1]+v[1]*d];const a=v[0]+(v[1]-v[0])*(len?Math.min(1,d/len):0);return [o[0]+r*Math.cos(a),o[1]+r*Math.sin(a)];}d-=len;}return [W/2,H];};
     stage.querySelectorAll(".bpt-ol-seat[data-pos]").forEach(el=>{const n=Number(el.dataset.n)||1,p=Number(el.dataset.pos)||0;const [x,y]=at(P*p/n);el.style.left=x.toFixed(1)+"px";el.style.top=y.toFixed(1)+"px";
-      const dx=W/2-x,dy=H/2-y,len=Math.hypot(dx,dy)||1;el.style.setProperty("--tx",(dx/len).toFixed(3));el.style.setProperty("--ty",(dy/len).toFixed(3));});
+      const dx=W/2-x,dy=H/2-y,len=Math.hypot(dx,dy)||1;
+      // Table verticale (téléphone en portrait) : cartes et mises des joueurs des côtés au-dessus / au-dessous d'eux, pas vers le tableau.
+      el.classList.toggle("is-side",H>W&&Math.abs(dx)>Math.abs(dy)*1.2);el.style.setProperty("--tx",(dx/len).toFixed(3));el.style.setProperty("--ty",(dy/len).toFixed(3));});
   }
   window.addEventListener("resize",()=>requestAnimationFrame(layoutSeats));
   const clock=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+":"+String(s%60).padStart(2,"0");};
@@ -235,7 +423,9 @@
     const t=openId&&tables[openId];if(!t||t.status!=="running"||!$("online")?.classList.contains("active"))return;
     const L=levelAt(t);if(L.index!==shownLevel){shownLevel=L.index;render();return;}
     const el=document.querySelector("#bptOnlineBody [data-ol-clock]");if(el)el.textContent=clock(L.left);
+    const bar=document.querySelector("#bptOnlineBody [data-ol-turn]");if(bar&&t.hand)bar.style.width=Math.max(0,100-100*(Date.now()-Number(t.hand.actionAt||0))/TURN_MS).toFixed(0)+"%";
   },1000);
+  setInterval(()=>{try{autopilot();}catch(e){console.warn("BPT en ligne :",e);}},400);
   function render(){
     const box=$("bptOnlineBody");if(!box)return;
     if(!me()){box.innerHTML=`<div class="bpt-ol-card"><p>Identifiez-vous d'abord (Paramètres › Mon profil) pour rejoindre une table.</p></div>`;return;}
@@ -271,10 +461,15 @@
       if(g("[data-ol-bots]")){addBots(openId,3);return;}
       if(g("[data-ol-leave]")){leave(openId);return;}
       if(g("[data-ol-start]")){start(openId);return;}
-      if(g("[data-ol-advance]")){advance(openId);return;}
+      if((el=g("[data-ol-act]"))){const a=el.dataset.olAct;act(openId,a,a==="raise"?raiseTo:0);return;}
+      if((el=g("[data-ol-preset]"))){raiseTo=Number(el.dataset.olPreset)||raiseTo;render();return;}
+      if(g("[data-ol-next]")){nextHand(openId);return;}
       if(g("[data-ol-remove]")){removeTable(openId);return;}
     });
     view.addEventListener("change",e=>{const c=e.target.closest("[data-ol-counts]");if(c)toggleCounts(openId,c.checked);});
+    // Curseur de relance : met à jour le montant affiché sans redessiner toute la table.
+    view.addEventListener("input",e=>{const r=e.target.closest("[data-ol-range]");if(!r)return;raiseTo=Number(r.value)||raiseTo;
+      const b=view.querySelector("[data-ol-act=raise]");if(b){const max=Number(r.max);b.textContent=raiseTo>=max?"Tapis "+fmt(max):(b.textContent.startsWith("Miser")?"Miser ":"Relancer à ")+fmt(raiseTo);}});
     watch();
     render();
   }
