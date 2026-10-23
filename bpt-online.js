@@ -636,18 +636,17 @@
         </div>`;
       }else{
         // Raccourcis, arrondis à la petite blinde :
-        // aucune mise → 2 blindes · 3 blindes · ½ pot · Pot · Tapis ; mise existante → x2 · x3 · Pot · Tapis.
-        const sbStep=Math.max(1,Number(lv.sb)||25),bbv=Number(lv.bb)||50;
+        // Mêmes raccourcis pour miser et relancer : x2 · x3 (mise précédente, ou grosse blinde si personne n'a misé),
+        // ⅓ pot · ½ pot (mise à suivre + part du pot après avoir suivi), Tapis.
+        const sbStep=Math.max(1,Number(lv.sb)||25),bbv=Number(lv.bb)||50,ref=h.currentBet||bbv;
         const clamp=v=>Math.max(minTo,Math.min(maxTotal,Math.round(v/sbStep)*sbStep));
-        const presets=(h.currentBet
-          ?[["x2",clamp(h.currentBet*2)],["x3",clamp(h.currentBet*3)],["Pot",clamp(h.currentBet+pot)],["Tapis",maxTotal]]
-          :[["2 blindes",clamp(bbv*2)],["3 blindes",clamp(bbv*3)],["½ pot",clamp(pot/2)],["Pot",clamp(pot)],["Tapis",maxTotal]])
+        const presets=[["x2",clamp(ref*2)],["x3",clamp(ref*3)],["⅓ pot",clamp(h.currentBet+pot/3)],["½ pot",clamp(h.currentBet+pot/2)],["Tapis",maxTotal]]
           .map(([l,v])=>`<button type="button" class="${v===raiseTo?"is-on":""}" data-ol-preset="${v}">${l}</button>`).join("");
         // Curseur exponentiel : précis sur les petites mises, rapide vers le tapis.
         const span=Math.max(1,maxTotal/minTo);
         const toPos=a=>maxTotal<=minTo?1000:Math.round(1000*Math.log(Math.max(minTo,a)/minTo)/Math.log(span));
         myBar=`<div class="bpt-ol-mybar is-step2">
-          <div class="bpt-ol-presets" style="--n:${h.currentBet?4:5}"><button type="button" class="is-cancel" data-ol-raise-close aria-label="Ne pas ${verb.toLowerCase()}">✕</button>${presets}</div>
+          <div class="bpt-ol-presets" style="--n:5"><button type="button" class="is-cancel" data-ol-raise-close aria-label="Ne pas ${verb.toLowerCase()}">✕</button>${presets}</div>
           <input type="range" data-ol-range min="0" max="1000" step="1" value="${toPos(raiseTo)}" data-min="${minTo}" data-max="${maxTotal}" data-step="${sbStep}">
           <button type="button" class="is-raise" data-ol-act="raise">${raiseTo>=maxTotal?"Tapis "+fmt(maxTotal):verb+(h.currentBet?" à ":" ")+fmt(raiseTo)}</button>
         </div>`;
