@@ -7024,3 +7024,5 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
 /* 10.4.84 — Partie en ligne : mode spectateur */
 .bpt-ol-note.is-spectator{border-color:var(--bpt-line,#2a3560);color:var(--bpt-muted,#9aa6c8)}
 .bpt-ol-table.is-spectator .bpt-ol-seat[data-name]{cursor:default}
+/* 10.4.86 — Symboles des cartes des joueurs : couleur de la carte (noir ♠ ♣, rouge ♥ ♦), pas le gris des mentions sous la plaque */
+.bpt-ol-seat .bpt-card i{color:inherit !important;margin-top:1px;font-weight:400}
