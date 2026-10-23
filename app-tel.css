@@ -9497,3 +9497,26 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
 .bpt-ol-table.is-spectator .bpt-ol-seat[data-name]{cursor:default}
 /* 10.4.86 — Symboles des cartes des joueurs : couleur de la carte (noir ♠ ♣, rouge ♥ ♦), pas le gris des mentions sous la plaque */
 .bpt-ol-seat .bpt-card i{color:inherit !important;margin-top:1px;font-weight:400}
+/* 10.4.87 — Relance / mise : seulement un curseur exponentiel vertical sur la droite de l'écran */
+.bpt-ol-table{position:relative}
+.bpt-ol-mybar.is-step2{display:block !important;min-height:0;height:0;padding:0;margin:0}
+.bpt-ol-side{position:absolute;right:6px;top:50%;z-index:20;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;width:78px;padding:8px 6px;border-radius:18px;background:rgba(6,9,20,.85);border:1px solid var(--bpt-line,#2a3560);box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.bpt-ol-side small{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--bpt-muted,#9aa6c8)}
+.bpt-ol-side input.is-vertical{writing-mode:vertical-lr;direction:rtl;width:36px;height:min(46vh,300px);margin:0;accent-color:var(--bpt-gold,#f2c853);cursor:pointer}
+.bpt-ol-side .is-cancel{width:40px;height:40px;border-radius:50%;border:1px solid var(--bpt-line,#2a3560);background:var(--bpt-card,#161d36);color:var(--bpt-muted,#9aa6c8);font-size:16px;cursor:pointer}
+.bpt-ol-side .is-raise{width:100%;min-height:56px;padding:4px;border:0;border-radius:12px;background:var(--bpt-gold,#f2c853);color:#171007;font-weight:900;font-size:12.5px;line-height:1.15;cursor:pointer}
+@media (orientation:landscape) and (max-height:500px){
+  .bpt-ol-table:has(.bpt-ol-mybar.is-step2){grid-template-columns:minmax(0,1fr) !important}
+  .bpt-ol-table:has(.bpt-ol-mybar.is-step2)>.bpt-ol-stage{grid-row:2/5 !important}
+  .bpt-ol-side{gap:4px;padding:5px;width:72px}.bpt-ol-side input.is-vertical{height:min(52vh,220px)}.bpt-ol-side .is-cancel{width:32px;height:32px}.bpt-ol-side .is-raise{min-height:42px;font-size:11.5px}
+}
+@media (orientation:portrait){.bpt-ol-table:has(.bpt-ol-mybar.is-step2) .bpt-ol-stage{margin-right:96px !important;margin-left:24px !important}.bpt-ol-side{width:70px;right:4px}}
+.bpt-ol-side .is-raise{font-size:11.5px !important;padding:4px 2px !important}
+/* 10.4.87 — Chrono de la partie en ligne : menu de l'hôte et pause */
+.bpt-ol-bar-level.is-clickable{cursor:pointer;padding:3px 8px;border-radius:10px;border:1px solid transparent}
+.bpt-ol-bar-level.is-clickable:hover,.bpt-ol-bar-level.is-clickable:focus-visible{border-color:var(--bpt-line,#2a3560)}
+.bpt-ol-bar-level.is-paused b,.bpt-ol-bar-level.is-paused [data-ol-clock]{opacity:.55}
+.bpt-ol-pause{display:inline-block;font-style:normal;font-size:10px;font-weight:950;letter-spacing:.1em;padding:1px 7px;border-radius:999px;border:1px solid var(--bpt-gold,#f2c853);color:var(--bpt-gold,#f2c853);margin-bottom:2px}
+.bpt-ol-clockmenu{position:absolute;top:58px;right:10px;z-index:30;display:grid;grid-template-columns:1fr 1fr;gap:6px;width:min(260px,calc(100% - 20px));padding:8px;border-radius:14px;background:var(--bpt-bg2,#121a33);border:1px solid var(--bpt-gold,#f2c853);box-shadow:0 14px 34px rgba(0,0,0,.55)}
+.bpt-ol-clockmenu button{min-height:40px;border-radius:10px;border:1px solid var(--bpt-line,#2a3560);background:var(--bpt-card,#161d36);color:var(--bpt-text,#eef2fb);font-weight:850;font-size:13px;cursor:pointer}
+.bpt-ol-clockmenu .is-wide{grid-column:1/-1;background:var(--bpt-gold,#f2c853);color:#171007;border:0}

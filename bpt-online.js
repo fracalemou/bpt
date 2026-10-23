@@ -170,6 +170,7 @@
   function nextOf(list,i){return list.find(x=>x>i)??list[0];}
   // Niveau courant d'après le temps écoulé depuis le lancement (pas de pause en ligne).
   function levelAt(t,now=Date.now()){
+    if(t.pausedAt)now=Number(t.pausedAt); // en pause : le chrono est figé
     const lv=Array.isArray(t.levels)?t.levels:[];if(!t.startedAt||!lv.length)return {index:0,left:0};
     let el=Math.max(0,(now-Number(t.startedAt))/1000);
     for(let i=0;i<lv.length;i++){const d=Math.max(60,Number(lv[i].durationSec)||Number(t.levelSeconds)||600);if(el<d)return {index:i,left:Math.ceil(d-el)};el-=d;}
@@ -313,7 +314,7 @@
   // Règle d'une action, sans accès à la base (testable seule). Renvoie false si l'action est refusée.
   function applyAction(t,action,amount,asBot=false){
     {
-      const h=t.hand;if(t.status!=="running"||!h||h.street==="done")return false;
+      const h=t.hand;if(t.status!=="running"||!h||h.street==="done"||t.pausedAt)return false;
       const i=h.toAct,seat=t.seats?.[i];if(seat===undefined||seat===null||i===null)return false;
       if(asBot?!(seat.bot&&pilotName(t)===me()):seat.name!==me()){
         if(!(action==="timeout"&&pilotName(t)===me()&&Date.now()-Number(h.actionAt||0)>=TURN_MS))return false;
@@ -342,6 +343,22 @@
       settle(t);
     }
   }
+  /* Chrono (hôte) : ±1 min, pause/reprise, niveau précédent/suivant. On décale l'heure de départ, les durées restent intactes. */
+  async function clockCmd(id,cmd){
+    await tx(id,t=>{
+      if(t.status!=="running"||t.host!==me())return false;
+      const now=Date.now(),L=levelAt(t),lv=t.levels||[],dur=k=>Math.max(60,Number(lv[k]?.durationSec)||Number(t.levelSeconds)||600);
+      const shift=ms=>{t.startedAt=Number(t.startedAt)+ms;};
+      if(cmd==="pause"){if(t.pausedAt)return false;t.pausedAt=now;}
+      else if(cmd==="resume"){if(!t.pausedAt)return false;shift(now-Number(t.pausedAt));t.pausedAt=null;if(t.hand)t.hand.actionAt=now;}
+      else if(cmd==="plus")shift(60000);
+      else if(cmd==="minus")shift(-Math.min(60000,L.left*1000));
+      else if(cmd==="next"){if(L.index>=lv.length-1)return false;shift(-L.left*1000);}
+      else if(cmd==="prev"){if(L.index<1)return false;shift((dur(L.index)-L.left+dur(L.index-1))*1000);}
+      else return false;
+      t.levelIndex=levelAt(t).index;
+    });
+  }
   async function nextHand(id){await tx(id,t=>{if(t.status!=="running"||t.hand?.street!=="done")return false;dealHand(t);});}
 
   /* Automatismes, exécutés par l'appareil de l'hôte uniquement : joueurs virtuels (test local), délai de décision
@@ -352,7 +369,7 @@
     if(pilotName(t)!==me())return;
     if(t.status==="finished"&&!t.runningCleared){t.runningCleared=true;setRunning(t.id,false);}
     if(t.status==="finished"){if(t.countsForChampionship&&!t.publishedToHistory&&!t.publishing&&!t.publishError)publishResult(t.id);return;}
-    if(t.status!=="running")return;
+    if(t.status!=="running"||t.pausedAt)return;
     const h=t.hand;if(!h)return;
     const now=Date.now();
     if(h.street==="done"){
@@ -573,7 +590,7 @@
     const init=String(name||"?").trim().split(/\s+/).slice(0,2).map(w=>w[0]||"").join("").toUpperCase();
     return `<span class="bpt-av bpt-av-lg">${esc(init)}</span>`;
   }
-  let raiseTo=0, raiseKey="", raiseMode=false;
+  let raiseTo=0, raiseKey="", raiseMode=false, clockMenuOpen=false;
   function tableHtml(t){
     const seats=seatsOf(t),mine=mySeat(t),isHost=t.host===me(),running=t.status==="running";
     // Spectateur : partie lancée (ou terminée) sans y être assis → aucune action, seulement quitter.
@@ -640,16 +657,18 @@
         // ⅓ pot · ½ pot (mise à suivre + part du pot après avoir suivi), Tapis.
         const sbStep=Math.max(1,Number(lv.sb)||25),bbv=Number(lv.bb)||50,ref=h.currentBet||bbv;
         const clamp=v=>Math.max(minTo,Math.min(maxTotal,Math.round(v/sbStep)*sbStep));
-        const presets=[["x2",clamp(ref*2)],["x3",clamp(ref*3)],["⅓ pot",clamp(h.currentBet+pot/3)],["½ pot",clamp(h.currentBet+pot/2)],["Tapis",maxTotal]]
-          .map(([l,v])=>`<button type="button" class="${v===raiseTo?"is-on":""}" data-ol-preset="${v}">${l}</button>`).join("");
         // Curseur exponentiel : précis sur les petites mises, rapide vers le tapis.
         const span=Math.max(1,maxTotal/minTo);
         const toPos=a=>maxTotal<=minTo?1000:Math.round(1000*Math.log(Math.max(minTo,a)/minTo)/Math.log(span));
-        myBar=`<div class="bpt-ol-mybar is-step2">
-          <div class="bpt-ol-presets" style="--n:5"><button type="button" class="is-cancel" data-ol-raise-close aria-label="Ne pas ${verb.toLowerCase()}">✕</button>${presets}</div>
-          <input type="range" data-ol-range min="0" max="1000" step="1" value="${toPos(raiseTo)}" data-min="${minTo}" data-max="${maxTotal}" data-step="${sbStep}">
+        // Uniquement un curseur exponentiel vertical sur la droite de l'écran (minimum en bas, tapis en haut),
+        // avec ✕ pour annuler et le bouton de validation : la table garde toute sa taille.
+        myBar=`<div class="bpt-ol-mybar is-step2"><div class="bpt-ol-side">
+          <button type="button" class="is-cancel" data-ol-raise-close aria-label="Ne pas ${verb.toLowerCase()}">✕</button>
+          <small>Tapis</small>
+          <input type="range" class="is-vertical" data-ol-range min="0" max="1000" step="1" value="${toPos(raiseTo)}" data-min="${minTo}" data-max="${maxTotal}" data-step="${sbStep}" aria-label="Montant">
+          <small>Min</small>
           <button type="button" class="is-raise" data-ol-act="raise">${raiseTo>=maxTotal?"Tapis "+fmt(maxTotal):verb+(h.currentBet?" à ":" ")+fmt(raiseTo)}</button>
-        </div>`;
+        </div></div>`;
       }
     }
     // Abattage : la combinaison gagnante (cartes du joueur + tableau) sort au centre, carte par carte, avec le nom de la main.
@@ -676,11 +695,11 @@
         <div class="bpt-ol-bar-title"><b>${esc(t.name)}</b><small>${t.countsForChampionship?"Compte au championnat":"Hors championnat"} · ${t.adaptive?"Adaptatif":"Classique"}</small></div>
         ${isHost&&t.status==="waiting"?`<label class="bpt-ol-check"><input type="checkbox" data-ol-counts${t.countsForChampionship?" checked":""}> Championnat</label>`:""}
         ${isHost?`<button type="button" class="bpt-ol-bar-del" data-ol-remove title="Supprimer la table" aria-label="Supprimer la table">🗑</button>`:""}
-        <div class="bpt-ol-bar-level"><small>Niveau ${L.index+1}${running?` · <span data-ol-clock>${clock(L.left)}</span>`:""} · ${Math.round((Number(lv.durationSec)||Number(t.levelSeconds)||0)/60)} min</small><b>${fmt(lv.sb)} / ${fmt(lv.bb)}</b></div></div>
+        <div class="bpt-ol-bar-level${running&&isHost?" is-clickable":""}${t.pausedAt?" is-paused":""}"${running&&isHost?" data-ol-clock-menu role=\"button\" tabindex=\"0\" title=\"Réglages du chrono\"":""}>${t.pausedAt?"<em class=\"bpt-ol-pause\">EN PAUSE</em>":""}<small>Niveau ${L.index+1}${running?` · <span data-ol-clock>${clock(L.left)}</span>`:""} · ${Math.round((Number(lv.durationSec)||Number(t.levelSeconds)||0)/60)} min</small><b>${fmt(lv.sb)} / ${fmt(lv.bb)}</b></div></div>
       <div class="bpt-ol-stage"><div class="bpt-ol-rail"><div class="bpt-ol-felt">
         <div class="bpt-ol-center"><span class="bpt-ol-logo">♠ BPT</span>${center}<small>${centerSub}</small></div>
       </div></div>${ring}${t.status==="finished"?resultsHtml(t):showcase}${t.status!=="waiting"&&!spectator?`<button type="button" class="bpt-ol-fx-btn" data-ol-fx aria-label="Chat et objets">💬</button>`:""}</div>
-      ${specNote}${last}${myBar}<div class="bpt-ol-actions">${actions.join("")}</div></div>`;
+      ${clockMenuOpen&&running&&isHost?`<div class="bpt-ol-clockmenu" role="menu"><button type="button" data-ol-clk="minus">−1 min</button><button type="button" data-ol-clk="plus">+1 min</button><button type="button" class="is-wide" data-ol-clk="${t.pausedAt?"resume":"pause"}">${t.pausedAt?"▶ Reprendre":"⏸ Pause"}</button><button type="button" data-ol-clk="prev">◀ Niveau préc.</button><button type="button" data-ol-clk="next">Niveau suiv. ▶</button></div>`:""}${specNote}${last}${myBar}<div class="bpt-ol-actions">${actions.join("")}</div></div>`;
   }
   // Table « stade » (rectangle aux bouts arrondis) : chaque joueur est posé sur le bord, à intervalles réguliers
   // le long du contour, en partant du bas (soi) puis vers la gauche. Recalculé à chaque affichage et redimensionnement.
@@ -757,6 +776,9 @@
       if(g("[data-ol-start]")){start(openId);return;}
       if((el=g("[data-ol-act]"))){const a=el.dataset.olAct;act(openId,a,a==="raise"?raiseTo:0);return;}
       if((el=g("[data-ol-preset]"))){raiseTo=Number(el.dataset.olPreset)||raiseTo;render();return;}
+      if(g("[data-ol-clock-menu]")){clockMenuOpen=!clockMenuOpen;render();return;}
+      if((el=g("[data-ol-clk]"))){clockCmd(openId,el.dataset.olClk);return;}
+      if(clockMenuOpen&&!g(".bpt-ol-clockmenu")){clockMenuOpen=false;render();}
       if(g("[data-ol-raise-open]")){raiseMode=true;render();return;}
       if(g("[data-ol-raise-close]")){raiseMode=false;render();return;}
       if(g("[data-ol-next]")){nextHand(openId);return;}
