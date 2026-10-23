@@ -235,6 +235,8 @@
   }
 
   /* Évaluation : meilleure main de 5 cartes parmi 7 → [catégorie, départages…] comparable. */
+  // Nom de la main avec son article, pour la phrase « X gagne avec … ».
+  const HAND_PHRASE={"Hauteur":"la carte haute","Paire":"une paire","Double paire":"une double paire","Brelan":"un brelan","Quinte":"une quinte","Couleur":"une couleur","Full":"un full","Carré":"un carré","Quinte flush":"une quinte flush"};
   const HAND_NAMES=["Hauteur","Paire","Double paire","Brelan","Quinte","Couleur","Full","Carré","Quinte flush"];
   const RV=c=>RANKS.indexOf(c[0])+2;
   function eval5(cs){
@@ -623,16 +625,19 @@
           ${canRaise?(maxTotal<=minTo?`<button type="button" class="is-raise" data-ol-act="allin">Tapis ${fmt(maxTotal)}</button>`:`<button type="button" class="is-raise" data-ol-raise-open>${verb}</button>`):""}
         </div>`;
       }else{
-        // Raccourcis : double / triple de la mise à suivre (ou de la grosse blinde), pot, tapis — arrondis à la petite blinde.
-        const sbStep=Math.max(1,Number(lv.sb)||25),base=Math.max(h.currentBet,Number(lv.bb)||50);
+        // Raccourcis, arrondis à la petite blinde :
+        // aucune mise → 2 blindes · 3 blindes · ½ pot · Pot · Tapis ; mise existante → x2 · x3 · Pot · Tapis.
+        const sbStep=Math.max(1,Number(lv.sb)||25),bbv=Number(lv.bb)||50;
         const clamp=v=>Math.max(minTo,Math.min(maxTotal,Math.round(v/sbStep)*sbStep));
-        const presets=[["Double",clamp(base*2)],["Triple",clamp(base*3)],["Pot",clamp(h.currentBet+pot)],["Tapis",maxTotal]]
+        const presets=(h.currentBet
+          ?[["x2",clamp(h.currentBet*2)],["x3",clamp(h.currentBet*3)],["Pot",clamp(h.currentBet+pot)],["Tapis",maxTotal]]
+          :[["2 blindes",clamp(bbv*2)],["3 blindes",clamp(bbv*3)],["½ pot",clamp(pot/2)],["Pot",clamp(pot)],["Tapis",maxTotal]])
           .map(([l,v])=>`<button type="button" class="${v===raiseTo?"is-on":""}" data-ol-preset="${v}">${l}</button>`).join("");
         // Curseur exponentiel : précis sur les petites mises, rapide vers le tapis.
         const span=Math.max(1,maxTotal/minTo);
         const toPos=a=>maxTotal<=minTo?1000:Math.round(1000*Math.log(Math.max(minTo,a)/minTo)/Math.log(span));
         myBar=`<div class="bpt-ol-mybar is-step2">
-          <div class="bpt-ol-presets"><button type="button" class="is-cancel" data-ol-raise-close aria-label="Ne pas ${verb.toLowerCase()}">✕</button>${presets}</div>
+          <div class="bpt-ol-presets" style="--n:${h.currentBet?4:5}"><button type="button" class="is-cancel" data-ol-raise-close aria-label="Ne pas ${verb.toLowerCase()}">✕</button>${presets}</div>
           <input type="range" data-ol-range min="0" max="1000" step="1" value="${toPos(raiseTo)}" data-min="${minTo}" data-max="${maxTotal}" data-step="${sbStep}">
           <button type="button" class="is-raise" data-ol-act="raise">${raiseTo>=maxTotal?"Tapis "+fmt(maxTotal):verb+(h.currentBet?" à ":" ")+fmt(raiseTo)}</button>
         </div>`;
@@ -647,7 +652,7 @@
       const five=raw.sort((a,b)=>n(b)-n(a)||RV(b)-RV(a));
       // Animation jouée une seule fois par main : si la table est redessinée, les cartes restent en place.
       const skey=`${t.id}:${h.no}`,still=shownShowcase===skey;shownShowcase=skey;
-      showcase=`<div class="bpt-ol-showcase${still?" is-static":""}" aria-live="polite"><div class="bpt-ol-show-title"><b>${r0.winners.map(i=>esc(firstName(t,i))).join(" et ")}</b> · ${esc(r0.hand||"")}</div>
+      showcase=`<div class="bpt-ol-showcase${still?" is-static":""}" aria-live="polite"><div class="bpt-ol-show-title"><b>${r0.winners.map(i=>esc(firstName(t,i))).join(" et ")}</b> ${r0.winners.length>1?"partagent":"gagne"} avec ${esc(HAND_PHRASE[r0.hand]||String(r0.hand||"").toLowerCase())}</div>
         <div class="bpt-ol-show-cards">${five.map((c,k)=>`<span class="bpt-ol-show-slot${mineCards.has(c)?" is-hole":""}" style="--k:${k}">${cardHtml(c," is-show")}</span>`).join("")}</div></div>`;
     }
     const center=h?`<div class="bpt-ol-board">${[0,1,2,3,4].map(k=>cardHtml(board[k])).join("")}</div><div class="bpt-ol-pot">${potLine}</div>`

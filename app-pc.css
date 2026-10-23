@@ -7019,3 +7019,5 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
 .bpt-ag-mode button.is-on{border-color:var(--bpt-gold,#f2c853);color:var(--bpt-gold,#f2c853);box-shadow:inset 0 0 0 1px var(--bpt-gold,#f2c853)}
 .bpt-ag-loc[hidden]{display:none !important}
 .bpt-ag-time[hidden]{display:none !important}
+.bpt-ol-mybar.is-step2 .bpt-ol-presets{grid-template-columns:38px repeat(var(--n,4),1fr) !important}
+.bpt-ol-mybar.is-step2 .bpt-ol-presets button{padding:0 2px;font-size:13px;white-space:nowrap}
