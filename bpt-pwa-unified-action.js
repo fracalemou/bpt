@@ -151,8 +151,14 @@
   });
 
   if("serviceWorker" in navigator){
+    // 10.4.84 — Pas de rechargement au démarrage : la page vient d'être chargée depuis le réseau (HTML « réseau d'abord »,
+    // fichiers ?v= de la nouvelle version), elle est déjà à jour. Avant, la prise de contrôle par le service worker
+    // (première visite, et chaque ouverture après une mise à jour) rechargeait l'accueil une seconde fois.
+    // On ne recharge que si l'appli était déjà ouverte depuis un moment avec une version précédente.
+    const hadController=!!navigator.serviceWorker.controller;
     navigator.serviceWorker.addEventListener("controllerchange",()=>{
       if(refreshing)return;
+      if(!hadController||performance.now()<20000)return;
       refreshing=true;
       location.reload();
     });

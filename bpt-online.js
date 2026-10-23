@@ -64,14 +64,21 @@
   }
 
   /* ---------- Écritures ---------- */
+  // Une seule partie en ligne à la fois : partie en préparation ou en cours (index léger, entrées de moins de 12 h).
+  async function activeTable(){
+    try{const snap=await (await db()).ref(RUN_ROOT).once("value");const v=snap.val()||{};
+      const e=Object.entries(v).find(([,x])=>x&&Date.now()-Number(x.at||0)<12*3600*1000);return e?{id:e[0],...e[1]}:null;}catch(_e){return null;}
+  }
   async function createTable(form){
     const name=me();if(!name){alert("Identifiez-vous d'abord (Paramètres › Mon profil).");return;}
+    const busy=await activeTable();
+    if(busy){alert(busy.state==="waiting"?"Une partie en ligne est déjà en préparation : rejoignez-la.":"Une partie en ligne est déjà en cours.");openId=busy.id;render();return;}
     const maxSeats=MAX_PLAYERS;
     const startStack=Math.max(1000,Number(form.startStack)||20000);
     const targetHours=Math.max(0.5,Number(form.targetHours)||2);
     const st=structure(2,targetHours,startStack); // recalculée au lancement avec le nombre réel de joueurs
     const id="t"+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
-    const table={id,name:String(form.title||"").trim()||`Table de ${name.split(" ")[0]}`,host:name,createdAt:Date.now(),status:"waiting",
+    const table={id,name:String(form.title||"").trim()||"Partie en ligne",host:name,createdAt:Date.now(),status:"waiting",
       countsForChampionship:!!form.counts,adaptive:form.adaptive!==false,maxSeats,startStack,targetHours,levelSeconds:st.levelSeconds,levels:st.levels,levelIndex:0,
       seats:{0:{name,stack:startStack,joinedAt:Date.now()}}};
     await (await db()).ref(`${ROOT}/${id}`).set(table);
@@ -393,7 +400,7 @@
     ranking.forEach(r=>{if(r.by)kills[r.by]=(kills[r.by]||0)+1;});
     const start=Number(t.startedAt)||Date.now(),end=Number(t.finishedAt)||Date.now();
     return ranking.map(r=>({
-      game:gameNo,date:new Date(start).toISOString().slice(0,10),location:`${t.name} (en ligne)`,
+      game:gameNo,date:new Date(start).toISOString().slice(0,10),location:"En ligne",
       player:r.name,place:r.place,killer:r.place===1?"":String(r.by||""),
       outLevel:r.level||null,outTime:r.at?new Date(r.at).toLocaleTimeString("fr-FR"):"",outAt:Number(r.at)||null,
       gameStartedAt:start,gameFinishedAt:end,gameDurationSec:Math.max(0,Math.floor((end-start)/1000)),gameActiveDurationSec:Math.max(0,Math.floor((end-start)/1000)),
@@ -569,6 +576,8 @@
   let raiseTo=0, raiseKey="", raiseMode=false;
   function tableHtml(t){
     const seats=seatsOf(t),mine=mySeat(t),isHost=t.host===me(),running=t.status==="running";
+    // Spectateur : partie lancée (ou terminée) sans y être assis → aucune action, seulement quitter.
+    const spectator=!mine&&t.status!=="waiting";
     const L=running?levelAt(t):{index:0,left:0},lv=t.levels?.[L.index]||{};
     const h=(running||t.status==="finished")?t.hand:null,board=split(h?.board),done=h?.street==="done";
     const N=Math.max(1,seats.length);
@@ -608,7 +617,8 @@
       if(isHost)actions.push(`<button type="button" class="bpt-ol-primary" data-ol-start${seats.length<2?" disabled":""}>Lancer · ${seats.length} joueur${seats.length>1?"s":""}</button>`);
     }
     if(isHost&&done&&running)actions.push(`<button type="button" class="bpt-ol-primary" data-ol-next>Main suivante →</button>`);
-    if(t.status==="finished")actions.push(`<button type="button" class="bpt-ol-primary" data-ol-live>Retour au Live</button>`);
+    if(t.status==="finished"&&!spectator)actions.push(`<button type="button" class="bpt-ol-primary" data-ol-live>Retour au Live</button>`);
+    if(spectator)actions.push(`<button type="button" data-ol-quit>Quitter</button>`);
     // Barre d'actions du joueur dont c'est le tour, en deux temps :
     // 1) Se coucher · Check/Suivre · Relancer   2) après « Relancer » : ✕ · Double · Triple · Pot · Tapis, curseur exponentiel et validation.
     let myBar="";
@@ -660,8 +670,9 @@
     const centerSub=t.status==="finished"?`🏆 ${esc(t.winner||"")} remporte le tournoi`
       :t.status==="waiting"?`En attente des joueurs · ${seats.length} inscrit${seats.length>1?"s":""}`
       :"";
+    const specNote=spectator?`<div class="bpt-ol-note is-spectator">👁 Mode spectateur · vous ne jouez pas cette partie</div>`:"";
     const last=h?.last?.txt?`<div class="bpt-ol-note">${esc(h.last.txt)}${done&&running?` · main suivante dans <span data-ol-next-in>${Math.max(1,Math.ceil((nextHandMs(h)-(Date.now()-Number(h.at||0)))/1000))}</span> s`:""}</div>`:"";
-    return `<div class="bpt-ol-table">
+    return `<div class="bpt-ol-table${spectator?" is-spectator":""}">
       <div class="bpt-ol-bar"><button type="button" data-ol-back aria-label="Retour aux tables">‹</button>
         <div class="bpt-ol-bar-title"><b>${esc(t.name)}</b><small>${t.countsForChampionship?"Compte au championnat":"Hors championnat"} · ${t.adaptive?"Adaptatif":"Classique"}</small></div>
         ${isHost&&t.status==="waiting"?`<label class="bpt-ol-check"><input type="checkbox" data-ol-counts${t.countsForChampionship?" checked":""}> Championnat</label>`:""}
@@ -669,8 +680,8 @@
         <div class="bpt-ol-bar-level"><small>Niveau ${L.index+1}${running?` · <span data-ol-clock>${clock(L.left)}</span>`:""} · ${Math.round((Number(lv.durationSec)||Number(t.levelSeconds)||0)/60)} min</small><b>${fmt(lv.sb)} / ${fmt(lv.bb)}</b></div></div>
       <div class="bpt-ol-stage"><div class="bpt-ol-rail"><div class="bpt-ol-felt">
         <div class="bpt-ol-center"><span class="bpt-ol-logo">♠ BPT</span>${center}<small>${centerSub}</small></div>
-      </div></div>${ring}${t.status==="finished"?resultsHtml(t):showcase}${t.status!=="waiting"?`<button type="button" class="bpt-ol-fx-btn" data-ol-fx aria-label="Chat et objets">💬</button>`:""}</div>
-      ${last}${myBar}<div class="bpt-ol-actions">${actions.join("")}</div></div>`;
+      </div></div>${ring}${t.status==="finished"?resultsHtml(t):showcase}${t.status!=="waiting"&&!spectator?`<button type="button" class="bpt-ol-fx-btn" data-ol-fx aria-label="Chat et objets">💬</button>`:""}</div>
+      ${specNote}${last}${myBar}<div class="bpt-ol-actions">${actions.join("")}</div></div>`;
   }
   // Table « stade » (rectangle aux bouts arrondis) : chaque joueur est posé sur le bord, à intervalles réguliers
   // le long du contour, en partant du bas (soi) puis vers la gauche. Recalculé à chaque affichage et redimensionnement.
@@ -730,12 +741,16 @@
   }
   function install(){
     const view=$("online");if(!view)return;
-    const live=$("live3");const watch=()=>{listen(view.classList.contains("active")||!!live?.classList.contains("active"));if(!view.classList.contains("active")){document.documentElement.classList.remove("bpt-online-open");fxListen();}else render();};
+    const live=$("live3");let liveWas=false;
+    // Partie en ligne en cours (et pas de Live classique actif) : l'onglet Live ouvre directement la table,
+    // en joueur si l'on y est assis, sinon en spectateur.
+    const redirectLive=()=>{const on=!!live?.classList.contains("active");if(on&&!liveWas&&runningIds.length&&!$("live3NavBtn")?.classList.contains("live3-active"))setTimeout(()=>window.bptOnline.open(runningIds[0]),0);liveWas=on;};
+    const watch=()=>{redirectLive();listen(view.classList.contains("active")||!!live?.classList.contains("active"));if(!view.classList.contains("active")){document.documentElement.classList.remove("bpt-online-open");fxListen();}else render();};
     [view,live].filter(Boolean).forEach(el=>new MutationObserver(watch).observe(el,{attributes:true,attributeFilter:["class"]}));
     view.addEventListener("click",e=>{
       const g=s=>e.target.closest(s);let el;
       if((el=g("[data-ol-open]"))){openId=el.dataset.olOpen;render();return;}
-      if(g("[data-ol-back]")){openId=null;render();return;}
+      if(g("[data-ol-back]")){const sp=tables[openId]&&!mySeat(tables[openId])&&tables[openId].status!=="waiting";openId=null;if(sp&&window.showView){window.showView("dashboard");return;}render();return;}
       if(g("[data-ol-live]")){window.showView&&window.showView("live3");return;}
       if(g("[data-ol-join]")){join(openId);return;}
       if(g("[data-ol-bots]")){addBots(openId,3);return;}
@@ -747,7 +762,8 @@
       if(g("[data-ol-raise-close]")){raiseMode=false;render();return;}
       if(g("[data-ol-next]")){nextHand(openId);return;}
       if(g("[data-ol-fx]")){fxOpen?fxClose():fxOpenPanel();return;}
-      if((el=g(".bpt-ol-seat[data-name]"))&&el.dataset.name!==me()&&tables[openId]?.status!=="waiting"){fxOpenPanel(el.dataset.name);return;}
+      if(g("[data-ol-quit]")){openId=null;window.showView&&window.showView("dashboard");return;}
+      if((el=g(".bpt-ol-seat[data-name]"))&&el.dataset.name!==me()&&tables[openId]?.status!=="waiting"&&mySeat(tables[openId])){fxOpenPanel(el.dataset.name);return;}
       if(g("[data-ol-remove]")){removeTable(openId);return;}
     });
     view.addEventListener("change",e=>{const c=e.target.closest("[data-ol-counts]");if(c)toggleCounts(openId,c.checked);});
@@ -761,11 +777,11 @@
     render();
   }
   // Pastille rouge de l'onglet Live : partie Live (classe posée par le module Live) ou partie en ligne en cours.
-  let onlineRunning=0;
+  let onlineRunning=0,runningIds=[];
   function paintNavDot(){const b=$("live3NavBtn");if(b)b.classList.toggle("bpt-game-on",b.classList.contains("live3-active")||onlineRunning>0);}
   (async()=>{try{const r=await db();r.ref(RUN_ROOT).on("value",snap=>{const v=snap.val()||{};
     const fresh=Object.entries(v).filter(([,x])=>x&&Date.now()-Number(x.at||0)<12*3600*1000);
-    onlineRunning=fresh.filter(([,x])=>x.state!=="waiting").length;paintNavDot();
+    runningIds=fresh.filter(([,x])=>x.state!=="waiting").map(([id])=>id);onlineRunning=runningIds.length;paintNavDot();document.dispatchEvent(new CustomEvent("bpt-online-tables"));
     waitingTables=fresh.filter(([,x])=>x.state==="waiting").map(([id,x])=>({id,...x}));paintHome();});}catch(_e){}})();
   // Alerte « partie en ligne en préparation » : proposée à ceux qui ne sont pas encore inscrits, une fois par table
   // (fermée = plus proposée), retirée au lancement. Pas affichée sur l'écran de la table elle-même.
@@ -797,6 +813,7 @@
   window.bptOnline={
     openTables,
     me,
+    active(){const w=waitingTables[0];if(w)return {id:w.id,state:"waiting"};return runningIds[0]?{id:runningIds[0],state:"running"}:null;},
     pilot(id){const t=tables[id];return t?pilotName(t):null;}, // diagnostic : qui pilote les automatismes
     open(id){openId=id||null;window.showView&&window.showView("online");render();},
     async create(form){await createTable(form);window.showView&&window.showView("online");render();}

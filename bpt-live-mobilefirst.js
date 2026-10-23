@@ -64,7 +64,11 @@
     // En ligne : structure adaptative proposée par défaut (modifiable).
     const st=legacy().structure;if(m==='online'&&st&&[...st.options].some(o=>o.value==='adaptive')){st.value='adaptive';st.dispatchEvent(new Event('change',{bubbles:true}));}
     renderStep1()}
-  function paintOnlineBanner(){
+  // Libellé du bouton en ligne selon l'état réel (partie en préparation, en cours, ou aucune).
+  function paintOnlineButton(){const b=$('bptllOnlineGo');if(!b)return;const a=window.bptOnline?.active?.();
+    b.textContent=!a?'Créer la table en ligne →':a.state==='waiting'?'Rejoindre la partie en ligne →':'Voir la partie en cours →';}
+  setInterval(paintOnlineButton,1500);
+  function paintOnlineBanner(){paintOnlineButton();
     const box=$('bptllOnlineBanner');if(!box)return;
     const list=(window.bptOnline?.openTables?.()||[]).filter(t=>t.status==='waiting');
     box.hidden=!list.length;
@@ -92,7 +96,7 @@
       b.addEventListener('click',()=>{if(mode!==id)setLiveMode(id)});modes.append(b);
     });
     const defs=[['Nom / lieu','text',l.location],['Date','date',l.date],['Tapis de départ','number',l.stack],['Buy-in (€)','number',l.buyIn],['Durée souhaitée','select',l.hours],['Structure','select',l.structure]]
-      .filter(([label])=>!online||['Nom / lieu','Tapis de départ','Durée souhaitée','Structure'].includes(label));
+      .filter(([label])=>!online||['Tapis de départ','Durée souhaitée','Structure'].includes(label));
     const form=document.createElement('div');form.className='bptll-form';
     defs.forEach(([label,type,src])=>{
       const wrap=document.createElement('div');wrap.className='bptll-field';
@@ -120,11 +124,13 @@
     footer([
       button('← Retour',false,()=>{if(typeof window.showView==='function')window.showView('dashboard');}), // 10.4.33 : quitter la préparation
       online
-        ? button('Créer la table en ligne →',true,()=>{
+        ? Object.assign(button('Créer la table en ligne →',true,()=>{
             if(!window.bptOnline){alert('Module en ligne indisponible.');return;}
-            window.bptOnline.create({title:String(l.location?.value||'').trim(),startStack:l.stack?.value,targetHours:l.hours?.value,adaptive:l.structure?.value!=='classic',counts:!!counts?.checked})
+            // Une seule partie en ligne à la fois : s'il en existe une, on l'ouvre au lieu d'en créer une autre.
+            const act=window.bptOnline.active?.();if(act){window.bptOnline.open(act.id);return;}
+            window.bptOnline.create({title:'',startStack:l.stack?.value,targetHours:l.hours?.value,adaptive:l.structure?.value!=='classic',counts:!!counts?.checked})
               .catch(e=>alert('Création impossible : '+(e?.message||e)));
-          })
+          }),{id:'bptllOnlineGo'})
         : button('Continuer →',true,()=>{if(!String(l.location?.value||'').trim()){alert('Indiquez le nom / lieu de la partie.');return;}step=2;render(true)})
     ]);
   }

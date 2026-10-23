@@ -9492,3 +9492,6 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
 .bpt-ag-time[hidden]{display:none !important}
 .bpt-ol-mybar.is-step2 .bpt-ol-presets{grid-template-columns:38px repeat(var(--n,4),1fr) !important}
 .bpt-ol-mybar.is-step2 .bpt-ol-presets button{padding:0 2px;font-size:13px;white-space:nowrap}
+/* 10.4.84 — Partie en ligne : mode spectateur */
+.bpt-ol-note.is-spectator{border-color:var(--bpt-line,#2a3560);color:var(--bpt-muted,#9aa6c8)}
+.bpt-ol-table.is-spectator .bpt-ol-seat[data-name]{cursor:default}
