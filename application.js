@@ -2025,26 +2025,26 @@ function playerProfileData(name){
 
 // ===== BPT 2.6.3 — avatars joueurs =====
 const BPT_AVATARS=[
-  {id:"avatar_01",name:'Poker Shark',src:"./avatars/avatar_01.webp"},
-  {id:"avatar_02",name:'Lucky Lady',src:"./avatars/avatar_02.webp"},
-  {id:"avatar_03",name:'The Bluff',src:"./avatars/avatar_03.webp"},
-  {id:"avatar_04",name:'The Grinder',src:"./avatars/avatar_04.webp"},
-  {id:"avatar_05",name:'The Boss',src:"./avatars/avatar_05.webp"},
-  {id:"avatar_06",name:'The Strategist',src:"./avatars/avatar_06.webp"},
-  {id:"avatar_07",name:'The Stealer',src:"./avatars/avatar_07.webp"},
-  {id:"avatar_08",name:'The Colossus',src:"./avatars/avatar_08.webp"},
-  {id:"avatar_09",name:'The Shadow',src:"./avatars/avatar_09.webp"},
-  {id:"avatar_10",name:'The Techno',src:"./avatars/avatar_10.webp"},
-  {id:"avatar_11",name:'The Bear',src:"./avatars/avatar_11.webp"},
-  {id:"avatar_12",name:'The Wolf',src:"./avatars/avatar_12.webp"},
-  {id:"avatar_13",name:'The Fox',src:"./avatars/avatar_13.webp"},
-  {id:"avatar_14",name:'The Owl',src:"./avatars/avatar_14.webp"},
-  {id:"avatar_15",name:'The Panther',src:"./avatars/avatar_15.webp"},
-  {id:"avatar_16",name:'The High Roller',src:"./avatars/avatar_16.webp"},
-  {id:"avatar_17",name:'The Gambler',src:"./avatars/avatar_17.webp"},
-  {id:"avatar_18",name:'The Professor',src:"./avatars/avatar_18.webp"},
-  {id:"avatar_19",name:'The Queen',src:"./avatars/avatar_19.webp"},
-  {id:"avatar_20",name:'The Monk',src:"./avatars/avatar_20.webp"}
+  {id:"avatar_01",name:'Poker Shark',src:"./avatars/avatar_01.webp?v=2"},
+  {id:"avatar_02",name:'Lucky Lady',src:"./avatars/avatar_02.webp?v=2"},
+  {id:"avatar_03",name:'The Bluff',src:"./avatars/avatar_03.webp?v=2"},
+  {id:"avatar_04",name:'The Grinder',src:"./avatars/avatar_04.webp?v=2"},
+  {id:"avatar_05",name:'The Boss',src:"./avatars/avatar_05.webp?v=2"},
+  {id:"avatar_06",name:'The Strategist',src:"./avatars/avatar_06.webp?v=2"},
+  {id:"avatar_07",name:'The Stealer',src:"./avatars/avatar_07.webp?v=2"},
+  {id:"avatar_08",name:'The Colossus',src:"./avatars/avatar_08.webp?v=2"},
+  {id:"avatar_09",name:'The Shadow',src:"./avatars/avatar_09.webp?v=2"},
+  {id:"avatar_10",name:'The Techno',src:"./avatars/avatar_10.webp?v=2"},
+  {id:"avatar_11",name:'The Bear',src:"./avatars/avatar_11.webp?v=2"},
+  {id:"avatar_12",name:'The Wolf',src:"./avatars/avatar_12.webp?v=2"},
+  {id:"avatar_13",name:'The Fox',src:"./avatars/avatar_13.webp?v=2"},
+  {id:"avatar_14",name:'The Owl',src:"./avatars/avatar_14.webp?v=2"},
+  {id:"avatar_15",name:'The Panther',src:"./avatars/avatar_15.webp?v=2"},
+  {id:"avatar_16",name:'The High Roller',src:"./avatars/avatar_16.webp?v=2"},
+  {id:"avatar_17",name:'The Gambler',src:"./avatars/avatar_17.webp?v=2"},
+  {id:"avatar_18",name:'The Professor',src:"./avatars/avatar_18.webp?v=2"},
+  {id:"avatar_19",name:'The Queen',src:"./avatars/avatar_19.webp?v=2"},
+  {id:"avatar_20",name:'The Monk',src:"./avatars/avatar_20.webp?v=2"}
 ];
 
 function playerRecordByName(name){
