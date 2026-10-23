@@ -690,6 +690,8 @@
     };
   }
 
+  // 10.4.73 — exposé pour « Jouer en ligne » : même structure Classique que le Live.
+  window.bptComputeLiveStructure=computeStructure;
   function buildLevels(targetHours,playerCount,startStack){
     return computeStructure(targetHours,playerCount,startStack).levels;
   }

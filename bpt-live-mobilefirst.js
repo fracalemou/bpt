@@ -57,11 +57,39 @@
   function button(label,primary,handler,disabled=false){const b=document.createElement('button');b.type='button';b.className='bptll-btn'+(primary?' primary':'');b.textContent=label;b.disabled=disabled;b.addEventListener('click',handler);return b}
   function footer(buttons){const f=$('bptllFoot');f.className='bptll-foot'+(buttons.length===1?' one':'');f.replaceChildren(...buttons)}
 
+  // 10.4.73 — Étape 1 : partie « À la table » (Live habituel) ou « En ligne » (cartes virtuelles, bpt-online.js).
+  const MODE_KEY='bpt_live_mode';
+  function liveMode(){try{return sessionStorage.getItem(MODE_KEY)==='online'?'online':'table'}catch(_e){return 'table'}}
+  function setLiveMode(m){try{sessionStorage.setItem(MODE_KEY,m)}catch(_e){}renderStep1()}
+  function paintOnlineBanner(){
+    const box=$('bptllOnlineBanner');if(!box)return;
+    const list=(window.bptOnline?.openTables?.()||[]).filter(t=>t.status==='waiting');
+    box.hidden=!list.length;
+    box.replaceChildren(...list.slice(0,3).map(t=>{
+      const n=Object.values(t.seats||{}).filter(s=>s&&s.name).length;
+      const row=document.createElement('div');row.className='bptll-online-row';
+      const txt=document.createElement('span');txt.innerHTML='<b>💻 Partie en ligne en attente</b><small></small>';
+      txt.querySelector('small').textContent=`${t.name} · ${n} joueur${n>1?'s':''} inscrit${n>1?'s':''} · hôte ${t.host}`;
+      row.append(txt,button('Rejoindre',true,()=>window.bptOnline.open(t.id)));
+      return row;
+    }));
+  }
+  document.addEventListener('bpt-online-tables',paintOnlineBanner);
+
   function renderStep1(){
     ensure().querySelector('.bptll-shell')?.classList.remove('is-spectator-step');
     title('PRÉPARATION','Paramètres de la partie',1);
-    const l=legacy(),body=$('bptllBody');
-    const defs=[['Nom / lieu','text',l.location],['Date','date',l.date],['Tapis de départ','number',l.stack],['Buy-in (€)','number',l.buyIn],['Durée souhaitée','select',l.hours],['Structure','select',l.structure]];
+    const l=legacy(),body=$('bptllBody'),mode=liveMode(),online=mode==='online';
+    const banner=document.createElement('div');banner.id='bptllOnlineBanner';banner.className='bptll-online-banner';banner.hidden=true;
+    const modes=document.createElement('div');modes.className='bptll-mode';modes.setAttribute('role','radiogroup');modes.setAttribute('aria-label','Type de partie');
+    [['table','🃏 À la table','Cartes réelles, chrono et suivi'],['online','💻 En ligne','Chacun joue sur son appareil']].forEach(([id,label,sub])=>{
+      const b=document.createElement('button');b.type='button';b.className='bptll-mode-btn'+(mode===id?' is-active':'');
+      b.setAttribute('role','radio');b.setAttribute('aria-checked',String(mode===id));
+      b.innerHTML='<b></b><small></small>';b.querySelector('b').textContent=label;b.querySelector('small').textContent=sub;
+      b.addEventListener('click',()=>{if(mode!==id)setLiveMode(id)});modes.append(b);
+    });
+    const defs=[['Nom / lieu','text',l.location],['Date','date',l.date],['Tapis de départ','number',l.stack],['Buy-in (€)','number',l.buyIn],['Durée souhaitée','select',l.hours],['Structure','select',l.structure]]
+      .filter(([label])=>!online||['Nom / lieu','Tapis de départ','Durée souhaitée'].includes(label));
     const form=document.createElement('div');form.className='bptll-form';
     defs.forEach(([label,type,src])=>{
       const wrap=document.createElement('div');wrap.className='bptll-field';
@@ -78,10 +106,23 @@
       el.addEventListener('input',sync);el.addEventListener('change',sync);
       wrap.append(lab,el);form.append(wrap);
     });
-    body.replaceChildren(form);
+    let counts=null;
+    if(online){
+      const wrap=document.createElement('label');wrap.className='bptll-field bptll-check';
+      counts=document.createElement('input');counts.type='checkbox';
+      wrap.append(counts,document.createTextNode(' Compter au championnat'));form.append(wrap);
+    }
+    body.replaceChildren(banner,modes,form);
+    paintOnlineBanner();
     footer([
       button('← Retour',false,()=>{if(typeof window.showView==='function')window.showView('dashboard');}), // 10.4.33 : quitter la préparation
-      button('Continuer →',true,()=>{if(!String(l.location?.value||'').trim()){alert('Indiquez le nom / lieu de la partie.');return;}step=2;render(true)})
+      online
+        ? button('Créer la table en ligne →',true,()=>{
+            if(!window.bptOnline){alert('Module en ligne indisponible.');return;}
+            window.bptOnline.create({title:String(l.location?.value||'').trim(),startStack:l.stack?.value,targetHours:l.hours?.value,counts:!!counts?.checked})
+              .catch(e=>alert('Création impossible : '+(e?.message||e)));
+          })
+        : button('Continuer →',true,()=>{if(!String(l.location?.value||'').trim()){alert('Indiquez le nom / lieu de la partie.');return;}step=2;render(true)})
     ]);
   }
 

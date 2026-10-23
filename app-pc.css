@@ -6700,3 +6700,74 @@ header.bpt-header #bptConnectedIdentity:not(:empty){display:inline-flex !importa
 html.bpt-mobile-device .pf-exit-row{padding-left:5px !important}
 html.bpt-mobile-device .pf-exit-row>b{font-size:16px !important}
 html.bpt-mobile-device .pf-exit-row>span{font-size:11px}
+
+/* 10.4.73 — Jouer en ligne · lot 1 : salon et table (couleurs du thème, règle 60-30-10) */
+#bptOnlineBody{display:grid;gap:14px;max-width:900px}
+.bpt-ol-card{background:var(--bpt-card,#161d36);border:1px solid var(--bpt-line,#2a3560);border-radius:16px;padding:14px 16px;color:var(--bpt-text,#eef2fb)}
+.bpt-ol-card h2{margin:0 0 10px;font-size:18px}
+.bpt-ol-row{display:flex;width:100%;align-items:center;gap:10px;padding:12px 4px;background:transparent;border:0;border-bottom:1px solid var(--bpt-line,#2a3560);color:inherit;text-align:left;cursor:pointer}
+.bpt-ol-row:last-child{border-bottom:0}
+.bpt-ol-row span{flex:1;min-width:0}.bpt-ol-row strong{display:block;font-size:16px}
+.bpt-ol-row small{display:block;color:var(--bpt-muted,#9aa6c8);font-size:12.5px}.bpt-ol-row small b{color:var(--bpt-gold,#f2c853)}
+.bpt-ol-row em{font-style:normal;font-size:24px;color:var(--bpt-muted,#9aa6c8)}
+.bpt-ol-empty,.bpt-ol-hint{color:var(--bpt-muted,#9aa6c8);font-size:13px;margin:4px 0}
+.bpt-ol-form label{display:grid;gap:4px;font-size:12px;font-weight:800;color:var(--bpt-muted,#9aa6c8);margin-bottom:10px}
+.bpt-ol-form input:not([type=checkbox]),.bpt-ol-form select{min-height:42px;padding:8px 10px;border-radius:10px;border:1px solid var(--bpt-line,#2a3560);background:var(--bpt-bg2,#121a33);color:var(--bpt-text,#eef2fb);font-size:15px}
+.bpt-ol-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+label.bpt-ol-check{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--bpt-text,#eef2fb)}
+.bpt-ol-primary,.bpt-ol-actions button,.bpt-ol-head>button{min-height:44px;padding:10px 16px;border-radius:12px;border:1px solid var(--bpt-line,#2a3560);background:transparent;color:var(--bpt-text,#eef2fb);font-weight:850;cursor:pointer}
+.bpt-ol-primary{background:var(--bpt-gold,#f2c853) !important;border-color:transparent !important;color:#171007 !important}
+.bpt-ol-primary:disabled{opacity:.45;cursor:default}
+.bpt-ol-danger{color:#ff8f8c !important}
+.bpt-ol-actions{display:flex;flex-wrap:wrap;gap:10px}
+html.bpt-mobile-device .bpt-ol-grid{grid-template-columns:1fr 1fr}
+label.bpt-ol-check input{width:20px !important;height:20px !important;min-height:0 !important;flex:0 0 auto;margin:0;accent-color:var(--bpt-gold,#f2c853)}
+
+/* 10.4.73 — Partie en ligne : table plein écran (en-tête et navigation masqués), tapis aux couleurs du thème, joueurs en jetons ronds */
+html.bpt-online-open .bpt-header,html.bpt-online-open nav#nav,html.bpt-online-open #bptMobileMoreTopMenu,html.bpt-online-open .bpt-pwa-install,html.bpt-online-open #bptInstallToast{display:none !important}
+html.bpt-online-open body{overflow:hidden !important}
+html.bpt-online-open #online{position:fixed !important;inset:0;z-index:1400;margin:0 !important;padding:0 !important;background:radial-gradient(ellipse at 50% 45%,color-mix(in srgb,var(--bpt-30,#1f2b52) 45%,var(--bpt-60,#0f1426)),var(--bpt-60,#0f1426) 70%) !important;overflow:hidden}
+html.bpt-online-open #online>.hero{display:none !important}
+html.bpt-online-open #bptOnlineBody{display:block;max-width:none;height:100%}
+.bpt-ol-table{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;padding:max(10px,env(safe-area-inset-top)) 12px max(10px,env(safe-area-inset-bottom));box-sizing:border-box;gap:8px}
+.bpt-ol-bar{display:flex;align-items:center;gap:10px;min-width:0}
+.bpt-ol-bar>button{flex:0 0 auto;width:40px;height:40px;border-radius:50%;border:1px solid var(--bpt-line,#2a3560);background:var(--bpt-card,#161d36);color:var(--bpt-text,#eef2fb);font-size:22px;line-height:1;cursor:pointer}
+.bpt-ol-bar-title{flex:1;min-width:0;display:grid}
+.bpt-ol-bar-title b{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bpt-ol-bar-title small{font-size:11.5px;color:var(--bpt-muted,#9aa6c8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bpt-ol-bar .bpt-ol-check{font-size:12px !important;white-space:nowrap}
+.bpt-ol-bar-level{text-align:right;display:grid;flex:0 0 auto}
+.bpt-ol-bar-level small{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--bpt-muted,#9aa6c8)}
+.bpt-ol-bar-level b{font-size:17px;color:var(--bpt-gold,#f2c853)}
+.bpt-ol-stage{position:relative;min-height:0;margin:34px 46px}
+.bpt-ol-rail{position:absolute;inset:0;border-radius:50%;padding:clamp(8px,1.6vmin,16px);background:linear-gradient(160deg,color-mix(in srgb,var(--bpt-30,#1f2b52) 70%,#fff 10%),color-mix(in srgb,var(--bpt-60,#0f1426) 85%,#000));box-shadow:0 18px 40px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.12)}
+.bpt-ol-felt{position:relative;width:100%;height:100%;border-radius:50%;background:radial-gradient(ellipse at 50% 40%,color-mix(in srgb,var(--bpt-30,#1f2b52) 80%,#fff 7%),var(--bpt-30,#1f2b52) 45%,color-mix(in srgb,var(--bpt-30,#1f2b52) 55%,var(--bpt-60,#0f1426)));box-shadow:inset 0 0 0 2px rgba(0,0,0,.25),inset 0 0 40px rgba(0,0,0,.35)}
+.bpt-ol-felt::after{content:"";position:absolute;inset:14%;border-radius:50%;border:1px solid color-mix(in srgb,var(--bpt-gold,#f2c853) 28%,transparent);pointer-events:none}
+.bpt-ol-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:grid;gap:2px;text-align:center;width:60%}
+.bpt-ol-logo{font-size:12px;font-weight:900;letter-spacing:.3em;color:color-mix(in srgb,var(--bpt-text,#eef2fb) 35%,transparent)}
+.bpt-ol-center strong{font-size:clamp(20px,5vmin,40px);font-weight:950;color:var(--bpt-gold,#f2c853)}
+.bpt-ol-center small{font-size:12px;color:var(--bpt-muted,#9aa6c8)}
+.bpt-ol-seat{position:absolute;transform:translate(-50%,-50%);display:grid;justify-items:center;gap:0;width:90px;z-index:2}
+.bpt-ol-avatar .bpt-av{width:52px !important;height:52px !important;font-size:18px !important;border-radius:50%;box-shadow:0 0 0 3px var(--bpt-60,#0f1426),0 0 0 4px var(--bpt-line,#2a3560),0 6px 14px rgba(0,0,0,.4)}
+.bpt-ol-avatar .bpt-av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.bpt-ol-plate{margin-top:-8px;display:grid;justify-items:center;min-width:76px;max-width:96px;padding:3px 8px;border-radius:10px;background:var(--bpt-60,#0f1426);border:1px solid var(--bpt-line,#2a3560);box-shadow:0 4px 10px rgba(0,0,0,.35)}
+.bpt-ol-plate b{font-size:12.5px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--bpt-text,#eef2fb)}
+.bpt-ol-plate span{font-size:12px;font-weight:800;color:var(--bpt-gold,#f2c853)}
+.bpt-ol-seat i{font-style:normal;font-size:10px;font-weight:800;color:var(--bpt-muted,#9aa6c8);margin-top:1px}
+.bpt-ol-seat i.is-host{color:var(--bpt-gold,#f2c853)}
+.bpt-ol-seat.is-me .bpt-av{box-shadow:0 0 0 3px var(--bpt-60,#0f1426),0 0 0 5px var(--bpt-gold,#f2c853),0 6px 14px rgba(0,0,0,.4)}
+.bpt-ol-seat.is-me .bpt-ol-plate{border-color:var(--bpt-gold,#f2c853)}
+.bpt-ol-note{justify-self:center;padding:6px 12px;border-radius:999px;font-size:12.5px;background:var(--bpt-card2,#1b2442);border:1px solid color-mix(in srgb,var(--bpt-gold,#f2c853) 60%,transparent)}
+.bpt-ol-table .bpt-ol-actions{justify-content:center}
+.bpt-ol-table .bpt-ol-actions button{min-height:42px}
+@media (orientation:portrait){.bpt-ol-stage{margin:44px 34px 40px}}
+@media (max-height:500px){.bpt-ol-stage{margin:26px 60px 22px}.bpt-ol-avatar .bpt-av{width:40px !important;height:40px !important;font-size:15px !important}.bpt-ol-table{gap:4px}}
+html.bpt-online-open body nav#nav:not(#bptOlA):not(#bptOlB),html.bpt-online-open body .bpt-header:not(#bptOlA){display:none !important}
+html.bpt-online-open #bptAppAction{display:none !important}
+/* 10.4.73 — Table « stade » : rectangle aux bouts arrondis, bordure épaisse (inspirée des tables en ligne classiques) */
+.bpt-ol-rail{border-radius:9999px !important;padding:clamp(10px,2.2vmin,20px) !important;background:linear-gradient(180deg,#2a2d33,#0d0e10) !important;box-shadow:0 18px 40px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.14),inset 0 -2px 0 rgba(0,0,0,.6) !important}
+.bpt-ol-felt{border-radius:9999px !important}
+.bpt-ol-felt::after{inset:9% 7% !important;border-radius:9999px !important}
+.bpt-ol-stage{margin:30px 40px 26px !important}
+@media (orientation:portrait){.bpt-ol-stage{margin:40px 30px 34px !important}}
+@media (max-height:500px){.bpt-ol-stage{margin:24px 52px 20px !important}}

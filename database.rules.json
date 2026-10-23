@@ -31,6 +31,9 @@
       "photos": {
         ".write": "auth != null"
       },
+      "online": {
+        ".write": "auth != null"
+      },
       "bettingLedger": {
         ".write": "auth != null"
       },
