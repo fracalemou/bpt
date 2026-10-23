@@ -60,7 +60,10 @@
   // 10.4.73 — Étape 1 : partie « À la table » (Live habituel) ou « En ligne » (cartes virtuelles, bpt-online.js).
   const MODE_KEY='bpt_live_mode';
   function liveMode(){try{return sessionStorage.getItem(MODE_KEY)==='online'?'online':'table'}catch(_e){return 'table'}}
-  function setLiveMode(m){try{sessionStorage.setItem(MODE_KEY,m)}catch(_e){}renderStep1()}
+  function setLiveMode(m){try{sessionStorage.setItem(MODE_KEY,m)}catch(_e){}
+    // En ligne : structure adaptative proposée par défaut (modifiable).
+    const st=legacy().structure;if(m==='online'&&st&&[...st.options].some(o=>o.value==='adaptive')){st.value='adaptive';st.dispatchEvent(new Event('change',{bubbles:true}));}
+    renderStep1()}
   function paintOnlineBanner(){
     const box=$('bptllOnlineBanner');if(!box)return;
     const list=(window.bptOnline?.openTables?.()||[]).filter(t=>t.status==='waiting');
@@ -89,7 +92,7 @@
       b.addEventListener('click',()=>{if(mode!==id)setLiveMode(id)});modes.append(b);
     });
     const defs=[['Nom / lieu','text',l.location],['Date','date',l.date],['Tapis de départ','number',l.stack],['Buy-in (€)','number',l.buyIn],['Durée souhaitée','select',l.hours],['Structure','select',l.structure]]
-      .filter(([label])=>!online||['Nom / lieu','Tapis de départ','Durée souhaitée'].includes(label));
+      .filter(([label])=>!online||['Nom / lieu','Tapis de départ','Durée souhaitée','Structure'].includes(label));
     const form=document.createElement('div');form.className='bptll-form';
     defs.forEach(([label,type,src])=>{
       const wrap=document.createElement('div');wrap.className='bptll-field';
@@ -119,7 +122,7 @@
       online
         ? button('Créer la table en ligne →',true,()=>{
             if(!window.bptOnline){alert('Module en ligne indisponible.');return;}
-            window.bptOnline.create({title:String(l.location?.value||'').trim(),startStack:l.stack?.value,targetHours:l.hours?.value,counts:!!counts?.checked})
+            window.bptOnline.create({title:String(l.location?.value||'').trim(),startStack:l.stack?.value,targetHours:l.hours?.value,adaptive:l.structure?.value!=='classic',counts:!!counts?.checked})
               .catch(e=>alert('Création impossible : '+(e?.message||e)));
           })
         : button('Continuer →',true,()=>{if(!String(l.location?.value||'').trim()){alert('Indiquez le nom / lieu de la partie.');return;}step=2;render(true)})

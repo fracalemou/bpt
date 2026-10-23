@@ -10,7 +10,7 @@
   const $=id=>document.getElementById(id);
   const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const fmt=n=>Number(n||0).toLocaleString("fr-FR");
-  let tables={}, openId=null, listening=false, ref=null, seen=new Set();
+  let tables={}, openId=null, listening=false, ref=null, seen=new Set(), lastSig="", shownShowcase="";
 
   function me(){try{return String(localStorage.getItem(IDENTITY_KEY)||"").trim();}catch(_e){return "";}}
   async function db(){
@@ -20,15 +20,45 @@
   function seatsOf(t){return Object.entries(t?.seats||{}).filter(([,s])=>s&&s.name).map(([i,s])=>({i:Number(i),...s}));}
   function mySeat(t){const n=me();return seatsOf(t).find(s=>s.name===n)||null;}
 
+  // En ligne, les mains vont ~20 % plus vite qu'en Live : plus de mains par niveau, la partie se termine plus tôt
+  // dans la structure (≈ 50 BB de jetons en jeu au lieu de 40). Les niveaux sont calés sur cette fin pour tenir la durée.
+  const ONLINE_END_BB=50;
+  function endIndexFor(levels,totalChips){const target=totalChips/ONLINE_END_BB;let best=0,gap=Infinity;levels.forEach((l,i)=>{const d=Math.abs(Number(l.bb)-target);if(d<gap){gap=d;best=i;}});return best;}
   function structure(players,targetHours,startStack){
     const fn=window.bptComputeLiveStructure;
-    if(typeof fn==="function"){
-      const s=fn(targetHours,players,startStack);
-      return {levels:(s.levels||[]).map(l=>({sb:l.sb,bb:l.bb,durationSec:l.durationSec})),levelSeconds:s.levelSeconds};
-    }
-    const sb=[25,50,75,100,150,200,300,400,500,600,800,1000,1200,1500,2000,2500,3000,4000,5000,6000,8000,10000,12000,15000,20000];
-    const sec=Math.max(120,Math.round(targetHours*3600/16/60)*60);
-    return {levels:sb.map(v=>({sb:v,bb:v*2,durationSec:sec})),levelSeconds:sec};
+    const sbs=typeof fn==="function"?(fn(targetHours,players,startStack).levels||[]).map(l=>Number(l.sb))
+      :[25,50,75,100,150,200,300,400,500,600,800,1000,1200,1500,2000,2500,3000,4000,5000,6000,8000,10000,12000,15000,20000];
+    const levels=sbs.map(v=>({sb:v,bb:v*2}));
+    const endIdx=endIndexFor(levels,Math.max(2,players)*startStack);
+    const sec=Math.max(120,Math.round(Math.max(0.5,targetHours)*3600/(endIdx+1)/60)*60);
+    levels.forEach(l=>l.durationSec=sec);
+    return {levels,levelSeconds:sec};
+  }
+  /* Structure adaptative (comme le Live) : à chaque nouveau niveau, si la fin projetée s'écarte de 3 min ou plus de la durée
+     visée, la durée des niveaux suivants est réajustée (±30 % maxi, entre 3 et 40 min). Projection : temps restant selon la
+     structure jusqu'au niveau de fin, corrigé par les joueurs restants dans la zone de fin. */
+  function adaptLevels(t){
+    if(!t.adaptive||!t.startedAt)return;
+    const L=levelAt(t),idx=L.index;if(Number(t.adaptAt)>=idx||idx<1)return;
+    t.adaptAt=idx;
+    const lv=t.levels,N=Math.max(2,Object.keys(t.seats||{}).length),remaining=Math.max(1,inPlay(t).length);
+    const endIdx=endIndexFor(lv,N*(Number(t.startStack)||20000));
+    if(endIdx<=idx)return; // déjà dans la zone de fin
+    const targetSec=Math.max(1800,(Number(t.targetHours)||2)*3600),elapsed=(Date.now()-Number(t.startedAt))/1000;
+    const curDur=Math.max(60,Number(lv[idx].durationSec)||600);
+    let scheduleLeft=L.left;for(let i=idx+1;i<=endIdx;i++)scheduleLeft+=Math.max(60,Number(lv[i]?.durationSec)||curDur);
+    const levelProgress=Math.max(0,(idx+1-L.left/curDur)/(endIdx+1));
+    const expectedRemaining=N-(N-1)*Math.pow(Math.min(1,levelProgress),4.5);
+    const weight=Math.max(0,Math.min(1,(levelProgress-.55)/.30));
+    const correction=Math.max(-2700,Math.min(2700,(remaining-expectedRemaining)*0.8*8*60*weight));
+    const delta=elapsed+scheduleLeft+correction-targetSec;
+    if(Math.abs(delta)<180)return;
+    const nextMin=Math.max(1,Math.round((Number(lv[idx+1]?.durationSec)||curDur)/60));
+    const ideal=(targetSec-elapsed-L.left-correction)/(endIdx-idx)/60;
+    const min=Math.max(3,Math.min(40,Math.round(Math.max(nextMin*.7,Math.min(nextMin*1.3,ideal)))));
+    if(min===nextMin)return;
+    for(let i=idx+1;i<lv.length;i++)lv[i].durationSec=min*60;
+    t.lastAdapt={level:idx+1,from:nextMin,to:min,at:Date.now()};
   }
 
   /* ---------- Écritures ---------- */
@@ -40,7 +70,7 @@
     const st=structure(2,targetHours,startStack); // recalculée au lancement avec le nombre réel de joueurs
     const id="t"+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
     const table={id,name:String(form.title||"").trim()||`Table de ${name.split(" ")[0]}`,host:name,createdAt:Date.now(),status:"waiting",
-      countsForChampionship:!!form.counts,maxSeats,startStack,targetHours,levelSeconds:st.levelSeconds,levels:st.levels,levelIndex:0,
+      countsForChampionship:!!form.counts,adaptive:form.adaptive!==false,maxSeats,startStack,targetHours,levelSeconds:st.levelSeconds,levels:st.levels,levelIndex:0,
       seats:{0:{name,stack:startStack,joinedAt:Date.now()}}};
     await (await db()).ref(`${ROOT}/${id}`).set(table);
     openId=id;render();
@@ -162,6 +192,7 @@
     t.hand={no:(Number(t.hand?.no)||0)+1,level,dealer,sb,bb,deck:deck.join(","),hole,board:"",street:"preflop",at:Date.now(),
       bets:{},contrib:{},folded:{},allin:{},acted:{},currentBet:Number(lv.bb)||50,minRaise:Number(lv.bb)||50,result:null,showdown:false};
     t.levelIndex=level;
+    try{adaptLevels(t);}catch(_e){}
     commit(t,sb,Number(lv.sb)||25);commit(t,bb,Number(lv.bb)||50);
     t.hand.last={i:bb,txt:`Blindes ${fmt(lv.sb)} / ${fmt(lv.bb)}`};
     t.hand.toAct=nextToAct(t,bb);t.hand.actionAt=Date.now();
@@ -389,6 +420,114 @@
       <ol class="bpt-ol-res-list">${rk.map(r=>`<li class="${r.place===1?"is-win":""}${r.name===me()?" is-me":""}"><em>${r.place}${r.place===1?"er":"e"}</em><span><b>${esc(r.name)}</b><small>${r.place===1?`${kills[r.name]||0} élimination${(kills[r.name]||0)>1?"s":""}`:`éliminé par ${esc(String(r.by||"?").split(" ")[0])} · main n°${r.hand||"?"}${kills[r.name]?` · ${kills[r.name]} élim.`:""}`}</small></span></li>`).join("")}</ol>
       <p class="bpt-ol-res-status${t.publishError?" is-error":t.publishedToHistory?" is-ok":""}">${status}</p></div>`;
   }
+
+  /* ---------- Chat rapide et objets rigolos ----------
+     Stockés à part du jeu (bpt/online/fx/{idTable}/{envoi}) pour ne pas redessiner la table à chaque envoi :
+     {from, to:"all"|nom, kind:"say"|objet, text, at}. Effacés après 2 minutes. */
+  const FX_ROOT="bpt/online/fx";
+  const FX_ITEMS=[["beer","🍺","Bière"],["kiss","😘","Bisous"],["poop","💩","Caca"],["rose","🌹","Rose"],["tomato","🍅","Tomate"],
+    ["clap","👏","Bravo"],["fish","🐟","Poisson"],["fire","🔥","En feu"],["clown","🤡","Clown"],["money","💰","Jackpot"]];
+  const FX_QUICK=["Bien joué !","Joli coup 👌","Allez !","Pas de chance…","Tu bluffes ? 🤔","Je te suis 😎","On accélère ? ⏱","GG 🤝"];
+  const FX_KEEP_MS=120000, FX_GAP_MS=1500;
+  let fxRef=null,fxTable=null,fxSince=0,fxSeen=new Set(),fxTarget="all",fxLastSend=0,fxOpen=false;
+  function fxLayer(){let l=$("bptOlFxLayer");if(!l){l=document.createElement("div");l.id="bptOlFxLayer";document.body.append(l);}return l;}
+  async function fxListen(){
+    const want=($("online")?.classList.contains("active")&&openId&&tables[openId]&&tables[openId].status!=="waiting")?openId:null;
+    if(want===fxTable)return;
+    if(fxRef){fxRef.off();fxRef=null;}
+    fxTable=want;if(!want){fxClose();return;}
+    fxSince=Date.now();fxSeen=new Set();
+    try{
+      fxRef=(await db()).ref(`${FX_ROOT}/${want}`).limitToLast(30);
+      fxRef.on("value",snap=>{
+        const all=snap.val()||{};
+        Object.entries(all).sort((a,b)=>Number(a[1]?.at||0)-Number(b[1]?.at||0)).forEach(([k,e])=>{
+          if(!e||fxSeen.has(k))return;fxSeen.add(k);
+          if(Number(e.at||0)<fxSince-1500)return; // envois antérieurs à l'ouverture : ignorés
+          playFx(e);
+        });
+      });
+    }catch(_e){}
+  }
+  async function sendFx(kind,text){
+    const t=openId&&tables[openId];if(!t||!me())return;
+    if(Date.now()-fxLastSend<FX_GAP_MS)return;fxLastSend=Date.now();
+    const entry={from:me(),to:kind==="say"?"all":fxTarget,kind,at:Date.now()};
+    if(kind==="say")entry.text=String(text||"").trim().slice(0,60);
+    if(kind==="say"&&!entry.text)return;
+    try{
+      const r=(await db()).ref(`${FX_ROOT}/${t.id}`);await r.push(entry);
+      // Ménage : chacun efface les envois de plus de 2 minutes qu'il voit passer.
+      r.once&&r.once("value").then(s=>{const v=s.val()||{};Object.entries(v).forEach(([k,e])=>{if(Date.now()-Number(e?.at||0)>FX_KEEP_MS)r.child(k).remove();});}).catch(()=>{});
+    }catch(e){alert("Envoi impossible : "+(e.message||e));}
+    fxClose();
+  }
+  function plateOf(name){
+    const seat=[...document.querySelectorAll("#bptOnlineBody .bpt-ol-seat[data-name]")].find(el=>el.dataset.name===name);
+    return seat?.querySelector(".bpt-ol-plate")||seat||null;
+  }
+  function centerOf(el,fallback){
+    if(!el){const st=document.querySelector("#bptOnlineBody .bpt-ol-stage")?.getBoundingClientRect();
+      return fallback==="bottom"&&st?{x:st.left+st.width/2,y:st.bottom}:st?{x:st.left+st.width/2,y:st.top+st.height/2}:{x:innerWidth/2,y:innerHeight/2};}
+    const r=el.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2};
+  }
+  function playFx(e){
+    const t=openId&&tables[openId];if(!t)return;
+    const layer=fxLayer(),reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if(e.kind==="say"){
+      const from=centerOf(plateOf(e.from),"bottom");
+      const b=document.createElement("div");b.className="bpt-ol-bubble";b.textContent=e.text||"";
+      b.style.left=from.x+"px";b.style.top=from.y+"px";layer.append(b);
+      const who=document.createElement("small");who.textContent=String(e.from||"").split(" ")[0];b.prepend(who);
+      setTimeout(()=>b.classList.add("is-out"),3800);setTimeout(()=>b.remove(),4400);return;
+    }
+    const item=FX_ITEMS.find(x=>x[0]===e.kind);if(!item)return;
+    const targets=e.to==="all"?seatsOf(t).map(s=>s.name).filter(n=>n!==e.from):[e.to];
+    const from=centerOf(plateOf(e.from),"bottom");
+    targets.forEach((name,k)=>{
+      const to=centerOf(plateOf(name));
+      const el=document.createElement("span");el.className="bpt-ol-throw";el.textContent=item[1];layer.append(el);
+      const dx=to.x-from.x,dy=to.y-from.y,lift=Math.min(160,Math.hypot(dx,dy)*0.35);
+      const done=()=>{el.remove();impact(to,item[1]);};
+      if(reduce||!el.animate){el.style.left=to.x+"px";el.style.top=to.y+"px";setTimeout(done,300);return;}
+      el.style.left=from.x+"px";el.style.top=from.y+"px";
+      const anim=el.animate([
+        {transform:"translate(-50%,-50%) scale(.6) rotate(0deg)",opacity:0},
+        {transform:`translate(calc(-50% + ${dx*0.5}px),calc(-50% + ${dy*0.5-lift}px)) scale(1.25) rotate(200deg)`,opacity:1,offset:.5},
+        {transform:`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px)) scale(1) rotate(360deg)`,opacity:1}
+      ],{duration:900,delay:k*90,easing:"cubic-bezier(.3,.1,.3,1)",fill:"forwards"});
+      anim.onfinish=done;
+    });
+  }
+  function impact(p,emoji){
+    const layer=fxLayer();
+    const big=document.createElement("span");big.className="bpt-ol-impact";big.textContent=emoji;big.style.left=p.x+"px";big.style.top=p.y+"px";layer.append(big);
+    for(let k=0;k<5;k++){const s=document.createElement("span");s.className="bpt-ol-spark";s.textContent=emoji;s.style.left=p.x+"px";s.style.top=p.y+"px";
+      const a=(Math.PI*2*k)/5+Math.random()*.6,d=34+Math.random()*26;s.style.setProperty("--sx",Math.cos(a)*d+"px");s.style.setProperty("--sy",Math.sin(a)*d+"px");layer.append(s);setTimeout(()=>s.remove(),900);}
+    setTimeout(()=>big.remove(),1700);
+  }
+  function fxPanelHtml(){
+    const t=openId&&tables[openId];if(!t)return "";
+    const others=seatsOf(t).filter(s=>s.name!==me());
+    if(fxTarget!=="all"&&!others.some(s=>s.name===fxTarget))fxTarget="all";
+    return `<div class="bpt-ol-fx-head"><b>Ambiance</b><button type="button" data-fx-close aria-label="Fermer">×</button></div>
+      <div class="bpt-ol-fx-sec">Envoyer à</div>
+      <div class="bpt-ol-fx-targets"><button type="button" data-fx-target="all" class="${fxTarget==="all"?"is-on":""}">Tout le monde</button>${others.map(s=>`<button type="button" data-fx-target="${esc(s.name)}" class="${fxTarget===s.name?"is-on":""}">${esc(s.name.split(" ")[0])}</button>`).join("")}</div>
+      <div class="bpt-ol-fx-items">${FX_ITEMS.map(([k,e,l])=>`<button type="button" data-fx-item="${k}" title="${l}"><span>${e}</span><small>${l}</small></button>`).join("")}</div>
+      <div class="bpt-ol-fx-sec">Message rapide (à toute la table)</div>
+      <div class="bpt-ol-fx-quick">${FX_QUICK.map(q=>`<button type="button" data-fx-say="${esc(q)}">${esc(q)}</button>`).join("")}</div>
+      <form class="bpt-ol-fx-free" data-fx-form><input maxlength="60" placeholder="Votre message…" data-fx-text><button type="submit">Envoyer</button></form>`;
+  }
+  function fxPanel(){let p=$("bptOlFxPanel");if(!p){p=document.createElement("div");p.id="bptOlFxPanel";p.hidden=true;document.body.append(p);
+      p.addEventListener("click",e=>{const g=s=>e.target.closest(s);let el;
+        if(g("[data-fx-close]")){fxClose();return;}
+        if((el=g("[data-fx-target]"))){fxTarget=el.dataset.fxTarget;p.innerHTML=fxPanelHtml();return;}
+        if((el=g("[data-fx-item]"))){sendFx(el.dataset.fxItem);return;}
+        if((el=g("[data-fx-say]"))){sendFx("say",el.dataset.fxSay);return;}});
+      p.addEventListener("submit",e=>{e.preventDefault();const i=p.querySelector("[data-fx-text]");sendFx("say",i?.value);});}
+    return p;}
+  function fxOpenPanel(target){const p=fxPanel();if(target)fxTarget=target;p.innerHTML=fxPanelHtml();p.hidden=false;fxOpen=true;}
+  function fxClose(){const p=$("bptOlFxPanel");if(p)p.hidden=true;fxOpen=false;}
   const SUIT={s:"♠",h:"♥",d:"♦",c:"♣"};
   function cardHtml(c,cls=""){
     if(!c)return `<span class="bpt-card is-empty${cls}"></span>`;
@@ -420,6 +559,8 @@
     const h=(running||t.status==="finished")?t.hand:null,board=split(h?.board),done=h?.street==="done";
     const N=Math.max(1,seats.length);
     const winners=new Set(done?(h.result?.[0]?.winners||[]):[]);
+    // Tapis en grosses blindes (arrondi à l'entier) : niveau de la main en cours, sinon niveau affiché.
+    const bbNow=Number(t.levels?.[h&&!done?h.level:L.index]?.bb)||0;
     // La table « tourne » : le joueur connecté est toujours en bas, les autres dans l'ordre de jeu autour de lui.
     const meIdx=Math.max(0,seats.findIndex(x=>x.name===me()));
     const ring=seats.map((s,idx)=>{
@@ -435,8 +576,8 @@
       const tag=out?'<i class="is-out">éliminé</i>':allin?'<i class="is-allin">TAPIS</i>':fold?'<i>couché</i>':s.bot?'<i>virtuel</i>':"";
       const badge=!h||done?"":h.dealer===s.i?'<em class="bpt-ol-dealer">D</em>':"";
       const timer=turn?`<span class="bpt-ol-timer"><span data-ol-turn style="width:${Math.max(0,100-100*(Date.now()-Number(h.actionAt||0))/TURN_MS).toFixed(0)}%"></span></span>`:"";
-      return `<div class="bpt-ol-seat${isMe?" is-me":""}${turn?" is-turn":""}${allin?" is-allin":""}${winners.has(s.i)?" is-winner":""}${fold?" is-folded":""}${out?" is-out":""}" data-pos="${pos}" data-n="${N}" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%">
-        <div class="bpt-ol-plate"><b>${esc(s.name.split(" ")[0])}</b><span>${out?"—":fmt(s.stack)}</span>${timer}</div>${tag}${cards}${badge}${chips}</div>`;
+      return `<div class="bpt-ol-seat${isMe?" is-me":""}${turn?" is-turn":""}${allin?" is-allin":""}${winners.has(s.i)?" is-winner":""}${fold?" is-folded":""}${out?" is-out":""}" data-name="${esc(s.name)}" data-pos="${pos}" data-n="${N}" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%">
+        <div class="bpt-ol-plate">${isMe?"":`<b>${esc(s.name.split(" ")[0])}</b>`}<span>${out?"—":fmt(s.stack)}</span>${!out&&bbNow?`<small class="bpt-ol-bb">${fmt(Math.round(Number(s.stack||0)/bbNow))} BB</small>`:""}${timer}</div>${tag}${cards}${badge}${chips}</div>`;
     }).join("");
     // Pot : tout ce qui a été misé pendant la main, moins les mises encore devant les joueurs.
     const potTotal=h?Object.values(h.contrib||{}).reduce((a,x)=>a+(Number(x)||0),0):0;
@@ -454,7 +595,6 @@
     }
     if(isHost&&done&&running)actions.push(`<button type="button" class="bpt-ol-primary" data-ol-next>Main suivante →</button>`);
     if(t.status==="finished")actions.push(`<button type="button" class="bpt-ol-primary" data-ol-live>Retour au Live</button>`);
-    if(isHost)actions.push(`<button type="button" class="bpt-ol-danger" data-ol-remove>Supprimer</button>`);
     // Barre d'actions du joueur dont c'est le tour.
     let myBar="";
     if(h&&!done&&mine&&h.toAct===mine.i){
@@ -463,13 +603,21 @@
       const key=`${h.no}:${h.street}:${h.actionAt}`;if(raiseKey!==key){raiseKey=key;raiseTo=minTo;}
       raiseTo=Math.max(minTo,Math.min(maxTotal,raiseTo));
       const canRaise=maxTotal>h.currentBet;
-      const presets=[["Min",minTo],["½ pot",h.currentBet+Math.round(pot/2)],["Pot",h.currentBet+pot],["Tapis",maxTotal]]
-        .map(([l,v])=>`<button type="button" data-ol-preset="${Math.max(minTo,Math.min(maxTotal,v))}">${l}</button>`).join("");
+      // Tranches de pot (relance « à » = mise actuelle + fraction du pot après avoir suivi), puis tapis.
+      const sbStep=Math.max(1,Number(lv.sb)||25);
+      // « Min » = relance minimale (double la mise) ; tranches arrondies à la petite blinde.
+      const tranches=[["Min",minTo]].concat([["⅓",1/3],["½",1/2],["¾",3/4],["Pot",1]].map(([l,f])=>[l,Math.max(minTo,Math.min(maxTotal,Math.round((h.currentBet+pot*f)/sbStep)*sbStep))])).concat([["Tapis",maxTotal]]);
+      const presets=tranches.map(([l,v])=>`<button type="button" data-ol-preset="${v}">${l}</button>`).join("");
+      // Curseur exponentiel : précis sur les petites mises, rapide vers le tapis.
+      const step=Math.max(1,Number(lv.sb)||25),span=Math.max(1,maxTotal/minTo);
+      const toPos=a=>maxTotal<=minTo?1000:Math.round(1000*Math.log(Math.max(minTo,a)/minTo)/Math.log(span));
+      // Repères cliquables sous le curseur (les tranches confondues avec la mise minimale ou le tapis ne sont pas répétées).
+      let lastPos=-99;const ticks=tranches.filter(([l,v],k)=>l==="Tapis"||(v>minTo&&v<maxTotal&&tranches.findIndex(x=>x[1]===v)===k)).filter(([l,v])=>{const p=toPos(v)/10;if(l!=="Tapis"&&p-lastPos<9)return false;lastPos=p;return true;}).map(([l,v])=>`<button type="button" data-ol-preset="${v}" style="left:${(toPos(v)/10).toFixed(1)}%">${l}</button>`).join("");
       myBar=`<div class="bpt-ol-mybar">
         <button type="button" class="is-fold" data-ol-act="fold">Se coucher</button>
         ${toCall?`<button type="button" class="is-call" data-ol-act="call">${toCall>=stack?"Suivre à tapis":"Suivre "+fmt(toCall)}</button>`:`<button type="button" class="is-call" data-ol-act="check">Check</button>`}
         ${canRaise?`<button type="button" class="is-raise" data-ol-act="raise">${raiseTo>=maxTotal?"Tapis "+fmt(maxTotal):(h.currentBet?"Relancer à ":"Miser ")+fmt(raiseTo)}</button>
-        <div class="bpt-ol-raise">${maxTotal>minTo?`<div class="bpt-ol-presets">${presets}</div><input type="range" data-ol-range min="${minTo}" max="${maxTotal}" step="${Math.max(1,Math.round((Number(lv.sb)||25)))}" value="${raiseTo}">`:""}</div>`:""}
+        <div class="bpt-ol-raise">${maxTotal>minTo?`<div class="bpt-ol-presets">${presets}</div><div class="bpt-ol-range"><input type="range" data-ol-range min="0" max="1000" step="1" value="${toPos(raiseTo)}" data-min="${minTo}" data-max="${maxTotal}" data-step="${step}"><div class="bpt-ol-ticks">${ticks}</div></div>`:""}</div>`:""}
       </div>`;
     }
     // Abattage : la combinaison gagnante (cartes du joueur + tableau) sort au centre, carte par carte, avec le nom de la main.
@@ -479,24 +627,26 @@
       // Rangement lisible : d'abord les cartes groupées (carré, brelan, paires), puis par hauteur.
       const raw=split(r0.cards),n=c=>raw.filter(x=>x[0]===c[0]).length;
       const five=raw.sort((a,b)=>n(b)-n(a)||RV(b)-RV(a));
-      showcase=`<div class="bpt-ol-showcase" aria-live="polite"><div class="bpt-ol-show-title"><b>${r0.winners.map(i=>esc(firstName(t,i))).join(" et ")}</b> · ${esc(r0.hand||"")}</div>
-        <div class="bpt-ol-show-cards">${five.map((c,k)=>`<span class="bpt-ol-show-slot${mineCards.has(c)?" is-hole":""}" style="--k:${k}">${cardHtml(c," is-show")}</span>`).join("")}</div>
-        <div class="bpt-ol-show-legend"><span class="is-hole">■</span> cartes du joueur · <span>■</span> tableau</div></div>`;
+      // Animation jouée une seule fois par main : si la table est redessinée, les cartes restent en place.
+      const skey=`${t.id}:${h.no}`,still=shownShowcase===skey;shownShowcase=skey;
+      showcase=`<div class="bpt-ol-showcase${still?" is-static":""}" aria-live="polite"><div class="bpt-ol-show-title"><b>${r0.winners.map(i=>esc(firstName(t,i))).join(" et ")}</b> · ${esc(r0.hand||"")}</div>
+        <div class="bpt-ol-show-cards">${five.map((c,k)=>`<span class="bpt-ol-show-slot${mineCards.has(c)?" is-hole":""}" style="--k:${k}">${cardHtml(c," is-show")}</span>`).join("")}</div></div>`;
     }
     const center=h?`<div class="bpt-ol-board">${[0,1,2,3,4].map(k=>cardHtml(board[k])).join("")}</div><div class="bpt-ol-pot">${potLine}</div>`
       :`<strong>${fmt(lv.sb)} / ${fmt(lv.bb)}</strong>`;
     const centerSub=t.status==="finished"?`🏆 ${esc(t.winner||"")} remporte le tournoi`
       :t.status==="waiting"?`En attente des joueurs · ${seats.length} inscrit${seats.length>1?"s":""}`
-      :`Main n°${h?.no||1} · ${STREET[h?.street]||""}`;
+      :"";
     const last=h?.last?.txt?`<div class="bpt-ol-note">${esc(h.last.txt)}${done&&running?` · main suivante dans <span data-ol-next-in>${Math.max(1,Math.ceil((nextHandMs(h)-(Date.now()-Number(h.at||0)))/1000))}</span> s`:""}</div>`:"";
     return `<div class="bpt-ol-table">
       <div class="bpt-ol-bar"><button type="button" data-ol-back aria-label="Retour aux tables">‹</button>
-        <div class="bpt-ol-bar-title"><b>${esc(t.name)}</b><small>${t.countsForChampionship?"Compte au championnat":"Hors championnat"}</small></div>
+        <div class="bpt-ol-bar-title"><b>${esc(t.name)}</b><small>${t.countsForChampionship?"Compte au championnat":"Hors championnat"} · ${t.adaptive?"Adaptatif":"Classique"}</small></div>
         ${isHost&&t.status==="waiting"?`<label class="bpt-ol-check"><input type="checkbox" data-ol-counts${t.countsForChampionship?" checked":""}> Championnat</label>`:""}
+        ${isHost?`<button type="button" class="bpt-ol-bar-del" data-ol-remove title="Supprimer la table" aria-label="Supprimer la table">🗑</button>`:""}
         <div class="bpt-ol-bar-level"><small>Niveau ${L.index+1}${running?` · <span data-ol-clock>${clock(L.left)}</span>`:""}</small><b>${fmt(lv.sb)} / ${fmt(lv.bb)}</b></div></div>
       <div class="bpt-ol-stage"><div class="bpt-ol-rail"><div class="bpt-ol-felt">
         <div class="bpt-ol-center"><span class="bpt-ol-logo">♠ BPT</span>${center}<small>${centerSub}</small></div>
-      </div></div>${ring}${t.status==="finished"?resultsHtml(t):showcase}</div>
+      </div></div>${ring}${t.status==="finished"?resultsHtml(t):showcase}${t.status!=="waiting"?`<button type="button" class="bpt-ol-fx-btn" data-ol-fx aria-label="Chat et objets">💬</button>`:""}</div>
       ${last}${myBar}<div class="bpt-ol-actions">${actions.join("")}</div></div>`;
   }
   // Table « stade » (rectangle aux bouts arrondis) : chaque joueur est posé sur le bord, à intervalles réguliers
@@ -538,6 +688,8 @@
     document.documentElement.classList.toggle("bpt-online-open",!!t&&!!$("online")?.classList.contains("active"));
     box.innerHTML=t?tableHtml(t):lobbyHtml();
     if(t)requestAnimationFrame(layoutSeats);
+    fxListen();
+    if(fxOpen&&!t)fxClose();
   }
 
   /* ---------- Écoute ---------- */
@@ -545,13 +697,17 @@
     if(on===listening)return;listening=on;
     try{
       const r=await db();
-      if(on){ref=r.ref(ROOT);ref.on("value",snap=>{tables=snap.val()||{};Object.keys(tables).forEach(k=>seen.add(k));render();document.dispatchEvent(new CustomEvent("bpt-online-tables"));});}
+      if(on){ref=r.ref(ROOT);ref.on("value",snap=>{tables=snap.val()||{};Object.keys(tables).forEach(k=>seen.add(k));
+        // Les signaux de présence (seen) changent toutes les 10 s : ils ne doivent pas redessiner la table (ni relancer les animations).
+        const sig=JSON.stringify(Object.values(tables).map(t=>t&&{...t,seen:null}));
+        if(sig!==lastSig){lastSig=sig;render();}
+        document.dispatchEvent(new CustomEvent("bpt-online-tables"));});}
       else if(ref){ref.off();ref=null;document.documentElement.classList.remove("bpt-online-open");}
     }catch(e){const box=$("bptOnlineBody");if(box)box.innerHTML=`<div class="bpt-ol-card"><p>Connexion impossible : ${esc(e.message||e)}</p></div>`;}
   }
   function install(){
     const view=$("online");if(!view)return;
-    const live=$("live3");const watch=()=>{listen(view.classList.contains("active")||!!live?.classList.contains("active"));if(!view.classList.contains("active"))document.documentElement.classList.remove("bpt-online-open");else render();};
+    const live=$("live3");const watch=()=>{listen(view.classList.contains("active")||!!live?.classList.contains("active"));if(!view.classList.contains("active")){document.documentElement.classList.remove("bpt-online-open");fxListen();}else render();};
     [view,live].filter(Boolean).forEach(el=>new MutationObserver(watch).observe(el,{attributes:true,attributeFilter:["class"]}));
     view.addEventListener("click",e=>{
       const g=s=>e.target.closest(s);let el;
@@ -565,12 +721,16 @@
       if((el=g("[data-ol-act]"))){const a=el.dataset.olAct;act(openId,a,a==="raise"?raiseTo:0);return;}
       if((el=g("[data-ol-preset]"))){raiseTo=Number(el.dataset.olPreset)||raiseTo;render();return;}
       if(g("[data-ol-next]")){nextHand(openId);return;}
+      if(g("[data-ol-fx]")){fxOpen?fxClose():fxOpenPanel();return;}
+      if((el=g(".bpt-ol-seat[data-name]"))&&el.dataset.name!==me()&&tables[openId]?.status!=="waiting"){fxOpenPanel(el.dataset.name);return;}
       if(g("[data-ol-remove]")){removeTable(openId);return;}
     });
     view.addEventListener("change",e=>{const c=e.target.closest("[data-ol-counts]");if(c)toggleCounts(openId,c.checked);});
     // Curseur de relance : met à jour le montant affiché sans redessiner toute la table.
-    view.addEventListener("input",e=>{const r=e.target.closest("[data-ol-range]");if(!r)return;raiseTo=Number(r.value)||raiseTo;
-      const b=view.querySelector("[data-ol-act=raise]");if(b){const max=Number(r.max);b.textContent=raiseTo>=max?"Tapis "+fmt(max):(b.textContent.startsWith("Miser")?"Miser ":"Relancer à ")+fmt(raiseTo);}});
+    view.addEventListener("input",e=>{const r=e.target.closest("[data-ol-range]");if(!r)return;
+      const min=Number(r.dataset.min),max=Number(r.dataset.max),step=Number(r.dataset.step)||1,p=Number(r.value)/1000;
+      raiseTo=p>=1?max:Math.max(min,Math.min(max,Math.round(min*Math.pow(max/min,p)/step)*step));
+      const b=view.querySelector("[data-ol-act=raise]");if(b){b.textContent=raiseTo>=max?"Tapis "+fmt(max):(b.textContent.startsWith("Miser")?"Miser ":"Relancer à ")+fmt(raiseTo);}});
     watch();
     render();
   }
