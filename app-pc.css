@@ -7109,3 +7109,30 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
 .bpt-ol-seat i.is-away{color:#ffb067}
 .bpt-ol-seat:has(i.is-away) .bpt-ol-plate{opacity:.6;border-style:dashed}
 .bpt-ol-req.is-away{border-color:#ffb067}.bpt-ol-req.is-away b{color:#ffb067}
+/* 10.4.92 — Bouton dealer de sa propre place : à gauche de la plaque (il était caché par ses cartes) */
+.bpt-ol-seat.is-me .bpt-ol-dealer{transform:translate(calc(-50% - 62px),-50%) !important;z-index:5}
+@media (orientation:landscape) and (max-height:500px){.bpt-ol-seat.is-me .bpt-ol-dealer{transform:translate(calc(-50% - 52px),calc(-50% - 26px)) !important}}
+/* 10.4.92 — Chances de gain pendant un tapis */
+.bpt-ol-equity{position:absolute;left:50%;top:100%;transform:translate(-50%,4px);z-index:4;font-style:normal;padding:2px 9px;border-radius:999px;background:rgba(6,9,20,.85);border:1px solid var(--bpt-line,#2a3560);color:var(--bpt-text,#eef2fb);font-size:12.5px;font-weight:950;white-space:nowrap}
+.bpt-ol-equity.is-fav{border-color:var(--bpt-gold,#f2c853);color:var(--bpt-gold,#f2c853)}
+.bpt-ol-seat.is-me .bpt-ol-equity{top:50%;left:50%;transform:translate(calc(-50% + 74px),-50%)}
+/* 10.4.92 — Rien ne recouvre les cartes : chances dans la plaque, D sur le côté extérieur, mise/gains à droite de sa plaque */
+.bpt-ol-plate .bpt-ol-equity{position:static !important;transform:none !important;display:block;margin-top:2px;padding:1px 8px;font-size:12px;border-radius:999px}
+.bpt-ol-dealer{transform:translate(calc(-50% + var(--dside,1) * 58px),calc(-50% - 20px)) !important}
+.bpt-ol-seat.is-me .bpt-ol-dealer{transform:translate(calc(-50% - 62px),-50%) !important}
+.bpt-ol-seat.is-me .bpt-ol-bet{transform:translate(calc(-50% + 84px),-50%) !important}
+@media (orientation:landscape) and (max-height:500px){
+  .bpt-ol-dealer{transform:translate(calc(-50% + var(--dside,1) * 46px),calc(-50% - 16px)) !important}
+  .bpt-ol-seat.is-me .bpt-ol-dealer{transform:translate(calc(-50% - 52px),calc(-50% - 26px)) !important}
+  .bpt-ol-seat.is-me .bpt-ol-bet{transform:translate(calc(-50% - 74px),calc(-50% + 12px)) !important}
+}
+.bpt-ol-plate .bpt-ol-equity{margin-top:0 !important;padding:0 7px !important;font-size:11.5px !important;line-height:1.35}
+/* 10.4.92 — Cartes et mises placées d'après la taille réelle (plus aucun recouvrement) */
+.bpt-ol-seat:not(.is-me) .bpt-ol-cards{transform:translate(calc(-50% + var(--cx,0px)),calc(-50% + var(--cy,0px))) !important}
+.bpt-ol-seat:not(.is-me) .bpt-ol-bet{transform:translate(calc(-50% + var(--bx,0px)),calc(-50% + var(--by,0px))) !important}
+.bpt-ol-stage.is-crowded .bpt-ol-seat:not(.is-me) .bpt-ol-cards .bpt-card{width:23px !important;height:33px !important}
+.bpt-ol-stage.is-crowded .bpt-ol-seat:not(.is-me) .bpt-ol-cards .bpt-card b,.bpt-ol-stage.is-crowded .bpt-ol-seat:not(.is-me) .bpt-ol-cards .bpt-card i{font-size:11.5px !important}
+.bpt-ol-stage.is-crowded .bpt-ol-bet{font-size:11px !important}
+.bpt-ol-bet.is-lost{color:#ff8f8c}.bpt-ol-bet.is-lost::before{background:#8f2f35}
+.bpt-ol-seat:not(.is-me) .bpt-ol-dealer{transform:translate(calc(-50% + var(--dside,1) * 58px),calc(-50% + var(--ddy,-20px))) !important}
+@media (orientation:landscape) and (max-height:500px){.bpt-ol-seat:not(.is-me) .bpt-ol-dealer{transform:translate(calc(-50% + var(--dside,1) * 46px),calc(-50% + var(--ddy,-16px))) !important}}
