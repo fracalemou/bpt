@@ -9347,3 +9347,17 @@ html.bpt-online-open #bptAppAction{display:none !important}
 @keyframes bptOlShowIn{from{opacity:0;transform:translate(-50%,-50%) scale(.85)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
 @keyframes bptOlShowOut{to{opacity:0;visibility:hidden}}
 @keyframes bptOlCardIn{from{opacity:0;transform:translateY(34px) rotateY(90deg) scale(.6)}to{opacity:1;transform:none}}
+/* 10.4.78 — Partie en ligne · lot 4 : écran de fin du tournoi */
+.bpt-ol-results{position:absolute;left:50%;top:50%;z-index:9;transform:translate(-50%,-50%);width:min(420px,92%);max-height:92%;overflow:auto;display:grid;gap:10px;padding:14px 16px;border-radius:18px;background:rgba(6,9,20,.92);border:1px solid var(--bpt-gold,#f2c853);box-shadow:0 18px 44px rgba(0,0,0,.6)}
+.bpt-ol-res-head{display:flex;align-items:center;gap:12px}
+.bpt-ol-res-head>span{font-size:34px}
+.bpt-ol-res-head small{display:block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--bpt-muted,#9aa6c8)}
+.bpt-ol-res-head b{font-size:20px;color:var(--bpt-gold,#f2c853)}
+.bpt-ol-res-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.bpt-ol-res-list li{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:10px;background:var(--bpt-card,#161d36)}
+.bpt-ol-res-list li em{font-style:normal;min-width:34px;font-weight:950;color:var(--bpt-muted,#9aa6c8)}
+.bpt-ol-res-list li.is-win{border:1px solid var(--bpt-gold,#f2c853)}.bpt-ol-res-list li.is-win em{color:var(--bpt-gold,#f2c853)}
+.bpt-ol-res-list li.is-me b{color:var(--bpt-gold,#f2c853)}
+.bpt-ol-res-list span{display:grid;min-width:0}.bpt-ol-res-list b{font-size:14px}.bpt-ol-res-list small{font-size:11.5px;color:var(--bpt-muted,#9aa6c8)}
+.bpt-ol-res-status{margin:0;font-size:12.5px;text-align:center;color:var(--bpt-muted,#9aa6c8)}
+.bpt-ol-res-status.is-ok{color:#54d68b}.bpt-ol-res-status.is-error{color:#ff8f8c}

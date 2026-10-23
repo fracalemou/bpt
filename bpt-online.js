@@ -1,4 +1,4 @@
-/* BPT 10.4.76 — Jouer en ligne · lot 1 : salon et places · lot 2 : donne · lot 3 : enchères, pots, abattage.
+/* BPT 10.4.78 — Jouer en ligne · lot 1 : salon et places · lot 2 : donne · lot 3 : enchères, pots, abattage · lot 4 : fin du tournoi, championnat, relais de l'hôte.
    Mode confiance (pas de serveur) : tout passe par Firebase, les écritures concurrentes par transaction.
    Données : bpt/online/tables/{id} = {id,name,host,createdAt,status,countsForChampionship,maxSeats,
    startStack,targetHours,levelSeconds,levels[],levelIndex,seats{index:{name,stack,joinedAt}}}. */
@@ -143,9 +143,13 @@
   }
   function nextToAct(t,from){const list=handPlayers(t);let p=from;for(let k=0;k<list.length;k++){p=nextOf(list,p);if(canAct(t,p))return p;}return null;}
 
+  function finishTournament(t){
+    const list=inPlay(t);if(t.status==="finished")return;
+    t.status="finished";t.finishedAt=Date.now();t.winner=list.length?t.seats[list[0]].name:null;
+  }
   function dealHand(t){
     const list=inPlay(t);
-    if(list.length<2){t.status="finished";t.finishedAt=Date.now();t.winner=list.length?t.seats[list[0]].name:null;return;}
+    if(list.length<2){finishTournament(t);return;}
     const prev=t.hand?t.hand.dealer:null;
     // Première main : bouton tiré au sort ; ensuite il passe au joueur suivant encore en jeu.
     const dealer=prev===null||prev===undefined?list[Math.floor(Math.random()*list.length)]:nextOf(list,prev);
@@ -236,12 +240,19 @@
       // Jeton indivisible : au premier gagnant à gauche du bouton.
       const ordered=[];let q=h.dealer;for(let k=0;k<list.length;k++){q=nextOf(list,q);if(w.includes(q))ordered.push(q);}
       ordered.forEach(i=>{t.seats[i].stack=stackOf(t,i)+share+(rest>0?1:0);if(rest>0)rest--;});
-      return {amount:p.amount,winners:ordered,hand:showdown&&score[ordered[0]]?HAND_NAMES[score[ordered[0]][0]]:null,cards:showdown?(combo[ordered[0]]||""):""};
+      return {amount:p.amount,winners:ordered,elig:p.elig,hand:showdown&&score[ordered[0]]?HAND_NAMES[score[ordered[0]][0]]:null,cards:showdown?(combo[ordered[0]]||""):""};
     });
     h.showdown=!!showdown;h.street="done";h.toAct=null;h.at=Date.now();h.bets={};
-    // Éliminations (détaillées au lot 4) : place = nombre de joueurs encore en jeu + 1.
+    // Éliminations : si plusieurs joueurs sortent sur la même main, le plus gros tapis de départ prend la meilleure place.
+    // Éliminateur : gagnant du pot le plus élevé auquel le joueur participait.
     t.out=t.out||{};const still=inPlay(t).length;
-    list.filter(i=>stackOf(t,i)===0&&!t.out[K(i)]).forEach(i=>{t.out[K(i)]={name:t.seats[i].name,place:still+1,hand:h.no,by:h.result[h.result.length-1]?.winners?.map(w=>t.seats[w].name)[0]||null};});
+    const busted=list.filter(i=>stackOf(t,i)===0&&!t.out[K(i)]).sort((a,b)=>(Number(h.contrib?.[K(b)])||0)-(Number(h.contrib?.[K(a)])||0));
+    busted.forEach((i,k)=>{
+      const pot=[...h.result].reverse().find(r=>(r.elig||[]).includes(i)&&r.winners.length)||h.result[0];
+      const by=pot?.winners?.find(w=>stackOf(t,w)>0);
+      t.out[K(i)]={name:t.seats[i].name,place:still+1+k,hand:h.no,by:by!==undefined?t.seats[by].name:null,level:(Number(h.level)||0)+1,at:Date.now()};
+    });
+    if(still<2)finishTournament(t);
     const w0=h.result[0]?.winners||[];
     h.last={i:w0[0],txt:w0.length?`${w0.map(i=>firstName(t,i)).join(" et ")} remporte${w0.length>1?"nt":""} ${fmt(h.result.reduce((a,r)=>a+r.amount,0))}${h.result[0]?.hand?` · ${h.result[0].hand}`:""}`:""};
   }
@@ -253,8 +264,8 @@
     {
       const h=t.hand;if(t.status!=="running"||!h||h.street==="done")return false;
       const i=h.toAct,seat=t.seats?.[i];if(seat===undefined||seat===null||i===null)return false;
-      if(asBot?!(seat.bot&&t.host===me()):seat.name!==me()){
-        if(!(action==="timeout"&&t.host===me()&&Date.now()-Number(h.actionAt||0)>=TURN_MS))return false;
+      if(asBot?!(seat.bot&&pilotName(t)===me()):seat.name!==me()){
+        if(!(action==="timeout"&&pilotName(t)===me()&&Date.now()-Number(h.actionAt||0)>=TURN_MS))return false;
       }
       const toCall=Math.max(0,h.currentBet-betOf(h,i)),stack=stackOf(t,i),name=firstName(t,i);
       h.acted=h.acted||{};h.folded=h.folded||{};
@@ -286,7 +297,10 @@
      dépassé, main suivante. Un seul déclenchement par situation. */
   let autoKey="";
   function autopilot(){
-    const t=openId&&tables[openId];if(!t||t.status!=="running"||t.host!==me())return;
+    const t=openId&&tables[openId];if(!t||t.status==="waiting")return;
+    if(pilotName(t)!==me())return;
+    if(t.status==="finished"){if(t.countsForChampionship&&!t.publishedToHistory&&!t.publishing&&!t.publishError)publishResult(t.id);return;}
+    if(t.status!=="running")return;
     const h=t.hand;if(!h)return;
     const now=Date.now();
     if(h.street==="done"){
@@ -304,6 +318,76 @@
     if(!toCall)return r<0.18?{action:"raise",amount:Math.max(bb,Math.round(pot/2))}:{action:"check"};
     if(toCall<=Math.max(bb*3,stack*0.08))return r<0.1?{action:"raise",amount:h.currentBet+Math.max(h.minRaise,bb)}:{action:"call"};
     return r<0.25?{action:"call"}:{action:"fold"};
+  }
+
+  /* ---------- Lot 4 : relais de l'hôte, classement final, enregistrement au championnat ---------- */
+  // Présence : chaque appareil qui regarde la table signale sa présence toutes les 10 s (bpt/online/tables/{id}/seen).
+  const SEEN_MS=25000;
+  const seenKey=name=>String(name||"").replace(/[.#$\[\]\/]/g,"_");
+  const seenRecently=(t,name)=>Date.now()-Number(t.seen?.[seenKey(name)]||0)<SEEN_MS;
+  // Pilote des automatismes : l'hôte s'il est présent, sinon le premier joueur présent (ordre des places).
+  function pilotName(t){
+    if(!t.seen||seenRecently(t,t.host))return t.host;
+    const c=seatsOf(t).filter(s=>!s.bot).sort((a,b)=>a.i-b.i).find(s=>seenRecently(t,s.name));
+    return c?c.name:t.host;
+  }
+  let lastBeat=0;
+  async function heartbeat(){
+    const t=openId&&tables[openId];if(!t||t.status==="waiting"||!me())return;
+    if(Date.now()-lastBeat<10000)return;lastBeat=Date.now();
+    try{await (await db()).ref(`${ROOT}/${t.id}/seen/${seenKey(me())}`).set(Date.now());}catch(_e){}
+  }
+  function finalRanking(t){
+    const out=Object.values(t.out||{}).filter(Boolean);
+    return [...(t.winner?[{name:t.winner,place:1,by:"",hand:null}]:[]),...out].sort((a,b)=>a.place-b.place);
+  }
+  // Lignes d'historique : même format et même circuit que le Live (validation, points, publication).
+  function championshipRows(t){
+    const g=new Function("return typeof db!==\"undefined\"?db:null")();
+    const ranking=finalRanking(t),n=ranking.length,gameNo=window.nextGameNo(),kills={};
+    ranking.forEach(r=>{if(r.by)kills[r.by]=(kills[r.by]||0)+1;});
+    const start=Number(t.startedAt)||Date.now(),end=Number(t.finishedAt)||Date.now();
+    return ranking.map(r=>({
+      game:gameNo,date:new Date(start).toISOString().slice(0,10),location:`${t.name} (en ligne)`,
+      player:r.name,place:r.place,killer:r.place===1?"":String(r.by||""),
+      outLevel:r.level||null,outTime:r.at?new Date(r.at).toLocaleTimeString("fr-FR"):"",outAt:Number(r.at)||null,
+      gameStartedAt:start,gameFinishedAt:end,gameDurationSec:Math.max(0,Math.floor((end-start)/1000)),gameActiveDurationSec:Math.max(0,Math.floor((end-start)/1000)),
+      gameTimingSource:"recorded",startStack:Number(t.startStack)||20000,liveTargetHours:Number(t.targetHours)||null,
+      tablier:n>=Number(g?.settings?.tablierMinPlayers||10)&&r.place===1,n,points:window.pointsFor(r.place,n),
+      stake:0,gross:0,net:0,kills:kills[r.name]||0,win:r.place===1,podium:r.place<=3,online:true
+    }));
+  }
+  let publishing=false;
+  async function publishResult(id){
+    if(publishing)return;publishing=true;
+    try{
+      const claimed=await tx(id,t=>{
+        if(t.status!=="finished"||!t.countsForChampionship||t.publishedToHistory)return false;
+        if(t.publishing&&Date.now()-Number(t.publishing.at||0)<60000)return false;
+        t.publishing={by:me(),at:Date.now()};t.publishError=null;
+      });
+      if(!claimed)return;
+      const t=tables[id];
+      try{
+        if(typeof window.persistCompletedGame!=="function")throw new Error("enregistrement indisponible sur cet appareil");
+        const rows=championshipRows(t),err=window.validateCompletedGameRows(rows);
+        if(err)throw new Error(err);
+        await window.persistCompletedGame(rows,{showSummary:false});
+        await tx(id,x=>{x.publishedToHistory=true;x.historyGameNo=Number(rows[0]?.game)||null;x.publishing=null;});
+      }catch(e){
+        await tx(id,x=>{x.publishing=null;x.publishError=String(e?.message||e).slice(0,200);});
+      }
+    }finally{publishing=false;}
+  }
+  function resultsHtml(t){
+    const rk=finalRanking(t),kills={};rk.forEach(r=>{if(r.by)kills[r.by]=(kills[r.by]||0)+1;});
+    const status=!t.countsForChampionship?"Hors championnat"
+      :t.publishedToHistory?`Enregistrée au championnat · partie n°${t.historyGameNo||"?"}${rk.length<6?" · pas de points sous 6 joueurs":""}`
+      :t.publishError?`Enregistrement au championnat impossible : ${esc(t.publishError)}`
+      :"Enregistrement au championnat en cours…";
+    return `<div class="bpt-ol-results"><div class="bpt-ol-res-head"><span>🏆</span><div><small>Vainqueur du tournoi</small><b>${esc(t.winner||"—")}</b></div></div>
+      <ol class="bpt-ol-res-list">${rk.map(r=>`<li class="${r.place===1?"is-win":""}${r.name===me()?" is-me":""}"><em>${r.place}${r.place===1?"er":"e"}</em><span><b>${esc(r.name)}</b><small>${r.place===1?`${kills[r.name]||0} élimination${(kills[r.name]||0)>1?"s":""}`:`éliminé par ${esc(String(r.by||"?").split(" ")[0])} · main n°${r.hand||"?"}${kills[r.name]?` · ${kills[r.name]} élim.`:""}`}</small></span></li>`).join("")}</ol>
+      <p class="bpt-ol-res-status${t.publishError?" is-error":t.publishedToHistory?" is-ok":""}">${status}</p></div>`;
   }
   const SUIT={s:"♠",h:"♥",d:"♦",c:"♣"};
   function cardHtml(c,cls=""){
@@ -369,6 +453,7 @@
       if(isHost)actions.push(`<button type="button" class="bpt-ol-primary" data-ol-start${seats.length<2?" disabled":""}>Lancer · ${seats.length} joueur${seats.length>1?"s":""}</button>`);
     }
     if(isHost&&done&&running)actions.push(`<button type="button" class="bpt-ol-primary" data-ol-next>Main suivante →</button>`);
+    if(t.status==="finished")actions.push(`<button type="button" class="bpt-ol-primary" data-ol-live>Retour au Live</button>`);
     if(isHost)actions.push(`<button type="button" class="bpt-ol-danger" data-ol-remove>Supprimer</button>`);
     // Barre d'actions du joueur dont c'est le tour.
     let myBar="";
@@ -411,7 +496,7 @@
         <div class="bpt-ol-bar-level"><small>Niveau ${L.index+1}${running?` · <span data-ol-clock>${clock(L.left)}</span>`:""}</small><b>${fmt(lv.sb)} / ${fmt(lv.bb)}</b></div></div>
       <div class="bpt-ol-stage"><div class="bpt-ol-rail"><div class="bpt-ol-felt">
         <div class="bpt-ol-center"><span class="bpt-ol-logo">♠ BPT</span>${center}<small>${centerSub}</small></div>
-      </div></div>${ring}${showcase}</div>
+      </div></div>${ring}${t.status==="finished"?resultsHtml(t):showcase}</div>
       ${last}${myBar}<div class="bpt-ol-actions">${actions.join("")}</div></div>`;
   }
   // Table « stade » (rectangle aux bouts arrondis) : chaque joueur est posé sur le bord, à intervalles réguliers
@@ -441,7 +526,7 @@
     const nx=document.querySelector("#bptOnlineBody [data-ol-next-in]");if(nx&&t.hand)nx.textContent=Math.max(1,Math.ceil((nextHandMs(t.hand)-(Date.now()-Number(t.hand.at||0)))/1000));
     const bar=document.querySelector("#bptOnlineBody [data-ol-turn]");if(bar&&t.hand)bar.style.width=Math.max(0,100-100*(Date.now()-Number(t.hand.actionAt||0))/TURN_MS).toFixed(0)+"%";
   },1000);
-  setInterval(()=>{try{autopilot();}catch(e){console.warn("BPT en ligne :",e);}},400);
+  setInterval(()=>{try{heartbeat();autopilot();}catch(e){console.warn("BPT en ligne :",e);}},400);
   function render(){
     const box=$("bptOnlineBody");if(!box)return;
     if(!me()){box.innerHTML=`<div class="bpt-ol-card"><p>Identifiez-vous d'abord (Paramètres › Mon profil) pour rejoindre une table.</p></div>`;return;}
@@ -494,6 +579,7 @@
   window.bptOnline={
     openTables,
     me,
+    pilot(id){const t=tables[id];return t?pilotName(t):null;}, // diagnostic : qui pilote les automatismes
     open(id){openId=id||null;window.showView&&window.showView("online");render();},
     async create(form){await createTable(form);window.showView&&window.showView("online");render();}
   };
