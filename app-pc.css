@@ -7049,3 +7049,40 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
 .bpt-ol-clockmenu{position:absolute;top:58px;right:10px;z-index:30;display:grid;grid-template-columns:1fr 1fr;gap:6px;width:min(260px,calc(100% - 20px));padding:8px;border-radius:14px;background:var(--bpt-bg2,#121a33);border:1px solid var(--bpt-gold,#f2c853);box-shadow:0 14px 34px rgba(0,0,0,.55)}
 .bpt-ol-clockmenu button{min-height:40px;border-radius:10px;border:1px solid var(--bpt-line,#2a3560);background:var(--bpt-card,#161d36);color:var(--bpt-text,#eef2fb);font-weight:850;font-size:13px;cursor:pointer}
 .bpt-ol-clockmenu .is-wide{grid-column:1/-1;background:var(--bpt-gold,#f2c853);color:#171007;border:0}
+/* 10.4.88 — Raccourcis sous le curseur vertical */
+.bpt-ol-side-presets{display:grid;grid-template-columns:1fr;gap:4px;width:100%}
+.bpt-ol-side-presets button{min-height:30px;padding:0 2px;border-radius:9px;border:1px solid var(--bpt-line,#2a3560);background:var(--bpt-card,#161d36);color:var(--bpt-text,#eef2fb);font-weight:850;font-size:12px;white-space:nowrap;cursor:pointer}
+.bpt-ol-side-presets button.is-on{border-color:var(--bpt-gold,#f2c853);color:var(--bpt-gold,#f2c853)}
+.bpt-ol-side input.is-vertical{height:min(30vh,210px) !important}
+@media (orientation:landscape) and (max-height:500px){
+  .bpt-ol-side{flex-direction:row;flex-wrap:wrap;justify-content:center;width:150px !important;top:52%}
+  .bpt-ol-side input.is-vertical{height:min(60vh,200px) !important}
+  .bpt-ol-side small{display:none}
+  .bpt-ol-side-presets{width:66px;gap:3px}.bpt-ol-side-presets button{min-height:24px;font-size:11px}
+  .bpt-ol-side .is-raise{width:100%}
+}
+@media (orientation:landscape) and (max-height:500px){
+  .bpt-ol-side{display:grid !important;grid-template-columns:34px 78px;grid-template-rows:auto 1fr auto;grid-template-areas:"slider cancel" "slider presets" "slider raise";gap:4px 6px;width:auto !important;top:46px !important;bottom:8px;transform:none !important;align-items:start}
+  .bpt-ol-side .is-cancel{grid-area:cancel;justify-self:end}
+  .bpt-ol-side input.is-vertical{grid-area:slider;height:100% !important;min-height:120px;width:30px}
+  .bpt-ol-side-presets{grid-area:presets;width:100% !important}
+  .bpt-ol-side .is-raise{grid-area:raise;min-height:38px !important}
+}
+/* 10.4.88 — Demandes pendant la partie en ligne (rejoindre, reprise) */
+.bpt-ol-req{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:12px;background:var(--bpt-card2,#1b2442);border:1px solid var(--bpt-gold,#f2c853);font-size:13px;color:var(--bpt-text,#eef2fb)}
+.bpt-ol-req span{flex:1;min-width:0}.bpt-ol-req b{color:var(--bpt-gold,#f2c853)}
+.bpt-ol-req button{flex:0 0 auto;min-height:34px;padding:0 12px;border-radius:9px;border:1px solid var(--bpt-line,#2a3560);background:transparent;color:var(--bpt-text,#eef2fb);font-weight:850;cursor:pointer}
+.bpt-ol-req button.is-ok{background:var(--bpt-gold,#f2c853);color:#171007;border:0}
+.bpt-ol-req.is-info{border-color:var(--bpt-line,#2a3560)}
+/* 10.4.88 — Parties en ligne hors classement (écran Parties) */
+.bpt-ol-unranked{margin:0 0 12px;border-radius:14px;background:var(--bpt-card,#161d36);border:1px solid var(--bpt-line,#2a3560);color:var(--bpt-text,#eef2fb)}
+.bpt-ol-unranked[hidden]{display:none}
+.bpt-ol-unranked summary{padding:10px 14px;font-weight:850;cursor:pointer}
+.bpt-ol-unranked summary span{display:inline-block;margin-left:6px;padding:0 7px;border-radius:999px;background:var(--bpt-card2,#1b2442);font-size:12px;color:var(--bpt-muted,#9aa6c8)}
+.bpt-ol-unranked-list{display:grid;gap:4px;padding:0 10px}
+.bpt-ol-unranked-row{display:flex;gap:6px}
+.bpt-ol-unranked-row button{min-height:40px;border-radius:10px;border:1px solid var(--bpt-line,#2a3560);background:var(--bpt-bg2,#121a33);color:var(--bpt-text,#eef2fb);cursor:pointer}
+.bpt-ol-unranked-row button:first-child{flex:1;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 12px;text-align:left}
+.bpt-ol-unranked-row button:first-child span{font-size:12.5px;color:var(--bpt-muted,#9aa6c8)}
+.bpt-ol-unranked-row .is-del{width:40px;opacity:.6}
+.bpt-ol-unranked-note{margin:8px 14px 12px;font-size:12px;color:var(--bpt-muted,#9aa6c8)}

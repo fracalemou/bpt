@@ -2462,14 +2462,14 @@ function showEndGameSummary(rows){
   const first=sorted[0];
 
   content.innerHTML=`
-    <div class="muted" style="margin-top:6px">Partie #${first.game} · ${esc(shortDate(first.date))}${first.location?" · "+esc(first.location):""} · ${sorted.length} joueurs${bptGameTiming(sorted).durationSec?" · "+esc(formatGameDuration(bptGameTiming(sorted).durationSec)):""}</div>
+    <div class="muted" style="margin-top:6px">${first.unranked?"💻 Partie en ligne · hors classement":(first.online?"💻 En ligne · ":"")+"Partie #"+first.game} · ${esc(shortDate(first.date))}${first.location?" · "+esc(first.location):""} · ${sorted.length} joueurs${bptGameTiming(sorted).durationSec?" · "+esc(formatGameDuration(bptGameTiming(sorted).durationSec)):""}</div>
 
     <div class="summary-podium">
       ${sorted.slice(0,3).map((r,i)=>`<div class="summary-place">
         <b>${esc(r.player)}</b>
         <div class="podium-nickname">${playerNicknameInfo(r.player).primary?`(${esc(playerNicknameInfo(r.player).primary)})`:""}</div>
         <div class="big">${medalForRank(i+1)}</div>
-        <div>${num(r.points,0)} pts · ${euro(r.gross)}</div>
+        <div>${r.unranked?"Hors classement":`${num(r.points,0)} pts${r.online?"":" · "+euro(r.gross)}`}</div>
         <div class="muted">${r.kills||0} kill${Number(r.kills||0)>1?"s":""}</div>
       </div>`).join("")}
     </div>
@@ -2495,7 +2495,7 @@ function showEndGameSummary(rows){
           ${sorted.map(r=>`<tr>
             <td>${r.place}</td>
             <td>${playerNameHtml(r.player)}</td>
-            <td>${num(r.points,0)}</td>
+            <td>${r.unranked?"—":num(r.points,0)}</td>
             <td>${r.kills||0}</td>
             <td>${Number(r.place)===1?"🏆 Vainqueur":(r.killer?playerNameHtml(r.killer):"—")}</td>
             <td>${r.outLevel?`N${Number(r.outLevel)}`:"—"}</td>
@@ -4686,7 +4686,7 @@ function renderLatestGame(){
   const pot=rows.length*Number(first.stake||0);
   const seasonKey=entry.seasonKey||currentGamePhotoSeasonKey();
 
-  $("latestGameTitle").textContent=gameDisplayTitle(first,gameNo);
+  $("latestGameTitle").textContent=gameDisplayTitle(first,gameNo)+(first.online?" · 💻 En ligne":"");
   $("latestGameMeta").textContent=`${shortDate(first.date||"")}${first.location?" · "+first.location:""} · ${rows.length} joueurs`;
   $("latestGameWinner").textContent=winner?.player||"—";
   if($("latestGameWinnerNickname")){

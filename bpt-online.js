@@ -343,6 +343,65 @@
       settle(t);
     }
   }
+
+  /* ---------- Demandes pendant la partie (comme le Live classique) ----------
+     t.joinRequest = {name, at} : un spectateur demande à rejoindre ; l'organisateur accepte (place + tapis de départ,
+     joue dès la main suivante) ou refuse (t.joinRefused = {name, at}).
+     t.takeoverRequest = {name, at} : un joueur assis demande à devenir organisateur ; acceptation, refus, ou reprise
+     forcée avec le code BPT après 30 s sans réponse. */
+  const TAKEOVER_MS=30000, FORCE_CODE="bpt";
+  async function requestJoin(id){
+    const name=me();if(!name)return;
+    const ok=await tx(id,t=>{
+      if(t.status!=="running"||mySeat(t))return false;
+      if(t.joinRequest&&t.joinRequest.name!==name)return false; // une demande à la fois
+      if(seatsOf(t).length>=MAX_PLAYERS)return false;
+      t.joinRequest={name,at:Date.now()};if(t.joinRefused?.name===name)t.joinRefused=null;
+    });
+    if(!ok)alert("Impossible pour l’instant : une autre demande est en attente ou la table est complète.");
+  }
+  async function answerJoin(id,accept){
+    await tx(id,t=>{
+      const r=t.joinRequest;if(!r||t.host!==me())return false;
+      t.joinRequest=null;
+      if(!accept){t.joinRefused={name:r.name,at:Date.now()};return;}
+      if(seatsOf(t).some(s=>s.name===r.name)||seatsOf(t).length>=MAX_PLAYERS)return;
+      let i=0;while(t.seats[i]&&t.seats[i].name)i++;
+      t.seats[i]={name:r.name,stack:Number(t.startStack)||20000,joinedAt:Date.now(),late:true};
+      t.lastJoin={name:r.name,at:Date.now()};
+    });
+  }
+  async function requestTakeover(id){
+    const name=me();if(!name)return;
+    const t0=tables[id];
+    if(t0?.takeoverRequest?.name===name){ // demande déjà envoyée : reprise forcée possible après 30 s
+      const left=Math.ceil((TAKEOVER_MS-(Date.now()-Number(t0.takeoverRequest.at||0)))/1000);
+      if(left>0){alert(`L’organisateur a encore ${left} s pour répondre.`);return;}
+      const code=prompt("Aucune réponse depuis 30 secondes.\n\nSaisissez le code BPT pour forcer la reprise :","");
+      if(code===null)return;
+      if(String(code).trim().toLowerCase()!==FORCE_CODE){alert("Code BPT incorrect.");return;}
+      await tx(id,t=>{if(t.takeoverRequest?.name!==name)return false;t.host=name;t.takeoverRequest=null;});
+      return;
+    }
+    const ok=await tx(id,t=>{
+      if(t.status!=="running"||t.host===name||!mySeat(t))return false;
+      if(t.takeoverRequest&&t.takeoverRequest.name!==name)return false;
+      t.takeoverRequest={name,at:Date.now()};
+    });
+    if(!ok)alert("Une autre demande de reprise est déjà en attente.");
+  }
+  async function answerTakeover(id,accept){
+    await tx(id,t=>{const r=t.takeoverRequest;if(!r||t.host!==me())return false;if(accept)t.host=r.name;t.takeoverRequest=null;});
+  }
+  function requestsHtml(t,isHost,mine){
+    const out=[],fn=n=>esc(String(n||"").split(" ")[0]);
+    if(isHost&&t.joinRequest)out.push(`<div class="bpt-ol-req"><span><b>${fn(t.joinRequest.name)}</b> demande à rejoindre la partie</span><button type="button" class="is-ok" data-ol-join-ans="1">Accepter</button><button type="button" data-ol-join-ans="0">Refuser</button></div>`);
+    if(isHost&&t.takeoverRequest)out.push(`<div class="bpt-ol-req"><span><b>${fn(t.takeoverRequest.name)}</b> demande à reprendre l’organisation</span><button type="button" class="is-ok" data-ol-take-ans="1">Accepter</button><button type="button" data-ol-take-ans="0">Refuser</button></div>`);
+    if(!isHost&&t.takeoverRequest?.name===me()){const left=Math.max(0,Math.ceil((TAKEOVER_MS-(Date.now()-Number(t.takeoverRequest.at||0)))/1000));
+      out.push(`<div class="bpt-ol-req is-info"><span>Demande de reprise envoyée${left?` · réponse attendue (<b data-ol-take-left="${t.takeoverRequest.at}">${left}</b> s)`:" · pas de réponse"}</span>${left?"":`<button type="button" class="is-ok" data-ol-take>Forcer la reprise</button>`}</div>`);}
+    if(t.lastJoin&&Date.now()-Number(t.lastJoin.at||0)<8000&&t.lastJoin.name!==me())out.push(`<div class="bpt-ol-req is-info"><span><b>${fn(t.lastJoin.name)}</b> rejoint la partie à la prochaine main</span></div>`);
+    return out.join("");
+  }
   /* Chrono (hôte) : ±1 min, pause/reprise, niveau précédent/suivant. On décale l'heure de départ, les durées restent intactes. */
   async function clockCmd(id,cmd){
     await tx(id,t=>{
@@ -368,7 +427,7 @@
     const t=openId&&tables[openId];if(!t||t.status==="waiting")return;
     if(pilotName(t)!==me())return;
     if(t.status==="finished"&&!t.runningCleared){t.runningCleared=true;setRunning(t.id,false);}
-    if(t.status==="finished"){if(t.countsForChampionship&&!t.publishedToHistory&&!t.publishing&&!t.publishError)publishResult(t.id);return;}
+    if(t.status==="finished"){if(!t.publishedToHistory&&!t.publishing&&!t.publishError)publishResult(t.id);return;}
     if(t.status!=="running"||t.pausedAt)return;
     const h=t.hand;if(!h)return;
     const now=Date.now();
@@ -411,46 +470,91 @@
     return [...(t.winner?[{name:t.winner,place:1,by:"",hand:null}]:[]),...out].sort((a,b)=>a.place-b.place);
   }
   // Lignes d'historique : même format et même circuit que le Live (validation, points, publication).
-  function championshipRows(t){
+  function championshipRows(t,{unranked=false,gameNo=null}={}){
     const g=new Function("return typeof db!==\"undefined\"?db:null")();
-    const ranking=finalRanking(t),n=ranking.length,gameNo=window.nextGameNo(),kills={};
+    const ranking=finalRanking(t),n=ranking.length,kills={};
+    const no=gameNo??(unranked?null:window.nextGameNo());
     ranking.forEach(r=>{if(r.by)kills[r.by]=(kills[r.by]||0)+1;});
     const start=Number(t.startedAt)||Date.now(),end=Number(t.finishedAt)||Date.now();
     return ranking.map(r=>({
-      game:gameNo,date:new Date(start).toISOString().slice(0,10),location:"En ligne",
+      game:no,date:new Date(start).toISOString().slice(0,10),location:"En ligne",
       player:r.name,place:r.place,killer:r.place===1?"":String(r.by||""),
       outLevel:r.level||null,outTime:r.at?new Date(r.at).toLocaleTimeString("fr-FR"):"",outAt:Number(r.at)||null,
       gameStartedAt:start,gameFinishedAt:end,gameDurationSec:Math.max(0,Math.floor((end-start)/1000)),gameActiveDurationSec:Math.max(0,Math.floor((end-start)/1000)),
       gameTimingSource:"recorded",startStack:Number(t.startStack)||20000,liveTargetHours:Number(t.targetHours)||null,
-      tablier:n>=Number(g?.settings?.tablierMinPlayers||10)&&r.place===1,n,points:window.pointsFor(r.place,n),
-      stake:0,gross:0,net:0,kills:kills[r.name]||0,win:r.place===1,podium:r.place<=3,online:true
+      // Hors classement : aucun point ni tablier (la partie n'entre jamais dans l'historique du championnat).
+      tablier:!unranked&&n>=Number(g?.settings?.tablierMinPlayers||10)&&r.place===1,n,points:unranked?0:window.pointsFor(r.place,n),
+      stake:0,gross:0,net:0,kills:kills[r.name]||0,win:r.place===1,podium:r.place<=3,online:true,...(unranked?{unranked:true}:{})
     }));
   }
+  /* Fin de partie : partie comptée → historique du championnat (même circuit que le Live) ;
+     partie non comptée → liste séparée bpt/online/history/{id}, qui n'entre dans aucun calcul (classement, records…). */
+  const HIST_ROOT="bpt/online/history";
   let publishing=false;
   async function publishResult(id){
     if(publishing)return;publishing=true;
     try{
       const claimed=await tx(id,t=>{
-        if(t.status!=="finished"||!t.countsForChampionship||t.publishedToHistory)return false;
+        if(t.status!=="finished"||t.publishedToHistory)return false;
         if(t.publishing&&Date.now()-Number(t.publishing.at||0)<60000)return false;
         t.publishing={by:me(),at:Date.now()};t.publishError=null;
       });
       if(!claimed)return;
       const t=tables[id];
       try{
-        if(typeof window.persistCompletedGame!=="function")throw new Error("enregistrement indisponible sur cet appareil");
-        const rows=championshipRows(t),err=window.validateCompletedGameRows(rows);
-        if(err)throw new Error(err);
-        await window.persistCompletedGame(rows,{showSummary:false});
-        await tx(id,x=>{x.publishedToHistory=true;x.historyGameNo=Number(rows[0]?.game)||null;x.publishing=null;});
+        if(t.countsForChampionship){
+          if(typeof window.persistCompletedGame!=="function")throw new Error("enregistrement indisponible sur cet appareil");
+          const rows=championshipRows(t),err=window.validateCompletedGameRows(rows);
+          if(err)throw new Error(err);
+          await window.persistCompletedGame(rows,{showSummary:false});
+          await tx(id,x=>{x.publishedToHistory=true;x.historyGameNo=Number(rows[0]?.game)||null;x.publishing=null;});
+        }else{
+          const rows=championshipRows(t,{unranked:true});
+          await (await db()).ref(`${HIST_ROOT}/${id}`).set({id,at:Number(t.finishedAt)||Date.now(),name:t.name,rows});
+          await tx(id,x=>{x.publishedToHistory=true;x.unrankedSaved=true;x.publishing=null;});
+        }
       }catch(e){
         await tx(id,x=>{x.publishing=null;x.publishError=String(e?.message||e).slice(0,200);});
       }
     }finally{publishing=false;}
   }
+  // Bilan de fin de partie, comme pour le Live : affiché une fois à chaque joueur quand la partie est enregistrée.
+  function maybeShowSummary(t){
+    if(!t||t.status!=="finished"||!t.publishedToHistory||typeof window.showEndGameSummary!=="function")return;
+    if(!mySeat(t))return;
+    const key="bpt_ol_summary_"+t.id;
+    try{if(sessionStorage.getItem(key))return;sessionStorage.setItem(key,"1");}catch(_e){}
+    const rows=t.unrankedSaved?championshipRows(t,{unranked:true}):championshipRows(t,{gameNo:t.historyGameNo});
+    setTimeout(()=>window.showEndGameSummary(rows),1500);
+  }
+  /* Parties en ligne hors classement : liste sur l'écran Parties, bilan au toucher, suppression sans effet sur le classement. */
+  let unranked={};
+  function paintUnranked(){
+    const view=$("latestgame");if(!view)return;
+    let box=$("bptOnlineUnranked");
+    if(!box){box=document.createElement("details");box.id="bptOnlineUnranked";box.className="bpt-ol-unranked";
+      const nav=view.querySelector(".lg-nav");nav?nav.after(box):view.prepend(box);
+      box.addEventListener("click",async e=>{
+        const del=e.target.closest("[data-ol-hist-del]");
+        if(del){e.preventDefault();if(!confirm("Supprimer cette partie en ligne hors classement ?\n\nCela ne change rien au classement."))return;
+          try{await (await db()).ref(`${HIST_ROOT}/${del.dataset.olHistDel}`).remove();}catch(err){alert("Suppression impossible : "+(err.message||err));}return;}
+        const open=e.target.closest("[data-ol-hist]");
+        if(open){const g=unranked[open.dataset.olHist];if(g&&Array.isArray(g.rows))window.showEndGameSummary(g.rows);}
+      });}
+    const list=Object.values(unranked).filter(g=>g&&Array.isArray(g.rows)&&g.rows.length).sort((a,b)=>b.at-a.at);
+    box.hidden=!list.length;
+    const open=box.open;
+    box.innerHTML=`<summary>💻 Parties en ligne hors classement <span>${list.length}</span></summary>
+      <div class="bpt-ol-unranked-list">${list.map(g=>{const w=g.rows.find(r=>Number(r.place)===1);
+        return `<div class="bpt-ol-unranked-row"><button type="button" data-ol-hist="${esc(g.id)}"><b>${esc(new Date(g.at).toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"}))}</b>
+          <span>${g.rows.length} joueurs · 🏆 ${esc(w?.player||"—")}</span></button><button type="button" class="is-del" data-ol-hist-del="${esc(g.id)}" aria-label="Supprimer">🗑</button></div>`;}).join("")}</div>
+      <p class="bpt-ol-unranked-note">Ces parties n'entrent ni dans le classement, ni dans les records et statistiques.</p>`;
+    box.open=open;
+  }
+  (async()=>{try{(await db()).ref(HIST_ROOT).on("value",s=>{unranked=s.val()||{};paintUnranked();});}catch(_e){}})();
   function resultsHtml(t){
     const rk=finalRanking(t),kills={};rk.forEach(r=>{if(r.by)kills[r.by]=(kills[r.by]||0)+1;});
-    const status=!t.countsForChampionship?"Hors championnat"
+    const status=!t.countsForChampionship?(t.unrankedSaved?"Enregistrée dans les parties en ligne · hors classement":t.publishError?`Enregistrement impossible : ${esc(t.publishError)}`:"Enregistrement en cours…")
       :t.publishedToHistory?`Enregistrée au championnat · partie n°${t.historyGameNo||"?"}${rk.length<6?" · pas de points sous 6 joueurs":""}`
       :t.publishError?`Enregistrement au championnat impossible : ${esc(t.publishError)}`
       :"Enregistrement au championnat en cours…";
@@ -635,6 +739,10 @@
     }
     if(isHost&&done&&running)actions.push(`<button type="button" class="bpt-ol-primary" data-ol-next>Main suivante →</button>`);
     if(t.status==="finished"&&!spectator)actions.push(`<button type="button" class="bpt-ol-primary" data-ol-live>Retour au Live</button>`);
+    if(spectator&&running){
+      if(t.joinRequest?.name===me())actions.push(`<button type="button" disabled>Demande envoyée…</button>`);
+      else if(seats.length<MAX_PLAYERS)actions.push(`<button type="button" class="bpt-ol-primary" data-ol-join-req>Demander à rejoindre</button>`);
+    }
     if(spectator)actions.push(`<button type="button" data-ol-quit>Quitter</button>`);
     // Barre d'actions du joueur dont c'est le tour, en deux temps :
     // 1) Se coucher · Check/Suivre · Relancer   2) après « Relancer » : ✕ · Double · Triple · Pot · Tapis, curseur exponentiel et validation.
@@ -656,7 +764,10 @@
         // Mêmes raccourcis pour miser et relancer : x2 · x3 (mise précédente, ou grosse blinde si personne n'a misé),
         // ⅓ pot · ½ pot (mise à suivre + part du pot après avoir suivi), Tapis.
         const sbStep=Math.max(1,Number(lv.sb)||25),bbv=Number(lv.bb)||50,ref=h.currentBet||bbv;
+        // Raccourcis sous le curseur : x2 · x3 (mise précédente, ou grosse blinde) · ½ pot · Pot · All in.
         const clamp=v=>Math.max(minTo,Math.min(maxTotal,Math.round(v/sbStep)*sbStep));
+        const presets=[["x2",clamp(ref*2)],["x3",clamp(ref*3)],["½ pot",clamp(h.currentBet+pot/2)],["Pot",clamp(h.currentBet+pot)],["All in",maxTotal]]
+          .map(([l,v])=>`<button type="button" class="${v===raiseTo?"is-on":""}" data-ol-preset="${v}">${l}</button>`).join("");
         // Curseur exponentiel : précis sur les petites mises, rapide vers le tapis.
         const span=Math.max(1,maxTotal/minTo);
         const toPos=a=>maxTotal<=minTo?1000:Math.round(1000*Math.log(Math.max(minTo,a)/minTo)/Math.log(span));
@@ -667,6 +778,7 @@
           <small>Tapis</small>
           <input type="range" class="is-vertical" data-ol-range min="0" max="1000" step="1" value="${toPos(raiseTo)}" data-min="${minTo}" data-max="${maxTotal}" data-step="${sbStep}" aria-label="Montant">
           <small>Min</small>
+          <div class="bpt-ol-side-presets">${presets}</div>
           <button type="button" class="is-raise" data-ol-act="raise">${raiseTo>=maxTotal?"Tapis "+fmt(maxTotal):verb+(h.currentBet?" à ":" ")+fmt(raiseTo)}</button>
         </div></div>`;
       }
@@ -688,18 +800,18 @@
     const centerSub=t.status==="finished"?`🏆 ${esc(t.winner||"")} remporte le tournoi`
       :t.status==="waiting"?`En attente des joueurs · ${seats.length} inscrit${seats.length>1?"s":""}`
       :"";
-    const specNote=spectator?`<div class="bpt-ol-note is-spectator">👁 Mode spectateur · vous ne jouez pas cette partie</div>`:"";
+    const specNote=(spectator?`<div class="bpt-ol-note is-spectator">👁 Mode spectateur · vous ne jouez pas cette partie${t.joinRefused?.name===me()?" · demande refusée":""}</div>`:"")+requestsHtml(t,isHost,mine);
     const last=h?.last?.txt?`<div class="bpt-ol-note">${esc(h.last.txt)}${done&&running?` · main suivante dans <span data-ol-next-in>${Math.max(1,Math.ceil((nextHandMs(h)-(Date.now()-Number(h.at||0)))/1000))}</span> s`:""}</div>`:"";
     return `<div class="bpt-ol-table${spectator?" is-spectator":""}">
       <div class="bpt-ol-bar"><button type="button" data-ol-back aria-label="Retour aux tables">‹</button>
         <div class="bpt-ol-bar-title"><b>${esc(t.name)}</b><small>${t.countsForChampionship?"Compte au championnat":"Hors championnat"} · ${t.adaptive?"Adaptatif":"Classique"}</small></div>
         ${isHost&&t.status==="waiting"?`<label class="bpt-ol-check"><input type="checkbox" data-ol-counts${t.countsForChampionship?" checked":""}> Championnat</label>`:""}
         ${isHost?`<button type="button" class="bpt-ol-bar-del" data-ol-remove title="Supprimer la table" aria-label="Supprimer la table">🗑</button>`:""}
-        <div class="bpt-ol-bar-level${running&&isHost?" is-clickable":""}${t.pausedAt?" is-paused":""}"${running&&isHost?" data-ol-clock-menu role=\"button\" tabindex=\"0\" title=\"Réglages du chrono\"":""}>${t.pausedAt?"<em class=\"bpt-ol-pause\">EN PAUSE</em>":""}<small>Niveau ${L.index+1}${running?` · <span data-ol-clock>${clock(L.left)}</span>`:""} · ${Math.round((Number(lv.durationSec)||Number(t.levelSeconds)||0)/60)} min</small><b>${fmt(lv.sb)} / ${fmt(lv.bb)}</b></div></div>
+        <div class="bpt-ol-bar-level${running&&(isHost||mine)?" is-clickable":""}${t.pausedAt?" is-paused":""}"${running&&(isHost||mine)?" data-ol-clock-menu role=\"button\" tabindex=\"0\" title=\"Réglages du chrono\"":""}>${t.pausedAt?"<em class=\"bpt-ol-pause\">EN PAUSE</em>":""}<small>Niveau ${L.index+1}${running?` · <span data-ol-clock>${clock(L.left)}</span>`:""} · ${Math.round((Number(lv.durationSec)||Number(t.levelSeconds)||0)/60)} min</small><b>${fmt(lv.sb)} / ${fmt(lv.bb)}</b></div></div>
       <div class="bpt-ol-stage"><div class="bpt-ol-rail"><div class="bpt-ol-felt">
         <div class="bpt-ol-center"><span class="bpt-ol-logo">♠ BPT</span>${center}<small>${centerSub}</small></div>
       </div></div>${ring}${t.status==="finished"?resultsHtml(t):showcase}${t.status!=="waiting"&&!spectator?`<button type="button" class="bpt-ol-fx-btn" data-ol-fx aria-label="Chat et objets">💬</button>`:""}</div>
-      ${clockMenuOpen&&running&&isHost?`<div class="bpt-ol-clockmenu" role="menu"><button type="button" data-ol-clk="minus">−1 min</button><button type="button" data-ol-clk="plus">+1 min</button><button type="button" class="is-wide" data-ol-clk="${t.pausedAt?"resume":"pause"}">${t.pausedAt?"▶ Reprendre":"⏸ Pause"}</button><button type="button" data-ol-clk="prev">◀ Niveau préc.</button><button type="button" data-ol-clk="next">Niveau suiv. ▶</button></div>`:""}${specNote}${last}${myBar}<div class="bpt-ol-actions">${actions.join("")}</div></div>`;
+      ${clockMenuOpen&&running&&!isHost&&mine?`<div class="bpt-ol-clockmenu" role="menu"><button type="button" class="is-wide" data-ol-take>👑 Demander la reprise</button></div>`:""}${clockMenuOpen&&running&&isHost?`<div class="bpt-ol-clockmenu" role="menu"><button type="button" data-ol-clk="minus">−1 min</button><button type="button" data-ol-clk="plus">+1 min</button><button type="button" class="is-wide" data-ol-clk="${t.pausedAt?"resume":"pause"}">${t.pausedAt?"▶ Reprendre":"⏸ Pause"}</button><button type="button" data-ol-clk="prev">◀ Niveau préc.</button><button type="button" data-ol-clk="next">Niveau suiv. ▶</button></div>`:""}${specNote}${last}${myBar}<div class="bpt-ol-actions">${actions.join("")}</div></div>`;
   }
   // Table « stade » (rectangle aux bouts arrondis) : chaque joueur est posé sur le bord, à intervalles réguliers
   // le long du contour, en partant du bas (soi) puis vers la gauche. Recalculé à chaque affichage et redimensionnement.
@@ -726,6 +838,8 @@
     const L=levelAt(t);if(L.index!==shownLevel){shownLevel=L.index;render();return;}
     const el=document.querySelector("#bptOnlineBody [data-ol-clock]");if(el)el.textContent=clock(L.left);
     const nx=document.querySelector("#bptOnlineBody [data-ol-next-in]");if(nx&&t.hand)nx.textContent=Math.max(1,Math.ceil((nextHandMs(t.hand)-(Date.now()-Number(t.hand.at||0)))/1000));
+    // Compte à rebours de la demande de reprise : à zéro, on redessine pour proposer « Forcer la reprise ».
+    const tl=document.querySelector("#bptOnlineBody [data-ol-take-left]");if(tl){const left=Math.ceil((TAKEOVER_MS-(Date.now()-Number(tl.dataset.olTakeLeft)))/1000);if(left<=0)render();else tl.textContent=left;}
     const bar=document.querySelector("#bptOnlineBody [data-ol-turn]");if(bar&&t.hand)bar.style.width=Math.max(0,100-100*(Date.now()-Number(t.hand.actionAt||0))/TURN_MS).toFixed(0)+"%";
   },1000);
   setInterval(()=>{try{heartbeat();autopilot();}catch(e){console.warn("BPT en ligne :",e);}},400);
@@ -739,6 +853,7 @@
     // Table ouverte : plein écran, comme le Live (en-tête et navigation de l'appli masqués).
     document.documentElement.classList.toggle("bpt-online-open",!!t&&!!$("online")?.classList.contains("active"));
     box.innerHTML=t?tableHtml(t):lobbyHtml();
+    if(t)maybeShowSummary(t);
     if(t)requestAnimationFrame(layoutSeats);
     fxListen();
     if(fxOpen&&!t)fxClose();
@@ -776,6 +891,10 @@
       if(g("[data-ol-start]")){start(openId);return;}
       if((el=g("[data-ol-act]"))){const a=el.dataset.olAct;act(openId,a,a==="raise"?raiseTo:0);return;}
       if((el=g("[data-ol-preset]"))){raiseTo=Number(el.dataset.olPreset)||raiseTo;render();return;}
+      if(g("[data-ol-join-req]")){requestJoin(openId);return;}
+      if((el=g("[data-ol-join-ans]"))){answerJoin(openId,el.dataset.olJoinAns==="1");return;}
+      if((el=g("[data-ol-take-ans]"))){answerTakeover(openId,el.dataset.olTakeAns==="1");return;}
+      if(g("[data-ol-take]")){clockMenuOpen=false;requestTakeover(openId);return;}
       if(g("[data-ol-clock-menu]")){clockMenuOpen=!clockMenuOpen;render();return;}
       if((el=g("[data-ol-clk]"))){clockCmd(openId,el.dataset.olClk);return;}
       if(clockMenuOpen&&!g(".bpt-ol-clockmenu")){clockMenuOpen=false;render();}
