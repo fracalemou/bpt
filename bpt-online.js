@@ -539,13 +539,18 @@
     }finally{publishing=false;}
   }
   // Bilan de fin de partie, comme pour le Live : affiché une fois à chaque joueur quand la partie est enregistrée.
+  // Fin de partie : la dernière main (combinaison gagnante) reste affichée 12 s avant l'écran du vainqueur et le bilan.
+  const FINAL_HAND_MS=12000;
+  const lastHandShowing=t=>t?.status==="finished"&&!!t.hand?.showdown&&Date.now()-Number(t.finishedAt||0)<FINAL_HAND_MS;
+  let finalTimer=null;
   function maybeShowSummary(t){
+    if(lastHandShowing(t)){if(!finalTimer)finalTimer=setTimeout(()=>{finalTimer=null;render();},FINAL_HAND_MS-(Date.now()-Number(t.finishedAt||0))+100);return;}
     if(!t||t.status!=="finished"||!t.publishedToHistory||typeof window.showEndGameSummary!=="function")return;
     if(!mySeat(t))return;
     const key="bpt_ol_summary_"+t.id;
     try{if(sessionStorage.getItem(key))return;sessionStorage.setItem(key,"1");}catch(_e){}
     const rows=t.unrankedSaved?championshipRows(t,{unranked:true}):championshipRows(t,{gameNo:t.historyGameNo});
-    setTimeout(()=>window.showEndGameSummary(rows),1500);
+    setTimeout(()=>window.showEndGameSummary(rows),600);
   }
   /* Parties en ligne hors classement : liste sur l'écran Parties, bilan au toucher, suppression sans effet sur le classement. */
   let unranked={};
@@ -848,7 +853,7 @@
         <div class="bpt-ol-bar-level${running&&(isHost||mine)?" is-clickable":""}${t.pausedAt?" is-paused":""}"${running&&(isHost||mine)?" data-ol-clock-menu role=\"button\" tabindex=\"0\" title=\"Réglages du chrono\"":""}>${t.pausedAt?"<em class=\"bpt-ol-pause\">EN PAUSE</em>":""}<small>Niveau ${L.index+1}${running?` · <span data-ol-clock>${clock(L.left)}</span>`:""} · ${Math.round((Number(lv.durationSec)||Number(preview?.levelSeconds)||Number(t.levelSeconds)||0)/60)} min</small><b>${fmt(lv.sb)} / ${fmt(lv.bb)}</b></div></div>
       <div class="bpt-ol-stage"><div class="bpt-ol-rail"><div class="bpt-ol-felt">
         <div class="bpt-ol-center"><span class="bpt-ol-logo">♠ BPT</span>${center}<small>${centerSub}</small></div>
-      </div></div>${ring}${t.status==="finished"?resultsHtml(t):showcase}${t.status!=="waiting"&&!spectator?`<button type="button" class="bpt-ol-fx-btn" data-ol-fx aria-label="Chat et objets">💬</button>`:""}</div>
+      </div></div>${ring}${t.status==="finished"&&!lastHandShowing(t)?resultsHtml(t):showcase}${t.status!=="waiting"&&!spectator?`<button type="button" class="bpt-ol-fx-btn" data-ol-fx aria-label="Chat et objets">💬</button>`:""}</div>
       ${clockMenuOpen&&running&&!isHost&&mine?`<div class="bpt-ol-clockmenu" role="menu"><button type="button" class="is-wide" data-ol-take>👑 Demander la reprise</button><button type="button" class="is-wide is-plain" data-ol-hide>Masquer la partie</button></div>`:""}${clockMenuOpen&&running&&isHost?`<div class="bpt-ol-clockmenu" role="menu"><button type="button" data-ol-clk="minus">−1 min</button><button type="button" data-ol-clk="plus">+1 min</button><button type="button" class="is-wide" data-ol-clk="${t.pausedAt?"resume":"pause"}">${t.pausedAt?"▶ Reprendre":"⏸ Pause"}</button><button type="button" data-ol-clk="prev">◀ Niveau préc.</button><button type="button" data-ol-clk="next">Niveau suiv. ▶</button><button type="button" class="is-plain" data-ol-hide>Masquer la partie</button><button type="button" class="is-plain is-danger" data-ol-remove>Supprimer la partie</button></div>`:""}${specNote}${last}${myBar}<div class="bpt-ol-actions">${actions.join("")}</div></div>`;
   }
   // Table « stade » (rectangle aux bouts arrondis) : chaque joueur est posé sur le bord, à intervalles réguliers
@@ -915,7 +920,7 @@
     const live=$("live3");let liveWas=false;
     // Partie en ligne en cours (et pas de Live classique actif) : l'onglet Live ouvre directement la table,
     // en joueur si l'on y est assis, sinon en spectateur.
-    const redirectLive=()=>{const on=!!live?.classList.contains("active");if(on&&!liveWas&&runningIds.length&&!$("live3NavBtn")?.classList.contains("live3-active"))setTimeout(()=>window.bptOnline.open(runningIds[0]),0);liveWas=on;};
+    const redirectLive=()=>{const on=!!live?.classList.contains("active");if(on&&!liveWas&&runningIds.length&&verified.get(runningIds[0])==="running"&&!$("live3NavBtn")?.classList.contains("live3-active"))setTimeout(()=>window.bptOnline.open(runningIds[0]),0);liveWas=on;};
     const watch=()=>{redirectLive();listen(view.classList.contains("active")||!!live?.classList.contains("active"));if(!view.classList.contains("active")){document.documentElement.classList.remove("bpt-online-open");fxListen();}else render();};
     [view,live].filter(Boolean).forEach(el=>new MutationObserver(watch).observe(el,{attributes:true,attributeFilter:["class"]}));
     view.addEventListener("click",e=>{
@@ -960,8 +965,26 @@
   // Pastille rouge de l'onglet Live : partie Live (classe posée par le module Live) ou partie en ligne en cours.
   let onlineRunning=0,runningIds=[];
   function paintNavDot(){const b=$("live3NavBtn");if(b)b.classList.toggle("bpt-game-on",b.classList.contains("live3-active")||onlineRunning>0);}
+  // Indicateurs vérifiés auprès de la table : une entrée dont la table n'existe plus ou n'est plus dans cet état
+  // (partie terminée sans personne pour nettoyer, table supprimée…) est ignorée et retirée par n'importe quel appareil.
+  const verified=new Map(); // id → état réel de la table (null = absente)
+  let lastIndex={};
+  // Revérification toutes les minutes (une partie peut se terminer sans que personne ne retire son indicateur).
+  setInterval(async()=>{if(!Object.keys(lastIndex).length)return;verified.clear();try{await checkIndex(await db(),lastIndex);}catch(_e){}},60000);
+  async function checkIndex(r,v){
+    for(const [id,x] of Object.entries(v)){
+      const want=x?.state==="waiting"?"waiting":"running";
+      if(verified.has(id))continue;
+      try{const st=(await r.ref(`${ROOT}/${id}/status`).once("value")).val();verified.set(id,st||null);
+        if(st!==want){await r.ref(`${RUN_ROOT}/${id}`).remove();}}catch(_e){}
+    }
+  }
   (async()=>{try{const r=await db();r.ref(RUN_ROOT).on("value",snap=>{const v=snap.val()||{};
-    const fresh=Object.entries(v).filter(([,x])=>x&&Date.now()-Number(x.at||0)<12*3600*1000);
+    // Une entrée change d'état (attente → en cours) : la revérifier.
+    Object.entries(v).forEach(([id,x])=>{const want=x?.state==="waiting"?"waiting":"running";if(verified.has(id)&&verified.get(id)!==want&&verified.get(id)!==null)verified.delete(id);});
+    lastIndex=v;checkIndex(r,v);
+    const ok=(id,x)=>{const want=x?.state==="waiting"?"waiting":"running";return !verified.has(id)||verified.get(id)===want;};
+    const fresh=Object.entries(v).filter(([id,x])=>x&&Date.now()-Number(x.at||0)<12*3600*1000&&ok(id,x));
     runningIds=fresh.filter(([,x])=>x.state!=="waiting").map(([id])=>id);onlineRunning=runningIds.length;paintNavDot();document.dispatchEvent(new CustomEvent("bpt-online-tables"));
     waitingTables=fresh.filter(([,x])=>x.state==="waiting").map(([id,x])=>({id,...x}));paintHome();});}catch(_e){}})();
   // Alerte « partie en ligne en préparation » : proposée à ceux qui ne sont pas encore inscrits, une fois par table
