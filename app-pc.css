@@ -6979,3 +6979,23 @@ html.bpt-online-open #bptAppAction{display:none !important}
   .bpt-ol-show-slot .bpt-card.is-show{width:38px !important;height:54px !important}
   .bpt-ol-show-slot .bpt-card.is-show b,.bpt-ol-show-slot .bpt-card.is-show i{font-size:17px !important}
 }
+
+/* 10.4.80 — Pastille rouge sur l'onglet Live quand une partie (Live ou en ligne) est en cours */
+#live3NavBtn{position:relative}
+#live3NavBtn.bpt-game-on::after{content:"";position:absolute;top:6px;right:calc(50% - 22px);width:9px;height:9px;border-radius:50%;background:#ff3b3b;box-shadow:0 0 0 2px var(--bpt-bg2,#121a33),0 0 8px rgba(255,59,59,.8);pointer-events:none}
+html:not(.bpt-mobile-device) #live3NavBtn.bpt-game-on::after{top:4px;right:4px}
+@media (prefers-reduced-motion:no-preference){#live3NavBtn.bpt-game-on::after{animation:bptNavDot 1.6s ease-in-out infinite}}
+@keyframes bptNavDot{50%{opacity:.45}}
+/* Barre de mise en deux temps */
+.bpt-ol-mybar.is-step1{grid-template-columns:1fr 1fr 1fr !important}
+.bpt-ol-mybar.is-step2{grid-template-columns:1fr !important;gap:6px !important}
+.bpt-ol-mybar.is-step2 .bpt-ol-presets{grid-template-columns:42px repeat(4,1fr) !important;gap:5px !important}
+.bpt-ol-mybar.is-step2 .bpt-ol-presets button{min-height:36px}
+.bpt-ol-mybar.is-step2 .bpt-ol-presets button.is-on{border-color:var(--bpt-gold,#f2c853);color:var(--bpt-gold,#f2c853)}
+.bpt-ol-mybar.is-step2 .is-cancel{font-size:16px;color:var(--bpt-muted,#9aa6c8)}
+.bpt-ol-mybar.is-step2 input[type=range]{width:100%;accent-color:var(--bpt-gold,#f2c853)}
+.bpt-ol-mybar.is-step2 .is-raise{min-height:44px}
+@media (orientation:landscape) and (max-height:500px){
+  .bpt-ol-table:has(.bpt-ol-mybar) .bpt-ol-mybar.is-step1{grid-template-columns:1fr !important}
+  .bpt-ol-table:has(.bpt-ol-mybar) .bpt-ol-mybar.is-step2 .bpt-ol-presets{grid-template-columns:34px 1fr 1fr !important}
+}

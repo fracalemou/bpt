@@ -4,6 +4,8 @@
    startStack,targetHours,levelSeconds,levels[],levelIndex,seats{index:{name,stack,joinedAt}}}. */
 (function(){
   const ROOT="bpt/online/tables";
+  // Indicateur léger des parties en ligne en cours (pastille de l'onglet Live), sans cartes ni détail des mains.
+  const RUN_ROOT="bpt/online/running";
   const IDENTITY_KEY="bpt_live3_identity_name";
   const MAX_AGE_MS=24*3600*1000;
   const MAX_PLAYERS=10;
@@ -111,9 +113,10 @@
     const name=me();
     await tx(id,t=>{if(t.status!=="waiting")return false;Object.keys(t.seats||{}).forEach(k=>{if(t.seats[k]?.name===name)delete t.seats[k];});});
   }
+  async function setRunning(id,on){try{const r=(await db()).ref(`${RUN_ROOT}/${id}`);on?await r.set({at:Date.now()}):await r.remove();}catch(_e){}}
   async function start(id){
     // Lancement : tirage au sort des places et structure calculée sur le nombre réel de joueurs.
-    await tx(id,t=>{
+    const started=await tx(id,t=>{
       const players=seatsOf(t);
       if(t.status!=="waiting"||t.host!==me()||players.length<2)return false;
       for(let i=players.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[players[i],players[j]]=[players[j],players[i]];}
@@ -123,10 +126,12 @@
       t.status="running";t.startedAt=Date.now();t.levelIndex=0;t.hand=null;
       dealHand(t);
     });
+    if(started)setRunning(id,true);
   }
   async function removeTable(id){
     if(!confirm("Supprimer cette table ?"))return;
-    await (await db()).ref(`${ROOT}/${id}`).remove();openId=null;render();
+    await (await db()).ref(`${ROOT}/${id}`).remove();
+    try{await (await db()).ref(`${RUN_ROOT}/${id}`).remove();}catch(_e){}openId=null;render();
   }
   async function toggleCounts(id,val){await tx(id,t=>{if(t.host!==me()||t.status!=="waiting")return false;t.countsForChampionship=!!val;});}
 
@@ -330,6 +335,7 @@
   function autopilot(){
     const t=openId&&tables[openId];if(!t||t.status==="waiting")return;
     if(pilotName(t)!==me())return;
+    if(t.status==="finished"&&!t.runningCleared){t.runningCleared=true;setRunning(t.id,false);}
     if(t.status==="finished"){if(t.countsForChampionship&&!t.publishedToHistory&&!t.publishing&&!t.publishError)publishResult(t.id);return;}
     if(t.status!=="running")return;
     const h=t.hand;if(!h)return;
@@ -552,7 +558,7 @@
     const init=String(name||"?").trim().split(/\s+/).slice(0,2).map(w=>w[0]||"").join("").toUpperCase();
     return `<span class="bpt-av bpt-av-lg">${esc(init)}</span>`;
   }
-  let raiseTo=0, raiseKey="";
+  let raiseTo=0, raiseKey="", raiseMode=false;
   function tableHtml(t){
     const seats=seatsOf(t),mine=mySeat(t),isHost=t.host===me(),running=t.status==="running";
     const L=running?levelAt(t):{index:0,left:0},lv=t.levels?.[L.index]||{};
@@ -595,30 +601,36 @@
     }
     if(isHost&&done&&running)actions.push(`<button type="button" class="bpt-ol-primary" data-ol-next>Main suivante →</button>`);
     if(t.status==="finished")actions.push(`<button type="button" class="bpt-ol-primary" data-ol-live>Retour au Live</button>`);
-    // Barre d'actions du joueur dont c'est le tour.
+    // Barre d'actions du joueur dont c'est le tour, en deux temps :
+    // 1) Se coucher · Check/Suivre · Relancer   2) après « Relancer » : ✕ · Double · Triple · Pot · Tapis, curseur exponentiel et validation.
     let myBar="";
     if(h&&!done&&mine&&h.toAct===mine.i){
       const i=mine.i,toCall=Math.max(0,h.currentBet-betOf(h,i)),stack=stackOf(t,i),maxTotal=betOf(h,i)+stack;
       const minTo=Math.min(maxTotal,h.currentBet+Math.max(h.minRaise,Number(lv.bb)||50)),pot=potTotal+toCall;
-      const key=`${h.no}:${h.street}:${h.actionAt}`;if(raiseKey!==key){raiseKey=key;raiseTo=minTo;}
+      const key=`${h.no}:${h.street}:${h.actionAt}`;if(raiseKey!==key){raiseKey=key;raiseTo=minTo;raiseMode=false;}
       raiseTo=Math.max(minTo,Math.min(maxTotal,raiseTo));
-      const canRaise=maxTotal>h.currentBet;
-      // Tranches de pot (relance « à » = mise actuelle + fraction du pot après avoir suivi), puis tapis.
-      const sbStep=Math.max(1,Number(lv.sb)||25);
-      // « Min » = relance minimale (double la mise) ; tranches arrondies à la petite blinde.
-      const tranches=[["Min",minTo]].concat([["⅓",1/3],["½",1/2],["¾",3/4],["Pot",1]].map(([l,f])=>[l,Math.max(minTo,Math.min(maxTotal,Math.round((h.currentBet+pot*f)/sbStep)*sbStep))])).concat([["Tapis",maxTotal]]);
-      const presets=tranches.map(([l,v])=>`<button type="button" data-ol-preset="${v}">${l}</button>`).join("");
-      // Curseur exponentiel : précis sur les petites mises, rapide vers le tapis.
-      const step=Math.max(1,Number(lv.sb)||25),span=Math.max(1,maxTotal/minTo);
-      const toPos=a=>maxTotal<=minTo?1000:Math.round(1000*Math.log(Math.max(minTo,a)/minTo)/Math.log(span));
-      // Repères cliquables sous le curseur (les tranches confondues avec la mise minimale ou le tapis ne sont pas répétées).
-      let lastPos=-99;const ticks=tranches.filter(([l,v],k)=>l==="Tapis"||(v>minTo&&v<maxTotal&&tranches.findIndex(x=>x[1]===v)===k)).filter(([l,v])=>{const p=toPos(v)/10;if(l!=="Tapis"&&p-lastPos<9)return false;lastPos=p;return true;}).map(([l,v])=>`<button type="button" data-ol-preset="${v}" style="left:${(toPos(v)/10).toFixed(1)}%">${l}</button>`).join("");
-      myBar=`<div class="bpt-ol-mybar">
-        <button type="button" class="is-fold" data-ol-act="fold">Se coucher</button>
-        ${toCall?`<button type="button" class="is-call" data-ol-act="call">${toCall>=stack?"Suivre à tapis":"Suivre "+fmt(toCall)}</button>`:`<button type="button" class="is-call" data-ol-act="check">Check</button>`}
-        ${canRaise?`<button type="button" class="is-raise" data-ol-act="raise">${raiseTo>=maxTotal?"Tapis "+fmt(maxTotal):(h.currentBet?"Relancer à ":"Miser ")+fmt(raiseTo)}</button>
-        <div class="bpt-ol-raise">${maxTotal>minTo?`<div class="bpt-ol-presets">${presets}</div><div class="bpt-ol-range"><input type="range" data-ol-range min="0" max="1000" step="1" value="${toPos(raiseTo)}" data-min="${minTo}" data-max="${maxTotal}" data-step="${step}"><div class="bpt-ol-ticks">${ticks}</div></div>`:""}</div>`:""}
-      </div>`;
+      const canRaise=maxTotal>h.currentBet, verb=h.currentBet?"Relancer":"Miser";
+      if(!raiseMode||!canRaise){
+        myBar=`<div class="bpt-ol-mybar is-step1">
+          <button type="button" class="is-fold" data-ol-act="fold">Se coucher</button>
+          ${toCall?`<button type="button" class="is-call" data-ol-act="call">${toCall>=stack?"Suivre à tapis":"Suivre "+fmt(toCall)}</button>`:`<button type="button" class="is-call" data-ol-act="check">Check</button>`}
+          ${canRaise?(maxTotal<=minTo?`<button type="button" class="is-raise" data-ol-act="allin">Tapis ${fmt(maxTotal)}</button>`:`<button type="button" class="is-raise" data-ol-raise-open>${verb}</button>`):""}
+        </div>`;
+      }else{
+        // Raccourcis : double / triple de la mise à suivre (ou de la grosse blinde), pot, tapis — arrondis à la petite blinde.
+        const sbStep=Math.max(1,Number(lv.sb)||25),base=Math.max(h.currentBet,Number(lv.bb)||50);
+        const clamp=v=>Math.max(minTo,Math.min(maxTotal,Math.round(v/sbStep)*sbStep));
+        const presets=[["Double",clamp(base*2)],["Triple",clamp(base*3)],["Pot",clamp(h.currentBet+pot)],["Tapis",maxTotal]]
+          .map(([l,v])=>`<button type="button" class="${v===raiseTo?"is-on":""}" data-ol-preset="${v}">${l}</button>`).join("");
+        // Curseur exponentiel : précis sur les petites mises, rapide vers le tapis.
+        const span=Math.max(1,maxTotal/minTo);
+        const toPos=a=>maxTotal<=minTo?1000:Math.round(1000*Math.log(Math.max(minTo,a)/minTo)/Math.log(span));
+        myBar=`<div class="bpt-ol-mybar is-step2">
+          <div class="bpt-ol-presets"><button type="button" class="is-cancel" data-ol-raise-close aria-label="Ne pas ${verb.toLowerCase()}">✕</button>${presets}</div>
+          <input type="range" data-ol-range min="0" max="1000" step="1" value="${toPos(raiseTo)}" data-min="${minTo}" data-max="${maxTotal}" data-step="${sbStep}">
+          <button type="button" class="is-raise" data-ol-act="raise">${raiseTo>=maxTotal?"Tapis "+fmt(maxTotal):verb+(h.currentBet?" à ":" ")+fmt(raiseTo)}</button>
+        </div>`;
+      }
     }
     // Abattage : la combinaison gagnante (cartes du joueur + tableau) sort au centre, carte par carte, avec le nom de la main.
     let showcase="";
@@ -643,7 +655,7 @@
         <div class="bpt-ol-bar-title"><b>${esc(t.name)}</b><small>${t.countsForChampionship?"Compte au championnat":"Hors championnat"} · ${t.adaptive?"Adaptatif":"Classique"}</small></div>
         ${isHost&&t.status==="waiting"?`<label class="bpt-ol-check"><input type="checkbox" data-ol-counts${t.countsForChampionship?" checked":""}> Championnat</label>`:""}
         ${isHost?`<button type="button" class="bpt-ol-bar-del" data-ol-remove title="Supprimer la table" aria-label="Supprimer la table">🗑</button>`:""}
-        <div class="bpt-ol-bar-level"><small>Niveau ${L.index+1}${running?` · <span data-ol-clock>${clock(L.left)}</span>`:""}</small><b>${fmt(lv.sb)} / ${fmt(lv.bb)}</b></div></div>
+        <div class="bpt-ol-bar-level"><small>Niveau ${L.index+1}${running?` · <span data-ol-clock>${clock(L.left)}</span>`:""} · ${Math.round((Number(lv.durationSec)||Number(t.levelSeconds)||0)/60)} min</small><b>${fmt(lv.sb)} / ${fmt(lv.bb)}</b></div></div>
       <div class="bpt-ol-stage"><div class="bpt-ol-rail"><div class="bpt-ol-felt">
         <div class="bpt-ol-center"><span class="bpt-ol-logo">♠ BPT</span>${center}<small>${centerSub}</small></div>
       </div></div>${ring}${t.status==="finished"?resultsHtml(t):showcase}${t.status!=="waiting"?`<button type="button" class="bpt-ol-fx-btn" data-ol-fx aria-label="Chat et objets">💬</button>`:""}</div>
@@ -720,6 +732,8 @@
       if(g("[data-ol-start]")){start(openId);return;}
       if((el=g("[data-ol-act]"))){const a=el.dataset.olAct;act(openId,a,a==="raise"?raiseTo:0);return;}
       if((el=g("[data-ol-preset]"))){raiseTo=Number(el.dataset.olPreset)||raiseTo;render();return;}
+      if(g("[data-ol-raise-open]")){raiseMode=true;render();return;}
+      if(g("[data-ol-raise-close]")){raiseMode=false;render();return;}
       if(g("[data-ol-next]")){nextHand(openId);return;}
       if(g("[data-ol-fx]")){fxOpen?fxClose():fxOpenPanel();return;}
       if((el=g(".bpt-ol-seat[data-name]"))&&el.dataset.name!==me()&&tables[openId]?.status!=="waiting"){fxOpenPanel(el.dataset.name);return;}
@@ -730,10 +744,17 @@
     view.addEventListener("input",e=>{const r=e.target.closest("[data-ol-range]");if(!r)return;
       const min=Number(r.dataset.min),max=Number(r.dataset.max),step=Number(r.dataset.step)||1,p=Number(r.value)/1000;
       raiseTo=p>=1?max:Math.max(min,Math.min(max,Math.round(min*Math.pow(max/min,p)/step)*step));
-      const b=view.querySelector("[data-ol-act=raise]");if(b){b.textContent=raiseTo>=max?"Tapis "+fmt(max):(b.textContent.startsWith("Miser")?"Miser ":"Relancer à ")+fmt(raiseTo);}});
+      const b=view.querySelector("[data-ol-act=raise]");if(b){b.textContent=raiseTo>=max?"Tapis "+fmt(max):(b.textContent.startsWith("Miser")?"Miser ":"Relancer à ")+fmt(raiseTo);}
+      view.querySelectorAll("[data-ol-preset]").forEach(x=>x.classList.toggle("is-on",Number(x.dataset.olPreset)===raiseTo));});
     watch();
     render();
   }
+  // Pastille rouge de l'onglet Live : partie Live (classe posée par le module Live) ou partie en ligne en cours.
+  let onlineRunning=0;
+  function paintNavDot(){const b=$("live3NavBtn");if(b)b.classList.toggle("bpt-game-on",b.classList.contains("live3-active")||onlineRunning>0);}
+  (async()=>{try{const r=await db();r.ref(RUN_ROOT).on("value",snap=>{const v=snap.val()||{};
+    onlineRunning=Object.values(v).filter(x=>x&&Date.now()-Number(x.at||0)<12*3600*1000).length;paintNavDot();});}catch(_e){}})();
+  setInterval(paintNavDot,2000);
   // API utilisée par l'étape 1 du Live (bpt-live-mobilefirst.js).
   function openTables(){return Object.values(tables).filter(t=>t&&t.status!=="finished"&&Date.now()-Number(t.createdAt||0)<MAX_AGE_MS).sort((a,b)=>b.createdAt-a.createdAt);}
   window.bptOnline={
