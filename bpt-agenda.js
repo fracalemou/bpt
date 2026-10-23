@@ -148,9 +148,11 @@
   document.addEventListener('click',ev=>{const b=ev.target.closest('[data-ag-mode]');if(!b)return;
     const form=b.closest('.bpt-ag-form');if(!form)return;const m=b.dataset.agMode;
     form.querySelector('#bptAgMode').value=m;form.querySelectorAll('[data-ag-mode]').forEach(x=>x.classList.toggle('is-on',x===b));
-    const loc=form.querySelector('.bpt-ag-loc');if(loc)loc.hidden=m==='online';});
+    const loc=form.querySelector('.bpt-ag-loc');if(loc)loc.hidden=m==='online';
+    const tm=form.querySelector('.bpt-ag-time');if(tm)tm.hidden=m!=='online';});
   // Lieu affiché : « 💻 En ligne » pour une partie en ligne, sinon « 📍 lieu ».
-  function whereHtml(e){return e?.mode==='online'?'💻 En ligne':`📍 ${esc(e?.location||'Lieu à définir')}`;}
+  const timeLabel=t=>{const m=String(t||'').match(/^(\d{1,2}):(\d{2})/);return m?`${Number(m[1])} h ${m[2]}`:'';};
+  function whereHtml(e){return e?.mode==='online'?`💻 En ligne${e.time?' · '+timeLabel(e.time):''}`:`📍 ${esc(e?.location||'Lieu à définir')}`;}
   function formHtml(iso,e){
     const n=me();const locs=activePlayers();
     const mode=e?.mode==='online'?'online':'table';
@@ -165,6 +167,7 @@
         <div class="is-wide bpt-ag-mode" role="radiogroup" aria-label="Type de partie"><input id="bptAgMode" type="hidden" value="${mode}">
           <button type="button" data-ag-mode="table" class="${mode==='table'?'is-on':''}">🃏 En live</button>
           <button type="button" data-ag-mode="online" class="${mode==='online'?'is-on':''}">💻 En ligne</button></div>
+        <label class="is-wide bpt-ag-time"${mode==='online'?'':' hidden'}>Heure de la partie<input id="bptAgTime" type="time" step="300" value="${esc(e?.time||'21:00')}"></label>
         <label class="is-wide bpt-ag-loc"${mode==='online'?' hidden':''}>Lieu<input id="bptAgLoc" list="bptAgLocList" value="${esc(loc)}" placeholder="Chez …"></label>
         <datalist id="bptAgLocList">${locs.map(p=>`<option value="Chez ${esc(p)}">`).join('')}</datalist>
       </div>
@@ -210,7 +213,7 @@
   function inviteText(e){
     // 10.4.47 — Uniquement des symboles « simples » (♠ ♥ ♦ ♣ ★ ➜) : WhatsApp Web abîme les emojis récents
     // transmis par un lien wa.me (ils s'affichent « � »).
-    const where=e.mode==='online'?'En ligne, dans l’appli BPT':(e.location||'Lieu à définir');
+    const where=e.mode==='online'?`En ligne, dans l’appli BPT${e.time?' · à '+timeLabel(e.time):''}`:(e.location||'Lieu à définir');
     const host=String(where).toLocaleLowerCase('fr').includes(String(e.createdBy||'').toLocaleLowerCase('fr'))?'':`Proposée par ${e.createdBy}`;
     const lines=[
       '♠ ♥  *SOIRÉE POKER BPT*  ♦ ♣',
@@ -276,10 +279,13 @@
     if(!date){alert('Choisissez une date.');return;}
     if(date<t){alert('Choisissez une date à venir.');return;}
     const other=eventFor(date);if(other&&other.id!==e?.id){alert('Une partie est déjà proposée à cette date.');return;}
+    const online=$('bptAgMode')?.value==='online',time=String($('bptAgTime')?.value||'').trim();
+    if(online&&!/^\d{1,2}:\d{2}$/.test(time)){alert('Indiquez l’heure de la partie en ligne.');return;}
     const n=me();
     // Heure, durée et tapis ne sont plus demandés : on conserve ceux d'une partie existante, sinon rien.
     const ev={...(e||{}),id:e?.id||`agenda_${Date.now()}`,date,
-      mode:($('bptAgMode')?.value==='online')?'online':'table',
+      mode:online?'online':'table',
+      ...(online?{time}:{}),
       location:($('bptAgMode')?.value==='online')?'En ligne':($('bptAgLoc').value.trim()||`Chez ${n}`),createdBy:e?.createdBy||n,
       createdAt:e?.createdAt||Date.now(),responses:e?.responses||{[n]:'present'}};
     if(!e)justCreatedId=ev.id;
