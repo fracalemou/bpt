@@ -174,6 +174,7 @@
       if(key==="targetHours")t.targetHours=Math.max(0.5,Number(val)||2);
       else if(key==="startStack"){const v=Math.max(1000,Math.round((Number(val)||20000)/100)*100);t.startStack=v;Object.values(t.seats||{}).forEach(x=>{if(x&&x.name)x.stack=v;});}
       else if(key==="adaptive")t.adaptive=String(val)==="1";
+      else if(key==="breakEvery")t.breakEvery=Math.max(0,Number(val)||0);
       else return false;
     });
   }
@@ -327,6 +328,25 @@
     if(g[0][0]===2&&g[1][0]===2)return [2,g[0][1],g[1][1],g[2][1]];
     if(g[0][0]===2)return [1,g[0][1],...g.slice(1).map(x=>x[1])];
     return [0,...r];
+  }
+  // Main du joueur en clair : « Paire de rois · tirage couleur », avant le flop « As-roi assortis ».
+  const RNAME=v=>v===14?"as":v===13?"roi":v===12?"dame":v===11?"valet":String(v);
+  const RPL=v=>v===14?"as":v>=11?RNAME(v)+"s":String(v);
+  const DE=v=>v===14?"d’as":"de "+RPL(v), AU=v=>v===14?"à l’as":"au "+RNAME(v);
+  function handLabel(hole,board){
+    const hc=split(hole),bd=split(board);if(hc.length<2)return "";
+    if(!bd.length){const [a,b]=hc.map(RV).sort((x,y)=>y-x);if(a===b)return "Paire "+DE(a);const n=RNAME(a);return `${n[0].toUpperCase()+n.slice(1)}-${RNAME(b)} ${hc[0][1]===hc[1][1]?"assortis":"dépareillés"}`;}
+    const all=[...hc,...bd],n=all.length;let s=null;
+    const pick=(start,acc)=>{if(acc.length===5){const v=eval5(acc.map(k=>all[k]));if(!s||cmp(v,s)>0)s=v;return;}for(let k=start;k<n;k++)pick(k+1,[...acc,k]);};pick(0,[]);
+    if(!s)return "";
+    let txt=["Hauteur "+RNAME(s[1]),"Paire "+DE(s[1]),`Double paire ${RPL(s[1])} et ${RPL(s[2])}`,"Brelan "+DE(s[1]),"Quinte "+AU(s[1]),"Couleur "+AU(s[1]),`Full aux ${RPL(s[1])} par les ${RPL(s[2])}`,"Carré "+DE(s[1]),s[1]===14?"Quinte flush royale":"Quinte flush "+AU(s[1])][s[0]];
+    if(bd.length<5&&s[0]<5){const draws=[];
+      const bySuit={};all.forEach(c=>bySuit[c[1]]=(bySuit[c[1]]||0)+1);if(Object.entries(bySuit).some(([su,k])=>k===4&&hc.some(c=>c[1]===su)))draws.push("tirage couleur");
+      if(s[0]<4){const rs=new Set(all.map(RV));if(rs.has(14))rs.add(1);let outs=0;
+        for(let v=1;v<=14;v++){if(rs.has(v))continue;const w=new Set(rs).add(v);for(let lo=Math.max(1,v-4);lo<=Math.min(10,v);lo++){let ok=true;for(let x=lo;x<lo+5;x++)if(!w.has(x)){ok=false;break;}if(ok){outs++;break;}}}
+        if(outs)draws.push(outs>1?"tirage quinte":"quinte ventrale");}
+      if(draws.length)txt+=" · "+draws.join(" · ");}
+    return txt;
   }
   const cmp=(a,b)=>{for(let k=0;k<Math.max(a.length,b.length);k++){const d=(a[k]||0)-(b[k]||0);if(d)return d;}return 0;};
   function best7(cards){return bestCombo(cards).score;}
@@ -485,7 +505,7 @@
       const now=srvNow(),L=levelAt(t),lv=t.levels||[],dur=k=>Math.max(60,Number(lv[k]?.durationSec)||Number(t.levelSeconds)||600);
       const shift=ms=>{t.startedAt=Number(t.startedAt)+ms;};
       if(cmd==="pause"){if(t.pausedAt)return false;t.pausedAt=now;}
-      else if(cmd==="resume"){if(!t.pausedAt)return false;shift(now-Number(t.pausedAt));t.pausedAt=null;if(t.hand)t.hand.actionAt=now;}
+      else if(cmd==="resume"){if(!t.pausedAt)return false;shift(now-Number(t.pausedAt));t.pausedAt=null;t.breakUntil=null;if(t.hand)t.hand.actionAt=now;}
       else if(cmd==="plus")shift(60000);
       else if(cmd==="minus")shift(-Math.min(60000,L.left*1000));
       else if(cmd==="next"){if(L.index>=lv.length-1)return false;shift(-L.left*1000);}
@@ -500,7 +520,15 @@
       if(!(h.result||[]).some(r=>(r.winners||[]).includes(i)))return false;
       h.shown={...(h.shown||{}),[K(i)]:true};h.shownAt=srvNow();h.last={i,txt:`${firstName(t,i)} montre ses cartes`};logAct(h);});
   }
-  async function nextHand(id){await tx(id,t=>{if(t.status!=="running"||t.hand?.street!=="done")return false;dealHand(t);});}
+  // Pause automatique : au début de chaque N-ième niveau, avant de distribuer, 5 min de pause (chrono figé).
+  const BREAK_MS=5*60000;
+  const breakEvery=t=>t.breakEvery===undefined||t.breakEvery===null?4:Number(t.breakEvery)||0;
+  async function nextHand(id){await tx(id,t=>{if(t.status!=="running"||t.hand?.street!=="done"||t.pausedAt)return false;
+    const L=levelAt(t).index,ev=breakEvery(t);
+    if(ev&&L>0&&L%ev===0&&!t.breaks?.["l"+L]){t.breaks={...(t.breaks||{}),["l"+L]:true};t.pausedAt=srvNow();t.breakUntil=srvNow()+BREAK_MS;return;}
+    dealHand(t);});}
+  async function endBreak(id){return tx(id,t=>{if(!t.pausedAt||!t.breakUntil||srvNow()<Number(t.breakUntil))return false;
+    t.startedAt=Number(t.startedAt)+(srvNow()-Number(t.pausedAt));t.pausedAt=null;t.breakUntil=null;});}
 
   /* Automatismes, exécutés par l'appareil de l'hôte uniquement : joueurs virtuels (test local), délai de décision
      dépassé, main suivante. Un seul déclenchement par situation. */
@@ -511,7 +539,8 @@
     if(t.status==="finished"&&!t.runningCleared){t.runningCleared=true;setRunning(t.id,false);}
     if(t.hand?.street==="done")logHand(t);
     if(t.status==="finished"){if(!t.publishedToHistory&&!t.publishing&&!t.publishError)publishResult(t.id);return;}
-    if(t.status!=="running"||t.pausedAt)return;
+    if(t.status!=="running")return;
+    if(t.pausedAt){const bk="brk:"+t.breakUntil;if(t.breakUntil&&srvNow()>=Number(t.breakUntil)&&autoKey!==bk){autoKey=bk;endBreak(t.id).then(ok=>{if(!ok)autoKey="";});}return;}
     const h=t.hand;if(!h)return;
     const now=srvNow();
     if(h.street==="done"){
@@ -719,6 +748,41 @@
      Stockés à part du jeu (bpt/online/fx/{idTable}/{envoi}) pour ne pas redessiner la table à chaque envoi :
      {from, to:"all"|nom, kind:"say"|objet, text, at}. Effacés après 2 minutes. */
   const FX_ROOT="bpt/online/fx";
+  /* ---------- Sons (synthétisés, aucun fichier) et alerte « À vous de jouer » ---------- */
+  let soundOn=(()=>{try{return localStorage.getItem("bpt_ol_sound")!=="0";}catch(_e){return true;}})(),actx=null;
+  const audio=()=>{try{if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();if(actx.state==="suspended")actx.resume();return actx;}catch(_e){return null;}};
+  document.addEventListener("pointerdown",()=>{if(soundOn&&openId)audio();},{passive:true}); // le navigateur n'autorise le son qu'après un appui
+  function tone(freq,dur,{type="sine",vol=0.08,at=0,slide=0}={}){
+    const a=audio();if(!a||a.state!=="running")return;const t0=a.currentTime+Math.max(0,at),o=a.createOscillator(),g=a.createGain();
+    o.type=type;o.frequency.setValueAtTime(freq,t0);if(slide)o.frequency.exponentialRampToValueAtTime(freq*slide,t0+dur);
+    g.gain.setValueAtTime(vol,t0);g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);o.connect(g).connect(a.destination);o.start(t0);o.stop(t0+dur+0.02);
+  }
+  const SOUNDS={card:at=>tone(1700,0.05,{type:"triangle",vol:0.05,at,slide:0.5}),
+    chips:()=>{tone(2400,0.04,{type:"square",vol:0.025});tone(2000,0.05,{type:"square",vol:0.025,at:0.05});tone(2700,0.04,{type:"square",vol:0.02,at:0.1});},
+    turn:()=>{tone(880,0.14,{vol:0.1});tone(1320,0.22,{vol:0.1,at:0.15});},
+    win:()=>{[523,659,784,1047].forEach((f,k)=>tone(f,0.2,{type:"triangle",vol:0.08,at:k*0.11}));}};
+  const play=(k,...a)=>{try{if(soundOn)SOUNDS[k]?.(...a);}catch(_e){}};
+  let soundLogKey="",soundWinKey="",soundBoardKey="";
+  function tableSounds(t){
+    const h=t.hand;if(!h)return;const mine=mySeat(t);
+    const lk=t.id+":"+h.no+":"+String(h.log||"").length;
+    if(soundLogKey&&soundLogKey!==lk&&/mise|relance|suit|tapis/.test(h.last?.txt||""))play("chips");soundLogKey=lk;
+    if(h.street==="done"&&mine&&(h.result||[]).some(r=>(r.winners||[]).includes(mine.i))&&soundWinKey!==t.id+":"+h.no){soundWinKey=t.id+":"+h.no;play("win");}
+  }
+  let turnKey="",flashIv=0,baseTitle="";
+  function startFlash(){if(flashIv)return;baseTitle=document.title;flashIv=setInterval(()=>{document.title=document.title.startsWith("🔔")?baseTitle:"🔔 À vous de jouer !";},900);}
+  function stopFlash(){if(!flashIv)return;clearInterval(flashIv);flashIv=0;document.title=baseTitle;}
+  // Pré-actions (cochées avant son tour, valables pour le tour d'enchères en cours) : check/couché, check, suivre tout.
+  let preAct=null;
+  function myTurnTick(){
+    const t=openId&&tables[openId],h=t?.hand,mine=t&&mySeat(t);
+    if(!t||t.status!=="running"||t.pausedAt||!h||h.street==="done"||!mine||h.toAct!==mine.i||(h.dealEnd&&srvNow()<Number(h.dealEnd))){stopFlash();return;}
+    const key=`${t.id}:${h.no}:${h.street}:${h.actionAt}`;if(turnKey===key)return;turnKey=key;
+    const pa=preAct&&preAct.key===`${t.id}:${h.no}:${h.street}`?preAct.type:null;preAct=null;
+    if(pa){const toCall=Math.max(0,h.currentBet-betOf(h,mine.i)),a=pa==="checkfold"?(toCall?"fold":"check"):pa==="check"?(toCall?null:"check"):(toCall?"call":"check");
+      if(a){act(t.id,a,0);return;}}
+    play("turn");try{navigator.vibrate&&navigator.vibrate([180,90,180]);}catch(_e){}startFlash();
+  }
   const FX_ITEMS=[["beer","🍺","Bière"],["kiss","😘","Bisous"],["poop","💩","Caca"],["rose","🌹","Rose"],["tomato","🍅","Tomate"],
     ["clap","👏","Bravo"],["fish","🐟","Poisson"],["fire","🔥","En feu"],["clown","🤡","Clown"],["money","💰","Jackpot"]];
   const FX_QUICK=["Bien joué !","Joli coup 👌","Allez !","Pas de chance…","Tu bluffes ? 🤔","Je te suis 😎","On accélère ? ⏱","GG 🤝"];
@@ -871,9 +935,12 @@
     // Donne carte par carte : à la première vue d une main, chaque carte arrive à son tour (petite blinde d abord, un tour
     // de table par carte). Le décalage est recalculé à chaque rendu : l animation continue sans repartir de zéro.
     const dealKey=h?t.id+":"+h.no:"";
+    const dealFresh=h&&!dealStart.has(dealKey);
     if(h&&!dealStart.has(dealKey))dealStart.set(dealKey,h.street==="preflop"&&srvNow()-Number(h.at||0)<3000?Date.now()-(srvNow()-Number(h.at||0)):0);
     const dealT0=dealStart.get(dealKey)||0,dealOrder=(()=>{if(!h||!dealT0)return [];const ids=Object.keys(h.hole||{}).map(Number).filter(i=>h.hole[i]).sort((a,b)=>a-b);const k=ids.indexOf(Number(h.sb));return k<0?ids:[...ids.slice(k),...ids.slice(0,k)];})();
     const dealDelay=(i,j)=>{const k=dealOrder.indexOf(i);if(k<0)return null;const d=(j*dealOrder.length+k)*DEAL_STEP-(Date.now()-dealT0);return d>-400?d:null;};
+    if(dealFresh&&dealT0)for(let k=0;k<2*dealOrder.length;k++){const d=k*DEAL_STEP-(Date.now()-dealT0);if(d>=0)play("card",d/1000);}
+    tableSounds(t);
     const ring=seats.map((s,idx)=>{
       const pos=(idx-meIdx+N)%N, a=Math.PI/2+pos*2*Math.PI/N, x=50+47*Math.cos(a), y=50+46*Math.sin(a);
       const isMe=s.name===me(), out=!!t.out?.[K(s.i)]&&Number(s.stack)<=0;
@@ -927,8 +994,16 @@
     // Barre d'actions du joueur dont c'est le tour, en deux temps :
     // 1) Se coucher · Check/Suivre · Relancer   2) après « Relancer » : ✕ · Double · Triple · Pot · Tapis, curseur exponentiel et validation.
     let myBar="";
+    // Ma main en clair, une fois les cartes de la rue entièrement distribuées (sinon elle dévoilerait les cartes à venir).
+    const myHandHtml=h&&mine&&h.hole?.[mine.i]&&!folded(h,mine.i)&&!(h.dealEnd&&srvNow()<Number(h.dealEnd))?`<div class="bpt-ol-myhand">${esc(handLabel(h.hole[mine.i],h.board))}</div>`:"";
     const dealing=h&&!done&&h.dealEnd&&srvNow()<Number(h.dealEnd);
     if(dealing&&!dealTimer)dealTimer=setTimeout(()=>{dealTimer=0;render();},Number(h.dealEnd)-srvNow()+40);
+    const inHand=h&&!done&&!h.runout&&mine&&handPlayers(t).includes(mine.i)&&!folded(h,mine.i)&&!h.allin?.[K(mine.i)]&&stackOf(t,mine.i)>0;
+    if(inHand&&(dealing||h.toAct!==mine.i)){
+      const pk=`${t.id}:${h.no}:${h.street}`;if(preAct&&preAct.key!==pk)preAct=null;
+      const cur=preAct?.type,toCallNow=Math.max(0,h.currentBet-betOf(h,mine.i)),opt=(v,l)=>`<button type="button" class="${cur===v?"is-on":""}" data-ol-pre="${v}">${l}</button>`;
+      myBar=`<div class="bpt-ol-prebar">${opt("checkfold","Check / Couché")}${toCallNow?"":opt("check","Check")}${opt("callany","Suivre tout")}</div>`;
+    }
     if(h&&!done&&!dealing&&mine&&h.toAct===mine.i){
       const i=mine.i,toCall=Math.max(0,h.currentBet-betOf(h,i)),stack=stackOf(t,i),maxTotal=betOf(h,i)+stack;
       const minTo=Math.min(maxTotal,h.currentBet+Math.max(h.minRaise,Number(lv.bb)||50)),pot=potTotal+toCall;
@@ -987,12 +1062,14 @@
       const edit=isHost?`<div class="bpt-ol-setup">
           <label>Durée<select data-ol-setup="targetHours">${opts.sort((a,b)=>a[0]-b[0]).map(([v,l])=>`<option value="${v}"${v===hh?" selected":""}>${esc(l)}</option>`).join("")}</select></label>
           <label>Tapis<input type="number" min="1000" step="1000" inputmode="numeric" data-ol-setup="startStack" value="${Number(t.startStack)||20000}"></label>
+          <label>Pause<select data-ol-setup="breakEvery">${[[0,"Aucune"],[3,"Tous les 3 niveaux"],[4,"Tous les 4 niveaux"],[6,"Tous les 6 niveaux"]].map(([v,l])=>`<option value="${v}"${breakEvery(t)===v?" selected":""}>${l}</option>`).join("")}</select></label>
           <label>Structure<select data-ol-setup="adaptive"><option value="1"${t.adaptive?" selected":""}>Adaptatif</option><option value="0"${t.adaptive?"":" selected"}>Classique</option></select></label>
         </div>`:"";
       waitInfo=`<div class="bpt-ol-waitinfo">${edit}<b>Niveaux de ${Math.round(preview.levelSeconds/60)} min</b><span>${seats.length} joueur${seats.length>1?"s":""} · ${fmt(t.startStack)} jetons · durée visée ${dur}</span><span>Fin prévue vers le niveau ${endIdx+1} (blinds ${fmt(end.sb)} / ${fmt(end.bb)})${t.adaptive?" · ajustée en cours de partie":""}</span></div>`;}
     // Tableau : les cartes qui viennent d arriver (flop : 3, turn / river : 1) apparaissent une par une.
     const newFrom=h&&!done?({flop:0,turn:3,river:4})[h.street]:undefined,boardT0=newFrom===undefined?0:Date.now()-(srvNow()-(h.runout?Number(h.runoutAt||0):Number(h.dealEnd||0)-((h.street==="flop"?3:1)*DEAL_STEP+300)));
     const boardCard=k=>{const html=cardHtml(board[k]);if(newFrom===undefined||k<newFrom||!board[k]||!boardT0)return html;const d=(k-newFrom)*DEAL_STEP-(Date.now()-boardT0);return d>-400?html.replace("<span ",`<span style="animation-delay:${Math.round(d)}ms" `).replace("class=\"bpt-card","class=\"bpt-card is-dealt"):html;};
+    const bsk=t.id+":"+(h?.no)+":"+(h?.street);if(newFrom!==undefined&&boardT0&&soundBoardKey!==bsk){soundBoardKey=bsk;for(let k=newFrom;k<board.length;k++){const d=(k-newFrom)*DEAL_STEP-(Date.now()-boardT0);if(d>=0)play("card",d/1000);}}
     const center=h?`<div class="bpt-ol-board">${[0,1,2,3,4].map(boardCard).join("")}</div><div class="bpt-ol-pot">${potLine}</div>`
       :waitInfo; // blindes affichées seulement dans le bandeau en haut à droite
     const centerSub=t.status==="finished"?`🏆 ${esc(t.winner||"")} remporte le tournoi`
@@ -1000,7 +1077,7 @@
       :"";
     const awayNote=mine&&running&&t.seats?.[mine.i]?.away?`<div class="bpt-ol-req is-away"><span><b>Vous êtes absent</b> · vos mains sont jouées automatiquement (check ou couché), les blindes continuent</span><button type="button" class="is-ok" data-ol-back-in>Revenir</button></div>`:"";
     const specNote=awayNote+(spectator?`<div class="bpt-ol-note is-spectator">👁 Mode spectateur · vous ne jouez pas cette partie${t.joinRefused?.name===me()?" · demande refusée":""}</div>`:"")+requestsHtml(t,isHost,mine);
-    const last=h?.last?.txt?`<div class="bpt-ol-note">${esc(h.last.txt)}${done&&running?` · main suivante dans <span data-ol-next-in>${Math.max(1,Math.ceil((nextHandMs(h)-(srvNow()-Number(h.at||0)))/1000))}</span> s`:""}</div>`:"";
+    const last=t.pausedAt&&t.breakUntil?`<div class="bpt-ol-note is-break">☕ Pause · reprise dans <span data-ol-break-left>${clock((Number(t.breakUntil)-srvNow())/1000)}</span></div>`:h?.last?.txt?`<div class="bpt-ol-note">${esc(h.last.txt)}${done&&running?` · main suivante dans <span data-ol-next-in>${Math.max(1,Math.ceil((nextHandMs(h)-(srvNow()-Number(h.at||0)))/1000))}</span> s`:""}</div>`:"";
     // Tapis moyen des joueurs encore en jeu (jetons misés dans la main en cours compris), en grosses blindes du niveau.
     const alive=seatsOf(t).filter(s=>!t.out?.[K(s.i)]),chips=alive.reduce((a,s)=>a+(Number(s.stack)||0),0)+(h&&!done?Object.values(h.contrib||{}).reduce((a,x)=>a+(Number(x)||0),0):0);
     const avgBB=running&&alive.length&&Number(lv.bb)?Math.round(chips/alive.length/Number(lv.bb)):0;
@@ -1009,11 +1086,11 @@
         <div class="bpt-ol-bar-title"><b>${esc(t.name)}</b><small>${t.countsForChampionship?"Compte au championnat":"Hors championnat"} · ${t.adaptive?"Adaptatif":"Classique"}</small></div>
         ${isHost&&t.status==="waiting"?`<label class="bpt-ol-check"><input type="checkbox" data-ol-counts${t.countsForChampionship?" checked":""}${hasBots(t)?" disabled title=\"Partie avec joueurs virtuels : hors championnat\"":""}> Championnat</label>`:""}
         ${isHost&&t.status==="waiting"?`<button type="button" class="bpt-ol-bar-del" data-ol-remove title="Supprimer la table" aria-label="Supprimer la table">🗑</button>`:""}
-        <div class="bpt-ol-bar-level${running&&(isHost||mine)?" is-clickable":""}${t.pausedAt?" is-paused":""}"${running&&(isHost||mine)?" data-ol-clock-menu role=\"button\" tabindex=\"0\" title=\"Réglages du chrono\"":""}>${t.pausedAt?"<em class=\"bpt-ol-pause\">EN PAUSE</em>":""}<small>Niveau ${L.index+1}${running?` · <span data-ol-clock>${clock(L.left)}</span>`:""} · ${Math.round((Number(lv.durationSec)||Number(preview?.levelSeconds)||Number(t.levelSeconds)||0)/60)} min</small><b>${fmt(lv.sb)} / ${fmt(lv.bb)}</b>${avgBB?`<small class="bpt-ol-avg">Tapis moyen ${fmt(avgBB)} BB</small>`:""}</div>${t.status!=="waiting"&&!spectator?`<button type="button" class="bpt-ol-fx-btn" data-ol-fx aria-label="Chat et objets">💬</button>`:""}${t.status!=="waiting"?`<button type="button" class="bpt-ol-hist-btn${spectator?" is-alone":""}" data-ol-hist-open aria-label="Historique des mains et du chat" title="Historique des mains et du chat">📜</button>`:""}</div>
+        <div class="bpt-ol-bar-level${running&&(isHost||mine)?" is-clickable":""}${t.pausedAt?" is-paused":""}"${running&&(isHost||mine)?" data-ol-clock-menu role=\"button\" tabindex=\"0\" title=\"Réglages du chrono\"":""}>${t.pausedAt?"<em class=\"bpt-ol-pause\">EN PAUSE</em>":""}<small>Niveau ${L.index+1}${running?` · <span data-ol-clock>${clock(L.left)}</span>`:""} · ${Math.round((Number(lv.durationSec)||Number(preview?.levelSeconds)||Number(t.levelSeconds)||0)/60)} min</small><b>${fmt(lv.sb)} / ${fmt(lv.bb)}</b>${avgBB?`<small class="bpt-ol-avg">Tapis moyen ${fmt(avgBB)} BB</small>`:""}</div>${t.status!=="waiting"&&!spectator?`<button type="button" class="bpt-ol-fx-btn" data-ol-fx aria-label="Chat et objets">💬</button>`:""}${t.status!=="waiting"?`<button type="button" class="bpt-ol-hist-btn${spectator?" is-alone":""}" data-ol-hist-open aria-label="Historique des mains et du chat" title="Historique des mains et du chat">📜</button><button type="button" class="bpt-ol-snd-btn${spectator?" is-alone":""}" data-ol-sound aria-label="${soundOn?"Couper le son":"Activer le son"}" title="${soundOn?"Couper le son":"Activer le son"}">${soundOn?"🔊":"🔇"}</button>`:""}</div>
       <div class="bpt-ol-stage"><div class="bpt-ol-rail"><div class="bpt-ol-felt">
         <div class="bpt-ol-center"><span class="bpt-ol-logo">♠ BPT</span>${center}<small>${centerSub}</small></div>
       </div></div>${ring}${t.status==="finished"&&!lastHandShowing(t)?resultsHtml(t):showcase}</div>
-      ${clockMenuOpen&&running&&!isHost&&mine?`<div class="bpt-ol-clockmenu" role="menu"><button type="button" class="is-wide" data-ol-take>👑 Demander la reprise</button><button type="button" class="is-wide is-plain" data-ol-hide>Masquer la partie</button></div>`:""}${clockMenuOpen&&running&&isHost?`<div class="bpt-ol-clockmenu" role="menu"><button type="button" data-ol-clk="minus">−1 min</button><button type="button" data-ol-clk="plus">+1 min</button><button type="button" class="is-wide" data-ol-clk="${t.pausedAt?"resume":"pause"}">${t.pausedAt?"▶ Reprendre":"⏸ Pause"}</button><button type="button" data-ol-clk="prev">◀ Niveau préc.</button><button type="button" data-ol-clk="next">Niveau suiv. ▶</button><button type="button" class="is-plain" data-ol-hide>Masquer la partie</button><button type="button" class="is-plain is-danger" data-ol-remove>Supprimer la partie</button></div>`:""}${specNote}${last}${myBar}<div class="bpt-ol-actions">${actions.join("")}</div></div>`;
+      ${clockMenuOpen&&running&&!isHost&&mine?`<div class="bpt-ol-clockmenu" role="menu"><button type="button" class="is-wide" data-ol-take>👑 Demander la reprise</button><button type="button" class="is-wide is-plain" data-ol-hide>Masquer la partie</button></div>`:""}${clockMenuOpen&&running&&isHost?`<div class="bpt-ol-clockmenu" role="menu"><button type="button" data-ol-clk="minus">−1 min</button><button type="button" data-ol-clk="plus">+1 min</button><button type="button" class="is-wide" data-ol-clk="${t.pausedAt?"resume":"pause"}">${t.pausedAt?"▶ Reprendre":"⏸ Pause"}</button><button type="button" data-ol-clk="prev">◀ Niveau préc.</button><button type="button" data-ol-clk="next">Niveau suiv. ▶</button><button type="button" class="is-plain" data-ol-hide>Masquer la partie</button><button type="button" class="is-plain is-danger" data-ol-remove>Supprimer la partie</button></div>`:""}${specNote}${last}${myHandHtml}${myBar}<div class="bpt-ol-actions">${actions.join("")}</div></div>`;
   }
   // Table « stade » (rectangle aux bouts arrondis) : chaque joueur est posé sur le bord, à intervalles réguliers
   // le long du contour, en partant du bas (soi) puis vers la gauche. Recalculé à chaque affichage et redimensionnement.
@@ -1086,12 +1163,13 @@
     const t=openId&&tables[openId];if(!t||t.status!=="running"||!$("online")?.classList.contains("active"))return;
     const L=levelAt(t);if(L.index!==shownLevel){shownLevel=L.index;render();return;}
     const el=document.querySelector("#bptOnlineBody [data-ol-clock]");if(el)el.textContent=clock(L.left);
+    const bk=document.querySelector("#bptOnlineBody [data-ol-break-left]");if(bk&&t.breakUntil)bk.textContent=clock((Number(t.breakUntil)-srvNow())/1000);
     const nx=document.querySelector("#bptOnlineBody [data-ol-next-in]");if(nx&&t.hand)nx.textContent=Math.max(1,Math.ceil((nextHandMs(t.hand)-(srvNow()-Number(t.hand.at||0)))/1000));
     // Compte à rebours de la demande de reprise : à zéro, on redessine pour proposer « Forcer la reprise ».
     const tl=document.querySelector("#bptOnlineBody [data-ol-take-left]");if(tl){const left=Math.ceil((TAKEOVER_MS-(srvNow()-Number(tl.dataset.olTakeLeft)))/1000);if(left<=0)render();else tl.textContent=left;}
     const bar=document.querySelector("#bptOnlineBody [data-ol-turn]");if(bar&&t.hand)bar.style.width=Math.min(100,Math.max(0,100-100*(srvNow()-Number(t.hand.actionAt||0))/TURN_MS)).toFixed(0)+"%";
   },1000);
-  setInterval(()=>{try{heartbeat();autopilot();}catch(e){console.warn("BPT en ligne :",e);}},400);
+  setInterval(()=>{try{heartbeat();autopilot();myTurnTick();}catch(e){console.warn("BPT en ligne :",e);}},400);
   function render(){
     const box=$("bptOnlineBody");if(!box)return;
     if(!me()){box.innerHTML=`<div class="bpt-ol-card"><p>Identifiez-vous d'abord (Paramètres › Mon profil) pour rejoindre une table.</p></div>`;return;}
@@ -1153,6 +1231,8 @@
       if(g("[data-ol-next]")){nextHand(openId);return;}
       if(g("[data-ol-fx]")){fxOpen?fxClose():fxOpenPanel();return;}
       if(g("[data-ol-hist-open]")){fxClose();showHands(openId);return;}
+      if((el=g("[data-ol-pre]"))){const h=tables[openId]?.hand;if(h){const pk=`${openId}:${h.no}:${h.street}`;preAct=preAct?.key===pk&&preAct.type===el.dataset.olPre?null:{key:pk,type:el.dataset.olPre};render();}return;}
+      if(g("[data-ol-sound]")){soundOn=!soundOn;try{localStorage.setItem("bpt_ol_sound",soundOn?"1":"0");}catch(_e){}if(soundOn){audio();play("chips");}render();return;}
       if(g("[data-ol-show]")){showMyCards(openId,tables[openId]?.hand?.no);return;}
       if(g("[data-ol-summary]")){openSummary(tables[openId]);return;}
       if(g("[data-ol-final]")){finalSeen.add(openId);render();return;}
@@ -1230,7 +1310,7 @@
     me,
     active(){const w=waitingTables[0];if(w)return {id:w.id,state:"waiting"};return runningIds[0]?{id:runningIds[0],state:"running"}:null;},
     pilot(id){const t=tables[id];return t?pilotName(t):null;},
-    showHands, // diagnostic : qui pilote les automatismes
+    showHands,handLabel, // diagnostic : qui pilote les automatismes
     open(id){openId=id||null;window.showView&&window.showView("online");render();},
     async create(form){await createTable(form);window.showView&&window.showView("online");render();}
   };

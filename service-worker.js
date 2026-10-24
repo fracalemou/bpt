@@ -1,15 +1,15 @@
-const CACHE='bpt-pwa-10.4.101';
+const CACHE='bpt-pwa-10.4.102';
 // Avatars (10.4.53) : fichiers fixes, cache à part conservé d'une version à l'autre.
 // Un avatar modifié doit changer de nom de fichier (ou AVATAR_CACHE de numéro).
 const AVATAR_CACHE='bpt-avatars-v1';
-const ASSETS=['./', './index.html', './app-pc.css?v=10.4.101', './app-tel.css?v=10.4.101', './app-version.js?v=10.4.101', './application.js?v=10.4.101', './bpt-live-mobilefirst.css?v=10.4.101', './bpt-live-mobilefirst.js?v=10.4.101', './bpt-online.js?v=10.4.101', './bpt-live3-module.js?v=10.4.101', './bpt-pwa-unified-action.js?v=10.4.101', './bpt-config-ui.js?v=10.4.101', './bpt-odds.js?v=10.4.101', './firebase-bridge.js?v=10.4.101', './live-betting.js?v=10.4.101', './live-ui.js?v=10.4.101', './mobile-device.js?v=10.4.101', './navigation.js?v=10.4.101', './bpt-share-recap.js?v=10.4.101', './bpt-agenda.js?v=10.4.101', './bpt-my-profile.js?v=10.4.101', './manifest.webmanifest', './icon-192.png', './icon-512.png', './partie-5.jpg'];
+const ASSETS=['./', './index.html', './app-pc.css?v=10.4.102', './app-tel.css?v=10.4.102', './app-version.js?v=10.4.102', './application.js?v=10.4.102', './bpt-live-mobilefirst.css?v=10.4.102', './bpt-live-mobilefirst.js?v=10.4.102', './bpt-online.js?v=10.4.102', './bpt-live3-module.js?v=10.4.102', './bpt-pwa-unified-action.js?v=10.4.102', './bpt-config-ui.js?v=10.4.102', './bpt-odds.js?v=10.4.102', './firebase-bridge.js?v=10.4.102', './live-betting.js?v=10.4.102', './live-ui.js?v=10.4.102', './mobile-device.js?v=10.4.102', './navigation.js?v=10.4.102', './bpt-share-recap.js?v=10.4.102', './bpt-agenda.js?v=10.4.102', './bpt-my-profile.js?v=10.4.102', './manifest.webmanifest', './icon-192.png', './icon-512.png', './partie-5.jpg'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
 self.addEventListener('activate',event=>{
   event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE&&k!==AVATAR_CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
 });
-// 10.4.101 — Stratégies :
+// 10.4.102 — Stratégies :
 // - page (index.html) : réseau d'abord, c'est elle qui porte les numéros ?v= et déclenche les mises à jour ;
 // - fichiers de l'appli avec ?v= : cache d'abord (contenu figé pour un numéro donné) → ouverture immédiate ;
 // - bibliothèques Firebase (version dans l'adresse) : cache d'abord ;

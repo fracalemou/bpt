@@ -9694,3 +9694,12 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
 
 /* 10.4.100 — Historique 📜 en haut à gauche, sous le titre */
 .bpt-ol-bar .bpt-ol-hist-btn,.bpt-ol-bar .bpt-ol-hist-btn.is-alone{right:auto;left:0;top:calc(100% + 6px)}
+
+/* 10.4.102 — Confort : pré-actions, main en clair, son, pause */
+.bpt-ol-bar .bpt-ol-snd-btn{position:absolute;left:0;top:calc(100% + 50px);z-index:8;width:38px;height:38px;border-radius:50%;border:1px solid var(--bpt-line,#2a3560);background:var(--bpt-card2,#1b2442);font-size:16px;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.45)}
+.bpt-ol-myhand{justify-self:center;margin:4px auto 2px;padding:3px 12px;border-radius:999px;background:rgba(212,166,64,.14);border:1px solid rgba(212,166,64,.45);color:var(--bpt-10,#d4a640);font-weight:800;font-size:13px;text-align:center;width:max-content;max-width:94%}
+.bpt-ol-prebar{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:4px 0}
+.bpt-ol-prebar button{padding:8px 12px;border-radius:999px;border:1px dashed var(--bpt-line,#2a3560);background:transparent;color:inherit;font-weight:700;font-size:13px;cursor:pointer;opacity:.85}
+.bpt-ol-prebar button.is-on{border-style:solid;border-color:var(--bpt-10,#d4a640);background:rgba(212,166,64,.18);color:var(--bpt-10,#d4a640);opacity:1}
+.bpt-ol-prebar button.is-on::before{content:"✓ "}
+.bpt-ol-note.is-break{border-color:var(--bpt-10,#d4a640);color:var(--bpt-10,#d4a640);font-weight:800}
