@@ -2476,6 +2476,7 @@ function showEndGameSummary(rows){
     </div>
 
     ${finishedRecapSections(sorted)}
+    ${first.onlineId?`<div id="bptSummaryOnlineStats" class="bpt-summary-online-stats"></div>`:""}
     <h3 style="margin-top:18px">Classement complet</h3>
     <div class="tablewrap">
       <table class="summary-table">
@@ -2507,6 +2508,8 @@ function showEndGameSummary(rows){
         </tbody>
       </table>
     </div>`;
+  // Partie en ligne : statistiques calculées à partir de l historique des mains.
+  if(first.onlineId&&window.bptOnline?.fillStats)window.bptOnline.fillStats(first.onlineId,$("bptSummaryOnlineStats"));
   const mount=document.fullscreenElement||document.body;if(backdrop.parentElement!==mount)mount.appendChild(backdrop);
   backdrop.style.display="flex";
 }

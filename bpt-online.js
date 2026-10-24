@@ -714,6 +714,55 @@
     const key=t.id+":"+t.hand.no+":"+Object.keys(t.hand.shown||{}).join();if(loggedHand===key)return; // réécrite si le gagnant montre ensuite ses cartesloggedHand=key;
     (async()=>{try{await (await db()).ref(`${HANDS_ROOT}/${t.id}/m${String(t.hand.no).padStart(4,"0")}`).set(handRecord(t));}catch(_e){loggedHand="";}})();
   }
+  /* Statistiques de la partie, calculées à partir de l'historique des mains (bpt/online/hands) :
+     mains reçues, mains jouées (VPIP : mise volontaire avant le flop), mains gagnées, abattages gagnés, relances,
+     plus gros pot gagné, meilleure combinaison ; et les faits marquants de la soirée. */
+  function computeStats(list){
+    const P={},get=n=>P[n]=P[n]||{name:n,dealt:0,vpip:0,won:0,sdWon:0,raises:0,bigPot:0,best:null,bestRank:-1};
+    const first=n=>String(n||"").split(" ")[0];
+    let bigPot=null,bestHand=null;
+    list.forEach(m=>{
+      const names=Object.values(m.players||{}).map(p=>p.name);names.forEach(n=>get(n).dealt++);
+      const byFirst={};names.forEach(n=>byFirst[first(n)]=n);
+      const pre=new Set();
+      String(m.log||"").split("|").filter(Boolean).forEach(x=>{const st=x[0],txt=x.slice(2),who=byFirst[txt.split(" ")[0]];if(!who)return;
+        if(/ (suit|relance|mise|fait tapis)/.test(txt)&&st==="p")pre.add(who);
+        if(/ (relance|mise|fait tapis)/.test(txt))get(who).raises++;});
+      pre.forEach(n=>get(n).vpip++);
+      (m.result||[]).forEach(r=>{const ws=String(r.winners||"").split(", ").filter(Boolean);const amt=Number(r.amount)||0;
+        ws.forEach(n=>{const p=get(n);p.won++;if(m.showdown)p.sdWon++;if(amt>p.bigPot)p.bigPot=amt;});
+        if(ws.length&&(!bigPot||amt>bigPot.amount))bigPot={amount:amt,who:ws,no:m.no};
+        const rk=HAND_NAMES.indexOf(r.hand);if(m.showdown&&rk>=0)ws.forEach(n=>{const p=get(n);if(rk>p.bestRank){p.bestRank=rk;p.best=r.hand;}
+          if(!bestHand||rk>bestHand.rank)bestHand={rank:rk,hand:r.hand,who:n,no:m.no};});});
+    });
+    // Une victoire partagée compte pour chaque gagnant mais une seule fois par main.
+    return {players:Object.values(P).sort((a,b)=>b.won-a.won||b.bigPot-a.bigPot),bigPot,bestHand,hands:list.length};
+  }
+  function statsHtml(list){
+    if(!list.length)return "<p>Les statistiques apparaissent après la première main.</p>";
+    const st=computeStats(list),fn=n=>esc(String(n||"").split(" ")[0]),pct=(a,b)=>b?Math.round(100*a/b)+" %":"—";
+    const ps=st.players.filter(p=>p.dealt);
+    const top=(k,f=x=>x[k])=>ps.slice().sort((a,b)=>f(b)-f(a))[0];
+    const aggro=top("raises"),loose=top(null,p=>p.dealt>=5?p.vpip/p.dealt:-1),tight=ps.filter(p=>p.dealt>=5).sort((a,b)=>a.vpip/a.dealt-b.vpip/b.dealt)[0];
+    const facts=[
+      st.bigPot&&`💰 Plus gros pot : <b>${fmt(st.bigPot.amount)}</b> pour ${st.bigPot.who.map(fn).join(" et ")} (main ${st.bigPot.no})`,
+      st.bestHand&&`🃏 Plus belle main : <b>${esc(HAND_PHRASE[st.bestHand.hand]||st.bestHand.hand)}</b> pour ${fn(st.bestHand.who)} (main ${st.bestHand.no})`,
+      aggro&&aggro.raises&&`🔥 Le plus agressif : <b>${fn(aggro.name)}</b> · ${aggro.raises} mise${aggro.raises>1?"s":""} ou relance${aggro.raises>1?"s":""}`,
+      loose&&loose.dealt>=5&&`🎲 Joue le plus de mains : <b>${fn(loose.name)}</b> · ${pct(loose.vpip,loose.dealt)}`,
+      tight&&tight!==loose&&`🧊 Le plus serré : <b>${fn(tight.name)}</b> · ${pct(tight.vpip,tight.dealt)}`
+    ].filter(Boolean);
+    return `<div class="bpt-ol-stats">
+      <ul class="bpt-ol-stats-facts">${facts.map(f=>`<li>${f}</li>`).join("")}</ul>
+      <table class="bpt-ol-stats-table"><thead><tr><th>Joueur</th><th title="Mains reçues">Mains</th><th title="Mains jouées volontairement avant le flop">Jouées</th><th title="Mains gagnées (dont à l abattage)">Gagn.</th><th title="Mises et relances">Rel.</th><th title="Plus gros pot gagné">Gros pot</th></tr></thead>
+      <tbody>${ps.map(p=>`<tr${p.name===me()?' class="is-me"':""}><td>${fn(p.name)}${p.best?`<small>${esc(p.best)}</small>`:""}</td><td>${p.dealt}</td><td>${pct(p.vpip,p.dealt)}</td><td>${p.won}${p.sdWon?`<small>${p.sdWon} abatt.</small>`:""}</td><td>${p.raises}</td><td>${p.bigPot?fmt(p.bigPot):"—"}</td></tr>`).join("")}</tbody></table>
+      <p class="bpt-ol-stats-note">${st.hands} main${st.hands>1?"s":""} · « Jouées » = mains où le joueur a misé, suivi ou relancé avant le flop (hors blindes).</p></div>`;
+  }
+  // Bilan de la soirée : les statistiques en ligne sont ajoutées sous le podium.
+  async function fillStats(id,el){
+    if(!id||!el)return;el.innerHTML="<p class=\"muted\">Chargement des statistiques…</p>";
+    try{const v=(await (await db()).ref(`${HANDS_ROOT}/${id}`).once("value")).val()||{};const list=Object.values(v).filter(Boolean).sort((a,b)=>a.no-b.no);
+      el.innerHTML=list.length?`<h3 class="bpt-ol-stats-title">📊 Statistiques de la partie</h3>${statsHtml(list)}`:"";}catch(_e){el.innerHTML="";}
+  }
   const LOG_STREET={p:"Pré-flop",f:"Flop",t:"Turn",r:"River",d:"Fin"};
   async function showHands(id){
     let box=$("bptOlHands");
@@ -738,10 +787,10 @@
     const fn=n=>esc(String(n||"").split(" ")[0]);
     const chatBody=chat.length?chat.map(c=>{const it=FX_ITEMS.find(x=>x[0]===c.kind);
       return `<div class="bpt-ol-chat-row"><small>${new Date(c.at).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}</small><b>${fn(c.from)}${c.to&&c.to!=="all"?` → ${fn(c.to)}`:""}</b><span>${c.kind==="say"?esc(c.text):it?`${it[1]} ${esc(it[2])}`:""}</span></div>`;}).join(""):"<p>Aucun message pour cette partie.</p>";
-    const tab=box.dataset.tab==="chat"?"chat":"hands";
+    const tab=["chat","stats"].includes(box.dataset.tab)?box.dataset.tab:"hands";
     box.querySelector(".bpt-ol-hands").innerHTML=`<div class="bpt-ol-hands-head"><b>📜 Historique</b><button type="button" data-hands-close aria-label="Fermer">×</button></div>
-      <div class="bpt-ol-hands-tabs"><button type="button" data-hands-tab="hands" class="${tab==="hands"?"is-on":""}">Mains · ${list.length}</button><button type="button" data-hands-tab="chat" class="${tab==="chat"?"is-on":""}">Chat · ${chat.length}</button></div>
-      <div class="bpt-ol-hands-list" data-pane="hands"${tab==="hands"?"":" hidden"}>${body}</div><div class="bpt-ol-hands-list" data-pane="chat"${tab==="chat"?"":" hidden"}>${chatBody}</div>`;
+      <div class="bpt-ol-hands-tabs"><button type="button" data-hands-tab="hands" class="${tab==="hands"?"is-on":""}">Mains · ${list.length}</button><button type="button" data-hands-tab="chat" class="${tab==="chat"?"is-on":""}">Chat · ${chat.length}</button><button type="button" data-hands-tab="stats" class="${tab==="stats"?"is-on":""}">Stats</button></div>
+      <div class="bpt-ol-hands-list" data-pane="hands"${tab==="hands"?"":" hidden"}>${body}</div><div class="bpt-ol-hands-list" data-pane="chat"${tab==="chat"?"":" hidden"}>${chatBody}</div><div class="bpt-ol-hands-list" data-pane="stats"${tab==="stats"?"":" hidden"}>${statsHtml(list)}</div>`;
   }
 
   /* ---------- Chat rapide et objets rigolos ----------
@@ -769,7 +818,21 @@
     if(soundLogKey&&soundLogKey!==lk&&/mise|relance|suit|tapis/.test(h.last?.txt||""))play("chips");soundLogKey=lk;
     if(h.street==="done"&&mine&&(h.result||[]).some(r=>(r.winners||[]).includes(mine.i))&&soundWinKey!==t.id+":"+h.no){soundWinKey=t.id+":"+h.no;play("win");}
   }
-  let turnKey="",flashIv=0,baseTitle="";
+  // Vibration : Android via navigator.vibrate ; iPhone (pas de vibrate dans Safari) : retour haptique d'un interrupteur
+  // <input switch> caché, déclenché deux fois (iOS 18 et plus, sans garantie selon la version).
+  function buzz(){
+    try{if(navigator.vibrate&&navigator.vibrate([300,120,300]))return true;}catch(_e){}
+    try{let l=$("bptOlHaptic");if(!l){l=document.createElement("label");l.id="bptOlHaptic";l.setAttribute("aria-hidden","true");l.style.cssText="position:fixed;left:-9999px;top:0;opacity:0;pointer-events:none";
+        l.innerHTML='<input type="checkbox" switch tabindex="-1">';document.body.append(l);}
+      l.click();setTimeout(()=>l.click(),160);}catch(_e){}
+  }
+  let turnKey="",turnRemind=0,flashIv=0,baseTitle="";
+  // Test depuis le panneau Ambiance (appui = geste de l'utilisateur, exigé par Android pour vibrer).
+  function testBuzz(){
+    if(!navigator.vibrate)return "Ce téléphone ou ce navigateur ne permet pas la vibration (iPhone : non disponible dans Safari).";
+    let ok=false;try{ok=navigator.vibrate([400,150,400]);}catch(_e){}
+    return ok?"Vibration envoyée. Rien senti ? Vérifiez que le téléphone n'est pas en mode silencieux ou « Ne pas déranger » et que la vibration est activée (Paramètres › Sons et vibrations).":"Vibration refusée par le navigateur.";
+  }
   function startFlash(){if(flashIv)return;baseTitle=document.title;flashIv=setInterval(()=>{document.title=document.title.startsWith("🔔")?baseTitle:"🔔 À vous de jouer !";},900);}
   function stopFlash(){if(!flashIv)return;clearInterval(flashIv);flashIv=0;document.title=baseTitle;}
   // Pré-actions (cochées avant son tour, valables pour le tour d'enchères en cours) : check/couché, check, suivre tout.
@@ -777,11 +840,13 @@
   function myTurnTick(){
     const t=openId&&tables[openId],h=t?.hand,mine=t&&mySeat(t);
     if(!t||t.status!=="running"||t.pausedAt||!h||h.street==="done"||!mine||h.toAct!==mine.i||(h.dealEnd&&srvNow()<Number(h.dealEnd))){stopFlash();return;}
-    const key=`${t.id}:${h.no}:${h.street}:${h.actionAt}`;if(turnKey===key)return;turnKey=key;
+    const key=`${t.id}:${h.no}:${h.street}:${h.actionAt}`;
+    if(turnKey===key){const n=Math.floor((srvNow()-Number(h.actionAt||0))/15000);if(n>turnRemind&&n<=2){turnRemind=n;play("turn");buzz();}return;}
+    turnKey=key;turnRemind=0;
     const pa=preAct&&preAct.key===`${t.id}:${h.no}:${h.street}`?preAct.type:null;preAct=null;
     if(pa){const toCall=Math.max(0,h.currentBet-betOf(h,mine.i)),a=pa==="checkfold"?(toCall?"fold":"check"):pa==="check"?(toCall?null:"check"):(toCall?"call":"check");
       if(a){act(t.id,a,0);return;}}
-    play("turn");try{navigator.vibrate&&navigator.vibrate([180,90,180]);}catch(_e){}startFlash();
+    play("turn");buzz();startFlash();
   }
   const FX_ITEMS=[["beer","🍺","Bière"],["kiss","😘","Bisous"],["poop","💩","Caca"],["rose","🌹","Rose"],["tomato","🍅","Tomate"],
     ["clap","👏","Bravo"],["fish","🐟","Poisson"],["fire","🔥","En feu"],["clown","🤡","Clown"],["money","💰","Jackpot"]];
@@ -876,11 +941,13 @@
       <div class="bpt-ol-fx-sec">Message rapide (à toute la table)</div>
       <div class="bpt-ol-fx-quick">${FX_QUICK.map(q=>`<button type="button" data-fx-say="${esc(q)}">${esc(q)}</button>`).join("")}</div>
       <form class="bpt-ol-fx-free" data-fx-form><input maxlength="60" placeholder="Votre message…" data-fx-text><button type="submit">Envoyer</button></form>
-      <button type="button" class="bpt-ol-fx-hands" data-fx-hands>📜 Historique des mains et du chat</button>`;
+      <button type="button" class="bpt-ol-fx-hands" data-fx-hands>📜 Historique des mains et du chat</button>
+      <button type="button" class="bpt-ol-fx-hands" data-fx-buzz>📳 Tester la vibration</button><p class="bpt-ol-fx-buzz" data-fx-buzz-res hidden></p>`;
   }
   function fxPanel(){let p=$("bptOlFxPanel");if(!p){p=document.createElement("div");p.id="bptOlFxPanel";p.hidden=true;document.body.append(p);
       p.addEventListener("click",e=>{const g=s=>e.target.closest(s);let el;
         if(g("[data-fx-close]")){fxClose();return;}
+        if(g("[data-fx-buzz]")){const r=p.querySelector("[data-fx-buzz-res]");if(r){r.textContent=testBuzz();r.hidden=false;}return;}
         if(g("[data-fx-hands]")){const id=openId;fxClose();if(id)showHands(id);return;}
         if((el=g("[data-fx-target]"))){fxTarget=el.dataset.fxTarget;p.innerHTML=fxPanelHtml();return;}
         if((el=g("[data-fx-item]"))){sendFx(el.dataset.fxItem);return;}
@@ -1310,7 +1377,7 @@
     me,
     active(){const w=waitingTables[0];if(w)return {id:w.id,state:"waiting"};return runningIds[0]?{id:runningIds[0],state:"running"}:null;},
     pilot(id){const t=tables[id];return t?pilotName(t):null;},
-    showHands,handLabel, // diagnostic : qui pilote les automatismes
+    showHands,handLabel,fillStats, // diagnostic : qui pilote les automatismes
     open(id){openId=id||null;window.showView&&window.showView("online");render();},
     async create(form){await createTable(form);window.showView&&window.showView("online");render();}
   };

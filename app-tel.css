@@ -9703,3 +9703,34 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
 .bpt-ol-prebar button.is-on{border-style:solid;border-color:var(--bpt-10,#d4a640);background:rgba(212,166,64,.18);color:var(--bpt-10,#d4a640);opacity:1}
 .bpt-ol-prebar button.is-on::before{content:"✓ "}
 .bpt-ol-note.is-break{border-color:var(--bpt-10,#d4a640);color:var(--bpt-10,#d4a640);font-weight:800}
+
+/* 10.4.103 — Statistiques de la partie en ligne, test de vibration */
+.bpt-ol-stats{display:grid;gap:10px}
+.bpt-ol-stats-facts{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.bpt-ol-stats-facts li{padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);border:1px solid var(--bpt-line,#2a3560);font-size:13px}
+.bpt-ol-stats-facts b{color:var(--bpt-10,#d4a640)}
+.bpt-ol-stats-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.bpt-ol-stats-table th{font-size:11px;font-weight:700;opacity:.65;text-align:right;padding:4px 4px;border-bottom:1px solid var(--bpt-line,#2a3560)}
+.bpt-ol-stats-table th:first-child,.bpt-ol-stats-table td:first-child{text-align:left}
+.bpt-ol-stats-table td{text-align:right;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.06);white-space:nowrap}
+.bpt-ol-stats-table td small{display:block;font-size:10.5px;opacity:.6}
+.bpt-ol-stats-table tr.is-me td{color:var(--bpt-10,#d4a640);font-weight:700}
+.bpt-ol-stats-note{margin:0;font-size:11px;opacity:.6}
+.bpt-summary-online-stats{margin-top:16px}
+.bpt-ol-stats-title{margin:0 0 8px}
+.bpt-ol-fx-buzz{margin:2px 2px 0;font-size:12px;opacity:.85}
+.bpt-ol-hands-list>*{min-width:0}
+.bpt-ol-stats{min-width:0;max-width:100%;overflow-x:auto}
+.bpt-ol-stats-facts li{overflow-wrap:anywhere}
+.bpt-ol-stats-table{font-size:12px;table-layout:auto}
+.bpt-ol-stats-table th,.bpt-ol-stats-table td{padding:5px 3px}
+.bpt-ol-stats-table td:first-child{white-space:normal;max-width:90px}
+.bpt-ol-stats{display:block}
+.bpt-ol-stats>*+*{margin-top:10px}
+.bpt-ol-stats-table{width:100%;font-size:11.5px}
+.bpt-ol-stats-table th{white-space:normal;line-height:1.15}
+.bpt-ol-stats-table td{white-space:normal}
+.bpt-ol-stats-note{white-space:normal}
+.bpt-ol-stats-table{table-layout:fixed}
+.bpt-ol-stats-table th:first-child,.bpt-ol-stats-table td:first-child{width:26%;max-width:none;overflow-wrap:anywhere}
+.bpt-ol-stats table.bpt-ol-stats-table{display:table !important;width:100% !important;min-width:0 !important;max-width:100% !important;table-layout:fixed !important}
