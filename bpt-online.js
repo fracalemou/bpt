@@ -248,6 +248,8 @@
     t.hand.last={i:bb,txt:`Blindes ${fmt(lv.sb)} / ${fmt(lv.bb)}`};logAct(t.hand);
     t.hand.toAct=nextToAct(t,bb);t.hand.actionAt=srvNow();
     settle(t);
+    // Décision seulement après la donne (animation carte par carte) : le délai de jeu démarre à la dernière carte.
+    if(t.hand.street==="preflop"&&!t.hand.runout){t.hand.dealEnd=srvNow()+2*list.length*DEAL_STEP+300;t.hand.actionAt=t.hand.dealEnd;}
   }
   // Fin du tour d'enchères : tous ceux qui peuvent encore parler ont parlé depuis la dernière relance et sont alignés.
   function streetDone(t){
@@ -278,7 +280,9 @@
     h.bets={};h.currentBet=0;h.minRaise=Number(t.levels?.[h.level]?.bb)||50;h.acted={};
     h.deck=deck.join(",");h.board=board.join(",");
     if(handPlayers(t).filter(i=>canAct(t,i)).length<2){h.runout=true;h.toAct=null;h.runoutAt=srvNow();return;}
-    h.runout=false;h.toAct=nextToAct(t,h.dealer);h.actionAt=srvNow();
+    h.runout=false;h.toAct=nextToAct(t,h.dealer);
+    // Flop carte par carte (turn et river : une carte) ; la décision attend la fin du tirage.
+    h.dealEnd=srvNow()+(h.street==="flop"?3:1)*DEAL_STEP+300;h.actionAt=h.dealEnd;
   }
   // Tapis : avant le flop, la carte suivante n'est pas encore tirée ; on attend RUNOUT_MS puis on révèle la rue suivante.
   function runoutStep(t){
@@ -379,6 +383,7 @@
   function applyAction(t,action,amount,asBot=false){
     {
       const h=t.hand;if(t.status!=="running"||!h||h.street==="done"||t.pausedAt)return false;
+      if(h.dealEnd&&srvNow()<Number(h.dealEnd)-250&&action!=="timeout"&&action!=="away")return false; // cartes encore en cours de distribution
       const i=h.toAct,seat=t.seats?.[i];if(seat===undefined||seat===null||i===null)return false;
       if(asBot?!(seat.bot&&pilotName(t)===me()):seat.name!==me()){
         const pilotOk=pilotName(t)===me();
@@ -613,7 +618,7 @@
   }
   // Bilan de fin de partie, comme pour le Live : affiché une fois à chaque joueur quand la partie est enregistrée.
   // Fin de partie : la dernière main (combinaison gagnante) reste affichée jusqu'à ce que le joueur touche « Voir le bilan ».
-  const finalSeen=new Set(),dealStart=new Map(),DEAL_STEP=300;
+  const finalSeen=new Set(),dealStart=new Map(),DEAL_STEP=300;let dealTimer=0;
   const lastHandShowing=t=>t?.status==="finished"&&!!t.hand?.showdown&&!finalSeen.has(t.id);
   // Plus d enchaînement automatique : dernière main → « Voir le classement » → écran du vainqueur → « Bilan de la soirée ».
   function maybeShowSummary(_t){}
@@ -866,7 +871,7 @@
     // Donne carte par carte : à la première vue d une main, chaque carte arrive à son tour (petite blinde d abord, un tour
     // de table par carte). Le décalage est recalculé à chaque rendu : l animation continue sans repartir de zéro.
     const dealKey=h?t.id+":"+h.no:"";
-    if(h&&!dealStart.has(dealKey))dealStart.set(dealKey,h.street==="preflop"&&srvNow()-Number(h.at||0)<3000?Date.now():0);
+    if(h&&!dealStart.has(dealKey))dealStart.set(dealKey,h.street==="preflop"&&srvNow()-Number(h.at||0)<3000?Date.now()-(srvNow()-Number(h.at||0)):0);
     const dealT0=dealStart.get(dealKey)||0,dealOrder=(()=>{if(!h||!dealT0)return [];const ids=Object.keys(h.hole||{}).map(Number).filter(i=>h.hole[i]).sort((a,b)=>a-b);const k=ids.indexOf(Number(h.sb));return k<0?ids:[...ids.slice(k),...ids.slice(0,k)];})();
     const dealDelay=(i,j)=>{const k=dealOrder.indexOf(i);if(k<0)return null;const d=(j*dealOrder.length+k)*DEAL_STEP-(Date.now()-dealT0);return d>-400?d:null;};
     const ring=seats.map((s,idx)=>{
@@ -887,7 +892,7 @@
       const turn=h&&!done&&h.toAct===s.i;
       const tag=out?'<i class="is-out">éliminé</i>':s.away?'<i class="is-away">absent</i>':allin?'<i class="is-allin">TAPIS</i>':fold?'<i>couché</i>':"";
       const badge=!h||done?"":h.dealer===s.i?'<em class="bpt-ol-dealer">D</em>':"";
-      const timer=turn?`<span class="bpt-ol-timer"><span data-ol-turn style="width:${Math.max(0,100-100*(srvNow()-Number(h.actionAt||0))/TURN_MS).toFixed(0)}%"></span></span>`:"";
+      const timer=turn?`<span class="bpt-ol-timer"><span data-ol-turn style="width:${Math.min(100,Math.max(0,100-100*(srvNow()-Number(h.actionAt||0))/TURN_MS)).toFixed(0)}%"></span></span>`:"";
       return `<div class="bpt-ol-seat${isMe?" is-me":""}${turn?" is-turn":""}${allin?" is-allin":""}${winners.has(s.i)?" is-winner":""}${fold?" is-folded":""}${out?" is-out":""}" data-name="${esc(s.name)}" data-pos="${pos}" data-n="${N}" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%">
         <div class="bpt-ol-plate">${isMe?"":`<b>${esc(s.name.split(" ")[0])}</b>`}<span>${out?"—":fmt(s.stack)}</span>${inPlate?`<em class="bpt-ol-plate-res ${won?"is-won":"is-lost"}">${won?"+"+fmt(won):"−"+fmt(lost)}</em>`:eq[s.i]!==undefined?`<em class="bpt-ol-equity${eq[s.i]>=0.5?" is-fav":""}">${Math.round(eq[s.i]*100)} %</em>`:!out&&bbNow?`<small class="bpt-ol-bb">${fmt(Math.round(Number(s.stack||0)/bbNow))} BB</small>`:""}${timer}</div>${tag}${cards}${badge}${chips}</div>`;
     }).join("");
@@ -922,7 +927,9 @@
     // Barre d'actions du joueur dont c'est le tour, en deux temps :
     // 1) Se coucher · Check/Suivre · Relancer   2) après « Relancer » : ✕ · Double · Triple · Pot · Tapis, curseur exponentiel et validation.
     let myBar="";
-    if(h&&!done&&mine&&h.toAct===mine.i){
+    const dealing=h&&!done&&h.dealEnd&&srvNow()<Number(h.dealEnd);
+    if(dealing&&!dealTimer)dealTimer=setTimeout(()=>{dealTimer=0;render();},Number(h.dealEnd)-srvNow()+40);
+    if(h&&!done&&!dealing&&mine&&h.toAct===mine.i){
       const i=mine.i,toCall=Math.max(0,h.currentBet-betOf(h,i)),stack=stackOf(t,i),maxTotal=betOf(h,i)+stack;
       const minTo=Math.min(maxTotal,h.currentBet+Math.max(h.minRaise,Number(lv.bb)||50)),pot=potTotal+toCall;
       const key=`${h.no}:${h.street}:${h.actionAt}`;if(raiseKey!==key){raiseKey=key;raiseTo=minTo;raiseMode=false;}
@@ -983,7 +990,10 @@
           <label>Structure<select data-ol-setup="adaptive"><option value="1"${t.adaptive?" selected":""}>Adaptatif</option><option value="0"${t.adaptive?"":" selected"}>Classique</option></select></label>
         </div>`:"";
       waitInfo=`<div class="bpt-ol-waitinfo">${edit}<b>Niveaux de ${Math.round(preview.levelSeconds/60)} min</b><span>${seats.length} joueur${seats.length>1?"s":""} · ${fmt(t.startStack)} jetons · durée visée ${dur}</span><span>Fin prévue vers le niveau ${endIdx+1} (blinds ${fmt(end.sb)} / ${fmt(end.bb)})${t.adaptive?" · ajustée en cours de partie":""}</span></div>`;}
-    const center=h?`<div class="bpt-ol-board">${[0,1,2,3,4].map(k=>cardHtml(board[k])).join("")}</div><div class="bpt-ol-pot">${potLine}</div>`
+    // Tableau : les cartes qui viennent d arriver (flop : 3, turn / river : 1) apparaissent une par une.
+    const newFrom=h&&!done?({flop:0,turn:3,river:4})[h.street]:undefined,boardT0=newFrom===undefined?0:Date.now()-(srvNow()-(h.runout?Number(h.runoutAt||0):Number(h.dealEnd||0)-((h.street==="flop"?3:1)*DEAL_STEP+300)));
+    const boardCard=k=>{const html=cardHtml(board[k]);if(newFrom===undefined||k<newFrom||!board[k]||!boardT0)return html;const d=(k-newFrom)*DEAL_STEP-(Date.now()-boardT0);return d>-400?html.replace("<span ",`<span style="animation-delay:${Math.round(d)}ms" `).replace("class=\"bpt-card","class=\"bpt-card is-dealt"):html;};
+    const center=h?`<div class="bpt-ol-board">${[0,1,2,3,4].map(boardCard).join("")}</div><div class="bpt-ol-pot">${potLine}</div>`
       :waitInfo; // blindes affichées seulement dans le bandeau en haut à droite
     const centerSub=t.status==="finished"?`🏆 ${esc(t.winner||"")} remporte le tournoi`
       :t.status==="waiting"?`En attente des joueurs · ${seats.length} inscrit${seats.length>1?"s":""}`
@@ -1079,7 +1089,7 @@
     const nx=document.querySelector("#bptOnlineBody [data-ol-next-in]");if(nx&&t.hand)nx.textContent=Math.max(1,Math.ceil((nextHandMs(t.hand)-(srvNow()-Number(t.hand.at||0)))/1000));
     // Compte à rebours de la demande de reprise : à zéro, on redessine pour proposer « Forcer la reprise ».
     const tl=document.querySelector("#bptOnlineBody [data-ol-take-left]");if(tl){const left=Math.ceil((TAKEOVER_MS-(srvNow()-Number(tl.dataset.olTakeLeft)))/1000);if(left<=0)render();else tl.textContent=left;}
-    const bar=document.querySelector("#bptOnlineBody [data-ol-turn]");if(bar&&t.hand)bar.style.width=Math.max(0,100-100*(srvNow()-Number(t.hand.actionAt||0))/TURN_MS).toFixed(0)+"%";
+    const bar=document.querySelector("#bptOnlineBody [data-ol-turn]");if(bar&&t.hand)bar.style.width=Math.min(100,Math.max(0,100-100*(srvNow()-Number(t.hand.actionAt||0))/TURN_MS)).toFixed(0)+"%";
   },1000);
   setInterval(()=>{try{heartbeat();autopilot();}catch(e){console.warn("BPT en ligne :",e);}},400);
   function render(){
