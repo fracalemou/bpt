@@ -1175,6 +1175,10 @@
     // Obstacles : tableau + pot, plaques de tous les joueurs (complétés au fur et à mesure par les cartes et mises placées).
     const obstacles=[],placing=[];
     stage.querySelectorAll(".bpt-ol-seat[data-pos]").forEach(el=>{const [x,y]=at(P*(Number(el.dataset.pos)||0)/(Number(el.dataset.n)||1));el.style.left=x.toFixed(1)+"px";el.style.top=y.toFixed(1)+"px";});
+    // Ma mise : juste au-dessus de mes cartes, quelle que soit leur taille (téléphone, paysage, PC).
+    {const me1=stage.querySelector(".bpt-ol-seat.is-me"),mc=me1?.querySelector(".bpt-ol-cards"),mb=me1?.querySelector(".bpt-ol-bet");
+      if(me1&&mb){const sr2=me1.getBoundingClientRect(),cy0=sr2.top+sr2.height/2,cx0=sr2.left+sr2.width/2,ref=mc?mc.getBoundingClientRect():me1.querySelector(".bpt-ol-plate").getBoundingClientRect();
+        me1.style.setProperty("--mbx",(ref.left+ref.width/2-cx0).toFixed(1)+"px");me1.style.setProperty("--mby",(ref.top-cy0-6-mb.offsetHeight/2).toFixed(1)+"px");}}
     stage.querySelectorAll(".bpt-ol-board,.bpt-ol-pot,.bpt-ol-seat .bpt-ol-plate,.bpt-ol-seat.is-me .bpt-ol-cards,.bpt-ol-seat.is-me .bpt-ol-bet").forEach(e=>{const r=e.getBoundingClientRect();if(r.width)obstacles.push(r);});
     stage.querySelectorAll(".bpt-ol-seat[data-pos]").forEach(el=>{const n=Number(el.dataset.n)||1,p=Number(el.dataset.pos)||0;const [x,y]=at(P*p/n);el.style.left=x.toFixed(1)+"px";el.style.top=y.toFixed(1)+"px";
       const dx=W/2-x,dy=H/2-y,len=Math.hypot(dx,dy)||1;

@@ -7339,3 +7339,20 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
   .bpt-ol-table:has(.bpt-ol-panel) .bpt-ol-seat.is-me .bpt-ol-bet{transform:translate(calc(-50% + 70px),-50%) !important}
 }
 #bptOlHands{z-index:2000000 !important}
+
+/* 10.4.105 — Ma mise au-dessus de mes cartes */
+.bpt-ol-table .bpt-ol-seat.is-me .bpt-ol-bet{transform:translate(-50%,calc(-50% - 108px)) !important}
+@media (orientation:landscape) and (max-height:500px){
+  .bpt-ol-table .bpt-ol-seat.is-me .bpt-ol-bet{transform:translate(-50%,calc(-50% - 92px)) !important}
+}
+.bpt-ol-table .bpt-ol-seat.is-me .bpt-ol-bet{transform:translate(calc(-50% + var(--mbx,0px)),calc(-50% + var(--mby,-108px))) !important;font-size:15px !important;padding:4px 12px 4px 26px !important;z-index:5}
+.bpt-ol-table .bpt-ol-seat.is-me .bpt-ol-bet::before{left:8px !important;width:13px !important;height:13px !important}
+@media (orientation:landscape) and (max-height:500px){
+  .bpt-ol-table .bpt-ol-seat.is-me .bpt-ol-bet{transform:translate(calc(-50% + var(--mbx,0px)),calc(-50% + var(--mby,-92px))) !important;font-size:13.5px !important;padding:3px 10px 3px 24px !important}
+}
+@media (orientation:landscape) and (max-height:500px){
+  .bpt-ol-table:has(.bpt-ol-panel) .bpt-ol-seat.is-me .bpt-ol-bet{transform:translate(calc(-50% + var(--mbx,0px)),calc(-50% + var(--mby,-92px))) !important}
+}
+@media (orientation:landscape) and (max-height:500px){
+  .bpt-ol-table:has(.bpt-ol-seat.is-me .bpt-ol-bet) .bpt-ol-center{transform:translate(-50%,calc(-50% - 16px))}
+}
