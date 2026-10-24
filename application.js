@@ -2464,6 +2464,7 @@ function showEndGameSummary(rows){
   content.innerHTML=`
     <div class="muted" style="margin-top:6px">${first.unranked?"💻 Partie en ligne · hors classement":(first.online?"💻 En ligne · ":"")+"Partie #"+first.game} · ${esc(shortDate(first.date))}${first.location?" · "+esc(first.location):""} · ${sorted.length} joueurs${bptGameTiming(sorted).durationSec?" · "+esc(formatGameDuration(bptGameTiming(sorted).durationSec)):""}</div>
 
+    ${first.onlineId&&window.bptOnline?.showHands?`<button type="button" class="btn secondary bpt-summary-hands" onclick="window.bptOnline.showHands('${esc(first.onlineId)}')">📜 Mains et chat</button>`:""}
     <div class="summary-podium">
       ${sorted.slice(0,3).map((r,i)=>`<div class="summary-place">
         <b>${esc(r.player)}</b>
