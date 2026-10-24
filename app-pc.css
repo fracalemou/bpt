@@ -7214,3 +7214,9 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
 /* 10.4.98 — Accès direct à l'historique : bouton 📜 sous le 💬 (le lien en bas du panneau était hors de vue en paysage) */
 .bpt-ol-bar .bpt-ol-hist-btn{position:absolute;right:0;top:calc(100% + 50px);z-index:8;width:38px;height:38px;border-radius:50%;border:1px solid var(--bpt-line,#2a3560);background:var(--bpt-card2,#1b2442);font-size:17px;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.45)}
 .bpt-ol-bar .bpt-ol-hist-btn.is-alone{top:calc(100% + 6px)}
+
+/* 10.4.99 — Tapis moyen en BB sous les blindes */
+.bpt-ol-bar-level .bpt-ol-avg{display:block;font-size:11px;font-weight:700;opacity:.7;letter-spacing:0;text-transform:none;margin-top:1px}
+/* Donne carte par carte */
+@keyframes bptOlDeal{from{opacity:0;transform:translateY(-18px) scale(.55)}}
+.bpt-card.is-dealt{animation:bptOlDeal .26s ease-out backwards}
