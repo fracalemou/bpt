@@ -1,6 +1,6 @@
 
 
-const BPT_APP_VERSION="10.4.96";
+const BPT_APP_VERSION="10.4.97";
 function updateBptSettingsVersion(){
   const el=document.getElementById("settingsVersionInfo");
   if(el)el.textContent=`Version BPT ${BPT_APP_VERSION}`;

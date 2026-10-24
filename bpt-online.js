@@ -871,7 +871,8 @@
       const isMe=s.name===me(), out=!!t.out?.[K(s.i)]&&Number(s.stack)<=0;
       const hole=split(h?.hole?.[s.i]), fold=h&&folded(h,s.i), allin=h&&h.allin?.[K(s.i)]&&!done;
       const show=isMe||(done&&h.showdown&&!fold)||(done&&!!h.shown?.[K(s.i)])||(h?.runout&&!done&&!fold);
-      const cards=hole.length&&!fold?`<div class="bpt-ol-cards${isMe?" is-mine":""}">${hole.map(c=>show?cardHtml(c):backHtml()).join("")}</div>`:"";
+      // Couché : on continue de voir ses propres cartes (grisées) ; celles des autres disparaissent.
+      const cards=hole.length&&(!fold||isMe)?`<div class="bpt-ol-cards${isMe?" is-mine":""}${fold?" is-folded":""}">${hole.map(c=>show?cardHtml(c):backHtml()).join("")}</div>`:"";
       const bet=h&&!done?betOf(h,s.i):0;
       // Gain net : récupéré − misé. Un pot où l'on est seul (excédent de tapis non suivi) n'est qu'un remboursement.
       const back=done?wonBack(h,s.i):0;
@@ -991,10 +992,10 @@
         <div class="bpt-ol-bar-title"><b>${esc(t.name)}</b><small>${t.countsForChampionship?"Compte au championnat":"Hors championnat"} · ${t.adaptive?"Adaptatif":"Classique"}</small></div>
         ${isHost&&t.status==="waiting"?`<label class="bpt-ol-check"><input type="checkbox" data-ol-counts${t.countsForChampionship?" checked":""}${hasBots(t)?" disabled title=\"Partie avec joueurs virtuels : hors championnat\"":""}> Championnat</label>`:""}
         ${isHost&&t.status==="waiting"?`<button type="button" class="bpt-ol-bar-del" data-ol-remove title="Supprimer la table" aria-label="Supprimer la table">🗑</button>`:""}
-        <div class="bpt-ol-bar-level${running&&(isHost||mine)?" is-clickable":""}${t.pausedAt?" is-paused":""}"${running&&(isHost||mine)?" data-ol-clock-menu role=\"button\" tabindex=\"0\" title=\"Réglages du chrono\"":""}>${t.pausedAt?"<em class=\"bpt-ol-pause\">EN PAUSE</em>":""}<small>Niveau ${L.index+1}${running?` · <span data-ol-clock>${clock(L.left)}</span>`:""} · ${Math.round((Number(lv.durationSec)||Number(preview?.levelSeconds)||Number(t.levelSeconds)||0)/60)} min</small><b>${fmt(lv.sb)} / ${fmt(lv.bb)}</b></div></div>
+        <div class="bpt-ol-bar-level${running&&(isHost||mine)?" is-clickable":""}${t.pausedAt?" is-paused":""}"${running&&(isHost||mine)?" data-ol-clock-menu role=\"button\" tabindex=\"0\" title=\"Réglages du chrono\"":""}>${t.pausedAt?"<em class=\"bpt-ol-pause\">EN PAUSE</em>":""}<small>Niveau ${L.index+1}${running?` · <span data-ol-clock>${clock(L.left)}</span>`:""} · ${Math.round((Number(lv.durationSec)||Number(preview?.levelSeconds)||Number(t.levelSeconds)||0)/60)} min</small><b>${fmt(lv.sb)} / ${fmt(lv.bb)}</b></div>${t.status!=="waiting"&&!spectator?`<button type="button" class="bpt-ol-fx-btn" data-ol-fx aria-label="Chat et objets">💬</button>`:""}</div>
       <div class="bpt-ol-stage"><div class="bpt-ol-rail"><div class="bpt-ol-felt">
         <div class="bpt-ol-center"><span class="bpt-ol-logo">♠ BPT</span>${center}<small>${centerSub}</small></div>
-      </div></div>${ring}${t.status==="finished"&&!lastHandShowing(t)?resultsHtml(t):showcase}${t.status!=="waiting"&&!spectator?`<button type="button" class="bpt-ol-fx-btn" data-ol-fx aria-label="Chat et objets">💬</button>`:""}</div>
+      </div></div>${ring}${t.status==="finished"&&!lastHandShowing(t)?resultsHtml(t):showcase}</div>
       ${clockMenuOpen&&running&&!isHost&&mine?`<div class="bpt-ol-clockmenu" role="menu"><button type="button" class="is-wide" data-ol-take>👑 Demander la reprise</button><button type="button" class="is-wide is-plain" data-ol-hide>Masquer la partie</button></div>`:""}${clockMenuOpen&&running&&isHost?`<div class="bpt-ol-clockmenu" role="menu"><button type="button" data-ol-clk="minus">−1 min</button><button type="button" data-ol-clk="plus">+1 min</button><button type="button" class="is-wide" data-ol-clk="${t.pausedAt?"resume":"pause"}">${t.pausedAt?"▶ Reprendre":"⏸ Pause"}</button><button type="button" data-ol-clk="prev">◀ Niveau préc.</button><button type="button" data-ol-clk="next">Niveau suiv. ▶</button><button type="button" class="is-plain" data-ol-hide>Masquer la partie</button><button type="button" class="is-plain is-danger" data-ol-remove>Supprimer la partie</button></div>`:""}${specNote}${last}${myBar}<div class="bpt-ol-actions">${actions.join("")}</div></div>`;
   }
   // Table « stade » (rectangle aux bouts arrondis) : chaque joueur est posé sur le bord, à intervalles réguliers
