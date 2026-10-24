@@ -45,19 +45,26 @@
     t.adaptAt=idx;
     const lv=t.levels,N=Math.max(2,Object.keys(t.seats||{}).length),remaining=Math.max(1,inPlay(t).length);
     const endIdx=endIndexFor(lv,N*(Number(t.startStack)||20000));
-    if(endIdx<=idx)return; // déjà dans la zone de fin
     const targetSec=Math.max(1800,(Number(t.targetHours)||2)*3600),elapsed=(Date.now()-Number(t.startedAt))/1000;
+    // Au-delà du niveau de fin prévu (arrivée de joueurs, sorties tardives…) : si l'heure visée est proche ou dépassée,
+    // chaque nouveau niveau est raccourci de 40 % (3 min minimum). Avant, plus rien n'était ajusté dans cette zone.
+    if(endIdx<=idx){
+      if(elapsed<targetSec*0.85||remaining<2)return;
+      const nextMin=Math.max(1,Math.round((Number(lv[idx+1]?.durationSec)||Number(lv[idx].durationSec)||600)/60)),min=Math.max(3,Math.round(nextMin*0.6));
+      if(min<nextMin){for(let i=idx+1;i<lv.length;i++)lv[i].durationSec=min*60;t.lastAdapt={level:idx+1,from:nextMin,to:min,at:Date.now()};}
+      return;
+    }
     const curDur=Math.max(60,Number(lv[idx].durationSec)||600);
     let scheduleLeft=L.left;for(let i=idx+1;i<=endIdx;i++)scheduleLeft+=Math.max(60,Number(lv[i]?.durationSec)||curDur);
     const levelProgress=Math.max(0,(idx+1-L.left/curDur)/(endIdx+1));
     const expectedRemaining=N-(N-1)*Math.pow(Math.min(1,levelProgress),4.5);
-    const weight=Math.max(0,Math.min(1,(levelProgress-.55)/.30));
+    const weight=Math.max(0,Math.min(1,(levelProgress-.35)/.30));
     const correction=Math.max(-2700,Math.min(2700,(remaining-expectedRemaining)*0.8*8*60*weight));
     const delta=elapsed+scheduleLeft+correction-targetSec;
-    if(Math.abs(delta)<180)return;
+    if(Math.abs(delta)<120)return;
     const nextMin=Math.max(1,Math.round((Number(lv[idx+1]?.durationSec)||curDur)/60));
     const ideal=(targetSec-elapsed-L.left-correction)/(endIdx-idx)/60;
-    const min=Math.max(3,Math.min(40,Math.round(Math.max(nextMin*.7,Math.min(nextMin*1.3,ideal)))));
+    const min=Math.max(3,Math.min(40,Math.round(Math.max(nextMin*.5,Math.min(nextMin*1.3,ideal)))));
     if(min===nextMin)return;
     for(let i=idx+1;i<lv.length;i++)lv[i].durationSec=min*60;
     t.lastAdapt={level:idx+1,from:nextMin,to:min,at:Date.now()};
@@ -168,7 +175,7 @@
   const K=i=>"p"+i;
   const TURN_MS=45000, AWAY_AFTER=2;
   // Délai avant la main suivante : plus long après un abattage pour laisser voir les cartes de chacun.
-  const nextHandMs=h=>h?.showdown?12000:6000;
+  const nextHandMs=h=>h?.showdown?7000:4000;
   function freshDeck(){
     const d=[];for(const s of SUITS)for(const r of RANKS)d.push(r+s);
     const rnd=n=>{try{const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]%n;}catch(_e){return Math.floor(Math.random()*n);}};
@@ -760,6 +767,7 @@
     const h=(running||t.status==="finished")?t.hand:null,board=split(h?.board),done=h?.street==="done";
     const N=Math.max(1,seats.length);
     const winners=new Set(done?(h.result?.[0]?.winners||[]):[]);
+    const compact=seats.length>=8&&window.matchMedia?.("(orientation:portrait) and (max-width:600px)").matches;
     const runoutPlayers=h?.runout&&!done?handPlayers(t).filter(i=>!folded(h,i)):[];
     const eq=runoutPlayers.length>1?equities(h,runoutPlayers):{};
     // Tapis en grosses blindes (arrondi à l'entier) : niveau de la main en cours, sinon niveau affiché.
@@ -777,13 +785,15 @@
       const back=done?(h.result||[]).filter(r=>r.winners.includes(s.i)).reduce((a,r)=>a+Math.floor(r.amount/r.winners.length),0):0;
       const net=done?back-(Number(h?.contrib?.[K(s.i)])||0):0,won=Math.max(0,net),lost=Math.max(0,-net);
       // Fin de main : résultat net de chaque joueur qui a misé (+ en vert, − en rouge).
-      const chips=bet?`<em class="bpt-ol-bet">${fmt(bet)}</em>`:won?`<em class="bpt-ol-bet is-won">+${fmt(won)}</em>`:lost?`<em class="bpt-ol-bet is-lost">−${fmt(lost)}</em>`:"";
+      // Table chargée en portrait : le résultat de la main va dans la plaque (pas la place pour un jeton à côté).
+      const inPlate=done&&compact&&(won||lost);
+      const chips=inPlate?"":bet?`<em class="bpt-ol-bet">${fmt(bet)}</em>`:won?`<em class="bpt-ol-bet is-won">+${fmt(won)}</em>`:lost?`<em class="bpt-ol-bet is-lost">−${fmt(lost)}</em>`:"";
       const turn=h&&!done&&h.toAct===s.i;
       const tag=out?'<i class="is-out">éliminé</i>':s.away?'<i class="is-away">absent</i>':allin?'<i class="is-allin">TAPIS</i>':fold?'<i>couché</i>':s.bot?'<i>virtuel</i>':"";
       const badge=!h||done?"":h.dealer===s.i?'<em class="bpt-ol-dealer">D</em>':"";
       const timer=turn?`<span class="bpt-ol-timer"><span data-ol-turn style="width:${Math.max(0,100-100*(Date.now()-Number(h.actionAt||0))/TURN_MS).toFixed(0)}%"></span></span>`:"";
       return `<div class="bpt-ol-seat${isMe?" is-me":""}${turn?" is-turn":""}${allin?" is-allin":""}${winners.has(s.i)?" is-winner":""}${fold?" is-folded":""}${out?" is-out":""}" data-name="${esc(s.name)}" data-pos="${pos}" data-n="${N}" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%">
-        <div class="bpt-ol-plate">${isMe?"":`<b>${esc(s.name.split(" ")[0])}</b>`}<span>${out?"—":fmt(s.stack)}</span>${eq[s.i]!==undefined?`<em class="bpt-ol-equity${eq[s.i]>=0.5?" is-fav":""}">${Math.round(eq[s.i]*100)} %</em>`:!out&&bbNow?`<small class="bpt-ol-bb">${fmt(Math.round(Number(s.stack||0)/bbNow))} BB</small>`:""}${timer}</div>${tag}${cards}${badge}${chips}</div>`;
+        <div class="bpt-ol-plate">${isMe?"":`<b>${esc(s.name.split(" ")[0])}</b>`}<span>${out?"—":fmt(s.stack)}</span>${inPlate?`<em class="bpt-ol-plate-res ${won?"is-won":"is-lost"}">${won?"+"+fmt(won):"−"+fmt(lost)}</em>`:eq[s.i]!==undefined?`<em class="bpt-ol-equity${eq[s.i]>=0.5?" is-fav":""}">${Math.round(eq[s.i]*100)} %</em>`:!out&&bbNow?`<small class="bpt-ol-bb">${fmt(Math.round(Number(s.stack||0)/bbNow))} BB</small>`:""}${timer}</div>${tag}${cards}${badge}${chips}</div>`;
     }).join("");
     // Pot : tout ce qui a été misé pendant la main, moins les mises encore devant les joueurs.
     const potTotal=h?Object.values(h.contrib||{}).reduce((a,x)=>a+(Number(x)||0),0):0;
@@ -916,7 +926,7 @@
       if(!el.classList.contains("is-me")){
         // Directions essayées pour ce siège : vers le centre, verticale, diagonales (les mises en ont d'autres en plus).
         const sy=dy>=0?1:-1,sx=dx>=0?1:-1,d=Math.SQRT1_2,u0=[dx/len,dy/len];
-        placing.push({el,cands:[u0,[0,sy],[sx*d,sy*d],[sx*d,-sy*d],[0,-sy]],betCands:[u0,[0,sy],[sx*d,sy*d],[sx*d,-sy*d],[0,-sy],[-u0[1],u0[0]],[u0[1],-u0[0]],[-u0[0],-u0[1]],[1,0],[-1,0]]});
+        placing.push({el,cands:[u0,[0,sy],[sx*d,sy*d],[sx*d,-sy*d],[0,-sy]],betCands:[u0,[0,sy],[sx*d,sy*d],[sx*d,-sy*d],[0,-sy],[-u0[1],u0[0]],[u0[1],-u0[0]],[-u0[0],-u0[1]],[1,0],[-1,0],[-sx*d,sy*d],[-sx*d,-sy*d]]});
       }});
     // Placement en deux passes : d'abord les cartes de tous les joueurs, puis les mises / résultats. Chaque élément prend
     // la direction qui touche le moins d'obstacles (tableau, pot, plaques, éléments déjà placés, bords de l'écran).
