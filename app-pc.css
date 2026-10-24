@@ -7263,3 +7263,79 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
 .bpt-ol-stats-table{table-layout:fixed}
 .bpt-ol-stats-table th:first-child,.bpt-ol-stats-table td:first-child{width:26%;max-width:none;overflow-wrap:anywhere}
 .bpt-ol-stats table.bpt-ol-stats-table{display:table !important;width:100% !important;min-width:0 !important;max-width:100% !important;table-layout:fixed !important}
+
+/* 10.4.104 — Table v2 (inspirée des tables en ligne, couleurs du thème BPT 60-30-10) :
+   pot au-dessus du tableau, mises sur un anneau intérieur avec pile de jetons, compte à rebours en anneau,
+   barre d'infos (blindes · mise à suivre · à qui de jouer), actions en une étape avec curseur horizontal. */
+.bpt-ol-center .bpt-ol-pot{order:-1;margin:0 0 6px;padding:3px 12px 3px 26px;position:relative;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);font-weight:900}
+.bpt-ol-center .bpt-ol-pot::before{content:"";position:absolute;left:9px;top:50%;width:11px;height:11px;margin-top:-2px;border-radius:50%;background:var(--bpt-10,#f2c853);box-shadow:0 -3px 0 var(--bpt-30,#1f2b52),0 -3px 0 1px rgba(255,255,255,.35),0 -6px 0 var(--bpt-10,#f2c853)}
+.bpt-ol-bet{padding:2px 8px 2px 21px !important;background:rgba(0,0,0,.5) !important;border:1px solid rgba(255,255,255,.08)}
+.bpt-ol-bet::before{width:11px !important;height:11px !important;margin-top:-3px !important;box-shadow:0 -3px 0 var(--bpt-30,#1f2b52),0 -3px 0 1px rgba(255,255,255,.35),0 -6px 0 var(--bpt-10,#f2c853) !important}
+.bpt-ol-bet.is-won::before,.bpt-ol-bet.is-lost::before{box-shadow:none !important}
+/* Anneau du compte à rebours */
+.bpt-ol-plate{position:relative}
+.bpt-ol-ring{position:absolute;right:-15px;top:50%;width:28px;height:28px;margin-top:-14px;border-radius:50%;display:grid;place-items:center;z-index:6;
+  background:conic-gradient(var(--bpt-10,#f2c853) calc(var(--p,100)*1%),rgba(255,255,255,.14) 0);box-shadow:0 2px 8px rgba(0,0,0,.5)}
+.bpt-ol-ring::before{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--bpt-60,#0f1426)}
+.bpt-ol-ring b{position:relative;font-size:11px;font-weight:900;color:var(--bpt-10,#f2c853)}
+.bpt-ol-seat.is-me .bpt-ol-ring{right:-18px;width:32px;height:32px;margin-top:-16px}
+/* Mes cartes en éventail */
+.bpt-ol-cards.is-mine{gap:0 !important}
+.bpt-ol-cards.is-mine .bpt-card:first-child{transform:rotate(-6deg) translateX(4px)}
+.bpt-ol-cards.is-mine .bpt-card:last-child{transform:rotate(6deg) translate(-4px,2px)}
+/* Barre d'infos */
+.bpt-ol-infobar{display:grid;grid-template-columns:1fr 1fr 1.1fr;margin:6px 8px 0;border-radius:14px;background:var(--bpt-30,#1f2b52);border:1px solid rgba(255,255,255,.07);overflow:hidden}
+.bpt-ol-infobar>div{display:grid;justify-items:center;align-content:center;padding:5px 4px;gap:1px;font-size:13px}
+.bpt-ol-infobar>div+div{border-left:1px solid rgba(255,255,255,.08)}
+.bpt-ol-infobar small{font-size:10.5px;opacity:.6}
+.bpt-ol-infobar b{font-size:14px}
+.bpt-ol-infobar .is-turn{display:flex;align-items:center;justify-content:center;gap:6px;font-weight:800;opacity:.75}
+.bpt-ol-infobar .is-turn i{width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.6}
+.bpt-ol-infobar .is-turn.is-me{color:var(--bpt-10,#f2c853);opacity:1}
+.bpt-ol-infobar .is-turn.is-me i{opacity:1;box-shadow:0 0 0 3px rgba(242,200,83,.25);animation:bptOlBlink 1s infinite}
+@keyframes bptOlBlink{50%{opacity:.3}}
+/* Actions */
+.bpt-ol-dock{display:grid;gap:8px;margin:8px 8px 4px}
+.bpt-ol-acts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.bpt-ol-acts button{min-height:54px;border-radius:14px;border:1px solid rgba(255,255,255,.1);display:grid;align-content:center;justify-items:center;gap:1px;font-size:16px;font-weight:900;cursor:pointer;color:var(--bpt-text,#eef2fb)}
+.bpt-ol-acts button small{font-size:12.5px;font-weight:700;opacity:.85}
+.bpt-ol-acts .is-fold{background:rgba(255,255,255,.06)}
+.bpt-ol-acts .is-call{background:var(--bpt-30,#1f2b52);border-color:rgba(255,255,255,.18)}
+.bpt-ol-acts .is-raise{background:var(--bpt-10,#f2c853);color:#141414;border-color:transparent}
+.bpt-ol-slider{display:grid;grid-template-columns:38px 1fr 38px;gap:8px;align-items:center}
+.bpt-ol-slider button{width:38px;height:38px;border-radius:50%;border:1px solid var(--bpt-line,#2a3560);background:rgba(255,255,255,.05);color:inherit;font-size:20px;font-weight:700;cursor:pointer}
+.bpt-ol-slider input[type=range]{width:100%;accent-color:var(--bpt-10,#f2c853)}
+.bpt-ol-presets2{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.bpt-ol-presets2 button{min-height:34px;border-radius:10px;border:1px solid var(--bpt-line,#2a3560);background:rgba(255,255,255,.04);color:inherit;font-weight:800;font-size:13px;cursor:pointer}
+.bpt-ol-presets2 button.is-on{border-color:var(--bpt-10,#f2c853);color:var(--bpt-10,#f2c853)}
+.bpt-ol-panel{display:grid;gap:0;min-width:0}
+.bpt-ol-panel .bpt-ol-myhand{margin-bottom:0}
+/* Téléphone en paysage : panneau (main, infos, actions) en colonne à droite, la table garde toute la hauteur */
+@media (orientation:landscape) and (max-height:500px){
+  .bpt-ol-table:has(.bpt-ol-panel){grid-template-columns:minmax(0,1fr) 270px !important;grid-template-rows:auto minmax(0,1fr) auto auto !important;column-gap:8px}
+  .bpt-ol-table:has(.bpt-ol-panel)>.bpt-ol-bar{grid-column:1/-1}
+  .bpt-ol-table:has(.bpt-ol-panel)>.bpt-ol-stage{grid-column:1;grid-row:2/6 !important}
+  .bpt-ol-table:has(.bpt-ol-panel)>.bpt-ol-panel{grid-column:2;grid-row:2;align-content:center}
+  .bpt-ol-table:has(.bpt-ol-panel)>.bpt-ol-note,.bpt-ol-table:has(.bpt-ol-panel)>.bpt-ol-req{grid-column:2}
+  .bpt-ol-table:has(.bpt-ol-panel)>.bpt-ol-actions{grid-column:2}
+  .bpt-ol-panel .bpt-ol-infobar{margin:4px 0 0}
+  .bpt-ol-panel .bpt-ol-infobar>div{padding:3px 2px;font-size:11.5px}
+  .bpt-ol-panel .bpt-ol-infobar b{font-size:12.5px}
+  .bpt-ol-panel .bpt-ol-dock{margin:6px 0 0;gap:6px}
+  .bpt-ol-panel .bpt-ol-acts{gap:5px}
+  .bpt-ol-panel .bpt-ol-acts button{min-height:44px;font-size:13.5px;border-radius:12px}
+  .bpt-ol-panel .bpt-ol-acts button small{font-size:11px}
+  .bpt-ol-panel .bpt-ol-slider{grid-template-columns:32px 1fr 32px;gap:6px}
+  .bpt-ol-panel .bpt-ol-slider button{width:32px;height:32px;font-size:17px}
+  .bpt-ol-panel .bpt-ol-presets2{gap:4px}
+  .bpt-ol-panel .bpt-ol-presets2 button{min-height:30px;font-size:11.5px;padding:0 2px}
+  .bpt-ol-panel .bpt-ol-myhand{font-size:12px;margin-top:2px}
+  .bpt-ol-panel .bpt-ol-prebar button{padding:6px 9px;font-size:12px}
+}
+@media (orientation:landscape) and (max-height:500px){
+  .bpt-ol-table:has(.bpt-ol-panel) .bpt-ol-seat.is-me .bpt-ol-cards.is-mine{transform:translate(-50%,calc(-50% - 50px)) !important}
+  .bpt-ol-table:has(.bpt-ol-panel) .bpt-ol-cards.is-mine .bpt-card{width:38px !important;height:54px !important}
+  .bpt-ol-table:has(.bpt-ol-panel) .bpt-ol-cards.is-mine .bpt-card b,.bpt-ol-table:has(.bpt-ol-panel) .bpt-ol-cards.is-mine .bpt-card i{font-size:17px !important}
+  .bpt-ol-table:has(.bpt-ol-panel) .bpt-ol-seat.is-me .bpt-ol-bet{transform:translate(calc(-50% + 70px),-50%) !important}
+}
+#bptOlHands{z-index:2000000 !important}

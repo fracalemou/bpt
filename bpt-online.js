@@ -164,7 +164,9 @@
   }
   async function removeTable(id){
     if(!confirm("Supprimer cette table ?"))return;
-    await (await db()).ref(`${ROOT}/${id}`).remove();(await db()).ref(`${HANDS_ROOT}/${id}`).remove().catch(()=>{});(await db()).ref(`${CHATLOG_ROOT}/${id}`).remove().catch(()=>{});
+    // Partie terminée : l historique des mains et du chat est gardé (il sert au bilan) ; sinon il part avec la table.
+    const keep=tables[id]?.status==="finished";
+    await (await db()).ref(`${ROOT}/${id}`).remove();if(!keep){(await db()).ref(`${HANDS_ROOT}/${id}`).remove().catch(()=>{});(await db()).ref(`${CHATLOG_ROOT}/${id}`).remove().catch(()=>{});}
     try{await (await db()).ref(`${RUN_ROOT}/${id}`).remove();}catch(_e){}openId=null;render();
   }
   // Réglages de la partie avant lancement (organisateur) : durée visée, tapis de départ, structure.
@@ -766,9 +768,11 @@
   const LOG_STREET={p:"Pré-flop",f:"Flop",t:"Turn",r:"River",d:"Fin"};
   async function showHands(id){
     let box=$("bptOlHands");
-    if(!box){box=document.createElement("div");box.id="bptOlHands";document.body.append(box);
+    if(!box){box=document.createElement("div");box.id="bptOlHands";
       box.addEventListener("click",e=>{if(e.target===box||e.target.closest("[data-hands-close]")){box.hidden=true;return;}
         const tb=e.target.closest("[data-hands-tab]");if(tb){box.dataset.tab=tb.dataset.handsTab;box.querySelectorAll("[data-hands-tab]").forEach(b=>b.classList.toggle("is-on",b===tb));box.querySelectorAll("[data-pane]").forEach(p=>p.hidden=p.dataset.pane!==tb.dataset.handsTab);}});}
+    // Toujours au premier plan, au-dessus du bilan de la soirée (même s il est ouvert en plein écran).
+    const host=document.fullscreenElement||document.body;if(box.parentElement!==host||box.nextElementSibling)host.append(box);
     box.hidden=false;box.dataset.tab="hands";box.innerHTML=`<div class="bpt-ol-hands"><div class="bpt-ol-hands-head"><b>📜 Historique</b><button type="button" data-hands-close aria-label="Fermer">×</button></div><p>Chargement…</p></div>`;
     let list=[],chat=[];
     try{const v=(await (await db()).ref(`${HANDS_ROOT}/${id}`).once("value")).val()||{};list=Object.values(v).filter(Boolean).sort((a,b)=>b.no-a.no);}catch(_e){}
@@ -783,7 +787,7 @@
         ${m.board?`<div class="bpt-ol-hand-board">${cards(m.board)}</div>`:""}
         <div class="bpt-ol-hand-players">${ps.map(p=>`<div><span>${esc(p.name)}${p.name===m.dealer?" <i>D</i>":""}</span><span class="bpt-ol-hand-hole">${p.hole?cards(p.hole):""}</span>${signed(Number(p.net)||0)}</div>`).join("")}</div>
         <div class="bpt-ol-hand-log">${Object.keys(LOG_STREET).filter(k=>steps[k]).map(k=>`<div><b>${LOG_STREET[k]}</b><span>${steps[k].map(esc).join(" · ")}</span></div>`).join("")}</div>
-      </details>`;}).join(""):"<p>Aucune main enregistrée pour cette partie.</p>";
+      </details>`;}).join(""):"<p>Aucune main enregistrée pour cette partie (historique disponible pour les parties jouées depuis la version 10.4.94).</p>";
     const fn=n=>esc(String(n||"").split(" ")[0]);
     const chatBody=chat.length?chat.map(c=>{const it=FX_ITEMS.find(x=>x[0]===c.kind);
       return `<div class="bpt-ol-chat-row"><small>${new Date(c.at).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}</small><b>${fn(c.from)}${c.to&&c.to!=="all"?` → ${fn(c.to)}`:""}</b><span>${c.kind==="say"?esc(c.text):it?`${it[1]} ${esc(it[2])}`:""}</span></div>`;}).join(""):"<p>Aucun message pour cette partie.</p>";
@@ -1021,12 +1025,14 @@
       const net=done?back-(Number(h?.contrib?.[K(s.i)])||0):0,won=Math.max(0,net),lost=Math.max(0,-net);
       // Fin de main : résultat net de chaque joueur qui a misé (+ en vert, − en rouge).
       // Table chargée en portrait : le résultat de la main va dans la plaque (pas la place pour un jeton à côté).
-      const inPlate=done&&compact&&(won||lost);
+      // Mon résultat de la main dans ma plaque (la place manque à côté, surtout en paysage).
+      const inPlate=done&&(compact||isMe)&&(won||lost);
       const chips=inPlate?"":bet?`<em class="bpt-ol-bet">${fmt(bet)}</em>`:won?`<em class="bpt-ol-bet is-won">+${fmt(won)}</em>`:lost?`<em class="bpt-ol-bet is-lost">−${fmt(lost)}</em>`:"";
       const turn=h&&!done&&h.toAct===s.i;
       const tag=out?'<i class="is-out">éliminé</i>':s.away?'<i class="is-away">absent</i>':allin?'<i class="is-allin">TAPIS</i>':fold?'<i>couché</i>':"";
       const badge=!h||done?"":h.dealer===s.i?'<em class="bpt-ol-dealer">D</em>':"";
-      const timer=turn?`<span class="bpt-ol-timer"><span data-ol-turn style="width:${Math.min(100,Math.max(0,100-100*(srvNow()-Number(h.actionAt||0))/TURN_MS)).toFixed(0)}%"></span></span>`:"";
+      const left=turn?Math.max(0,Math.min(TURN_MS,TURN_MS-(srvNow()-Number(h.actionAt||0)))):0;
+      const timer=turn?`<span class="bpt-ol-ring" data-ol-turn style="--p:${(100*left/TURN_MS).toFixed(0)}"><b>${Math.ceil(left/1000)}</b></span>`:"";
       return `<div class="bpt-ol-seat${isMe?" is-me":""}${turn?" is-turn":""}${allin?" is-allin":""}${winners.has(s.i)?" is-winner":""}${fold?" is-folded":""}${out?" is-out":""}" data-name="${esc(s.name)}" data-pos="${pos}" data-n="${N}" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%">
         <div class="bpt-ol-plate">${isMe?"":`<b>${esc(s.name.split(" ")[0])}</b>`}<span>${out?"—":fmt(s.stack)}</span>${inPlate?`<em class="bpt-ol-plate-res ${won?"is-won":"is-lost"}">${won?"+"+fmt(won):"−"+fmt(lost)}</em>`:eq[s.i]!==undefined?`<em class="bpt-ol-equity${eq[s.i]>=0.5?" is-fav":""}">${Math.round(eq[s.i]*100)} %</em>`:!out&&bbNow?`<small class="bpt-ol-bb">${fmt(Math.round(Number(s.stack||0)/bbNow))} BB</small>`:""}${timer}</div>${tag}${cards}${badge}${chips}</div>`;
     }).join("");
@@ -1077,36 +1083,27 @@
       const key=`${h.no}:${h.street}:${h.actionAt}`;if(raiseKey!==key){raiseKey=key;raiseTo=minTo;raiseMode=false;}
       raiseTo=Math.max(minTo,Math.min(maxTotal,raiseTo));
       const canRaise=maxTotal>h.currentBet, verb=h.currentBet?"Relancer":"Miser";
-      if(!raiseMode||!canRaise){
-        myBar=`<div class="bpt-ol-mybar is-step1">
+      // Une seule étape : Se coucher · Check/Suivre · Miser/Relancer (montant dessous), puis curseur exponentiel
+      // horizontal avec − / + (une grosse blinde) et raccourcis x2 · x3 · ½ pot · Pot · Tapis.
+      const sbStep=Math.max(1,Number(lv.sb)||25),bbv=Number(lv.bb)||50,ref=h.currentBet||bbv;
+      const clamp=v=>Math.max(minTo,Math.min(maxTotal,Math.round(v/sbStep)*sbStep));
+      const presets=[["x2",clamp(ref*2)],["x3",clamp(ref*3)],["½ pot",clamp(h.currentBet+pot/2)],["Pot",clamp(h.currentBet+pot)],["Tapis",maxTotal]]
+        .map(([l,v])=>`<button type="button" class="${v===raiseTo?"is-on":""}" data-ol-preset="${v}">${l}</button>`).join("");
+      const span=Math.max(1,maxTotal/minTo),toPos=a=>maxTotal<=minTo?1000:Math.round(1000*Math.log(Math.max(minTo,a)/minTo)/Math.log(span));
+      const onlyAllin=maxTotal<=minTo;
+      myBar=`<div class="bpt-ol-dock">
+        <div class="bpt-ol-acts">
           <button type="button" class="is-fold" data-ol-act="fold">Se coucher</button>
-          ${toCall?`<button type="button" class="is-call" data-ol-act="call">${toCall>=stack?"Suivre à tapis":"Suivre "+fmt(toCall)}</button>`:`<button type="button" class="is-call" data-ol-act="check">Check</button>`}
-          ${canRaise?(maxTotal<=minTo?`<button type="button" class="is-raise" data-ol-act="allin">Tapis ${fmt(maxTotal)}</button>`:`<button type="button" class="is-raise" data-ol-raise-open>${verb}</button>`):""}
-        </div>`;
-      }else{
-        // Raccourcis, arrondis à la petite blinde :
-        // Mêmes raccourcis pour miser et relancer : x2 · x3 (mise précédente, ou grosse blinde si personne n'a misé),
-        // ⅓ pot · ½ pot (mise à suivre + part du pot après avoir suivi), Tapis.
-        const sbStep=Math.max(1,Number(lv.sb)||25),bbv=Number(lv.bb)||50,ref=h.currentBet||bbv;
-        // Raccourcis sous le curseur : x2 · x3 (mise précédente, ou grosse blinde) · ½ pot · Pot · All in.
-        const clamp=v=>Math.max(minTo,Math.min(maxTotal,Math.round(v/sbStep)*sbStep));
-        const presets=[["x2",clamp(ref*2)],["x3",clamp(ref*3)],["½ pot",clamp(h.currentBet+pot/2)],["Pot",clamp(h.currentBet+pot)],["All in",maxTotal]]
-          .map(([l,v])=>`<button type="button" class="${v===raiseTo?"is-on":""}" data-ol-preset="${v}">${l}</button>`).join("");
-        // Curseur exponentiel : précis sur les petites mises, rapide vers le tapis.
-        const span=Math.max(1,maxTotal/minTo);
-        const toPos=a=>maxTotal<=minTo?1000:Math.round(1000*Math.log(Math.max(minTo,a)/minTo)/Math.log(span));
-        // Uniquement un curseur exponentiel vertical sur la droite de l'écran (minimum en bas, tapis en haut),
-        // avec ✕ pour annuler et le bouton de validation : la table garde toute sa taille.
-        myBar=`<div class="bpt-ol-mybar is-step2"><div class="bpt-ol-side">
-          <button type="button" class="is-cancel" data-ol-raise-close aria-label="Ne pas ${verb.toLowerCase()}">✕</button>
-          <small>Tapis</small>
-          <input type="range" class="is-vertical" data-ol-range min="0" max="1000" step="1" value="${toPos(raiseTo)}" data-min="${minTo}" data-max="${maxTotal}" data-step="${sbStep}" aria-label="Montant">
-          <small>Min</small>
-          <div class="bpt-ol-side-presets">${presets}</div>
-          <button type="button" class="is-raise" data-ol-act="raise">${raiseTo>=maxTotal?"Tapis "+fmt(maxTotal):verb+(h.currentBet?" à ":" ")+fmt(raiseTo)}</button>
-        </div></div>`;
-      }
+          ${toCall?`<button type="button" class="is-call" data-ol-act="call">${toCall>=stack?"Tapis":"Suivre"}<small>${fmt(Math.min(toCall,stack))}</small></button>`:`<button type="button" class="is-call" data-ol-act="check">Check</button>`}
+          ${canRaise?`<button type="button" class="is-raise" data-ol-act="${onlyAllin?"allin":"raise"}"><span data-ol-raise-lbl data-verb="${verb}">${onlyAllin||raiseTo>=maxTotal?"Tapis":verb}</span><small data-ol-raise-val>${fmt(onlyAllin?maxTotal:raiseTo)}</small></button>`:""}
+        </div>
+        ${canRaise&&!onlyAllin?`<div class="bpt-ol-slider"><button type="button" data-ol-step="-1" aria-label="Moins">−</button><input type="range" data-ol-range min="0" max="1000" step="1" value="${toPos(raiseTo)}" data-min="${minTo}" data-max="${maxTotal}" data-step="${sbStep}" data-bb="${bbv}" aria-label="Montant"><button type="button" data-ol-step="1" aria-label="Plus">+</button></div>
+        <div class="bpt-ol-presets2">${presets}</div>`:""}
+      </div>`;
     }
+    // Barre d'infos : blindes de la main · mise à suivre · à qui de jouer.
+    const lvH=t.levels?.[h?.level]||lv,turnSeat=h&&!done&&h.toAct!==null&&h.toAct!==undefined?h.toAct:null,myTurnNow=!!(mine&&turnSeat===mine.i&&!dealing);
+    const infoBar=h&&!done&&running?`<div class="bpt-ol-infobar"><div><small>Blindes</small><b>${fmt(lvH.sb)} / ${fmt(lvH.bb)}</b></div><div><small>Mise à suivre</small><b>${fmt(Math.max(0,h.currentBet-(mine?betOf(h,mine.i):0)))}</b></div><div class="is-turn${myTurnNow?" is-me":""}"><i></i>${dealing?"Distribution…":h.runout?"Tapis !":myTurnNow?"À vous":turnSeat!==null?"À "+esc(firstName(t,turnSeat)):"—"}</div></div>`:"";
     // Abattage : la combinaison gagnante (cartes du joueur + tableau) sort au centre, carte par carte, avec le nom de la main.
     let showcase="";
     if(done&&h.showdown&&h.result?.[0]?.cards){
@@ -1137,7 +1134,7 @@
     const newFrom=h&&!done?({flop:0,turn:3,river:4})[h.street]:undefined,boardT0=newFrom===undefined?0:Date.now()-(srvNow()-(h.runout?Number(h.runoutAt||0):Number(h.dealEnd||0)-((h.street==="flop"?3:1)*DEAL_STEP+300)));
     const boardCard=k=>{const html=cardHtml(board[k]);if(newFrom===undefined||k<newFrom||!board[k]||!boardT0)return html;const d=(k-newFrom)*DEAL_STEP-(Date.now()-boardT0);return d>-400?html.replace("<span ",`<span style="animation-delay:${Math.round(d)}ms" `).replace("class=\"bpt-card","class=\"bpt-card is-dealt"):html;};
     const bsk=t.id+":"+(h?.no)+":"+(h?.street);if(newFrom!==undefined&&boardT0&&soundBoardKey!==bsk){soundBoardKey=bsk;for(let k=newFrom;k<board.length;k++){const d=(k-newFrom)*DEAL_STEP-(Date.now()-boardT0);if(d>=0)play("card",d/1000);}}
-    const center=h?`<div class="bpt-ol-board">${[0,1,2,3,4].map(boardCard).join("")}</div><div class="bpt-ol-pot">${potLine}</div>`
+    const center=h?`<div class="bpt-ol-pot">${potLine}</div><div class="bpt-ol-board">${[0,1,2,3,4].map(boardCard).join("")}</div>`
       :waitInfo; // blindes affichées seulement dans le bandeau en haut à droite
     const centerSub=t.status==="finished"?`🏆 ${esc(t.winner||"")} remporte le tournoi`
       :t.status==="waiting"?`En attente des joueurs · ${seats.length} inscrit${seats.length>1?"s":""}`
@@ -1157,7 +1154,7 @@
       <div class="bpt-ol-stage"><div class="bpt-ol-rail"><div class="bpt-ol-felt">
         <div class="bpt-ol-center"><span class="bpt-ol-logo">♠ BPT</span>${center}<small>${centerSub}</small></div>
       </div></div>${ring}${t.status==="finished"&&!lastHandShowing(t)?resultsHtml(t):showcase}</div>
-      ${clockMenuOpen&&running&&!isHost&&mine?`<div class="bpt-ol-clockmenu" role="menu"><button type="button" class="is-wide" data-ol-take>👑 Demander la reprise</button><button type="button" class="is-wide is-plain" data-ol-hide>Masquer la partie</button></div>`:""}${clockMenuOpen&&running&&isHost?`<div class="bpt-ol-clockmenu" role="menu"><button type="button" data-ol-clk="minus">−1 min</button><button type="button" data-ol-clk="plus">+1 min</button><button type="button" class="is-wide" data-ol-clk="${t.pausedAt?"resume":"pause"}">${t.pausedAt?"▶ Reprendre":"⏸ Pause"}</button><button type="button" data-ol-clk="prev">◀ Niveau préc.</button><button type="button" data-ol-clk="next">Niveau suiv. ▶</button><button type="button" class="is-plain" data-ol-hide>Masquer la partie</button><button type="button" class="is-plain is-danger" data-ol-remove>Supprimer la partie</button></div>`:""}${specNote}${last}${myHandHtml}${myBar}<div class="bpt-ol-actions">${actions.join("")}</div></div>`;
+      ${clockMenuOpen&&running&&!isHost&&mine?`<div class="bpt-ol-clockmenu" role="menu"><button type="button" class="is-wide" data-ol-take>👑 Demander la reprise</button><button type="button" class="is-wide is-plain" data-ol-hide>Masquer la partie</button></div>`:""}${clockMenuOpen&&running&&isHost?`<div class="bpt-ol-clockmenu" role="menu"><button type="button" data-ol-clk="minus">−1 min</button><button type="button" data-ol-clk="plus">+1 min</button><button type="button" class="is-wide" data-ol-clk="${t.pausedAt?"resume":"pause"}">${t.pausedAt?"▶ Reprendre":"⏸ Pause"}</button><button type="button" data-ol-clk="prev">◀ Niveau préc.</button><button type="button" data-ol-clk="next">Niveau suiv. ▶</button><button type="button" class="is-plain" data-ol-hide>Masquer la partie</button><button type="button" class="is-plain is-danger" data-ol-remove>Supprimer la partie</button></div>`:""}${specNote}${last}${myHandHtml||infoBar||myBar?`<div class="bpt-ol-panel">${myHandHtml}${infoBar}${myBar}</div>`:""}<div class="bpt-ol-actions">${actions.join("")}</div></div>`;
   }
   // Table « stade » (rectangle aux bouts arrondis) : chaque joueur est posé sur le bord, à intervalles réguliers
   // le long du contour, en partant du bas (soi) puis vers la gauche. Recalculé à chaque affichage et redimensionnement.
@@ -1211,10 +1208,14 @@
       // Ordre essayé : derrière les cartes (vers le centre), puis à côté des cartes, puis autour de la plaque.
       // Mise au-dessus ou au-dessous des cartes (côté centre de la table d abord), jamais à côté ; sinon autour de la plaque.
       const vy=(Number(el.style.getPropertyValue("--ty"))||0)<0?-1:1;
-      const opts=[...(cards?[{vert:vy},{vert:-vy}]:[]),...betCands.map(u=>({u,behind:false}))];
+      const opts=[{ring:true},...(cards?[{vert:vy},{vert:-vy}]:[]),...betCands.map(u=>({u,behind:false}))];
       let pick=opts[0],low=Infinity;
-      const set=({u,behind,vert})=>{let bx,by;
-        if(vert){bx=parseFloat(el.style.getPropertyValue("--cx"))||0;by=(parseFloat(el.style.getPropertyValue("--cy"))||0)+vert*(cards.offsetHeight/2+5+bet.offsetHeight/2);}
+      const set=({u,behind,vert,ring})=>{let bx,by;
+        if(ring){const x=parseFloat(el.style.left)||0,y=parseFloat(el.style.top)||0,vx=W/2-x,vy2=H/2-y,dist=Math.hypot(vx,vy2)||1,ux=vx/dist,uy=vy2/dist;
+          const ccx=parseFloat(el.style.getPropertyValue("--cx"))||0,ccy=parseFloat(el.style.getPropertyValue("--cy"))||0;
+          const reach=cards?Math.abs(ccx*ux+ccy*uy)+halfOf(cards,[ux,uy]):halfOf(plate,[ux,uy]);
+          const d=Math.max(0.42*dist,reach+6+halfOf(bet,[ux,uy]));bx=ux*d;by=uy*d;}
+        else if(vert){bx=parseFloat(el.style.getPropertyValue("--cx"))||0;by=(parseFloat(el.style.getPropertyValue("--cy"))||0)+vert*(cards.offsetHeight/2+5+bet.offsetHeight/2);}
         else{const db=(behind&&cards?halfOf(plate,u)-10+2*halfOf(cards,u):halfOf(plate,u))+6+halfOf(bet,u);bx=u[0]*db;by=u[1]*db;}
         el.style.setProperty("--bx",bx.toFixed(1)+"px");el.style.setProperty("--by",by.toFixed(1)+"px");};
       for(const o of opts){set(o);const n=cost(bet);if(n<low){low=n;pick=o;}if(!n)break;}
@@ -1234,7 +1235,7 @@
     const nx=document.querySelector("#bptOnlineBody [data-ol-next-in]");if(nx&&t.hand)nx.textContent=Math.max(1,Math.ceil((nextHandMs(t.hand)-(srvNow()-Number(t.hand.at||0)))/1000));
     // Compte à rebours de la demande de reprise : à zéro, on redessine pour proposer « Forcer la reprise ».
     const tl=document.querySelector("#bptOnlineBody [data-ol-take-left]");if(tl){const left=Math.ceil((TAKEOVER_MS-(srvNow()-Number(tl.dataset.olTakeLeft)))/1000);if(left<=0)render();else tl.textContent=left;}
-    const bar=document.querySelector("#bptOnlineBody [data-ol-turn]");if(bar&&t.hand)bar.style.width=Math.min(100,Math.max(0,100-100*(srvNow()-Number(t.hand.actionAt||0))/TURN_MS)).toFixed(0)+"%";
+    const bar=document.querySelector("#bptOnlineBody [data-ol-turn]");if(bar&&t.hand){const left=Math.max(0,Math.min(TURN_MS,TURN_MS-(srvNow()-Number(t.hand.actionAt||0))));bar.style.setProperty("--p",(100*left/TURN_MS).toFixed(0));const b=bar.querySelector("b");if(b)b.textContent=Math.ceil(left/1000);}
   },1000);
   setInterval(()=>{try{heartbeat();autopilot();myTurnTick();}catch(e){console.warn("BPT en ligne :",e);}},400);
   function render(){
@@ -1285,6 +1286,7 @@
       if(g("[data-ol-leave]")){leave(openId);return;}
       if(g("[data-ol-start]")){start(openId);return;}
       if((el=g("[data-ol-act]"))){const a=el.dataset.olAct;act(openId,a,a==="raise"?raiseTo:0);return;}
+      if((el=g("[data-ol-step]"))){const r=view.querySelector("[data-ol-range]");if(r){const min=Number(r.dataset.min),max=Number(r.dataset.max),bb=Number(r.dataset.bb)||50;raiseTo=Math.max(min,Math.min(max,raiseTo+Number(el.dataset.olStep)*bb));render();}return;}
       if((el=g("[data-ol-preset]"))){raiseTo=Number(el.dataset.olPreset)||raiseTo;render();return;}
       if(g("[data-ol-join-req]")){requestJoin(openId);return;}
       if((el=g("[data-ol-join-ans]"))){answerJoin(openId,el.dataset.olJoinAns==="1");return;}
@@ -1315,7 +1317,7 @@
     view.addEventListener("input",e=>{const r=e.target.closest("[data-ol-range]");if(!r)return;
       const min=Number(r.dataset.min),max=Number(r.dataset.max),step=Number(r.dataset.step)||1,p=Number(r.value)/1000;
       raiseTo=p>=1?max:Math.max(min,Math.min(max,Math.round(min*Math.pow(max/min,p)/step)*step));
-      const b=view.querySelector("[data-ol-act=raise]");if(b){b.textContent=raiseTo>=max?"Tapis "+fmt(max):(b.textContent.startsWith("Miser")?"Miser ":"Relancer à ")+fmt(raiseTo);}
+      const lb=view.querySelector("[data-ol-raise-lbl]"),vb=view.querySelector("[data-ol-raise-val]");if(lb)lb.textContent=raiseTo>=max?"Tapis":lb.dataset.verb;if(vb)vb.textContent=fmt(raiseTo);
       view.querySelectorAll("[data-ol-preset]").forEach(x=>x.classList.toggle("is-on",Number(x.dataset.olPreset)===raiseTo));});
     watch();
     render();
