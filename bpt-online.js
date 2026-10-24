@@ -992,7 +992,7 @@
         <div class="bpt-ol-bar-title"><b>${esc(t.name)}</b><small>${t.countsForChampionship?"Compte au championnat":"Hors championnat"} · ${t.adaptive?"Adaptatif":"Classique"}</small></div>
         ${isHost&&t.status==="waiting"?`<label class="bpt-ol-check"><input type="checkbox" data-ol-counts${t.countsForChampionship?" checked":""}${hasBots(t)?" disabled title=\"Partie avec joueurs virtuels : hors championnat\"":""}> Championnat</label>`:""}
         ${isHost&&t.status==="waiting"?`<button type="button" class="bpt-ol-bar-del" data-ol-remove title="Supprimer la table" aria-label="Supprimer la table">🗑</button>`:""}
-        <div class="bpt-ol-bar-level${running&&(isHost||mine)?" is-clickable":""}${t.pausedAt?" is-paused":""}"${running&&(isHost||mine)?" data-ol-clock-menu role=\"button\" tabindex=\"0\" title=\"Réglages du chrono\"":""}>${t.pausedAt?"<em class=\"bpt-ol-pause\">EN PAUSE</em>":""}<small>Niveau ${L.index+1}${running?` · <span data-ol-clock>${clock(L.left)}</span>`:""} · ${Math.round((Number(lv.durationSec)||Number(preview?.levelSeconds)||Number(t.levelSeconds)||0)/60)} min</small><b>${fmt(lv.sb)} / ${fmt(lv.bb)}</b></div>${t.status!=="waiting"&&!spectator?`<button type="button" class="bpt-ol-fx-btn" data-ol-fx aria-label="Chat et objets">💬</button>`:""}</div>
+        <div class="bpt-ol-bar-level${running&&(isHost||mine)?" is-clickable":""}${t.pausedAt?" is-paused":""}"${running&&(isHost||mine)?" data-ol-clock-menu role=\"button\" tabindex=\"0\" title=\"Réglages du chrono\"":""}>${t.pausedAt?"<em class=\"bpt-ol-pause\">EN PAUSE</em>":""}<small>Niveau ${L.index+1}${running?` · <span data-ol-clock>${clock(L.left)}</span>`:""} · ${Math.round((Number(lv.durationSec)||Number(preview?.levelSeconds)||Number(t.levelSeconds)||0)/60)} min</small><b>${fmt(lv.sb)} / ${fmt(lv.bb)}</b></div>${t.status!=="waiting"&&!spectator?`<button type="button" class="bpt-ol-fx-btn" data-ol-fx aria-label="Chat et objets">💬</button>`:""}${t.status!=="waiting"?`<button type="button" class="bpt-ol-hist-btn${spectator?" is-alone":""}" data-ol-hist-open aria-label="Historique des mains et du chat" title="Historique des mains et du chat">📜</button>`:""}</div>
       <div class="bpt-ol-stage"><div class="bpt-ol-rail"><div class="bpt-ol-felt">
         <div class="bpt-ol-center"><span class="bpt-ol-logo">♠ BPT</span>${center}<small>${centerSub}</small></div>
       </div></div>${ring}${t.status==="finished"&&!lastHandShowing(t)?resultsHtml(t):showcase}</div>
@@ -1133,6 +1133,7 @@
       if(g("[data-ol-raise-close]")){raiseMode=false;render();return;}
       if(g("[data-ol-next]")){nextHand(openId);return;}
       if(g("[data-ol-fx]")){fxOpen?fxClose():fxOpenPanel();return;}
+      if(g("[data-ol-hist-open]")){fxClose();showHands(openId);return;}
       if(g("[data-ol-show]")){showMyCards(openId,tables[openId]?.hand?.no);return;}
       if(g("[data-ol-final]")){finalSeen.add(openId);render();return;}
       if(g("[data-ol-back-in]")){comeBack(openId);return;}

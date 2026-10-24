@@ -7210,3 +7210,7 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
 .bpt-ol-bar{position:relative}
 .bpt-ol-bar .bpt-ol-fx-btn{left:auto;bottom:auto;right:0;top:calc(100% + 6px);width:38px;height:38px;font-size:18px;z-index:8}
 .bpt-ol-cards.is-mine.is-folded{opacity:.45;filter:grayscale(.6)}
+
+/* 10.4.98 — Accès direct à l'historique : bouton 📜 sous le 💬 (le lien en bas du panneau était hors de vue en paysage) */
+.bpt-ol-bar .bpt-ol-hist-btn{position:absolute;right:0;top:calc(100% + 50px);z-index:8;width:38px;height:38px;border-radius:50%;border:1px solid var(--bpt-line,#2a3560);background:var(--bpt-card2,#1b2442);font-size:17px;cursor:pointer;box-shadow:0 6px 16px rgba(0,0,0,.45)}
+.bpt-ol-bar .bpt-ol-hist-btn.is-alone{top:calc(100% + 6px)}
