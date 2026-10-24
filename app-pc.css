@@ -7220,3 +7220,6 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
 /* Donne carte par carte */
 @keyframes bptOlDeal{from{opacity:0;transform:translateY(-18px) scale(.55)}}
 .bpt-card.is-dealt{animation:bptOlDeal .26s ease-out backwards}
+
+/* 10.4.100 — Historique 📜 en haut à gauche, sous le titre */
+.bpt-ol-bar .bpt-ol-hist-btn,.bpt-ol-bar .bpt-ol-hist-btn.is-alone{right:auto;left:0;top:calc(100% + 6px)}

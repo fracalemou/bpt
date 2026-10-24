@@ -613,7 +613,7 @@
   }
   // Bilan de fin de partie, comme pour le Live : affiché une fois à chaque joueur quand la partie est enregistrée.
   // Fin de partie : la dernière main (combinaison gagnante) reste affichée jusqu'à ce que le joueur touche « Voir le bilan ».
-  const finalSeen=new Set(),dealStart=new Map(),DEAL_STEP=120;
+  const finalSeen=new Set(),dealStart=new Map(),DEAL_STEP=300;
   const lastHandShowing=t=>t?.status==="finished"&&!!t.hand?.showdown&&!finalSeen.has(t.id);
   // Plus d enchaînement automatique : dernière main → « Voir le classement » → écran du vainqueur → « Bilan de la soirée ».
   function maybeShowSummary(_t){}
