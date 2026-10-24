@@ -9663,7 +9663,7 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
 .bpt-ol-hand-log{display:grid;gap:4px;padding:4px 12px 12px;font-size:12px}
 .bpt-ol-hand-log>div{display:grid;grid-template-columns:62px 1fr;gap:8px}
 .bpt-ol-hand-log b{opacity:.7;font-weight:700}
-.bpt-ol-fx-head .bpt-ol-fx-hands{margin-left:auto;margin-right:6px;padding:5px 10px;border-radius:999px;border:1px solid var(--bpt-line,#2a3560);background:transparent;color:inherit;font-size:12px;cursor:pointer}
+.bpt-ol-fx-hands{margin-top:4px;width:100%;padding:10px;border-radius:999px;border:1px solid var(--bpt-line,#2a3560);background:transparent;color:inherit;font-size:12px;cursor:pointer}
 .bpt-summary-hands{display:block;margin:10px auto 0}
 .bpt-ol-hands-list[hidden]{display:none}
 .bpt-ol-hands-tabs{display:flex;gap:6px;padding:8px 10px 0}

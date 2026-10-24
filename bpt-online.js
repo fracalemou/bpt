@@ -803,13 +803,14 @@
     const t=openId&&tables[openId];if(!t)return "";
     const others=seatsOf(t).filter(s=>s.name!==me());
     if(fxTarget!=="all"&&!others.some(s=>s.name===fxTarget))fxTarget="all";
-    return `<div class="bpt-ol-fx-head"><b>Ambiance</b><button type="button" class="bpt-ol-fx-hands" data-fx-hands>📜 Historique</button><button type="button" data-fx-close aria-label="Fermer">×</button></div>
+    return `<div class="bpt-ol-fx-head"><b>Ambiance</b><button type="button" data-fx-close aria-label="Fermer">×</button></div>
       <div class="bpt-ol-fx-sec">Envoyer à</div>
       <div class="bpt-ol-fx-targets"><button type="button" data-fx-target="all" class="${fxTarget==="all"?"is-on":""}">Tout le monde</button>${others.map(s=>`<button type="button" data-fx-target="${esc(s.name)}" class="${fxTarget===s.name?"is-on":""}">${esc(s.name.split(" ")[0])}</button>`).join("")}</div>
       <div class="bpt-ol-fx-items">${FX_ITEMS.map(([k,e,l])=>`<button type="button" data-fx-item="${k}" title="${l}"><span>${e}</span><small>${l}</small></button>`).join("")}</div>
       <div class="bpt-ol-fx-sec">Message rapide (à toute la table)</div>
       <div class="bpt-ol-fx-quick">${FX_QUICK.map(q=>`<button type="button" data-fx-say="${esc(q)}">${esc(q)}</button>`).join("")}</div>
-      <form class="bpt-ol-fx-free" data-fx-form><input maxlength="60" placeholder="Votre message…" data-fx-text><button type="submit">Envoyer</button></form>`;
+      <form class="bpt-ol-fx-free" data-fx-form><input maxlength="60" placeholder="Votre message…" data-fx-text><button type="submit">Envoyer</button></form>
+      <button type="button" class="bpt-ol-fx-hands" data-fx-hands>📜 Historique des mains et du chat</button>`;
   }
   function fxPanel(){let p=$("bptOlFxPanel");if(!p){p=document.createElement("div");p.id="bptOlFxPanel";p.hidden=true;document.body.append(p);
       p.addEventListener("click",e=>{const g=s=>e.target.closest(s);let el;
