@@ -881,7 +881,7 @@
       const inPlate=done&&compact&&(won||lost);
       const chips=inPlate?"":bet?`<em class="bpt-ol-bet">${fmt(bet)}</em>`:won?`<em class="bpt-ol-bet is-won">+${fmt(won)}</em>`:lost?`<em class="bpt-ol-bet is-lost">−${fmt(lost)}</em>`:"";
       const turn=h&&!done&&h.toAct===s.i;
-      const tag=out?'<i class="is-out">éliminé</i>':s.away?'<i class="is-away">absent</i>':allin?'<i class="is-allin">TAPIS</i>':fold?'<i>couché</i>':s.bot?'<i>virtuel</i>':"";
+      const tag=out?'<i class="is-out">éliminé</i>':s.away?'<i class="is-away">absent</i>':allin?'<i class="is-allin">TAPIS</i>':fold?'<i>couché</i>':"";
       const badge=!h||done?"":h.dealer===s.i?'<em class="bpt-ol-dealer">D</em>':"";
       const timer=turn?`<span class="bpt-ol-timer"><span data-ol-turn style="width:${Math.max(0,100-100*(srvNow()-Number(h.actionAt||0))/TURN_MS).toFixed(0)}%"></span></span>`:"";
       return `<div class="bpt-ol-seat${isMe?" is-me":""}${turn?" is-turn":""}${allin?" is-allin":""}${winners.has(s.i)?" is-winner":""}${fold?" is-folded":""}${out?" is-out":""}" data-name="${esc(s.name)}" data-pos="${pos}" data-n="${N}" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%">
@@ -1002,10 +1002,13 @@
   function layoutSeats(){
     const stage=document.querySelector("#bptOnlineBody .bpt-ol-stage");if(!stage)return;
     const W=stage.clientWidth,H=stage.clientHeight;if(!W||!H)return;
-    const inset=Math.min(W,H)*0.03,w=W-2*inset,h=H-2*inset,r=Math.min(w,h)/2,lx=w-2*r,ly=h-2*r;
-    const segs=[["l",lx/2,[inset+w/2,inset+h],[-1,0]],["a",Math.PI*r/2,[inset+r,inset+h-r],[Math.PI/2,Math.PI]],["l",ly,[inset,inset+h-r],[0,-1]],
-      ["a",Math.PI*r/2,[inset+r,inset+r],[Math.PI,1.5*Math.PI]],["l",lx,[inset+r,inset],[1,0]],["a",Math.PI*r/2,[inset+w-r,inset+r],[1.5*Math.PI,2*Math.PI]],
-      ["l",ly,[inset+w,inset+r],[0,1]],["a",Math.PI*r/2,[inset+w-r,inset+h-r],[0,Math.PI/2]],["l",lx/2,[inset+w-r,inset+h],[-1,0]]];
+    // Les plaques sont posées sur le rebord de la table : contour à mi-chemin entre le bord extérieur et le tapis.
+    const sr=stage.getBoundingClientRect(),rr=stage.querySelector(".bpt-ol-rail")?.getBoundingClientRect(),fr=stage.querySelector(".bpt-ol-felt")?.getBoundingClientRect();
+    const ring=rr&&fr&&rr.width?{l:(rr.left+fr.left)/2-sr.left,t:(rr.top+fr.top)/2-sr.top,r:(rr.right+fr.right)/2-sr.left,b:(rr.bottom+fr.bottom)/2-sr.top}:{l:W*0.03,t:H*0.03,r:W*0.97,b:H*0.97};
+    const ox=ring.l,oy=ring.t,w=ring.r-ring.l,h=ring.b-ring.t,r=Math.min(w,h)/2,lx=w-2*r,ly=h-2*r;
+    const segs=[["l",lx/2,[ox+w/2,oy+h],[-1,0]],["a",Math.PI*r/2,[ox+r,oy+h-r],[Math.PI/2,Math.PI]],["l",ly,[ox,oy+h-r],[0,-1]],
+      ["a",Math.PI*r/2,[ox+r,oy+r],[Math.PI,1.5*Math.PI]],["l",lx,[ox+r,oy],[1,0]],["a",Math.PI*r/2,[ox+w-r,oy+r],[1.5*Math.PI,2*Math.PI]],
+      ["l",ly,[ox+w,oy+r],[0,1]],["a",Math.PI*r/2,[ox+w-r,oy+h-r],[0,Math.PI/2]],["l",lx/2,[ox+w-r,oy+h],[-1,0]]];
     const P=segs.reduce((a,x)=>a+x[1],0);
     const at=d=>{for(let i=0;i<segs.length;i++){const [k,len,o,v]=segs[i];if(d<=len||i===segs.length-1){
       if(k==="l")return [o[0]+v[0]*d,o[1]+v[1]*d];const a=v[0]+(v[1]-v[0])*(len?Math.min(1,d/len):0);return [o[0]+r*Math.cos(a),o[1]+r*Math.sin(a)];}d-=len;}return [W/2,H];};
@@ -1021,25 +1024,35 @@
       el.classList.toggle("is-side",H>W&&Math.abs(dx)>Math.abs(dy)*1.2);el.style.setProperty("--tx",(dx/len).toFixed(3));el.style.setProperty("--ty",(dy/len).toFixed(3));
       if(!el.classList.contains("is-me")){
         // Directions essayées pour ce siège : vers le centre, verticale, diagonales (les mises en ont d'autres en plus).
-        const sy=dy>=0?1:-1,sx=dx>=0?1:-1,d=Math.SQRT1_2,u0=[dx/len,dy/len];
+        const sy=dy>=0?1:-1,sx=dx>=0?1:-1,d=Math.SQRT1_2;
+        // Direction principale : perpendiculaire au rebord, vers l intérieur (cartes puis mise alignées derrière la plaque).
+        const at0=P*p/n,[x1,y1]=at(Math.max(0,at0-2)),[x2,y2]=at(Math.min(P,at0+2)),tl=Math.hypot(x2-x1,y2-y1)||1;let nx=-(y2-y1)/tl,ny=(x2-x1)/tl;if(nx*dx+ny*dy<0){nx=-nx;ny=-ny;}
+        const u0=[nx,ny];
         placing.push({el,cands:[u0,[0,sy],[sx*d,sy*d],[sx*d,-sy*d],[0,-sy]],betCands:[u0,[0,sy],[sx*d,sy*d],[sx*d,-sy*d],[0,-sy],[-u0[1],u0[0]],[u0[1],-u0[0]],[-u0[0],-u0[1]],[1,0],[-1,0],[-sx*d,sy*d],[-sx*d,-sy*d]]});
       }});
     // Placement en deux passes : d'abord les cartes de tous les joueurs, puis les mises / résultats. Chaque élément prend
     // la direction qui touche le moins d'obstacles (tableau, pot, plaques, éléments déjà placés, bords de l'écran).
     const view=document.documentElement,vw=view.clientWidth,vh=view.clientHeight;
-    const cost=e=>{const r=e.getBoundingClientRect();let n=obstacles.filter(o=>!(r.right<=o.left||o.right<=r.left||r.bottom<=o.top||o.bottom<=r.top)).length;
+    // La plaque du joueur lui-même n est pas un obstacle pour ses cartes (elles glissent derrière).
+    const cost=(e,own)=>{const r=e.getBoundingClientRect(),skip=own?.getBoundingClientRect();let n=obstacles.filter(o=>!(skip&&o.left===skip.left&&o.top===skip.top)).filter(o=>!(r.right<=o.left||o.right<=r.left||r.bottom<=o.top||o.bottom<=r.top)).length;
       if(r.left<0||r.top<0||r.right>vw||r.bottom>vh)n+=5;return n;};
     const halfOf=(e,[ux,uy])=>e?(Math.abs(ux)*e.offsetWidth+Math.abs(uy)*e.offsetHeight)/2:0;
-    const best=(e,cands,set)=>{let pick=cands[0],low=Infinity;for(const c of cands){set(c);const n=cost(e);if(n<low){low=n;pick=c;}if(!n)break;}set(pick);obstacles.push(e.getBoundingClientRect());return pick;};
+    const best=(e,cands,set,own)=>{let pick=cands[0],low=Infinity;for(const c of cands){set(c);const n=cost(e,own);if(n<low){low=n;pick=c;}if(!n)break;}set(pick);obstacles.push(e.getBoundingClientRect());return pick;};
     const dirOf=new Map();
     placing.forEach(({el,cands})=>{const plate=el.querySelector(".bpt-ol-plate"),cards=el.querySelector(".bpt-ol-cards");if(!cards)return;
-      dirOf.set(el,best(cards,cands,u=>{const dc=halfOf(plate,u)+6+halfOf(cards,u);el.style.setProperty("--cx",(u[0]*dc).toFixed(1)+"px");el.style.setProperty("--cy",(u[1]*dc).toFixed(1)+"px");}));});
+      // Cartes collées à la plaque, côté centre, glissées un peu derrière elle (plaque + cartes = un seul bloc).
+      const tuck=cards.querySelector(".bpt-card:not(.is-back)")?0:6;
+      dirOf.set(el,best(cards,cands,u=>{const dc=halfOf(plate,u)-tuck+halfOf(cards,u);el.style.setProperty("--cx",(u[0]*dc).toFixed(1)+"px");el.style.setProperty("--cy",(u[1]*dc).toFixed(1)+"px");},plate));});
     placing.forEach(({el,betCands})=>{const plate=el.querySelector(".bpt-ol-plate"),cards=el.querySelector(".bpt-ol-cards"),bet=el.querySelector(".bpt-ol-bet");if(!bet)return;
       const cu=dirOf.get(el);
       // Première idée : derrière les cartes (même direction) ; sinon à côté de la plaque dans une autre direction.
-      const opts=[...(cu?[{u:cu,behind:true}]:[]),...betCands.map(u=>({u,behind:false}))];
+      // Ordre essayé : derrière les cartes (vers le centre), puis à côté des cartes, puis autour de la plaque.
+      const opts=[...(cu?[{u:cu,behind:true},{u:cu,side:1},{u:cu,side:-1}]:[]),...betCands.map(u=>({u,behind:false}))];
       let pick=opts[0],low=Infinity;
-      const set=({u,behind})=>{const db=(behind&&cards?halfOf(plate,u)+6+2*halfOf(cards,u):halfOf(plate,u))+6+halfOf(bet,u);el.style.setProperty("--bx",(u[0]*db).toFixed(1)+"px");el.style.setProperty("--by",(u[1]*db).toFixed(1)+"px");};
+      const set=({u,behind,side})=>{let bx,by;
+        if(side&&cards){const dc=halfOf(plate,u)-10+halfOf(cards,u),tg=[-u[1]*side,u[0]*side],ds=halfOf(cards,tg)+6+halfOf(bet,tg);bx=u[0]*dc+tg[0]*ds;by=u[1]*dc+tg[1]*ds;}
+        else{const db=(behind&&cards?halfOf(plate,u)-10+2*halfOf(cards,u):halfOf(plate,u))+6+halfOf(bet,u);bx=u[0]*db;by=u[1]*db;}
+        el.style.setProperty("--bx",bx.toFixed(1)+"px");el.style.setProperty("--by",by.toFixed(1)+"px");};
       for(const o of opts){set(o);const n=cost(bet);if(n<low){low=n;pick=o;}if(!n)break;}
       set(pick);obstacles.push(bet.getBoundingClientRect());});
     // Jeton D des autres joueurs : quatre coins autour de la plaque, le premier libre et visible.

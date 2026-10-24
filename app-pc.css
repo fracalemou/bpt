@@ -7201,3 +7201,7 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
 .bpt-ol-chat-row{display:grid;grid-template-columns:40px auto 1fr;gap:8px;align-items:baseline;padding:6px 4px;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px}
 .bpt-ol-chat-row small{opacity:.55;font-size:11px}
 .bpt-ol-chat-row b{white-space:nowrap}
+
+/* 10.4.96 — Disposition : plaques posées sur le rebord, cartes collées à la plaque (glissées derrière), mises juste devant */
+.bpt-ol-seat:not(.is-me) .bpt-ol-plate{position:relative;z-index:4}
+.bpt-ol-seat:not(.is-me) .bpt-ol-cards{z-index:1}
