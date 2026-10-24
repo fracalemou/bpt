@@ -9862,3 +9862,22 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
 }
 .bpt-ol-bar.is-running .bpt-ol-bar-level{display:block !important;text-align:right}
 .bpt-ol-bar.is-running .bpt-ol-bar-level>small:not(.bpt-ol-avg){display:block}
+
+/* 10.4.107 — Actions et ligne d'état plus compactes */
+.bpt-ol-dock{gap:6px;margin:6px 8px 2px}
+.bpt-ol-acts{gap:6px}
+.bpt-ol-acts button{min-height:40px;border-radius:11px;font-size:14px;gap:0}
+.bpt-ol-acts button small{font-size:11px}
+.bpt-ol-slider{grid-template-columns:30px 1fr 30px;gap:6px}
+.bpt-ol-slider button{width:30px;height:30px;font-size:16px}
+.bpt-ol-presets2{gap:5px}
+.bpt-ol-presets2 button{min-height:28px;font-size:12px;border-radius:8px}
+.bpt-ol-status{margin:3px 8px 0;padding:3px 10px;font-size:12px;border-radius:10px;gap:2px 8px}
+.bpt-ol-status .is-turn i{width:6px;height:6px}
+.bpt-ol-status .is-turn.is-me i{box-shadow:0 0 0 2px rgba(242,200,83,.25)}
+.bpt-ol-prebar{gap:5px;margin:3px 0}
+.bpt-ol-prebar button{padding:6px 10px;font-size:12px}
+@media (orientation:landscape) and (max-height:500px){
+  .bpt-ol-panel .bpt-ol-acts button{min-height:36px;font-size:12.5px}
+  .bpt-ol-panel .bpt-ol-presets2 button{min-height:26px}
+}
