@@ -12,6 +12,7 @@
   const $=id=>document.getElementById(id);
   const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const fmt=n=>Number(n||0).toLocaleString("fr-FR");
+  let tablesLoaded=false;
   let tables={}, openId=null, listening=false, ref=null, seen=new Set(), lastSig="", shownShowcase="";
 
   // Heure du serveur Firebase : tous les appareils comparent la même horloge (délais de jeu, présence), même si un
@@ -460,6 +461,31 @@
       t.joinRequest={name,at:srvNow()};if(t.joinRefused?.name===name)t.joinRefused=null;
     });
     if(!ok)alert("Impossible pour l’instant : une autre demande est en attente ou la table est complète.");
+  }
+  // Invitation WhatsApp : message prêt à envoyer avec le lien direct vers la table (?table=id). Symboles simples
+  // seulement (♠ ♥ ♦ ♣ ★ ➜) : WhatsApp Web abîme les emojis récents transmis par un lien wa.me (cf. agenda).
+  const BPT_PUBLIC_URL="https://fracalemou.github.io/bpt/";
+  function inviteText(t){
+    const ppl=seatsOf(t),humans=ppl.filter(s=>!s.bot).map(s=>String(s.name).split(" ")[0]),bots=ppl.length-humans.length;
+    const first=n=>String(n||"").split(" ")[0],who=first(me()||t.host),at=!me()||me()===t.host?"à sa table":`à la table de ${first(t.host)}`;
+    const state=t.status==="running"?`★ Partie en cours · niveau ${levelAt(t).index+1} · ${ppl.length} joueurs`
+      :`★ ${ppl.length} inscrit${ppl.length>1?"s":""} : ${humans.join(", ")}${bots?` + ${bots} robot${bots>1?"s":""}`:""}`;
+    return ["♠ ♥  *POKER EN LIGNE BPT*  ♦ ♣","",`★ ${who} t’invite ${at}`,state,"","➜ *Rejoins la table* :",`${BPT_PUBLIC_URL}?table=${encodeURIComponent(t.id)}`].join("\n");
+  }
+  function shareInvite(t){
+    if(!t)return;const url="https://wa.me/?text="+encodeURIComponent(inviteText(t));
+    const w=window.open(url,"_blank","noopener");if(!w)location.href=url; // bloqueur de fenêtres : ouverture dans la page
+  }
+  // Lien d'invitation ouvert : la table s'affiche ; en préparation, on s'y inscrit ; en cours, mode spectateur
+  // avec la demande pour rejoindre ; terminée ou supprimée : message.
+  async function openFromLink(){
+    let id="";try{const u=new URL(location.href);id=u.searchParams.get("table")||"";if(!id)return;u.searchParams.delete("table");history.replaceState(history.state,"",u.pathname+u.search+u.hash);}catch(_e){return;}
+    for(let k=0;k<60&&!window.showView;k++)await new Promise(r=>setTimeout(r,250));
+    window.bptOnline.open(id);
+    for(let k=0;k<50&&!tables[id]&&!(tablesLoaded&&k>=5);k++)await new Promise(r=>setTimeout(r,200));
+    const t=tables[id];
+    if(!t||t.status==="finished"){openId=null;render();alert("Cette partie en ligne est terminée ou n’existe plus.");return;}
+    if(t.status==="waiting"&&!mySeat(t))join(id);
   }
   async function answerJoin(id,accept){
     await tx(id,t=>{
@@ -1172,6 +1198,7 @@
       if(mine)actions.push(`<button type="button" data-ol-leave>Me retirer</button>`);
       else if(seats.length<MAX_PLAYERS)actions.push(`<button type="button" class="bpt-ol-primary" data-ol-join>Rejoindre la table</button>`);
       actions.push(`<button type="button" data-ol-hide>Quitter</button>`);
+      if(seats.length<MAX_PLAYERS)actions.push(`<button type="button" class="bpt-ol-wa" data-ol-invite>💬 Inviter sur WhatsApp</button>`);
       if(isHost&&seats.length<MAX_PLAYERS)actions.push(`<button type="button" data-ol-bots>${isLocalTest()?"+ 3 virtuels (test)":"🤖 + Virtuel"}</button>`);
       if(isHost&&seats.some(s=>s.bot))actions.push(`<button type="button" data-ol-bot-del>🤖 − Virtuel</button>`);
       if(isHost)actions.push(`<button type="button" class="bpt-ol-primary" data-ol-start${seats.length<2?" disabled":""}>Lancer · ${seats.length} joueur${seats.length>1?"s":""}</button>`);
@@ -1283,7 +1310,7 @@
       <div class="bpt-ol-stage"><div class="bpt-ol-rail"><div class="bpt-ol-felt">
         <div class="bpt-ol-center"><span class="bpt-ol-logo">♠ BPT</span>${center}<small>${centerSub}</small></div>
       </div></div>${ring}${t.status==="finished"&&!lastHandShowing(t)?resultsHtml(t):showcase}</div>
-      ${clockMenuOpen&&running&&!isHost&&mine?`<div class="bpt-ol-clockmenu" role="menu"><button type="button" class="is-wide" data-ol-take>👑 Demander la reprise</button><button type="button" class="is-wide is-plain" data-ol-hide>Masquer la partie</button></div>`:""}${clockMenuOpen&&running&&isHost?`<div class="bpt-ol-clockmenu" role="menu"><button type="button" data-ol-clk="minus">−1 min</button><button type="button" data-ol-clk="plus">+1 min</button><button type="button" class="is-wide" data-ol-clk="${t.pausedAt?"resume":"pause"}">${t.pausedAt?"▶ Reprendre":"⏸ Pause"}</button><button type="button" data-ol-clk="prev">◀ Niveau préc.</button><button type="button" data-ol-clk="next">Niveau suiv. ▶</button><button type="button" class="is-plain" data-ol-hide>Masquer la partie</button><button type="button" class="is-plain is-danger" data-ol-remove>Supprimer la partie</button></div>`:""}${specNote}${last}${myHandHtml||infoBar||myBar?`<div class="bpt-ol-panel">${myHandHtml}${infoBar}${myBar}</div>`:""}<div class="bpt-ol-actions">${actions.join("")}</div></div>`;
+      ${clockMenuOpen&&running&&!isHost&&mine?`<div class="bpt-ol-clockmenu" role="menu"><button type="button" class="is-wide" data-ol-take>👑 Demander la reprise</button><button type="button" class="is-wide is-plain" data-ol-hide>Masquer la partie</button></div>`:""}${clockMenuOpen&&running&&isHost?`<div class="bpt-ol-clockmenu" role="menu"><button type="button" data-ol-clk="minus">−1 min</button><button type="button" data-ol-clk="plus">+1 min</button><button type="button" class="is-wide" data-ol-clk="${t.pausedAt?"resume":"pause"}">${t.pausedAt?"▶ Reprendre":"⏸ Pause"}</button><button type="button" data-ol-clk="prev">◀ Niveau préc.</button><button type="button" data-ol-clk="next">Niveau suiv. ▶</button><button type="button" class="is-wide is-plain" data-ol-invite>💬 Inviter sur WhatsApp</button><button type="button" class="is-plain" data-ol-hide>Masquer la partie</button><button type="button" class="is-plain is-danger" data-ol-remove>Supprimer la partie</button></div>`:""}${specNote}${last}${myHandHtml||infoBar||myBar?`<div class="bpt-ol-panel">${myHandHtml}${infoBar}${myBar}</div>`:""}<div class="bpt-ol-actions">${actions.join("")}</div></div>`;
   }
   // Table « stade » (rectangle aux bouts arrondis) : chaque joueur est posé sur le bord, à intervalles réguliers
   // le long du contour, en partant du bas (soi) puis vers la gauche. Recalculé à chaque affichage et redimensionnement.
@@ -1397,7 +1424,7 @@
     if(on===listening)return;listening=on;
     try{
       const r=await db();
-      if(on){ref=r.ref(ROOT);ref.on("value",snap=>{tables=snap.val()||{};Object.keys(tables).forEach(k=>seen.add(k));
+      if(on){ref=r.ref(ROOT);ref.on("value",snap=>{tables=snap.val()||{};tablesLoaded=true;Object.keys(tables).forEach(k=>seen.add(k));
         // Les signaux de présence (seen) changent toutes les 10 s : ils ne doivent pas redessiner la table (ni relancer les animations).
         const sig=JSON.stringify(Object.values(tables).map(t=>t&&{...t,seen:null}));
         if(sig!==lastSig){lastSig=sig;render();}
@@ -1419,6 +1446,7 @@
       if(g("[data-ol-back]")){const sp=tables[openId]&&!mySeat(tables[openId])&&tables[openId].status!=="waiting";openId=null;if(sp&&window.showView){window.showView("dashboard");return;}render();return;}
       if(g("[data-ol-live]")){window.showView&&window.showView("live3");return;}
       if(g("[data-ol-join]")){join(openId);return;}
+      if(g("[data-ol-invite]")){clockMenuOpen=false;shareInvite(tables[openId]);render();return;}
       if(g("[data-ol-bots]")){addBots(openId,isLocalTest()?3:1);return;}
       if(g("[data-ol-bot-del]")){removeBot(openId);return;}
       if(g("[data-ol-leave]")){leave(openId);return;}
@@ -1522,4 +1550,5 @@
     async create(form){await createTable(form);window.showView&&window.showView("online");render();}
   };
   if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",install);else install();
+  openFromLink();
 })();
