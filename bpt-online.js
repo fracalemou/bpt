@@ -547,7 +547,19 @@
      dépassé, main suivante. Un seul déclenchement par situation. */
   // Une étape lancée et restée sans effet (réseau coupé, transaction refusée ou jamais revenue) est relancée après
   // AUTO_RETRY_MS : avant, la partie restait bloquée jusqu à ce que le pilote se déconnecte.
-  let autoKey="",autoAt=0,autoLabel="",autoOk=false,pilotOf="";const AUTO_RETRY_MS=6000;
+  let autoKey="",autoAt=0,autoLabel="",autoOk=false,pilotOf="",hostGone={id:"",host:"",since:0};
+  // Organisateur absent depuis HOST_GONE_MS (vu par le pilote, sans interruption) : l'organisation passe au pilote,
+  // sans demande ni code, pour que le chrono, les pauses et les arrivées en cours de partie ne restent pas bloqués.
+  const HOST_GONE_MS=120000;
+  function adoptHost(t){
+    if(t.status!=="running"||t.host===me()||!mySeat(t)){hostGone.id="";return;}
+    if(seenRecently(t,t.host)){hostGone.id="";return;}
+    if(hostGone.id!==t.id||hostGone.host!==t.host){hostGone={id:t.id,host:t.host,since:srvNow()};return;}
+    if(srvNow()-hostGone.since<HOST_GONE_MS)return;
+    const old=t.host;hostGone.since=srvNow(); // un essai toutes les 2 min au plus
+    tx(t.id,x=>{if(x.status!=="running"||x.host!==old||seenRecently(x,old))return false;x.host=me();x.takeoverRequest=null;})
+      .then(ok=>{if(ok)plog(t.id,"organisation",`devient organisateur (${String(old).split(" ")[0]} absent depuis plus de 2 min)`);}).catch(()=>{});
+  }const AUTO_RETRY_MS=6000;
   // Lance une étape une seule fois par situation ; refus ou erreur : journalisée et relançable.
   function step(t,key,label,fn,quiet){
     autoKey=key;autoAt=srvNow();autoLabel=label;autoOk=false;
@@ -556,8 +568,9 @@
   }
   function autopilot(){
     const t=openId&&tables[openId];if(!t||t.status==="waiting")return;
-    if(!following()||pilotName(t)!==me()){if(pilotOf===t.id)pilotOf="";return;} // table non suivie : données figées, on laisse piloter un autre joueur
+    if(!following()||pilotName(t)!==me()){if(pilotOf===t.id)pilotOf="";hostGone.id="";return;} // table non suivie : données figées, on laisse piloter un autre joueur
     if(pilotOf!==t.id){pilotOf=t.id;if(t.status==="running")plog(t.id,"pilote",me()===t.host?"l'hôte pilote la table":`prend le relais (hôte ${String(t.host).split(" ")[0]} absent)`);}
+    adoptHost(t);
     if(autoKey&&srvNow()-autoAt>AUTO_RETRY_MS){if(!autoOk)plog(t.id,"relance",autoLabel+" : sans effet après "+Math.round((srvNow()-autoAt)/1000)+" s, relancée");autoKey="";}
     if(t.status==="finished"&&!t.runningCleared){t.runningCleared=true;setRunning(t.id,false);}
     if(t.hand?.street==="done")logHand(t);
@@ -879,7 +892,7 @@
     const fn=n=>esc(String(n||"").split(" ")[0]);
     const chatBody=chat.length?chat.map(c=>{const it=FX_ITEMS.find(x=>x[0]===c.kind);
       return `<div class="bpt-ol-chat-row"><small>${new Date(c.at).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}</small><b>${fn(c.from)}${c.to&&c.to!=="all"?` → ${fn(c.to)}`:""}</b><span>${c.kind==="say"?esc(c.text):it?`${it[1]} ${esc(it[2])}`:""}</span></div>`;}).join(""):"<p>Aucun message pour cette partie.</p>";
-    const PLOG_ICO={pilote:"👑",départ:"🚪",refus:"⛔",erreur:"⚠️",relance:"🔁",figée:"🧊"};
+    const PLOG_ICO={organisation:"🎩",pilote:"👑",départ:"🚪",refus:"⛔",erreur:"⚠️",relance:"🔁",figée:"🧊"};
     const plogBody=plogs.length?plogs.map(l=>`<div class="bpt-ol-chat-row is-${esc(l.ev)}"><small>${new Date(l.at).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}</small><b>${PLOG_ICO[l.ev]||"•"} ${fn(l.by)}</b><span>${esc(l.info)}${l.v?` <i>${esc(l.v)}</i>`:""}</span></div>`).join(""):"<p>Rien à signaler : aucun relais, refus ni blocage noté pour cette partie.</p>";
     const tab=["chat","stats","plog"].includes(box.dataset.tab)?box.dataset.tab:"hands";
     box.querySelector(".bpt-ol-hands").innerHTML=`<div class="bpt-ol-hands-head"><b>📜 Historique</b><button type="button" data-hands-close aria-label="Fermer">×</button></div>
