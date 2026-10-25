@@ -7413,3 +7413,43 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
 
 /* 10.4.108 — partie en cours : plus de titre dans l en-tete, niveau cale a droite */
 .bpt-ol-bar.is-running .bpt-ol-bar-level{margin-left:auto}
+
+/* 10.4.109 — paysage téléphone : en-tête dans la colonne de droite (la table prend toute la hauteur), colonne plus étroite,
+   ligne d'état et actions compactes */
+@media (orientation:landscape) and (max-height:500px){
+  .bpt-ol-table:has(.bpt-ol-panel){grid-template-columns:minmax(0,1fr) 214px !important;column-gap:6px}
+  .bpt-ol-table:has(.bpt-ol-panel)>.bpt-ol-bar{grid-column:2 !important;grid-row:1 !important;flex-wrap:wrap;row-gap:2px;padding:4px 0 0 !important;min-height:0 !important}
+  .bpt-ol-table:has(.bpt-ol-panel)>.bpt-ol-stage{grid-column:1 !important;grid-row:1/6 !important;margin:10px 10px 8px !important}
+  .bpt-ol-table:has(.bpt-ol-panel) .bpt-ol-bar.is-running .bpt-ol-fx-btn,.bpt-ol-table:has(.bpt-ol-panel) .bpt-ol-bar.is-running .bpt-ol-hist-btn,.bpt-ol-table:has(.bpt-ol-panel) .bpt-ol-bar.is-running .bpt-ol-snd-btn{width:28px !important;height:28px !important;font-size:12px !important}
+  .bpt-ol-table:has(.bpt-ol-panel) .bpt-ol-bar.is-running .bpt-ol-bar-level{padding:0 2px !important}
+  .bpt-ol-table:has(.bpt-ol-panel) .bpt-ol-bar.is-running .bpt-ol-bar-level small{font-size:9.5px}
+  .bpt-ol-table:has(.bpt-ol-panel) .bpt-ol-bar.is-running .bpt-ol-bar-level b{font-size:15px}
+  .bpt-ol-table:has(.bpt-ol-panel) .bpt-ol-bar.is-running .bpt-ol-bar-level .bpt-ol-avg{display:block !important;margin:0;font-size:9.5px}
+  .bpt-ol-panel .bpt-ol-status{margin:2px 0 0;padding:2px 8px;font-size:11px;flex-wrap:nowrap;overflow:hidden;white-space:nowrap}
+  .bpt-ol-panel .bpt-ol-status>*{overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .bpt-ol-panel .bpt-ol-status .is-last{display:none}
+  .bpt-ol-panel .bpt-ol-dock{margin:4px 0 0;gap:4px}
+  .bpt-ol-panel .bpt-ol-acts{gap:4px}
+  .bpt-ol-panel .bpt-ol-acts button{min-height:32px !important;font-size:11.5px !important;border-radius:9px;padding:0 2px}
+  .bpt-ol-panel .bpt-ol-acts button small{font-size:10px}
+  .bpt-ol-panel .bpt-ol-slider{grid-template-columns:24px 1fr 24px;gap:4px}
+  .bpt-ol-panel .bpt-ol-slider button{width:24px;height:24px;font-size:14px}
+  .bpt-ol-panel .bpt-ol-presets2{gap:3px}
+  .bpt-ol-panel .bpt-ol-presets2 button{min-height:22px !important;font-size:10.5px;border-radius:7px}
+  .bpt-ol-panel .bpt-ol-prebar button{padding:4px 7px;font-size:11px}
+}
+/* boutons ronds (− +, 💬 📜 🔊) : pas de hauteur minimale imposée par les boutons de l appli */
+.bpt-ol-slider button,.bpt-ol-bar .bpt-ol-fx-btn,.bpt-ol-bar .bpt-ol-hist-btn,.bpt-ol-bar .bpt-ol-snd-btn{min-height:0 !important;padding:0 !important}
+/* paysage téléphone : colonne d'actions étroite (boutons empilés) pour laisser presque toute la largeur à la table */
+@media (orientation:landscape) and (max-height:500px){
+  .bpt-ol-table:has(.bpt-ol-panel){grid-template-columns:minmax(0,1fr) 150px !important;column-gap:4px}
+  .bpt-ol-table:has(.bpt-ol-panel)>.bpt-ol-stage{margin:8px 26px 6px 30px !important}
+  .bpt-ol-table:has(.bpt-ol-panel)>.bpt-ol-bar{justify-content:flex-end;gap:4px !important}
+  .bpt-ol-table:has(.bpt-ol-panel) .bpt-ol-bar.is-running .bpt-ol-bar-level{flex:1 1 100%;margin-left:0}
+  .bpt-ol-panel .bpt-ol-status{flex-wrap:wrap;white-space:normal;justify-content:flex-start;text-align:left;padding:2px 6px;font-size:10.5px}
+  .bpt-ol-panel .bpt-ol-acts{grid-template-columns:1fr !important;gap:4px}
+  .bpt-ol-panel .bpt-ol-acts button{min-height:30px !important;display:flex !important;justify-content:center;align-items:center !important;align-content:center;gap:5px !important;font-size:12px !important;padding:0 4px !important;line-height:1}
+  .bpt-ol-panel .bpt-ol-acts button small{font-size:11px;opacity:.85}
+  .bpt-ol-panel .bpt-ol-presets2{grid-template-columns:repeat(3,1fr) !important}
+  .bpt-ol-panel .bpt-ol-prebar{flex-direction:column;align-items:stretch}
+}
