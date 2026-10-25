@@ -176,7 +176,7 @@
       if(key==="targetHours")t.targetHours=Math.max(0.5,Number(val)||2);
       else if(key==="startStack"){const v=Math.max(1000,Math.round((Number(val)||20000)/100)*100);t.startStack=v;Object.values(t.seats||{}).forEach(x=>{if(x&&x.name)x.stack=v;});}
       else if(key==="adaptive")t.adaptive=String(val)==="1";
-      else if(key==="breakEvery")t.breakEvery=Math.max(0,Number(val)||0);
+      else if(key==="breakMin")t.breakMin=Math.max(0,Number(val)||0);
       else return false;
     });
   }
@@ -215,6 +215,8 @@
   const betOf=(h,i)=>Number(h.bets?.[K(i)])||0;
   const handPlayers=t=>Object.keys(t.hand?.hole||{}).map(Number).filter(i=>!Number.isNaN(i)&&split(t.hand.hole[i]).length).sort((a,b)=>a-b);
   const folded=(h,i)=>!!h.folded?.[K(i)];
+  // Relance minimale (règle de la table) : au moins le double de la mise en cours, et au moins la dernière relance en plus.
+  const minRaiseTo=(h,bb)=>h.currentBet?Math.max(2*h.currentBet,h.currentBet+Math.max(Number(h.minRaise)||0,bb||0)):Math.max(Number(h.minRaise)||0,bb||0);
   const canAct=(t,i)=>!folded(t.hand,i)&&!t.hand.allin?.[K(i)]&&stackOf(t,i)>0;
   const firstName=(t,i)=>String(t.seats?.[i]?.name||"?").split(" ")[0];
   function commit(t,i,amt){
@@ -428,7 +430,7 @@
         if(target<=h.currentBet){if(action!=="allin")return false;commit(t,i,toCall);h.last={i,txt:`${name} suit à tapis`};}
         else{
           const size=target-h.currentBet;
-          if(size<h.minRaise&&target<maxTotal)return false;
+          if(target<minRaiseTo(h,0)&&target<maxTotal)return false;
           const wasBet=h.currentBet;commit(t,i,target-betOf(h,i));
           if(size>=h.minRaise){h.minRaise=size;h.acted={};}
           h.currentBet=target;
@@ -522,48 +524,60 @@
       if(!(h.result||[]).some(r=>(r.winners||[]).includes(i)))return false;
       h.shown={...(h.shown||{}),[K(i)]:true};h.shownAt=srvNow();h.last={i,txt:`${firstName(t,i)} montre ses cartes`};logAct(h);});
   }
-  // Pause automatique : au début de chaque N-ième niveau, avant de distribuer, 5 min de pause (chrono figé).
+  // Pause automatique toutes les 30 min ou toutes les heures de jeu (réglage breakMin, 60 par défaut) : elle tombe à la fin
+  // du niveau qui se termine le plus près de cette durée, avant de distribuer ; 5 min de pause (chrono figé).
   const BREAK_MS=5*60000;
-  const breakEvery=t=>t.breakEvery===undefined||t.breakEvery===null?4:Number(t.breakEvery)||0;
+  const breakMin=t=>t.breakMin===undefined||t.breakMin===null?60:Number(t.breakMin)||0;
+  // Niveaux au début desquels on fait une pause : pour chaque multiple de la durée, la fin de niveau la plus proche.
+  function breakLevels(t){
+    const every=breakMin(t)*60,lv=Array.isArray(t.levels)?t.levels:[],out=new Set();if(!every||lv.length<2)return out;
+    const ends=[];let el=0;lv.forEach(x=>{el+=Math.max(60,Number(x.durationSec)||Number(t.levelSeconds)||600);ends.push(el);});
+    for(let m=1;m*every<=ends[ends.length-2];m++){let L=1,gap=Infinity;
+      for(let i=0;i<ends.length-1;i++){const g=Math.abs(ends[i]-m*every);if(g<gap){gap=g;L=i+1;}}out.add(L);}
+    return out;
+  }
   async function nextHand(id){await tx(id,t=>{if(t.status!=="running"||t.hand?.street!=="done"||t.pausedAt)return false;
-    const L=levelAt(t).index,ev=breakEvery(t);
-    if(ev&&L>0&&L%ev===0&&!t.breaks?.["l"+L]){t.breaks={...(t.breaks||{}),["l"+L]:true};t.pausedAt=srvNow();t.breakUntil=srvNow()+BREAK_MS;return;}
+    const L=levelAt(t).index;
+    if(L>0&&breakLevels(t).has(L)&&!t.breaks?.["l"+L]){t.breaks={...(t.breaks||{}),["l"+L]:true};t.pausedAt=srvNow();t.breakUntil=srvNow()+BREAK_MS;return;}
     dealHand(t);});}
   async function endBreak(id){return tx(id,t=>{if(!t.pausedAt||!t.breakUntil||srvNow()<Number(t.breakUntil))return false;
     t.startedAt=Number(t.startedAt)+(srvNow()-Number(t.pausedAt));t.pausedAt=null;t.breakUntil=null;});}
 
   /* Automatismes, exécutés par l'appareil de l'hôte uniquement : joueurs virtuels (test local), délai de décision
      dépassé, main suivante. Un seul déclenchement par situation. */
-  let autoKey="";
+  // Une étape lancée et restée sans effet (réseau coupé, transaction refusée ou jamais revenue) est relancée après
+  // AUTO_RETRY_MS : avant, la partie restait bloquée jusqu à ce que le pilote se déconnecte.
+  let autoKey="",autoAt=0;const AUTO_RETRY_MS=6000;
   function autopilot(){
     const t=openId&&tables[openId];if(!t||t.status==="waiting")return;
     if(!following()||pilotName(t)!==me())return; // table non suivie : données figées, on laisse piloter un autre joueur
+    if(autoKey&&srvNow()-autoAt>AUTO_RETRY_MS)autoKey="";
     if(t.status==="finished"&&!t.runningCleared){t.runningCleared=true;setRunning(t.id,false);}
     if(t.hand?.street==="done")logHand(t);
     if(t.status==="finished"){if(!t.publishedToHistory&&!t.publishing&&!t.publishError)publishResult(t.id);return;}
     if(t.status!=="running")return;
-    if(t.pausedAt){const bk="brk:"+t.breakUntil;if(t.breakUntil&&srvNow()>=Number(t.breakUntil)&&autoKey!==bk){autoKey=bk;endBreak(t.id).then(ok=>{if(!ok)autoKey="";});}return;}
+    if(t.pausedAt){const bk="brk:"+t.breakUntil;if(t.breakUntil&&srvNow()>=Number(t.breakUntil)&&autoKey!==bk){autoKey=bk;autoAt=srvNow();endBreak(t.id).then(ok=>{if(!ok)autoKey="";});}return;}
     const h=t.hand;if(!h)return;
     const now=srvNow();
     if(h.street==="done"){
-      const key=`next:${h.no}`;if(autoKey!==key&&now-Number(h.at||0)>=nextHandMs(h)){autoKey=key;nextHand(t.id);}return;
+      const key=`next:${h.no}`;if(autoKey!==key&&now-Number(h.at||0)>=nextHandMs(h)){autoKey=key;autoAt=srvNow();nextHand(t.id);}return;
     }
-    if(h.runout){const key=`run:${h.no}:${h.street}`;if(autoKey!==key&&now-Number(h.runoutAt||0)>=RUNOUT_MS){autoKey=key;tx(t.id,x=>runoutStep(x)).then(ok=>{if(!ok)autoKey="";});}return;}
+    if(h.runout){const key=`run:${h.no}:${h.street}`;if(autoKey!==key&&now-Number(h.runoutAt||0)>=RUNOUT_MS){autoKey=key;autoAt=srvNow();tx(t.id,x=>runoutStep(x)).then(ok=>{if(!ok)autoKey="";});}return;}
     const i=h.toAct;if(i===null||i===undefined)return;
     const seat=t.seats[i];const key=`${h.no}:${h.street}:${i}:${h.actionAt}`;if(autoKey===key)return;
     // Joueur virtuel (test local) : si sa décision est refusée par les règles, il suit, sinon checke, sinon se couche
     // (avant, une relance refusée bloquait la main : le tour était marqué comme traité sans action).
-    if(seat?.bot&&now-Number(h.actionAt||0)>=900){autoKey=key;const d=botDecision(t,i);
+    if(seat?.bot&&now-Number(h.actionAt||0)>=900){autoKey=key;autoAt=srvNow();const d=botDecision(t,i);
       (async()=>{for(const [a,v] of [[d.action,d.amount],["call"],["check"],["fold"]]){if(await act(t.id,a,v,true))return;}autoKey="";})();return;}
-    if(seat?.away&&now-Number(h.actionAt||0)>=600){autoKey=key;act(t.id,"away").then(ok=>{if(!ok)autoKey="";});return;}
-    if(now-Number(h.actionAt||0)>=TURN_MS){autoKey=key;act(t.id,"timeout").then(ok=>{if(!ok)autoKey="";});}
+    if(seat?.away&&now-Number(h.actionAt||0)>=600){autoKey=key;autoAt=srvNow();act(t.id,"away").then(ok=>{if(!ok)autoKey="";});return;}
+    if(now-Number(h.actionAt||0)>=TURN_MS){autoKey=key;autoAt=srvNow();act(t.id,"timeout").then(ok=>{if(!ok)autoKey="";});}
   }
   // Joueur virtuel prudent : parole ou mise légère, suit les petites mises, se couche face aux grosses.
   function botDecision(t,i){
     const h=t.hand,toCall=Math.max(0,h.currentBet-betOf(h,i)),stack=stackOf(t,i),bb=Number(t.levels?.[h.level]?.bb)||50;
     const pot=Object.values(h.contrib||{}).reduce((a,x)=>a+(Number(x)||0),0),r=Math.random();
     if(!toCall)return r<0.18?{action:"raise",amount:Math.max(bb,Math.round(pot/2))}:{action:"check"};
-    if(toCall<=Math.max(bb*3,stack*0.08))return r<0.1?{action:"raise",amount:h.currentBet+Math.max(h.minRaise,bb)}:{action:"call"};
+    if(toCall<=Math.max(bb*3,stack*0.08))return r<0.1?{action:"raise",amount:minRaiseTo(h,bb)}:{action:"call"};
     return r<0.25?{action:"call"}:{action:"fold"};
   }
 
@@ -1079,7 +1093,7 @@
     }
     if(h&&!done&&!dealing&&mine&&h.toAct===mine.i){
       const i=mine.i,toCall=Math.max(0,h.currentBet-betOf(h,i)),stack=stackOf(t,i),maxTotal=betOf(h,i)+stack;
-      const minTo=Math.min(maxTotal,h.currentBet+Math.max(h.minRaise,Number(lv.bb)||50)),pot=potTotal+toCall;
+      const minTo=Math.min(maxTotal,minRaiseTo(h,Number(lv.bb)||50)),pot=potTotal+toCall;
       const key=`${h.no}:${h.street}:${h.actionAt}`;if(raiseKey!==key){raiseKey=key;raiseTo=minTo;raiseMode=false;}
       raiseTo=Math.max(minTo,Math.min(maxTotal,raiseTo));
       const canRaise=maxTotal>h.currentBet, verb=h.currentBet?"Relancer":"Miser";
@@ -1131,7 +1145,7 @@
       const edit=isHost?`<div class="bpt-ol-setup">
           <label>Durée<select data-ol-setup="targetHours">${opts.sort((a,b)=>a[0]-b[0]).map(([v,l])=>`<option value="${v}"${v===hh?" selected":""}>${esc(l)}</option>`).join("")}</select></label>
           <label>Tapis<input type="number" min="1000" step="1000" inputmode="numeric" data-ol-setup="startStack" value="${Number(t.startStack)||20000}"></label>
-          <label>Pause<select data-ol-setup="breakEvery">${[[0,"Aucune"],[3,"Tous les 3 niveaux"],[4,"Tous les 4 niveaux"],[6,"Tous les 6 niveaux"]].map(([v,l])=>`<option value="${v}"${breakEvery(t)===v?" selected":""}>${l}</option>`).join("")}</select></label>
+          <label>Pause<select data-ol-setup="breakMin">${[[0,"Aucune"],[30,"Toutes les 30 min"],[60,"Toutes les heures"]].map(([v,l])=>`<option value="${v}"${breakMin(t)===v?" selected":""}>${l}</option>`).join("")}</select></label>
           <label>Structure<select data-ol-setup="adaptive"><option value="1"${t.adaptive?" selected":""}>Adaptatif</option><option value="0"${t.adaptive?"":" selected"}>Classique</option></select></label>
         </div>`:"";
       waitInfo=`<div class="bpt-ol-waitinfo">${edit}<b>Niveaux de ${Math.round(preview.levelSeconds/60)} min</b><span>${seats.length} joueur${seats.length>1?"s":""} · ${fmt(t.startStack)} jetons · durée visée ${dur}</span><span>Fin prévue vers le niveau ${endIdx+1} (blinds ${fmt(end.sb)} / ${fmt(end.bb)})${t.adaptive?" · ajustée en cours de partie":""}</span></div>`;}
@@ -1152,7 +1166,7 @@
     const avgBB=running&&alive.length&&Number(lv.bb)?Math.round(chips/alive.length/Number(lv.bb)):0;
     return `<div class="bpt-ol-table${spectator?" is-spectator":""}">
       <div class="bpt-ol-bar${t.status!=="waiting"?" is-running":""}">
-        <div class="bpt-ol-bar-title"><b>${esc(t.name)}</b><small>${t.countsForChampionship?"Compte au championnat":"Hors championnat"} · ${t.adaptive?"Adaptatif":"Classique"}</small></div>
+        ${t.status!=="waiting"?"":`<div class="bpt-ol-bar-title"><b>${esc(t.name)}</b><small>${t.countsForChampionship?"Compte au championnat":"Hors championnat"} · ${t.adaptive?"Adaptatif":"Classique"}</small></div>`}
         ${isHost&&t.status==="waiting"?`<label class="bpt-ol-check"><input type="checkbox" data-ol-counts${t.countsForChampionship?" checked":""}${hasBots(t)?" disabled title=\"Partie avec joueurs virtuels : hors championnat\"":""}> Championnat</label>`:""}
         ${isHost&&t.status==="waiting"?`<button type="button" class="bpt-ol-bar-del" data-ol-remove title="Supprimer la table" aria-label="Supprimer la table">🗑</button>`:""}
         <div class="bpt-ol-bar-level${running&&(isHost||mine)?" is-clickable":""}${t.pausedAt?" is-paused":""}"${running&&(isHost||mine)?" data-ol-clock-menu role=\"button\" tabindex=\"0\" title=\"Réglages du chrono\"":""}>${t.pausedAt?"<em class=\"bpt-ol-pause\">EN PAUSE</em>":""}<small>Niveau ${L.index+1}${running?` · <span data-ol-clock>${clock(L.left)}</span>`:""} · ${Math.round((Number(lv.durationSec)||Number(preview?.levelSeconds)||Number(t.levelSeconds)||0)/60)} min</small><b>${fmt(lv.sb)} / ${fmt(lv.bb)}</b>${avgBB?`<small class="bpt-ol-avg" title="Tapis moyen des joueurs en jeu">· moy. ${fmt(avgBB)} BB</small>`:""}</div>${t.status!=="waiting"&&!spectator?`<button type="button" class="bpt-ol-fx-btn" data-ol-fx aria-label="Chat et objets">💬</button>`:""}${t.status!=="waiting"?`<button type="button" class="bpt-ol-hist-btn${spectator?" is-alone":""}" data-ol-hist-open aria-label="Historique des mains et du chat" title="Historique des mains et du chat">📜</button><button type="button" class="bpt-ol-snd-btn${spectator?" is-alone":""}" data-ol-sound aria-label="${soundOn?"Couper le son":"Activer le son"}" title="${soundOn?"Couper le son":"Activer le son"}">${soundOn?"🔊":"🔇"}</button>`:""}</div>
@@ -1182,8 +1196,8 @@
     stage.querySelectorAll(".bpt-ol-seat[data-pos]").forEach(el=>{const [x,y]=at(P*(Number(el.dataset.pos)||0)/(Number(el.dataset.n)||1));el.style.left=x.toFixed(1)+"px";el.style.top=y.toFixed(1)+"px";});
     // Ma mise : juste au-dessus de mes cartes, quelle que soit leur taille (téléphone, paysage, PC).
     {const me1=stage.querySelector(".bpt-ol-seat.is-me"),mc=me1?.querySelector(".bpt-ol-cards"),mb=me1?.querySelector(".bpt-ol-bet");
-      if(me1&&mb){const sr2=me1.getBoundingClientRect(),cy0=sr2.top+sr2.height/2,cx0=sr2.left+sr2.width/2,ref=mc?mc.getBoundingClientRect():me1.querySelector(".bpt-ol-plate").getBoundingClientRect();
-        me1.style.setProperty("--mbx",(ref.left+ref.width/2-cx0).toFixed(1)+"px");me1.style.setProperty("--mby",(ref.top-cy0-6-mb.offsetHeight/2).toFixed(1)+"px");}}
+      if(me1&&mb){const sr2=me1.getBoundingClientRect(),cy0=sr2.top+sr2.height/2,cx0=sr2.left+sr2.width/2,ref=(mc||me1.querySelector(".bpt-ol-plate")).getBoundingClientRect(); // bloc des cartes (pas les cartes : animées pendant la donne)
+        me1.style.setProperty("--mbx",(ref.left+ref.width/2-cx0).toFixed(1)+"px");me1.style.setProperty("--mby",(ref.top-cy0-1-mb.offsetHeight/2).toFixed(1)+"px");}}
     stage.querySelectorAll(".bpt-ol-board,.bpt-ol-pot,.bpt-ol-seat .bpt-ol-plate,.bpt-ol-seat.is-me .bpt-ol-cards,.bpt-ol-seat.is-me .bpt-ol-bet").forEach(e=>{const r=e.getBoundingClientRect();if(r.width)obstacles.push(r);});
     stage.querySelectorAll(".bpt-ol-seat[data-pos]").forEach(el=>{const n=Number(el.dataset.n)||1,p=Number(el.dataset.pos)||0;const [x,y]=at(P*p/n);el.style.left=x.toFixed(1)+"px";el.style.top=y.toFixed(1)+"px";
       const dx=W/2-x,dy=H/2-y,len=Math.hypot(dx,dy)||1;
@@ -1225,7 +1239,7 @@
         if(ring){const x=parseFloat(el.style.left)||0,y=parseFloat(el.style.top)||0,vx=W/2-x,vy2=H/2-y,dist=Math.hypot(vx,vy2)||1,ux=vx/dist,uy=vy2/dist;
           const ccx=parseFloat(el.style.getPropertyValue("--cx"))||0,ccy=parseFloat(el.style.getPropertyValue("--cy"))||0;
           const reach=cards?Math.abs(ccx*ux+ccy*uy)+halfOf(cards,[ux,uy]):halfOf(plate,[ux,uy]);
-          const d=Math.max(0.42*dist,reach+6+halfOf(bet,[ux,uy]));bx=ux*d;by=uy*d;}
+          const d=reach+4+halfOf(bet,[ux,uy]);bx=ux*d;by=uy*d;} // collée aux cartes, côté centre
         else if(vert){bx=parseFloat(el.style.getPropertyValue("--cx"))||0;by=(parseFloat(el.style.getPropertyValue("--cy"))||0)+vert*(cards.offsetHeight/2+5+bet.offsetHeight/2);
           // Joueur au bord de l écran : la mise est décalée vers l intérieur pour rester visible.
           const r0=el.getBoundingClientRect(),x0=r0.left+r0.width/2+bx,w=bet.offsetWidth;if(x0-w/2<4)bx+=4-(x0-w/2);else if(x0+w/2>vw-4)bx-=x0+w/2-(vw-4);}

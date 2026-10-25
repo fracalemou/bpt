@@ -7410,3 +7410,6 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
   .bpt-ol-panel .bpt-ol-acts button{min-height:36px;font-size:12.5px}
   .bpt-ol-panel .bpt-ol-presets2 button{min-height:26px}
 }
+
+/* 10.4.108 — partie en cours : plus de titre dans l en-tete, niveau cale a droite */
+.bpt-ol-bar.is-running .bpt-ol-bar-level{margin-left:auto}
