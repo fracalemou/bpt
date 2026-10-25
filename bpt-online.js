@@ -166,7 +166,7 @@
     if(!confirm("Supprimer cette table ?"))return;
     // Partie terminée : l historique des mains et du chat est gardé (il sert au bilan) ; sinon il part avec la table.
     const keep=tables[id]?.status==="finished";
-    await (await db()).ref(`${ROOT}/${id}`).remove();if(!keep){(await db()).ref(`${HANDS_ROOT}/${id}`).remove().catch(()=>{});(await db()).ref(`${CHATLOG_ROOT}/${id}`).remove().catch(()=>{});}
+    await (await db()).ref(`${ROOT}/${id}`).remove();if(!keep){(await db()).ref(`${HANDS_ROOT}/${id}`).remove().catch(()=>{});(await db()).ref(`${CHATLOG_ROOT}/${id}`).remove().catch(()=>{});(await db()).ref(`${PLOG_ROOT}/${id}`).remove().catch(()=>{});}
     try{await (await db()).ref(`${RUN_ROOT}/${id}`).remove();}catch(_e){}openId=null;render();
   }
   // Réglages de la partie avant lancement (organisateur) : durée visée, tapis de départ, structure.
@@ -536,7 +536,7 @@
       for(let i=0;i<ends.length-1;i++){const g=Math.abs(ends[i]-m*every);if(g<gap){gap=g;L=i+1;}}out.add(L);}
     return out;
   }
-  async function nextHand(id){await tx(id,t=>{if(t.status!=="running"||t.hand?.street!=="done"||t.pausedAt)return false;
+  async function nextHand(id){return tx(id,t=>{if(t.status!=="running"||t.hand?.street!=="done"||t.pausedAt)return false;
     const L=levelAt(t).index;
     if(L>0&&breakLevels(t).has(L)&&!t.breaks?.["l"+L]){t.breaks={...(t.breaks||{}),["l"+L]:true};t.pausedAt=srvNow();t.breakUntil=srvNow()+BREAK_MS;return;}
     dealHand(t);});}
@@ -547,38 +547,102 @@
      dépassé, main suivante. Un seul déclenchement par situation. */
   // Une étape lancée et restée sans effet (réseau coupé, transaction refusée ou jamais revenue) est relancée après
   // AUTO_RETRY_MS : avant, la partie restait bloquée jusqu à ce que le pilote se déconnecte.
-  let autoKey="",autoAt=0;const AUTO_RETRY_MS=6000;
+  let autoKey="",autoAt=0,autoLabel="",autoOk=false,pilotOf="";const AUTO_RETRY_MS=6000;
+  // Lance une étape une seule fois par situation ; refus ou erreur : journalisée et relançable.
+  function step(t,key,label,fn,quiet){
+    autoKey=key;autoAt=srvNow();autoLabel=label;autoOk=false;
+    Promise.resolve().then(fn).then(ok=>{if(ok!==false&&autoKey===key)autoOk=true;if(ok===false){if(autoKey===key)autoKey="";if(!quiet)plog(t.id,"refus",label+" : refusée par la base");}})
+      .catch(e=>{if(autoKey===key)autoKey="";plog(t.id,"erreur",label+" : "+(e?.message||e)+" @ "+String(e?.stack||"").split("\n").slice(1,3).map(x=>x.trim().replace(/^at /,"").replace(/https?:\/\/[^)]*\//,"")).join(" < "));});
+  }
   function autopilot(){
     const t=openId&&tables[openId];if(!t||t.status==="waiting")return;
-    if(!following()||pilotName(t)!==me())return; // table non suivie : données figées, on laisse piloter un autre joueur
-    if(autoKey&&srvNow()-autoAt>AUTO_RETRY_MS)autoKey="";
+    if(!following()||pilotName(t)!==me()){if(pilotOf===t.id)pilotOf="";return;} // table non suivie : données figées, on laisse piloter un autre joueur
+    if(pilotOf!==t.id){pilotOf=t.id;if(t.status==="running")plog(t.id,"pilote",me()===t.host?"l'hôte pilote la table":`prend le relais (hôte ${String(t.host).split(" ")[0]} absent)`);}
+    if(autoKey&&srvNow()-autoAt>AUTO_RETRY_MS){if(!autoOk)plog(t.id,"relance",autoLabel+" : sans effet après "+Math.round((srvNow()-autoAt)/1000)+" s, relancée");autoKey="";}
     if(t.status==="finished"&&!t.runningCleared){t.runningCleared=true;setRunning(t.id,false);}
     if(t.hand?.street==="done")logHand(t);
     if(t.status==="finished"){if(!t.publishedToHistory&&!t.publishing&&!t.publishError)publishResult(t.id);return;}
     if(t.status!=="running")return;
-    if(t.pausedAt){const bk="brk:"+t.breakUntil;if(t.breakUntil&&srvNow()>=Number(t.breakUntil)&&autoKey!==bk){autoKey=bk;autoAt=srvNow();endBreak(t.id).then(ok=>{if(!ok)autoKey="";});}return;}
+    if(t.pausedAt){const bk="brk:"+t.breakUntil;if(t.breakUntil&&srvNow()>=Number(t.breakUntil)&&autoKey!==bk)step(t,bk,"fin de pause",()=>endBreak(t.id));return;}
     const h=t.hand;if(!h)return;
     const now=srvNow();
     if(h.street==="done"){
-      const key=`next:${h.no}`;if(autoKey!==key&&now-Number(h.at||0)>=nextHandMs(h)){autoKey=key;autoAt=srvNow();nextHand(t.id);}return;
+      const key=`next:${h.no}`;if(autoKey!==key&&now-Number(h.at||0)>=nextHandMs(h))step(t,key,`main suivante après la main ${h.no}`,()=>nextHand(t.id));return;
     }
-    if(h.runout){const key=`run:${h.no}:${h.street}`;if(autoKey!==key&&now-Number(h.runoutAt||0)>=RUNOUT_MS){autoKey=key;autoAt=srvNow();tx(t.id,x=>runoutStep(x)).then(ok=>{if(!ok)autoKey="";});}return;}
+    if(h.runout){const key=`run:${h.no}:${h.street}`;if(autoKey!==key&&now-Number(h.runoutAt||0)>=RUNOUT_MS)step(t,key,`tapis main ${h.no} (${h.street})`,()=>tx(t.id,x=>runoutStep(x)),true);return;}
     const i=h.toAct;if(i===null||i===undefined)return;
     const seat=t.seats[i];const key=`${h.no}:${h.street}:${i}:${h.actionAt}`;if(autoKey===key)return;
-    // Joueur virtuel (test local) : si sa décision est refusée par les règles, il suit, sinon checke, sinon se couche
-    // (avant, une relance refusée bloquait la main : le tour était marqué comme traité sans action).
-    if(seat?.bot&&now-Number(h.actionAt||0)>=900){autoKey=key;autoAt=srvNow();const d=botDecision(t,i);
-      (async()=>{for(const [a,v] of [[d.action,d.amount],["call"],["check"],["fold"]]){if(await act(t.id,a,v,true))return;}autoKey="";})();return;}
-    if(seat?.away&&now-Number(h.actionAt||0)>=600){autoKey=key;autoAt=srvNow();act(t.id,"away").then(ok=>{if(!ok)autoKey="";});return;}
-    if(now-Number(h.actionAt||0)>=TURN_MS){autoKey=key;autoAt=srvNow();act(t.id,"timeout").then(ok=>{if(!ok)autoKey="";});}
+    // Joueur virtuel : si sa décision est refusée par les règles, il suit, sinon checke, sinon se couche.
+    if(seat?.bot&&now-Number(h.actionAt||0)>=900){const d=botDecision(t,i);
+      step(t,key,`décision de ${firstName(t,i)} (virtuel)`,async()=>{for(const [a,v] of [[d.action,d.amount],["call"],["check"],["fold"]]){if(await act(t.id,a,v,true))return true;}return false;});return;}
+    if(seat?.away&&now-Number(h.actionAt||0)>=600){step(t,key,`jeu automatique de ${firstName(t,i)} (absent)`,()=>act(t.id,"away"),true);return;}
+    if(now-Number(h.actionAt||0)>=TURN_MS)step(t,key,`délai dépassé pour ${firstName(t,i)}`,()=>act(t.id,"timeout"),true);
   }
-  // Joueur virtuel prudent : parole ou mise légère, suit les petites mises, se couche face aux grosses.
+  // Vigie (tous les appareils qui suivent la table) : une étape attendue depuis plus de 12 s est notée au journal,
+  // avec le pilote attendu et l'âge de sa présence.
+  let stuckKey="",watchKey="",watchSince=0;
+  function watchdog(){
+    const t=openId&&tables[openId];if(!t||t.status!=="running"||t.pausedAt||!following())return;
+    const h=t.hand;if(!h)return;const now=srvNow();
+    const late=h.street==="done"?now-Number(h.at||0)-nextHandMs(h):h.runout?now-Number(h.runoutAt||0)-RUNOUT_MS:h.toAct!==null&&h.toAct!==undefined?now-Number(h.actionAt||0)-TURN_MS:0;
+    const key=`${h.no}:${h.street}:${h.actionAt}:${h.runoutAt||0}`;if(key!==watchKey){watchKey=key;watchSince=now;}if(late<12000||now-watchSince<8000||stuckKey===key)return;stuckKey=key; // situation inchangée depuis 8 s sous mes yeux
+    const p=pilotName(t),seenAgo=Math.round((now-Number(t.seen?.[seenKey(p)]||0))/1000);
+    plog(t.id,"figée",`main ${h.no} (${h.street}) en attente depuis ${Math.round(late/1000)} s · pilote attendu : ${String(p).split(" ")[0]} (présence il y a ${t.seen?.[seenKey(p)]?seenAgo+" s":"jamais"})${p===me()?" · c'est moi":""}`);
+  }
+  /* Joueur virtuel : il ne voit que ses cartes et le tableau. Il estime ses chances contre le nombre d'adversaires encore
+     en jeu (500 tirages au hasard), puis mise ses bonnes mains, suit si la cote du pot le permet, se couche sinon,
+     avec un peu de bluff et de jeu lent pour rester imprévisible. */
+  // Évaluation directe de 7 cartes (même résultat que best7, sans passer par les 21 combinaisons) : réservée aux robots.
+  const straightHigh=has=>{for(let h=14;h>=5;h--){let ok=true;for(let k=0;k<5;k++){const r=h-k;if(!has[r===1?14:r]){ok=false;break;}}if(ok)return h;}return 0;};
+  function fast7(cs){
+    const cnt=new Array(15).fill(0),bySuit={};
+    for(const c of cs){const v=RV(c);cnt[v]++;(bySuit[c[1]]=bySuit[c[1]]||[]).push(v);}
+    const fl=Object.values(bySuit).find(a=>a.length>=5);
+    if(fl){const has=[];fl.forEach(v=>has[v]=true);const sf=straightHigh(has);if(sf)return [8,sf];}
+    const g=[];for(let v=14;v>=2;v--)if(cnt[v])g.push([cnt[v],v]);g.sort((a,b)=>b[0]-a[0]||b[1]-a[1]);
+    const kick=(n,skip)=>{const o=[];for(let v=14;v>=2&&o.length<n;v--)if(cnt[v]&&!skip.includes(v))o.push(v);return o;};
+    if(g[0][0]===4)return [7,g[0][1],...kick(1,[g[0][1]])];
+    if(g[0][0]===3&&g[1]&&g[1][0]>=2)return [6,g[0][1],g[1][1]];
+    if(fl)return [5,...fl.sort((a,b)=>b-a).slice(0,5)];
+    const st=straightHigh(cnt.map(x=>x>0));if(st)return [4,st];
+    if(g[0][0]===3)return [3,g[0][1],...kick(2,[g[0][1]])];
+    if(g[0][0]===2&&g[1]&&g[1][0]===2)return [2,g[0][1],g[1][1],...kick(1,[g[0][1],g[1][1]])];
+    if(g[0][0]===2)return [1,g[0][1],...kick(3,[g[0][1]])];
+    return [0,...kick(5,[])];
+  }
+  const botEqCache=new Map();
+  function botStrength(hole,board,nOpp){
+    const ck=hole.join()+"|"+board.join()+"|"+nOpp;if(botEqCache.has(ck))return botEqCache.get(ck);
+    const res=botStrength0(hole,board,nOpp);botEqCache.set(ck,res);if(botEqCache.size>30)botEqCache.delete(botEqCache.keys().next().value);return res;
+  }
+  function botStrength0(hole,board,nOpp){
+    const used=new Set([...hole,...board]),rest=[];for(const su of SUITS)for(const r of RANKS){const c=r+su;if(!used.has(c))rest.push(c);}
+    const need=5-board.length,take=need+2*nOpp;let win=0;const N=500;
+    for(let k=0;k<N;k++){
+      for(let j=0;j<take;j++){const x=j+Math.floor(Math.random()*(rest.length-j));[rest[j],rest[x]]=[rest[x],rest[j]];}
+      const full=[...board,...rest.slice(0,need)],mine=fast7([...hole,...full]);let res=1,ties=1;
+      for(let o=0;o<nOpp;o++){const c=cmp(mine,fast7([rest[need+2*o],rest[need+2*o+1],...full]));if(c<0){res=0;break;}if(c===0)ties++;}
+      win+=res?1/ties:0;
+    }
+    return win/N;
+  }
   function botDecision(t,i){
     const h=t.hand,toCall=Math.max(0,h.currentBet-betOf(h,i)),stack=stackOf(t,i),bb=Number(t.levels?.[h.level]?.bb)||50;
     const pot=Object.values(h.contrib||{}).reduce((a,x)=>a+(Number(x)||0),0),r=Math.random();
-    if(!toCall)return r<0.18?{action:"raise",amount:Math.max(bb,Math.round(pot/2))}:{action:"check"};
-    if(toCall<=Math.max(bb*3,stack*0.08))return r<0.1?{action:"raise",amount:minRaiseTo(h,bb)}:{action:"call"};
-    return r<0.25?{action:"call"}:{action:"fold"};
+    const nOpp=Math.max(1,handPlayers(t).filter(j=>j!==i&&!folded(h,j)).length);
+    const eq=botStrength(split(h.hole[i]),split(h.board),nOpp),rel=eq*(nOpp+1); // rel > 1 : mieux que la moyenne de la table
+    const strong=eq>0.62||rel>2,good=eq>0.5||rel>1.4;
+    const sized=f=>Math.max(minRaiseTo(h,bb),h.currentBet+Math.round(Math.max(pot,bb*2)*f));
+    if(stack<=bb*10&&(strong||(good&&r<0.5)))return {action:"allin"}; // tapis court : tout ou rien
+    if(!toCall){
+      if(strong)return r<0.2?{action:"check"}:{action:"raise",amount:sized(0.75)};   // parfois jeu lent
+      if(good)return r<0.55?{action:"raise",amount:sized(0.5)}:{action:"check"};
+      return r<0.08?{action:"raise",amount:sized(0.5)}:{action:"check"};            // bluff
+    }
+    const odds=toCall/(pot+toCall);
+    if(strong)return r<0.3?{action:"call"}:{action:"raise",amount:sized(0.8)};
+    if(eq>=odds+0.04||(good&&toCall<=bb*2))return r<0.08&&good?{action:"raise",amount:sized(0.6)}:{action:"call"};
+    return r<0.03?{action:"raise",amount:sized(0.6)}:{action:"fold"};
   }
 
   /* ---------- Lot 4 : relais de l'hôte, classement final, enregistrement au championnat ---------- */
@@ -604,6 +668,7 @@
   }
   async function releasePresence(){
     const id=beatId;beatId=null;lastBeat=0;if(!id||!me())return;
+    if(tables[id]?.status==="running"&&pilotName(tables[id])===me())plog(id,"départ","le pilote quitte la table (appli en arrière-plan ou fermée)");
     try{const r=(await db()).ref(`${ROOT}/${id}/seen/${seenKey(me())}`);await r.remove();r.onDisconnect().cancel();}catch(_e){}
   }
   document.addEventListener("visibilitychange",()=>{try{heartbeat();}catch(_e){}});
@@ -681,7 +746,7 @@
       box.addEventListener("click",async e=>{
         const del=e.target.closest("[data-ol-hist-del]");
         if(del){e.preventDefault();if(!confirm("Supprimer cette partie en ligne hors classement ?\n\nCela ne change rien au classement."))return;
-          try{await (await db()).ref(`${HIST_ROOT}/${del.dataset.olHistDel}`).remove();(await db()).ref(`${HANDS_ROOT}/${del.dataset.olHistDel}`).remove().catch(()=>{});(await db()).ref(`${CHATLOG_ROOT}/${del.dataset.olHistDel}`).remove().catch(()=>{});}catch(err){alert("Suppression impossible : "+(err.message||err));}return;}
+          try{await (await db()).ref(`${HIST_ROOT}/${del.dataset.olHistDel}`).remove();(await db()).ref(`${HANDS_ROOT}/${del.dataset.olHistDel}`).remove().catch(()=>{});(await db()).ref(`${CHATLOG_ROOT}/${del.dataset.olHistDel}`).remove().catch(()=>{});(await db()).ref(`${PLOG_ROOT}/${del.dataset.olHistDel}`).remove().catch(()=>{});}catch(err){alert("Suppression impossible : "+(err.message||err));}return;}
         const open=e.target.closest("[data-ol-hist]");
         if(open){const g=unranked[open.dataset.olHist];if(g&&Array.isArray(g.rows))window.showEndGameSummary(g.rows);}
       });}
@@ -714,6 +779,14 @@
   const HANDS_ROOT="bpt/online/hands";
   // Historique du chat (messages et objets envoyés), gardé avec la partie ; bpt/online/fx ne sert qu à l animation (2 min).
   const CHATLOG_ROOT="bpt/online/chatlog";
+  /* Journal du pilote (bpt/online/pilotlog/{idTable}) : prise de la main, départ du pilote, étapes refusées, en erreur ou
+     relancées, et table vue figée par un joueur. Sert à comprendre un blocage (onglet Journal de l'historique). */
+  const PLOG_ROOT="bpt/online/pilotlog";
+  const plogLast=new Map();
+  function plog(id,ev,info){
+    if(!id)return;const k=ev+"|"+info;if(srvNow()-(plogLast.get(k)||0)<5000)return;plogLast.set(k,srvNow());
+    db().then(d=>d.ref(`${PLOG_ROOT}/${id}`).push({at:srvNow(),by:me()||"?",ev,info:String(info||"").slice(0,200),v:typeof BPT_APP_VERSION==="string"?BPT_APP_VERSION:""})).catch(()=>{});
+  }
   // Jetons récupérés par un joueur sur la main, jeton indivisible compris (au premier gagnant, comme dans finishHand).
   const wonBack=(h,i)=>(h.result||[]).reduce((a,r)=>{const w=r.winners||[],k=w.indexOf(i);if(k<0)return a;const sh=Math.floor(r.amount/w.length);return a+sh+(k<r.amount-sh*w.length?1:0);},0);
   let loggedHand="";
@@ -788,9 +861,10 @@
     // Toujours au premier plan, au-dessus du bilan de la soirée (même s il est ouvert en plein écran).
     const host=document.fullscreenElement||document.body;if(box.parentElement!==host||box.nextElementSibling)host.append(box);
     box.hidden=false;box.dataset.tab="hands";box.innerHTML=`<div class="bpt-ol-hands"><div class="bpt-ol-hands-head"><b>📜 Historique</b><button type="button" data-hands-close aria-label="Fermer">×</button></div><p>Chargement…</p></div>`;
-    let list=[],chat=[];
+    let list=[],chat=[],plogs=[];
     try{const v=(await (await db()).ref(`${HANDS_ROOT}/${id}`).once("value")).val()||{};list=Object.values(v).filter(Boolean).sort((a,b)=>b.no-a.no);}catch(_e){}
     try{const v=(await (await db()).ref(`${CHATLOG_ROOT}/${id}`).once("value")).val()||{};chat=Object.values(v).filter(Boolean).sort((a,b)=>b.at-a.at);}catch(_e){}
+    try{const v=(await (await db()).ref(`${PLOG_ROOT}/${id}`).once("value")).val()||{};plogs=Object.values(v).filter(Boolean).sort((a,b)=>b.at-a.at);}catch(_e){}
     const cards=c=>split(c).map(x=>cardHtml(x)).join("");
     const signed=n=>n>0?`<em class="is-won">+${fmt(n)}</em>`:n<0?`<em class="is-lost">−${fmt(-n)}</em>`:"<em>0</em>";
     const body=list.length?list.map(m=>{
@@ -805,10 +879,12 @@
     const fn=n=>esc(String(n||"").split(" ")[0]);
     const chatBody=chat.length?chat.map(c=>{const it=FX_ITEMS.find(x=>x[0]===c.kind);
       return `<div class="bpt-ol-chat-row"><small>${new Date(c.at).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}</small><b>${fn(c.from)}${c.to&&c.to!=="all"?` → ${fn(c.to)}`:""}</b><span>${c.kind==="say"?esc(c.text):it?`${it[1]} ${esc(it[2])}`:""}</span></div>`;}).join(""):"<p>Aucun message pour cette partie.</p>";
-    const tab=["chat","stats"].includes(box.dataset.tab)?box.dataset.tab:"hands";
+    const PLOG_ICO={pilote:"👑",départ:"🚪",refus:"⛔",erreur:"⚠️",relance:"🔁",figée:"🧊"};
+    const plogBody=plogs.length?plogs.map(l=>`<div class="bpt-ol-chat-row is-${esc(l.ev)}"><small>${new Date(l.at).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}</small><b>${PLOG_ICO[l.ev]||"•"} ${fn(l.by)}</b><span>${esc(l.info)}${l.v?` <i>${esc(l.v)}</i>`:""}</span></div>`).join(""):"<p>Rien à signaler : aucun relais, refus ni blocage noté pour cette partie.</p>";
+    const tab=["chat","stats","plog"].includes(box.dataset.tab)?box.dataset.tab:"hands";
     box.querySelector(".bpt-ol-hands").innerHTML=`<div class="bpt-ol-hands-head"><b>📜 Historique</b><button type="button" data-hands-close aria-label="Fermer">×</button></div>
-      <div class="bpt-ol-hands-tabs"><button type="button" data-hands-tab="hands" class="${tab==="hands"?"is-on":""}">Mains · ${list.length}</button><button type="button" data-hands-tab="chat" class="${tab==="chat"?"is-on":""}">Chat · ${chat.length}</button><button type="button" data-hands-tab="stats" class="${tab==="stats"?"is-on":""}">Stats</button></div>
-      <div class="bpt-ol-hands-list" data-pane="hands"${tab==="hands"?"":" hidden"}>${body}</div><div class="bpt-ol-hands-list" data-pane="chat"${tab==="chat"?"":" hidden"}>${chatBody}</div><div class="bpt-ol-hands-list" data-pane="stats"${tab==="stats"?"":" hidden"}>${statsHtml(list)}</div>`;
+      <div class="bpt-ol-hands-tabs"><button type="button" data-hands-tab="hands" class="${tab==="hands"?"is-on":""}">Mains · ${list.length}</button><button type="button" data-hands-tab="chat" class="${tab==="chat"?"is-on":""}">Chat · ${chat.length}</button><button type="button" data-hands-tab="stats" class="${tab==="stats"?"is-on":""}">Stats</button><button type="button" data-hands-tab="plog" class="${tab==="plog"?"is-on":""}">Journal</button></div>
+      <div class="bpt-ol-hands-list" data-pane="hands"${tab==="hands"?"":" hidden"}>${body}</div><div class="bpt-ol-hands-list" data-pane="chat"${tab==="chat"?"":" hidden"}>${chatBody}</div><div class="bpt-ol-hands-list" data-pane="stats"${tab==="stats"?"":" hidden"}>${statsHtml(list)}</div><div class="bpt-ol-hands-list" data-pane="plog"${tab==="plog"?"":" hidden"}>${plogBody}</div>`;
   }
 
   /* ---------- Chat rapide et objets rigolos ----------
@@ -1043,12 +1119,14 @@
       const inPlate=done&&(compact||isMe)&&(won||lost);
       const chips=inPlate?"":bet?`<em class="bpt-ol-bet">${fmt(bet)}</em>`:won?`<em class="bpt-ol-bet is-won">+${fmt(won)}</em>`:lost?`<em class="bpt-ol-bet is-lost">−${fmt(lost)}</em>`:"";
       const turn=h&&!done&&h.toAct===s.i;
-      const tag=out?'<i class="is-out">éliminé</i>':s.away?'<i class="is-away">absent</i>':allin?'<i class="is-allin">TAPIS</i>':fold?'<i>couché</i>':"";
+      // Déconnecté : plus de présence récente (appli quittée, écran verrouillé, réseau coupé). Pas pour soi ni les virtuels.
+      const offline=running&&!isMe&&!s.bot&&!out&&!!t.seen&&!seenRecently(t,s.name);
+      const tag=out?'<i class="is-out">éliminé</i>':offline&&!s.away?'<i class="is-offline">déconnecté</i>':s.away?'<i class="is-away">absent</i>':allin?'<i class="is-allin">TAPIS</i>':fold?'<i>couché</i>':"";
       const badge=!h||done?"":h.dealer===s.i?'<em class="bpt-ol-dealer">D</em>':"";
       const left=turn?Math.max(0,Math.min(TURN_MS,TURN_MS-(srvNow()-Number(h.actionAt||0)))):0;
       const timer=turn?`<span class="bpt-ol-ring" data-ol-turn style="--p:${(100*left/TURN_MS).toFixed(0)}"><b>${Math.ceil(left/1000)}</b></span>`:"";
-      return `<div class="bpt-ol-seat${isMe?" is-me":""}${turn?" is-turn":""}${allin?" is-allin":""}${winners.has(s.i)?" is-winner":""}${fold?" is-folded":""}${out?" is-out":""}" data-name="${esc(s.name)}" data-pos="${pos}" data-n="${N}" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%">
-        <div class="bpt-ol-plate">${isMe?"":`<b>${esc(s.name.split(" ")[0])}</b>`}<span>${out?"—":fmt(s.stack)}</span>${inPlate?`<em class="bpt-ol-plate-res ${won?"is-won":"is-lost"}">${won?"+"+fmt(won):"−"+fmt(lost)}</em>`:eq[s.i]!==undefined?`<em class="bpt-ol-equity${eq[s.i]>=0.5?" is-fav":""}">${Math.round(eq[s.i]*100)} %</em>`:!out&&bbNow?`<small class="bpt-ol-bb">${fmt(Math.round(Number(s.stack||0)/bbNow))} BB</small>`:""}${timer}</div>${tag}${cards}${badge}${chips}</div>`;
+      return `<div class="bpt-ol-seat${isMe?" is-me":""}${turn?" is-turn":""}${allin?" is-allin":""}${winners.has(s.i)?" is-winner":""}${fold?" is-folded":""}${out?" is-out":""}${offline?" is-offline":""}" data-name="${esc(s.name)}" data-pos="${pos}" data-n="${N}" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%">
+        <div class="bpt-ol-plate">${offline?'<i class="bpt-ol-off" title="Déconnecté"></i>':""}${isMe?"":`<b>${esc(s.name.split(" ")[0])}</b>`}<span>${out?"—":fmt(s.stack)}</span>${inPlate?`<em class="bpt-ol-plate-res ${won?"is-won":"is-lost"}">${won?"+"+fmt(won):"−"+fmt(lost)}</em>`:eq[s.i]!==undefined?`<em class="bpt-ol-equity${eq[s.i]>=0.5?" is-fav":""}">${Math.round(eq[s.i]*100)} %</em>`:!out&&bbNow?`<small class="bpt-ol-bb">${fmt(Math.round(Number(s.stack||0)/bbNow))} BB</small>`:""}${timer}</div>${tag}${cards}${badge}${chips}</div>`;
     }).join("");
     // Pot : tout ce qui a été misé pendant la main, moins les mises encore devant les joueurs.
     const potTotal=h?Object.values(h.contrib||{}).reduce((a,x)=>a+(Number(x)||0),0):0;
@@ -1119,7 +1197,7 @@
     const lvH=t.levels?.[h?.level]||lv,turnSeat=h&&!done&&h.toAct!==null&&h.toAct!==undefined?h.toAct:null,myTurnNow=!!(mine&&turnSeat===mine.i&&!dealing);
     // Ligne d'état unique (gain de place en portrait) : ● à qui de jouer · dernière action · ma main en clair.
     // Les blindes sont en haut à droite et la mise à suivre sur le bouton « Suivre » : plus de barre d'infos séparée.
-    const turnTxt=h&&!done&&running?(dealing?"Distribution…":h.runout?"Tapis !":myTurnNow?"À vous":turnSeat!==null?"À "+esc(firstName(t,turnSeat)):""):"";
+    const turnTxt=h&&!done&&running?(dealing?"Distribution…":h.runout?"Tapis !":myTurnNow?"À vous":turnSeat!==null?"À "+esc(firstName(t,turnSeat))+(t.seen&&!t.seats?.[turnSeat]?.bot&&!seenRecently(t,t.seats?.[turnSeat]?.name)?" (déconnecté)":""):""):"";
     const lastTxt=h?.last?.txt?`${esc(h.last.txt)}${done&&running?` · main suivante dans <span data-ol-next-in>${Math.max(1,Math.ceil((nextHandMs(h)-(srvNow()-Number(h.at||0)))/1000))}</span> s`:""}`:"";
     const infoBar=(turnTxt||lastTxt||myHandTxt)&&!(t.pausedAt&&t.breakUntil)?`<div class="bpt-ol-status">${turnTxt?`<span class="is-turn${myTurnNow?" is-me":""}"><i></i>${turnTxt}</span>`:""}${lastTxt?`<span class="is-last">${lastTxt}</span>`:""}${myHandTxt?`<b class="is-hand">${esc(myHandTxt)}</b>`:""}</div>`:"";
     const oldInfoBar=h&&!done&&running?`<div class="bpt-ol-infobar"><div><small>Blindes</small><b>${fmt(lvH.sb)} / ${fmt(lvH.bb)}</b></div><div><small>Mise à suivre</small><b>${fmt(Math.max(0,h.currentBet-(mine?betOf(h,mine.i):0)))}</b></div><div class="is-turn${myTurnNow?" is-me":""}"><i></i>${dealing?"Distribution…":h.runout?"Tapis !":myTurnNow?"À vous":turnSeat!==null?"À "+esc(firstName(t,turnSeat)):"—"}</div></div>`:"";
@@ -1253,10 +1331,11 @@
   }
   window.addEventListener("resize",()=>requestAnimationFrame(layoutSeats));
   const clock=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+":"+String(s%60).padStart(2,"0");};
-  let shownLevel=-1;
+  let shownLevel=-1,shownOffline="";
   setInterval(()=>{
     const t=openId&&tables[openId];if(!t||t.status!=="running"||!$("online")?.classList.contains("active"))return;
     const L=levelAt(t);if(L.index!==shownLevel){shownLevel=L.index;render();return;}
+    const offSig=seatsOf(t).filter(x=>!x.bot&&t.seen&&!seenRecently(t,x.name)).map(x=>x.i).join(",");if(offSig!==shownOffline){shownOffline=offSig;render();return;}
     const el=document.querySelector("#bptOnlineBody [data-ol-clock]");if(el)el.textContent=clock(L.left);
     const bk=document.querySelector("#bptOnlineBody [data-ol-break-left]");if(bk&&t.breakUntil)bk.textContent=clock((Number(t.breakUntil)-srvNow())/1000);
     const nx=document.querySelector("#bptOnlineBody [data-ol-next-in]");if(nx&&t.hand)nx.textContent=Math.max(1,Math.ceil((nextHandMs(t.hand)-(srvNow()-Number(t.hand.at||0)))/1000));
@@ -1264,7 +1343,7 @@
     const tl=document.querySelector("#bptOnlineBody [data-ol-take-left]");if(tl){const left=Math.ceil((TAKEOVER_MS-(srvNow()-Number(tl.dataset.olTakeLeft)))/1000);if(left<=0)render();else tl.textContent=left;}
     const bar=document.querySelector("#bptOnlineBody [data-ol-turn]");if(bar&&t.hand){const left=Math.max(0,Math.min(TURN_MS,TURN_MS-(srvNow()-Number(t.hand.actionAt||0))));bar.style.setProperty("--p",(100*left/TURN_MS).toFixed(0));const b=bar.querySelector("b");if(b)b.textContent=Math.ceil(left/1000);}
   },1000);
-  setInterval(()=>{try{heartbeat();autopilot();myTurnTick();}catch(e){console.warn("BPT en ligne :",e);}},400);
+  setInterval(()=>{try{heartbeat();autopilot();watchdog();myTurnTick();}catch(e){console.warn("BPT en ligne :",e);}},400);
   function render(){
     const box=$("bptOnlineBody");if(!box)return;
     if(!me()){box.innerHTML=`<div class="bpt-ol-card"><p>Identifiez-vous d'abord (Paramètres › Mon profil) pour rejoindre une table.</p></div>`;return;}

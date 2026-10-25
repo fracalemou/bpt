@@ -9924,3 +9924,13 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
   .bpt-ol-panel .bpt-ol-presets2{grid-template-columns:repeat(3,1fr) !important}
   .bpt-ol-panel .bpt-ol-prebar{flex-direction:column;align-items:stretch}
 }
+
+/* 10.4.110 — joueur déconnecté (pastille grise), journal du pilote */
+.bpt-ol-off{position:absolute;top:-4px;left:-4px;width:11px;height:11px;border-radius:50%;background:#8a93a8;border:2px solid var(--bpt-60,#0f1426);box-shadow:0 0 0 1px rgba(255,255,255,.15)}
+.bpt-ol-seat.is-offline .bpt-ol-plate{opacity:.6;filter:grayscale(.6)}
+.bpt-ol-seat i.is-offline{color:#a7b0c4}
+.bpt-ol-hands-tabs{flex-wrap:wrap}
+.bpt-ol-chat-row.is-figée b,.bpt-ol-chat-row.is-erreur b{color:#ff8a80}
+.bpt-ol-chat-row.is-relance b,.bpt-ol-chat-row.is-refus b{color:#ffb067}
+.bpt-ol-chat-row span i{opacity:.5;font-size:11px;font-style:normal}
+.bpt-ol-hands-tabs{gap:5px !important}.bpt-ol-hands-tabs button{flex:1 1 auto;min-height:0 !important;padding:6px 8px !important;font-size:13px !important;white-space:nowrap}
