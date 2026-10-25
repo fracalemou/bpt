@@ -407,19 +407,20 @@
   function applyAction(t,action,amount,asBot=false){
     {
       const h=t.hand;if(t.status!=="running"||!h||h.street==="done"||t.pausedAt)return false;
-      if(h.dealEnd&&srvNow()<Number(h.dealEnd)-250&&action!=="timeout"&&action!=="away")return false; // cartes encore en cours de distribution
+      if(h.dealEnd&&srvNow()<Number(h.dealEnd)-250&&action!=="timeout"&&action!=="away"&&action!=="offline")return false; // cartes encore en cours de distribution
       const i=h.toAct,seat=t.seats?.[i];if(seat===undefined||seat===null||i===null)return false;
       if(asBot?!(seat.bot&&pilotName(t)===me()):seat.name!==me()){
         const pilotOk=pilotName(t)===me();
-        if(!(pilotOk&&((action==="timeout"&&srvNow()-Number(h.actionAt||0)>=TURN_MS)||(action==="away"&&seat.away))))return false;
+        if(!(pilotOk&&((action==="timeout"&&srvNow()-Number(h.actionAt||0)>=TURN_MS)||(action==="away"&&seat.away)||(action==="offline"&&!seat.bot&&!!t.seen&&!seenRecently(t,seat.name)))))return false;
       }
       const toCall=Math.max(0,h.currentBet-betOf(h,i)),stack=stackOf(t,i),name=firstName(t,i);
       h.acted=h.acted||{};h.folded=h.folded||{};
       // Délai dépassé : compteur ; au 2e d'affilée le joueur passe absent (sit out). Absent : check ou couché sans attendre.
-      // Une action jouée par le joueur lui-même remet le compteur à zéro.
+      // Une action jouée par le joueur lui-même remet le compteur à zéro. Déconnecté (appli fermée ou en arrière-plan) :
+      // check ou couché tout de suite, sans toucher au compteur ; il rejoue normalement dès son retour.
       if(action==="timeout"){seat.timeouts=(Number(seat.timeouts)||0)+1;if(seat.timeouts>=AWAY_AFTER)seat.away=true;}
-      else if(action!=="away"&&!asBot){seat.timeouts=0;seat.away=false;}
-      if(action==="timeout"||action==="away")action=toCall?"fold":"check";
+      else if(action!=="away"&&action!=="offline"&&!asBot){seat.timeouts=0;seat.away=false;}
+      if(action==="timeout"||action==="away"||action==="offline")action=toCall?"fold":"check";
       if(action==="fold"){h.folded[K(i)]=true;h.last={i,txt:`${name} se couche`};}
       else if(action==="check"){if(toCall)return false;h.last={i,txt:`${name} checke`};}
       else if(action==="call"&&!toCall){h.last={i,txt:`${name} checke`};}
@@ -606,6 +607,7 @@
     if(seat?.bot&&now-Number(h.actionAt||0)>=900){const d=botDecision(t,i);
       step(t,key,`décision de ${firstName(t,i)} (virtuel)`,async()=>{for(const [a,v] of [[d.action,d.amount],["call"],["check"],["fold"]]){if(await act(t.id,a,v,true))return true;}return false;});return;}
     if(seat?.away&&now-Number(h.actionAt||0)>=600){step(t,key,`jeu automatique de ${firstName(t,i)} (absent)`,()=>act(t.id,"away"),true);return;}
+    if(seat&&!seat.bot&&t.seen&&!seenRecently(t,seat.name)&&now-Number(h.actionAt||0)>=600){step(t,key,`jeu automatique de ${firstName(t,i)} (déconnecté)`,()=>act(t.id,"offline"),true);return;}
     if(now-Number(h.actionAt||0)>=TURN_MS)step(t,key,`délai dépassé pour ${firstName(t,i)}`,()=>act(t.id,"timeout"),true);
   }
   // Vigie (tous les appareils qui suivent la table) : une étape attendue depuis plus de 12 s est notée au journal,
