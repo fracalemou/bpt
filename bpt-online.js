@@ -559,7 +559,23 @@
     const old=t.host;hostGone.since=srvNow(); // un essai toutes les 2 min au plus
     tx(t.id,x=>{if(x.status!=="running"||x.host!==old||seenRecently(x,old))return false;x.host=me();x.takeoverRequest=null;})
       .then(ok=>{if(ok)plog(t.id,"organisation",`devient organisateur (${String(old).split(" ")[0]} absent depuis plus de 2 min)`);}).catch(()=>{});
-  }const AUTO_RETRY_MS=6000;
+  }
+  // Personne aux commandes : sans serveur, la partie ne peut pas avancer quand aucun joueur n'a l'appli ouverte, mais le
+  // chrono, lui, continuait (blindes montées sans main jouée). Le pilote date la table (aliveAt) toutes les 10 s ; au
+  // retour d'un joueur après plus de IDLE_MS sans pilote, le chrono (ou la pause en cours) est décalé de toute l'absence.
+  const IDLE_MS=45000;let aliveBeat={id:"",at:0};
+  function keepAlive(t){
+    const now=srvNow(),gap=now-Number(t.aliveAt||0);
+    if(t.aliveAt&&gap>IDLE_MS){const key="idle:"+t.aliveAt;if(autoKey!==key)step(t,key,"reprise après absence",()=>tx(t.id,x=>{
+        const g=srvNow()-Number(x.aliveAt||0);if(x.status!=="running"||!x.aliveAt||g<=IDLE_MS)return false;
+        if(!x.pausedAt)x.startedAt=Number(x.startedAt)+g;else if(x.breakUntil)x.breakUntil=Number(x.breakUntil)+Math.min(g,Math.max(0,srvNow()-Number(x.pausedAt)));
+        if(x.hand&&x.hand.street!=="done")x.hand.actionAt=srvNow();
+        x.aliveAt=srvNow();x.levelIndex=levelAt(x).index;
+      }).then(ok=>{if(ok)plog(t.id,"veille",`chrono arrêté ${Math.round(gap/60000)||"<1"} min : aucun joueur connecté`);return ok;}),true);return false;}
+    if(aliveBeat.id!==t.id||now-aliveBeat.at>=10000){aliveBeat={id:t.id,at:now};db().then(d=>d.ref(`${ROOT}/${t.id}/aliveAt`).set(srvNow())).catch(()=>{});}
+    return true;
+  }
+  const AUTO_RETRY_MS=6000;
   // Lance une étape une seule fois par situation ; refus ou erreur : journalisée et relançable.
   function step(t,key,label,fn,quiet){
     autoKey=key;autoAt=srvNow();autoLabel=label;autoOk=false;
@@ -576,6 +592,7 @@
     if(t.hand?.street==="done")logHand(t);
     if(t.status==="finished"){if(!t.publishedToHistory&&!t.publishing&&!t.publishError)publishResult(t.id);return;}
     if(t.status!=="running")return;
+    if(!keepAlive(t))return;
     if(t.pausedAt){const bk="brk:"+t.breakUntil;if(t.breakUntil&&srvNow()>=Number(t.breakUntil)&&autoKey!==bk)step(t,bk,"fin de pause",()=>endBreak(t.id));return;}
     const h=t.hand;if(!h)return;
     const now=srvNow();
@@ -892,8 +909,8 @@
     const fn=n=>esc(String(n||"").split(" ")[0]);
     const chatBody=chat.length?chat.map(c=>{const it=FX_ITEMS.find(x=>x[0]===c.kind);
       return `<div class="bpt-ol-chat-row"><small>${new Date(c.at).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}</small><b>${fn(c.from)}${c.to&&c.to!=="all"?` → ${fn(c.to)}`:""}</b><span>${c.kind==="say"?esc(c.text):it?`${it[1]} ${esc(it[2])}`:""}</span></div>`;}).join(""):"<p>Aucun message pour cette partie.</p>";
-    const PLOG_ICO={organisation:"🎩",pilote:"👑",départ:"🚪",refus:"⛔",erreur:"⚠️",relance:"🔁",figée:"🧊"};
-    const plogBody=plogs.length?plogs.map(l=>`<div class="bpt-ol-chat-row is-${esc(l.ev)}"><small>${new Date(l.at).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}</small><b>${PLOG_ICO[l.ev]||"•"} ${fn(l.by)}</b><span>${esc(l.info)}${l.v?` <i>${esc(l.v)}</i>`:""}</span></div>`).join(""):"<p>Rien à signaler : aucun relais, refus ni blocage noté pour cette partie.</p>";
+    const PLOG_ICO={organisation:"🎩",pilote:"👑",départ:"🚪",refus:"⛔",erreur:"⚠️",relance:"🔁",figée:"🧊",veille:"⏸️"};
+    const plogBody=plogs.length?plogs.map(l=>`<div class="bpt-ol-chat-row is-${esc(l.ev)}"><small>${new Date(l.at).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit",second:"2-digit"})}</small><b>${PLOG_ICO[l.ev]||"•"} ${fn(l.by)}</b><span>${esc(l.info)}${l.v?` <i>${esc(l.v)}</i>`:""}</span></div>`).join(""):"<p>Rien à signaler : aucun relais, refus, blocage ni absence notés pour cette partie.</p>";
     const tab=["chat","stats","plog"].includes(box.dataset.tab)?box.dataset.tab:"hands";
     box.querySelector(".bpt-ol-hands").innerHTML=`<div class="bpt-ol-hands-head"><b>📜 Historique</b><button type="button" data-hands-close aria-label="Fermer">×</button></div>
       <div class="bpt-ol-hands-tabs"><button type="button" data-hands-tab="hands" class="${tab==="hands"?"is-on":""}">Mains · ${list.length}</button><button type="button" data-hands-tab="chat" class="${tab==="chat"?"is-on":""}">Chat · ${chat.length}</button><button type="button" data-hands-tab="stats" class="${tab==="stats"?"is-on":""}">Stats</button><button type="button" data-hands-tab="plog" class="${tab==="plog"?"is-on":""}">Journal</button></div>
