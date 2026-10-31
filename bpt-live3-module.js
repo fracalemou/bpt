@@ -2200,6 +2200,38 @@ function connectionDeviceLabel(){
     return current?.betting?.bets?.[name]?.confirmed===true;
   }
 
+  // Historique des stacks en temps réel, lié à la session Firebase (10.4.124).
+  // Saisie réservée à l'organisateur, lecture partagée avec les spectateurs.
+  async function savePlayerStackSnapshot(playerName,counts){
+    if(!isOwner()||!current?.startedAt)throw new Error('Seul l’organisateur peut enregistrer un stack pendant la partie.');
+    const name=String(playerName||'').trim();
+    const allowed=[25,50,100,500,1000,5000,10000];
+    if(!allowed.every(v=>Number.isSafeInteger(Number(counts?.[v]))&&Number(counts[v])>=0&&Number(counts[v])<=9999)){
+      throw new Error('Quantités invalides : valeurs entières de 0 à 9 999.');
+    }
+    const quantities={};let stack=0,totalCount=0;
+    for(const v of allowed){const n=Number(counts[v]);quantities[v]=n;stack+=n*v;totalCount+=n;}
+    const recordedAt=Date.now();
+    const recordId='ST_'+recordedAt.toString(36)+'_'+Math.random().toString(36).slice(2,10);
+    let saved=false;
+    const savedState=await ownerTransaction(state=>{
+      if(!state.startedAt||!state.players?.some(p=>p.name===name))return null;
+      const now=recordedAt;
+      const elapsed=Math.max(0,Number(state.elapsedSec)||0)+
+        (state.running&&state.runStartedAt?Math.max(0,Math.floor((now-Number(state.runStartedAt))/1000)):0);
+      const entries=Array.isArray(state.stackHistory)?state.stackHistory.slice():[];
+      if(entries.some(p=>p.id===recordId))return null;
+      if(entries.length>=2000)throw new Error('Historique complet (2 000 relevés).');
+      entries.push({id:recordId,player:name,stack,counts:quantities,totalCount,
+        at:recordedAt,elapsedSec:Math.floor(elapsed),levelIndex:Math.max(0,Number(state.levelIndex)||0)});
+      state.stackHistory=entries;
+      saved=true;
+      return state;
+    });
+    if(!saved||!savedState?.stackHistory?.some(r=>r.id===recordId))throw new Error('Enregistrement impossible : la partie ou l’organisateur a changé.');
+    return {id:recordId,player:name,stack,counts:quantities,at:recordedAt};
+  }
+
   async function createLive(){
     if(!liveIdentityConfirmed || !liveIdentityName()){
       openSpectatorIdentity(true);
@@ -2239,7 +2271,7 @@ function connectionDeviceLabel(){
         startStack:Math.max(100,Number($3("live3Stack").value)||20000),
         buyIn:Math.max(0,Number($3("live3BuyIn").value)||0),
         running:false,startedAt:null,runStartedAt:null,deadline:null,elapsedSec:0,
-        levelIndex:0,
+        levelIndex:0,levelChangeSeq:0,levelChangedAt:0,levelStartedElapsedSec:0,stackHistory:[],
         targetHours:Math.max(0.5,Number($3("live3TargetHours").value)||4),
         levels:buildLevels(
           Math.max(0.5,Number($3("live3TargetHours").value)||4),
@@ -2444,6 +2476,9 @@ function connectionDeviceLabel(){
         s.elapsedSec=Number(s.elapsedSec||0)+Math.max(0,Math.floor((now-Number(s.runStartedAt))/1000));
       }
       s.levelIndex=idx;
+      s.levelChangedAt=now;
+      s.levelStartedElapsedSec=Math.max(0,Number(s.elapsedSec)||0);
+      s.levelChangeSeq=Math.max(0,Number(s.levelChangeSeq)||0)+1;
       s.remainingSec=Math.max(1,Number(s.levels[idx]?.durationSec||900));
       if(s.running){
         s.runStartedAt=now;
@@ -2481,6 +2516,9 @@ function connectionDeviceLabel(){
           const nextIndex=Math.max(0,Number(s.levelIndex)||0)+1;
           bptEnsureLevelExists(s,nextIndex);
           s.levelIndex=nextIndex;
+          s.levelChangedAt=transition;
+          s.levelStartedElapsedSec=Math.max(0,Number(s.elapsedSec)||0);
+          s.levelChangeSeq=Math.max(0,Number(s.levelChangeSeq)||0)+1;
           s.remainingSec=Math.max(1,Number(s.levels?.[nextIndex]?.durationSec||900));
           s.runStartedAt=transition;
           s.deadline=transition+s.remainingSec*1000;
@@ -4140,6 +4178,7 @@ async function requestTakeover(){
     getState:()=>clone(current),
     deviceId:uid,
     isOwner,
+    savePlayerStackSnapshot,
     adjustMinute,
     changeLevel,
     toggleStartPause,

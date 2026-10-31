@@ -1,0 +1,38 @@
+BPT Live — 10.4.124 — Historique nominatif du stack
+===================================================
+
+Fonctions
+- Live > Outils > Compter un stack.
+- Choix du joueur participant à la partie en cours.
+- Saisie manuelle des 7 couleurs : vert 25, bleu 50, noir 100,
+  violet 500, jaune 1 000, rose 5 000, orange 10 000.
+- Bouton « Enregistrer ce stack pour le joueur » (organisateur uniquement).
+- Enregistrement via transaction Firebase RTDB dans bpt/live_v3, champ stackHistory.
+- Chaque entrée contient : joueur, montant, détail des quantités, date/heure,
+  temps de jeu écoulé, niveau de blind et identifiant de relevé.
+- Historique et graphique de progression par joueur, visible aux spectateurs.
+- Saisie préchargée avec les quantités du dernier relevé du joueur.
+- Rappel non bloquant, « Saisir / Ignorer », après 60 secondes de JEU
+  depuis CHAQUE changement de blind (manuel ou automatique). Pas de rappel
+  au niveau initial. Ignoré s'il est déjà affiché sur cet appareil.
+- Rappel optionnel, désactivable dans la fenêtre. Pas de saisie obligatoire.
+- Aucune modification du tapis moyen, des blinds, du classement ou des scores.
+
+Stockage / confidentialité
+- Firebase déjà utilisé par BPT, pas de nouvelle clé ni de service externe.
+- Relevés conservés dans les données du Live courant. Ils sont visibles en
+  temps réel sur les appareils connectés à ce Live et ne sont pas liés à un
+  dossier de saison ni une partie terminée.
+- Le Live courant est remplacé à la création d'une nouvelle partie. Pour
+  conserver les courbes entre parties il faut prévoir leur archivage distinct.
+- Le rappel est mémorisé localement PAR APPAREIL pour éviter les répétitions.
+- Les vues spectateurs consultent l'historique mais ne peuvent l'enregistrer.
+- Maximum 2 000 relevés par session, avec erreur explicite au-delà.
+
+Installation
+- Extraire le ZIP à la racine du dépôt GitHub fracalemou/bpt.
+- Conserver les règles Firebase existantes (bpt/live_v3 est déjà autorisé).
+- Attendre GitHub Pages puis forcer l'actualisation PWA et vérifier v10.4.124.
+- Tester sur une partie de démonstration avant déploiement officiel.
+
+IMPORTANT : l'archive est livrée sans modification du déploiement GitHub.
