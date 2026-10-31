@@ -2200,7 +2200,7 @@ function connectionDeviceLabel(){
     return current?.betting?.bets?.[name]?.confirmed===true;
   }
 
-  // 10.4.125 — Relevé personnel, sans sélection d'un autre joueur.
+  // 10.4.126 — Relevé personnel, sans sélection d'un autre joueur.
   // L'identité est issue du profil confirmé de l'appareil ; pas d'argument de nom.
   // Écriture transactionnelle : aucun champ du Live autre que l'historique n'est modifié.
   async function saveMyStackSnapshot(counts){
@@ -2233,6 +2233,8 @@ function connectionDeviceLabel(){
     },undefined,false);
     if(!result.committed||!result.snapshot?.val()?.stackHistory?.some(row=>row.id===recordId))
       throw new Error('Enregistrement impossible : vérifie que la partie et ta connexion sont toujours actives.');
+    // Afficher aussitôt le nouveau relevé (sans attendre le prochain événement Firebase).
+    if(String(current?.sessionId||'')===session)current=bptNormalizeLive3Levels(result.snapshot.val());
     return {id:recordId,player:name,stack,counts:quantities,at:now};
   }
 
@@ -2275,7 +2277,7 @@ function connectionDeviceLabel(){
         startStack:Math.max(100,Number($3("live3Stack").value)||20000),
         buyIn:Math.max(0,Number($3("live3BuyIn").value)||0),
         running:false,startedAt:null,runStartedAt:null,deadline:null,elapsedSec:0,
-        levelIndex:0,levelChangeSeq:0,levelChangedAt:0,levelStartedElapsedSec:0,stackHistory:[],
+        levelIndex:0,levelChangeSeq:0,levelChangedAt:0,levelStartedElapsedSec:0,stackHistory:[],stackPause:null,
         targetHours:Math.max(0.5,Number($3("live3TargetHours").value)||4),
         levels:buildLevels(
           Math.max(0.5,Number($3("live3TargetHours").value)||4),
@@ -2377,6 +2379,8 @@ function connectionDeviceLabel(){
         s.running=false;s.runStartedAt=null;s.deadline=null;
       }else{
         const rem=Math.max(0,Number(s.remainingSec)||0);
+        // La phase de relevé ne se termine qu'à la relance volontaire de l'organisateur.
+        if(s.stackPause)s.stackPause=null;
         s.running=true;
         if(!s.startedAt){
           s.startedAt=now;
@@ -2467,6 +2471,16 @@ function connectionDeviceLabel(){
     });
   }
 
+  // 10.4.126 — Blind suivant prêt mais PAUSE globale : les joueurs relèvent
+  // librement leur stack ; seul l'organisateur peut relancer le chronomètre.
+  // Pause enregistrée dans le Live Firebase et visible sur tous les appareils.
+  function suspendForStackReview(s,at){
+    if(!s.startedAt||!s.active||s.finishedAt)return;
+    s.stackPause={levelIndex:Math.max(0,Number(s.levelIndex)||0),
+      seq:Math.max(0,Number(s.levelChangeSeq)||0),at:Number(at)||Date.now()};
+    s.running=false;s.runStartedAt=null;s.deadline=null;
+  }
+
   async function changeLevel(delta,auto=false){
     if(!isOwner())return;
     await ownerTransaction(s=>{
@@ -2476,20 +2490,20 @@ function connectionDeviceLabel(){
       const idx=Math.max(0,requestedIdx);
       if(idx===oldIdx&&!auto)return s;
       const now=Date.now();
+      // À l'échéance automatique, ne pas compter comme temps joué le délai
+      // éventuel avant le réveil d'un téléphone ou la synchronisation Firebase.
+      const endAt=auto&&s.deadline?Math.min(now,Number(s.deadline)):now;
       if(s.running&&s.runStartedAt){
-        s.elapsedSec=Number(s.elapsedSec||0)+Math.max(0,Math.floor((now-Number(s.runStartedAt))/1000));
+        s.elapsedSec=Number(s.elapsedSec||0)+Math.max(0,Math.floor((endAt-Number(s.runStartedAt))/1000));
       }
       s.levelIndex=idx;
       s.levelChangedAt=now;
       s.levelStartedElapsedSec=Math.max(0,Number(s.elapsedSec)||0);
       s.levelChangeSeq=Math.max(0,Number(s.levelChangeSeq)||0)+1;
       s.remainingSec=Math.max(1,Number(s.levels[idx]?.durationSec||900));
-      if(s.running){
-        s.runStartedAt=now;
-        s.deadline=now+s.remainingSec*1000;
-      }else{
-        s.runStartedAt=null;s.deadline=null;
-      }
+      // Même si le niveau a été avancé manuellement : pause avant jeu des nouvelles blinds.
+      suspendForStackReview(s,now);
+      if(!s.stackPause){s.running=false;s.runStartedAt=null;s.deadline=null;}
       return s;
     });
   }
@@ -2513,26 +2527,23 @@ function connectionDeviceLabel(){
     advancing=true;
     try{
       await ownerTransaction(s=>{
-        const now=Date.now();let guard=0;
-        while(s.running&&Number(s.deadline||0)>0&&now>=Number(s.deadline||0)&&guard<100){
-          const transition=Number(s.deadline),started=Number(s.runStartedAt||transition);
-          s.elapsedSec=Number(s.elapsedSec||0)+Math.max(0,Math.floor((transition-started)/1000));
-          const nextIndex=Math.max(0,Number(s.levelIndex)||0)+1;
-          bptEnsureLevelExists(s,nextIndex);
-          s.levelIndex=nextIndex;
-          s.levelChangedAt=transition;
-          s.levelStartedElapsedSec=Math.max(0,Number(s.elapsedSec)||0);
-          s.levelChangeSeq=Math.max(0,Number(s.levelChangeSeq)||0)+1;
-          s.remainingSec=Math.max(1,Number(s.levels?.[nextIndex]?.durationSec||900));
-          s.runStartedAt=transition;
-          s.deadline=transition+s.remainingSec*1000;
-          guard++;
-        }
-        return guard?s:null; // déjà à jour côté serveur : aucune écriture
+        if(!s.running||!Number(s.deadline)||Date.now()<Number(s.deadline))return null;
+        // Une seule transition, même après plusieurs minutes de veille :
+        // aucune blind ne doit être sautée et la nouvelle blind reste en pause.
+        const transition=Number(s.deadline),now=Date.now();
+        s.elapsedSec=Number(s.elapsedSec||0)+Math.max(0,Math.floor((transition-Number(s.runStartedAt||transition))/1000));
+        const nextIndex=Math.max(0,Number(s.levelIndex)||0)+1;
+        bptEnsureLevelExists(s,nextIndex);
+        s.levelIndex=nextIndex;
+        s.levelChangedAt=now;
+        s.levelStartedElapsedSec=Math.max(0,Number(s.elapsedSec)||0);
+        s.levelChangeSeq=Math.max(0,Number(s.levelChangeSeq)||0)+1;
+        s.remainingSec=Math.max(1,Number(s.levels?.[nextIndex]?.durationSec||900));
+        suspendForStackReview(s,transition);
+        return s;
       });
     }finally{advancing=false;}
   }
-
 
   function refreshEliminationLists(){
     const victimSelect=$3("live3ElimPlayer");
@@ -3615,6 +3626,21 @@ async function requestTakeover(){
 
     $3("live3NavBtn")?.classList.toggle("live3-active",active);
 
+    // Bandeau global également visible en plein écran sur les appareils joueurs.
+    const breakBox=$3('bptStackBlindPause');
+    const onBreak=!!(active&&current?.startedAt&&current?.stackPause&&!current?.running&&!current?.finishedAt);
+    if(breakBox){
+      breakBox.hidden=!onBreak;
+      if(onBreak){
+        const levelNo=(Number(current.levelIndex)||0)+1;
+        const lv=current.levels?.[Number(current.levelIndex)||0];
+        const info=$3('bptStackBlindPauseInfo');
+        if(info)info.textContent='Niveau '+levelNo+' · '+fmt(Number(lv?.sb)||0)+' / '+fmt(Number(lv?.bb)||0)+' · chronomètre arrêté';
+        const resume=$3('bptStackBlindResume');
+        if(resume)resume.hidden=!owner;
+      }
+    }
+
     if(!active){
       if(prep)prep.style.display="";
       if(game)game.style.display="none";
@@ -3691,7 +3717,7 @@ async function requestTakeover(){
     if($3("live3SettingsFinish"))$3("live3SettingsFinish").textContent=$3("live3EstimatedFinish")?.textContent||"—";
     if($3("live3SettingsDelta"))$3("live3SettingsDelta").textContent=$3("live3FinishDelta")?.textContent||"—";
     $3("live3AvgStack").textContent=fmt(avg);$3("live3Elapsed").textContent=elapsedHoursMinutes(elapsedSeconds());$3("live3Next").textContent=next;
-    $3("live3StartPauseBtn").textContent=current.running?"Pause":(current.startedAt?"Reprendre":"Démarrer");
+    $3("live3StartPauseBtn").textContent=current.running?"Pause":(current.stackPause?"Relancer les blinds":(current.startedAt?"Reprendre":"Démarrer"));
 
     // Visibilité stricte selon le rôle :
     // organisateur = aucun bouton de demande de gestion
@@ -3762,7 +3788,7 @@ async function requestTakeover(){
     $3("live3FsTimer").textContent=time(rem);$3("live3FsRemaining").textContent=String(count);
     live3RenderProjection();
     $3("live3FsAvg").textContent=fmt(avg);$3("live3FsElapsed").textContent=elapsedHoursMinutes(elapsedSeconds());$3("live3FsNext").textContent=next;
-    $3("live3FsStartPauseBtn").textContent=current.running?"Pause":(current.startedAt?"Reprendre":"Démarrer");
+    $3("live3FsStartPauseBtn").textContent=current.running?"Pause":(current.stackPause?"Relancer les blinds":(current.startedAt?"Reprendre":"Démarrer"));
 
     const fsMaster=$3("live3FsMasterActions");
     const fsSpectator=$3("live3FsSpectatorActions");
@@ -4041,6 +4067,7 @@ async function requestTakeover(){
     $3("live3PrepBackBtn")?.addEventListener("click",()=>setPrepWizardStep(1));
     $3("live3CreateBtn")?.addEventListener("click",createLive);
     $3("live3StartPauseBtn")?.addEventListener("click",toggleStartPause);
+    $3("bptStackBlindResume")?.addEventListener("click",()=>toggleStartPause());
     $3("live3PrevLevelBtn")?.addEventListener("click",()=>changeLevel(-1));
     $3("live3NextLevelBtn")?.addEventListener("click",()=>changeLevel(1));
     $3("live3MinusBtn")?.addEventListener("click",()=>adjustMinute(-60));

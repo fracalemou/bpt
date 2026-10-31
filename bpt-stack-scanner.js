@@ -1,6 +1,6 @@
-/* BPT Live v10.4.125 — comptage du stack du joueur connecté, sans sélection.
-   Les relevés sont enregistrés dans Firebase live_v3 via BPTLive3.savePlayerStackSnapshot.
-   Rappel facultatif une minute de temps de jeu après changement des blinds.
+/* BPT Live v10.4.126 — relevé manuel du stack du joueur connecté.
+   Validation explicite et historique chiffré en ordre antéchronologique.
+   Pause synchronisée à chaque transition de blind via BPTLive3.
    Aucun scanner photo / aucune API d'IA. */
 (function(){
   'use strict';
@@ -18,11 +18,8 @@
   const api=()=>window.BPTLive3||null;
   const getState=()=>{try{return api()?.getState?.()||null;}catch(_){return null;}};
   const MAX_COUNT=9999;
-  const reminderSettingKey='bpt:stack:reminder:enabled';
   let previousFocus=null, lastSession='', lastPlayer='', editorDirty=false;
-  let lastHistorySignature='', displayedReminderId='';
-  const remindersSeenThisSession=new Set();
-  let reminderPreferenceFallback=true;
+  let lastHistorySignature='';
   const sanitize=value=>{
     const number=Number.parseInt(value,10);
     return Number.isFinite(number)?Math.min(MAX_COUNT,Math.max(0,number)):0;
@@ -96,6 +93,7 @@
       const title=document.createElementNS(SVG,'title');title.textContent='Niveau '+(Number(r.levelIndex)+1)+' · '+timeLabel(r.elapsedSec)+' · '+fmt(r.stack)+' points';point.appendChild(title);
     });
     chart.appendChild(svg);
+    // La dernière validation figure systématiquement en premier.
     rows.slice().reverse().forEach((r,index)=>{
       const prior=rows[rows.length-index-2];
       const delta=prior?Number(r.stack)-Number(prior.stack):null;
@@ -147,34 +145,11 @@
     refreshPlayers();
     modal.hidden=false;modal.setAttribute('aria-hidden','false');
     $('bptStackClose').focus();
-    dismissReminder();
   }
   function close(){
     const modal=$('bptStackModal');if(!modal)return;
     modal.hidden=true;modal.setAttribute('aria-hidden','true');
     if(previousFocus&&previousFocus.isConnected&&typeof previousFocus.focus==='function')previousFocus.focus();
-  }
-  function dismissReminder(){
-    const banner=$('bptStackReminder');if(banner)banner.hidden=true;
-    displayedReminderId='';
-  }
-  function readReminderPreference(){try{return localStorage.getItem(reminderSettingKey)!=='0';}catch(_){return reminderPreferenceFallback;}}
-  function reminderTick(){
-    const st=getState(),banner=$('bptStackReminder');if(!banner)return;
-    if(!readReminderPreference()||!canSaveOwn(st)||
-      !Number(st.levelChangeSeq)||!Number(st.levelChangedAt)||!Number.isFinite(Number(st.levelStartedElapsedSec))){dismissReminder();return;}
-    const elapsed=Math.max(0,Number(st.elapsedSec)||0)+(st.running&&st.runStartedAt?
-      Math.max(0,Math.floor((Date.now()-Number(st.runStartedAt))/1000)):0);
-    if(elapsed-Number(st.levelStartedElapsedSec)<60){dismissReminder();return;}
-    const id=String(st.sessionId)+':'+String(st.levelChangeSeq);
-    const key='bpt:stack:prompt:'+id;
-    if(displayedReminderId===id)return;
-    if(remindersSeenThisSession.has(id)){dismissReminder();return;} // laisser le bandeau visible jusqu’au choix explicite
-    try{if(localStorage.getItem(key)==='1'){dismissReminder();return;}}catch(_){}
-    if(!$('bptStackModal')?.hidden)return;
-    $('bptStackReminderInfo').textContent='Niveau '+(Number(st.levelIndex)+1)+' · 1 minute écoulée · relevé facultatif';
-    banner.hidden=false;displayedReminderId=id;remindersSeenThisSession.add(id);
-    try{localStorage.setItem(key,'1');}catch(_){/* session seule */}
   }
   function init(){
     const modal=$('bptStackModal'),lines=$('bptStackLines');if(!modal||!lines)return;
@@ -219,17 +194,12 @@
       button.disabled=true;status('Enregistrement dans la partie en cours…');
       try{
         const record=await api().saveMyStackSnapshot(counts);
-        editorDirty=false;status('Ton stack est enregistré : '+fmt(record.stack)+' points.');
+        editorDirty=false;status('Stack validé : '+fmt(record.stack)+' points. Le relevé le plus récent apparaît en tête de l’historique.');
         refreshPlayers();
       }catch(e){status('Enregistrement refusé : '+(e?.message||'erreur réseau'));}
       finally{updateTotal();}
     });
-    $('bptStackReminderOpen').addEventListener('click',open);
-    $('bptStackReminderDismiss').addEventListener('click',dismissReminder);
-    const setting=$('bptStackReminderEnabled');setting.checked=readReminderPreference();
-    setting.addEventListener('change',()=>{reminderPreferenceFallback=setting.checked;try{localStorage.setItem(reminderSettingKey,setting.checked?'1':'0');}catch(_){};dismissReminder();});
     setInterval(()=>{
-      reminderTick();
       if(!modal.hidden)refreshPlayers();
     },1200);
     updateTotal();

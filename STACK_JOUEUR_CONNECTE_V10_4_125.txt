@@ -1,4 +1,4 @@
-BPT 10.4.125 — Compter son stack (profil connecté)
+BPT 10.4.126 — Compter son stack (profil connecté)
 
 - Aucun choix de joueur dans le compteur. Le profil confirmé à la connexion BPT est affiché.
 - Chaque participant inscrit à la partie active peut enregistrer son propre relevé depuis son appareil, même s’il n’est pas organisateur.

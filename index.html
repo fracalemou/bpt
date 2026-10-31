@@ -30,7 +30,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
     var narrowWindow=w<=700; // fenêtre PC très étroite : affichage téléphone (réversible)
     return !tablet&&(phoneUA||compactTouch||narrowWindow);
   };
-  window.bptDeviceCssHref=function(phone){return "./app-"+(phone?"tel":"pc")+".css?v=10.4.125";};
+  window.bptDeviceCssHref=function(phone){return "./app-"+(phone?"tel":"pc")+".css?v=10.4.126";};
   var phone=window.bptDetectPhone();
   document.documentElement.classList.toggle("bpt-mobile-device",phone);
   document.write('<link rel="stylesheet" id="bptDeviceCss" href="'+window.bptDeviceCssHref(phone)+'">');
@@ -38,7 +38,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
   try{var th=localStorage.getItem("bpt-theme");if(th&&th!=="nuit")document.documentElement.setAttribute("data-bpt-theme",th);}catch(_e){}
 })();
 </script>
-<noscript><link rel="stylesheet" href="./app-pc.css?v=10.4.125"></noscript>
+<noscript><link rel="stylesheet" href="./app-pc.css?v=10.4.126"></noscript>
 
 
 
@@ -114,7 +114,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 
 
 
-<link rel="stylesheet" href="./bpt-live-mobilefirst.css?v=10.4.125">
+<link rel="stylesheet" href="./bpt-live-mobilefirst.css?v=10.4.126">
 </head>
 <body>
 <div id="headUpPhotoPrompt" style="
@@ -152,9 +152,9 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 <button class="btn ghost" id="bptIosInstallClose" type="button">Fermer</button>
 </div>
 </div>
-<script src="./mobile-device.js?v=10.4.125"></script>
+<script src="./mobile-device.js?v=10.4.126"></script>
 
-<script src="./app-version.js?v=10.4.125"></script>
+<script src="./app-version.js?v=10.4.126"></script>
 <header class="bpt-header">
 <div class="bpt-brand-wrap">
 <div aria-label="BPT" class="bpt-logo">
@@ -1177,7 +1177,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
-<script src="./firebase-bridge.js?v=10.4.125"></script>
+<script src="./firebase-bridge.js?v=10.4.126"></script>
 <div id="cloudStatus" style="cursor:pointer" title="État de la synchronisation partagée — cliquer pour recharger depuis Firebase">
 <span id="cloudStatusDot">●</span>
 <span id="cloudStatusText">Connexion…</span>
@@ -1230,11 +1230,11 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 </div>
 </div>
 
-<!-- BPT Live : historique nominatif du stack, sauvegarde Firebase, saisie facultative -->
-<div id="bptStackReminder" class="bpt-stack-reminder" role="status" hidden aria-live="polite">
- <div><strong>Relever les stacks ?</strong><small id="bptStackReminderInfo">1 minute après le changement de blind</small></div>
- <div class="bpt-stack-reminder-buttons"><button type="button" id="bptStackReminderOpen">Saisir</button><button type="button" id="bptStackReminderDismiss">Ignorer</button></div>
-</div>
+<!-- Pause automatique de blinds, synchronisée dans la session Firebase -->
+<section id="bptStackBlindPause" class="bpt-stack-blind-pause" aria-live="polite" aria-label="Pause pour relevé des stacks" hidden>
+ <div class="bpt-stack-blind-pause-copy"><strong>Pause · Actualisation des stacks</strong><small id="bptStackBlindPauseInfo">Nouveau niveau · chronomètre arrêté</small><small>Chaque joueur peut saisir son stack. Reprise uniquement par l'organisateur, quand il le souhaite.</small></div>
+ <div class="bpt-stack-blind-pause-actions"><button type="button" class="bpt-stack-open">Compter mon stack</button><button type="button" id="bptStackBlindResume" hidden>Relancer les blinds</button></div>
+</section>
 <div id="bptStackModal" class="bpt-stack-modal" role="dialog" aria-modal="true" aria-labelledby="bptStackTitle" aria-hidden="true" hidden>
  <div class="bpt-stack-panel">
   <header class="bpt-stack-header"><div><h2 id="bptStackTitle">Comptage manuel du stack</h2><small>Ton stack · suivi pendant la partie</small></div><button type="button" id="bptStackClose" aria-label="Fermer le comptage du stack">×</button></header>
@@ -1244,32 +1244,32 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
    <div id="bptStackLines" class="bpt-stack-lines" aria-label="Quantités par couleur"></div>
    <div class="bpt-stack-summary"><span>Total du stack</span><strong id="bptStackTotal" aria-live="polite">0</strong><small id="bptStackCount">0 jeton</small></div>
    <div class="bpt-stack-actions"><button type="button" id="bptStackReset">Remettre à zéro</button><button type="button" id="bptStackCopy">Copier le total</button></div>
-   <button type="button" id="bptStackSave" class="bpt-stack-save">Enregistrer mon stack</button>
+   <button type="button" id="bptStackSave" class="bpt-stack-save">Valider le stack</button>
    <p id="bptStackMessage" class="bpt-stack-tip" role="status" aria-live="polite">Les relevés validés sont sauvegardés dans le Live, sans modifier le tapis moyen officiel.</p>
-   <section class="bpt-stack-history" aria-label="Historique du stack par joueur">
-    <h3>Évolution du stack <small id="bptStackHistoryPlayer"></small></h3>
-    <div id="bptStackChart" class="bpt-stack-chart" role="img" aria-label="Graphique de progression du stack"></div>
-    <div id="bptStackHistoryList" class="bpt-stack-history-list"></div>
+   <section class="bpt-stack-history" aria-label="Historique chiffré du stack par joueur">
+    <h3>Historique des stacks <small id="bptStackHistoryPlayer"></small></h3>
+    <p class="bpt-stack-history-hint">Dernière saisie en premier. Chaque relevé apparaît après « Valider le stack ».</p>
+    <div id="bptStackHistoryList" class="bpt-stack-history-list" aria-live="polite"></div>
+    <details class="bpt-stack-history-graph"><summary>Afficher la courbe d'évolution</summary><div id="bptStackChart" class="bpt-stack-chart" role="img" aria-label="Graphique de progression du stack"></div></details>
    </section>
-   <label class="bpt-stack-reminder-setting"><input type="checkbox" id="bptStackReminderEnabled" checked/> Me proposer un relevé 1 minute après chaque changement de blind (facultatif)</label>
   </div>
  </div>
 </div>
-<link rel="stylesheet" href="./bpt-stack-scanner.css?v=10.4.125"/>
-<script src="./bpt-stack-scanner.js?v=10.4.125" defer></script>
-<script src="./application.js?v=10.4.125"></script>
-<script src="./navigation.js?v=10.4.125"></script>
-<script id="bpt-share-recap" src="./bpt-share-recap.js?v=10.4.125"></script>
-<script id="bpt-agenda" src="./bpt-agenda.js?v=10.4.125"></script>
-<script id="bpt-my-profile" src="./bpt-my-profile.js?v=10.4.125"></script>
-<script id="bpt-live3-module" src="./bpt-live3-module.js?v=10.4.125"></script>
-<script id="bpt-pwa-unified-action" src="./bpt-pwa-unified-action.js?v=10.4.125"></script>
-<script id="bpt-config-ui" src="./bpt-config-ui.js?v=10.4.125"></script>
-<script id="bpt-odds" src="./bpt-odds.js?v=10.4.125"></script>
-<script id="bpt-live-betting" src="./live-betting.js?v=10.4.125"></script>
-<script id="bpt-live-ui" src="./live-ui.js?v=10.4.125"></script>
-<script src="./bpt-live-mobilefirst.js?v=10.4.125"></script>
-<script id="bpt-online" src="./bpt-online.js?v=10.4.125"></script>
+<link rel="stylesheet" href="./bpt-stack-scanner.css?v=10.4.126"/>
+<script src="./bpt-stack-scanner.js?v=10.4.126" defer></script>
+<script src="./application.js?v=10.4.126"></script>
+<script src="./navigation.js?v=10.4.126"></script>
+<script id="bpt-share-recap" src="./bpt-share-recap.js?v=10.4.126"></script>
+<script id="bpt-agenda" src="./bpt-agenda.js?v=10.4.126"></script>
+<script id="bpt-my-profile" src="./bpt-my-profile.js?v=10.4.126"></script>
+<script id="bpt-live3-module" src="./bpt-live3-module.js?v=10.4.126"></script>
+<script id="bpt-pwa-unified-action" src="./bpt-pwa-unified-action.js?v=10.4.126"></script>
+<script id="bpt-config-ui" src="./bpt-config-ui.js?v=10.4.126"></script>
+<script id="bpt-odds" src="./bpt-odds.js?v=10.4.126"></script>
+<script id="bpt-live-betting" src="./live-betting.js?v=10.4.126"></script>
+<script id="bpt-live-ui" src="./live-ui.js?v=10.4.126"></script>
+<script src="./bpt-live-mobilefirst.js?v=10.4.126"></script>
+<script id="bpt-online" src="./bpt-online.js?v=10.4.126"></script>
 </body>
 </html>
 

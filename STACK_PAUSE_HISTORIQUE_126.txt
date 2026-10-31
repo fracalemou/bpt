@@ -1,0 +1,14 @@
+BPT Live 10.4.126 — Pause de blinds et historique numerique
+
+1. Chaque fin de blind : passage au niveau suivant, timer mis en pause automatiquement dans Firebase. La pause ne compte pas comme temps de jeu actif. Pas de saut de niveaux meme si le telephone se met en veille.
+2. Tous les joueurs voient le bandeau Pause · Actualisation des stacks, et peuvent saisir leur stack sans obligation.
+3. Le joueur est celui du profil confirme sur son appareil, aucune selection proposee.
+4. Validation uniquement avec le bouton Valider le stack : Firebase enregistre heure, niveau, temps ecoule, quantites et total.
+5. Historique chiffre sous le bouton de validation, du plus recent au plus ancien. Courbe accessible en cliquant Afficher la courbe d'evolution.
+6. Seul l'organisateur peut relancer les blinds (bouton du bandeau ou commande Pause/Reprendre).
+7. Le prochain niveau est deja affiche pendant la pause mais son compte a rebours n'a pas demarre.
+8. Les autres commandes du Live et l'historique des parties ne sont pas modifies.
+9. Pas de comptage IA ou photo. Les donnees sont transmises a Firebase comme l'ancien historique de stack.
+10. Les anciens Live sans champ stackPause restent compatibles. La nouvelle regle s'applique a leur prochain changement de blind.
+
+Verifier sur un Live de demonstration avec au moins deux appareils, dont un organisateur et un joueur. Ne pas deployer en production sans ce test.
