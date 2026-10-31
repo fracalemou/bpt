@@ -30,7 +30,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
     var narrowWindow=w<=700; // fenêtre PC très étroite : affichage téléphone (réversible)
     return !tablet&&(phoneUA||compactTouch||narrowWindow);
   };
-  window.bptDeviceCssHref=function(phone){return "./app-"+(phone?"tel":"pc")+".css?v=10.4.114";};
+  window.bptDeviceCssHref=function(phone){return "./app-"+(phone?"tel":"pc")+".css?v=10.4.115";};
   var phone=window.bptDetectPhone();
   document.documentElement.classList.toggle("bpt-mobile-device",phone);
   document.write('<link rel="stylesheet" id="bptDeviceCss" href="'+window.bptDeviceCssHref(phone)+'">');
@@ -38,7 +38,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
   try{var th=localStorage.getItem("bpt-theme");if(th&&th!=="nuit")document.documentElement.setAttribute("data-bpt-theme",th);}catch(_e){}
 })();
 </script>
-<noscript><link rel="stylesheet" href="./app-pc.css?v=10.4.114"></noscript>
+<noscript><link rel="stylesheet" href="./app-pc.css?v=10.4.115"></noscript>
 
 
 
@@ -114,7 +114,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 
 
 
-<link rel="stylesheet" href="./bpt-live-mobilefirst.css?v=10.4.114">
+<link rel="stylesheet" href="./bpt-live-mobilefirst.css?v=10.4.115">
 </head>
 <body>
 <div id="headUpPhotoPrompt" style="
@@ -152,9 +152,9 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 <button class="btn ghost" id="bptIosInstallClose" type="button">Fermer</button>
 </div>
 </div>
-<script src="./mobile-device.js?v=10.4.114"></script>
+<script src="./mobile-device.js?v=10.4.115"></script>
 
-<script src="./app-version.js?v=10.4.114"></script>
+<script src="./app-version.js?v=10.4.115"></script>
 <header class="bpt-header">
 <div class="bpt-brand-wrap">
 <div aria-label="BPT" class="bpt-logo">
@@ -331,6 +331,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 <div class="b466-tools">
 <button id="live3ChatBtn" class="bpt-live3-chat-button" type="button">Chat <span class="bpt-live3-chat-unread" hidden="" id="live3ChatUnread">0</span></button>
 <button class="bpt-live3-odds-btn" id="live3OddsBtn" type="button">Calcul de côtes</button>
+<button class="bpt-stack-open" type="button">Scanner un stack</button>
 <button id="live3QuitViewBtn" type="button">Masquer le Live</button>
 <button id="live3SettingsBtn" type="button">⚙ Réglages</button>
 </div>
@@ -401,11 +402,13 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 <button class="b466-eliminate" id="live3FsEliminateBtn" type="button">Sortir un joueur</button>
 <button id="live3FsChatActionBtn" type="button">Chat <span class="bpt-live3-chat-unread" hidden="" id="live3FsChatUnread">0</span></button>
 <button class="bpt-live3-odds-btn" id="live3FsOddsActionBtn" type="button">Calcul de côtes</button>
+<button class="bpt-stack-open" type="button">Scanner un stack</button>
 <button id="live3FsExitActionBtn" type="button">Quitter le plein écran</button>
 </section>
 <section class="b466-fs-actions bpt-live3-spectator-only" id="live3FsSpectatorActions" style="display:none">
 <button id="live3FsSpectatorChatBtn" type="button">Chat <span class="bpt-live3-chat-unread" hidden="" id="live3FsSpectatorChatUnread">0</span></button>
 <button class="bpt-live3-odds-btn" id="live3FsSpectatorOddsBtn" type="button">Calcul de côtes</button>
+<button class="bpt-stack-open" type="button">Scanner un stack</button>
 <button id="live3FsSpectatorExitBtn" type="button">Quitter le plein écran</button>
 </section>
 <button aria-label="Quitter le plein écran" id="live3FsExitBtn" style="display:none" type="button">×</button>
@@ -1174,7 +1177,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
-<script src="./firebase-bridge.js?v=10.4.114"></script>
+<script src="./firebase-bridge.js?v=10.4.115"></script>
 <div id="cloudStatus" style="cursor:pointer" title="État de la synchronisation partagée — cliquer pour recharger depuis Firebase">
 <span id="cloudStatusDot">●</span>
 <span id="cloudStatusText">Connexion…</span>
@@ -1226,19 +1229,38 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 </div>
 </div>
 </div>
-<script src="./application.js?v=10.4.114"></script>
-<script src="./navigation.js?v=10.4.114"></script>
-<script id="bpt-share-recap" src="./bpt-share-recap.js?v=10.4.114"></script>
-<script id="bpt-agenda" src="./bpt-agenda.js?v=10.4.114"></script>
-<script id="bpt-my-profile" src="./bpt-my-profile.js?v=10.4.114"></script>
-<script id="bpt-live3-module" src="./bpt-live3-module.js?v=10.4.114"></script>
-<script id="bpt-pwa-unified-action" src="./bpt-pwa-unified-action.js?v=10.4.114"></script>
-<script id="bpt-config-ui" src="./bpt-config-ui.js?v=10.4.114"></script>
-<script id="bpt-odds" src="./bpt-odds.js?v=10.4.114"></script>
-<script id="bpt-live-betting" src="./live-betting.js?v=10.4.114"></script>
-<script id="bpt-live-ui" src="./live-ui.js?v=10.4.114"></script>
-<script src="./bpt-live-mobilefirst.js?v=10.4.114"></script>
-<script id="bpt-online" src="./bpt-online.js?v=10.4.114"></script>
+
+<!-- BPT Scanner de stack : calcul assisté local, sans transfert des photographies -->
+<div id="bptStackModal" class="bpt-stack-modal" role="dialog" aria-modal="true" aria-labelledby="bptStackTitle" aria-hidden="true" hidden>
+ <div class="bpt-stack-panel">
+  <header class="bpt-stack-header"><div><h2 id="bptStackTitle">Scanner un stack</h2><small>Chips Palace · Comptage assisté par couleur</small></div><button type="button" id="bptStackClose" aria-label="Fermer">×</button></header>
+  <div class="bpt-stack-body">
+   <label class="bpt-stack-photo-btn">Prendre / choisir une photo<input id="bptStackFile" type="file" accept="image/*" capture="environment"/></label>
+   <p class="bpt-stack-tip">La photo permet de vérifier les tranches. Saisissez le nombre de jetons de chaque couleur. Aucune reconnaissance automatique n'est annoncée à ce stade.</p>
+   <div id="bptStackPhotoWrap" class="bpt-stack-photo-wrap" hidden><img id="bptStackPreview" alt="Photographie du stack"/><div class="bpt-stack-zoom"><label for="bptStackZoom">Zoom</label><input id="bptStackZoom" type="range" min="100" max="500" step="25" value="100"/><span id="bptStackZoomVal">100 %</span></div></div>
+   <div id="bptStackLines" class="bpt-stack-lines"></div>
+   <div class="bpt-stack-summary"><span>Total du stack</span><strong id="bptStackTotal" aria-live="polite">0</strong><small id="bptStackCount">0 jeton</small></div>
+   <div class="bpt-stack-actions"><button type="button" id="bptStackReset">Réinitialiser</button><button type="button" id="bptStackCopy">Copier le total</button></div>
+   <p id="bptStackMessage" class="bpt-stack-tip" aria-live="polite">Calcul local, sans modification des données du Live.</p>
+  </div>
+ </div>
+</div>
+
+<link rel="stylesheet" href="./bpt-stack-scanner.css?v=10.4.115"/>
+<script src="./bpt-stack-scanner.js?v=10.4.115" defer></script>
+<script src="./application.js?v=10.4.115"></script>
+<script src="./navigation.js?v=10.4.115"></script>
+<script id="bpt-share-recap" src="./bpt-share-recap.js?v=10.4.115"></script>
+<script id="bpt-agenda" src="./bpt-agenda.js?v=10.4.115"></script>
+<script id="bpt-my-profile" src="./bpt-my-profile.js?v=10.4.115"></script>
+<script id="bpt-live3-module" src="./bpt-live3-module.js?v=10.4.115"></script>
+<script id="bpt-pwa-unified-action" src="./bpt-pwa-unified-action.js?v=10.4.115"></script>
+<script id="bpt-config-ui" src="./bpt-config-ui.js?v=10.4.115"></script>
+<script id="bpt-odds" src="./bpt-odds.js?v=10.4.115"></script>
+<script id="bpt-live-betting" src="./live-betting.js?v=10.4.115"></script>
+<script id="bpt-live-ui" src="./live-ui.js?v=10.4.115"></script>
+<script src="./bpt-live-mobilefirst.js?v=10.4.115"></script>
+<script id="bpt-online" src="./bpt-online.js?v=10.4.115"></script>
 </body>
 </html>
 

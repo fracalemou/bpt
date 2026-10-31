@@ -1,0 +1,14 @@
+BPT Live — Scanner de stack (version 10.4.115)
+
+Archive complète construite à partir du dépôt bpt-main.zip fourni par l’utilisateur.
+
+INTEGRATION : bouton Scanner un stack dans outils Live, plein écran organisateur et spectateur.
+Utilisation : photo locale, zoom 100-500 %, saisie des quantités par couleur, total, copie.
+
+IMPORTANT : ce prototype est un COMPTEUR ASSISTÉ. Il ne détecte pas automatiquement les jetons.
+Les photos ne sont pas envoyées sur un serveur et les quantités ne sont pas enregistrées dans Firebase.
+Aucune logique de championnat / structure de blinds / chronomètre n'a été modifiée.
+
+Pour GitHub Pages : décompresser, copier le CONTENU du dossier bpt-main à la racine du dépôt.
+Sauvegarder la branche auparavant. Le service worker change de cache (10.4.115).
+Tester en navigation privée, sur PC et téléphone, avec et sans mode plein écran.
