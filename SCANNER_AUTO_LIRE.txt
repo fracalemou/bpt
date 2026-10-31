@@ -1,9 +1,12 @@
-BPT Live — version 10.4.118
+BPT Live — version 10.4.121
 
-Changement : la bêta essaie désormais de détecter les faces circulaires individuelles via un anneau de couleur et un centre clair, puis élimine les détections qui se recouvrent.
+Deux modes dans « Scanner un stack » :
+1) Analyser par IA (jetons à plat, éventail, piles en biais) : la photo est envoyée à l'API Anthropic (modèle claude-sonnet-5-5)
+   uniquement quand on appuie sur le bouton ; l'IA renvoie le nombre de jetons par couleur et le tableau se remplit.
+   Réglages IA : clé API (stockée dans le navigateur de l'appareil seulement) OU adresse d'un proxy/serveur à toi (recommandé
+   pour ne pas exposer de clé : le proxy reçoit le même corps JSON que l'API Messages et renvoie sa réponse).
+2) Compter une pile de profil (local, hors ligne) : cadre autour d'une pile photographiée de côté, comptage par bandes de couleur.
 
-IMPORTANT : Une photo ne révèle pas toujours le nombre de jetons empilés. Les tranches sous une face ne sont PAS comptées par ce moteur. Il peut sous-compter ou se tromper de couleur ; les valeurs sont indicatives et DOIVENT être corrigées manuellement. Pas de modèle entraîné, pas de garantie de précision.
-
-Test de syntaxe seulement ; pas de validation sur navigateur mobile ou mesures d’exactitude sur les photos de référence. Aucune photo transmise à un service tiers.
-
-Déploiement : extraire le contenu à la racine du dépôt GitHub Pages et forcer le rechargement du cache PWA.
+Dans tous les cas : estimation à vérifier, corrigeable avec +/−. Aucune donnée n'est écrite dans le Live/Firebase.
+Photos de référence fournies par l'utilisateur : 36 200 (11 jetons) et 56 750 (26 jetons).
+Déploiement : extraire à la racine du dépôt GitHub Pages, forcer le rechargement du cache PWA (10.4.121).
