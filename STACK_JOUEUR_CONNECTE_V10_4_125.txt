@@ -1,0 +1,10 @@
+BPT 10.4.125 — Compter son stack (profil connecté)
+
+- Aucun choix de joueur dans le compteur. Le profil confirmé à la connexion BPT est affiché.
+- Chaque participant inscrit à la partie active peut enregistrer son propre relevé depuis son appareil, même s’il n’est pas organisateur.
+- Les relevés sont enregistrés dans bpt/live_v3/stackHistory (Firebase), associés à la session, au joueur, au niveau, à l’heure et au temps de jeu.
+- Un compte connecté mais non participant ne peut pas enregistrer.
+- Le rappel facultatif 1 min après un changement de blind s’adresse aussi aux joueurs participants, pas seulement à l’organisateur.
+- Les autres fonctions du Live, son minuteur et ses règles de blind ne sont pas modifiés.
+- Attention : les règles Firebase existantes autorisent largement les clients authentifiés à modifier live_v3 ; la limitation à son propre joueur est contrôlée par le code client, pas par une règle Firebase par joueur. Pour empêcher un client malveillant de falsifier des relevés, une vérification côté serveur / règles affinées est nécessaire.
+- La partie #6 (4h45 vs cible 4h) n’est pas modifiée : le calibrage de durée demeure théorique. Pour auditer exactement la partie, il faudra son historique et sa chronologie.

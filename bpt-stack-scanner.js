@@ -1,4 +1,4 @@
-/* BPT Live v10.4.124 — saisie manuelle et historique des stacks par joueur.
+/* BPT Live v10.4.125 — comptage du stack du joueur connecté, sans sélection.
    Les relevés sont enregistrés dans Firebase live_v3 via BPTLive3.savePlayerStackSnapshot.
    Rappel facultatif une minute de temps de jeu après changement des blinds.
    Aucun scanner photo / aucune API d'IA. */
@@ -27,7 +27,10 @@
     const number=Number.parseInt(value,10);
     return Number.isFinite(number)?Math.min(MAX_COUNT,Math.max(0,number)):0;
   };
-  const statePlayers=state=>Array.isArray(state?.players)?state.players.map(x=>String(x?.name||'').trim()).filter(Boolean):[];
+  const currentPlayer=()=>String(api()?.getConfirmedIdentityName?.()||'').trim();
+  const isParticipant=(state,name)=>!!name&&!!state?.active&&Array.isArray(state.players)&&
+    state.players.some(p=>String(p?.name||'').trim()===name);
+  const canSaveOwn=(state)=>isParticipant(state,currentPlayer())&&!!state?.startedAt&&!state?.finishedAt;
   const historyFor=(state,player)=>{
     const rows=Array.isArray(state?.stackHistory)?state.stackHistory:[];
     return rows.filter(r=>r.player===player).sort((a,b)=>Number(a.elapsedSec)-Number(b.elapsedSec)||Number(a.at)-Number(b.at));
@@ -48,8 +51,8 @@
     });
     $('bptStackTotal').textContent=fmt(total);
     $('bptStackCount').textContent=fmt(quantity)+' jeton'+(quantity===1?'':'s');
-    const st=getState(),selected=$('bptStackPlayer')?.value||'';
-    $('bptStackSave').disabled=!selected||!st?.active||!st.startedAt||!api()?.isOwner?.();
+    const st=getState();
+    $('bptStackSave').disabled=!canSaveOwn(st);
     return {total,quantity};
   }
   function status(text){const el=$('bptStackMessage');if(el)el.textContent=text;}
@@ -61,13 +64,13 @@
     editorDirty=false;updateTotal();
   }
   function renderHistory(){
-    const st=getState(),player=$('bptStackPlayer')?.value||'';
+    const st=getState(),player=currentPlayer();
     const chart=$('bptStackChart'),list=$('bptStackHistoryList');
     if(!chart||!list)return;
     const rows=historyFor(st,player);
     $('bptStackHistoryPlayer').textContent=player?'— '+player:'';
     chart.replaceChildren();list.replaceChildren();
-    if(!player){list.textContent='Sélectionne un joueur pour consulter ses relevés.';return;}
+    if(!player){list.textContent='Connecte-toi avec ton profil BPT pour consulter ton historique.';return;}
     if(!rows.length){list.textContent='Aucun stack enregistré pour ce joueur dans cette partie.';return;}
     const W=600,H=196,PX=47,PY=20,baseY=H-31;
     const minT=Math.min(...rows.map(r=>Number(r.elapsedSec)||0)),maxT=Math.max(...rows.map(r=>Number(r.elapsedSec)||0));
@@ -110,33 +113,32 @@
     });
   }
   function refreshPlayers(){
-    const st=getState(),players=statePlayers(st),sel=$('bptStackPlayer');if(!sel)return;
+    const st=getState(),player=currentPlayer();
     const session=String(st?.sessionId||'');
-    const former=sel.value;
-    const signature=session+'|'+players.join('\u001f');
+    const signature=session+'|'+player;
+    const nameEl=$('bptStackCurrentPlayer');
+    if(nameEl)nameEl.textContent=player||'Aucun profil connecté';
     if(signature!==lastSession){
-      lastSession=signature;
-      sel.replaceChildren();
-      const empty=document.createElement('option');empty.value='';empty.textContent='Choisir un joueur';sel.appendChild(empty);
-      players.forEach(name=>{const o=document.createElement('option');o.value=name;o.textContent=name;sel.appendChild(o);});
-      if(players.includes(former))sel.value=former;
-      else if(players.length===1)sel.value=players[0];
-      else sel.value='';
-      lastPlayer='';editorDirty=false;lastHistorySignature='';
+      lastSession=signature;lastPlayer=player;
+      editorDirty=false;lastHistorySignature='';
+      const rows=historyFor(st,player);
+      fillEditor(rows.at(-1)?.counts||{});
+      renderHistory();
+      status(player?'Prêt à enregistrer le stack de '+player+'.':'Connecte-toi avec ton profil BPT pour enregistrer ton stack.');
     }
-    if(sel.value!==lastPlayer){
-      lastPlayer=sel.value;
-      const rows=historyFor(st,lastPlayer);
-      fillEditor(rows.at(-1)?.counts||{});renderHistory();
-    }
-    const canSave=!!st?.active&&!!st?.startedAt&&!!api()?.isOwner?.();
+    const canSave=canSaveOwn(st);
     $('bptStackSave').hidden=!canSave;
     $('bptStackContext').textContent=canSave?
-      'Les relevés sont sauvegardés avec l’heure, le niveau de blind et le temps écoulé.':
-      (st?.active?'Consultation possible. Seul l’organisateur peut enregistrer un relevé.':'Aucune partie Live active : comptage local seulement.');
-    const rows=historyFor(st,sel.value);
-    const hSig=String(st?.sessionId||'')+'|'+sel.value+'|'+rows.map(r=>r.id+':'+r.stack).join(',');
-    if(hSig!==lastHistorySignature){lastHistorySignature=hSig;renderHistory();}
+      'Relevé associé automatiquement à ton profil, avec l’heure, le niveau de blind et le temps écoulé.':
+      (!player?'Identifie-toi dans BPT pour enregistrer ton stack.':
+      (st?.active?'Ton profil n’est pas inscrit à cette partie active, ou la partie est terminée.':'Aucune partie Live active : comptage local seulement.'));
+    const rows=historyFor(st,player);
+    const hSig=session+'|'+player+'|'+rows.map(r=>r.id+':'+r.stack).join(',');
+    if(hSig!==lastHistorySignature){
+      lastHistorySignature=hSig;
+      if(!editorDirty&&rows.length)fillEditor(rows.at(-1)?.counts||{});
+      renderHistory();
+    }
     updateTotal();
   }
   function open(){
@@ -159,7 +161,7 @@
   function readReminderPreference(){try{return localStorage.getItem(reminderSettingKey)!=='0';}catch(_){return reminderPreferenceFallback;}}
   function reminderTick(){
     const st=getState(),banner=$('bptStackReminder');if(!banner)return;
-    if(!readReminderPreference()||!st?.active||!st?.startedAt||!api()?.isOwner?.()||
+    if(!readReminderPreference()||!canSaveOwn(st)||
       !Number(st.levelChangeSeq)||!Number(st.levelChangedAt)||!Number.isFinite(Number(st.levelStartedElapsedSec))){dismissReminder();return;}
     const elapsed=Math.max(0,Number(st.elapsedSec)||0)+(st.running&&st.runStartedAt?
       Math.max(0,Math.floor((Date.now()-Number(st.runStartedAt))/1000)):0);
@@ -196,7 +198,6 @@
     $('bptStackClose').addEventListener('click',close);
     modal.addEventListener('click',e=>{if(e.target===modal)close();});
     document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden){e.preventDefault();close();}});
-    $('bptStackPlayer').addEventListener('change',()=>{lastPlayer='';editorDirty=false;refreshPlayers();});
     lines.addEventListener('click',e=>{
       const button=e.target.closest('[data-delta]');if(!button)return;
       const input=button.parentElement.querySelector('input');
@@ -212,13 +213,13 @@
       catch(_){status('Copie impossible sur cet appareil. Total : '+fmt(Number(text))+' points.');}
     });
     $('bptStackSave').addEventListener('click',async()=>{
-      const player=$('bptStackPlayer').value,button=$('bptStackSave');
-      if(!player||!api()?.isOwner?.()){status('Choisis un joueur et utilise le compte organisateur.');return;}
+      const player=currentPlayer(),button=$('bptStackSave');
+      if(!canSaveOwn(getState())){status('Connecte-toi avec le profil d’un joueur de la partie pour enregistrer ton stack.');return;}
       const counts=countsFromEditor();
       button.disabled=true;status('Enregistrement dans la partie en cours…');
       try{
-        const record=await api().savePlayerStackSnapshot(player,counts);
-        editorDirty=false;status('Stack de '+player+' enregistré : '+fmt(record.stack)+' points.');
+        const record=await api().saveMyStackSnapshot(counts);
+        editorDirty=false;status('Ton stack est enregistré : '+fmt(record.stack)+' points.');
         refreshPlayers();
       }catch(e){status('Enregistrement refusé : '+(e?.message||'erreur réseau'));}
       finally{updateTotal();}

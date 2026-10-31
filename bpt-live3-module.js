@@ -2200,36 +2200,40 @@ function connectionDeviceLabel(){
     return current?.betting?.bets?.[name]?.confirmed===true;
   }
 
-  // Historique des stacks en temps réel, lié à la session Firebase (10.4.124).
-  // Saisie réservée à l'organisateur, lecture partagée avec les spectateurs.
-  async function savePlayerStackSnapshot(playerName,counts){
-    if(!isOwner()||!current?.startedAt)throw new Error('Seul l’organisateur peut enregistrer un stack pendant la partie.');
-    const name=String(playerName||'').trim();
+  // 10.4.125 — Relevé personnel, sans sélection d'un autre joueur.
+  // L'identité est issue du profil confirmé de l'appareil ; pas d'argument de nom.
+  // Écriture transactionnelle : aucun champ du Live autre que l'historique n'est modifié.
+  async function saveMyStackSnapshot(counts){
+    const name=liveIdentityConfirmed?String(liveIdentityName()||'').trim():'';
+    if(!name)throw new Error('Identifie-toi avec ton profil BPT.');
+    if(!current?.active||!current?.startedAt||current?.finishedAt)throw new Error('Aucune partie Live en cours.');
+    if(!current.players?.some(p=>String(p?.name||'').trim()===name))
+      throw new Error('Ton profil ne fait pas partie des joueurs de cette partie.');
     const allowed=[25,50,100,500,1000,5000,10000];
-    if(!allowed.every(v=>Number.isSafeInteger(Number(counts?.[v]))&&Number(counts[v])>=0&&Number(counts[v])<=9999)){
+    if(!allowed.every(v=>Number.isSafeInteger(Number(counts?.[v]))&&Number(counts[v])>=0&&Number(counts[v])<=9999))
       throw new Error('Quantités invalides : valeurs entières de 0 à 9 999.');
-    }
     const quantities={};let stack=0,totalCount=0;
     for(const v of allowed){const n=Number(counts[v]);quantities[v]=n;stack+=n*v;totalCount+=n;}
-    const recordedAt=Date.now();
-    const recordId='ST_'+recordedAt.toString(36)+'_'+Math.random().toString(36).slice(2,10);
-    let saved=false;
-    const savedState=await ownerTransaction(state=>{
-      if(!state.startedAt||!state.players?.some(p=>p.name===name))return null;
-      const now=recordedAt;
-      const elapsed=Math.max(0,Number(state.elapsedSec)||0)+
-        (state.running&&state.runStartedAt?Math.max(0,Math.floor((now-Number(state.runStartedAt))/1000)):0);
-      const entries=Array.isArray(state.stackHistory)?state.stackHistory.slice():[];
-      if(entries.some(p=>p.id===recordId))return null;
-      if(entries.length>=2000)throw new Error('Historique complet (2 000 relevés).');
-      entries.push({id:recordId,player:name,stack,counts:quantities,totalCount,
-        at:recordedAt,elapsedSec:Math.floor(elapsed),levelIndex:Math.max(0,Number(state.levelIndex)||0)});
-      state.stackHistory=entries;
-      saved=true;
-      return state;
-    });
-    if(!saved||!savedState?.stackHistory?.some(r=>r.id===recordId))throw new Error('Enregistrement impossible : la partie ou l’organisateur a changé.');
-    return {id:recordId,player:name,stack,counts:quantities,at:recordedAt};
+    const now=Date.now(),session=String(current.sessionId||'');
+    const recordId='ST_'+now.toString(36)+'_'+Math.random().toString(36).slice(2,10);
+    const r=await ensureRef();
+    // Interruption explicite si un autre Live, une autre identité ou la fin de partie intervient.
+    const result=await r.transaction(server=>{
+      if(!server?.active||!server.startedAt||server.finishedAt||String(server.sessionId||'')!==session)return;
+      if(!liveIdentityConfirmed||String(liveIdentityName()||'').trim()!==name)return;
+      if(!server.players?.some(p=>String(p?.name||'').trim()===name))return;
+      const entries=Array.isArray(server.stackHistory)?server.stackHistory:[];
+      if(entries.length>=2000)return;
+      if(entries.some(row=>row.id===recordId))return;
+      const elapsed=Math.max(0,Number(server.elapsedSec)||0)+
+        (server.running&&server.runStartedAt?Math.max(0,Math.floor((now-Number(server.runStartedAt))/1000)):0);
+      const record={id:recordId,player:name,stack,counts:quantities,totalCount,
+        at:now,elapsedSec:Math.floor(elapsed),levelIndex:Math.max(0,Number(server.levelIndex)||0)};
+      return {...server,stackHistory:[...entries,record],updatedAt:now};
+    },undefined,false);
+    if(!result.committed||!result.snapshot?.val()?.stackHistory?.some(row=>row.id===recordId))
+      throw new Error('Enregistrement impossible : vérifie que la partie et ta connexion sont toujours actives.');
+    return {id:recordId,player:name,stack,counts:quantities,at:now};
   }
 
   async function createLive(){
@@ -4178,7 +4182,7 @@ async function requestTakeover(){
     getState:()=>clone(current),
     deviceId:uid,
     isOwner,
-    savePlayerStackSnapshot,
+    saveMyStackSnapshot,
     adjustMinute,
     changeLevel,
     toggleStartPause,
@@ -4195,6 +4199,7 @@ async function requestTakeover(){
     logoutIdentity,
     openIdentity:()=>openSpectatorIdentity(true),
     getVerifiedIdentityName:()=>liveIdentityConfirmed?verifiedProfileName:"",
+    getConfirmedIdentityName:()=>liveIdentityConfirmed?liveIdentityName():"",
     setMyNickname:(n)=>setMyNickname(n),
     openProfileCodeChange:()=>openProfileCodeChange(),
     openFullscreen,

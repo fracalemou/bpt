@@ -35,3 +35,5 @@
 .bpt-stack-reminder strong{display:block;font-size:15px}.bpt-stack-reminder small{display:block;color:#d0decf;font-size:11px;margin-top:3px;line-height:1.3}
 .bpt-stack-reminder-buttons{display:flex;gap:6px}.bpt-stack-reminder-buttons button{font-size:13px;font-weight:800;border:1px solid #5b796c;border-radius:7px;padding:9px 12px;cursor:pointer;background:#42634e;color:#fff}.bpt-stack-reminder-buttons button:first-child{background:#f4cd55;border-color:#f4cd55;color:#12281c}
 @media(max-width:370px){.bpt-stack-reminder{gap:6px}.bpt-stack-reminder-buttons button{padding:9px 8px;font-size:12px}}
+
+.bpt-stack-player-area .bpt-stack-label-heading{font-size:13px;font-weight:750;color:#d5e5db}.bpt-stack-current-player{display:block;border-radius:8px;border:1px solid #647e6f;background:#1a3026;padding:11px;font-size:16px;color:#f4cd55}
