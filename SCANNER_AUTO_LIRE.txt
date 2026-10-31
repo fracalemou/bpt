@@ -1,0 +1,13 @@
+BPT LIVE — SCANNER AUTO BÊTA — 10.4.117
+=======================================
+Déploiement : copier TOUS les fichiers de cette archive à la racine du dépôt GitHub fracalemou/bpt.
+Ouvrir Live > Outils > Scanner un stack > Prendre / choisir une photo > Estimer par couleurs (bêta).
+
+IMPORTANT : l'estimation par couleurs est un prototype local (Canvas JavaScript), sans API IA et sans serveur.
+Il dénombre des régions colorées regroupées par proximité : il peut fortement sous-compter des piles,
+mal compter des jetons de différentes couleurs et confondre des inserts de couleur.
+Ce n'est PAS encore une reconnaissance automatique validée ni un calcul fiable du stack.
+Toujours vérifier / corriger les 6 quantités avant usage. La photo reste sur l'appareil.
+
+Le module préserve les commandes existantes de Live et ne modifie aucune donnée Firebase.
+La validation complète dans un navigateur / sur GitHub Pages n'a pas été effectuée.

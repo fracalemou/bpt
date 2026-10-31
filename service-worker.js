@@ -1,15 +1,15 @@
-const CACHE='bpt-pwa-10.4.116';
+const CACHE='bpt-pwa-10.4.117';
 // Avatars (10.4.53) : fichiers fixes, cache à part conservé d'une version à l'autre.
 // Un avatar modifié doit changer de nom de fichier (ou AVATAR_CACHE de numéro).
 const AVATAR_CACHE='bpt-avatars-v1';
-const ASSETS=['./', './index.html', './app-pc.css?v=10.4.116', './app-tel.css?v=10.4.116', './app-version.js?v=10.4.116', './application.js?v=10.4.116', './bpt-live-mobilefirst.css?v=10.4.116', './bpt-live-mobilefirst.js?v=10.4.116', './bpt-online.js?v=10.4.116', './bpt-live3-module.js?v=10.4.116', './bpt-pwa-unified-action.js?v=10.4.116', './bpt-config-ui.js?v=10.4.116', './bpt-odds.js?v=10.4.116', './bpt-stack-scanner.js?v=10.4.116', './bpt-stack-scanner.css?v=10.4.116', './firebase-bridge.js?v=10.4.116', './live-betting.js?v=10.4.116', './live-ui.js?v=10.4.116', './mobile-device.js?v=10.4.116', './navigation.js?v=10.4.116', './bpt-share-recap.js?v=10.4.116', './bpt-agenda.js?v=10.4.116', './bpt-my-profile.js?v=10.4.116', './manifest.webmanifest', './icon-192.png', './icon-512.png', './partie-5.jpg'];
+const ASSETS=['./', './index.html', './app-pc.css?v=10.4.117', './app-tel.css?v=10.4.117', './app-version.js?v=10.4.117', './application.js?v=10.4.117', './bpt-live-mobilefirst.css?v=10.4.117', './bpt-live-mobilefirst.js?v=10.4.117', './bpt-online.js?v=10.4.117', './bpt-live3-module.js?v=10.4.117', './bpt-pwa-unified-action.js?v=10.4.117', './bpt-config-ui.js?v=10.4.117', './bpt-odds.js?v=10.4.117', './bpt-stack-scanner.js?v=10.4.117', './bpt-stack-auto.js?v=10.4.117', './bpt-stack-scanner.css?v=10.4.117', './firebase-bridge.js?v=10.4.117', './live-betting.js?v=10.4.117', './live-ui.js?v=10.4.117', './mobile-device.js?v=10.4.117', './navigation.js?v=10.4.117', './bpt-share-recap.js?v=10.4.117', './bpt-agenda.js?v=10.4.117', './bpt-my-profile.js?v=10.4.117', './manifest.webmanifest', './icon-192.png', './icon-512.png', './partie-5.jpg'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
 self.addEventListener('activate',event=>{
   event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE&&k!==AVATAR_CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
 });
-// 10.4.116 — Stratégies :
+// 10.4.117 — Stratégies :
 // - page (index.html) : réseau d'abord, c'est elle qui porte les numéros ?v= et déclenche les mises à jour ;
 // - fichiers de l'appli avec ?v= : cache d'abord (contenu figé pour un numéro donné) → ouverture immédiate ;
 // - bibliothèques Firebase (version dans l'adresse) : cache d'abord ;
