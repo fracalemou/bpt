@@ -49,3 +49,7 @@
 .bpt-analysis-progress>span{position:absolute;top:0;bottom:0;width:37%;border-radius:9px;background:#f1d07a;animation:bptStackMove 1.45s ease-in-out infinite}
 @keyframes bptStackMove{from{left:-37%}to{left:100%}}
 @media (prefers-reduced-motion:reduce){.bpt-analysis-spinner,.bpt-analysis-progress>span{animation-duration:3s}}
+
+
+/* BPT 10.4.138 — modal simplifié sans titre ni croix. */
+#bptStackModal .bpt-stack-body{padding-top:18px;}

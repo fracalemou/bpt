@@ -1,0 +1,3 @@
+- Suppression du titre visible « Comptage stack » dans la fenêtre de comptage.
+- Suppression du bouton croix de fermeture dans cette fenêtre.
+- La fermeture reste possible par clic hors fenêtre, touche Échap, ou après validation du stack.

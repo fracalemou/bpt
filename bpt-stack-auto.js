@@ -1,4 +1,4 @@
-/* BPT 10.4.133 — compteur de stack : choix MANUEL ou IA du club.
+/* BPT 10.4.137 — compteur de stack : choix MANUEL ou IA du club.
    La sélection photo n'est déclenchée que par "Analyse par IA".
    Aucun mode "comptage par pile", aucun réglage fournisseur côté joueur.
    Ne pas stocker de clé dans GitHub Pages ; le serveur du club authentifie via Firebase. */
@@ -12,7 +12,7 @@
   const $ = id => document.getElementById(id);
   const fmt = n => Number(n).toLocaleString('fr-FR');
   let mode='manuel', busy=false, requestNo=0, imageCanvas=null, step='home', editingIndex=null;
-  let activeAIAbort=null;
+  let activeAIAbort=null, lastPhotoFile=null, samePhotoRetryAvailable=false;
   const AI_REQUEST_TIMEOUT_MS=35000; // délai maximal unique : aucun double appel caché
   function elapsedMs(from){return Math.max(0,Math.round(performance.now()-from));}
   function sec(ms){return (ms/1000).toLocaleString('fr-FR',{maximumFractionDigits:1})+' s';}
@@ -112,14 +112,15 @@
     for(const a of document.querySelectorAll('#bptStackModal .bpt-stack-actions:not(#bptStackWorkBar)'))show(a,!home,'flex');
     show($('bptStackPhotoWrap'),!home&&mode==='ia'&&!!imageCanvas);
     show($('bptStackRetry'),!home&&mode==='ia');
+    show($('bptStackRetrySame'),!home&&mode==='ia'&&samePhotoRetryAvailable);
     if(home)renderHistory();
   }
   function goHome(message=''){
-    requestNo++;stopAI();busy=false;const choose=$('bptStackGoAI');if(choose)choose.disabled=false;
+    requestNo++;stopAI();busy=false;lastPhotoFile=null;samePhotoRetryAvailable=false;const choose=$('bptStackGoAI');if(choose)choose.disabled=false;
     const msg=$('bptStackHomeMsg');if(msg)msg.textContent=message;
     setStep('home');
   }
-  function startManual(){requestNo++;stopAI();mode='manuel';imageCanvas=null;busy=false;editingIndex=null;reset();setStep('work');status('Indique tes quantités par couleur, puis valide le comptage.');}
+  function startManual(){requestNo++;stopAI();lastPhotoFile=null;samePhotoRetryAvailable=false;mode='manuel';imageCanvas=null;busy=false;editingIndex=null;reset();setStep('work');status('Indique tes quantités par couleur, puis valide le comptage.');}
   function selectPhoto(){if(busy)return;const input=$('bptStackFile');if(!input)return;
     mode='ia';input.value='';input.click(); // déclenche le sélecteur/caméra à la demande du joueur
   }
@@ -227,33 +228,59 @@
         counts[k]+=n;
       });
     }
-    return {counts,certitude:obj.certitude??obj.confiance??obj.confidence??obj.reliability??null,remarque:String(obj.remarque||obj.commentaire||'')};
+    return {counts,certitude:obj.certitude??obj.confiance??obj.confidence??obj.reliability??null,remarque:String(obj.remarque||obj.commentaire||''),jeu:obj.jeu==='eastriver'?'eastriver':(obj.jeu==='palace'?'palace':''),five:Number(obj.autres&&obj.autres.five)||0};
   }
   function isMalformedServerResponse(message){
     return /JSON|array element|Unexpected token|Expected ','|Expected '}'|SyntaxError|parse/i.test(String(message||''));
   }
+  // Diagnostic réseau : préserver le statut HTTP même si Cloudflare renvoie une page HTML
+  // au lieu d'un objet JSON. Ne jamais consigner le jeton Firebase ni la photo.
+  function safeServerCode(value){
+    const code=String(value||'').trim();
+    return /^[a-zA-Z0-9_.-]{1,60}$/.test(code)?code:'';
+  }
   async function callClubAI(base64,token){
     const url=String(root.BPT_AI_CONFIG&&root.BPT_AI_CONFIG.proxyUrl||'').trim();
     if(!url||!/^https:\/\//i.test(url))throw new Error('Service IA du club non configuré. Contacte l’organisateur.');
-    // Une seule demande : une relance automatique double la durée et consomme deux quotas IA.
-    // Prévoir un JSON structuré dans le Worker Cloudflare pour corriger la cause côté serveur.
+    // Une seule demande à Gemini. En cas de panne 502, seul le joueur peut relancer.
     const controller=new AbortController();activeAIAbort=controller;
     const timeout=setTimeout(()=>controller.abort(),AI_REQUEST_TIMEOUT_MS);
+    const t0=performance.now();
     try{
       const response=await fetch(url,{
         method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
         body:JSON.stringify({image:base64,requestedFormat:'counts'}),signal:controller.signal
       });
-      let data;
-      try{data=await response.json();}catch(_){
-        throw aiError('Le service IA ne renvoie pas un JSON valide. Préviens le responsable du club.','BAD_AI_JSON');
-      }
+      // Lire une seule fois la réponse comme texte, afin de différencier un HTTP 502
+      // renvoyant du HTML d'un vrai JSON IA incorrect après un HTTP 200.
+      const body=await response.text();
+      let data=null;
+      try{if(body.trim())data=JSON.parse(body);}catch(_){/* diagnostic selon le code HTTP */}
+      const ray=String(response.headers.get('cf-ray')||'').slice(0,80);
+      const serverCode=safeServerCode(data?.error?.code||data?.code||data?.error_code);
+      const upstreamStatus=Number(data?.error?.upstreamStatus||data?.upstreamStatus||0)||null;
       if(!response.ok){
-        if(response.status===429)throw new Error('Quota IA atteint : réessaie plus tard.');
-        if(response.status===401||response.status===403)throw new Error('Accès au service IA refusé. Vérifie ta connexion BPT.');
-        const serverMessage=String(data&&data.error&&data.error.message||data&&data.error||'');
-        if(isMalformedServerResponse(serverMessage))throw aiError('Le serveur IA renvoie un JSON incorrect. Le Worker doit imposer un format structuré.','BAD_AI_JSON');
-        throw new Error('Erreur du service IA du club (HTTP '+response.status+').');
+        // Pas de contenu sensible dans les logs : ni photo, ni clés, ni corps serveur.
+        console.warn('[BPT scanner IA] réponse serveur',{
+          httpStatus:response.status,serverCode,upstreamStatus,
+          cfRay:ray||null,dureeMs:Math.round(performance.now()-t0),
+          contenu:body.trim().startsWith('<')?'HTML':data?'JSON':'autre'
+        });
+        if(response.status===429)throw aiError('Quota IA atteint (HTTP 429). Réessaie plus tard.','AI_QUOTA');
+        if(response.status===401||response.status===403)
+          throw aiError('Accès au service IA refusé (HTTP '+response.status+'). Vérifie ta connexion BPT.','AI_AUTH');
+        if([502,503,504].includes(response.status)){
+          const e=aiError('Service IA du club indisponible (HTTP '+response.status+'). Réessaie dans quelques instants. Si cela persiste, l’organisateur doit examiner les journaux du Cloudflare Worker.'+(ray?' Référence Cloudflare : '+ray+'.':''),'AI_UPSTREAM');
+          e.httpStatus=response.status;e.cfRay=ray;e.serverCode=serverCode;throw e;
+        }
+        const serverMessage=String(data?.error?.message||data?.error||'');
+        if(isMalformedServerResponse(serverMessage))
+          throw aiError('Le serveur IA renvoie une réponse JSON incorrecte. Le Worker doit imposer un format structuré.','BAD_AI_JSON');
+        const e=aiError('Erreur du service IA du club (HTTP '+response.status+'). Contacte l’organisateur.','AI_HTTP');
+        e.httpStatus=response.status;e.cfRay=ray;e.serverCode=serverCode;throw e;
+      }
+      if(!data){
+        throw aiError('Le service IA a répondu HTTP 200 sans JSON valide. Correction nécessaire sur le Worker.','BAD_AI_JSON');
       }
       try{return parseResponse(data);}catch(err){
         if(err.code==='BAD_AI_JSON')throw aiError('Le serveur IA renvoie un JSON incorrect. Le Worker doit imposer un format structuré.','BAD_AI_JSON');
@@ -270,6 +297,7 @@
   }
   async function processPhoto(file){
     if(!file||!file.type.startsWith('image/'))return;
+    lastPhotoFile=file;samePhotoRetryAvailable=false;
     stopAI();
     const started=performance.now();let prepMs=0,serverMs=0,imageBytes=0;
     const myRequest=++requestNo;mode='ia';busy=true;editingIndex=null;reset();
@@ -296,7 +324,12 @@
       const n=KEYS.reduce((sum,k)=>sum+result.counts[k],0);
       const total=totalOf(result.counts),reliability=normalizeReliability(result.certitude);
       const timing='Durée : '+sec(elapsedMs(started))+' (préparation '+sec(prepMs)+' ; serveur '+sec(serverMs)+')';
-      showAnalysis('done',{total,chips:n,reliability,remark:result.remarque,timing});
+      const JEU={palace:'Chips Palace',eastriver:'East River Poker'};
+      const notes=[];if(result.jeu)notes.push('Jeu reconnu : '+JEU[result.jeu]+'.');
+      if(result.five>0)notes.push(result.five+' jeton'+(result.five>1?'s':'')+' de 5 (rouge East River) non compté'+(result.five>1?'s':'')+' : pas de ligne dans le tableau.');
+      if(result.remarque)notes.push(result.remarque);
+      showAnalysis('done',{total,chips:n,reliability,remark:notes.join(' '),timing});
+      samePhotoRetryAvailable=false;show($('bptStackRetrySame'),false);
       status('Stack estimé : '+fmt(total)+' points. Vérifie les quantités puis valide. '+timing);
       console.info('[BPT scanner IA] analyse', {preparationMs:prepMs,serverMs,imageKB:Math.round(imageBytes/1024)});
     }catch(err){
@@ -306,6 +339,7 @@
       const reason=err.name==='AbortError'?'Le serveur IA dépasse '+Math.round(AI_REQUEST_TIMEOUT_MS/1000)+' secondes. Réessaie plus tard.':(err&&err.message||'Erreur inconnue');
       const timing='Durée : '+sec(elapsedMs(started))+' (préparation '+sec(prepMs)+' ; serveur '+sec(serverMs)+')';
       showAnalysis('error',{message:reason,timing});
+      samePhotoRetryAvailable=!!lastPhotoFile;show($('bptStackRetrySame'),samePhotoRetryAvailable);
       status('Aucun résultat IA enregistré. '+timing+' Utilise le comptage manuel si nécessaire.');
       console.warn('[BPT scanner IA] échec', {preparationMs:prepMs,serverMs,message:reason});
     }finally{if(myRequest===requestNo){busy=false;if(btn)btn.disabled=false;}}
@@ -324,7 +358,7 @@
       '<div id="bptStackHist"></div>';
     body.insertBefore(home,body.firstChild);
     const toolbar=document.createElement('div');toolbar.id='bptStackWorkBar';toolbar.className='bpt-stack-actions';
-    toolbar.innerHTML='<button type="button" id="bptStackBack">← Retour</button><button type="button" id="bptStackRetry">Nouvelle photo IA</button>';
+    toolbar.innerHTML='<button type="button" id="bptStackBack">← Retour</button><button type="button" id="bptStackRetry">Nouvelle photo IA</button><button type="button" id="bptStackRetrySame" style="display:none">Réessayer cette photo</button>';
     body.insertBefore(toolbar,home.nextSibling);
     const validateButton=document.createElement('button');validateButton.type='button';validateButton.id='bptStackValidate';
     validateButton.className='bpt-stack-validate';validateButton.textContent='Valider le stack';
@@ -334,6 +368,7 @@
     $('bptStackGoManual').addEventListener('click',startManual);
     $('bptStackGoAI').addEventListener('click',selectPhoto);
     $('bptStackRetry').addEventListener('click',selectPhoto);
+    $('bptStackRetrySame').addEventListener('click',()=>{if(lastPhotoFile&&!busy)processPhoto(lastPhotoFile);});
     $('bptStackBack').addEventListener('click',()=>goHome());
     validateButton.addEventListener('click',validate);
     $('bptStackFile').addEventListener('change',event=>{

@@ -1,0 +1,8 @@
+BPT 10.4.137 — correction diagnostic HTTP 502 du scanner IA
+
+- Statut HTTP traité avant le décodage JSON, y compris erreur HTML Cloudflare.
+- Codes 502 / 503 / 504 présentés comme indisponibilité du service.
+- Nouvelle tentative facultative sur la même photo, sans deuxième appel automatique.
+- Diagnostic minimal dans la console, sans image ni jeton.
+- Le serveur Cloudflare nécessite une vérification distincte de ses journaux.
+- Autres fonctionnalités issues de 10.4.136 inchangées.

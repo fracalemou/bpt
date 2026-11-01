@@ -9,3 +9,12 @@ Serveur (à faire dans Cloudflare) : coller worker-rapide.js dans le Worker (Edi
   - la réponse contient timing.geminiMs / totalMs pour mesurer.
 Comparer l'affichage « Durée : X s (préparation … ; serveur …) » avant/après sur 5 mêmes photos.
 Les variables du Worker (GEMINI_API_KEY en Secret, ALLOWED_ORIGINS) restent inchangées.
+
+Reconnaissance du jeu : l'IA identifie d'abord « Chips Palace » ou « East River Poker » (Moon/River) puis applique la bonne correspondance couleur → valeur
+(Palace : marron=5000, rouge=10000 ; East River : rose=5000, orange=10000, rouge=5). Le jeu reconnu est affiché sous le résultat.
+Les jetons de 5 (East River) ne sont pas dans le tableau : ils sont signalés mais non comptés.
+Il faut recoller worker-rapide.js dans Cloudflare pour activer cette reconnaissance.
+
+10.4.136 — Erreur HTTP 502 : le message précis du serveur (ex. « Gemini 403 : API key not valid ») s'affiche maintenant dans l'appli.
+Worker : plafond de sortie relevé à 1500 jetons (la réflexion compte dans ce plafond), repli automatique sans schéma si Gemini refuse le schéma,
+lecture tolérante d'un JSON entouré de texte, messages d'erreur détaillés et journal Cloudflare (Workers > Logs).

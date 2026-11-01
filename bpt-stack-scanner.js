@@ -5,12 +5,12 @@ const $=id=>document.getElementById(id);
 const fmt=n=>n.toLocaleString('fr-FR');
 let previousFocus=null,photoUrl=null;
 function update(){let total=0,count=0;document.querySelectorAll('.bpt-stack-line').forEach(line=>{let n=Math.max(0,Math.min(99999,parseInt(line.querySelector('input').value,10)||0));count+=n;total+=n*Number(line.dataset.value)});$('bptStackTotal').textContent=fmt(total);$('bptStackCount').textContent=fmt(count)+' jeton'+(count===1?'':'s');}
-function open(){previousFocus=document.activeElement;const m=$('bptStackModal');m.hidden=false;m.setAttribute('aria-hidden','false');$('bptStackClose').focus();}
+function open(){previousFocus=document.activeElement;const m=$('bptStackModal');m.hidden=false;m.setAttribute('aria-hidden','false');const first=m.querySelector('button, input, select, textarea, [tabindex]:not([tabindex="-1"])');if(first&&first.focus)first.focus();}
 function close(){const m=$('bptStackModal');m.hidden=true;m.setAttribute('aria-hidden','true');if(previousFocus&&previousFocus.focus)previousFocus.focus();}
 function init(){const modal=$('bptStackModal'),lines=$('bptStackLines');if(!modal||!lines)return;
 CHIPS.forEach(c=>{const row=document.createElement('div');row.className='bpt-stack-line';row.dataset.value=c.value;row.innerHTML='<span class="bpt-stack-dot" style="--chip:'+c.color+'"></span><span class="bpt-stack-label"><strong>'+c.name+'</strong><small>'+fmt(c.value)+' points</small></span><button type="button" data-delta="-1" aria-label="Retirer un jeton '+c.name+'">−</button><input type="number" inputmode="numeric" min="0" max="99999" step="1" value="0" aria-label="Quantité '+c.name+'"/><button type="button" data-delta="1" aria-label="Ajouter un jeton '+c.name+'">+</button>';lines.appendChild(row)});
  document.addEventListener('click',e=>{const b=e.target.closest('.bpt-stack-open');if(b){e.preventDefault();open();}});
- $('bptStackClose').addEventListener('click',close);modal.addEventListener('click',e=>{if(e.target===modal)close()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)close()});
+ modal.addEventListener('click',e=>{if(e.target===modal)close()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)close()});
  lines.addEventListener('click',e=>{const b=e.target.closest('[data-delta]');if(!b)return;const i=b.parentElement.querySelector('input');i.value=Math.max(0,(parseInt(i.value,10)||0)+Number(b.dataset.delta));update()});lines.addEventListener('input',update);
  $('bptStackReset').addEventListener('click',()=>{lines.querySelectorAll('input').forEach(i=>i.value=0);update()});
 
