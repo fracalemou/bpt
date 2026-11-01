@@ -1,0 +1,5 @@
+V10.4.150
+- Worker (serveur-ia/worker-bpt-10.4.150.js) : invite dédiée Moon River (bleu 50 sombre vs bleu clair 10 000 -> orange), valeur imprimée prioritaire.
+- Planche de référence : 1 image (une vignette étiquetée par valeur, issue de vos photos des Paramètres), mise en cache 12 h, envoyée avec la photo. Pas d'attente ajoutée (limite 1,5 s). Cache vidé à l'ajout/suppression d'une photo.
+- HTTP 502 : le message exact (Gemini 4xx/5xx, secret absent, etc.) s'affiche dans l'appli. /health du Worker donne un diagnostic.
+- Le choix Moon River (défaut) / Chips Palace à la création de partie existait déjà.

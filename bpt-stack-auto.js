@@ -244,6 +244,10 @@
     return /^[a-zA-Z0-9_.-]{1,60}$/.test(code)?code:'';
   }
   async function callClubAI(base64,token){
+    const chipSetNow=root.BPTLive3?.getState?.()?.chipSet==='palace'?'palace':'moonriver';
+    // Planche de référence (1 petite image en cache) : n'ajoute pas d'attente si absente ou lente (max 1,5 s).
+    let referenceSheet=null;
+    try{referenceSheet=await Promise.race([root.BPTChipReferences?.getSheet?.(chipSetNow)||null,new Promise(r=>setTimeout(()=>r(null),1500))]);}catch(_){}
     const url=String(root.BPT_AI_CONFIG&&root.BPT_AI_CONFIG.proxyUrl||'').trim();
     if(!url||!/^https:\/\//i.test(url))throw new Error('Service IA du club non configuré. Contacte l’organisateur.');
     // Une seule demande à Gemini. En cas de panne 502, seul le joueur peut relancer.
@@ -256,7 +260,7 @@
         response=await fetch(url,{
           method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
           // Choix enregistre dans le Live et partage avec tous les joueurs.
-          body:JSON.stringify({image:base64,requestedFormat:'counts',chipSet:root.BPTLive3?.getState?.()?.chipSet==='palace'?'palace':'moonriver'}),signal:controller.signal
+          body:JSON.stringify(Object.assign({image:base64,requestedFormat:'counts',chipSet:chipSetNow},referenceSheet?{referenceSheet}:{})),signal:controller.signal
         });
       }catch(networkErr){
         if(networkErr?.name==='AbortError')throw networkErr;
@@ -285,7 +289,8 @@
         if(response.status===401||response.status===403)
           throw aiError('Accès au service IA refusé (HTTP '+response.status+'). Vérifie ta connexion BPT.','AI_AUTH');
         if([502,503,504].includes(response.status)){
-          const e=aiError('Service IA du club indisponible (HTTP '+response.status+'). Réessaie dans quelques instants. Si cela persiste, l’organisateur doit examiner les journaux du Cloudflare Worker.'+(ray?' Référence Cloudflare : '+ray+'.':''),'AI_UPSTREAM');
+          const detail=String(data?.error?.message||(typeof data?.error==='string'?data.error:'')||'').replace(/[<>]/g,'').slice(0,220);
+          const e=aiError('Service IA du club indisponible (HTTP '+response.status+')'+(detail?' : '+detail:'. Aucun détail : le Worker n’a pas répondu en JSON, voir ses journaux Cloudflare.')+(ray?' [Réf. '+ray+']':''),'AI_UPSTREAM');
           e.httpStatus=response.status;e.cfRay=ray;e.serverCode=serverCode;throw e;
         }
         const serverMessage=String(data?.error?.message||data?.error||'');
