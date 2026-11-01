@@ -1,0 +1,1 @@
+Correction du formulaire de création Live mobile : le sélecteur Moon River / Chips Palace ne peut plus être écrasé par la grille à 2 lignes. Défilement vertical de l’étape 1, commandes conservées accessibles. Photos de référence conservées.

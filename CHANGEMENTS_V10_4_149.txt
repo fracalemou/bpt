@@ -1,0 +1,1 @@
+Le scanner transmet uniquement la photo du stack et le jeu choisi. Les photos de reference restent stockees dans les parametres, mais ne sont pas transmises a chaque analyse.
