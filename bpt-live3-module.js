@@ -419,7 +419,7 @@
     if(!isOwner() || !isActive() || !current?.startedAt)return;
     const now=Date.now();
     if(!afterElimination && now-live3PaceLastCheckAt<60*1000)return;
-    // 10.4.134 — En adaptatif, contrôler l'avance/le retard PENDANT chaque blind.
+    // 10.4.135 — En adaptatif, contrôler l'avance/le retard PENDANT chaque blind.
     // Si nécessaire on modifie UNIQUEMENT les durées à partir de la blind suivante.
     // Aucune pause, aucun changement de durée de la blind en cours.
     const lvIdx=Math.max(0,Number(current?.levelIndex)||0);

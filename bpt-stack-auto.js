@@ -347,7 +347,12 @@
       if(take){const entry=hist.find(x=>x.id===take.dataset.hr);if(entry){startManual();editingIndex=entry.id;applyCounts(compatibleCounts(entry.counts));status('Modification de ce relevé : valide pour synchroniser la correction.');}}
     });
     document.addEventListener('bpt-stack-records-updated',()=>{if(step==='home')renderHistory();});
-    document.addEventListener('click',event=>{if(event.target.closest('.bpt-stack-open'))goHome();});
+    // Réveille le serveur IA (connexion TLS + démarrage du Worker) dès l'ouverture du scanner : la photo part ensuite plus vite.
+    let warmAt=0;
+    function warmUp(){const url=String(root.BPT_AI_CONFIG&&root.BPT_AI_CONFIG.proxyUrl||'').trim();
+      if(!/^https:\/\//i.test(url)||Date.now()-warmAt<240000)return;warmAt=Date.now();
+      try{fetch(url,{method:'GET',mode:'no-cors',cache:'no-store'}).catch(()=>{});}catch(_){/* sans importance */}}
+    document.addEventListener('click',event=>{if(event.target.closest('.bpt-stack-open')){goHome();warmUp();}});
     setStep('home');
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();

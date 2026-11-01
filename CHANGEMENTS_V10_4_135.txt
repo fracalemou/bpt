@@ -1,0 +1,11 @@
+BPT 10.4.135 — analyse IA plus rapide
+
+Navigateur : le serveur IA est "réveillé" (connexion + démarrage du Worker) dès l'ouverture du scanner.
+Serveur (à faire dans Cloudflare) : coller worker-rapide.js dans le Worker (Edit code > Deploy).
+  - réponse structurée : 7 entiers + certitude (plus de liste de jetons ni de coordonnées) ;
+  - consigne courte, maxOutputTokens 200 ;
+  - réflexion du modèle réduite au minimum (essai automatique thinkingLevel minimal, puis thinkingBudget 0, puis sans) ;
+  - cache du preflight CORS 24 h ;
+  - la réponse contient timing.geminiMs / totalMs pour mesurer.
+Comparer l'affichage « Durée : X s (préparation … ; serveur …) » avant/après sur 5 mêmes photos.
+Les variables du Worker (GEMINI_API_KEY en Secret, ALLOWED_ORIGINS) restent inchangées.

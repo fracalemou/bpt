@@ -1,4 +1,4 @@
-/* BPT 10.4.134 — rappel de stack FACULTATIF, sans pause de chronomètre.
+/* BPT 10.4.135 — rappel de stack FACULTATIF, sans pause de chronomètre.
  * Uniquement pour un joueur encore en lice et identifié; une seule fois par niveau et par appareil.
  * La session Firebase contrôle le niveau; un réveil après veille retrouve le niveau en cours.
  */
