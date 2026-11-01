@@ -30,7 +30,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
     var narrowWindow=w<=700; // fenêtre PC très étroite : affichage téléphone (réversible)
     return !tablet&&(phoneUA||compactTouch||narrowWindow);
   };
-  window.bptDeviceCssHref=function(phone){return "./app-"+(phone?"tel":"pc")+".css?v=10.4.140";};
+  window.bptDeviceCssHref=function(phone){return "./app-"+(phone?"tel":"pc")+".css?v=10.4.141";};
   var phone=window.bptDetectPhone();
   document.documentElement.classList.toggle("bpt-mobile-device",phone);
   document.write('<link rel="stylesheet" id="bptDeviceCss" href="'+window.bptDeviceCssHref(phone)+'">');
@@ -38,7 +38,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
   try{var th=localStorage.getItem("bpt-theme");if(th&&th!=="nuit")document.documentElement.setAttribute("data-bpt-theme",th);}catch(_e){}
 })();
 </script>
-<noscript><link rel="stylesheet" href="./app-pc.css?v=10.4.140"></noscript>
+<noscript><link rel="stylesheet" href="./app-pc.css?v=10.4.141"></noscript>
 
 
 
@@ -114,7 +114,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 
 
 
-<link rel="stylesheet" href="./bpt-live-mobilefirst.css?v=10.4.140">
+<link rel="stylesheet" href="./bpt-live-mobilefirst.css?v=10.4.141">
 </head>
 <body>
 <div id="headUpPhotoPrompt" style="
@@ -152,9 +152,9 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 <button class="btn ghost" id="bptIosInstallClose" type="button">Fermer</button>
 </div>
 </div>
-<script src="./mobile-device.js?v=10.4.140"></script>
+<script src="./mobile-device.js?v=10.4.141"></script>
 
-<script src="./app-version.js?v=10.4.140"></script>
+<script src="./app-version.js?v=10.4.141"></script>
 <header class="bpt-header">
 <div class="bpt-brand-wrap">
 <div aria-label="BPT" class="bpt-logo">
@@ -234,6 +234,12 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 
   <section class="bpt-live3-prep-step" id="live3PrepStep1" data-prep-step="1">
     <div class="bpt-live3-grid bpt-live3-config-grid">
+      <label class="bpt-chipset-field" for="live3ChipSet"><strong>Jeu de jetons de la partie</strong>
+        <select id="live3ChipSet" aria-label="Jeu de jetons de cette partie">
+          <option value="moonriver" selected>Moon River (par défaut)</option>
+          <option value="palace">Chips Palace</option>
+        </select>
+      </label>
       <label>Nom / lieu
         <input id="live3Location" placeholder="Ex. Soirée chez Martin"/>
       </label>
@@ -251,12 +257,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
           <option value="0.5">30 min</option><option value="1">1 h 00</option><option value="1.5">1 h 30</option><option value="2">2 h 00</option><option value="2.5">2 h 30</option><option value="3">3 h 00</option><option value="3.5">3 h 30</option><option selected value="4">4 h 00</option><option value="4.5">4 h 30</option><option value="5">5 h 00</option><option value="5.5">5 h 30</option><option value="6">6 h 00</option><option value="6.5">6 h 30</option><option value="7">7 h 00</option><option value="7.5">7 h 30</option><option value="8">8 h 00</option>
         </select>
       </label>
-      <label>Jeu de jetons
-        <select id="live3ChipSet" aria-label="Jeu de jetons de cette partie">
-          <option value="moonriver" selected>Moon River (par défaut)</option>
-          <option value="palace">Chips Palace</option>
-        </select>
-      </label>
+
       <label>Structure
         <select id="live3StructureMode"><option value="classic" selected>Classique · 25 niveaux · sans ante</option><option value="adaptive">Adaptatif · ajustement automatique des durées</option></select>
       </label>
@@ -1183,7 +1184,7 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
-<script src="./firebase-bridge.js?v=10.4.140"></script>
+<script src="./firebase-bridge.js?v=10.4.141"></script>
 <div id="cloudStatus" style="cursor:pointer" title="État de la synchronisation partagée — cliquer pour recharger depuis Firebase">
 <span id="cloudStatusDot">●</span>
 <span id="cloudStatusText">Connexion…</span>
@@ -1251,26 +1252,26 @@ Conserver cette version comme point de retour avant toute évolution ultérieure
  </div>
 </div>
 
-<link rel="stylesheet" href="./bpt-stack-scanner.css?v=10.4.140"/>
-<script src="./bpt-stack-scanner.js?v=10.4.140" defer></script>
-<script src="./bpt-ai-config.js?v=10.4.140" defer></script>
-<script src="./bpt-stack-sync.js?v=10.4.140" defer></script>
-<script src="./bpt-stack-auto.js?v=10.4.140" defer></script>
-<script src="./application.js?v=10.4.140"></script>
-<script src="./navigation.js?v=10.4.140"></script>
-<script id="bpt-share-recap" src="./bpt-share-recap.js?v=10.4.140"></script>
-<script id="bpt-agenda" src="./bpt-agenda.js?v=10.4.140"></script>
-<script id="bpt-my-profile" src="./bpt-my-profile.js?v=10.4.140"></script>
-<script id="bpt-live3-module" src="./bpt-live3-module.js?v=10.4.140"></script>
-<script id="bpt-pwa-unified-action" src="./bpt-pwa-unified-action.js?v=10.4.140"></script>
-<script id="bpt-config-ui" src="./bpt-config-ui.js?v=10.4.140"></script>
-<script id="bpt-odds" src="./bpt-odds.js?v=10.4.140"></script>
-<script id="bpt-live-betting" src="./live-betting.js?v=10.4.140"></script>
-<script id="bpt-live-ui" src="./live-ui.js?v=10.4.140"></script>
-<script src="./bpt-live-mobilefirst.js?v=10.4.140"></script>
-<link rel="stylesheet" href="./bpt-stack-reminder.css?v=10.4.140"/>
-<script src="./bpt-stack-reminder.js?v=10.4.140" defer></script>
-<script id="bpt-online" src="./bpt-online.js?v=10.4.140"></script>
+<link rel="stylesheet" href="./bpt-stack-scanner.css?v=10.4.141"/>
+<script src="./bpt-stack-scanner.js?v=10.4.141" defer></script>
+<script src="./bpt-ai-config.js?v=10.4.141" defer></script>
+<script src="./bpt-stack-sync.js?v=10.4.141" defer></script>
+<script src="./bpt-stack-auto.js?v=10.4.141" defer></script>
+<script src="./application.js?v=10.4.141"></script>
+<script src="./navigation.js?v=10.4.141"></script>
+<script id="bpt-share-recap" src="./bpt-share-recap.js?v=10.4.141"></script>
+<script id="bpt-agenda" src="./bpt-agenda.js?v=10.4.141"></script>
+<script id="bpt-my-profile" src="./bpt-my-profile.js?v=10.4.141"></script>
+<script id="bpt-live3-module" src="./bpt-live3-module.js?v=10.4.141"></script>
+<script id="bpt-pwa-unified-action" src="./bpt-pwa-unified-action.js?v=10.4.141"></script>
+<script id="bpt-config-ui" src="./bpt-config-ui.js?v=10.4.141"></script>
+<script id="bpt-odds" src="./bpt-odds.js?v=10.4.141"></script>
+<script id="bpt-live-betting" src="./live-betting.js?v=10.4.141"></script>
+<script id="bpt-live-ui" src="./live-ui.js?v=10.4.141"></script>
+<script src="./bpt-live-mobilefirst.js?v=10.4.141"></script>
+<link rel="stylesheet" href="./bpt-stack-reminder.css?v=10.4.141"/>
+<script src="./bpt-stack-reminder.js?v=10.4.141" defer></script>
+<script id="bpt-online" src="./bpt-online.js?v=10.4.141"></script>
 </body>
 </html>
 

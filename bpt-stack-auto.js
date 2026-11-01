@@ -232,7 +232,7 @@
         counts[k]+=n;
       });
     }
-    return {counts,certitude:obj.certitude??obj.confiance??obj.confidence??obj.reliability??null,remarque:String(obj.remarque||obj.commentaire||''),jeu:['moonriver','palace'].includes(obj.jeu)?obj.jeu:(obj.jeu==='eastriver'?'eastriver':''),five:0};
+    return {counts,certitude:obj.certitude??obj.confiance??obj.confidence??obj.reliability??null,remarque:String(obj.remarque||obj.commentaire||''),jeu:(['moonriver','palace','indetermine'].includes(obj.jeuDetecte)?obj.jeuDetecte:'indetermine'),five:0};
   }
   function isMalformedServerResponse(message){
     return /JSON|array element|Unexpected token|Expected ','|Expected '}'|SyntaxError|parse/i.test(String(message||''));
@@ -327,12 +327,17 @@
       if(myRequest!==requestNo)return;
       applyCounts(result.counts);
       const n=KEYS.reduce((sum,k)=>sum+result.counts[k],0);
-      const total=totalOf(result.counts),reliability=normalizeReliability(result.certitude);
+      const total=totalOf(result.counts);
+      let reliability=normalizeReliability(result.certitude);
+      const configuredSet=root.BPTLive3?.getState?.()?.chipSet==='palace'?'palace':'moonriver';
+      if(result.jeu==='indetermine'||(result.jeu&&result.jeu!==configuredSet))reliability='low';
       const timing='Durée : '+sec(elapsedMs(started))+' (préparation '+sec(prepMs)+' ; serveur '+sec(serverMs)+')';
       const JEU={palace:'Chips Palace',moonriver:'Moon River'};
       const selectedSet=root.BPTLive3?.getState?.()?.chipSet==='palace'?'palace':'moonriver';
-      const notes=['Jeu de la partie : '+JEU[selectedSet]+'.'];
-      if(result.jeu&&result.jeu!==selectedSet)notes.push('Attention : le serveur IA ne respecte pas encore le jeu sélectionné. Mettre à jour le Worker Cloudflare.');
+      const detectedSet=JEU[result.jeu]||'Indéterminé';
+      const notes=['Jeu détecté : '+detectedSet+'.'];
+      if(result.jeu==='indetermine')notes.push('Le jeu n’a pas pu être reconnu avec certitude.');
+      else if(result.jeu!==selectedSet)notes.push('Attention : le jeu détecté diffère du jeu choisi pour la partie ('+JEU[selectedSet]+'). Vérifie les quantités.');
       if(result.remarque)notes.push(result.remarque);
       showAnalysis('done',{total,chips:n,reliability,remark:notes.join(' '),timing});
       samePhotoRetryAvailable=false;show($('bptStackRetrySame'),false);

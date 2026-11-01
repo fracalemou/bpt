@@ -1,0 +1,9 @@
+BPT 10.4.141 — Correction du choix des jetons et indication du jeu détecté
+
+- Étape 1 « Paramètres de la partie » : jeu de jetons tout en haut, rendu plus visible et sélectionné sur Moon River par défaut.
+- Formulaire mobile verticalement défilable pour éviter que les champs soient coupés ; bouton Continuer toujours accessible.
+- Le scanner affiche « Jeu détecté : Moon River / Chips Palace / Indéterminé » d'après la réponse IA.
+- Une divergence avec le jeu annoncé réduit la fiabilité affichée et déclenche un avertissement.
+- Le Worker 10.4.141 fourni à part lit d'abord la valeur imprimée sur une face visible avant d'associer l'apparence aux autres jetons ; les 10 000 Moon River peuvent être bleu clair.
+- Aucun jeton de 5 points.
+- BPT et Worker à publier séparément ; le moteur Live, chrono et validations restent inchangés.
