@@ -1,7 +1,16 @@
-BPT Live — version 10.4.126 — Scanner de stack simplifié
+BPT 10.4.127 — Comptage de stack
 
-Écran d'accueil : « Analyse par IA » (on prend la photo, l'IA compte) ou « Comptage manuel ».
-Après l'analyse IA : marqueurs sur la photo (toucher un marqueur = le retirer ; choisir une couleur puis toucher la photo = ajouter),
-et le tableau reste modifiable avec + / −. « Valider le comptage » enregistre la saisie dans l'historique de CET appareil
-(5 derniers affichés, bouton Reprendre / ✕). Rien n'est écrit dans le Live ni dans Firebase.
-IA : serveur du club (bpt-ai-config.js, proxyUrl) ou ta propre clé Gemini dans « Réglages IA ».
+Live > Outils > Scanner un stack
+
+Accueil :
+- Comptage manuel : aucune photo demandée.
+- Analyse par IA : ouverture de la caméra / galerie à ce moment seulement ; l’analyse utilise le serveur sécurisé du club.
+- Réglages fournisseur, clés privées et comptage de pile de profil supprimés.
+
+L’adresse publique de l’API du club est définie dans bpt-ai-config.js.
+Aucune clé secrète ne doit être stockée dans des fichiers GitHub Pages.
+Le proxy doit valider le jeton Firebase envoyé dans l’en-tête Authorization.
+Si le serveur est indisponible, le mode manuel reste opérationnel.
+
+L’historique des derniers comptages de ce module est conservé localement sur l’appareil.
+La synchronisation des autres données Live n’a pas été modifiée.
