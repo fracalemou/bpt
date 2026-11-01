@@ -1,0 +1,7 @@
+BPT 10.4.139 — Retour automatique au Live
+
+- Après confirmation de l'écriture du stack dans Firebase, le compteur se ferme automatiquement et le Live s'affiche.
+- La fermeture n'utilise plus la croix supprimée en 10.4.138.
+- Si la synchronisation échoue, la fenêtre et la saisie restent ouvertes.
+- Mise à jour des références de ressources et du cache PWA vers 10.4.139 (PC et téléphone).
+- Archive ZIP à fichiers racine : décompresser puis copier directement dans la racine du dépôt GitHub Pages.

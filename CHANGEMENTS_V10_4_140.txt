@@ -1,0 +1,11 @@
+BPT 10.4.140 — Choix du jeu de jetons à la création du Live
+
+- Étape 1 « Paramètres de la partie » : choix Moon River (par défaut) / Chips Palace.
+- Enregistrement du champ chipSet = moonriver ou palace dans bpt/live_v3/current (Firebase).
+- Valeur conservée si l’organisateur retourne à l’étape de configuration avant lancement.
+- Jeu affiché dans les informations du Live ; tous les appareils utilisent la donnée de la partie.
+- Comptage IA : envoie chipSet au Worker Cloudflare. Aucun jeton de 5 points.
+- Mise à jour cache PWA, scripts et version affichée.
+
+IMPORTANT : mettre également à jour le Worker Cloudflare fourni séparément,
+sinon l’ancienne version du Worker ignore le champ chipSet.

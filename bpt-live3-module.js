@@ -2236,6 +2236,8 @@ function connectionDeviceLabel(){
         location,date:$3("live3Date").value||new Date().toISOString().slice(0,10),
         startStack:Math.max(100,Number($3("live3Stack").value)||20000),
         buyIn:Math.max(0,Number($3("live3BuyIn").value)||0),
+        // Le référentiel de jetons est fixé pour l'ensemble des appareils du Live.
+        chipSet:$3("live3ChipSet")?.value==="palace"?"palace":"moonriver",
         running:false,startedAt:null,runStartedAt:null,deadline:null,elapsedSec:0,
         levelIndex:0,
         targetHours:Math.max(0.5,Number($3("live3TargetHours").value)||4),
@@ -2288,7 +2290,7 @@ function connectionDeviceLabel(){
     if(!result.committed){alert('La partie a déjà été lancée ou sa gestion a changé.');return;}
     const selected=new Set((draft.players||[]).map(p=>p.name));
     for(const name of selected){if(!(db?.players||[]).some(p=>p.name===name&&p.active===true))live3TemporaryPlayers.add(name);}
-    const values={live3Location:draft.location,live3Date:draft.date,live3Stack:draft.startStack,live3BuyIn:draft.buyIn,live3TargetHours:draft.targetHours,live3StructureMode:draft.paceAdaptive===true?"adaptive":"classic"};
+    const values={live3Location:draft.location,live3Date:draft.date,live3Stack:draft.startStack,live3BuyIn:draft.buyIn,live3TargetHours:draft.targetHours,live3ChipSet:draft.chipSet==="palace"?"palace":"moonriver",live3StructureMode:draft.paceAdaptive===true?"adaptive":"classic"};
     for(const [id,value] of Object.entries(values)){const field=$3(id);if(field)field.value=value??'';}
     current=result.snapshot.val();
     prepWizardStep=1;
@@ -3666,7 +3668,7 @@ async function requestTakeover(){
     const next=`${fmt(nx.sb)} / ${fmt(nx.bb)}${nx.ante?` · ante ${fmt(nx.ante)}`:""}`;
 
     $3("live3GameLocation").textContent=current.location||"Live BPT";
-    $3("live3GameMeta").textContent=`${current.date||""} · ${current.players?.length||0} joueurs · organisateur : ${current.ownerLabel||"—"}`;
+    $3("live3GameMeta").textContent=`${current.date||""} · ${current.players?.length||0} joueurs · ${current.chipSet==="palace"?"Chips Palace":"Moon River"} · organisateur : ${current.ownerLabel||"—"}`;
     const structureText=current?.paceAdaptive===true?"Structure · Adaptatif":"Structure · Classique";
     if($3("live3StructureBadge"))$3("live3StructureBadge").textContent=structureText;
     if($3("live3OwnerLabel"))$3("live3OwnerLabel").textContent=`Organisateur · ${current?.ownerLabel||live3OwnerDisplayName()}`;

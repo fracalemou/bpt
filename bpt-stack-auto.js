@@ -136,11 +136,15 @@
       const record={counts,total,chips,mode:id?'manuel':(mode==='ia'?'IA':'manuel')};
       if(id)await sync.update(id,record);else await sync.save(record);
       editingIndex=null;reset();imageCanvas=null;
-      // Retour automatique au Live uniquement après validation effective dans Firebase.
-      // Le bouton de fermeture utilise la gestion existante du focus et de la modale.
+      // Fermer le compteur uniquement après la confirmation de l'écriture Firebase.
+      // Ne pas dépendre d'une croix HTML : elle a été supprimée en 10.4.138.
       goHome('Stack synchronisé : '+fmt(total)+' points ('+chips+' jetons).');
-      const closeButton=$('bptStackClose');
-      if(closeButton)closeButton.click();
+      if(typeof root.BPTStackScanner?.close==='function')root.BPTStackScanner.close();
+      else{const modal=$('bptStackModal');if(modal){modal.hidden=true;modal.setAttribute('aria-hidden','true');}}
+      // Même si le joueur est arrivé depuis un autre écran, revenir au Live.
+      // Un éventuel problème d'affichage ne doit pas transformer un stack sauvegardé en erreur.
+      try{document.querySelector('nav#nav button[data-view="live3"]')?.click();}
+      catch(navErr){console.warn('[BPT stack] navigation Live',navErr);}
     }catch(err){status('Échec de la synchronisation : '+(err.message||'connexion indisponible')+'. Aucun relevé validé.');}
     finally{busy=false;if(button)button.disabled=false;}
   }
@@ -228,7 +232,7 @@
         counts[k]+=n;
       });
     }
-    return {counts,certitude:obj.certitude??obj.confiance??obj.confidence??obj.reliability??null,remarque:String(obj.remarque||obj.commentaire||''),jeu:obj.jeu==='eastriver'?'eastriver':(obj.jeu==='palace'?'palace':''),five:Number(obj.autres&&obj.autres.five)||0};
+    return {counts,certitude:obj.certitude??obj.confiance??obj.confidence??obj.reliability??null,remarque:String(obj.remarque||obj.commentaire||''),jeu:['moonriver','palace'].includes(obj.jeu)?obj.jeu:(obj.jeu==='eastriver'?'eastriver':''),five:0};
   }
   function isMalformedServerResponse(message){
     return /JSON|array element|Unexpected token|Expected ','|Expected '}'|SyntaxError|parse/i.test(String(message||''));
@@ -249,7 +253,8 @@
     try{
       const response=await fetch(url,{
         method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-        body:JSON.stringify({image:base64,requestedFormat:'counts'}),signal:controller.signal
+        // Choix enregistre dans le Live et partage avec tous les joueurs.
+        body:JSON.stringify({image:base64,requestedFormat:'counts',chipSet:root.BPTLive3?.getState?.()?.chipSet==='palace'?'palace':'moonriver'}),signal:controller.signal
       });
       // Lire une seule fois la réponse comme texte, afin de différencier un HTTP 502
       // renvoyant du HTML d'un vrai JSON IA incorrect après un HTTP 200.
@@ -324,9 +329,10 @@
       const n=KEYS.reduce((sum,k)=>sum+result.counts[k],0);
       const total=totalOf(result.counts),reliability=normalizeReliability(result.certitude);
       const timing='Durée : '+sec(elapsedMs(started))+' (préparation '+sec(prepMs)+' ; serveur '+sec(serverMs)+')';
-      const JEU={palace:'Chips Palace',eastriver:'East River Poker'};
-      const notes=[];if(result.jeu)notes.push('Jeu reconnu : '+JEU[result.jeu]+'.');
-      if(result.five>0)notes.push(result.five+' jeton'+(result.five>1?'s':'')+' de 5 (rouge East River) non compté'+(result.five>1?'s':'')+' : pas de ligne dans le tableau.');
+      const JEU={palace:'Chips Palace',moonriver:'Moon River'};
+      const selectedSet=root.BPTLive3?.getState?.()?.chipSet==='palace'?'palace':'moonriver';
+      const notes=['Jeu de la partie : '+JEU[selectedSet]+'.'];
+      if(result.jeu&&result.jeu!==selectedSet)notes.push('Attention : le serveur IA ne respecte pas encore le jeu sélectionné. Mettre à jour le Worker Cloudflare.');
       if(result.remarque)notes.push(result.remarque);
       showAnalysis('done',{total,chips:n,reliability,remark:notes.join(' '),timing});
       samePhotoRetryAvailable=false;show($('bptStackRetrySame'),false);
