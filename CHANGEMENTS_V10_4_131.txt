@@ -1,4 +1,4 @@
-BPT v10.4.131 — Classement des joueurs par stack
+BPT v10.4.133 — Classement des joueurs par stack
 
 - Dans Live → Joueurs, les joueurs encore en lice sont tries par stack valide decroissant.
 - Un joueur sans stack valide se trouve apres les joueurs ayant une valeur connue.

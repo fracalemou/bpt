@@ -1,4 +1,4 @@
-BPT 10.4.131 — Suivi des stacks des joueurs en lice
+BPT 10.4.133 — Suivi des stacks des joueurs en lice
 
 - En cliquant sur la tuile Joueurs, chaque joueur encore en lice affiche son dernier stack validé.
 - Affiche la durée depuis l'enregistrement synchronisé (ex. « il y a 12 min »).

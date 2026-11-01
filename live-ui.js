@@ -2,6 +2,16 @@
   const $=id=>document.getElementById(id);
   const esc=s=>String(s??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]||c));
   const fmt=n=>Math.round(Number(n)||0).toLocaleString('fr-FR');
+  function ageSince(timestamp){
+    const t=Number(timestamp)||0;if(!t)return '—';
+    const sec=Math.max(0,Math.floor((Date.now()-t)/1000));
+    if(sec<60)return 'il y a moins d’une minute';
+    const min=Math.floor(sec/60);
+    if(min<60)return 'il y a '+min+' min';
+    const h=Math.floor(min/60),m=min%60;
+    return 'il y a '+h+' h'+(m?' '+m.toString().padStart(2,'0'):'');
+  }
+
   const STANDARD_SB=[25,50,75,100,150,200,300,400,500,600,800,1000,1200,1500,2000,2500,3000,4000,5000,6000,8000,10000,12000,15000,20000];
   let repairTried=false;
   function setText(element,value){
@@ -57,7 +67,7 @@
     <div class="bpt484-actions">
       <button class="bpt484-pause" data-do="pause">Pause</button><button class="bpt484-out" data-do="out">Sortir un joueur</button><button class="bpt484-follow" data-menu-toggle="follow" aria-expanded="false">Suivi de partie</button><button class="bpt484-tools" data-menu-toggle="tools" aria-expanded="false">Outils</button><button class="bpt484-takeover" data-do="takeover">Demander la reprise</button>
       <div class="bpt484-action-menu" data-menu-panel="follow" hidden><button class="bpt484-enjeux" data-do="enjeux">🏆 Enjeux de la partie</button><button class="bpt484-bets" data-do="bets">🎲 Paris de la table</button><button class="bpt484-personal" data-do="personal-bounty">🎯 Bounty</button><button class="bpt484-live-ranking" data-do="live-ranking">📊 Classement en direct</button></div>
-      <div class="bpt484-action-menu" data-menu-panel="tools" hidden><button data-do="timer">⏱ Timer de réflexion</button><button data-do="odds">🧮 Calcul de cotes</button><button type="button" class="bpt-stack-open">🪙 Scanner un stack</button><button data-do="hide-live">👁 Masquer le Live</button><button class="bpt484-end" data-do="end">⏹ Terminer le Live</button></div>
+      <div class="bpt484-action-menu" data-menu-panel="tools" hidden><button data-do="timer">⏱ Timer de réflexion</button><button data-do="odds">🧮 Calcul de cotes</button><button type="button" class="bpt-stack-open">🪙 Comptage stack</button><button data-do="hide-live">👁 Masquer le Live</button><button class="bpt484-end" data-do="end">⏹ Terminer le Live</button></div>
     </div>
   </div>`}
   function install(){
@@ -248,7 +258,7 @@
   }
   function ensureModal(){if($('bpt484Modal'))return;document.body.insertAdjacentHTML('beforeend','<div id="bpt484Modal" class="bpt484-modal"><div id="bpt484Dialog" class="bpt484-dialog"></div></div>');$('bpt484Modal').onclick=e=>{if(e.target===$('bpt484Modal'))closeModal()}}
   function closeModal(){$('bpt484Modal')?.classList.remove('open')}
-  function open(title,body){closeActionMenus();ensureModal();$('bpt484Dialog').onclick=null;$('bpt484Dialog').innerHTML=`<button class="bpt484-close" data-modal-close>×</button><h2>${title}</h2>${body}`;$('bpt484Modal').classList.add('open');$('bpt484Dialog').querySelector('[data-modal-close]')?.addEventListener('click',closeModal)}
+  function open(title,body){closeActionMenus();ensureModal();$('bpt484Dialog').dataset.panel='';$('bpt484Dialog').onclick=null;$('bpt484Dialog').innerHTML=`<button class="bpt484-close" data-modal-close>×</button><h2>${title}</h2>${body}`;$('bpt484Modal').classList.add('open');$('bpt484Dialog').querySelector('[data-modal-close]')?.addEventListener('click',closeModal)}
   async function doit(a,fs){
     const x=api();
     try{
@@ -307,6 +317,15 @@
     if(kind==='pause')await x.toggleStartPause?.();
     setTimeout(sync,60);
   }
+  function refreshPlayerStacks(){
+    const dialog=$('bpt484Dialog'),modal=$('bpt484Modal');
+    if(!dialog||dialog.dataset.panel!=='players'||!modal?.classList.contains('open'))return;
+    const oldScroll=dialog.scrollTop;
+    info('players');
+    const next=$('bpt484Dialog');if(next)next.scrollTop=oldScroll;
+  }
+  document.addEventListener('bpt-stack-records-updated',refreshPlayerStacks);
+  setInterval(refreshPlayerStacks,30000);
   function info(type){
     const st=state();
     if(type==='players'){
@@ -316,16 +335,35 @@
       const outs=ps.filter(p=>p.status==='out').sort((a,b)=>Number(b.outAt||0)-Number(a.outAt||0));
       const other=ps.filter(p=>!['in','out','winner'].includes(String(p.status||'')));
       const lastOut=outs[0]||null,canManage=!!api()?.isOwner?.();
-      const ordered=[...winner,...alive,...other,...outs];
+      const stackStore=window.BPTStackSync;
+      stackStore?.trackSession?.();
+      const stackStatus=stackStore?.getStatus?.()||{};
+      // Ne classer que les joueurs encore en lice. Les releves sans valeur exploitable
+      // restent en fin de liste. En cas d'egalite, conserver l'ordre de la partie.
+      // Le tri est recalcule lors de chaque actualisation Firebase.
+      const activeRanked=[...winner,...alive].map((player,index)=>{
+        const record=stackStatus.loaded?stackStore?.getLatest?.(player.name):null;
+        const amount=record===null||record===undefined?null:Number(record.total);
+        return {player,index,amount:Number.isFinite(amount)&&amount>=0?amount:null};
+      }).sort((a,b)=>{
+        if(a.amount===null)return b.amount===null?a.index-b.index:1;
+        if(b.amount===null)return -1;
+        return b.amount-a.amount||a.index-b.index;
+      }).map(x=>x.player);
+      const ordered=[...activeRanked,...other,...outs];
       const rows=ordered.map(p=>{
         const out=p.status==='out',win=p.status==='winner',lv=Number(p.outLevel)||0;
         const isLast=!!(canManage&&lastOut&&p.name===lastOut.name&&Number(p.outAt||0)===Number(lastOut.outAt||0));
         const status=win?'Vainqueur':out?(lv?`Éliminé · niveau ${lv}`:'Éliminé'):'En jeu';
         const detail=out&&p.killer?` · par ${esc(p.killer)}`:'';
-        return `<div class="bpt484-row${isLast?' bpt484-last-out':''}" ${isLast?'data-last-out="1" tabindex="0" role="button" title="Corriger ou annuler cette élimination"':''}><span>${esc(p.name||'—')}${isLast?' <small>· dernière élimination</small>':''}</span><b>${status}${detail}</b></div>`;
+        const active=!out&&(p.status==='in'||win);
+        const latest=active&&stackStatus.loaded?stackStore?.getLatest?.(p.name):null;
+        const stackLabel=!active?'':!stackStatus.connected?'Stack indisponible':!stackStatus.loaded?(stackStatus.error?'Synchronisation indisponible':'Chargement du stack…'):
+          latest?`${fmt(latest.total)} points · ${ageSince(latest.at)}`:'Stack non renseigné';
+        return `<div class="bpt484-row${isLast?' bpt484-last-out':''}" ${isLast?'data-last-out="1" tabindex="0" role="button" title="Corriger ou annuler cette élimination"':''}><span>${esc(p.name||'—')}${isLast?' <small>· dernière élimination</small>':''}</span><b>${status}${detail}${active?`<small class="bpt484-player-stack">${esc(stackLabel)}</small>`:''}</b></div>`;
       }).join('');
       open('Joueurs',rows||'<p>Aucun joueur disponible.</p>');
-      const dlg=$('bpt484Dialog');
+      const dlg=$('bpt484Dialog');if(dlg)dlg.dataset.panel='players';
       const lastRow=dlg?.querySelector('[data-last-out="1"]');
       const openCorrection=()=>{
         if(!canManage||!lastOut)return;
@@ -644,7 +682,7 @@
     if(first)card.focus({preventScroll:true});
   }
   function sync(){
-    const st=state();queuePublishedLiveSummary(st);if(!st?.active)return;
+    const st=state();window.BPTStackSync?.trackSession?.();queuePublishedLiveSummary(st);if(!st?.active)return;
     const idx=Math.max(0,Math.min(200,Number(st.levelIndex)||0)),cur=blindAt(idx),nx=blindAt(idx+1);
     const players=Array.isArray(st.players)?st.players:[],alive=players.filter(p=>p.status==='in').length+(players.some(p=>p.status==='winner')?1:0);
     const total=players.length*Number(st.startStack||0),avg=alive?total/alive:0,avgBB=cur.bb?Math.round(avg/cur.bb):0;

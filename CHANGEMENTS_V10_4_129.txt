@@ -1,4 +1,4 @@
-BPT 10.4.131 — Modifications du comptage stack
+BPT 10.4.133 — Modifications du comptage stack
 
 - Outils : « Comptage stack ».
 - Plus de bouton « Copier le total » : le joueur valide son stack.

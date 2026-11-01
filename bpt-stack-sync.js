@@ -1,4 +1,4 @@
-/* BPT v10.4.131 — stacks par joueur et par partie, synchronisés dans Firebase RTDB.
+/* BPT v10.4.133 — stacks par joueur et par partie, synchronisés dans Firebase RTDB.
  * Une validation réussie est la seule opération qui crée un relevé.
  * IMPORTANT : règles Firebase de sécurité du projet à renforcer (l'auth anonyme seule ne
  * prouve pas l'identité métier du joueur). */

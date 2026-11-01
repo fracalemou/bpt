@@ -1,4 +1,4 @@
-BPT 10.4.131 — correctif du traitement des résultats IA
+BPT 10.4.133 — correctif du traitement des résultats IA
 
 La version 10.4.127 lançait JSON.parse() sur du texte libre renvoyé par
 le Worker du club. Quand le modèle renvoyait un tableau mal formé, le

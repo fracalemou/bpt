@@ -1,0 +1,10 @@
+BPT v10.4.133 — retour au Live après validation du stack
+
+- Cliquer sur « Valider le stack » déclenche l’enregistrement Firebase.
+- Après succès confirmé, la fenêtre du compteur se ferme automatiquement et le Live redevient visible.
+- Si la sauvegarde échoue, si le stack est vide ou si l’analyse est en cours, la fenêtre reste ouverte.
+- L’historique, les 7 valeurs, l’IA, la synchronisation et le classement sont inchangés.
+- Versions des ressources et du cache PWA mises à jour vers 10.4.133.
+
+Déploiement : extraire le contenu à la racine du dépôt GitHub fracalemou/bpt.
+Ne pas ajouter le dossier parent, mais bien son contenu.

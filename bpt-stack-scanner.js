@@ -1,6 +1,6 @@
 (function(){
 'use strict';
-const CHIPS=[{value:25,name:'Vert / marron',color:'#6fc64a'},{value:50,name:'Bleu / blanc',color:'#169cd7'},{value:100,name:'Noir / rose',color:'#34333e'},{value:500,name:'Violet / blanc',color:'#4e376b'},{value:5000,name:'Marron / vert',color:'#805334'},{value:10000,name:'Rouge / blanc',color:'#d74750'}];
+const CHIPS=[{value:25,name:'Vert',color:'#69BC48'},{value:50,name:'Bleu',color:'#159ED1'},{value:100,name:'Noir',color:'#292B35'},{value:500,name:'Violet',color:'#7850B2'},{value:1000,name:'Jaune',color:'#F3CC27'},{value:5000,name:'Rose',color:'#E65B9B'},{value:10000,name:'Orange',color:'#ED882A'}];
 const $=id=>document.getElementById(id);
 const fmt=n=>n.toLocaleString('fr-FR');
 let previousFocus=null,photoUrl=null;
@@ -13,7 +13,7 @@ CHIPS.forEach(c=>{const row=document.createElement('div');row.className='bpt-sta
  $('bptStackClose').addEventListener('click',close);modal.addEventListener('click',e=>{if(e.target===modal)close()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)close()});
  lines.addEventListener('click',e=>{const b=e.target.closest('[data-delta]');if(!b)return;const i=b.parentElement.querySelector('input');i.value=Math.max(0,(parseInt(i.value,10)||0)+Number(b.dataset.delta));update()});lines.addEventListener('input',update);
  $('bptStackReset').addEventListener('click',()=>{lines.querySelectorAll('input').forEach(i=>i.value=0);update()});
- $('bptStackCopy').addEventListener('click',async()=>{let t=$('bptStackTotal').textContent.replace(/[^0-9]/g,'');try{await navigator.clipboard.writeText(t);$('bptStackMessage').textContent='Total copié : '+fmt(Number(t));}catch(_){$('bptStackMessage').textContent='Copie non disponible : '+fmt(Number(t));}});
+
  $('bptStackFile').addEventListener('change',e=>{const file=e.target.files&&e.target.files[0];if(!file)return;if(!file.type.startsWith('image/')){$('bptStackMessage').textContent='Choisissez une image.';return;}if(photoUrl)URL.revokeObjectURL(photoUrl);photoUrl=URL.createObjectURL(file);$('bptStackPreview').src=photoUrl;$('bptStackPhotoWrap').hidden=false;$('bptStackZoom').value=100;zoom();});
  function zoom(){const n=Number($('bptStackZoom').value);$('bptStackPreview').style.width=n+'%';$('bptStackZoomVal').textContent=n+' %';} $('bptStackZoom').addEventListener('input',zoom);
  window.addEventListener('pagehide',()=>{if(photoUrl)URL.revokeObjectURL(photoUrl)});update();

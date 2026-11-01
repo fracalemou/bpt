@@ -1,0 +1,14 @@
+BPT Live v10.4.133 — optimisation du délai d’analyse IA (sans modification des stacks)
+
+1. Une seule requête IA par photo : suppression de la deuxième analyse automatique après JSON malformé.
+2. Délai maximal de la requête réduit à 35 secondes ; en cas d’échec, le comptage manuel reste disponible.
+3. Compression JPEG asynchrone à 73 % (résolution maximale 1 280 px conservée pour garder les détails des tranches).
+4. Authentification Firebase et préparation photo en parallèle.
+5. Affichage de la durée réelle dans l’encart : préparation et serveur séparés ; diagnostic local sans enregistrer ni transmettre les photos.
+6. Annulation de la requête en cours lors d'un retour ou d'un changement de mode.
+
+IMPORTANT : le temps d'inférence Gemini dépend du Cloudflare Worker du club.
+Pour améliorer réellement le serveur, imposer un JSON structuré, limiter le nombre de tokens de sortie et éventuellement réduire le raisonnement (si le modèle le supporte).
+Voir OPTIMISATION_CLOUDFLARE_GEMINI.md.
+
+Le comptage manuel, les valeurs de jetons, l’historique, la tuile Joueurs et la validation sont inchangés.
