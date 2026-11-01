@@ -347,7 +347,11 @@
       if(myRequest!==requestNo)return;
       if(step!=='work')setStep('work');
       reset();
-      const reason=err.name==='AbortError'?'Le serveur IA dépasse '+Math.round(AI_REQUEST_TIMEOUT_MS/1000)+' secondes. Réessaie plus tard.':(err&&err.message||'Erreur inconnue');
+      const reason=err.name==='AbortError'
+        ? 'Le serveur IA dépasse '+Math.round(AI_REQUEST_TIMEOUT_MS/1000)+' secondes. Réessaie plus tard.'
+        : err instanceof TypeError && /fetch|network|failed|connexion|réseau/i.test(err.message||'')
+          ? 'Connexion au serveur IA impossible. Vérifie que le Worker est accessible et que son déploiement et les autorisations CORS sont corrects.'
+          : (err&&err.message||'Erreur inconnue');
       const timing='Durée : '+sec(elapsedMs(started))+' (préparation '+sec(prepMs)+' ; serveur '+sec(serverMs)+')';
       showAnalysis('error',{message:reason,timing});
       samePhotoRetryAvailable=!!lastPhotoFile;show($('bptStackRetrySame'),samePhotoRetryAvailable);

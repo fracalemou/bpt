@@ -9941,7 +9941,7 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
 /* v10.4.133 — dernier stack dans la tuile Joueurs */
 .bpt484-player-stack{display:block;margin-top:4px;font-size:.83em;color:#8cdacc;font-weight:650;white-space:normal}
 
-/* BPT 10.4.141 : rendre le jeu de jetons visible, même sur un petit téléphone. */
+/* BPT 10.4.142 : rendre le jeu de jetons visible, même sur un petit téléphone. */
 #live3PrepStep1 .bpt-chipset-field{
   grid-column:1 / -1!important;
   display:grid!important;
