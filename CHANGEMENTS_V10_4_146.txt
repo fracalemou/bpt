@@ -1,0 +1,1 @@
+Création de partie Live → étape 1 : deux boutons radio bien visibles Moon River (par défaut) et Chips Palace, hors de la grille compactée. La valeur enregistrée dans Firebase et envoyée au scanner reste chipSet. Cache PWA version 10.4.146.

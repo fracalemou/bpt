@@ -2292,6 +2292,7 @@ function connectionDeviceLabel(){
     for(const name of selected){if(!(db?.players||[]).some(p=>p.name===name&&p.active===true))live3TemporaryPlayers.add(name);}
     const values={live3Location:draft.location,live3Date:draft.date,live3Stack:draft.startStack,live3BuyIn:draft.buyIn,live3TargetHours:draft.targetHours,live3ChipSet:draft.chipSet==="palace"?"palace":"moonriver",live3StructureMode:draft.paceAdaptive===true?"adaptive":"classic"};
     for(const [id,value] of Object.entries(values)){const field=$3(id);if(field)field.value=value??'';}
+    document.querySelectorAll('input[name="live3ChipChoice"]').forEach(r=>{r.checked=r.value===($3("live3ChipSet")?.value||"moonriver");});
     current=result.snapshot.val();
     prepWizardStep=1;
     await closeFullscreen();render();setPrepWizardStep(1);renderPrepPlayers();
@@ -4032,6 +4033,13 @@ async function requestTakeover(){
       }
     });
 
+    // Valeur unique utilisée par Firebase et par le scanner IA ; radios lisibles sur mobile.
+    const chipSelect=$3("live3ChipSet");
+    const chipRadios=[...document.querySelectorAll('input[name="live3ChipChoice"]')];
+    chipRadios.forEach(r=>r.addEventListener('change',()=>{if(r.checked&&chipSelect)chipSelect.value=r.value;}));
+    const syncChipRadios=()=>chipRadios.forEach(r=>{r.checked=r.value===(chipSelect?.value||'moonriver');});
+    chipSelect?.addEventListener('change',syncChipRadios);
+    syncChipRadios();
     $3("live3PrepNextBtn")?.addEventListener("click",goToPlayerSelection);
     $3("live3PrepBackBtn")?.addEventListener("click",()=>setPrepWizardStep(1));
     $3("live3CreateBtn")?.addEventListener("click",createLive);

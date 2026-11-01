@@ -1,1 +1,5 @@
-BPT 10.4.142 : diagnostic réseau lisible pour l'analyse IA. Aucun changement au comptage de jetons, à la sauvegarde Firebase ou aux règles du Live.
+- Echec reseau/CORS du service IA : message utilisateur explicite, sans "Failed to fetch" brut.
+- Aucun changement du moteur de comptage des jetons.
+- Correspondance Moon River et Chips Palace conservee.
+- Cache PWA et references versionnes 10.4.142.
+- Pour un diagnostic complet, deployer aussi le Worker Cloudflare 10.4.142 avec /health.

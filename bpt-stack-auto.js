@@ -251,11 +251,21 @@
     const timeout=setTimeout(()=>controller.abort(),AI_REQUEST_TIMEOUT_MS);
     const t0=performance.now();
     try{
-      const response=await fetch(url,{
-        method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-        // Choix enregistre dans le Live et partage avec tous les joueurs.
-        body:JSON.stringify({image:base64,requestedFormat:'counts',chipSet:root.BPTLive3?.getState?.()?.chipSet==='palace'?'palace':'moonriver'}),signal:controller.signal
-      });
+      let response;
+      try{
+        response=await fetch(url,{
+          method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+          // Choix enregistre dans le Live et partage avec tous les joueurs.
+          body:JSON.stringify({image:base64,requestedFormat:'counts',chipSet:root.BPTLive3?.getState?.()?.chipSet==='palace'?'palace':'moonriver'}),signal:controller.signal
+        });
+      }catch(networkErr){
+        if(networkErr?.name==='AbortError')throw networkErr;
+        if(networkErr instanceof TypeError || /failed to fetch|networkerror|load failed/i.test(String(networkErr?.message||''))){
+          console.warn('[BPT scanner IA] échec réseau/CORS',{origin:location.origin,service:url.replace(/\?.*$/, ''),errorName:networkErr?.name||'TypeError'});
+          throw aiError('Connexion au serveur IA impossible (réseau ou CORS). Vérifie le Worker Cloudflare via /health.','AI_NETWORK');
+        }
+        throw networkErr;
+      }
       // Lire une seule fois la réponse comme texte, afin de différencier un HTTP 502
       // renvoyant du HTML d'un vrai JSON IA incorrect après un HTTP 200.
       const body=await response.text();
@@ -347,11 +357,7 @@
       if(myRequest!==requestNo)return;
       if(step!=='work')setStep('work');
       reset();
-      const reason=err.name==='AbortError'
-        ? 'Le serveur IA dépasse '+Math.round(AI_REQUEST_TIMEOUT_MS/1000)+' secondes. Réessaie plus tard.'
-        : err instanceof TypeError && /fetch|network|failed|connexion|réseau/i.test(err.message||'')
-          ? 'Connexion au serveur IA impossible. Vérifie que le Worker est accessible et que son déploiement et les autorisations CORS sont corrects.'
-          : (err&&err.message||'Erreur inconnue');
+      const reason=err.name==='AbortError'?'Le serveur IA dépasse '+Math.round(AI_REQUEST_TIMEOUT_MS/1000)+' secondes. Réessaie plus tard.':(err&&err.message||'Erreur inconnue');
       const timing='Durée : '+sec(elapsedMs(started))+' (préparation '+sec(prepMs)+' ; serveur '+sec(serverMs)+')';
       showAnalysis('error',{message:reason,timing});
       samePhotoRetryAvailable=!!lastPhotoFile;show($('bptStackRetrySame'),samePhotoRetryAvailable);
