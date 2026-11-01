@@ -1,14 +1,7 @@
-BPT Live — version 10.4.125
+BPT Live — version 10.4.126 — Scanner de stack simplifié
 
-Analyse par IA (bouton « Analyser par IA ») :
-- Fournisseur par défaut : Google Gemini, palier GRATUIT (clé gratuite sur aistudio.google.com > Get API key).
-  Modèle par défaut : gemini-flash-latest (modifiable dans Réglages IA). Limites gratuites non publiées : en cas d'erreur 429, réessayer plus tard.
-  Attention : sur le palier gratuit Google peut utiliser les photos pour améliorer ses produits ; dans l'UE/EEE ses conditions prévoient
-  les services payants pour une appli mise à disposition d'utilisateurs. Usage personnel ou test : acceptable ; en cas de doute, utiliser la clé payante.
-- Option : Anthropic Claude (payant), clé API ou proxy.
-- L'IA marque chaque jeton sur la photo ; toucher un marqueur le supprime ; choisir une couleur puis toucher la photo ajoute un jeton.
-  Le tableau des quantités et le total suivent les marqueurs.
-- La clé est stockée dans le navigateur de l'appareil uniquement. La photo n'est envoyée que lorsqu'on appuie sur le bouton.
-Mode local hors ligne : « Compter une pile de profil » (cadre autour d'une pile vue de côté).
-Photos de référence utilisateur : 36 200 ; 56 750 ; 56 525.
-Déploiement : extraire à la racine du dépôt GitHub Pages, forcer le rechargement du cache PWA (10.4.125).
+Écran d'accueil : « Analyse par IA » (on prend la photo, l'IA compte) ou « Comptage manuel ».
+Après l'analyse IA : marqueurs sur la photo (toucher un marqueur = le retirer ; choisir une couleur puis toucher la photo = ajouter),
+et le tableau reste modifiable avec + / −. « Valider le comptage » enregistre la saisie dans l'historique de CET appareil
+(5 derniers affichés, bouton Reprendre / ✕). Rien n'est écrit dans le Live ni dans Firebase.
+IA : serveur du club (bpt-ai-config.js, proxyUrl) ou ta propre clé Gemini dans « Réglages IA ».

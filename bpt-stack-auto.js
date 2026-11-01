@@ -1,4 +1,4 @@
-/* BPT 10.4.125 — comptage de pile VUE DE CÔTÉ.
+/* BPT 10.4.126 — comptage de pile VUE DE CÔTÉ.
    Principe : l'utilisateur entoure la pile ; la largeur de la pile = diamètre du jeton (≈39 mm), l'épaisseur
    d'un jeton (≈3,3 mm) s'en déduit (ratio ≈11,8) et peut être affinée par la périodicité des jointures.
    Chaque ligne de pixels reçoit une couleur (vote majoritaire), on découpe en bandes de même couleur,
@@ -131,7 +131,10 @@ function applyCounts(counts){
  $('bptStackLines').dispatchEvent(new Event('input',{bubbles:true}));}
 const NAMES_FR={green:'vert',blue:'bleu',black:'noir',purple:'violet',brown:'marron',red:'rouge'};
 function aiSummary(){const c=chipCounts(aiChips);return KEYS.filter(x=>c[x]).map(x=>c[x]+' '+NAMES_FR[x]).join(' · ')||'aucun jeton';}
-function aiSync(){applyCounts(chipCounts(aiChips));$('bptStackBands').textContent='Marqueurs : '+aiSummary()+(aiInfo?' — IA : certitude '+aiInfo.certitude+(aiInfo.remarque?'. '+aiInfo.remarque:''):'');redraw();}
+function bandsText(){$('bptStackBands').textContent=aiInfo?('IA : certitude '+aiInfo.certitude+(aiInfo.remarque?'. '+aiInfo.remarque:'')):'';}
+function aiSync(){applyCounts(chipCounts(aiChips));bandsText();redraw();}
+function adjust(key,d){const line=[...document.querySelectorAll('#bptStackLines .bpt-stack-line')].find(l=>Number(l.dataset.value)===VAL[key]);if(!line)return;const i=line.querySelector('input');i.value=Math.max(0,(parseInt(i.value,10)||0)+d);$('bptStackLines').dispatchEvent(new Event('input',{bubbles:true}));}
+function readTable(){const c={};KEYS.forEach(k=>c[k]=0);document.querySelectorAll('#bptStackLines .bpt-stack-line').forEach(l=>{const k=KEYS[ROW_VALUE_ORDER.indexOf(Number(l.dataset.value))];if(k)c[k]=Math.max(0,parseInt(l.querySelector('input').value,10)||0);});return c;}
 function buildAI(){
  const auto=$('bptStackAuto');if(!auto||$('bptStackAI'))return;
  const b=document.createElement('button');b.type='button';b.id='bptStackAI';b.className='bpt-stack-auto';b.textContent='Analyser par IA (jetons à plat, piles, éventail)';
@@ -200,8 +203,8 @@ async function loadImage(file){
  const c=document.createElement('canvas');c.width=Math.round(W*s);c.height=Math.round(H*s);c.getContext('2d').drawImage(src,0,0,c.width,c.height);if(src.close)src.close();return c;}
 
 function aiTap(p){const R=Math.max(10,sel.width/32);let bi=-1,bd=1e9;aiChips.forEach((j,i)=>{const d=Math.hypot(j.x*sel.width-p.x,j.y*sel.height-p.y);if(d<bd){bd=d;bi=i;}});
- if(bi>=0&&bd<=R*1.4){aiChips.splice(bi,1);aiSync();status(aiChips.length+' jeton(s) marqué(s).');return;}
- if(aiTool){aiChips.push({c:aiTool,x:p.x/sel.width,y:p.y/sel.height});aiSync();status(aiChips.length+' jeton(s) marqué(s).');}
+ if(bi>=0&&bd<=R*1.4){const rm=aiChips.splice(bi,1)[0];adjust(rm.c,-1);bandsText();redraw();status('Jeton retiré.');return;}
+ if(aiTool){aiChips.push({c:aiTool,x:p.x/sel.width,y:p.y/sel.height});adjust(aiTool,1);bandsText();redraw();status('Jeton '+NAMES_FR[aiTool]+' ajouté.');}
  else status('Choisis d’abord une couleur pour ajouter un jeton, ou touche un marqueur pour le supprimer.');}
 function drawMarkers(ctx){const R=Math.max(10,sel.width/32);ctx.font='bold '+Math.round(R*.95)+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
  aiChips.forEach((j,i)=>{const x=j.x*sel.width,y=j.y*sel.height;ctx.beginPath();ctx.arc(x,y,R,0,Math.PI*2);ctx.fillStyle=HEX[j.c];ctx.fill();ctx.lineWidth=Math.max(2,R/5);ctx.strokeStyle='#fff';ctx.stroke();ctx.lineWidth=Math.max(2,R/6);ctx.strokeStyle='#000b';ctx.strokeText(String(i+1),x,y);ctx.fillStyle='#fff';ctx.fillText(String(i+1),x,y);});}
@@ -244,8 +247,56 @@ function run(){
  redraw();
 }
 
+/* ---------------- Parcours simplifié : accueil, analyse IA ou manuel, validation ---------------- */
+let step='home',pendingAI=false,currentMode='manuel';
+function histGet(){try{return JSON.parse(localStorage.getItem('bptStackHistory')||'[]');}catch(_){return [];}}
+function histSet(a){try{localStorage.setItem('bptStackHistory',JSON.stringify(a.slice(0,20)));}catch(_){}}
+function totalOf(c){return KEYS.reduce((t,k)=>t+(c[k]||0)*VAL[k],0);}
+function renderHist(){const box=$('bptStackHist');if(!box)return;const h=histGet();
+ box.innerHTML=h.length?('<p class="bpt-stack-tip"><strong>Derniers comptages enregistrés (sur cet appareil)</strong></p>'+h.slice(0,5).map((e,i)=>'<div class="bpt-hist-row"><span>'+new Date(e.t).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' · <b>'+fmt(e.total)+'</b> · '+e.chips+' jeton'+(e.chips>1?'s':'')+' · '+e.mode+'</span><button type="button" data-hr="'+i+'">Reprendre</button><button type="button" data-hd="'+i+'" aria-label="Supprimer">✕</button></div>').join('')):'';}
+function setStep(st){step=st;const home=st==='home';
+ const show=(el,on,disp)=>{if(el)el.style.display=on?(disp||''):'none';};
+ show($('bptStackHome'),home);
+ ['bptStackLines','bptStackAutoStatus','bptStackMessage','bptStackWorkBar','bptStackValidate'].forEach(id=>show($(id),!home));
+ document.querySelectorAll('#bptStackModal .bpt-stack-summary').forEach(e=>show(e,!home,'flex'));
+ document.querySelectorAll('#bptStackModal .bpt-stack-actions').forEach(e=>show(e,!home,'flex'));
+ show($('bptStackSel'),!home&&currentMode==='ia'&&!!bmp);
+ if(home){const b=$('bptStackAutoBadge');if(b)b.hidden=true;renderHist();}}
+function goHome(msg){setStep('home');const m=$('bptStackHomeMsg');if(m)m.textContent=msg||'';}
+function resetAll(){document.querySelectorAll('#bptStackLines input').forEach(i=>i.value=0);$('bptStackLines').dispatchEvent(new Event('input',{bubbles:true}));aiChips=[];aiInfo=null;bandsText();if(sel&&view)redraw();}
+function startAI(){pendingAI=true;const f=$('bptStackFile');f.value='';f.click();}
+function startManual(){currentMode='manuel';bmp=null;view=null;$('bptStackSel').hidden=true;resetAll();setStep('work');$('bptStackAutoStatus').textContent='Saisis les quantités avec + et −, puis valide.';}
+function validate(){const c=readTable();const chips=KEYS.reduce((n,k)=>n+c[k],0);if(!chips){status('Rien à enregistrer : le comptage est vide.');return;}
+ const h=histGet();h.unshift({t:Date.now(),counts:c,total:totalOf(c),chips,mode:currentMode==='ia'?'IA':'manuel'});histSet(h);
+ const t=totalOf(c);resetAll();goHome('✔ Comptage enregistré : '+fmt(t)+' ('+chips+' jeton'+(chips>1?'s':'')+').');}
+function buildHome(){
+ const body=document.querySelector('#bptStackModal .bpt-stack-body');if(!body||$('bptStackHome'))return;
+ const hide=el=>{if(el)el.style.display='none';};
+ hide(body.querySelector('label.bpt-stack-photo-btn'));hide(body.querySelector(':scope > p.bpt-stack-tip'));hide($('bptStackAuto'));hide($('bptStackAI'));
+ const home=document.createElement('div');home.id='bptStackHome';
+ home.innerHTML='<p id="bptStackHomeMsg" class="bpt-stack-tip" style="color:#9be3a6;font-weight:700"></p>'
+  +'<button type="button" id="bptStackGoAI" class="bpt-home-btn bpt-home-ai"><strong>📷 Analyse par IA</strong><small>Prends une photo de tes jetons : l’IA les compte, tu ajustes si besoin</small></button>'
+  +'<button type="button" id="bptStackGoManual" class="bpt-home-btn"><strong>✍️ Comptage manuel</strong><small>Saisis toi-même les quantités par couleur</small></button><div id="bptStackHist"></div>';
+ body.insertBefore(home,body.firstChild);
+ const bar=document.createElement('div');bar.id='bptStackWorkBar';bar.className='bpt-stack-actions';bar.style.marginBottom='8px';
+ bar.innerHTML='<button type="button" id="bptStackBack">← Retour</button><button type="button" id="bptStackRetry">📷 Nouvelle photo</button>';
+ body.insertBefore(bar,home.nextSibling);
+ const v=document.createElement('button');v.type='button';v.id='bptStackValidate';v.className='bpt-stack-validate';v.textContent='✔ Valider le comptage';
+ const act=body.querySelector('.bpt-stack-actions:not(#bptStackWorkBar)');act.parentNode.insertBefore(v,act);
+ $('bptStackGoAI').addEventListener('click',()=>{currentMode='ia';startAI();});
+ $('bptStackGoManual').addEventListener('click',startManual);
+ $('bptStackBack').addEventListener('click',()=>goHome(''));
+ $('bptStackRetry').addEventListener('click',()=>{currentMode='ia';startAI();});
+ v.addEventListener('click',validate);
+ $('bptStackReset').addEventListener('click',()=>{aiChips=[];aiInfo=null;bandsText();if(sel&&view)redraw();});
+ $('bptStackHist').addEventListener('click',e=>{const r=e.target.closest('[data-hr]'),d=e.target.closest('[data-hd]');const h=histGet();
+  if(d){h.splice(Number(d.dataset.hd),1);histSet(h);renderHist();}
+  if(r){const en=h[Number(r.dataset.hr)];if(en){startManual();applyCounts(en.counts);$('bptStackAutoStatus').textContent='Comptage repris : modifie-le puis valide.';}}});
+ document.addEventListener('click',e=>{if(e.target.closest('.bpt-stack-open'))goHome('');});
+ setStep('home');}
+
 function init(){
- const btn=$('bptStackAuto'),file=$('bptStackFile');if(!btn||!file)return;buildUI();buildAI();
+ const btn=$('bptStackAuto'),file=$('bptStackFile');if(!btn||!file)return;buildUI();buildAI();buildHome();
  btn.textContent='Compter une pile de profil (local)';
  btn.addEventListener('click',()=>{if(!bmp){status('Choisis d’abord une photo.');return;}setMode('box');
   if(!lastBox){const W=sel.width,H=sel.height;lastBox={x0:W*.35,y0:H*.1,x1:W*.65,y1:H*.9};}run();});
@@ -254,9 +305,10 @@ function init(){
   const W=bmp.width,H=bmp.height;
   const scale=Math.min(1,1000/Math.max(W,H));sel.width=Math.round(W*scale);sel.height=Math.round(H*scale);
   view=document.createElement('canvas');view.width=sel.width;view.height=sel.height;view.getContext('2d').drawImage(bmp,0,0,sel.width,sel.height);
-  aiChips=[];aiInfo=null;mode='box';setMode('box');lastBox=null;lastResult=null;$('bptStackThick').value=100;$('bptStackThickVal').textContent='auto';$('bptStackBands').textContent='';
+  aiChips=[];aiInfo=null;currentMode='ia';setMode('ai');lastBox=null;lastResult=null;$('bptStackThick').value=100;$('bptStackThickVal').textContent='auto';$('bptStackBands').textContent='';
   $('bptStackSel').hidden=false;$('bptStackPhotoWrap').hidden=true;redraw();
-  status('Photo chargée. Dessine un cadre autour de la pile (de côté).');});
+  setStep('work');
+  if(pendingAI){pendingAI=false;resetAll();$('bptStackAI').click();}else status('Photo chargée.');});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })(typeof window!=='undefined'?window:globalThis);
