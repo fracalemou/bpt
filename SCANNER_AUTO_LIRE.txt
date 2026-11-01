@@ -1,12 +1,14 @@
-BPT Live — version 10.4.121
+BPT Live — version 10.4.123
 
-Deux modes dans « Scanner un stack » :
-1) Analyser par IA (jetons à plat, éventail, piles en biais) : la photo est envoyée à l'API Anthropic (modèle claude-sonnet-5-5)
-   uniquement quand on appuie sur le bouton ; l'IA renvoie le nombre de jetons par couleur et le tableau se remplit.
-   Réglages IA : clé API (stockée dans le navigateur de l'appareil seulement) OU adresse d'un proxy/serveur à toi (recommandé
-   pour ne pas exposer de clé : le proxy reçoit le même corps JSON que l'API Messages et renvoie sa réponse).
-2) Compter une pile de profil (local, hors ligne) : cadre autour d'une pile photographiée de côté, comptage par bandes de couleur.
-
-Dans tous les cas : estimation à vérifier, corrigeable avec +/−. Aucune donnée n'est écrite dans le Live/Firebase.
-Photos de référence fournies par l'utilisateur : 36 200 (11 jetons) et 56 750 (26 jetons).
-Déploiement : extraire à la racine du dépôt GitHub Pages, forcer le rechargement du cache PWA (10.4.121).
+Analyse par IA (bouton « Analyser par IA ») :
+- Fournisseur par défaut : Google Gemini, palier GRATUIT (clé gratuite sur aistudio.google.com > Get API key).
+  Modèle par défaut : gemini-flash-latest (modifiable dans Réglages IA). Limites gratuites non publiées : en cas d'erreur 429, réessayer plus tard.
+  Attention : sur le palier gratuit Google peut utiliser les photos pour améliorer ses produits ; dans l'UE/EEE ses conditions prévoient
+  les services payants pour une appli mise à disposition d'utilisateurs. Usage personnel ou test : acceptable ; en cas de doute, utiliser la clé payante.
+- Option : Anthropic Claude (payant), clé API ou proxy.
+- L'IA marque chaque jeton sur la photo ; toucher un marqueur le supprime ; choisir une couleur puis toucher la photo ajoute un jeton.
+  Le tableau des quantités et le total suivent les marqueurs.
+- La clé est stockée dans le navigateur de l'appareil uniquement. La photo n'est envoyée que lorsqu'on appuie sur le bouton.
+Mode local hors ligne : « Compter une pile de profil » (cadre autour d'une pile vue de côté).
+Photos de référence utilisateur : 36 200 ; 56 750 ; 56 525.
+Déploiement : extraire à la racine du dépôt GitHub Pages, forcer le rechargement du cache PWA (10.4.123).
