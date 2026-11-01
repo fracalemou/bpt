@@ -3669,7 +3669,7 @@ async function requestTakeover(){
     const next=`${fmt(nx.sb)} / ${fmt(nx.bb)}${nx.ante?` · ante ${fmt(nx.ante)}`:""}`;
 
     $3("live3GameLocation").textContent=current.location||"Live BPT";
-    $3("live3GameMeta").textContent=`${current.date||""} · ${current.players?.length||0} joueurs · ${current.chipSet==="palace"?"Chips Palace":"Moon River"} · organisateur : ${current.ownerLabel||"—"}`;
+    $3("live3GameMeta").textContent=`${current.date||""} · ${current.players?.length||0} joueurs · organisateur : ${current.ownerLabel||"—"}`;
     const structureText=current?.paceAdaptive===true?"Structure · Adaptatif":"Structure · Classique";
     if($3("live3StructureBadge"))$3("live3StructureBadge").textContent=structureText;
     if($3("live3OwnerLabel"))$3("live3OwnerLabel").textContent=`Organisateur · ${current?.ownerLabel||live3OwnerDisplayName()}`;

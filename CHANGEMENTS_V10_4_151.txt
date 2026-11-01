@@ -1,0 +1,5 @@
+V10.4.151
+- Le choix du jeu de jetons n'est plus demandé à la création de la partie (champ masqué, plus affiché dans le détail de la partie).
+- Il se choisit sur l'écran d'analyse IA : Moon River (par défaut) / Chips Palace, mémorisé sur l'appareil.
+- Changer de jeu pendant l'affichage d'un résultat relance l'analyse de la même photo avec la bonne consigne.
+- Le Worker 10.4.150 reste valable sans changement.

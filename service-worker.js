@@ -1,15 +1,15 @@
-const CACHE='bpt-pwa-10.4.150';
+const CACHE='bpt-pwa-10.4.151';
 // Avatars (10.4.53) : fichiers fixes, cache à part conservé d'une version à l'autre.
 // Un avatar modifié doit changer de nom de fichier (ou AVATAR_CACHE de numéro).
 const AVATAR_CACHE='bpt-avatars-v1';
-const ASSETS=['./', './index.html', './app-pc.css?v=10.4.150', './app-tel.css?v=10.4.150', './app-version.js?v=10.4.150', './application.js?v=10.4.150', './bpt-live-mobilefirst.css?v=10.4.150', './bpt-live-mobilefirst.js?v=10.4.150', './bpt-online.js?v=10.4.150', './bpt-live3-module.js?v=10.4.150', './bpt-pwa-unified-action.js?v=10.4.150', './bpt-config-ui.js?v=10.4.150', './bpt-odds.js?v=10.4.150', './bpt-stack-scanner.js?v=10.4.150', './bpt-ai-config.js?v=10.4.150', './bpt-stack-sync.js?v=10.4.150', './bpt-stack-auto.js?v=10.4.150', './bpt-stack-scanner.css?v=10.4.150', './bpt-stack-reminder.js?v=10.4.150', './bpt-stack-reminder.css?v=10.4.150', './firebase-bridge.js?v=10.4.150', './live-betting.js?v=10.4.150', './live-ui.js?v=10.4.150', './mobile-device.js?v=10.4.150', './navigation.js?v=10.4.150', './bpt-share-recap.js?v=10.4.150', './bpt-agenda.js?v=10.4.150', './bpt-my-profile.js?v=10.4.150', './manifest.webmanifest', './icon-192.png', './icon-512.png', './partie-5.jpg'];
+const ASSETS=['./', './index.html', './app-pc.css?v=10.4.151', './app-tel.css?v=10.4.151', './app-version.js?v=10.4.151', './application.js?v=10.4.151', './bpt-live-mobilefirst.css?v=10.4.151', './bpt-live-mobilefirst.js?v=10.4.151', './bpt-online.js?v=10.4.151', './bpt-live3-module.js?v=10.4.151', './bpt-pwa-unified-action.js?v=10.4.151', './bpt-config-ui.js?v=10.4.151', './bpt-odds.js?v=10.4.151', './bpt-stack-scanner.js?v=10.4.151', './bpt-ai-config.js?v=10.4.151', './bpt-stack-sync.js?v=10.4.151', './bpt-stack-auto.js?v=10.4.151', './bpt-stack-scanner.css?v=10.4.151', './bpt-stack-reminder.js?v=10.4.151', './bpt-stack-reminder.css?v=10.4.151', './firebase-bridge.js?v=10.4.151', './live-betting.js?v=10.4.151', './live-ui.js?v=10.4.151', './mobile-device.js?v=10.4.151', './navigation.js?v=10.4.151', './bpt-share-recap.js?v=10.4.151', './bpt-agenda.js?v=10.4.151', './bpt-my-profile.js?v=10.4.151', './manifest.webmanifest', './icon-192.png', './icon-512.png', './partie-5.jpg'];
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
 self.addEventListener('activate',event=>{
   event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE&&k!==AVATAR_CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
 });
-// 10.4.150 — Stratégies :
+// 10.4.151 — Stratégies :
 // - page (index.html) : réseau d'abord, c'est elle qui porte les numéros ?v= et déclenche les mises à jour ;
 // - fichiers de l'appli avec ?v= : cache d'abord (contenu figé pour un numéro donné) → ouverture immédiate ;
 // - bibliothèques Firebase (version dans l'adresse) : cache d'abord ;

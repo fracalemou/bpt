@@ -14,6 +14,10 @@
   let mode='manuel', busy=false, requestNo=0, imageCanvas=null, step='home', editingIndex=null;
   let activeAIAbort=null, lastPhotoFile=null, samePhotoRetryAvailable=false;
   const AI_REQUEST_TIMEOUT_MS=35000; // délai maximal unique : aucun double appel caché
+  // V10.4.151 : le jeu de jetons se choisit au moment de l'analyse (mémorisé sur l'appareil, Moon River par défaut).
+  function scanSet(){try{return localStorage.getItem('bptScanChipSet')==='palace'?'palace':'moonriver';}catch(_){return 'moonriver';}}
+  function setScanSet(v){try{localStorage.setItem('bptScanChipSet',v==='palace'?'palace':'moonriver');}catch(_){}}
+  function syncSetPicker(){document.querySelectorAll('input[name="bptScanSet"]').forEach(r=>{r.checked=r.value===scanSet();});}
   function elapsedMs(from){return Math.max(0,Math.round(performance.now()-from));}
   function sec(ms){return (ms/1000).toLocaleString('fr-FR',{maximumFractionDigits:1})+' s';}
   function stopAI(){if(activeAIAbort){activeAIAbort.abort();activeAIAbort=null;}}
@@ -104,6 +108,7 @@
   function setStep(next){step=next;const home=next==='home';
     show($('bptStackHome'),home);
     show($('bptStackWorkBar'),!home,'flex');
+    show($('bptScanSetPicker'),!home&&mode==='ia','flex');
     show($('bptStackValidate'),!home);
     show($('bptStackLines'),!home);
     show($('bptStackAutoStatus'),!home);
@@ -244,7 +249,7 @@
     return /^[a-zA-Z0-9_.-]{1,60}$/.test(code)?code:'';
   }
   async function callClubAI(base64,token){
-    const chipSetNow=root.BPTLive3?.getState?.()?.chipSet==='palace'?'palace':'moonriver';
+    const chipSetNow=scanSet();
     // Planche de référence (1 petite image en cache) : n'ajoute pas d'attente si absente ou lente (max 1,5 s).
     let referenceSheet=null;
     try{referenceSheet=await Promise.race([root.BPTChipReferences?.getSheet?.(chipSetNow)||null,new Promise(r=>setTimeout(()=>r(null),1500))]);}catch(_){}
@@ -344,15 +349,15 @@
       const n=KEYS.reduce((sum,k)=>sum+result.counts[k],0);
       const total=totalOf(result.counts);
       let reliability=normalizeReliability(result.certitude);
-      const configuredSet=root.BPTLive3?.getState?.()?.chipSet==='palace'?'palace':'moonriver';
+      const configuredSet=scanSet();
       if(result.jeu==='indetermine'||(result.jeu&&result.jeu!==configuredSet))reliability='low';
       const timing='Durée : '+sec(elapsedMs(started))+' (préparation '+sec(prepMs)+' ; serveur '+sec(serverMs)+')';
       const JEU={palace:'Chips Palace',moonriver:'Moon River'};
-      const selectedSet=root.BPTLive3?.getState?.()?.chipSet==='palace'?'palace':'moonriver';
+      const selectedSet=scanSet();
       const detectedSet=JEU[result.jeu]||'Indéterminé';
       const notes=['Jeu détecté : '+detectedSet+'.'];
       if(result.jeu==='indetermine')notes.push('Le jeu n’a pas pu être reconnu avec certitude.');
-      else if(result.jeu!==selectedSet)notes.push('Attention : le jeu détecté diffère du jeu choisi pour la partie ('+JEU[selectedSet]+'). Vérifie les quantités.');
+      else if(result.jeu!==selectedSet)notes.push('Attention : le jeu détecté diffère du jeu choisi ('+JEU[selectedSet]+'). Change le jeu ci-dessous si besoin : la photo sera réanalysée.');
       if(result.remarque)notes.push(result.remarque);
       showAnalysis('done',{total,chips:n,reliability,remark:notes.join(' '),timing});
       samePhotoRetryAvailable=false;show($('bptStackRetrySame'),false);
@@ -384,7 +389,9 @@
       '<div id="bptStackHist"></div>';
     body.insertBefore(home,body.firstChild);
     const toolbar=document.createElement('div');toolbar.id='bptStackWorkBar';toolbar.className='bpt-stack-actions';
-    toolbar.innerHTML='<button type="button" id="bptStackBack">← Retour</button><button type="button" id="bptStackRetry">Nouvelle photo IA</button><button type="button" id="bptStackRetrySame" style="display:none">Réessayer cette photo</button>';
+    toolbar.innerHTML='<button type="button" id="bptStackBack">← Retour</button><button type="button" id="bptStackRetry">Nouvelle photo IA</button><button type="button" id="bptStackRetrySame" style="display:none">Réessayer cette photo</button>'+
+      '<fieldset id="bptScanSetPicker" style="border:0;padding:0;margin:8px 0 0;display:flex;gap:14px;flex-wrap:wrap;width:100%"><legend style="font-size:.85em;opacity:.8">Jeu de jetons de la photo</legend>'+
+      '<label><input type="radio" name="bptScanSet" value="moonriver"> Moon River</label><label><input type="radio" name="bptScanSet" value="palace"> Chips Palace</label></fieldset>';
     body.insertBefore(toolbar,home.nextSibling);
     const validateButton=document.createElement('button');validateButton.type='button';validateButton.id='bptStackValidate';
     validateButton.className='bpt-stack-validate';validateButton.textContent='Valider le stack';
@@ -395,6 +402,12 @@
     $('bptStackGoAI').addEventListener('click',selectPhoto);
     $('bptStackRetry').addEventListener('click',selectPhoto);
     $('bptStackRetrySame').addEventListener('click',()=>{if(lastPhotoFile&&!busy)processPhoto(lastPhotoFile);});
+    syncSetPicker();
+    document.querySelectorAll('input[name="bptScanSet"]').forEach(r=>r.addEventListener('change',()=>{
+      if(!r.checked)return;setScanSet(r.value);
+      // Jeu corrigé après coup : l'analyse repart sur la même photo avec la bonne consigne.
+      if(mode==='ia'&&lastPhotoFile&&!busy)processPhoto(lastPhotoFile);
+    }));
     $('bptStackBack').addEventListener('click',()=>goHome());
     validateButton.addEventListener('click',validate);
     $('bptStackFile').addEventListener('change',event=>{
