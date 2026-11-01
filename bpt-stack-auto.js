@@ -1,4 +1,4 @@
-/* BPT 10.4.123 — comptage de pile VUE DE CÔTÉ.
+/* BPT 10.4.125 — comptage de pile VUE DE CÔTÉ.
    Principe : l'utilisateur entoure la pile ; la largeur de la pile = diamètre du jeton (≈39 mm), l'épaisseur
    d'un jeton (≈3,3 mm) s'en déduit (ratio ≈11,8) et peut être affinée par la périodicité des jointures.
    Chaque ligne de pixels reçoit une couleur (vote majoritaire), on découpe en bandes de même couleur,
@@ -86,7 +86,7 @@ const AI_PROMPT="Tu es un compteur de jetons de poker. Les jetons sont de la mar
 +"Méthode : 1) repère chaque groupe (jetons isolés, éventails, piles) ; 2) dans chaque groupe compte les jetons UN PAR UN : un jeton posé à plat se reconnaît à son disque central imprimé, un jeton dans une pile vue de côté ou en biais se reconnaît à sa tranche (bande de couleur avec ses pastilles) ; deux tranches de même couleur superposées = 2 jetons ; 3) vérifie qu'aucun jeton n'est compté deux fois (un jeton à demi caché derrière un autre compte pour 1) et qu'aucun jeton partiellement visible n'est oublié. Ne compte pas la face imprimée ET la tranche du même jeton. Ignore tout ce qui n'est pas un jeton (cartes, objets, motifs du tapis ou du parquet).\n"
 +"Pour chaque jeton donne un point (x,y) sur ce jeton, en fraction de la largeur et de la hauteur de l'image (0 à 1, origine en haut à gauche) ; pour une pile, un point par tranche, posé sur la tranche.\n"
 +"Réponds UNIQUEMENT par un objet JSON compact, sans texte autour : {\"jetons\":[{\"c\":\"red\",\"x\":0.52,\"y\":0.31},...],\"certitude\":\"haute|moyenne|basse\",\"remarque\":\"une phrase sur les jetons difficiles à compter (cachés, flous, ambigus)\"}";
-function aiGet(k){let v='';try{v=localStorage.getItem(k)||'';}catch(_){}if(v)return v;const c=root.BPT_AI_CONFIG||{};return ({bptStackAIProvider:c.provider,bptStackGeminiKey:c.geminiKey,bptStackGeminiModel:c.geminiModel}[k])||'';}
+function aiGet(k){let v='';try{v=localStorage.getItem(k)||'';}catch(_){}if(v)return v;const c=root.BPT_AI_CONFIG||{};return ({bptStackAIProvider:c.proxyUrl?'proxy':c.provider,bptStackProxyUrl:c.proxyUrl,bptStackGeminiKey:c.geminiKey,bptStackGeminiModel:c.geminiModel}[k])||'';}
 function aiSet(k,v){try{localStorage.setItem(k,v);}catch(_){}}
 function toJpegBase64(canvas,maxSide){const sc=Math.min(1,maxSide/Math.max(canvas.width,canvas.height));const c=document.createElement('canvas');c.width=Math.round(canvas.width*sc);c.height=Math.round(canvas.height*sc);c.getContext('2d').drawImage(canvas,0,0,c.width,c.height);return c.toDataURL('image/jpeg',.85).split(',')[1];}
 function chipCounts(chips){const c={};KEYS.forEach(k=>c[k]=0);chips.forEach(j=>{if(c[j.c]!==undefined)c[j.c]++;});return c;}
@@ -95,11 +95,14 @@ function parseAI(text){const m=String(text).match(/\{[\s\S]*\}/);if(!m)throw Err
  else{ // ancien format : seulement des totaux
   KEYS.forEach(k=>{const n=Math.max(0,Math.min(99,Math.round(Number(o[k]))||0));for(let i=0;i<n;i++)chips.push({c:k,x:.5,y:.5,noPos:true});});}
  return {chips,counts:chipCounts(chips),certitude:o.certitude||'',remarque:o.remarque||''};}
-async function aiToken(){try{if(window.firebase&&firebase.auth){const u=firebase.auth().currentUser;if(u)return await u.getIdToken();}}catch(_){}return '';}
+async function aiToken(){try{for(let i=0;i<20;i++){if(window.firebase&&firebase.auth){const u=firebase.auth().currentUser;if(u)return await u.getIdToken();}await new Promise(ok=>setTimeout(ok,250));}}catch(_){}return '';}
 function aiProvider(){return aiGet('bptStackAIProvider')||'gemini';}
 async function callAI(b64){
  const prov=aiProvider();let url,headers={'content-type':'application/json'},body,extract;
- if(prov==='gemini'){
+ if(prov==='proxy'){
+  const pu=aiGet('bptStackProxyUrl').trim();if(!pu)throw Error('NOKEY');const t=await aiToken();if(!t)throw Error('Connexion Firebase requise : ouvre l’appli en ligne, connecte-toi puis réessaie.');
+  url=pu;headers.authorization='Bearer '+t;body={image:b64};extract=j=>j.text||'';
+ }else if(prov==='gemini'){
   const key=aiGet('bptStackGeminiKey').trim();if(!key)throw Error('NOKEY');const model=(aiGet('bptStackGeminiModel').trim()||'gemini-flash-latest');
   url='https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(model)+':generateContent';headers['x-goog-api-key']=key;
   body={contents:[{role:'user',parts:[{inline_data:{mime_type:'image/jpeg',data:b64}},{text:AI_PROMPT}]}],generationConfig:{temperature:0,maxOutputTokens:4000,responseMimeType:'application/json'}};
@@ -118,7 +121,7 @@ async function callAI(b64){
    const j=await r.json().catch(()=>({}));
    if(!r.ok){const msg=(j.error&&(j.error.message||j.error))||('Erreur '+r.status);if([429,500,502,503,529].indexOf(r.status)>=0&&attempt===0){lastErr=Error(r.status===429?'Quota gratuit atteint, nouvelle tentative…':String(msg));await new Promise(ok=>setTimeout(ok,r.status===429?4000:1500));continue;}
     if(r.status===429)throw Error('Quota atteint (limite gratuite par minute ou par jour) : réessaie dans un moment.');
-    if(r.status===401||r.status===403||(r.status===400&&/api key/i.test(String(msg))))throw Error('Clé refusée : vérifie la clé API'+(prov==='gemini'?' Gemini.':' ou l’adresse du serveur.'));throw Error(String(msg));}
+    if(prov==='proxy'&&r.status===429)throw Error(String(msg));if(r.status===401||r.status===403||(r.status===400&&/api key/i.test(String(msg))))throw Error('Clé refusée : vérifie la clé API'+(prov==='gemini'?' Gemini.':' ou l’adresse du serveur.'));throw Error(String(msg));}
    return parseAI(extract(j));}
   catch(err){if(err.name==='AbortError')throw err;if(attempt===0&&err instanceof TypeError){lastErr=err;await new Promise(ok=>setTimeout(ok,1500));continue;}throw err;}
   finally{clearTimeout(to);}}
@@ -135,14 +138,15 @@ function buildAI(){
  const det=document.createElement('details');det.className='bpt-stack-tip';
  const inp='style="width:100%;box-sizing:border-box;padding:8px;border-radius:6px"';
  det.innerHTML='<summary>Réglages IA</summary>'
-  +'<p><label>Fournisseur <select id="bptStackAIProv" '+inp+'><option value="gemini">Google Gemini — palier gratuit</option><option value="anthropic">Anthropic Claude — payant</option></select></label></p>'
+  +'<p><label>Fournisseur <select id="bptStackAIProv" '+inp+'><option value="proxy">Serveur du club (aucune clé à saisir)</option><option value="gemini">Google Gemini — ma propre clé</option><option value="anthropic">Anthropic Claude — payant</option></select></label></p>'
+  +'<div id="bptStackAIPrx" style="display:none"><p>Adresse du serveur du club (fournie par l’organisateur) :</p><input id="bptStackProxyUrl" type="url" placeholder="https://bpt-scanner-ia.xxx.workers.dev" '+inp+'/></div>'
   +'<div id="bptStackAIGem"><p>Clé gratuite : aistudio.google.com → « Get API key ». Elle reste sur cet appareil. Attention : sur le palier gratuit, Google peut utiliser les photos envoyées pour améliorer ses produits ; dans l’UE/EEE ses conditions prévoient les services payants pour une appli mise à disposition d’utilisateurs.</p><input id="bptStackGeminiKey" type="password" autocomplete="off" placeholder="AIza…" '+inp+'/><p>Modèle (laisser vide = gemini-flash-latest) :</p><input id="bptStackGeminiModel" type="text" placeholder="gemini-flash-latest" '+inp+'/></div>'
   +'<div id="bptStackAIAnt" style="display:none"><p>Clé API Anthropic (payante, stockée seulement sur cet appareil) :</p><input id="bptStackAIKey" type="password" autocomplete="off" placeholder="sk-ant-…" '+inp+'/><p>Ou adresse de ton serveur/proxy (remplace la clé) :</p><input id="bptStackAIEndpoint" type="url" placeholder="https://…" '+inp+'/></div>'
   +'<p>La photo n’est envoyée que lorsque tu appuies sur « Analyser par IA ».</p>';
  auto.parentNode.insertBefore(b,auto);auto.parentNode.insertBefore(det,auto);
- const fields={bptStackAIKey:$('bptStackAIKey'),bptStackAIEndpoint:$('bptStackAIEndpoint'),bptStackGeminiKey:$('bptStackGeminiKey'),bptStackGeminiModel:$('bptStackGeminiModel')};
+ const fields={bptStackAIKey:$('bptStackAIKey'),bptStackAIEndpoint:$('bptStackAIEndpoint'),bptStackProxyUrl:$('bptStackProxyUrl'),bptStackGeminiKey:$('bptStackGeminiKey'),bptStackGeminiModel:$('bptStackGeminiModel')};
  const prov=$('bptStackAIProv');prov.value=aiProvider();
- const showProv=()=>{$('bptStackAIGem').style.display=prov.value==='gemini'?'':'none';$('bptStackAIAnt').style.display=prov.value==='anthropic'?'':'none';};showProv();
+ const showProv=()=>{$('bptStackAIPrx').style.display=prov.value==='proxy'?'':'none';$('bptStackAIGem').style.display=prov.value==='gemini'?'':'none';$('bptStackAIAnt').style.display=prov.value==='anthropic'?'':'none';};showProv();
  const saveAll=()=>{aiSet('bptStackAIProvider',prov.value);Object.keys(fields).forEach(n=>aiSet(n,fields[n].value.trim()));};
  Object.keys(fields).forEach(n=>{fields[n].value=aiGet(n);fields[n].addEventListener('change',saveAll);});prov.addEventListener('change',()=>{saveAll();showProv();});
  b.addEventListener('click',async()=>{
@@ -153,7 +157,7 @@ function buildAI(){
    aiChips=res.chips;aiInfo={certitude:res.certitude,remarque:res.remarque};setMode('ai');
    const badge=$('bptStackAutoBadge');if(badge){badge.hidden=false;badge.textContent='ESTIMATION PAR IA : chaque jeton est marqué sur la photo. Touche un marqueur pour le supprimer ; choisis une couleur puis touche la photo pour en ajouter.';}
    aiSync();status('Analyse terminée : '+aiChips.length+' jeton(s) marqué(s). Vérifie les marqueurs, corrige si besoin.');}
-  catch(err){if(err.message==='NOKEY'){det.open=true;status('Saisis ta clé API dans « Réglages IA » (clé gratuite Gemini : aistudio.google.com), puis relance.');}
+  catch(err){if(err.message==='NOKEY'){det.open=true;status('Configure l’IA dans « Réglages IA » (adresse du serveur du club, ou ta clé Gemini), puis relance.');}
    else status('Analyse IA impossible : '+(err.name==='AbortError'?'délai dépassé':err.message));}
   finally{b.disabled=false;}});
 }
