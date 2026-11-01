@@ -1,0 +1,10 @@
+BPT 10.4.134 — Live continu + rappels facultatifs
+
+- AUCUNE pause automatique au changement de blind. Le Live ne s’arrête que par la commande Pause de l’organisateur.
+- Le chronomètre continue durant la veille ; au réveil, l’application rattrape automatiquement les niveaux écoulés sur la base des échéances absolues.
+- Rappel non bloquant « Compter mon stack / Ignorer » une fois par niveau de blind pour les joueurs connectés encore en lice. Aucun relevé n’est enregistré sans validation.
+- En mode adaptatif, analyse du retard ou de l’avance pendant le niveau, modification des durées uniquement à partir du niveau suivant.
+- Si plusieurs niveaux ont passé pendant la veille, adaptation appliquée aux niveaux successifs au moment de leur rattrapage.
+- Le comptage manuel/IA, l’historique Firebase, le classement par stack et les autres fonctions Live sont conservés.
+
+Vérification réelle multi-appareils et Firebase à effectuer avant tournoi.

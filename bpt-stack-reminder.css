@@ -1,0 +1,9 @@
+/* Notification facultative, aucun arrêt de timer */
+#bpt-blind-stack-reminder[hidden]{display:none!important}
+#bpt-blind-stack-reminder{position:fixed;bottom:max(14px,env(safe-area-inset-bottom));right:16px;z-index:6500;box-sizing:border-box;width:min(370px,calc(100vw - 28px));padding:15px 17px;border:1px solid #d4b96f;border-radius:14px;background:#203d32;color:#f7fbf8;box-shadow:0 6px 28px rgba(0,0,0,.38);font-family:inherit}
+#bpt-blind-stack-reminder .bpt-reminder-title{font-weight:800;font-size:15px;color:#f7d987}
+#bpt-blind-stack-reminder p{margin:7px 0 12px;font-size:13px;line-height:1.45;color:#e3ece7}
+#bpt-blind-stack-reminder .bpt-reminder-actions{display:flex;gap:9px}
+#bpt-blind-stack-reminder button{flex:1;border:1px solid #9db1a7;border-radius:9px;padding:10px 9px;font:inherit;font-size:13px;font-weight:700;background:#36584b;color:white;cursor:pointer}
+#bpt-blind-stack-reminder button:first-child{border-color:#b7a05c;background:#dfbd65;color:#162720}
+@media(max-width:700px){#bpt-blind-stack-reminder{right:12px;bottom:max(12px,env(safe-area-inset-bottom))}}

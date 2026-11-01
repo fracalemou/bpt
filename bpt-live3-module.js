@@ -419,23 +419,21 @@
     if(!isOwner() || !isActive() || !current?.startedAt)return;
     const now=Date.now();
     if(!afterElimination && now-live3PaceLastCheckAt<60*1000)return;
-    // 10.4.24 : l'alerte n'est proposée qu'au changement de niveau (une fois par niveau),
-    // pour ne pas interrompre l'organisateur en pleine main. Le retard reste affiché en continu.
+    // 10.4.134 — En adaptatif, contrôler l'avance/le retard PENDANT chaque blind.
+    // Si nécessaire on modifie UNIQUEMENT les durées à partir de la blind suivante.
+    // Aucune pause, aucun changement de durée de la blind en cours.
     const lvIdx=Math.max(0,Number(current?.levelIndex)||0);
-    if(!live3AtLevelStart() || live3PaceLevelShown===lvIdx)return;
     live3PaceLastCheckAt=now;
-
-    // 10.4.36 — En adaptatif : réajustement automatique des niveaux suivants à chaque
-    // changement de niveau dès que l’écart atteint 3 min (sans fenêtre de confirmation).
     if(current?.paceAdaptive===true){
-      live3PaceLevelShown=lvIdx;
       const last=current?.lastPaceAdjustment||{};
-      if(Number(last.levelIndex)===lvIdx && last.automatic===true)return; // déjà ajusté à ce niveau
+      if(Number(last.levelIndex)===lvIdx && last.automatic===true)return;
       const auto=live3PaceAnalysis({minDeltaMin:LIVE3_ADAPTIVE_MIN_DELTA_MIN});
       if(auto)live3AutoApplyPaceAdvice(auto).catch(e=>console.warn("BPT adaptatif :",e));
       return;
     }
 
+    // En classique, conserver les propositions UNIQUEMENT au début d'une blind.
+    if(!live3AtLevelStart() || live3PaceLevelShown===lvIdx)return;
     const advice=live3PaceAnalysis();
     if(!advice || advice.autoSuggest!==true)return;
 
@@ -2465,9 +2463,44 @@ function connectionDeviceLabel(){
     try{await changeLevel(1,true);}finally{advancing=false;}
   }
 
+  // L'adaptation au changement de blind se calcule JUSTE AVANT d'entrer dans
+  // le niveau suivant. Même après veille, la durée du prochain niveau est appliquée
+  // dès son premier instant, sans arrêt du chrono. Aucun appel réseau supplémentaire.
+  function live3ApplyAdaptiveAtTransition(s,at){
+    if(!s?.paceAdaptive || !s?.startedAt)return;
+    const idx=Math.max(0,Number(s.levelIndex)||0);
+    const last=s.lastPaceAdjustment||{};
+    if(Number(last.levelIndex)===idx && last.automatic===true)return;
+    const levels=Array.isArray(s.levels)?s.levels:[];
+    bptEnsureLevelExists(s,idx+1);
+    const endIdx=bptEndLevelIndexForChips(live3TotalChips(s));
+    const total=Math.max(2,(s.players||[]).length);
+    const remain=Math.max(1,(s.players||[]).filter(p=>p.status!=='out'&&p.status!=='winner').length || 1);
+    // catchUpTimerAfterWake a déjà ajouté la durée du niveau terminé à elapsedSec.
+    const elapsed=Math.max(0,Number(s.elapsedSec)||0);
+    const target=Math.max(1800,Number(s.targetHours||4)*3600);
+    const dur=Math.max(60,Number(levels[idx]?.durationSec)||900);
+    const progress=Math.min(1,Math.max(0,(idx+1)/(endIdx+1)));
+    const expected=total-(total-1)*Math.pow(progress,4.5);
+    const weight=Math.min(1,Math.max(0,(progress-.55)/.30));
+    const correction=Math.max(-2700,Math.min(2700,(remain-expected)*480*weight));
+    let remaining=0;
+    for(let i=idx+1;i<=endIdx;i++)remaining+=Math.max(60,Number(levels[i]?.durationSec)||dur);
+    const deltaSec=elapsed+remaining+correction-target;
+    if(Math.abs(deltaSec)<LIVE3_ADAPTIVE_MIN_DELTA_MIN*60)return;
+    const nextMin=Math.max(1,Math.round(Number(levels[idx+1]?.durationSec||dur)/60));
+    const count=Math.max(1,endIdx-idx);
+    const ideal=(target-elapsed-correction)/count/60;
+    let next=Math.max(3,Math.min(40,Math.round(Math.max(nextMin*.7,Math.min(nextMin*1.3,ideal)))));
+    if((deltaSec>0 && next>=nextMin)||(deltaSec<0 && next<=nextMin))return;
+    for(let i=idx+1;i<levels.length;i++)levels[i].durationSec=next*60;
+    s.lastPaceAdjustment={at,levelIndex:idx,automatic:true,type:deltaSec>0?'accelerate':'slow',minutes:next,remainingPlayers:remain};
+  }
+
   // Les minuteurs JavaScript sont suspendus ou fortement ralentis par iOS/Android
   // lorsque le téléphone se met en veille. Le deadline Firebase reste absolu :
   // au réveil, on rattrape donc tous les niveaux réellement écoulés d'un coup.
+  // Aucune pause AUTOMATIQUE n'est créée : seule la pause manuelle de l'organisateur arrête le temps.
   async function catchUpTimerAfterWake(){
     if(advancing||!isOwner()||!current?.running||!current?.deadline)return;
     if(Date.now()<Number(current.deadline))return;
@@ -2478,6 +2511,8 @@ function connectionDeviceLabel(){
         while(s.running&&Number(s.deadline||0)>0&&now>=Number(s.deadline||0)&&guard<100){
           const transition=Number(s.deadline),started=Number(s.runStartedAt||transition);
           s.elapsedSec=Number(s.elapsedSec||0)+Math.max(0,Math.floor((transition-started)/1000));
+          // L'avance/le retard détecté à ce passage s'applique à la blind qui commence.
+          live3ApplyAdaptiveAtTransition(s,transition);
           const nextIndex=Math.max(0,Number(s.levelIndex)||0)+1;
           bptEnsureLevelExists(s,nextIndex);
           s.levelIndex=nextIndex;
