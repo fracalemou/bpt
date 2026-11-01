@@ -1,0 +1,16 @@
+BPT 10.4.131 — Modifications du comptage stack
+
+- Outils : « Comptage stack ».
+- Plus de bouton « Copier le total » : le joueur valide son stack.
+- Pendant l’analyse IA, encart avec animation de progression indéterminée.
+- Après l’analyse, montant calculé + nombre de jetons + indice déclaré par le modèle.
+- Couleurs de l’encart : vert haute, ambre moyenne, rouge basse, gris si non fournie.
+- En cas d’erreur, rouge et pas d’enregistrement automatique.
+- Photo réduite à 1280 px maximum, JPEG 80 %, encodage une seule fois.
+- Décodage photo et lecture du jeton Firebase en parallèle.
+- Historique local : dernière saisie en haut, « Modifier » remplace « Reprendre ».
+- Référentiel : vert 25, bleu 50, noir 100, violet 500, jaune 1000, rose 5000, orange 10000.
+- Compatibilité des anciennes réponses IA : red/rouge et brown/marron migrent vers leurs valeurs correspondantes.
+- Ne modifie pas le Worker IA du club : il faut demander au service Gemini de reconnaître aussi les jetons jaunes.
+- Le temps d'analyse du fournisseur est indépendant des performances du navigateur.
+- À tester sur GitHub Pages, puis avec le service IA réel du club.

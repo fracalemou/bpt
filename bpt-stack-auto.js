@@ -1,4 +1,4 @@
-/* BPT 10.4.127 — compteur de stack : choix MANUEL ou IA du club.
+/* BPT 10.4.131 — compteur de stack : choix MANUEL ou IA du club.
    La sélection photo n'est déclenchée que par "Analyse par IA".
    Aucun mode "comptage par pile", aucun réglage fournisseur côté joueur.
    Ne pas stocker de clé dans GitHub Pages ; le serveur du club authentifie via Firebase. */
@@ -6,14 +6,52 @@
   'use strict';
   if (typeof document === 'undefined') return;
 
-  const KEYS = ['green','blue','black','purple','brown','red'];
-  const VAL = {green:25,blue:50,black:100,purple:500,brown:5000,red:10000};
-  const NAMES = {green:'vert',blue:'bleu',black:'noir',purple:'violet',brown:'marron',red:'rouge'};
+  const KEYS = ['green','blue','black','purple','yellow','pink','orange'];
+  const VAL = {green:25,blue:50,black:100,purple:500,yellow:1000,pink:5000,orange:10000};
+  const NAMES = {green:'vert',blue:'bleu',black:'noir',purple:'violet',yellow:'jaune',pink:'rose',orange:'orange'};
   const $ = id => document.getElementById(id);
   const fmt = n => Number(n).toLocaleString('fr-FR');
-  let mode='manuel', busy=false, requestNo=0, imageCanvas=null, step='home';
+  let mode='manuel', busy=false, requestNo=0, imageCanvas=null, step='home', editingIndex=null;
 
   function status(s){ const el=$('bptStackAutoStatus');if(el)el.textContent=s; }
+  // L'indice de fiabilité est indicatif : il provient de l'IA et n'est pas une mesure calibrée.
+  function normalizeReliability(raw){
+    if(typeof raw==='number' && Number.isFinite(raw)){
+      const n=raw>1?raw/100:raw;
+      return n>=.85?'high':n>=.60?'medium':'low';
+    }
+    const v=String(raw??'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    if(/^(high|haute?|eleve|elevee|forte?|sure?|certain|excellent|tres bonne?)$/.test(v))return 'high';
+    if(/^(moyenne?|medium|moderate|moderee?|intermediaire|correcte?)$/.test(v))return 'medium';
+    if(/^(low|basse?|faible|incertain|incertaine|poor|bad|tres faible)$/.test(v))return 'low';
+    if(/^\d+(?:\.\d+)?%?$/.test(v))return normalizeReliability(Number(v.replace('%','')));
+    return 'unknown';
+  }
+  const RELIABILITY_LABEL={high:'Haute',medium:'Moyenne',low:'Basse',unknown:'Non évaluée'};
+  function showAnalysis(state,options={}){
+    const badge=$('bptStackAutoBadge');if(!badge)return;
+    badge.hidden=false;
+    badge.className='bpt-stack-warning bpt-stack-analysis bpt-analysis-'+(state==='done'?(options.reliability||'unknown'):state);
+    badge.replaceChildren();
+    const heading=document.createElement('div');heading.className='bpt-analysis-heading';
+    if(state==='pending'){
+      const spinner=document.createElement('span');spinner.className='bpt-analysis-spinner';spinner.setAttribute('aria-hidden','true');heading.appendChild(spinner);
+      const label=document.createElement('strong');label.textContent='Analyse en cours…';heading.appendChild(label);
+      badge.appendChild(heading);
+      const progress=document.createElement('div');progress.className='bpt-analysis-progress';progress.setAttribute('role','progressbar');progress.setAttribute('aria-valuetext','Analyse en cours');
+      const fill=document.createElement('span');progress.appendChild(fill);badge.appendChild(progress);
+      const note=document.createElement('small');note.textContent=options.message||'Reconnaissance des couleurs et des jetons';badge.appendChild(note);
+    }else if(state==='done'){
+      const title=document.createElement('strong');title.textContent='Stack estimé : '+fmt(options.total||0)+' points';heading.appendChild(title);badge.appendChild(heading);
+      const meta=document.createElement('div');meta.className='bpt-analysis-meta';meta.textContent=fmt(options.chips||0)+' jetons · Fiabilité '+RELIABILITY_LABEL[options.reliability] ;badge.appendChild(meta);
+      if(options.remark){const note=document.createElement('small');note.textContent=options.remark.slice(0,400);badge.appendChild(note);}
+    }else if(state==='error'){
+      const title=document.createElement('strong');title.textContent='Analyse indisponible';heading.appendChild(title);badge.appendChild(heading);
+      const meta=document.createElement('div');meta.className='bpt-analysis-meta';meta.textContent=options.message||'Aucun résultat enregistré';badge.appendChild(meta);
+    }
+  }
+  function hideAnalysis(){const badge=$('bptStackAutoBadge');if(badge){badge.hidden=true;badge.replaceChildren();}}
+
   function show(el,yes,display=''){if(el)el.style.display=yes?display:'none';}
   function lines(){return [...document.querySelectorAll('#bptStackLines .bpt-stack-line')];}
   function readCounts(){const counts={};for(const key of KEYS)counts[key]=0;
@@ -29,21 +67,29 @@
     if(key)row.querySelector('input').value=Math.max(0,Math.min(99999,Number(counts[key])||0));
   }$('bptStackLines').dispatchEvent(new Event('input',{bubbles:true}));}
   function totalOf(counts){return KEYS.reduce((n,k)=>n+VAL[k]*(Number(counts[k])||0),0);}
-  function reset(){applyCounts({});const b=$('bptStackAutoBadge');if(b)b.hidden=true;}
+  function reset(){applyCounts({});hideAnalysis();}
 
-  function historyGet(){try{const a=JSON.parse(localStorage.getItem('bptStackHistory')||'[]');return Array.isArray(a)?a:[];}catch(_){return [];}}
-  function historySet(a){try{localStorage.setItem('bptStackHistory',JSON.stringify(a.slice(0,20)));}catch(_){}}
+  function historyGet(){return root.BPTStackSync?.getHistory?.()||[];}
+  function compatibleCounts(old){
+    if(!old||typeof old!=='object')return {};
+    return {...old,pink:old.pink??old.brown??0,orange:old.orange??old.red??0};
+  }
   function renderHistory(){const target=$('bptStackHist');if(!target)return;
-    target.replaceChildren();const hist=historyGet();if(!hist.length)return;
+    target.replaceChildren();const sync=root.BPTStackSync;
+    sync?.trackSession?.();const st=sync?.getStatus?.();const hist=historyGet();
     const h=document.createElement('p');h.className='bpt-stack-tip';
-    const strong=document.createElement('strong');strong.textContent='Derniers comptages enregistrés (sur cet appareil)';h.appendChild(strong);target.appendChild(h);
-    hist.slice(0,5).forEach((item,i)=>{
+    const strong=document.createElement('strong');strong.textContent='Historique de mes stacks — dernier relevé en haut';h.appendChild(strong);target.appendChild(h);
+    if(!st?.connected){const p=document.createElement('p');p.className='bpt-stack-tip';p.textContent='Ouvre une partie Live pour synchroniser ton stack.';target.appendChild(p);return;}
+    if(st.error){const p=document.createElement('p');p.className='bpt-stack-tip';p.textContent='Synchronisation : '+st.error;target.appendChild(p);return;}
+    if(!st.loaded){const p=document.createElement('p');p.className='bpt-stack-tip';p.textContent='Chargement des relevés synchronisés…';target.appendChild(p);return;}
+    if(!hist.length){const p=document.createElement('p');p.className='bpt-stack-tip';p.textContent='Aucun stack validé pour cette partie.';target.appendChild(p);return;}
+    hist.forEach(item=>{
       const row=document.createElement('div');row.className='bpt-hist-row';
-      const text=document.createElement('span');const date=new Date(item.t);
+      const text=document.createElement('span');const date=new Date(item.at);
       const dateText=Number.isFinite(date.getTime())?date.toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
-      text.textContent=dateText+' · '+fmt(item.total||0)+' · '+fmt(item.chips||0)+' jetons · '+(item.mode||'manuel');row.appendChild(text);
-      const take=document.createElement('button');take.type='button';take.textContent='Reprendre';take.dataset.hr=String(i);row.appendChild(take);
-      const del=document.createElement('button');del.type='button';del.textContent='✕';del.dataset.hd=String(i);del.setAttribute('aria-label','Supprimer ce relevé');row.appendChild(del);
+      text.textContent=dateText+' · Niveau '+(item.level||'—')+' · '+fmt(item.total||0)+' · '+fmt(item.chips||0)+' jetons · '+(item.mode||'manuel');row.appendChild(text);
+      const take=document.createElement('button');take.type='button';take.textContent='Modifier';take.dataset.hr=item.id;row.appendChild(take);
+      const del=document.createElement('button');del.type='button';del.textContent='✕';del.dataset.hd=item.id;del.setAttribute('aria-label','Supprimer ce relevé');row.appendChild(del);
       target.appendChild(row);
     });
   }
@@ -66,17 +112,25 @@
     const msg=$('bptStackHomeMsg');if(msg)msg.textContent=message;
     setStep('home');
   }
-  function startManual(){requestNo++;mode='manuel';imageCanvas=null;busy=false;reset();setStep('work');status('Indique tes quantités par couleur, puis valide le comptage.');}
+  function startManual(){requestNo++;mode='manuel';imageCanvas=null;busy=false;editingIndex=null;reset();setStep('work');status('Indique tes quantités par couleur, puis valide le comptage.');}
   function selectPhoto(){if(busy)return;const input=$('bptStackFile');if(!input)return;
     mode='ia';input.value='';input.click(); // déclenche le sélecteur/caméra à la demande du joueur
   }
 
-  function validate(){if(busy){status('L’analyse est encore en cours.');return;}
-    const counts=readCounts(),chips=KEYS.reduce((s,k)=>s+counts[k],0);
+  async function validate(){if(busy){status('L’analyse est encore en cours.');return;}
+    const counts=readCounts(),chips=KEYS.reduce((sum,k)=>sum+counts[k],0);
     if(!chips){status('Le stack est vide. Aucun relevé enregistré.');return;}
-    const total=totalOf(counts),hist=historyGet();
-    hist.unshift({t:Date.now(),counts,total,chips,mode:mode==='ia'?'IA':'manuel'});historySet(hist);
-    reset();imageCanvas=null;goHome('Comptage enregistré : '+fmt(total)+' points ('+chips+' jetons).');
+    const total=totalOf(counts),id=editingIndex;
+    busy=true;const button=$('bptStackValidate');if(button)button.disabled=true;
+    status('Synchronisation du stack avec les autres joueurs…');
+    try{
+      const sync=root.BPTStackSync;if(!sync)throw new Error('Module de synchronisation indisponible.');
+      const record={counts,total,chips,mode:id?'manuel':(mode==='ia'?'IA':'manuel')};
+      if(id)await sync.update(id,record);else await sync.save(record);
+      editingIndex=null;reset();imageCanvas=null;
+      goHome('Stack synchronisé : '+fmt(total)+' points ('+chips+' jetons).');
+    }catch(err){status('Échec de la synchronisation : '+(err.message||'connexion indisponible')+'. Aucun relevé validé.');}
+    finally{busy=false;if(button)button.disabled=false;}
   }
 
   async function readImage(file){
@@ -90,7 +144,7 @@
     }
     const w=bitmap.naturalWidth||bitmap.width,h=bitmap.naturalHeight||bitmap.height;
     if(!w||!h)throw new Error('Image vide');
-    const ratio=Math.min(1,1568/Math.max(w,h));
+    const ratio=Math.min(1,1280/Math.max(w,h)); // photo allégée pour accélérer le transfert
     const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(w*ratio));canvas.height=Math.max(1,Math.round(h*ratio));
     canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);
     if(bitmap.close)bitmap.close();return canvas;
@@ -103,66 +157,134 @@
     }
     throw new Error('Connexion BPT nécessaire pour analyser une photo.');
   }
+  // Le service du club peut renvoyer soit un objet compte, soit {text:"..."}.
+  // Ne jamais deviner des quantités à partir d'un JSON incomplet : demander
+  // une nouvelle réponse plutôt que conserver un stack potentiellement faux.
+  function aiError(message, code){const error=new Error(message);error.code=code;return error;}
   function parseResponse(data){
-    // Le Worker du club renvoie habituellement {text:"{...}"}.
     let obj=data;
-    if(obj&&obj.result&&typeof obj.result==='object')obj=obj.result;
-    if(obj&&typeof obj.text==='string')obj=obj.text;
-    if(typeof obj==='string'){
-      let s=obj.trim();if(s.startsWith('```'))s=s.replace(/^```(?:json)?\s*/,'').replace(/\s*```$/,'');
-      const match=s.match(/\{[\s\S]*\}/);if(!match)throw new Error('Réponse IA illisible');
-      obj=JSON.parse(match[0]);
+    for(let depth=0;depth<4;depth++){
+      if(obj&&typeof obj==='object'&&obj.error)
+        throw aiError('Le service IA a refusé l’analyse. Réessaie ou contacte le responsable du club.','AI_SERVER');
+      if(obj&&typeof obj==='object'&&obj.result!==undefined){obj=obj.result;continue;}
+      if(obj&&typeof obj==='object'&&typeof obj.text==='string'){obj=obj.text;continue;}
+      if(obj&&typeof obj==='object'&&typeof obj.output_text==='string'){obj=obj.output_text;continue;}
+      // Compatibilité avec une réponse brute Gemini generateContent.
+      if(obj&&Array.isArray(obj.candidates)){
+        const parts=obj.candidates[0]&&obj.candidates[0].content&&obj.candidates[0].content.parts;
+        obj=Array.isArray(parts)?parts.map(p=>p&&p.text||'').join(''):'';
+        continue;
+      }
+      break;
     }
-    if(!obj||typeof obj!=='object')throw new Error('Réponse IA invalide');
+    if(typeof obj==='string'){
+      let value=obj.trim();
+      value=value.replace(/^```(?:json)?\s*/i,'').replace(/\s*```\s*$/,'').trim();
+      // Quelques serveurs placent un paragraphe autour d'un objet JSON valide.
+      const first=value.indexOf('{'),last=value.lastIndexOf('}');
+      if(first<0||last<=first)throw aiError('Réponse IA incomplète. Relance l’analyse.','BAD_AI_JSON');
+      value=value.slice(first,last+1);
+      try{obj=JSON.parse(value);}catch(_err){
+        // Ne pas tenter de réparer arbitrairement les listes de jetons :
+        // elles pourraient contenir des quantités falsifiées ou incomplètes.
+        throw aiError('Réponse IA mal formatée. Une nouvelle analyse est nécessaire.','BAD_AI_JSON');
+      }
+    }
+    if(!obj||typeof obj!=='object'||Array.isArray(obj))
+      throw aiError('Réponse IA non exploitable. Relance l’analyse.','BAD_AI_JSON');
     const counts={};KEYS.forEach(k=>counts[k]=0);
+    const canonical=k=>({red:'orange',rouge:'orange',brown:'pink',marron:'pink',vert:'green',bleu:'blue',noir:'black',violet:'purple',jaune:'yellow',rose:'pink'}[k]||k);
     if(Array.isArray(obj.jetons)){
-      for(const chip of obj.jetons.slice(0,400)){
-        const key=String(chip.c||chip.couleur||'').toLowerCase();if(key in counts)counts[key]++;
+      if(obj.jetons.length>400)throw aiError('Nombre de jetons incohérent.','BAD_AI_DATA');
+      for(const chip of obj.jetons){
+        if(!chip||typeof chip!=='object')throw aiError('Jeton invalide dans la réponse IA.','BAD_AI_DATA');
+        const key=canonical(String(chip.c||chip.couleur||'').toLowerCase().trim());
+        if(!KEYS.includes(key))throw aiError('Couleur inconnue dans la réponse IA.','BAD_AI_DATA');
+        const n=chip.quantite===undefined?1:Number(chip.quantite);
+        if(!Number.isInteger(n)||n<0||n>400)throw aiError('Quantité non valide dans la réponse IA.','BAD_AI_DATA');
+        counts[key]+=n;
       }
     }else{
-      const source=(obj.counts&&typeof obj.counts==='object')?obj.counts:obj;
-      KEYS.forEach(k=>counts[k]=Math.min(99999,Math.max(0,Math.round(Number(source[k])||0))));
+      const source=obj.counts&&typeof obj.counts==='object'?obj.counts:obj;
+      // Au moins un champ de couleur doit être présent, sinon ne pas afficher un faux zéro.
+      if(!Object.keys(source).some(k=>KEYS.includes(canonical(k.toLowerCase()))))
+        throw aiError('Aucune quantité reconnue dans la réponse IA.','BAD_AI_DATA');
+      Object.entries(source).forEach(([original,nRaw])=>{
+        const k=canonical(original.toLowerCase());if(!KEYS.includes(k))return;
+        const n=Number(nRaw);
+        if(!Number.isInteger(n)||n<0||n>400)throw aiError('Quantité IA non valide pour '+NAMES[k]+'.','BAD_AI_DATA');
+        counts[k]+=n;
+      });
     }
-    return {counts,certitude:String(obj.certitude||''),remarque:String(obj.remarque||'')};
+    return {counts,certitude:obj.certitude??obj.confiance??obj.confidence??obj.reliability??null,remarque:String(obj.remarque||obj.commentaire||'')};
   }
-  async function callClubAI(canvas){
+  function isMalformedServerResponse(message){
+    return /JSON|array element|Unexpected token|Expected ','|Expected '}'|SyntaxError|parse/i.test(String(message||''));
+  }
+  async function callClubAI(base64,token){
     const url=String(root.BPT_AI_CONFIG&&root.BPT_AI_CONFIG.proxyUrl||'').trim();
     if(!url||!/^https:\/\//i.test(url))throw new Error('Service IA du club non configuré. Contacte l’organisateur.');
-    const token=await firebaseToken();
-    const base64=canvas.toDataURL('image/jpeg',0.85).split(',')[1];
-    const abort=new AbortController(),timeout=setTimeout(()=>abort.abort(),60000);
-    try{
-      const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({image:base64}),signal:abort.signal});
-      const data=await response.json().catch(()=>({}));
-      if(!response.ok){
-        if(response.status===429)throw new Error('Quota IA atteint : réessaie plus tard.');
-        if(response.status===401||response.status===403)throw new Error('Accès au service IA refusé. Vérifie ta connexion BPT.');
-        throw new Error(String(data.error&&data.error.message||data.error||('Erreur du service '+response.status)));
-      }
-      return parseResponse(data);
-    }finally{clearTimeout(timeout);}
+    // Jeton d'authentification et compression pré-calculés en parallèle.
+    // Deux tentatives au maximum, seulement sur JSON mal formé (ou erreur 5xx de parsing).
+    for(let attempt=0;attempt<2;attempt++){
+      const abort=new AbortController(),timeout=setTimeout(()=>abort.abort(),60000);
+      try{
+        const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({image:base64,requestedFormat:'counts'}),signal:abort.signal});
+        let data;
+        try{data=await response.json();}catch(_){
+          if(attempt===0)continue;
+          throw aiError('Réponse du serveur IA invalide. Contacte l’organisateur.','BAD_AI_JSON');
+        }
+        if(!response.ok){
+          if(response.status===429)throw new Error('Quota IA atteint : réessaie plus tard.');
+          if(response.status===401||response.status===403)throw new Error('Accès au service IA refusé. Vérifie ta connexion BPT.');
+          const serverMessage=String(data&&data.error&&data.error.message||data&&data.error||'');
+          if([500,502,503].includes(response.status)&&isMalformedServerResponse(serverMessage)){
+            if(attempt===0)continue;
+            throw aiError('Le service IA renvoie un JSON incorrect. L’administrateur doit activer le format structuré.','BAD_AI_JSON');
+          }
+          throw new Error('Erreur du service IA du club (HTTP '+response.status+').');
+        }
+        try{return parseResponse(data);}catch(err){
+          if(err.code==='BAD_AI_JSON'&&attempt===0)continue;
+          if(err.code==='BAD_AI_JSON')throw aiError('Le service IA renvoie un JSON incorrect. L’administrateur doit activer le format structuré.','BAD_AI_JSON');
+          throw err;
+        }
+      }finally{clearTimeout(timeout);}
+    }
+    throw aiError('Réponse IA invalide. Contacte l’organisateur.','BAD_AI_JSON');
   }
   async function processPhoto(file){
     if(!file||!file.type.startsWith('image/'))return;
-    const myRequest=++requestNo;mode='ia';busy=true;reset();
+    const myRequest=++requestNo;mode='ia';busy=true;editingIndex=null;reset();
     const btn=$('bptStackGoAI');if(btn)btn.disabled=true;
+    setStep('work');showAnalysis('pending',{message:'Préparation de la photo…'});
+    status('Analyse IA du club en cours : le traitement peut prendre quelques secondes.');
     try{
-      imageCanvas=await readImage(file);if(myRequest!==requestNo)return;
-      // La photo n'est affichée qu'après choix explicite de l'analyse IA.
-      const preview=$('bptStackPreview');if(preview){preview.src=imageCanvas.toDataURL('image/jpeg',0.85);preview.style.width='100%';}
+      // L'authentification et le décodage ont lieu simultanément pour éviter l'attente successive.
+      const [canvas,token]=await Promise.all([readImage(file),firebaseToken()]);
+      if(myRequest!==requestNo)return;
+      imageCanvas=canvas;
+      const encoded=canvas.toDataURL('image/jpeg',0.80);
+      const preview=$('bptStackPreview');if(preview){preview.src=encoded;preview.style.width='100%';}
       if($('bptStackZoom'))$('bptStackZoom').value=100;
       if($('bptStackZoomVal'))$('bptStackZoomVal').textContent='100 %';
-      setStep('work');status('Analyse IA du club en cours…');
-      const result=await callClubAI(imageCanvas);if(myRequest!==requestNo)return;
+      show($('bptStackPhotoWrap'),true);
+      showAnalysis('pending',{message:'Reconnaissance IA en cours…'});
+      const result=await callClubAI(encoded.split(',')[1],token);
+      if(myRequest!==requestNo)return;
       applyCounts(result.counts);
-      const n=KEYS.reduce((s,k)=>s+result.counts[k],0);
-      const certainty=result.certitude?' · confiance '+result.certitude:'';
-      status('Estimation IA : '+fmt(n)+' jetons, '+fmt(totalOf(result.counts))+' points'+certainty+'. Vérifie le total avant validation.');
-      const badge=$('bptStackAutoBadge');
-      if(badge){badge.hidden=false;badge.textContent=result.remarque?('Analyse IA : '+result.remarque):'Estimation automatique. La validation reste volontaire.';}
-    }catch(err){if(myRequest!==requestNo)return;
+      const n=KEYS.reduce((sum,k)=>sum+result.counts[k],0);
+      const total=totalOf(result.counts),reliability=normalizeReliability(result.certitude);
+      showAnalysis('done',{total,chips:n,reliability,remark:result.remarque});
+      status('Résultat estimé : vérifie les quantités puis clique sur « Valider le stack ».');
+    }catch(err){
+      if(myRequest!==requestNo)return;
       if(step!=='work')setStep('work');
-      status('Analyse IA indisponible : '+(err.name==='AbortError'?'délai dépassé':err.message));
+      reset();
+      const reason=err.name==='AbortError'?'délai de réponse dépassé':(err&&err.message||'Erreur inconnue');
+      showAnalysis('error',{message:reason});
+      status('Aucun résultat IA enregistré. Réessaie ou utilise le comptage manuel.');
     }finally{if(myRequest===requestNo){busy=false;if(btn)btn.disabled=false;}}
   }
 
@@ -195,12 +317,14 @@
     $('bptStackFile').addEventListener('change',event=>{
       const file=event.target.files&&event.target.files[0];if(file)processPhoto(file);
     });
-    $('bptStackHist').addEventListener('click',event=>{
+    $('bptStackHist').addEventListener('click',async event=>{
       const take=event.target.closest('[data-hr]'),del=event.target.closest('[data-hd]');
       const hist=historyGet();
-      if(del){hist.splice(Number(del.dataset.hd),1);historySet(hist);renderHistory();}
-      if(take){const entry=hist[Number(take.dataset.hr)];if(entry){startManual();applyCounts(entry.counts||{});status('Ancien comptage repris : modifie les quantités puis valide.');}}
+      if(del){const id=del.dataset.hd;if(!confirm('Supprimer ce relevé synchronisé ?'))return;del.disabled=true;
+        try{await root.BPTStackSync.remove(id);}catch(e){alert('Suppression impossible : '+(e.message||'connexion indisponible'));del.disabled=false;}return;}
+      if(take){const entry=hist.find(x=>x.id===take.dataset.hr);if(entry){startManual();editingIndex=entry.id;applyCounts(compatibleCounts(entry.counts));status('Modification de ce relevé : valide pour synchroniser la correction.');}}
     });
+    document.addEventListener('bpt-stack-records-updated',()=>{if(step==='home')renderHistory();});
     document.addEventListener('click',event=>{if(event.target.closest('.bpt-stack-open'))goHome();});
     setStep('home');
   }

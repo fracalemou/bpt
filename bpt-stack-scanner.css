@@ -30,3 +30,22 @@
 .bpt-stack-validate{display:block;width:100%;margin-top:12px;padding:15px;border-radius:10px;border:1px solid #7fd08f;background:#2f8f4a;color:#fff;font-weight:800;font-size:16px;cursor:pointer}
 .bpt-hist-row{display:flex;gap:6px;align-items:center;background:#23372f;border-radius:8px;padding:8px;margin:6px 0;font-size:12px}.bpt-hist-row span{flex:1}
 .bpt-hist-row button,#bptStackWorkBar button{background:#42634e;color:#fff;border:1px solid #62816d;border-radius:6px;padding:8px;cursor:pointer}
+
+/* BPT 10.4.131 — analyse IA : progression indéterminée + indice déclaré par le modèle. */
+.bpt-stack-analysis{margin:10px 0 12px;padding:12px 14px;border-radius:10px;font-size:13px;line-height:1.5;transition:background-color .2s,border-color .2s}
+.bpt-stack-analysis[hidden]{display:none!important}
+.bpt-analysis-heading{display:flex;align-items:center;gap:10px;font-size:15px;font-weight:800}
+.bpt-stack-analysis small{display:block;margin-top:5px;opacity:.9}
+.bpt-analysis-meta{font-size:13px;margin-top:6px;font-weight:700}
+.bpt-analysis-pending{background:#664a24;border:1px solid #c89e49;color:#fff3d5}
+.bpt-analysis-high{background:#20593d;border:1px solid #57bf7a;color:#e0ffe7}
+.bpt-analysis-medium{background:#70551f;border:1px solid #d7ae46;color:#fff3d5}
+.bpt-analysis-low{background:#6b302b;border:1px solid #d97363;color:#ffebea}
+.bpt-analysis-unknown{background:#324450;border:1px solid #8aa0ad;color:#f4faff}
+.bpt-analysis-error{background:#642f32;border:1px solid #d47579;color:#ffe4e4}
+.bpt-analysis-spinner{height:19px;width:19px;border:3px solid #ffffff55;border-top-color:#fff;border-radius:50%;animation:bptStackSpin .8s linear infinite;flex-shrink:0}
+@keyframes bptStackSpin{to{transform:rotate(360deg)}}
+.bpt-analysis-progress{height:5px;margin-top:10px;background:#ffffff33;overflow:hidden;border-radius:9px;position:relative}
+.bpt-analysis-progress>span{position:absolute;top:0;bottom:0;width:37%;border-radius:9px;background:#f1d07a;animation:bptStackMove 1.45s ease-in-out infinite}
+@keyframes bptStackMove{from{left:-37%}to{left:100%}}
+@media (prefers-reduced-motion:reduce){.bpt-analysis-spinner,.bpt-analysis-progress>span{animation-duration:3s}}

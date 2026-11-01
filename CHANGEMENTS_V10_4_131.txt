@@ -1,0 +1,16 @@
+BPT v10.4.131 — Classement des joueurs par stack
+
+- Dans Live → Joueurs, les joueurs encore en lice sont tries par stack valide decroissant.
+- Un joueur sans stack valide se trouve apres les joueurs ayant une valeur connue.
+- Les ex aequo gardent l'ordre initial de la liste des joueurs.
+- Les joueurs elimines restent apres les joueurs en lice et sans stack affiche.
+- Lorsqu'un nouveau stack est valide et synchronise, l'ordre est recalcule immediatement.
+- Le montant et la duree ecoulee depuis la derniere saisie restent visibles.
+- Les autres fonctions et le comptage IA et manuel de la v10.4.130 sont conserves.
+
+Attention : le classement depend de la derniere saisie de chaque joueur, meme si les
+saisies n'ont pas ete faites a la meme minute. Un stack non actualise ne constitue
+pas une mesure actuelle fiable.
+
+Sécurité : les règles Firebase de la base doivent restreindre l'écriture aux seuls
+joueurs autorisés. Le contrôle par identite dans le navigateur n'est pas suffisant.

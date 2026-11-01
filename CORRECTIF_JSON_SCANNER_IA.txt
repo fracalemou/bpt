@@ -1,0 +1,25 @@
+BPT 10.4.131 — correctif du traitement des résultats IA
+
+La version 10.4.127 lançait JSON.parse() sur du texte libre renvoyé par
+le Worker du club. Quand le modèle renvoyait un tableau mal formé, le
+message technique « Expected comma or brace ... » apparaissait sur l'écran.
+
+Nouveau comportement côté BPT :
+- accepte counts ou une liste de jetons en JSON strict;
+- reconnaît les enveloppes {text:...}, {result:...} et Gemini candidates;
+- retente UNE fois seulement si le JSON est invalide;
+- ne copie jamais des quantités issues d'une réponse incomplète ou invalide;
+- explique qu'il faut corriger le serveur IA du club si les deux tentatives échouent.
+
+IMPORTANT : Le problème initial naît probablement dans la réponse produite
+par le service Cloudflare Worker du club. Ce ZIP ne peut pas corriger ce
+Worker distant, dont le code source n'était pas dans l'archive fournie.
+Pour une correction durable, ce Worker doit demander à Gemini une réponse
+JSON STRUCTURÉE avec un schéma à six nombres entiers. Voir
+CORRECTION_CLOUDFLARE_WORKER_JSON.md. Ne jamais mettre la clé Gemini
+sur GitHub Pages ou dans le navigateur.
+
+Déploiement : remplacer les fichiers de la racine GitHub avec ceux du ZIP,
+puis recharger BPT après publication de GitHub Pages.
+Tests effectués : parsing des réponses valides et invalides, syntaxe JS,
+cache PWA, intégrité ZIP. L'appel réel au Worker reste à vérifier.

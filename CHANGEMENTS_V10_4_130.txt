@@ -1,0 +1,16 @@
+BPT 10.4.131 — Suivi des stacks des joueurs en lice
+
+- En cliquant sur la tuile Joueurs, chaque joueur encore en lice affiche son dernier stack validé.
+- Affiche la durée depuis l'enregistrement synchronisé (ex. « il y a 12 min »).
+- Joueur sans relevé : « Stack non renseigné ».
+- Éliminés : aucune valeur de stack affichée.
+- Écran Comptage stack : aucune sélection de joueur ; profil connecté vérifié.
+- Bouton Valider le stack : enregistre dans Firebase sous la session Live, pas dans localStorage.
+- Historique personnel ordonné du plus récent au plus ancien, avec Modifier/Supprimer synchronisés.
+- Relevés rafraîchis en temps réel sur les autres appareils, et durée actualisée chaque 30 s.
+- En cas d'absence réseau, message d'échec ; ne prétend pas que le relevé a été synchronisé.
+- Autres modifications v10.4.129 conservées : IA, encart de progression et de fiabilité, couleurs, accélération photo et labels.
+
+SECURITE : les règles Firebase existantes autorisent tout utilisateur authentifié anonymement à écrire sous bpt/live_v3. Le contrôle côté client ne constitue pas une autorisation forte. Renforcer les règles du projet avant usage compétitif.
+
+TESTS REQUIS : synchronisation multi-appareils, reconnexion hors ligne, changement de session, joueur éliminé et sécurité RTDB.

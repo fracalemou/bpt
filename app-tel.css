@@ -9937,3 +9937,6 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
 
 /* 10.4.114 — Jouer en ligne : bouton « Inviter sur WhatsApp » (salle d attente et menu de l organisateur) */
 .bpt-ol-actions .bpt-ol-wa{background:#25d366 !important;color:#06331b !important;border-color:#25d366 !important;font-weight:900}
+
+/* v10.4.131 — dernier stack dans la tuile Joueurs */
+.bpt484-player-stack{display:block;margin-top:4px;font-size:.83em;color:#8cdacc;font-weight:650;white-space:normal}
