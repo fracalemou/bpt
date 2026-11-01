@@ -1,0 +1,1 @@
+Ajout des photos de référence dans Paramètres > Référentiel photographique. Jusqu’à 4 variantes par valeur et par jeu (Moon River/Chips Palace). Données compactées dans Firebase Realtime Database. Transmission des références au Worker via referenceImages.

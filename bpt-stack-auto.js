@@ -256,7 +256,7 @@
         response=await fetch(url,{
           method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
           // Choix enregistre dans le Live et partage avec tous les joueurs.
-          body:JSON.stringify({image:base64,requestedFormat:'counts',chipSet:root.BPTLive3?.getState?.()?.chipSet==='palace'?'palace':'moonriver'}),signal:controller.signal
+          body:JSON.stringify({image:base64,requestedFormat:'counts',chipSet:root.BPTLive3?.getState?.()?.chipSet==='palace'?'palace':'moonriver',referenceImages:await (root.BPTChipReferences?.getForScan?.(root.BPTLive3?.getState?.()?.chipSet)||Promise.resolve([]))}),signal:controller.signal
         });
       }catch(networkErr){
         if(networkErr?.name==='AbortError')throw networkErr;

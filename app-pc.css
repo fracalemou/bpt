@@ -7498,7 +7498,7 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
   #live3PrepStep1 .bpt-chipset-field select{min-height:36px!important;height:36px!important;font-size:12px!important}
 }
 
-/* v10.4.146 — choix du jeu en dehors des grilles compactées de l'étape 1. */
+/* v10.4.147 — choix du jeu en dehors des grilles compactées de l'étape 1. */
 #live3PrepStep1 .bpt-chipset-choice{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px!important;padding:12px!important;margin:0 0 14px!important;min-width:0;border:1px solid #58b5a5;border-radius:12px;background:#193b35;box-sizing:border-box;position:relative;overflow:visible!important;max-height:none!important}
 #live3PrepStep1 .bpt-chipset-choice legend{padding:0 7px;font-size:15px!important;line-height:1.4;color:#f0faf6;font-weight:800}
 #live3PrepStep1 .bpt-chipset-option{display:flex!important;align-items:center;justify-content:flex-start;gap:9px!important;min-height:48px!important;margin:0!important;padding:10px!important;background:#244e43;border:1px solid #51776b;border-radius:9px;cursor:pointer;color:#fff;font-size:14px!important;line-height:1.3!important;white-space:normal!important;box-sizing:border-box;max-width:none!important;overflow:visible!important}
