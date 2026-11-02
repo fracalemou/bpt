@@ -13,10 +13,10 @@ async function jpeg(file){if(!file.type.startsWith('image/'))throw Error('Format
 async function upload(v,file){if(busy)return;const selected=game;busy=true;draw();setStatus('Compression et enregistrement de la photo…');try{const data=await jpeg(file);const firebaseDb=await connect();const current=await firebaseDb.ref(path(selected)+'/'+v).once('value');if(current.numChildren()>=MAX_VARIANTS)throw Error('Maximum '+MAX_VARIANTS+' variantes par valeur');const id=firebaseDb.ref(path(selected)+'/'+v).push().key;await firebaseDb.ref(path(selected)+'/'+v+'/'+id).set({data,updatedAt:Date.now()});clearSheet();setStatus('Variante '+v+' points enregistrée.');}catch(e){setStatus('Enregistrement impossible : '+e.message)}finally{busy=false;draw()}}
 async function getForScan(chipSet){try{const firebaseDb=await connect();const snap=await firebaseDb.ref(path(chipSet==='palace'?'palace':'moonriver')).once('value');const rows=safeRecords(snap.val());const data=[];for(const v of VALUES)for(const ref of rows[v].slice(0,MAX_VARIANTS))data.push({value:v,image:ref.data.slice('data:image/jpeg;base64,'.length)});return data;}catch(e){console.warn('[BPT refs] Photos non disponibles :',e.message);return []}}
 
-// V10.4.151 — Planche de référence compacte : 1 vignette par valeur, étiquetée, en UNE seule image (~25 Ko)
+// V10.4.153 — Planche de référence compacte : 1 vignette par valeur, étiquetée, en UNE seule image (~25 Ko)
 // mise en cache 12 h sur l'appareil. Envoyée avec la photo pour lever les confusions 50 (bleu) / 10 000 (bleu clair).
 const SHEET_TTL=12*3600e3;
-function sheetKey(set){return 'bptRefSheet150:'+(set==='palace'?'palace':'moonriver');}
+function sheetKey(set){return 'bptRefSheet153:'+(set==='palace'?'palace':'moonriver');}
 function clearSheet(){try{localStorage.removeItem(sheetKey('palace'));localStorage.removeItem(sheetKey('moonriver'));}catch(_){}}
 function loadImg(src){return new Promise((ok,ko)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=ko;i.src=src;});}
 async function getSheet(chipSet){
@@ -34,7 +34,7 @@ async function getSheet(chipSet){
       const x=(i%cols)*T,y=Math.floor(i/cols)*H,im=await loadImg(tiles[i].ref.data);
       const k=Math.max(T/im.width,T/im.height),w=im.width*k,h=im.height*k;
       g.save();g.beginPath();g.rect(x,y+22,T,T);g.clip();g.drawImage(im,x+(T-w)/2,y+22+(T-h)/2,w,h);g.restore();
-      g.fillStyle='#000';g.font='bold 17px sans-serif';g.textBaseline='top';g.fillText(String(tiles[i].v),x+6,y+2);
+      g.fillStyle='#000';g.font='bold 17px sans-serif';g.textBaseline='top';g.fillText((set==='palace'?'Palace ':'MoonRiver ')+tiles[i].v,x+6,y+2);
       g.strokeStyle='#000';g.lineWidth=2;g.strokeRect(x+1,y+1,T-2,H-2);
     }
     const img=cv.toDataURL('image/jpeg',0.7).split(',')[1];

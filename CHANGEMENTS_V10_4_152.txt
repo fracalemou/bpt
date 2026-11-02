@@ -1,0 +1,5 @@
+V10.4.152
+- Worker 10.4.152 : l'IA recense les jetons UN PAR UN (couleur + position) ; c'est le Worker qui additionne. Fini les totaux inventés (ex. 10 au lieu de 8).
+- Photo envoyée en 1600 px (au lieu de 1280) pour mieux voir les tranches et les teintes.
+- La photo affichée est annotée : un rond numéroté et coloré sur chaque jeton compté. Un jeton oublié, compté deux fois ou un rond sur un objet qui n'est pas un jeton se voit tout de suite.
+- Il faut redéployer le Worker (serveur-ia/worker-bpt-10.4.152.js).

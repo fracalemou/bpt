@@ -1,0 +1,5 @@
+V10.4.153
+- Plus aucune notion de type de jetons dans l'appli : pas de choix, pas d'avertissement « jeu différent ».
+- Le Worker 10.4.153 reconnaît seul Moon River / Chips Palace, jeton par jeton, avec une consigne unique.
+- Les planches de référence (si vous avez enregistré des photos) des deux jeux sont envoyées, étiquetées au nom du jeu.
+- Redéployer le Worker : serveur-ia/worker-bpt-10.4.153.js.

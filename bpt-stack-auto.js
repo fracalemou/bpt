@@ -14,10 +14,6 @@
   let mode='manuel', busy=false, requestNo=0, imageCanvas=null, step='home', editingIndex=null;
   let activeAIAbort=null, lastPhotoFile=null, samePhotoRetryAvailable=false;
   const AI_REQUEST_TIMEOUT_MS=35000; // délai maximal unique : aucun double appel caché
-  // V10.4.151 : le jeu de jetons se choisit au moment de l'analyse (mémorisé sur l'appareil, Moon River par défaut).
-  function scanSet(){try{return localStorage.getItem('bptScanChipSet')==='palace'?'palace':'moonriver';}catch(_){return 'moonriver';}}
-  function setScanSet(v){try{localStorage.setItem('bptScanChipSet',v==='palace'?'palace':'moonriver');}catch(_){}}
-  function syncSetPicker(){document.querySelectorAll('input[name="bptScanSet"]').forEach(r=>{r.checked=r.value===scanSet();});}
   function elapsedMs(from){return Math.max(0,Math.round(performance.now()-from));}
   function sec(ms){return (ms/1000).toLocaleString('fr-FR',{maximumFractionDigits:1})+' s';}
   function stopAI(){if(activeAIAbort){activeAIAbort.abort();activeAIAbort=null;}}
@@ -108,7 +104,6 @@
   function setStep(next){step=next;const home=next==='home';
     show($('bptStackHome'),home);
     show($('bptStackWorkBar'),!home,'flex');
-    show($('bptScanSetPicker'),!home&&mode==='ia','flex');
     show($('bptStackValidate'),!home);
     show($('bptStackLines'),!home);
     show($('bptStackAutoStatus'),!home);
@@ -165,7 +160,7 @@
     }
     const w=bitmap.naturalWidth||bitmap.width,h=bitmap.naturalHeight||bitmap.height;
     if(!w||!h)throw new Error('Image vide');
-    const ratio=Math.min(1,1280/Math.max(w,h)); // photo allégée pour accélérer le transfert
+    const ratio=Math.min(1,1600/Math.max(w,h)); // photo allégée pour accélérer le transfert
     const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(w*ratio));canvas.height=Math.max(1,Math.round(h*ratio));
     canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);
     if(bitmap.close)bitmap.close();return canvas;
@@ -237,7 +232,8 @@
         counts[k]+=n;
       });
     }
-    return {counts,certitude:obj.certitude??obj.confiance??obj.confidence??obj.reliability??null,remarque:String(obj.remarque||obj.commentaire||''),jeu:(['moonriver','palace','indetermine'].includes(obj.jeuDetecte)?obj.jeuDetecte:'indetermine'),five:0};
+    return {counts,certitude:obj.certitude??obj.confiance??obj.confidence??obj.reliability??null,remarque:String(obj.remarque||obj.commentaire||''),jeu:(['moonriver','palace','indetermine'].includes(obj.jeuDetecte)?obj.jeuDetecte:'indetermine'),five:0,
+      marks:Array.isArray(obj.jetons)?obj.jetons.filter(m=>m&&KEYS.includes(canonical(String(m.c||'').toLowerCase()))&&Number.isFinite(Number(m.x))&&Number.isFinite(Number(m.y))).map(m=>({c:canonical(String(m.c).toLowerCase()),x:Number(m.x),y:Number(m.y)})):[]};
   }
   function isMalformedServerResponse(message){
     return /JSON|array element|Unexpected token|Expected ','|Expected '}'|SyntaxError|parse/i.test(String(message||''));
@@ -249,10 +245,11 @@
     return /^[a-zA-Z0-9_.-]{1,60}$/.test(code)?code:'';
   }
   async function callClubAI(base64,token){
-    const chipSetNow=scanSet();
-    // Planche de référence (1 petite image en cache) : n'ajoute pas d'attente si absente ou lente (max 1,5 s).
-    let referenceSheet=null;
-    try{referenceSheet=await Promise.race([root.BPTChipReferences?.getSheet?.(chipSetNow)||null,new Promise(r=>setTimeout(()=>r(null),1500))]);}catch(_){}
+    // Planches de référence (petites images en cache, une par jeu) : jamais d'attente > 1,5 s.
+    let referenceSheets=null;
+    try{const get=k=>Promise.race([root.BPTChipReferences?.getSheet?.(k)||null,new Promise(r=>setTimeout(()=>r(null),1500))]);
+      const [moonriver,palace]=await Promise.all([get('moonriver'),get('palace')]);
+      if(moonriver||palace)referenceSheets=Object.assign({},moonriver?{moonriver}:{},palace?{palace}:{});}catch(_){}
     const url=String(root.BPT_AI_CONFIG&&root.BPT_AI_CONFIG.proxyUrl||'').trim();
     if(!url||!/^https:\/\//i.test(url))throw new Error('Service IA du club non configuré. Contacte l’organisateur.');
     // Une seule demande à Gemini. En cas de panne 502, seul le joueur peut relancer.
@@ -265,7 +262,7 @@
         response=await fetch(url,{
           method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
           // Choix enregistre dans le Live et partage avec tous les joueurs.
-          body:JSON.stringify(Object.assign({image:base64,requestedFormat:'counts',chipSet:chipSetNow},referenceSheet?{referenceSheet}:{})),signal:controller.signal
+          body:JSON.stringify(Object.assign({image:base64,requestedFormat:'counts'},referenceSheets?{referenceSheets}:{})),signal:controller.signal
         });
       }catch(networkErr){
         if(networkErr?.name==='AbortError')throw networkErr;
@@ -320,6 +317,20 @@
     const encoded=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(new Error('Lecture photo impossible'));reader.readAsDataURL(blob);});
     return {canvas,encoded,bytes:blob.size};
   }
+  // V10.4.153 : numérote sur la photo chaque jeton compté pour vérifier d'un coup d'oeil (jeton oublié ou compté en double).
+  const MARK_COLOR={green:'#2ecc40',blue:'#0074d9',black:'#111',purple:'#b10dc9',yellow:'#ffdc00',pink:'#ff69b4',orange:'#ff851b'};
+  function drawMarks(marks){
+    try{const preview=$('bptStackPreview');if(!preview||!imageCanvas||!marks||!marks.length)return;
+      const cv=document.createElement('canvas');cv.width=imageCanvas.width;cv.height=imageCanvas.height;
+      const g=cv.getContext('2d');g.drawImage(imageCanvas,0,0);
+      const r=Math.max(11,Math.round(Math.max(cv.width,cv.height)/60));
+      g.font='bold '+Math.round(r*1.15)+'px sans-serif';g.textAlign='center';g.textBaseline='middle';
+      marks.forEach((m,i)=>{const x=m.x/1000*cv.width,y=m.y/1000*cv.height;
+        g.beginPath();g.arc(x,y,r,0,Math.PI*2);g.fillStyle=MARK_COLOR[m.c]||'#fff';g.fill();g.lineWidth=3;g.strokeStyle='#fff';g.stroke();
+        g.fillStyle=(m.c==='yellow'||m.c==='pink'||m.c==='green'||m.c==='orange')?'#000':'#fff';g.fillText(String(i+1),x,y+1);});
+      preview.src=cv.toDataURL('image/jpeg',0.82);
+    }catch(_){/* l'aperçu reste la photo d'origine */}
+  }
   async function processPhoto(file){
     if(!file||!file.type.startsWith('image/'))return;
     lastPhotoFile=file;samePhotoRetryAvailable=false;
@@ -345,19 +356,12 @@
       try{result=await callClubAI(encoded.split(',')[1],token);}
       finally{serverMs=elapsedMs(serverStart);}
       if(myRequest!==requestNo)return;
-      applyCounts(result.counts);
+      applyCounts(result.counts);drawMarks(result.marks);
       const n=KEYS.reduce((sum,k)=>sum+result.counts[k],0);
       const total=totalOf(result.counts);
       let reliability=normalizeReliability(result.certitude);
-      const configuredSet=scanSet();
-      if(result.jeu==='indetermine'||(result.jeu&&result.jeu!==configuredSet))reliability='low';
       const timing='Durée : '+sec(elapsedMs(started))+' (préparation '+sec(prepMs)+' ; serveur '+sec(serverMs)+')';
-      const JEU={palace:'Chips Palace',moonriver:'Moon River'};
-      const selectedSet=scanSet();
-      const detectedSet=JEU[result.jeu]||'Indéterminé';
-      const notes=['Jeu détecté : '+detectedSet+'.'];
-      if(result.jeu==='indetermine')notes.push('Le jeu n’a pas pu être reconnu avec certitude.');
-      else if(result.jeu!==selectedSet)notes.push('Attention : le jeu détecté diffère du jeu choisi ('+JEU[selectedSet]+'). Change le jeu ci-dessous si besoin : la photo sera réanalysée.');
+      const notes=[];
       if(result.remarque)notes.push(result.remarque);
       showAnalysis('done',{total,chips:n,reliability,remark:notes.join(' '),timing});
       samePhotoRetryAvailable=false;show($('bptStackRetrySame'),false);
@@ -389,9 +393,7 @@
       '<div id="bptStackHist"></div>';
     body.insertBefore(home,body.firstChild);
     const toolbar=document.createElement('div');toolbar.id='bptStackWorkBar';toolbar.className='bpt-stack-actions';
-    toolbar.innerHTML='<button type="button" id="bptStackBack">← Retour</button><button type="button" id="bptStackRetry">Nouvelle photo IA</button><button type="button" id="bptStackRetrySame" style="display:none">Réessayer cette photo</button>'+
-      '<fieldset id="bptScanSetPicker" style="border:0;padding:0;margin:8px 0 0;display:flex;gap:14px;flex-wrap:wrap;width:100%"><legend style="font-size:.85em;opacity:.8">Jeu de jetons de la photo</legend>'+
-      '<label><input type="radio" name="bptScanSet" value="moonriver"> Moon River</label><label><input type="radio" name="bptScanSet" value="palace"> Chips Palace</label></fieldset>';
+    toolbar.innerHTML='<button type="button" id="bptStackBack">← Retour</button><button type="button" id="bptStackRetry">Nouvelle photo IA</button><button type="button" id="bptStackRetrySame" style="display:none">Réessayer cette photo</button>';
     body.insertBefore(toolbar,home.nextSibling);
     const validateButton=document.createElement('button');validateButton.type='button';validateButton.id='bptStackValidate';
     validateButton.className='bpt-stack-validate';validateButton.textContent='Valider le stack';
@@ -402,12 +404,6 @@
     $('bptStackGoAI').addEventListener('click',selectPhoto);
     $('bptStackRetry').addEventListener('click',selectPhoto);
     $('bptStackRetrySame').addEventListener('click',()=>{if(lastPhotoFile&&!busy)processPhoto(lastPhotoFile);});
-    syncSetPicker();
-    document.querySelectorAll('input[name="bptScanSet"]').forEach(r=>r.addEventListener('change',()=>{
-      if(!r.checked)return;setScanSet(r.value);
-      // Jeu corrigé après coup : l'analyse repart sur la même photo avec la bonne consigne.
-      if(mode==='ia'&&lastPhotoFile&&!busy)processPhoto(lastPhotoFile);
-    }));
     $('bptStackBack').addEventListener('click',()=>goHome());
     validateButton.addEventListener('click',validate);
     $('bptStackFile').addEventListener('change',event=>{
