@@ -51,6 +51,25 @@
       },
       "backup_meta": {
         ".write": "auth != null"
+      },
+      "chip_reference_photos": {
+        "$game": {
+          "$value": {
+            "$id": {
+              ".write": "auth != null && ($game === 'moonriver' || $game === 'palace') && $value.matches(/^(25|50|100|500|1000|5000|10000)$/) && $id.matches(/^[A-Za-z0-9_-]{1,40}$/)",
+              ".validate": "newData.hasChildren(['data', 'updatedAt'])",
+              "data": {
+                ".validate": "newData.isString() && newData.val().beginsWith('data:image/jpeg;base64,') && newData.val().length <= 90000"
+              },
+              "updatedAt": {
+                ".validate": "newData.isNumber()"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          }
+        }
       }
     },
     "bpt_codes": {
