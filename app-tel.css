@@ -9996,3 +9996,9 @@ html:not(.bpt-mobile-device) .bpt-ol-invite{bottom:20px}
     position:sticky!important;bottom:0!important;z-index:5!important;
     background:var(--bpt-bg,#0f1426)!important;padding-top:7px!important;}
 }
+
+/* 10.4.154 — Joueurs : évolution du stack au clic */
+.bpt484-stack-link{cursor:pointer}.bpt484-stack-link .bpt484-player-stack::after{content:" · évolution ›";color:#f4d177}.bpt484-stack-link:focus-visible{outline:2px solid #f4d177;outline-offset:2px}
+.bpt484-stack-sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:4px 0 10px}.bpt484-stack-sum>div{background:#ffffff0d;border-radius:10px;padding:8px;min-width:0}.bpt484-stack-sum span,.bpt484-stack-sum small{display:block;font-size:.75em;color:#9fb4af}.bpt484-stack-sum b{display:block;font-size:1.15em;margin:2px 0;overflow-wrap:anywhere}
+.bpt484-stack-curve{display:block;width:100%;height:auto;margin:4px 0 10px}.bpt484-stack-curve .axis{stroke:#ffffff33;stroke-width:1}.bpt484-stack-curve .area{fill:#8cdacc22}.bpt484-stack-curve .line{fill:none;stroke:#8cdacc;stroke-width:2.5;stroke-linejoin:round}.bpt484-stack-curve circle{fill:#f4d177}.bpt484-stack-curve text{fill:#9fb4af;font-size:10px}
+#bpt484Dialog .up{color:#7fd08f}#bpt484Dialog .down{color:#ef8a7c}#bpt484Dialog .bpt484-row b small.up,#bpt484Dialog .bpt484-row b small.down{display:inline;margin-left:6px;font-size:.8em}

@@ -325,6 +325,37 @@
     const next=$('bpt484Dialog');if(next)next.scrollTop=oldScroll;
   }
   document.addEventListener('bpt-stack-records-updated',refreshPlayerStacks);
+  // 10.4.154 — évolution du stack d'un joueur (clic dans Joueurs) : courbe + relevés, mise à jour en temps réel.
+  function stackCurve(points){
+    const W=320,H=150,L=8,R=8,T=12,B=20;
+    if(points.length<2)return '';
+    const xs=points.map(p=>p.x),ys=points.map(p=>p.y);
+    const x0=Math.min(...xs),x1=Math.max(...xs),ymax=Math.max(...ys)*1.08||1;
+    const px=x=>L+(x1>x0?(x-x0)/(x1-x0):.5)*(W-L-R),py=y=>T+(1-y/ymax)*(H-T-B);
+    const d=points.map((p,i)=>(i?'L':'M')+px(p.x).toFixed(1)+' '+py(p.y).toFixed(1)).join(' ');
+    const area=d+` L${px(x1).toFixed(1)} ${H-B} L${px(x0).toFixed(1)} ${H-B} Z`;
+    const dots=points.map(p=>`<circle cx="${px(p.x).toFixed(1)}" cy="${py(p.y).toFixed(1)}" r="3.5"/>`).join('');
+    const lv=points.map((p,i)=>(i===0||p.level!==points[i-1].level)&&p.level?`<text x="${px(p.x).toFixed(1)}" y="${H-5}" text-anchor="middle">N${p.level}</text>`:'').join('');
+    return `<svg class="bpt484-stack-curve" viewBox="0 0 ${W} ${H}" role="img" aria-label="Courbe du stack"><line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" class="axis"/><path d="${area}" class="area"/><path d="${d}" class="line"/>${dots}${lv}</svg>`;
+  }
+  function stackEvolution(name){
+    const store=window.BPTStackSync,hist=(store?.getHistory?.(name)||[]).slice().reverse();
+    const st=state(),bb=blindAt(Number(st?.levelIndex)||0).bb;
+    if(!hist.length){info('players');return;}
+    const points=hist.map(r=>({x:Number.isFinite(Number(r.elapsedSec))?Number(r.elapsedSec):Number(r.at)/1000,y:Number(r.total)||0,level:Number(r.level)||0}));
+    const first=hist[0],last=hist[hist.length-1],diff=(Number(last.total)||0)-(Number(first.total)||0);
+    const sign=n=>n>0?'+'+fmt(n):n<0?'−'+fmt(-n):'±0';
+    const rows=hist.map((r,i)=>{const prev=i?Number(hist[i-1].total)||0:null,t=Number(r.total)||0,dt=new Date(Number(r.at));
+      const hour=Number.isFinite(dt.getTime())?dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';
+      const delta=prev===null?'':`<small class="${t>prev?'up':t<prev?'down':''}">${sign(t-prev)}</small>`;
+      return `<div class="bpt484-row"><span>${hour} · niveau ${esc(r.level||'—')}</span><b>${fmt(t)}${delta}</b></div>`;}).reverse().join('');
+    const summary=`<div class="bpt484-stack-sum"><div><span>Dernier stack</span><b>${fmt(last.total)}</b><small>${esc(ageSince(last.at))}</small></div><div><span>En big blinds</span><b>${bb?fmt((Number(last.total)||0)/bb):'—'} BB</b><small>BB actuelle ${fmt(bb)}</small></div><div><span>Depuis le 1er relevé</span><b class="${diff>0?'up':diff<0?'down':''}">${sign(diff)}</b><small>${hist.length} relevé${hist.length>1?'s':''}</small></div></div>`;
+    open(`${esc(name)} · évolution du stack`,`${summary}${stackCurve(points)||'<p class="bpt484-hint">La courbe apparaîtra dès le 2e relevé.</p>'}${rows}<div class="bpt484-btnrow"><button type="button" data-back-players>← Joueurs</button></div>`);
+    const dlg=$('bpt484Dialog');if(!dlg)return;dlg.dataset.panel='stack';dlg.dataset.stackPlayer=name;
+    dlg.querySelector('[data-back-players]')?.addEventListener('click',()=>info('players'));
+  }
+  document.addEventListener('bpt-stack-records-updated',()=>{const d=$('bpt484Dialog');
+    if(d&&d.dataset.panel==='stack'&&$('bpt484Modal')?.classList.contains('open')){const y=d.scrollTop;stackEvolution(d.dataset.stackPlayer);const n=$('bpt484Dialog');if(n)n.scrollTop=y;}});
   setInterval(refreshPlayerStacks,30000);
   function info(type){
     const st=state();
@@ -360,7 +391,8 @@
         const latest=active&&stackStatus.loaded?stackStore?.getLatest?.(p.name):null;
         const stackLabel=!active?'':!stackStatus.connected?'Stack indisponible':!stackStatus.loaded?(stackStatus.error?'Synchronisation indisponible':'Chargement du stack…'):
           latest?`${fmt(latest.total)} points · ${ageSince(latest.at)}`:'Stack non renseigné';
-        return `<div class="bpt484-row${isLast?' bpt484-last-out':''}" ${isLast?'data-last-out="1" tabindex="0" role="button" title="Corriger ou annuler cette élimination"':''}><span>${esc(p.name||'—')}${isLast?' <small>· dernière élimination</small>':''}</span><b>${status}${detail}${active?`<small class="bpt484-player-stack">${esc(stackLabel)}</small>`:''}</b></div>`;
+        const evo=!!latest&&!isLast;
+        return `<div class="bpt484-row${isLast?' bpt484-last-out':''}${evo?' bpt484-stack-link':''}" ${isLast?'data-last-out="1" tabindex="0" role="button" title="Corriger ou annuler cette élimination"':''}${evo?` data-stack-player="${esc(p.name)}" tabindex="0" role="button" title="Voir l’évolution du stack"`:''}><span>${esc(p.name||'—')}${isLast?' <small>· dernière élimination</small>':''}</span><b>${status}${detail}${active?`<small class="bpt484-player-stack">${esc(stackLabel)}</small>`:''}</b></div>`;
       }).join('');
       open('Joueurs',rows||'<p>Aucun joueur disponible.</p>');
       const dlg=$('bpt484Dialog');if(dlg)dlg.dataset.panel='players';
@@ -387,6 +419,11 @@
       };
       lastRow?.addEventListener('click',openCorrection);
       lastRow?.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openCorrection();}});
+      dlg?.querySelectorAll('[data-stack-player]').forEach(row=>{
+        const go=()=>stackEvolution(row.dataset.stackPlayer);
+        row.addEventListener('click',go);
+        row.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
+      });
       return;
     }
     if(type==='chrono'){
