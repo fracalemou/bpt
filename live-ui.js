@@ -326,36 +326,68 @@
   }
   document.addEventListener('bpt-stack-records-updated',refreshPlayerStacks);
   // 10.4.154 — évolution du stack d'un joueur (clic dans Joueurs) : courbe + relevés, mise à jour en temps réel.
-  function stackCurve(points){
-    const W=320,H=150,L=8,R=8,T=12,B=20;
-    if(points.length<2)return '';
-    const xs=points.map(p=>p.x),ys=points.map(p=>p.y);
-    const x0=Math.min(...xs),x1=Math.max(...xs),ymax=Math.max(...ys)*1.08||1;
-    const px=x=>L+(x1>x0?(x-x0)/(x1-x0):.5)*(W-L-R),py=y=>T+(1-y/ymax)*(H-T-B);
-    const d=points.map((p,i)=>(i?'L':'M')+px(p.x).toFixed(1)+' '+py(p.y).toFixed(1)).join(' ');
-    const area=d+` L${px(x1).toFixed(1)} ${H-B} L${px(x0).toFixed(1)} ${H-B} Z`;
-    const dots=points.map(p=>`<circle cx="${px(p.x).toFixed(1)}" cy="${py(p.y).toFixed(1)}" r="3.5"/>`).join('');
-    const lv=points.map((p,i)=>(i===0||p.level!==points[i-1].level)&&p.level?`<text x="${px(p.x).toFixed(1)}" y="${H-5}" text-anchor="middle">N${p.level}</text>`:'').join('');
-    return `<svg class="bpt484-stack-curve" viewBox="0 0 ${W} ${H}" role="img" aria-label="Courbe du stack"><line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" class="axis"/><path d="${area}" class="area"/><path d="${d}" class="line"/>${dots}${lv}</svg>`;
+  // 10.4.155 — ligne de temps de la partie (temps de jeu, pauses exclues) découpée en intervalles de niveau.
+  // Bornes réelles : début du niveau en cours = maintenant − temps déjà joué dans ce niveau ; niveaux précédents
+  // reconstitués à rebours avec leur durée (un niveau passé à la main avant la fin reste approché).
+  function liveElapsedSec(st){const base=Math.max(0,Number(st?.elapsedSec)||0);
+    return st?.running&&st?.runStartedAt?base+Math.max(0,Math.floor((Date.now()-Number(st.runStartedAt))/1000)):base;}
+  function levelTimeline(st){
+    if(!st?.startedAt)return null;
+    const idx=Math.max(0,Number(st.levelIndex)||0),now=liveElapsedSec(st);
+    const dur=i=>Math.max(60,Number(st.levels?.[i]?.durationSec)||1200);
+    const remain=st.running&&st.deadline?Math.max(0,(Number(st.deadline)-Date.now())/1000):Math.max(0,Number(st.remainingSec)||0);
+    const bands=[];let to=now,from=Math.max(0,now-Math.max(0,dur(idx)-remain));
+    for(let i=idx;i>=0;i--){
+      if(i<idx){to=from;from=Math.max(0,to-dur(i));}
+      if(i===0||from<=0){bands.unshift({level:i+1,from:0,to});break;}
+      bands.unshift({level:i+1,from,to});
+    }
+    return now>0?{now,bands}:null;
+  }
+  function gameClock(sec){const m=Math.round(sec/60),h=Math.floor(m/60),r=m%60;return h?`${h}h${r?String(r).padStart(2,'0'):''}`:`${r} min`;}
+  function stackCurve(points,tl){
+    const W=320,H=172,L=8,R=8,T=18,B=18,bottom=H-B;
+    if(!points.length||(!tl&&points.length<2))return '';
+    const band=lv=>tl?.bands.find(b=>b.level===lv);
+    const pts=points.map(p=>{const b=band(p.level);let x=Number.isFinite(p.x)?p.x:(b?b.from:0);if(b)x=Math.min(Math.max(x,b.from),b.to);return {...p,x};});
+    const x0=tl?0:Math.min(...pts.map(p=>p.x)),x1=Math.max(tl?tl.now:0,...pts.map(p=>p.x),x0+1);
+    const ymax=Math.max(...pts.map(p=>p.y))*1.1||1;
+    const px=x=>L+(x-x0)/(x1-x0)*(W-L-R),py=y=>T+(1-y/ymax)*(bottom-T),f=n=>n.toFixed(1);
+    let bg='';
+    if(tl){
+      const cur=tl.bands[tl.bands.length-1]?.level;
+      bg=tl.bands.map((b,i)=>{const a=px(b.from),z=px(b.to),w=z-a;
+        const lab=(w>=15||b.level===cur)?`<text class="lvl${b.level===cur?' cur':''}" x="${f(a+w/2)}" y="12" text-anchor="middle">N${b.level}</text>`:'';
+        return `<rect class="band${i%2?' alt':''}${b.level===cur?' cur':''}" x="${f(a)}" y="${T}" width="${f(Math.max(0,w))}" height="${bottom-T}"/>${i?`<line class="sep" x1="${f(a)}" x2="${f(a)}" y1="${T}" y2="${bottom}"/>`:''}${lab}`;}).join('');
+      const span=x1-x0,step=[900,1800,3600,7200,10800,14400].find(s=>span/s<=6)||21600;
+      for(let t=0;t<=x1+1;t+=step)bg+=`<text class="time" x="${f(px(t))}" y="${H-4}" text-anchor="${t===0?'start':'middle'}">${gameClock(t)}</text>`;
+    }
+    const d=pts.map((p,i)=>(i?'L':'M')+f(px(p.x))+' '+f(py(p.y))).join(' ');
+    const area=pts.length>1?`<path d="${d} L${f(px(pts[pts.length-1].x))} ${bottom} L${f(px(pts[0].x))} ${bottom} Z" class="area"/>`:'';
+    const dots=pts.map(p=>`<circle cx="${f(px(p.x))}" cy="${f(py(p.y))}" r="3.5"><title>N${p.level} · ${gameClock(p.x)} de jeu · ${fmt(p.y)}</title></circle>`).join('');
+    return `<svg class="bpt484-stack-curve" viewBox="0 0 ${W} ${H}" role="img" aria-label="Évolution du stack sur la durée de la partie, par niveau">${bg}<line x1="${L}" x2="${W-R}" y1="${bottom}" y2="${bottom}" class="axis"/>${area}${pts.length>1?`<path d="${d}" class="line"/>`:''}${dots}</svg>`;
   }
   function stackEvolution(name){
     const store=window.BPTStackSync,hist=(store?.getHistory?.(name)||[]).slice().reverse();
     const st=state(),bb=blindAt(Number(st?.levelIndex)||0).bb;
     if(!hist.length){info('players');return;}
-    const points=hist.map(r=>({x:Number.isFinite(Number(r.elapsedSec))?Number(r.elapsedSec):Number(r.at)/1000,y:Number(r.total)||0,level:Number(r.level)||0}));
+    const points=hist.map(r=>({x:r.elapsedSec==null||!Number.isFinite(Number(r.elapsedSec))?NaN:Number(r.elapsedSec),y:Number(r.total)||0,level:Number(r.level)||0}));
     const first=hist[0],last=hist[hist.length-1],diff=(Number(last.total)||0)-(Number(first.total)||0);
     const sign=n=>n>0?'+'+fmt(n):n<0?'−'+fmt(-n):'±0';
     const rows=hist.map((r,i)=>{const prev=i?Number(hist[i-1].total)||0:null,t=Number(r.total)||0,dt=new Date(Number(r.at));
       const hour=Number.isFinite(dt.getTime())?dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';
       const delta=prev===null?'':`<small class="${t>prev?'up':t<prev?'down':''}">${sign(t-prev)}</small>`;
-      return `<div class="bpt484-row"><span>${hour} · niveau ${esc(r.level||'—')}</span><b>${fmt(t)}${delta}</b></div>`;}).reverse().join('');
+      const played=r.elapsedSec!=null&&Number.isFinite(Number(r.elapsedSec))?` · ${gameClock(Number(r.elapsedSec))} de jeu`:'';
+      return `<div class="bpt484-row"><span>Niveau ${esc(r.level||'—')}${played}<small class="bpt484-stack-hour">${hour}</small></span><b>${fmt(t)}${delta}</b></div>`;}).reverse().join('');
     const summary=`<div class="bpt484-stack-sum"><div><span>Dernier stack</span><b>${fmt(last.total)}</b><small>${esc(ageSince(last.at))}</small></div><div><span>En big blinds</span><b>${bb?fmt((Number(last.total)||0)/bb):'—'} BB</b><small>BB actuelle ${fmt(bb)}</small></div><div><span>Depuis le 1er relevé</span><b class="${diff>0?'up':diff<0?'down':''}">${sign(diff)}</b><small>${hist.length} relevé${hist.length>1?'s':''}</small></div></div>`;
-    open(`${esc(name)} · évolution du stack`,`${summary}${stackCurve(points)||'<p class="bpt484-hint">La courbe apparaîtra dès le 2e relevé.</p>'}${rows}<div class="bpt484-btnrow"><button type="button" data-back-players>← Joueurs</button></div>`);
+    open(`${esc(name)} · évolution du stack`,`${summary}${stackCurve(points,levelTimeline(st))||'<p class="bpt484-hint">La courbe apparaîtra dès le 2e relevé.</p>'}${rows}<div class="bpt484-btnrow"><button type="button" data-back-players>← Joueurs</button></div>`);
     const dlg=$('bpt484Dialog');if(!dlg)return;dlg.dataset.panel='stack';dlg.dataset.stackPlayer=name;
     dlg.querySelector('[data-back-players]')?.addEventListener('click',()=>info('players'));
   }
-  document.addEventListener('bpt-stack-records-updated',()=>{const d=$('bpt484Dialog');
-    if(d&&d.dataset.panel==='stack'&&$('bpt484Modal')?.classList.contains('open')){const y=d.scrollTop;stackEvolution(d.dataset.stackPlayer);const n=$('bpt484Dialog');if(n)n.scrollTop=y;}});
+  function refreshStackPanel(){const d=$('bpt484Dialog');
+    if(d&&d.dataset.panel==='stack'&&$('bpt484Modal')?.classList.contains('open')){const y=d.scrollTop;stackEvolution(d.dataset.stackPlayer);const n=$('bpt484Dialog');if(n)n.scrollTop=y;}}
+  document.addEventListener('bpt-stack-records-updated',refreshStackPanel);
+  setInterval(refreshStackPanel,30000); // la ligne de temps avance avec la partie
   setInterval(refreshPlayerStacks,30000);
   function info(type){
     const st=state();

@@ -9,6 +9,10 @@
   function norm(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toLocaleLowerCase('fr')}
   function hash(v){let h=2166136261;for(const c of v){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return (h>>>0).toString(36)}
   function keyOf(name){return 'p_'+hash(norm(name))}
+  // 10.4.155 — temps de jeu À L'INSTANT du relevé : elapsedSec n'est cumulé qu'aux pauses et changements de niveau,
+  // il faut y ajouter le temps couru depuis runStartedAt (même calcul que elapsedSeconds() du module Live).
+  function liveElapsed(s){const base=Math.max(0,Number(s?.elapsedSec)||0);
+    return s?.running&&s?.runStartedAt?base+Math.max(0,Math.floor((Date.now()-Number(s.runStartedAt))/1000)):base;}
   function getLive(){try{return root.BPTLive3?.getState?.()||null}catch(_){return null}}
   function liveKey(){const s=getLive();return s?.active&&s?.sessionId?'s_'+hash(String(s.sessionId)):''}
   function identity(){const name=String(root.BPTLive3?.getVerifiedIdentityName?.()||'').trim(),s=getLive();
@@ -40,7 +44,7 @@
     if(id&&!previous)throw new Error('Ce relevé n’existe plus. Recharge l’historique.');
     const payload={name,total:record.total,chips:record.chips,counts:record.counts,mode:record.mode,
       level:previous?.level??Number(state.levelIndex||0)+1,
-      elapsedSec:previous?.elapsedSec??Math.max(0,Number(state.elapsedSec||0)),
+      elapsedSec:previous?.elapsedSec??liveElapsed(state),
       at:previous?.at??root.firebase.database.ServerValue.TIMESTAMP,
       updatedAt:root.firebase.database.ServerValue.TIMESTAMP,
       authorUid:env.auth?.currentUser?.uid||null};
