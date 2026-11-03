@@ -23,7 +23,21 @@
         ".write": "auth != null"
       },
       "live_v3": {
-        ".write": "auth != null"
+        "current": {
+          ".write": "auth != null"
+        },
+        "stack_history": {
+          "$session": {
+            "$player": {
+              "records": {
+                "$id": {
+                  ".write": "auth != null && (data.exists() ? data.child('authorUid').val() === auth.uid : newData.child('authorUid').val() === auth.uid)",
+                  ".validate": "newData.hasChildren(['name', 'total', 'at', 'authorUid']) && newData.child('authorUid').val() === auth.uid && newData.child('name').isString() && newData.child('total').isNumber() && newData.child('total').val() >= 0 && newData.child('total').val() <= 100000000 && newData.child('at').isNumber()"
+                }
+              }
+            }
+          }
+        }
       },
       "config": {
         ".write": "auth != null"
