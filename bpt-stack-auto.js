@@ -106,6 +106,7 @@
     show($('bptStackWorkBar'),!home,'flex');
     show($('bptStackValidate'),!home);
     show($('bptStackLines'),!home);
+    show($('bptStackStepBar'),!home,'flex');
     show($('bptStackAutoStatus'),!home);
     show($('bptStackMessage'),!home);
     for(const s of document.querySelectorAll('#bptStackModal .bpt-stack-summary'))show(s,!home,'flex');
@@ -114,13 +115,21 @@
     show($('bptStackRetry'),!home&&mode==='ia');
     show($('bptStackRetrySame'),!home&&mode==='ia'&&samePhotoRetryAvailable);
     if(home)renderHistory();
+    refreshLastButton();
   }
+  // 10.4.154 — reprendre les quantités du dernier relevé validé, pour ne corriger que ce qui a changé.
+  function refreshLastButton(){const b=$('bptStackLast');if(!b)return;
+    const last=step!=='home'&&mode==='manuel'&&editingIndex==null?historyGet()[0]:null;
+    show(b,!!last);if(last)b.title='Relevé de '+fmt(last.total||0)+' points';}
+  function applyLast(){const last=historyGet()[0];if(!last)return;
+    applyCounts(compatibleCounts(last.counts));
+    status('Quantités de ton dernier relevé ('+fmt(last.total||0)+' points) : corrige ce qui a changé, puis valide.');}
   function goHome(message=''){
     requestNo++;stopAI();busy=false;lastPhotoFile=null;samePhotoRetryAvailable=false;const choose=$('bptStackGoAI');if(choose)choose.disabled=false;
     const msg=$('bptStackHomeMsg');if(msg)msg.textContent=message;
     setStep('home');
   }
-  function startManual(){requestNo++;stopAI();lastPhotoFile=null;samePhotoRetryAvailable=false;mode='manuel';imageCanvas=null;busy=false;editingIndex=null;reset();setStep('work');status('Indique tes quantités par couleur, puis valide le comptage.');}
+  function startManual(){requestNo++;stopAI();lastPhotoFile=null;samePhotoRetryAvailable=false;mode='manuel';imageCanvas=null;busy=false;editingIndex=null;reset();setStep('work');status(historyGet()[0]?'Indique tes quantités par couleur, ou pars de ton dernier relevé, puis valide.':'Indique tes quantités par couleur, puis valide le comptage.');}
   function selectPhoto(){if(busy)return;const input=$('bptStackFile');if(!input)return;
     mode='ia';input.value='';input.click(); // déclenche le sélecteur/caméra à la demande du joueur
   }
@@ -399,6 +408,8 @@
     validateButton.className='bpt-stack-validate';validateButton.textContent='Valider le stack';
     const actions=body.querySelector('.bpt-stack-actions:not(#bptStackWorkBar)');if(!actions)return;
     actions.parentNode.insertBefore(validateButton,actions);
+    const lastButton=document.createElement('button');lastButton.type='button';lastButton.id='bptStackLast';lastButton.textContent='↺ Comme mon dernier relevé';
+    actions.insertBefore(lastButton,actions.firstChild);lastButton.addEventListener('click',applyLast);
 
     $('bptStackGoManual').addEventListener('click',startManual);
     $('bptStackGoAI').addEventListener('click',selectPhoto);
@@ -414,9 +425,9 @@
       const hist=historyGet();
       if(del){const id=del.dataset.hd;if(!confirm('Supprimer ce relevé synchronisé ?'))return;del.disabled=true;
         try{await root.BPTStackSync.remove(id);}catch(e){alert('Suppression impossible : '+(e.message||'connexion indisponible'));del.disabled=false;}return;}
-      if(take){const entry=hist.find(x=>x.id===take.dataset.hr);if(entry){startManual();editingIndex=entry.id;applyCounts(compatibleCounts(entry.counts));status('Modification de ce relevé : valide pour synchroniser la correction.');}}
+      if(take){const entry=hist.find(x=>x.id===take.dataset.hr);if(entry){startManual();editingIndex=entry.id;refreshLastButton();applyCounts(compatibleCounts(entry.counts));status('Modification de ce relevé : valide pour synchroniser la correction.');}}
     });
-    document.addEventListener('bpt-stack-records-updated',()=>{if(step==='home')renderHistory();});
+    document.addEventListener('bpt-stack-records-updated',()=>{if(step==='home')renderHistory();else refreshLastButton();});
     // Réveille le serveur IA (connexion TLS + démarrage du Worker) dès l'ouverture du scanner : la photo part ensuite plus vite.
     let warmAt=0;
     function warmUp(){const url=String(root.BPT_AI_CONFIG&&root.BPT_AI_CONFIG.proxyUrl||'').trim();
