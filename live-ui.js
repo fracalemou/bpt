@@ -53,7 +53,7 @@
       </section>
       <div class="bpt484-right">
         <div class="bpt484-kpis">
-          <section class="bpt484-card bpt484-players" data-action="players"><div class="bpt484-card-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="24" cy="15" r="7"/><circle cx="11" cy="19" r="5"/><circle cx="37" cy="19" r="5"/><path d="M13 38v-5c0-7 5-11 11-11s11 4 11 11v5"/><path d="M3 37v-5c0-5 3-8 8-8 2 0 4 .6 5.5 1.8"/><path d="M45 37v-5c0-5-3-8-8-8-2 0-4 .6-5.5 1.8"/></svg></div><div class="bpt484-label">Joueurs</div><div class="bpt484-value" data-role="players">0</div><div class="bpt484-sub" data-role="playerssub">restants</div></section>
+          <section class="bpt484-card bpt484-players" data-action="players"><div class="bpt484-card-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="24" cy="15" r="7"/><circle cx="11" cy="19" r="5"/><circle cx="37" cy="19" r="5"/><path d="M13 38v-5c0-7 5-11 11-11s11 4 11 11v5"/><path d="M3 37v-5c0-5 3-8 8-8 2 0 4 .6 5.5 1.8"/><path d="M45 37v-5c0-5-3-8-8-8-2 0-4 .6-5.5 1.8"/></svg></div><div class="bpt484-label">Joueurs</div><div class="bpt484-value" data-role="players">0</div><div class="bpt484-sub" data-role="playerssub">restants</div><div class="bpt484-leaders" data-role="stackleaders" hidden></div></section>
           <section class="bpt484-card bpt484-stack" data-action="stack"><div class="bpt484-card-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><ellipse cx="24" cy="12" rx="14" ry="6"/><path d="M10 12v7c0 3 6 6 14 6s14-3 14-6v-7"/><path d="M10 20v7c0 3 6 6 14 6s14-3 14-6v-7"/><path d="M10 28v7c0 3 6 6 14 6s14-3 14-6v-7"/></svg></div><div class="bpt484-label">Tapis moyen</div><div class="bpt484-value bpt484-stack-values"><span data-role="avgchips">0</span><small data-role="avgbb">0 BB</small></div></section>
         </div>
         <section class="bpt484-info" data-action="timing">
@@ -622,6 +622,19 @@
   const bountySeenAt=new Map(),bountyDismissed=new Set();
   let bountyLaunchBusy=false;
   function predictionOdds(st,type,name){return Number(st?.betting?.odds?.[type]?.[name])||3;}
+  // 10.4.156 — écran Live, case Joueurs : chip leader et short stack d'après le dernier relevé des joueurs en lice
+  // (affiché dès 2 joueurs relevés avec des stacks différents ; égalité → le premier dans l'ordre de la partie).
+  function renderStackLeaders(r,players,bb){
+    const box=r.querySelector('[data-role="stackleaders"]');if(!box)return;
+    const store=window.BPTStackSync,ok=!!store?.getStatus?.()?.loaded;
+    const rows=ok?players.filter(p=>p.status==='in'||p.status==='winner').map(p=>{const n=Number(store.getLatest?.(p.name)?.total);return Number.isFinite(n)&&n>=0?{name:p.name,n}:null;}).filter(Boolean):[];
+    let hi=null,lo=null;for(const x of rows){if(!hi||x.n>hi.n)hi=x;if(!lo||x.n<lo.n)lo=x;}
+    const show=rows.length>=2&&hi.n>lo.n;
+    const line=(cls,lab,x)=>`<div class="${cls}"><i>${lab}</i><span>${esc(x.name)}</span><b>${bb?fmt(Math.round(x.n/bb))+' BB':fmt(x.n)}</b></div>`;
+    const html=show?line('lead','Chip leader',hi)+line('short','Short stack',lo):'';
+    if(box.dataset.html!==html){box.dataset.html=html;box.innerHTML=html;}
+    box.hidden=!show;
+  }
   function predictionNames(st){return (st?.players||[]).map(p=>String(p.name||'').trim()).filter(Boolean);}
   async function handleBetAction(button){
     const x=api();if(!x)return;
@@ -808,6 +821,7 @@
       set('timer',$('live3Timer')?.textContent||'00:00');
       set('players',String(alive));
       set('playerssub',players.length>alive?`restants sur ${players.length}`:'restants');
+      renderStackLeaders(r,players,cur.bb);
       set('avgchips',fmt(avg));
       set('avgbb',`${avgBB} BB`);
       fitStackValues(r);
