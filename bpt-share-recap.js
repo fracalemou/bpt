@@ -36,7 +36,8 @@
     }
     const highlights=[...new Set((recap?.highlights||[]).map(h=>String(h.text||h.title||'').trim()).filter(Boolean))];
     return {sorted,game:first.game,date:dateTxt(first.date),location:first.location||'',
-      players:sorted.length,duration:durationTxt(sorted),hunters,kills,bounty,highlights};
+      players:sorted.length,duration:durationTxt(sorted),hunters,kills,bounty,highlights,
+      stackFacts:(()=>{try{return (window.bptStackRecapItems?.(recap?.stacks)||[]).map(e=>`${e.title} : ${e.name} — ${e.text}`);}catch(_e){return [];}})()};
   }
   function fate(r){
     if(Number(r.place)===1)return 'Vainqueur';
@@ -54,6 +55,7 @@
     d.sorted.forEach(r=>{
       L.push(`${r.place}. ${r.player} — ${Number(r.points)||0} pt${Math.abs(Number(r.points)||0)>1?'s':''}${Number(r.kills)?` · ${r.kills} kill${r.kills>1?'s':''}`:''}${Number(r.gross)?` · ${euroTxt(r.gross)}`:''} — ${fate(r)}`);
     });
+    if(d.stackFacts?.length){L.push('');L.push('STACKS');d.stackFacts.forEach(t=>L.push('- '+t));}
     L.push('');
     L.push(`Détails : ${SITE_URL}`);
     return L.join('\n');

@@ -2387,7 +2387,8 @@ function buildFinishedRecap(state){
     missions:(state.personalBounties||[]).filter(c=>c.status==='completed').map(c=>({name:c.hunter,title:c.title||'Cible secrète',text:c.text||'Éliminer '+c.target+' vous-même.',icon:c.icon||'🎯'})),
     objectives:(state.preGameBriefing||[]).filter(e=>e.completed).map(e=>({name:e.name,title:e.title,text:e.resultText||e.text,icon:e.icon||'⭐'})),
     highlights:(state.liveAlerts||[]).filter(e=>/RECORD|ACCOMPLISSEMENT/.test(e.title||'')).map(e=>({title:e.title,text:e.text,icon:e.icon||'🏆'})),
-    betting:buildLiveBettingRecap(state)
+    betting:buildLiveBettingRecap(state),
+    stacks:(()=>{try{return window.BPTStackSync?.summarize?.(state)||null}catch(_){return null}})() // 10.4.157
   };
 }
 const finishedSummaryShown=new Set();
@@ -2432,6 +2433,19 @@ function queuePublishedLiveSummary(state){
   const rows=(db.history||[]).filter(r=>Number(r.gameStartedAt)>0&&Number(r.gameStartedAt)===Number(state.startedAt));
   if(rows.length)queueFinishedGameSummary(rows,state);
 }
+// 10.4.157 — faits de stack du bilan (plus haut stack, plus belle remontée, plus longtemps chip leader).
+// Partagé avec le texte de partage (bpt-share-recap.js).
+function bptStackRecapItems(st){
+  if(!st)return [];
+  const n=v=>num(Math.round(Number(v)||0),0),lv=l=>l?' (niveau '+l+')':'';
+  const dur=sec=>{const m=Math.round(sec/60),h=Math.floor(m/60),r=m%60;return h?h+' h'+(r?' '+String(r).padStart(2,'0'):''):r+' min';};
+  const out=[];
+  if(st.top)out.push({icon:'💰',name:st.top.name,title:'Plus haut stack atteint',text:n(st.top.total)+' jetons'+lv(st.top.level)});
+  if(st.comeback)out.push({icon:'🚀',name:st.comeback.name,title:'Plus belle remontée',text:'De '+n(st.comeback.from)+' à '+n(st.comeback.to)+' jetons (+'+n(st.comeback.gain)+')'+(st.comeback.fromLevel&&st.comeback.toLevel?', niveau '+st.comeback.fromLevel+' → '+st.comeback.toLevel:'')});
+  if(st.leader)out.push({icon:'👑',name:st.leader.name,title:'Le plus longtemps chip leader',text:dur(st.leader.sec)+' en tête'+(st.leader.share?' ('+st.leader.share+' % du temps relevé)':'')+(st.leader.changes?' · '+st.leader.changes+' changement'+(st.leader.changes>1?'s':'')+' de leader':'')});
+  return out;
+}
+window.bptStackRecapItems=bptStackRecapItems;
 function finishedRecapSections(rows){
   const rawRecap=rows.find(r=>r.endGameRecap)?.endGameRecap;
   // 10.4.26 : les bilans enregistrés par d'anciennes versions n'ont pas toutes les listes.
@@ -2451,6 +2465,8 @@ function finishedRecapSections(rows){
     h+='<section class="bpt-recap-section"><h3>🎲 Résultats des paris</h3><div class="bpt-recap-bets-table"><div class="bpt-recap-bets-row head"><b>Joueur</b><b>Pari</b><b>Choix</b><b>Résultat</b><b>Solde</b></div>'+recap.betting.rows.map(b=>`<div class="bpt-recap-bets-row"><strong>${esc(b.player)}</strong><span>${betLabel(b.type)}</span><span>${esc(b.pick)}</span><span class="${b.hit?'is-hit':'is-miss'}">${b.hit?'✓ Réussi':'✕ Perdu'}</span><b class="${b.netCents>=0?'is-hit':'is-miss'}">${b.netCents>=0?'+':''}${euro(b.netCents/100)}</b></div>`).join('')+'</div><p class="bpt-recap-bets-total">Mises : '+euro(recap.betting.totalStakedCents/100)+' · Gains : '+euro(recap.betting.totalGrossWonCents/100)+' · Solde de la partie : '+(recap.betting.totalNetCents>=0?'+':'')+euro(recap.betting.totalNetCents/100)+'</p></section>';
   }
   if(recap.highlights.length)h+='<section class="bpt-recap-section"><h3>🏅 Records et accomplissements</h3>'+items(recap.highlights)+'</section>';
+  const stackItems=bptStackRecapItems(recap.stacks);
+  if(stackItems.length)h+='<section class="bpt-recap-section bpt-recap-stacks"><h3>📈 Les stacks de la partie</h3>'+items(stackItems)+'<p class="muted">D’après '+recap.stacks.records+' relevé'+(recap.stacks.records>1?'s':'')+' de stack de '+recap.stacks.players+' joueurs.</p></section>';
   return h;
 }
 
