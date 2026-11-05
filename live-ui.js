@@ -620,6 +620,27 @@
       fitText(root.querySelector('.bpt484-timing .bpt484-value'),{max:portrait?42:(landscapePhone?26:50),min:portrait?24:(landscapePhone?16:24),widthRatio:.92,heightRatio:.56});
       fitText(root.querySelector('.bpt484-next strong'),{max:portrait?27:(landscapePhone?19:30),min:portrait?16:(landscapePhone?12:16),widthRatio:.90,heightRatio:.42});
       root.querySelectorAll('.bpt484-actions>button').forEach(btn=>fitButtonText(btn,portrait?16:(landscapePhone?14:20),12));
+      // 10.4.160 — téléphone portrait de petite hauteur (surtout en pause, badge au-dessus) : le chrono ne doit déborder
+      // ni sur le badge « EN PAUSE » ni sur sa barre de progression. Vérifié en dernier, une fois blinds et « Prochain » dimensionnés
+      // (ce sont eux qui fixent la hauteur restante pour le chrono) ; le chrono descend alors sous son minimum de 72 px.
+      if(portrait){
+        const clk=root.querySelector('.bpt484-clock'),cv=clk?.querySelector('.bpt484-value');
+        if(cv&&clk.offsetParent!==null){
+          const cs=getComputedStyle(clk),bar=clk.querySelector('.bpt484-progress'),bv=root.querySelector('.bpt484-blinds .bpt484-value');
+          const fs0=parseFloat(getComputedStyle(cv).fontSize)||0,lh=(parseFloat(getComputedStyle(cv).lineHeight)||fs0*.86)/(fs0||1);
+          const room=()=>(clk.clientHeight-(parseFloat(cs.paddingTop)||0)-(parseFloat(cs.paddingBottom)||0)-((bar?.offsetHeight||0)+4)*2)/lh; // taille de chrono qui tient
+          if(room()<fs0||matchMedia('(max-height:720px)').matches){ // petit écran : les blinds n'ont plus de hauteur minimale (CSS), on équilibre
+            // hiérarchie chrono > blinds : on réduit les blinds (min 36 px) tant que le chrono qui tient reste plus petit qu'eux
+            for(let i=0;i<16&&bv;i++){const fb=parseFloat(getComputedStyle(bv).fontSize)||0;if(fb<=36||Math.min(fs0,room())>=fb*1.15)break;bv.style.fontSize=Math.max(36,fb*.95).toFixed(1)+'px';}
+            // puis on les regrossit tant qu'ils tiennent en largeur et que le chrono reste au moins 20 % plus grand
+            const bw=bv?.parentElement;
+            for(let i=0;i<16&&bv&&bw;i++){const fb=parseFloat(getComputedStyle(bv).fontSize)||0;if(fb>=102)break;const nf=fb*1.05;bv.style.fontSize=nf.toFixed(1)+'px';
+              if(bv.scrollWidth>bw.clientWidth*.96+1||Math.min(fs0,room())<nf*1.2){bv.style.fontSize=fb.toFixed(1)+'px';break;}}
+            const wmax=fs0*(clk.clientWidth*.92)/(cv.scrollWidth||1); // largeur : le chrono ne dépasse pas sa zone
+            const r=room();if(r>0)cv.style.fontSize=Math.max(30,Math.min(fs0,148,wmax,Math.floor(r*10)/10))+'px';
+          }
+        }
+      }
     });
   }
   function scheduleFitLiveTexts(){
