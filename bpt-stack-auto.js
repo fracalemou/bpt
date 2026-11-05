@@ -83,7 +83,7 @@
   }
   function renderHistory(){const target=$('bptStackHist');if(!target)return;
     // 10.4.163 — historique retiré de l'écran de saisie (la modification d'un relevé ne fonctionnait pas) :
-    // les relevés se consultent dans Suivi de partie › Suivi des stacks. « Comme mon dernier relevé » reste disponible.
+    // les relevés se consultent dans Suivi de partie › Suivi des stacks. (« Comme mon dernier relevé » retiré en 10.4.164.)
     target.replaceChildren();target.hidden=true;return;
     const sync=root.BPTStackSync;
     sync?.trackSession?.();const st=sync?.getStatus?.();const hist=historyGet();
@@ -132,7 +132,7 @@
     const msg=$('bptStackHomeMsg');if(msg)msg.textContent=message;
     setStep('home');
   }
-  function startManual(){requestNo++;stopAI();lastPhotoFile=null;samePhotoRetryAvailable=false;mode='manuel';imageCanvas=null;busy=false;editingIndex=null;reset();setStep('work');status(historyGet()[0]?'Indique tes quantités par couleur, ou pars de ton dernier relevé, puis valide.':'Indique tes quantités par couleur, puis valide le comptage.');}
+  function startManual(){requestNo++;stopAI();lastPhotoFile=null;samePhotoRetryAvailable=false;mode='manuel';imageCanvas=null;busy=false;editingIndex=null;reset();setStep('work');status('Indique tes quantités par couleur, puis valide le comptage.');}
   function selectPhoto(){if(busy)return;const input=$('bptStackFile');if(!input)return;
     mode='ia';input.value='';input.click(); // déclenche le sélecteur/caméra à la demande du joueur
   }
@@ -411,8 +411,7 @@
     validateButton.className='bpt-stack-validate';validateButton.textContent='Valider le stack';
     const actions=body.querySelector('.bpt-stack-actions:not(#bptStackWorkBar)');if(!actions)return;
     actions.parentNode.insertBefore(validateButton,actions);
-    const lastButton=document.createElement('button');lastButton.type='button';lastButton.id='bptStackLast';lastButton.textContent='↺ Comme mon dernier relevé';
-    actions.insertBefore(lastButton,actions.firstChild);lastButton.addEventListener('click',applyLast);
+    // 10.4.164 — bouton « ↺ Comme mon dernier relevé » retiré (demande utilisateur) : chaque saisie part de 0.
 
     $('bptStackGoManual').addEventListener('click',startManual);
     $('bptStackGoAI').addEventListener('click',selectPhoto);
