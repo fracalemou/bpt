@@ -405,7 +405,7 @@
       const meta=out?(lv?`Éliminé · niveau ${lv}`:'Éliminé'):x.last?`${esc(ageSince(x.last.at))}${x.h.length>1?` · ${x.h.length} relevés`:''}`:'Stack non renseigné';
       const link=x.h.length>0;
       const right=x.t===null?'—':fmt(x.t)+(out?'<small>dernier relevé</small>':`<small>${bb?fmt(x.t/bb)+' BB':''}${trend}</small>`);
-      return `<div class="bpt484-row bpt484-stk-row${out?' is-out':''}${link?' bpt484-stk-link':''}"${link?` data-stk-player="${esc(x.p.name)}" tabindex="0" role="button" title="Voir l’évolution du stack"`:''}><span><i class="bpt484-stk-rank">${rank||''}</i><span class="bpt484-stk-name">${esc(x.p.name||'—')}<small>${meta}</small></span></span><b>${right}</b>${link?'<i class="bpt484-stk-go" aria-hidden="true">›</i>':''}</div>`;};
+      return `<div class="bpt484-row bpt484-stk-row${out?' is-out':''}${link?' bpt484-stk-link':''}"${link?` data-stk-player="${esc(x.p.name)}" tabindex="0" role="button" title="Voir l’évolution du stack"`:''}><span><i class="bpt484-stk-rank">${rank||''}</i><span class="bpt484-stk-name">${esc(x.p.name||'—')}<small>${meta}</small></span></span><b>${right}</b><i class="bpt484-stk-go" aria-hidden="true">${link?'›':''}</i></div>`;};
     const status=!ss.connected?'<p class="bpt484-hint">Stacks indisponibles (connexion).</p>':!ss.loaded?`<p class="bpt484-hint">${ss.error?'Synchronisation des stacks indisponible.':'Chargement des stacks…'}</p>`:'';
     const known=active.filter(x=>x.t!==null).length;
     const head=ss.loaded?`<p class="bpt484-hint">${known?`${known} joueur${known>1?'s':''} en lice sur ${active.length} avec un relevé · touchez un joueur pour voir l’évolution de son stack.`:'Aucun relevé de stack pour l’instant : utilisez « 🪙 Comptage stack » dans Outils.'}</p>`:'';
@@ -459,7 +459,9 @@
         const stackLabel=!active?'':!stackStatus.connected?'Stack indisponible':!stackStatus.loaded?(stackStatus.error?'Synchronisation indisponible':'Chargement du stack…'):
           latest?`${fmt(latest.total)} jetons`:'Stack non renseigné'; // 10.4.161 : ni ancienneté ni évolution ici (→ Suivi de partie › Suivi des stacks)
         const evo=false;
-        return `<div class="bpt484-row${isLast?' bpt484-last-out':''}${evo?' bpt484-stack-link':''}" ${isLast?'data-last-out="1" tabindex="0" role="button" title="Corriger ou annuler cette élimination"':''}${evo?` data-stack-player="${esc(p.name)}" tabindex="0" role="button" title="Voir l’évolution du stack"`:''}><span>${esc(p.name||'—')}${isLast?' <small>· dernière élimination</small>':''}</span><b>${status}${detail}${active?`<small class="bpt484-player-stack">${esc(stackLabel)}</small>`:''}</b></div>`;
+        // 10.4.162 — détail Joueurs en tableau : nom + statut dessous à gauche, stack dans une colonne commune à droite
+        const stackCell=active?(latest?`${fmt(latest.total)}<small>jetons</small>`:`<small class="bpt484-pl-nostack">${esc(stackLabel==='Stack non renseigné'?'Non relevé':stackLabel)}</small>`):'';
+        return `<div class="bpt484-row bpt484-pl-row${isLast?' bpt484-last-out':''}${out?' is-out':''}" ${isLast?'data-last-out="1" tabindex="0" role="button" title="Corriger ou annuler cette élimination"':''}><span class="bpt484-pl-name">${esc(p.name||'—')}<small>${status}${detail}${isLast?' · dernière élimination':''}</small></span><b class="bpt484-pl-stack">${stackCell}</b></div>`;
       }).join('');
       open('Joueurs',rows||'<p>Aucun joueur disponible.</p>');
       const dlg=$('bpt484Dialog');if(dlg)dlg.dataset.panel='players';
