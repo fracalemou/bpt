@@ -374,6 +374,11 @@
     if(!hist.length){openStackTracking();return;}
     const points=hist.map(r=>({x:r.elapsedSec==null||!Number.isFinite(Number(r.elapsedSec))?NaN:Number(r.elapsedSec),y:Number(r.total)||0,level:Number(r.level)||0}));
     const first=hist[0],last=hist[hist.length-1],diff=(Number(last.total)||0)-(Number(first.total)||0);
+    // 10.4.165 — suppression du dernier relevé, seulement sur l'appareil qui l'a saisi (règle Firebase : authorUid = auth.uid)
+    // et pour le joueur identifié sur cet appareil (BPTStackSync.remove ne supprime que ses propres relevés).
+    let myUid='';try{myUid=window.firebase?.auth?.()?.currentUser?.uid||'';}catch(_e){}
+    const sameName=(a,b)=>String(a||'').normalize('NFD').replace(/[̀-ͯ]/g,'').trim().toLowerCase()===String(b||'').normalize('NFD').replace(/[̀-ͯ]/g,'').trim().toLowerCase();
+    const canDel=!!(myUid&&last?.id&&last.authorUid===myUid&&typeof store?.remove==='function'&&sameName(store?.identity?.(),name));
     const sign=n=>n>0?'+'+fmt(n):n<0?'−'+fmt(-n):'±0';
     const rows=hist.map((r,i)=>{const prev=i?Number(hist[i-1].total)||0:null,t=Number(r.total)||0,dt=new Date(Number(r.at));
       const hour=Number.isFinite(dt.getTime())?dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'—';
@@ -381,9 +386,16 @@
       const played=r.elapsedSec!=null&&Number.isFinite(Number(r.elapsedSec))?` · ${gameClock(Number(r.elapsedSec))} de jeu`:'';
       return `<div class="bpt484-row"><span>Niveau ${esc(r.level||'—')}${played}<small class="bpt484-stack-hour">${hour}</small></span><b>${fmt(t)}${delta}</b></div>`;}).reverse().join('');
     const summary=`<div class="bpt484-stack-sum"><div><span>Dernier stack</span><b>${fmt(last.total)}</b><small>${esc(ageSince(last.at))}</small></div><div><span>En big blinds</span><b>${bb?fmt((Number(last.total)||0)/bb):'—'} BB</b><small>BB actuelle ${fmt(bb)}</small></div><div><span>Depuis le 1er relevé</span><b class="${diff>0?'up':diff<0?'down':''}">${sign(diff)}</b><small>${hist.length} relevé${hist.length>1?'s':''}</small></div></div>`;
-    open(`${esc(name)} · évolution du stack`,`${summary}${stackCurve(points,levelTimeline(st))||'<p class="bpt484-hint">La courbe apparaîtra dès le 2e relevé.</p>'}${rows}<div class="bpt484-btnrow"><button type="button" data-back-stacks>← Suivi des stacks</button></div>`);
+    open(`${esc(name)} · évolution du stack`,`${summary}${stackCurve(points,levelTimeline(st))||'<p class="bpt484-hint">La courbe apparaîtra dès le 2e relevé.</p>'}${rows}<div class="bpt484-btnrow">${canDel?`<button type="button" class="bpt484-danger-action" data-del-last>🗑 Supprimer mon dernier relevé</button>`:''}<button type="button" data-back-stacks>← Suivi des stacks</button></div>`);
     const dlg=$('bpt484Dialog');if(!dlg)return;dlg.dataset.panel='stack';dlg.dataset.stackPlayer=name;
     dlg.querySelector('[data-back-stacks]')?.addEventListener('click',()=>openStackTracking());
+    dlg.querySelector('[data-del-last]')?.addEventListener('click',async e=>{
+      const prev=hist.length>1?hist[hist.length-2]:null;
+      if(!confirm(`Supprimer ton dernier relevé (${fmt(last.total)} jetons, niveau ${last.level||'—'}) ?\n${prev?`Ton stack affiché redeviendra ${fmt(prev.total)} (relevé précédent).`:'Tu n’auras plus aucun relevé pour cette partie.'}`))return;
+      const b=e.currentTarget;b.disabled=true;
+      try{await store.remove(last.id);}
+      catch(err){b.disabled=false;alert('Suppression impossible : '+(err?.message||'connexion indisponible'));}
+    });
   }
   // 10.4.161 — Suivi de partie › Suivi des stacks : joueurs en lice classés par stack (dernier relevé), ancienneté du relevé,
   // variation depuis le relevé précédent, équivalent en BB ; éliminés à la suite avec leur dernier stack connu.
