@@ -630,8 +630,9 @@
     const rows=ok?players.filter(p=>p.status==='in'||p.status==='winner').map(p=>{const n=Number(store.getLatest?.(p.name)?.total);return Number.isFinite(n)&&n>=0?{name:p.name,n}:null;}).filter(Boolean):[];
     let hi=null,lo=null;for(const x of rows){if(!hi||x.n>hi.n)hi=x;if(!lo||x.n<lo.n)lo=x;}
     const show=rows.length>=2&&hi.n>lo.n;
-    const line=(cls,lab,x)=>`<div class="${cls}"><i>${lab}</i><span>${esc(x.name)}</span><b>${bb?fmt(Math.round(x.n/bb))+' BB':fmt(x.n)}</b></div>`;
-    const html=show?line('lead','Chip leader',hi)+line('short','Short stack',lo):'';
+    // 10.4.158 — lisibilité : pleine largeur de la case, flèche colorée + nom + stack en jetons (plus de libellé ni de BB)
+    const line=(cls,mark,lab,x)=>`<div class="${cls}" title="${lab} : ${esc(x.name)} — ${fmt(x.n)} jetons"><i aria-hidden="true">${mark}</i><span>${esc(x.name)}</span><b>${fmt(x.n)}</b></div>`;
+    const html=show?line('lead','▲','Chip leader',hi)+line('short','▼','Short stack',lo):'';
     if(box.dataset.html!==html){box.dataset.html=html;box.innerHTML=html;}
     box.hidden=!show;
   }
