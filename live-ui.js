@@ -66,7 +66,7 @@
     </div>
     <div class="bpt484-actions">
       <button class="bpt484-pause" data-do="pause">Pause</button><button class="bpt484-out" data-do="out">Sortir un joueur</button><button class="bpt484-follow" data-menu-toggle="follow" aria-expanded="false">Suivi de partie</button><button class="bpt484-tools" data-menu-toggle="tools" aria-expanded="false">Outils</button><button class="bpt484-takeover" data-do="takeover">Demander la reprise</button>
-      <div class="bpt484-action-menu" data-menu-panel="follow" hidden><button class="bpt484-enjeux" data-do="enjeux">🏆 Enjeux de la partie</button><button class="bpt484-bets" data-do="bets">🎲 Paris de la table</button><button class="bpt484-personal" data-do="personal-bounty">🎯 Bounty</button><button class="bpt484-live-ranking" data-do="live-ranking">📊 Classement en direct</button></div>
+      <div class="bpt484-action-menu" data-menu-panel="follow" hidden><button class="bpt484-enjeux" data-do="enjeux">🏆 Enjeux de la partie</button><button class="bpt484-bets" data-do="bets">🎲 Paris de la table</button><button class="bpt484-personal" data-do="personal-bounty">🎯 Bounty</button><button class="bpt484-live-ranking" data-do="live-ranking">📊 Classement en direct</button><button class="bpt484-stacks" data-do="stacks">🪙 Suivi des stacks</button></div>
       <div class="bpt484-action-menu" data-menu-panel="tools" hidden><button data-do="timer">⏱ Timer de réflexion</button><button data-do="odds">🧮 Calcul de cotes</button><button type="button" class="bpt-stack-open">🪙 Comptage stack</button><button data-do="hide-live">👁 Masquer le Live</button><button class="bpt484-end" data-do="end">⏹ Terminer le Live</button></div>
     </div>
   </div>`}
@@ -86,7 +86,7 @@
         const a=e.target.closest('[data-action]');if(a){closeActionMenus();info(a.dataset.action);return;}
         const bet=e.target.closest('[data-bet-action]');if(bet&&bet.tagName!=='SELECT'){handleBetAction(bet);return;}
         const b=e.target.closest('[data-do]');if(b){
-          if(spectator&&!['takeover','chat','enjeux','personal-bounty','live-ranking','odds','bets','hide-live'].includes(b.dataset.do))return;
+          if(spectator&&!['takeover','chat','enjeux','personal-bounty','live-ranking','stacks','odds','bets','hide-live'].includes(b.dataset.do))return;
           closeActionMenus();doit(b.dataset.do,root.dataset.fs==='1');
         }
       });
@@ -270,6 +270,7 @@
       else if(a==='enjeux')openLiveObjectives();
       else if(a==='bets')openLiveBets();
       else if(a==='live-ranking')openLiveRanking();
+      else if(a==='stacks')openStackTracking();
       else if(a==='personal-bounty')openPersonalBounty();
       else if(a==='chat')$('live3ChatBtn')?.click();
       else if(a==='odds')$('live3OddsBtn')?.click();
@@ -370,7 +371,7 @@
   function stackEvolution(name){
     const store=window.BPTStackSync,hist=(store?.getHistory?.(name)||[]).slice().reverse();
     const st=state(),bb=blindAt(Number(st?.levelIndex)||0).bb;
-    if(!hist.length){info('players');return;}
+    if(!hist.length){openStackTracking();return;}
     const points=hist.map(r=>({x:r.elapsedSec==null||!Number.isFinite(Number(r.elapsedSec))?NaN:Number(r.elapsedSec),y:Number(r.total)||0,level:Number(r.level)||0}));
     const first=hist[0],last=hist[hist.length-1],diff=(Number(last.total)||0)-(Number(first.total)||0);
     const sign=n=>n>0?'+'+fmt(n):n<0?'−'+fmt(-n):'±0';
@@ -380,10 +381,44 @@
       const played=r.elapsedSec!=null&&Number.isFinite(Number(r.elapsedSec))?` · ${gameClock(Number(r.elapsedSec))} de jeu`:'';
       return `<div class="bpt484-row"><span>Niveau ${esc(r.level||'—')}${played}<small class="bpt484-stack-hour">${hour}</small></span><b>${fmt(t)}${delta}</b></div>`;}).reverse().join('');
     const summary=`<div class="bpt484-stack-sum"><div><span>Dernier stack</span><b>${fmt(last.total)}</b><small>${esc(ageSince(last.at))}</small></div><div><span>En big blinds</span><b>${bb?fmt((Number(last.total)||0)/bb):'—'} BB</b><small>BB actuelle ${fmt(bb)}</small></div><div><span>Depuis le 1er relevé</span><b class="${diff>0?'up':diff<0?'down':''}">${sign(diff)}</b><small>${hist.length} relevé${hist.length>1?'s':''}</small></div></div>`;
-    open(`${esc(name)} · évolution du stack`,`${summary}${stackCurve(points,levelTimeline(st))||'<p class="bpt484-hint">La courbe apparaîtra dès le 2e relevé.</p>'}${rows}<div class="bpt484-btnrow"><button type="button" data-back-players>← Joueurs</button></div>`);
+    open(`${esc(name)} · évolution du stack`,`${summary}${stackCurve(points,levelTimeline(st))||'<p class="bpt484-hint">La courbe apparaîtra dès le 2e relevé.</p>'}${rows}<div class="bpt484-btnrow"><button type="button" data-back-stacks>← Suivi des stacks</button></div>`);
     const dlg=$('bpt484Dialog');if(!dlg)return;dlg.dataset.panel='stack';dlg.dataset.stackPlayer=name;
-    dlg.querySelector('[data-back-players]')?.addEventListener('click',()=>info('players'));
+    dlg.querySelector('[data-back-stacks]')?.addEventListener('click',()=>openStackTracking());
   }
+  // 10.4.161 — Suivi de partie › Suivi des stacks : joueurs en lice classés par stack (dernier relevé), ancienneté du relevé,
+  // variation depuis le relevé précédent, équivalent en BB ; éliminés à la suite avec leur dernier stack connu.
+  // Un clic sur un joueur ayant des relevés ouvre l'évolution de son stack (courbe + relevés). Mis à jour en temps réel.
+  function openStackTracking(){
+    const st=state(),ps=Array.isArray(st?.players)?st.players:[];
+    const store=window.BPTStackSync;store?.trackSession?.();
+    const ss=store?.getStatus?.()||{},bb=blindAt(Number(st?.levelIndex)||0).bb;
+    const histOf=n=>ss.loaded?(store?.getHistory?.(n)||[]):[]; // du plus récent au plus ancien
+    const sign=n=>n>0?'+'+fmt(n):'−'+fmt(-n);
+    const entry=(p,i)=>{const h=histOf(p.name),last=h[0]||null,t=last?Number(last.total):NaN;return {p,i,h,last,t:Number.isFinite(t)&&t>=0?t:null};};
+    const byStack=(a,b)=>a.t===null?(b.t===null?a.i-b.i:1):b.t===null?-1:b.t-a.t||a.i-b.i;
+    const active=ps.map(entry).filter(x=>x.p.status==='in'||x.p.status==='winner').sort(byStack);
+    const outs=ps.map(entry).filter(x=>x.p.status==='out').sort((a,b)=>Number(b.p.outAt||0)-Number(a.p.outAt||0));
+    const row=(x,rank)=>{
+      const prev=x.h[1]?Number(x.h[1].total):NaN,d=x.t!==null&&Number.isFinite(prev)?x.t-prev:0;
+      const trend=d?`<em class="${d>0?'up':'down'}">${d>0?'▲':'▼'} ${sign(d)}</em>`:'';
+      const out=x.p.status==='out',lv=Number(x.p.outLevel)||0;
+      const meta=out?(lv?`Éliminé · niveau ${lv}`:'Éliminé'):x.last?`${esc(ageSince(x.last.at))}${x.h.length>1?` · ${x.h.length} relevés`:''}`:'Stack non renseigné';
+      const link=x.h.length>0;
+      const right=x.t===null?'—':fmt(x.t)+(out?'<small>dernier relevé</small>':`<small>${bb?fmt(x.t/bb)+' BB':''}${trend}</small>`);
+      return `<div class="bpt484-row bpt484-stk-row${out?' is-out':''}${link?' bpt484-stk-link':''}"${link?` data-stk-player="${esc(x.p.name)}" tabindex="0" role="button" title="Voir l’évolution du stack"`:''}><span><i class="bpt484-stk-rank">${rank||''}</i><span class="bpt484-stk-name">${esc(x.p.name||'—')}<small>${meta}</small></span></span><b>${right}</b>${link?'<i class="bpt484-stk-go" aria-hidden="true">›</i>':''}</div>`;};
+    const status=!ss.connected?'<p class="bpt484-hint">Stacks indisponibles (connexion).</p>':!ss.loaded?`<p class="bpt484-hint">${ss.error?'Synchronisation des stacks indisponible.':'Chargement des stacks…'}</p>`:'';
+    const known=active.filter(x=>x.t!==null).length;
+    const head=ss.loaded?`<p class="bpt484-hint">${known?`${known} joueur${known>1?'s':''} en lice sur ${active.length} avec un relevé · touchez un joueur pour voir l’évolution de son stack.`:'Aucun relevé de stack pour l’instant : utilisez « 🪙 Comptage stack » dans Outils.'}</p>`:'';
+    const body=status+head+active.map((x,k)=>row(x,x.t!==null?k+1:'')).join('')+(outs.length?`<h3 class="bpt484-stk-sep">Éliminés</h3>${outs.map(x=>row(x,'')).join('')}`:'');
+    open('Suivi des stacks',ps.length?body:'<p>Aucun joueur disponible.</p>');
+    const dlg=$('bpt484Dialog');if(!dlg)return;dlg.dataset.panel='stacks';
+    dlg.querySelectorAll('[data-stk-player]').forEach(r=>{const go=()=>stackEvolution(r.dataset.stkPlayer);
+      r.addEventListener('click',go);r.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});});
+  }
+  function refreshStackTracking(){const d=$('bpt484Dialog');
+    if(d&&d.dataset.panel==='stacks'&&$('bpt484Modal')?.classList.contains('open')){const y=d.scrollTop;openStackTracking();const n=$('bpt484Dialog');if(n)n.scrollTop=y;}}
+  document.addEventListener('bpt-stack-records-updated',refreshStackTracking);
+  setInterval(refreshStackTracking,30000); // ancienneté des relevés
   function refreshStackPanel(){const d=$('bpt484Dialog');
     if(d&&d.dataset.panel==='stack'&&$('bpt484Modal')?.classList.contains('open')){const y=d.scrollTop;stackEvolution(d.dataset.stackPlayer);const n=$('bpt484Dialog');if(n)n.scrollTop=y;}}
   document.addEventListener('bpt-stack-records-updated',refreshStackPanel);
@@ -422,8 +457,8 @@
         const active=!out&&(p.status==='in'||win);
         const latest=active&&stackStatus.loaded?stackStore?.getLatest?.(p.name):null;
         const stackLabel=!active?'':!stackStatus.connected?'Stack indisponible':!stackStatus.loaded?(stackStatus.error?'Synchronisation indisponible':'Chargement du stack…'):
-          latest?`${fmt(latest.total)} points · ${ageSince(latest.at)}`:'Stack non renseigné';
-        const evo=!!latest&&!isLast;
+          latest?`${fmt(latest.total)} jetons`:'Stack non renseigné'; // 10.4.161 : ni ancienneté ni évolution ici (→ Suivi de partie › Suivi des stacks)
+        const evo=false;
         return `<div class="bpt484-row${isLast?' bpt484-last-out':''}${evo?' bpt484-stack-link':''}" ${isLast?'data-last-out="1" tabindex="0" role="button" title="Corriger ou annuler cette élimination"':''}${evo?` data-stack-player="${esc(p.name)}" tabindex="0" role="button" title="Voir l’évolution du stack"`:''}><span>${esc(p.name||'—')}${isLast?' <small>· dernière élimination</small>':''}</span><b>${status}${detail}${active?`<small class="bpt484-player-stack">${esc(stackLabel)}</small>`:''}</b></div>`;
       }).join('');
       open('Joueurs',rows||'<p>Aucun joueur disponible.</p>');
