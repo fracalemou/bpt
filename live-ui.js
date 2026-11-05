@@ -541,11 +541,17 @@
     const card=parent.classList?.contains('bpt484-card')?parent:null;
     if(card && el.closest('.bpt484-card')===card){
       const icon=card.querySelector('.bpt484-card-icon');
-      if(icon) availableW-=icon.getBoundingClientRect().width+(parseFloat(getComputedStyle(card).columnGap)||0);
+      if(icon && icon.offsetParent!==null) availableW-=icon.getBoundingClientRect().width+(parseFloat(getComputedStyle(card).columnGap)||0);
       const label=card.querySelector('.bpt484-label');
       const sub=card.querySelector('.bpt484-sub');
       if(label && label!==el) availableH-=label.getBoundingClientRect().height+6;
-      if(sub && sub!==el) availableH-=sub.getBoundingClientRect().height+6;
+      // 10.4.159 — case Joueurs avec chip leader / short stack : « restants » est à côté du chiffre, les leaders dessous
+      const leaders=card.classList.contains('has-leaders')?card.querySelector('.bpt484-leaders:not([hidden])'):null;
+      if(leaders){
+        const ls=getComputedStyle(leaders);
+        availableH-=leaders.getBoundingClientRect().height+(parseFloat(ls.marginTop)||0)+4;
+        if(sub && sub!==el) availableW-=sub.getBoundingClientRect().width+(parseFloat(getComputedStyle(card).columnGap)||0);
+      }else if(sub && sub!==el) availableH-=sub.getBoundingClientRect().height+6;
     }
     if(!availableW || !availableH)return;
     const min=Math.max(1,Number(opts.min||10));
@@ -608,7 +614,8 @@
       /* Hiérarchie validée : Timer > Blinds > Joueurs = Tapis moyen = Prochaines blinds = Temps écoulé. */
       fitText(root.querySelector('.bpt484-clock .bpt484-value'),{max:portrait?148:(landscapePhone?100:210),min:portrait?72:(landscapePhone?46:74),widthRatio:.92,heightRatio:.74});
       fitText(root.querySelector('.bpt484-blinds .bpt484-value'),{max:portrait?102:(landscapePhone?88:170),min:portrait?42:(landscapePhone?38:56),widthRatio:.96,heightRatio:.92});
-      fitText(root.querySelector('.bpt484-players .bpt484-value'),{max:portrait?78:(landscapePhone?56:98),min:portrait?44:(landscapePhone?30:52),widthRatio:.88,heightRatio:.76});
+      {const lead=!!root.querySelector('.bpt484-players.has-leaders'); // 10.4.159 : le chiffre doit tenir avec les leaders dessous
+      fitText(root.querySelector('.bpt484-players .bpt484-value'),lead?{max:portrait?78:(landscapePhone?56:98),min:portrait?22:(landscapePhone?16:26),widthRatio:.96,heightRatio:.98}:{max:portrait?78:(landscapePhone?56:98),min:portrait?44:(landscapePhone?30:52),widthRatio:.88,heightRatio:.76});}
       fitText(root.querySelector('.bpt484-stack [data-role="avgchips"]'),{max:portrait?42:(landscapePhone?30:48),min:portrait?22:(landscapePhone?17:26),widthRatio:.88,heightRatio:.48});
       fitText(root.querySelector('.bpt484-timing .bpt484-value'),{max:portrait?42:(landscapePhone?26:50),min:portrait?24:(landscapePhone?16:24),widthRatio:.92,heightRatio:.56});
       fitText(root.querySelector('.bpt484-next strong'),{max:portrait?27:(landscapePhone?19:30),min:portrait?16:(landscapePhone?12:16),widthRatio:.90,heightRatio:.42});
@@ -635,6 +642,7 @@
     const html=show?line('lead','▲','Chip leader',hi)+line('short','▼','Short stack',lo):'';
     if(box.dataset.html!==html){box.dataset.html=html;box.innerHTML=html;}
     box.hidden=!show;
+    box.closest('.bpt484-players')?.classList.toggle('has-leaders',show);
   }
   function predictionNames(st){return (st?.players||[]).map(p=>String(p.name||'').trim()).filter(Boolean);}
   async function handleBetAction(button){
@@ -821,7 +829,8 @@
       set('blinddur',`${curDur} min`);
       set('timer',$('live3Timer')?.textContent||'00:00');
       set('players',String(alive));
-      set('playerssub',players.length>alive?`restants sur ${players.length}`:'restants');
+      set('playerssub',players.length>alive?`restants
+sur ${players.length}`:'restants'); // 10.4.159 : retour à la ligne visible seulement à côté du chiffre (case avec chip leader)
       renderStackLeaders(r,players,cur.bb);
       set('avgchips',fmt(avg));
       set('avgbb',`${avgBB} BB`);
