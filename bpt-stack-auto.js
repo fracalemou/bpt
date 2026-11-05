@@ -82,7 +82,10 @@
     return {...old,pink:old.pink??old.brown??0,orange:old.orange??old.red??0};
   }
   function renderHistory(){const target=$('bptStackHist');if(!target)return;
-    target.replaceChildren();const sync=root.BPTStackSync;
+    // 10.4.163 — historique retiré de l'écran de saisie (la modification d'un relevé ne fonctionnait pas) :
+    // les relevés se consultent dans Suivi de partie › Suivi des stacks. « Comme mon dernier relevé » reste disponible.
+    target.replaceChildren();target.hidden=true;return;
+    const sync=root.BPTStackSync;
     sync?.trackSession?.();const st=sync?.getStatus?.();const hist=historyGet();
     const h=document.createElement('p');h.className='bpt-stack-tip';
     const strong=document.createElement('strong');strong.textContent='Historique de mes stacks — dernier relevé en haut';h.appendChild(strong);target.appendChild(h);
