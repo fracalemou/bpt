@@ -951,8 +951,32 @@ sur ${players.length}`:'restants'); // 10.4.159 : retour à la ligne visible seu
   const obs=new MutationObserver(scheduleSync);
   function observe(){['live3Timer','live3Elapsed','live3EstimatedFinish','live3FinishDelta'].forEach(id=>{const n=$(id);if(n)obs.observe(n,{childList:true,subtree:true,characterData:true})})}
   window.addEventListener('resize',()=>{closeActionMenus();document.querySelectorAll('.bpt484-live').forEach(root=>delete root.dataset.fitSignature);scheduleFitLiveTexts();});
+  // 10.4.167 — écran toujours allumé (Screen Wake Lock) sur l'appareil de l'ORGANISATEUR, tant que la partie est lancée
+  // et non terminée, que l'écran Live (ou son plein écran) est affiché et que l'appli est au premier plan.
+  // Le navigateur relâche le verrou quand l'appli passe en arrière-plan : il est redemandé au retour.
+  // Navigateur sans Wake Lock (ancien iOS…) : aucun effet, aucune erreur.
+  let wakeLock=null,wakeBusy=false;
+  function wakeWanted(){
+    if(!('wakeLock' in navigator)||document.visibilityState!=='visible')return false;
+    const st=state();if(!st?.active||!st.startedAt||st.finishedAt)return false;
+    const x=api();const owner=!!x?.isOwner?.()||!!(st.ownerId&&String(st.ownerId)===String(x?.deviceId?.()));if(!owner)return false;
+    const fs=$('live3Fullscreen');const fsOn=!!fs&&getComputedStyle(fs).display!=='none'&&fs.getBoundingClientRect().height>0;
+    return !!$('live3')?.classList.contains('active')||fsOn;
+  }
+  async function updateWakeLock(){
+    if(wakeBusy)return;wakeBusy=true;
+    try{
+      const want=wakeWanted();
+      if(want&&(!wakeLock||wakeLock.released)){wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener?.('release',()=>{wakeLock=null;});}
+      else if(!want&&wakeLock&&!wakeLock.released){await wakeLock.release();wakeLock=null;}
+    }catch(_e){wakeLock=null;} // refus (économie d'énergie, onglet masqué…) : nouvel essai au prochain contrôle
+    finally{wakeBusy=false;}
+  }
+  window.BPTWakeLock={isActive:()=>!!(wakeLock&&!wakeLock.released),update:updateWakeLock};
+  document.addEventListener('visibilitychange',updateWakeLock);
   function boot(){
     install();observe();setInterval(scheduleSync,500);setTimeout(scheduleFitLiveTexts,120);
+    setInterval(updateWakeLock,3000);updateWakeLock();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
   else boot();
