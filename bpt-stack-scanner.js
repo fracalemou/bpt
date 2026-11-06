@@ -25,7 +25,8 @@ CHIPS.forEach(c=>{const row=document.createElement('div');row.className='bpt-sta
  lines.parentNode.insertBefore(stepBar,lines);
  stepBar.addEventListener('click',e=>{const b=e.target.closest('[data-step]');if(b)setStepSize(Number(b.dataset.step));});
  setStepSize(step);
- document.addEventListener('click',e=>{const b=e.target.closest('.bpt-stack-open');if(b){e.preventDefault();open();}});
+ // 10.4.170 — compteur réservé aux joueurs en lice de la partie (BPTStackSync.eligibility) : sinon, message et pas d'ouverture
+ document.addEventListener('click',e=>{const b=e.target.closest('.bpt-stack-open');if(b){e.preventDefault();const el=window.BPTStackSync?.eligibility?.();if(el&&!el.ok){alert(el.message);return;}open();}});
  modal.addEventListener('click',e=>{if(e.target===modal)close()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)close()});
  lines.addEventListener('click',e=>{const b=e.target.closest('[data-delta]');if(!b)return;const i=b.parentElement.querySelector('input');i.value=Math.max(0,Math.min(99999,(parseInt(i.value,10)||0)+Number(b.dataset.delta)*step));update()});lines.addEventListener('input',update);
  $('bptStackReset').addEventListener('click',()=>{lines.querySelectorAll('input').forEach(i=>i.value=0);update()});

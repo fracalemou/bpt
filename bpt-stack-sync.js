@@ -18,6 +18,17 @@
   function liveKey(){const s=getLive();return s?.active&&s?.sessionId?'s_'+hash(String(s.sessionId)):''}
   function identity(){const name=String(root.BPTLive3?.getVerifiedIdentityName?.()||'').trim(),s=getLive();
     return (s?.players||[]).find(p=>norm(p.name)===norm(name))?.name||''}
+  // 10.4.170 — qui peut compter son stack : uniquement la personne identifiée sur l'appareil, si elle est
+  // un joueur EN LICE de la partie Live en cours (ni simple spectateur, ni joueur absent de la partie, ni éliminé).
+  function eligibility(){
+    const s=getLive();if(!s?.active||!s.sessionId)return{ok:false,reason:'no-live',message:'Aucune partie Live en cours.'};
+    const who=String(root.BPTLive3?.getVerifiedIdentityName?.()||'').trim();
+    if(!who)return{ok:false,reason:'no-identity',message:'Identifie-toi avec ton profil joueur pour compter ton stack.'};
+    const p=(s.players||[]).find(x=>norm(x.name)===norm(who));
+    if(!p)return{ok:false,reason:'not-player',message:who+', tu ne fais pas partie de cette partie : seuls les joueurs inscrits peuvent enregistrer leur stack.'};
+    if(!['in','winner'].includes(p.status))return{ok:false,reason:'out',message:'Tu es éliminé : ton stack n’est plus suivi.'};
+    return{ok:true,reason:'',message:'',name:p.name};
+  }
   function onValue(snapshot){const values=snapshot.val();data=values&&typeof values==='object'?values:{};loaded=true;error='';emit()}
   function stop(){if(loaded&&context)archive={key:context,data};if(subscription){try{subscription.ref.off('value',subscription.cb)}catch(_){}subscription=null}dbRef=null;data={};loaded=false;error=''}
   function trackSession(){const next=liveKey();if(next===context)return;stop();context=next;const gen=++generation;emit();if(!next)return;
@@ -35,8 +46,8 @@
   function getLatest(name){return getHistory(name)[0]||null}
   function getStatus(){return{connected:!!context,loaded,error,sessionKey:context}}
   async function persist(record,id){trackSession();const key=context;if(!key)throw new Error('Aucune partie Live active.');
-    const name=identity();if(!name)throw new Error('Identifie-toi avec ton profil joueur avant de valider ton stack.');
-    const state=getLive();if(!state?.players?.some(p=>norm(p.name)===norm(name)&&['in','winner'].includes(p.status)))throw new Error('Le joueur n’est plus en lice.');
+    const elig=eligibility();if(!elig.ok)throw new Error(elig.message); // 10.4.170 : message selon la vraie cause
+    const name=elig.name;const state=getLive();
     const env=await root.bptFirebaseEnsure?.();if(!env?.rtdb)throw new Error('Connexion Firebase indisponible.');
     if(key!==context||key!==liveKey())throw new Error('La partie a changé : recommence la saisie.');
     const base=env.rtdb.ref('bpt/live_v3/stack_history/'+key+'/'+keyOf(name)+'/records');
@@ -95,7 +106,7 @@
     if(leader){const total=[...held.values()].reduce((a,b)=>a+b,0);leader.share=total?Math.round(leader.sec/total*100):0;leader.changes=changes;}
     return {records,players:series.length,top,comeback,leader};
   }
-  root.BPTStackSync={trackSession,getStatus,getHistory,getLatest,identity,summarize,save:r=>persist(r),update:(id,r)=>persist(r,id),remove};
+  root.BPTStackSync={trackSession,getStatus,getHistory,getLatest,identity,eligibility,summarize,save:r=>persist(r),update:(id,r)=>persist(r,id),remove};
   // Les écrans Live sont initialisés de manière asynchrone ; cet intervalle n'émet
   // aucune requête quand la partie ne change pas.
   setInterval(trackSession,3000);

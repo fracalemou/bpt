@@ -435,7 +435,11 @@
     function warmUp(){const url=String(root.BPT_AI_CONFIG&&root.BPT_AI_CONFIG.proxyUrl||'').trim();
       if(!/^https:\/\//i.test(url)||Date.now()-warmAt<240000)return;warmAt=Date.now();
       try{fetch(url,{method:'GET',mode:'no-cors',cache:'no-store'}).catch(()=>{});}catch(_){/* sans importance */}}
-    document.addEventListener('click',event=>{if(event.target.closest('.bpt-stack-open')){goHome();warmUp();}});
+    document.addEventListener('click',event=>{if(event.target.closest('.bpt-stack-open')){if(root.BPTStackSync?.eligibility?.()?.ok===false)return;goHome();warmUp();}});
+    // 10.4.170 — boutons « Comptage stack » masqués si la personne identifiée n'est pas un joueur en lice de la partie
+    const syncOpenButtons=()=>{const ok=root.BPTStackSync?.eligibility?.()?.ok!==false;
+      document.querySelectorAll('.bpt-stack-open').forEach(b=>{const v=ok?'':'none';if(b.style.display!==v)b.style.display=v;});};
+    setInterval(syncOpenButtons,1000);document.addEventListener('bpt-stack-records-updated',syncOpenButtons);syncOpenButtons();
     setStep('home');
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
