@@ -851,13 +851,38 @@
 
     if(first)card.focus({preventScroll:true});
   }
+  // 10.4.172 — appareil organisateur, mais personne identifiée différente de l'organisateur : commandes masquées
+  // (isOwner faux) et proposition de reprendre l'organisation. « Rester spectateur » : plus proposé pour ce Live et cette personne.
+  function renderOwnerClaim(st){
+    const m=api()?.getOwnerMismatch?.()||null;
+    const key=m?'bpt_owner_claim_no:'+(st?.sessionId||'')+':'+m.me:'';
+    let dismissed=false;try{dismissed=!!key&&sessionStorage.getItem(key)==='1';}catch(_e){}
+    let box=$('bptOwnerClaim');
+    if(!m||dismissed){if(box)box.hidden=true;return;}
+    if(!box){
+      box=document.createElement('aside');box.id='bptOwnerClaim';box.className='bpt-owner-claim';box.setAttribute('role','alertdialog');
+      box.addEventListener('click',async e=>{
+        const b=e.target.closest('[data-owner-claim]');if(!b)return;
+        if(b.dataset.ownerClaim==='no'){try{sessionStorage.setItem(box.dataset.key||'','1');}catch(_e){}box.hidden=true;return;}
+        b.disabled=true;
+        try{const ok=await api()?.claimOwnership?.();if(!ok)alert('Reprise impossible : la partie a changé ou la connexion est indisponible.');}
+        catch(err){alert('Reprise impossible : '+(err?.message||'connexion indisponible'));}
+        finally{b.disabled=false;setTimeout(sync,120);}
+      });
+      document.body.appendChild(box);
+    }
+    if(box.dataset.key!==key){box.dataset.key=key;
+      box.innerHTML='<b>Tu n’es pas l’organisateur de ce Live</b><p>'+esc(m.me)+', ce Live a été lancé sur cet appareil par <b>'+esc(m.owner)+'</b>. Tu le suis en spectateur : pause, éliminations, timer de réflexion et réglages sont réservés à l’organisateur.</p><div><button type="button" data-owner-claim="yes">Reprendre l’organisation</button><button type="button" data-owner-claim="no">Rester spectateur</button></div>';}
+    box.hidden=false;
+  }
   function sync(){
-    const st=state();window.BPTStackSync?.trackSession?.();queuePublishedLiveSummary(st);if(!st?.active)return;
+    const st=state();window.BPTStackSync?.trackSession?.();queuePublishedLiveSummary(st);if(!st?.active){const oc=$('bptOwnerClaim');if(oc)oc.hidden=true;return;}
     const idx=Math.max(0,Math.min(200,Number(st.levelIndex)||0)),cur=blindAt(idx),nx=blindAt(idx+1);
     const players=Array.isArray(st.players)?st.players:[],alive=players.filter(p=>p.status==='in').length+(players.some(p=>p.status==='winner')?1:0);
     const total=players.length*Number(st.startStack||0),avg=alive?total/alive:0,avgBB=cur.bb?Math.round(avg/cur.bb):0;
     const x=api();
-    const ownerRole=!!x?.isOwner?.()||!!(st.ownerId&&String(st.ownerId)===String(x?.deviceId?.()));
+    const ownerRole=typeof x?.isOwner==='function'?!!x.isOwner():!!(st.ownerId&&String(st.ownerId)===String(x?.deviceId?.())); // 10.4.172
+    renderOwnerClaim(st);
     const duelPair=players.filter(p=>p.status==='in').map(p=>p.name).sort();
     if(ownerRole&&st.startedAt&&!st.finishedAt&&duelPair.length===2&&st.finalDuelEvent?.pairKey!==JSON.stringify(duelPair)&&!window.__bptRefreshingDuel){
       window.__bptRefreshingDuel=true;x.refreshObjectives?.().finally(()=>{window.__bptRefreshingDuel=false});
@@ -968,7 +993,7 @@ sur ${players.length}`:'restants'); // 10.4.159 : retour à la ligne visible seu
   function wakeWanted(){
     if(!('wakeLock' in navigator)||document.visibilityState!=='visible')return false;
     const st=state();if(!st?.active||!st.startedAt||st.finishedAt)return false;
-    const x=api();const owner=!!x?.isOwner?.()||!!(st.ownerId&&String(st.ownerId)===String(x?.deviceId?.()));if(!owner)return false;
+    const x=api();const owner=typeof x?.isOwner==='function'?!!x.isOwner():!!(st.ownerId&&String(st.ownerId)===String(x?.deviceId?.()));if(!owner)return false;
     const fs=$('live3Fullscreen');const fsOn=!!fs&&getComputedStyle(fs).display!=='none'&&fs.getBoundingClientRect().height>0;
     return !!$('live3')?.classList.contains('active')||fsOn;
   }

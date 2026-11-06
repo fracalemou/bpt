@@ -208,7 +208,25 @@
     return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
   }
   function isActive(){return !!(current&&current.active);}
-  function isOwner(){return !!(isActive()&&String(current.ownerId||"")===uid());}
+  // 10.4.172 — organisateur = l'APPAREIL qui a créé (ou repris) le Live ET la PERSONNE identifiée qui l'a fait.
+  // Si quelqu'un d'autre s'identifie sur cet appareil, il n'a plus les commandes (il peut reprendre l'organisation).
+  // Personne de référence : ownerName (depuis 10.4.172), sinon ownerLabel s'il s'agit d'un nom (pas « Téléphone »/« PC »).
+  function ownerRefName(s=current){
+    if(s&&typeof s.ownerName==="string")return s.ownerName.trim();
+    const l=String(s?.ownerLabel||"").trim();return (l==="Téléphone"||l==="PC"||l==="Autre appareil")?"":l;
+  }
+  function ownerIdentityMismatch(){
+    if(!(isActive()&&String(current.ownerId||"")===uid()))return null;
+    const me=liveIdentityName(),ref=ownerRefName();
+    if(!me||!ref||normalizeIdentityKey(me)===normalizeIdentityKey(ref))return null;
+    return {owner:ref,me};
+  }
+  function isOwner(){return !!(isActive()&&String(current.ownerId||"")===uid())&&!ownerIdentityMismatch();}
+  async function claimOwnership(){
+    const m=ownerIdentityMismatch();if(!m)return false;
+    const done=await ownerTransaction(s=>{s.ownerName=m.me;s.ownerLabel=m.me;s.takeoverRequest=null;return s;});
+    return !!done;
+  }
   function alivePlayers(){
     return (current?.players||[]).filter(p=>p.status!=="out"&&p.status!=="winner");
   }
@@ -2234,7 +2252,7 @@ function connectionDeviceLabel(){
       const bountyMode=Math.random()<0.5?"individual":"common";
       const state={
         version:3,active:true,sessionId:"L3_"+now.toString(36)+"_"+Math.random().toString(36).slice(2,7),
-        ownerId:uid(),ownerLabel:liveIdentityName()||deviceLabel(),createdAt:now,updatedAt:now,
+        ownerId:uid(),ownerLabel:liveIdentityName()||deviceLabel(),ownerName:liveIdentityName()||"",createdAt:now,updatedAt:now,
         location,date:$3("live3Date").value||new Date().toISOString().slice(0,10),
         startStack:Math.max(100,Number($3("live3Stack").value)||20000),
         buyIn:Math.max(0,Number($3("live3BuyIn").value)||0),
@@ -3139,6 +3157,7 @@ async function forceLive3Takeover(){
     s=clone(s);
     s.ownerId=uid();
     s.ownerLabel=liveIdentityName()||deviceLabel();
+    s.ownerName=liveIdentityName()||""; // 10.4.172
     s.takeoverRequest=null;
     s.updatedAt=Date.now();
     taken=true;
@@ -3183,6 +3202,7 @@ async function requestTakeover(){
       state.takeoverRequest={
         requesterId:uid(),
         requesterLabel:liveIdentityName()||deviceLabel(),
+        requesterName:liveIdentityName()||"", // 10.4.172 : personne qui deviendra organisateur
         requestedAt:Date.now()
       };
       state.updatedAt=Date.now();
@@ -3210,7 +3230,7 @@ async function requestTakeover(){
     const label=current.takeoverRequest.requesterLabel||"Autre appareil";
     await ownerTransaction(s=>{
       if(String(s.takeoverRequest?.requesterId||"")!==target)return s;
-      s.ownerId=target;s.ownerLabel=label;s.takeoverRequest=null;return s;
+      s.ownerId=target;s.ownerLabel=label;s.ownerName=String(s.takeoverRequest?.requesterName||"");s.takeoverRequest=null;return s;
     });
   }
 
@@ -4187,6 +4207,8 @@ async function requestTakeover(){
     getState:()=>clone(current),
     deviceId:uid,
     isOwner,
+    getOwnerMismatch:()=>{try{return ownerIdentityMismatch();}catch(_e){return null;}}, // 10.4.172
+    claimOwnership,
     adjustMinute,
     changeLevel,
     toggleStartPause,

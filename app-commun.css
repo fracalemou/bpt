@@ -11,3 +11,7 @@
 .bpt484-stk-go{width:.6em;text-align:center}
 /* 10.4.169 — case Joueurs : un seul relevé (ou stacks égaux) → ligne neutre « ● nom stack » */
 .bpt484-leaders .solo i,.bpt484-leaders .solo b{color:#8cdacc}
+/* 10.4.172 — bandeau « Tu n'es pas l'organisateur » (appareil organisateur, autre personne identifiée) */
+.bpt-owner-claim{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:1500000;width:min(560px,calc(100% - 24px));box-sizing:border-box;padding:14px 16px;border-radius:14px;background:var(--bpt-card2,#18213f);border:1px solid #f4d177;box-shadow:0 12px 40px rgba(0,0,0,.5);color:var(--bpt-text,#eef3f1)}.bpt-owner-claim[hidden]{display:none}.bpt-owner-claim>b{display:block;color:#f4d177;font-size:1.05em}.bpt-owner-claim p{margin:6px 0 10px;line-height:1.4;font-size:.92em;color:var(--bpt-muted,#c9d4d0)}.bpt-owner-claim div{display:flex;gap:8px;flex-wrap:wrap}.bpt-owner-claim button{flex:1 1 160px;min-height:42px;border-radius:10px;font-weight:800;cursor:pointer;border:1px solid #f4d177;background:transparent;color:#f4d177}.bpt-owner-claim button[data-owner-claim="yes"]{background:#f4d177;color:#1a1f33}
+/* 10.4.172 — spectateurs : commandes réservées à l'organisateur retirées du menu Outils (avant : visibles mais sans effet) */
+.bpt484-live.is-spectator [data-menu-panel="tools"] [data-do="timer"],.bpt484-live.is-spectator [data-menu-panel="tools"] [data-do="end"]{display:none!important}
