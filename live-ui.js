@@ -522,11 +522,19 @@
       const adaptive=st?.paceAdaptive===true;
       const elapsed=$('live3Elapsed')?.textContent||'—',finish=$('live3EstimatedFinish')?.textContent||'—',delta=$('live3FinishDelta')?.textContent||'—';
       const canManage=!!api()?.isOwner?.(),advice=canManage?(api()?.getPaceAdvice?.()||null):null;
+      // 10.4.171 — expliquer pourquoi rien n'est proposé malgré un gros écart (avant : « ne nécessite pas d'ajustement »)
+      const proj=api()?.getFinishProjection?.()||null,lateMin=proj?Math.round(Number(proj.deltaSec||0)/60):0;
+      const P=t=>`<p style="margin:14px 0 0;color:#f4d177;line-height:1.45">${t}</p>`;
+      const situation=proj&&Number.isFinite(proj.endIdx)&&proj.levelIndex>proj.endIdx
+        ?P(`Niveau ${proj.levelIndex+1} alors que la fin était prévue au niveau ${proj.endIdx+1} : la structure est dépassée, raccourcir les niveaux ne changerait plus rien. La fin dépend maintenant des éliminations.`)
+        :proj&&Number.isFinite(proj.endIdx)&&proj.levelIndex===proj.endIdx&&Math.abs(lateMin)>=8
+        ?P(`Dernier niveau prévu atteint (niveau ${proj.endIdx+1}) : il n’y a plus de niveau à ${lateMin>0?'raccourcir':'allonger'}. La fin dépend maintenant des éliminations.`)
+        :!canManage&&Math.abs(lateMin)>=8?P('Les ajustements de rythme sont proposés à l’organisateur, sur son appareil.'):'';
       if(adaptive&&canManage){
         const last=st?.lastPaceAdjustment||{};
         const canReadapt=!!advice && (!Number.isFinite(Number(last.levelIndex)) || (Number(st?.levelIndex)||0)>Number(last.levelIndex));
         const readapt=canReadapt?`<button data-readapt>Nouvelle adaptation</button>`:'';
-        const explain=canReadapt?`<p style="margin:14px 0 4px;color:#f4f7f6;line-height:1.45">L’écart reste significatif malgré l’adaptation. BPT propose de passer les prochains niveaux de <b>${advice.currentMin} à ${advice.proposedMin} min</b>.</p>`:'';
+        const explain=!canReadapt?situation:`<p style="margin:14px 0 4px;color:#f4f7f6;line-height:1.45">L’écart reste significatif malgré l’adaptation. BPT propose de passer les prochains niveaux de <b>${advice.currentMin} à ${advice.proposedMin} min</b>.</p>`;
         open('Rythme de la partie',`<div class="bpt484-row"><span>Temps écoulé</span><b>${esc(elapsed)}</b></div><div class="bpt484-row"><span>Fin estimée</span><b>${esc(finish)}</b></div><div class="bpt484-row"><span>Écart</span><b>${esc(delta)}</b></div>${explain}<div class="bpt484-btnrow">${readapt}<button data-mode-toggle>Revenir en classique</button></div>`);
         $('bpt484Dialog').querySelector('[data-readapt]')?.addEventListener('click',()=>{closeModal();api()?.showPaceAdvice?.(advice,{readapt:true});});
       }else if(advice&&canManage){
@@ -534,7 +542,7 @@
         const verb=advice.type==='accelerate'?'raccourcir':'allonger';
         open('Rythme de la partie',`<div class="bpt484-row"><span>Temps écoulé</span><b>${esc(elapsed)}</b></div><div class="bpt484-row"><span>Fin estimée</span><b>${esc(finish)}</b></div><div class="bpt484-row"><span>Écart</span><b>${esc(delta)}</b></div><p style="margin:14px 0 4px;color:#f4f7f6;line-height:1.45">La partie prend trop d’${direction}. Pour essayer de respecter l’heure de fin prévue, BPT propose de <b>${verb} les prochains niveaux de ${advice.currentMin} à ${advice.proposedMin} min</b>.</p><div class="bpt484-btnrow"><button data-mode-toggle>Passer en adaptatif</button></div>`);
       }else{
-        open('Rythme de la partie',`<div class="bpt484-row"><span>Temps écoulé</span><b>${esc(elapsed)}</b></div><div class="bpt484-row"><span>Fin estimée</span><b>${esc(finish)}</b></div><div class="bpt484-row"><span>Écart</span><b>${esc(delta)}</b></div><p style="margin:14px 0 0;color:#9fb4af">Le rythme actuel ne nécessite pas d’ajustement particulier.</p>`);
+        open('Rythme de la partie',`<div class="bpt484-row"><span>Temps écoulé</span><b>${esc(elapsed)}</b></div><div class="bpt484-row"><span>Fin estimée</span><b>${esc(finish)}</b></div><div class="bpt484-row"><span>Écart</span><b>${esc(delta)}</b></div>${situation||'<p style="margin:14px 0 0;color:#9fb4af">Le rythme actuel ne nécessite pas d’ajustement particulier.</p>'}`);
       }
       $('bpt484Dialog').querySelector('[data-mode-toggle]')?.addEventListener('click',async()=>{
         if(adaptive){

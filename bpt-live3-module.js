@@ -345,7 +345,9 @@
     }
     const d=live3FormatProjectionDelta(p.deltaSec);
     // 10.4.24 : on affiche aussi le niveau de fin prévu (ex. « 01:12 · niv. 16 »)
-    const finishText=live3FormatClock(p.projectedFinish)+(Number.isFinite(p.endIdx)?' · niv. '+(p.endIdx+1):'');
+    // 10.4.171 — niveau en cours au-delà du niveau de fin prévu : « dépassée (prévue niv. X) » au lieu d'une heure et d'un niveau déjà passés
+    const finishText=(Number.isFinite(p.endIdx)&&p.levelIndex>p.endIdx)?'dépassée (prévue niv. '+(p.endIdx+1)+')'
+      :live3FormatClock(p.projectedFinish)+(Number.isFinite(p.endIdx)?' · niv. '+(p.endIdx+1):'');
     [normalFinish,fsFinish].forEach(el=>{if(el)el.textContent=finishText;});
     [normalDelta,fsDelta].forEach(el=>{if(el){el.textContent=d.text;el.className=d.cls;}});
   }
