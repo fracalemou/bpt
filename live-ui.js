@@ -67,7 +67,7 @@
     <div class="bpt484-actions">
       <button class="bpt484-pause" data-do="pause">Pause</button><button class="bpt484-out" data-do="out">Sortir un joueur</button><button class="bpt484-follow" data-menu-toggle="follow" aria-expanded="false">Suivi de partie</button><button class="bpt484-tools" data-menu-toggle="tools" aria-expanded="false">Outils</button><button class="bpt484-takeover" data-do="takeover">Demander la reprise</button>
       <div class="bpt484-action-menu" data-menu-panel="follow" hidden><button class="bpt484-enjeux" data-do="enjeux">🏆 Enjeux de la partie</button><button class="bpt484-bets" data-do="bets">🎲 Paris de la table</button><button class="bpt484-personal" data-do="personal-bounty">🎯 Bounty</button><button class="bpt484-live-ranking" data-do="live-ranking">📊 Classement en direct</button><button class="bpt484-stacks" data-do="stacks">🪙 Suivi des stacks</button></div>
-      <div class="bpt484-action-menu" data-menu-panel="tools" hidden><button data-do="timer">⏱ Timer de réflexion</button><button data-do="odds">🧮 Calcul de cotes</button><button type="button" class="bpt-stack-open">🪙 Comptage stack</button><button data-do="hide-live">👁 Masquer le Live</button><button class="bpt484-end" data-do="end">⏹ Terminer le Live</button></div>
+      <div class="bpt484-action-menu" data-menu-panel="tools" hidden><button data-do="timer">⏱ Timer de réflexion</button><button data-do="odds">🧮 Calcul de cotes</button><button type="button" class="bpt-stack-open">🪙 Comptage stack</button><button data-do="tv-link">📺 Écran TV</button><button data-do="hide-live">👁 Masquer le Live</button><button class="bpt484-end" data-do="end">⏹ Terminer le Live</button></div>
     </div>
   </div>`}
   function install(){
@@ -86,7 +86,7 @@
         const a=e.target.closest('[data-action]');if(a){closeActionMenus();info(a.dataset.action);return;}
         const bet=e.target.closest('[data-bet-action]');if(bet&&bet.tagName!=='SELECT'){handleBetAction(bet);return;}
         const b=e.target.closest('[data-do]');if(b){
-          if(spectator&&!['takeover','chat','enjeux','personal-bounty','live-ranking','stacks','odds','bets','hide-live'].includes(b.dataset.do))return;
+          if(spectator&&!['takeover','chat','enjeux','personal-bounty','live-ranking','stacks','odds','bets','hide-live','tv-link'].includes(b.dataset.do))return;
           closeActionMenus();doit(b.dataset.do,root.dataset.fs==='1');
         }
       });
@@ -259,6 +259,21 @@
   function ensureModal(){if($('bpt484Modal'))return;document.body.insertAdjacentHTML('beforeend','<div id="bpt484Modal" class="bpt484-modal"><div id="bpt484Dialog" class="bpt484-dialog"></div></div>');$('bpt484Modal').onclick=e=>{if(e.target===$('bpt484Modal'))closeModal()}}
   function closeModal(){$('bpt484Modal')?.classList.remove('open')}
   function open(title,body){closeActionMenus();ensureModal();$('bpt484Dialog').dataset.panel='';$('bpt484Dialog').onclick=null;$('bpt484Dialog').innerHTML=`<button class="bpt484-close" data-modal-close>×</button><h2>${title}</h2>${body}`;$('bpt484Modal').classList.add('open');$('bpt484Dialog').querySelector('[data-modal-close]')?.addEventListener('click',closeModal)}
+  // 10.4.173 — Écran TV : lien à copier et à ouvrir sur la TV (ou le PC branché dessus). Affichage en lecture seule.
+  function openTvLink(){
+    const link=window.BPTTv?.link?.()||(location.origin+location.pathname+'?tv=1');
+    open('📺 Écran TV',`<p style="margin:0 0 12px;line-height:1.45">Ouvre ce lien sur la TV, le PC branché dessus ou une tablette : le Live s’y affiche en grand, en <b>lecture seule</b> (aucun bouton, aucune action possible).</p>
+      <div class="bpt-tv-linkbox"><input type="text" readonly value="${esc(link)}" aria-label="Lien écran TV" data-tv-input><button type="button" data-tv-copy>Copier le lien</button></div>
+      <p class="bpt-tv-linkmsg" data-tv-msg aria-live="polite"></p>
+      <ul class="bpt-tv-tips"><li>Le même lien sert pour toutes les parties : sans Live en cours, la TV attend et affiche le prochain dès son lancement.</li><li>Un clic (ou OK sur la télécommande) passe en plein écran ; l’écran reste allumé.</li><li>Pour en sortir, ouvre le site sans « ?tv=1 ».</li></ul>`);
+    const d=$('bpt484Dialog'),input=d.querySelector('[data-tv-input]'),msg=d.querySelector('[data-tv-msg]');
+    input?.addEventListener('focus',()=>input.select());
+    d.querySelector('[data-tv-copy]')?.addEventListener('click',async()=>{
+      let ok=false;try{await navigator.clipboard.writeText(link);ok=true;}catch(_e){}
+      if(!ok){try{input.select();ok=document.execCommand('copy');}catch(_e){}}
+      setText(msg,ok?'✓ Lien copié : colle-le dans le navigateur de la TV ou envoie-le par message.':'Copie impossible ici : sélectionne le lien et copie-le à la main.');
+    });
+  }
   async function doit(a,fs){
     const x=api();
     try{
@@ -274,6 +289,7 @@
       else if(a==='personal-bounty')openPersonalBounty();
       else if(a==='chat')$('live3ChatBtn')?.click();
       else if(a==='odds')$('live3OddsBtn')?.click();
+      else if(a==='tv-link')openTvLink();
       else if(a==='hide-live'){$('live3QuitViewBtn')?.click();}
       else if(a==='takeover')await x?.requestTakeover?.();
       else if(a==='approve-takeover')await x?.approveTakeover?.();
