@@ -706,10 +706,11 @@
     const store=window.BPTStackSync,ok=!!store?.getStatus?.()?.loaded;
     const rows=ok?players.filter(p=>p.status==='in'||p.status==='winner').map(p=>{const n=Number(store.getLatest?.(p.name)?.total);return Number.isFinite(n)&&n>=0?{name:p.name,n}:null;}).filter(Boolean):[];
     let hi=null,lo=null;for(const x of rows){if(!hi||x.n>hi.n)hi=x;if(!lo||x.n<lo.n)lo=x;}
-    const show=rows.length>=2&&hi.n>lo.n;
+    // 10.4.169 — affiché dès le 1er relevé : un seul relevé (ou stacks tous égaux) → une ligne neutre « ● nom stack »
+    const show=rows.length>=1,pair=rows.length>=2&&hi.n>lo.n;
     // 10.4.158 — lisibilité : pleine largeur de la case, flèche colorée + nom + stack en jetons (plus de libellé ni de BB)
     const line=(cls,mark,lab,x)=>`<div class="${cls}" title="${lab} : ${esc(x.name)} — ${fmt(x.n)} jetons"><i aria-hidden="true">${mark}</i><span>${esc(x.name)}</span><b>${fmt(x.n)}</b></div>`;
-    const html=show?line('lead','▲','Chip leader',hi)+line('short','▼','Short stack',lo):'';
+    const html=!show?'':pair?line('lead','▲','Chip leader',hi)+line('short','▼','Short stack',lo):line('solo','●',rows.length===1?'Seul relevé pour l’instant':'Stacks égaux',hi);
     if(box.dataset.html!==html){box.dataset.html=html;box.innerHTML=html;}
     box.hidden=!show;
     box.closest('.bpt484-players')?.classList.toggle('has-leaders',show);
