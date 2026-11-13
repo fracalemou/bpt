@@ -1,4 +1,4 @@
-/* BPT 10.4.78 (10.4.174 : retour à la table) — Jouer en ligne · lot 1 : salon et places · lot 2 : donne · lot 3 : enchères, pots, abattage · lot 4 : fin du tournoi, championnat, relais de l'hôte.
+/* BPT 10.4.78 (10.4.174 : retour à la table · 10.4.175 : Paramètres › Parties en ligne) — Jouer en ligne · lot 1 : salon et places · lot 2 : donne · lot 3 : enchères, pots, abattage · lot 4 : fin du tournoi, championnat, relais de l'hôte.
    Mode confiance (pas de serveur) : tout passe par Firebase, les écritures concurrentes par transaction.
    Données : bpt/online/tables/{id} = {id,name,host,createdAt,status,countsForChampionship,maxSeats,
    startStack,targetHours,levelSeconds,levels[],levelIndex,seats{index:{name,stack,joinedAt}}}. */
@@ -85,7 +85,7 @@
   async function createTable(form){
     const name=me();if(!name){alert("Identifiez-vous d'abord (Paramètres › Mon profil).");return;}
     const busy=await activeTable();
-    if(busy){alert(busy.state==="waiting"?"Une partie en ligne est déjà en préparation : rejoignez-la.":"Une partie en ligne est déjà en cours.");openId=busy.id;render();return;}
+    if(busy){const by=busy.host?` (organisateur : ${busy.host})`:"";alert((busy.state==="waiting"?"Une partie en ligne est déjà en préparation"+by+" : rejoignez-la.":"Une partie en ligne est déjà en cours"+by+".")+"\n\nPartie abandonnée ? Un administrateur peut la supprimer dans Paramètres › Parties en ligne.");openId=busy.id;render();return;}
     const maxSeats=MAX_PLAYERS;
     const startStack=Math.max(1000,Number(form.startStack)||20000);
     const targetHours=Math.max(0.5,Number(form.targetHours)||2);
@@ -1442,6 +1442,7 @@
     }catch(e){const box=$("bptOnlineBody");if(box)box.innerHTML=`<div class="bpt-ol-card"><p>Connexion impossible : ${esc(e.message||e)}</p></div>`;}
   }
   function install(){
+    adminInstall();
     const view=$("online");if(!view)return;
     const live=$("live3");let liveWas=false;
     // Partie en ligne en cours (et pas de Live classique actif) : l'onglet Live ouvre directement la table,
@@ -1560,6 +1561,78 @@
   }
   setInterval(paintHome,2000);
   setInterval(paintNavDot,2000);
+  // 10.4.175 — Paramètres › Parties en ligne : liste de toutes les tables (et des indicateurs « en cours » restés seuls),
+  // suppression d'une partie et nettoyage des parties fantômes / abandonnées. Zone protégée (mot de passe admin).
+  const ADMIN_STALE_MS=6*3600*1000;
+  async function adminLoad(){
+    const r=await db();
+    const [ts,rs]=await Promise.all([r.ref(ROOT).once("value"),r.ref(RUN_ROOT).once("value")]);
+    const tv=ts.val()||{},rv=rs.val()||{},now=srvNow(),rows=[];
+    new Set([...Object.keys(tv),...Object.keys(rv)]).forEach(id=>{
+      const t=tv[id]||null,ix=rv[id]||null;
+      let state,ghost=false;
+      if(!t){state="Fantôme";ghost=true;}
+      else if(t.status==="finished"){state="Terminée";ghost=!!ix;}
+      else{
+        const last=Math.max(Number(t.aliveAt||0),Number(t.startedAt||0),Number(t.createdAt||0));
+        const stale=now-last>(t.status==="running"?ADMIN_STALE_MS:MAX_AGE_MS);
+        state=(t.status==="running"?"En cours":"En préparation")+(stale?" · abandonnée":"");ghost=stale;
+      }
+      const names=t?seatsOf(t).map(s=>s.name):String(ix?.players||"").split("|").filter(Boolean);
+      rows.push({id,t,ix,state,ghost,names,host:t?.host||ix?.host||"—",at:Number(t?.createdAt||ix?.at||0)});
+    });
+    return rows.sort((a,b)=>b.at-a.at);
+  }
+  // Efface une partie. Terminée : mains et chat gardés (bilan, historique hors classement) ; index seul : juste l'index.
+  async function adminDelete(row){
+    const r=await db(),id=row.id,keep=row.t?.status==="finished";
+    if(row.t&&!keep)await r.ref(`${ROOT}/${id}`).remove();
+    await r.ref(`${RUN_ROOT}/${id}`).remove().catch(()=>{});
+    if(row.t&&!keep)[HANDS_ROOT,CHATLOG_ROOT,PLOG_ROOT,FX_ROOT].forEach(p=>r.ref(`${p}/${id}`).remove().catch(()=>{}));
+    if(row.t&&keep)r.ref(`${FX_ROOT}/${id}`).remove().catch(()=>{});
+    if(openId===id){openId=null;render();}
+  }
+  let adminRows=[];
+  async function adminRender(){
+    const box=$("bptOnlineAdminList");if(!box)return;
+    box.innerHTML=`<p class="muted">Chargement…</p>`;
+    try{adminRows=await adminLoad();}catch(e){box.innerHTML=`<p style="color:#ff8f8f">Lecture impossible : ${esc(e.message||e)}</p>`;return;}
+    const ghosts=adminRows.filter(x=>x.ghost).length;
+    const d=at=>at?new Date(at).toLocaleString("fr-FR",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"—";
+    box.innerHTML=`<div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <button class="btn ghost" type="button" data-ol-admin-refresh>Actualiser</button>
+        <button class="btn secondary" type="button" data-ol-admin-clean ${ghosts?"":"disabled"}>🧹 Nettoyer les fantômes (${ghosts})</button></div>
+      ${adminRows.length?`<div class="tablewrap"><table class="summary-table"><thead><tr><th>Date</th><th>État</th><th>Organisateur</th><th>Joueurs</th><th></th></tr></thead><tbody>
+      ${adminRows.map((x,i)=>`<tr${x.ghost?' style="opacity:.7"':""}><td>${esc(d(x.at))}</td><td>${x.ghost?"👻 ":""}${esc(x.state)}</td><td>${esc(x.host)}</td>
+        <td>${x.names.length} · ${esc(x.names.map(n=>n.split(" ")[0]).join(", ")||"—")}</td>
+        <td><button class="btn ghost" type="button" data-ol-admin-del="${i}" title="Supprimer cette partie" aria-label="Supprimer cette partie">🗑</button></td></tr>`).join("")}
+      </tbody></table></div>`:`<p class="muted">Aucune partie en ligne en base.</p>`}
+      <p class="muted" style="font-size:11px;margin-top:8px">👻 Fantôme : indicateur « en cours » sans table, partie terminée encore signalée en cours, ou table sans activité (en cours depuis plus de 6 h, en préparation depuis plus de 24 h). Supprimer une partie hors championnat ne change rien au classement.</p>`;
+  }
+  function adminInstall(){
+    const box=$("bptOnlineAdminList");if(!box||box.dataset.olReady)return;box.dataset.olReady="1";
+    box.closest("details")?.addEventListener("toggle",e=>{if(e.target.open)adminRender();});
+    box.addEventListener("click",async e=>{
+      const b=e.target.closest("button");if(!b)return;
+      if(b.hasAttribute("data-ol-admin-refresh"))return adminRender();
+      if(b.hasAttribute("data-ol-admin-clean")){
+        const g=adminRows.filter(x=>x.ghost);if(!g.length)return;
+        if(!confirm(`Nettoyer ${g.length} partie(s) fantôme(s) ou abandonnée(s) ?\n\n${g.map(x=>`• ${x.state} — ${x.host} (${x.names.length} j.)`).join("\n")}\n\nCela ne change rien au classement.`))return;
+        b.disabled=true;try{for(const x of g)await adminDelete(x);}catch(err){alert("Nettoyage incomplet : "+(err.message||err));}
+        return adminRender();
+      }
+      const i=b.getAttribute("data-ol-admin-del");if(i==null)return;const x=adminRows[Number(i)];if(!x)return;
+      const live=x.t&&x.t.status==="running"&&!x.ghost;
+      const msg=`Supprimer la partie en ligne de ${x.host} (${x.state.toLowerCase()}) ?\n\nJoueurs : ${x.names.join(", ")||"—"}`
+        +(live?`\n\n⚠️ ${x.names.length} joueurs sont à la table : la partie s'arrêtera pour eux.`:"")
+        +(x.t?.status==="finished"?"\n\nL'historique des mains et du chat est conservé pour le bilan.":"")
+        +"\n\nCela ne change rien au classement.";
+      if(!confirm(msg))return;
+      b.disabled=true;try{await adminDelete(x);}catch(err){alert("Suppression impossible : "+(err.message||err));}
+      adminRender();
+    });
+    if(box.closest("details")?.open)adminRender();
+  }
   // API utilisée par l'étape 1 du Live (bpt-live-mobilefirst.js).
   function openTables(){return Object.values(tables).filter(t=>t&&t.status!=="finished"&&srvNow()-Number(t.createdAt||0)<MAX_AGE_MS).sort((a,b)=>b.createdAt-a.createdAt);}
   window.bptOnline={
