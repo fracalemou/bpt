@@ -1,4 +1,4 @@
-/* BPT 10.4.78 — Jouer en ligne · lot 1 : salon et places · lot 2 : donne · lot 3 : enchères, pots, abattage · lot 4 : fin du tournoi, championnat, relais de l'hôte.
+/* BPT 10.4.78 (10.4.174 : retour à la table) — Jouer en ligne · lot 1 : salon et places · lot 2 : donne · lot 3 : enchères, pots, abattage · lot 4 : fin du tournoi, championnat, relais de l'hôte.
    Mode confiance (pas de serveur) : tout passe par Firebase, les écritures concurrentes par transaction.
    Données : bpt/online/tables/{id} = {id,name,host,createdAt,status,countsForChampionship,maxSeats,
    startStack,targetHours,levelSeconds,levels[],levelIndex,seats{index:{name,stack,joinedAt}}}. */
@@ -144,7 +144,9 @@
     await tx(id,t=>{if(t.status!=="waiting")return false;Object.keys(t.seats||{}).forEach(k=>{if(t.seats[k]?.name===name)delete t.seats[k];});});
     setTimeout(()=>setWaiting(id),300);
   }
-  async function setRunning(id,on){try{const r=(await db()).ref(`${RUN_ROOT}/${id}`);on?await r.set({state:"running",at:srvNow()}):await r.remove();}catch(_e){}}
+  // 10.4.174 : l'entrée « en cours » liste les joueurs encore en lice (bandeau « Revenir à la table » de l'accueil).
+  const livePlayers=t=>seatsOf(t||{}).filter(s=>!s.bot&&Number(s.stack)>0).map(s=>s.name).join("|");
+  async function setRunning(id,on){try{const r=(await db()).ref(`${RUN_ROOT}/${id}`);on?await r.set({state:"running",at:srvNow(),players:livePlayers(tables[id])}):await r.remove();}catch(_e){}}
   // Tables en préparation : nom, hôte et nombre d'inscrits dans l'index léger (encart « Rejoindre » de l'accueil).
   async function setWaiting(id){try{const t=tables[id];if(!t||t.status!=="waiting")return;
     await (await db()).ref(`${RUN_ROOT}/${id}`).set({state:"waiting",name:t.name,host:t.host,n:seatsOf(t).length,players:seatsOf(t).map(x=>x.name).join("|"),at:srvNow()});}catch(_e){}}
@@ -599,7 +601,10 @@
         if(x.hand&&x.hand.street!=="done")x.hand.actionAt=srvNow();
         x.aliveAt=srvNow();x.levelIndex=levelAt(x).index;
       }).then(ok=>{if(ok)plog(t.id,"veille",`chrono arrêté ${Math.round(gap/60000)||"<1"} min : aucun joueur connecté`);return ok;}),true);return false;}
-    if(aliveBeat.id!==t.id||now-aliveBeat.at>=10000){aliveBeat={id:t.id,at:now};db().then(d=>d.ref(`${ROOT}/${t.id}/aliveAt`).set(srvNow())).catch(()=>{});}
+    if(aliveBeat.id!==t.id||now-aliveBeat.at>=10000){aliveBeat={id:t.id,at:now};db().then(d=>d.ref(`${ROOT}/${t.id}/aliveAt`).set(srvNow())).catch(()=>{});
+      // 10.4.174 : indicateur « partie en cours » absent ou faux (12/11 : effacé en cours de partie → un joueur déconnecté
+      // ne retrouvait plus la table et une autre partie a pu être créée) : le pilote le rétablit.
+      const ix=lastIndex[t.id];if(indexReady&&(!ix||ix.state!=="running"||String(ix.players||"")!==livePlayers(t)||now-Number(ix.at||0)>6*3600*1000)){if(!ix)plog(t.id,"index","indicateur « partie en cours » absent : rétabli");setRunning(t.id,true);}}
     return true;
   }
   const AUTO_RETRY_MS=6000;
@@ -1133,6 +1138,10 @@
     return `<span class="bpt-av bpt-av-lg">${esc(init)}</span>`;
   }
   let raiseTo=0, raiseKey="", raiseMode=false, clockMenuOpen=false;
+  // 10.4.174 : anti-fausse manœuvre (12/11, Franck couché avec KK sur un flop gratuit) — à l'arrivée de la barre d'actions,
+  // les touches des 0,7 premières secondes sont ignorées (la barre « Check / Couché » vient d'être remplacée par « Se coucher »
+  // au même endroit) ; se coucher alors que le check est gratuit demande une seconde touche.
+  const DOCK_GUARD_MS=700;let dockAt=0,foldArm="",foldArmTimer=0;
   function tableHtml(t){
     const seats=seatsOf(t),mine=mySeat(t),isHost=t.host===me(),running=t.status==="running";
     // Spectateur : partie lancée (ou terminée) sans y être assis → aucune action, seulement quitter.
@@ -1231,7 +1240,7 @@
     if(h&&!done&&!dealing&&mine&&h.toAct===mine.i){
       const i=mine.i,toCall=Math.max(0,h.currentBet-betOf(h,i)),stack=stackOf(t,i),maxTotal=betOf(h,i)+stack;
       const minTo=Math.min(maxTotal,minRaiseTo(h,Number(lv.bb)||50)),pot=potTotal+toCall;
-      const key=`${h.no}:${h.street}:${h.actionAt}`;if(raiseKey!==key){raiseKey=key;raiseTo=minTo;raiseMode=false;}
+      const key=`${h.no}:${h.street}:${h.actionAt}`;if(raiseKey!==key){raiseKey=key;raiseTo=minTo;raiseMode=false;dockAt=Date.now();foldArm="";}
       raiseTo=Math.max(minTo,Math.min(maxTotal,raiseTo));
       const canRaise=maxTotal>h.currentBet, verb=h.currentBet?"Relancer":"Miser";
       // Une seule étape : Se coucher · Check/Suivre · Miser/Relancer (montant dessous), puis curseur exponentiel
@@ -1244,7 +1253,7 @@
       const onlyAllin=maxTotal<=minTo;
       myBar=`<div class="bpt-ol-dock">
         <div class="bpt-ol-acts">
-          <button type="button" class="is-fold" data-ol-act="fold">Se coucher</button>
+          ${!toCall&&foldArm===key?`<button type="button" class="is-fold is-armed" data-ol-act="fold">Confirmer<small>check gratuit</small></button>`:`<button type="button" class="is-fold" data-ol-act="fold"${toCall?"":" data-ol-fold-free"}>Se coucher</button>`}
           ${toCall?`<button type="button" class="is-call" data-ol-act="call">${toCall>=stack?"Tapis":"Suivre"}<small>${fmt(Math.min(toCall,stack))}</small></button>`:`<button type="button" class="is-call" data-ol-act="check">Check</button>`}
           ${canRaise?`<button type="button" class="is-raise" data-ol-act="${onlyAllin?"allin":"raise"}"><span data-ol-raise-lbl data-verb="${verb}">${onlyAllin||raiseTo>=maxTotal?"Tapis":verb}</span><small data-ol-raise-val>${fmt(onlyAllin?maxTotal:raiseTo)}</small></button>`:""}
         </div>
@@ -1437,7 +1446,7 @@
     const live=$("live3");let liveWas=false;
     // Partie en ligne en cours (et pas de Live classique actif) : l'onglet Live ouvre directement la table,
     // en joueur si l'on y est assis, sinon en spectateur.
-    const redirectLive=()=>{const on=!!live?.classList.contains("active");if(on&&!liveWas&&runningIds.length&&verified.get(runningIds[0])==="running"&&!$("live3NavBtn")?.classList.contains("live3-active"))setTimeout(()=>window.bptOnline.open(runningIds[0]),0);liveWas=on;};
+    const redirectLive=()=>{const on=!!live?.classList.contains("active");if(on&&!liveWas&&runningIds.length&&[undefined,"running"].includes(verified.get(runningIds[0]))&&!$("live3NavBtn")?.classList.contains("live3-active"))setTimeout(()=>window.bptOnline.open(runningIds[0]),0);liveWas=on;};
     const watch=()=>{redirectLive();listen(view.classList.contains("active")||!!live?.classList.contains("active"));if(!view.classList.contains("active")){document.documentElement.classList.remove("bpt-online-open");fxListen();}else render();};
     [view,live].filter(Boolean).forEach(el=>new MutationObserver(watch).observe(el,{attributes:true,attributeFilter:["class"]}));
     view.addEventListener("click",e=>{
@@ -1451,7 +1460,10 @@
       if(g("[data-ol-bot-del]")){removeBot(openId);return;}
       if(g("[data-ol-leave]")){leave(openId);return;}
       if(g("[data-ol-start]")){start(openId);return;}
-      if((el=g("[data-ol-act]"))){const a=el.dataset.olAct;act(openId,a,a==="raise"?raiseTo:0);return;}
+      if((el=g("[data-ol-act]"))){
+        if(Date.now()-dockAt<DOCK_GUARD_MS)return; // barre tout juste affichée : touche destinée à l'ancienne barre
+        if(el.hasAttribute("data-ol-fold-free")){foldArm=raiseKey;clearTimeout(foldArmTimer);foldArmTimer=setTimeout(()=>{if(foldArm){foldArm="";render();}},3000);render();return;}
+        foldArm="";const a=el.dataset.olAct;act(openId,a,a==="raise"?raiseTo:0);return;}
       if((el=g("[data-ol-step]"))){const r=view.querySelector("[data-ol-range]");if(r){const min=Number(r.dataset.min),max=Number(r.dataset.max),bb=Number(r.dataset.bb)||50;raiseTo=Math.max(min,Math.min(max,raiseTo+Number(el.dataset.olStep)*bb));render();}return;}
       if((el=g("[data-ol-preset]"))){raiseTo=Number(el.dataset.olPreset)||raiseTo;render();return;}
       if(g("[data-ol-join-req]")){requestJoin(openId);return;}
@@ -1489,12 +1501,12 @@
     render();
   }
   // Pastille rouge de l'onglet Live : partie Live (classe posée par le module Live) ou partie en ligne en cours.
-  let onlineRunning=0,runningIds=[];
+  let onlineRunning=0,runningIds=[],myRunning="";
   function paintNavDot(){const b=$("live3NavBtn");if(b)b.classList.toggle("bpt-game-on",b.classList.contains("live3-active")||onlineRunning>0);}
   // Indicateurs vérifiés auprès de la table : une entrée dont la table n'existe plus ou n'est plus dans cet état
   // (partie terminée sans personne pour nettoyer, table supprimée…) est ignorée et retirée par n'importe quel appareil.
   const verified=new Map(); // id → état réel de la table (null = absente)
-  let lastIndex={};
+  let lastIndex={},indexReady=false;
   // Revérification toutes les minutes (une partie peut se terminer sans que personne ne retire son indicateur).
   setInterval(async()=>{if(!Object.keys(lastIndex).length)return;verified.clear();try{await checkIndex(await db(),lastIndex);}catch(_e){}},60000);
   async function checkIndex(r,v){
@@ -1502,16 +1514,20 @@
       const want=x?.state==="waiting"?"waiting":"running";
       if(verified.has(id))continue;
       try{const st=(await r.ref(`${ROOT}/${id}/status`).once("value")).val();verified.set(id,st||null);
-        if(st!==want){await r.ref(`${RUN_ROOT}/${id}`).remove();}}catch(_e){}
+        // 10.4.174 : table lancée mais entrée encore « en préparation » (course avec le lancement) → corrigée, jamais supprimée.
+        if(st==="running"&&want==="waiting"){await r.ref(`${RUN_ROOT}/${id}`).set({state:"running",at:srvNow()});}
+        else if(st!==want){await r.ref(`${RUN_ROOT}/${id}`).remove();}}catch(_e){}
     }
   }
   (async()=>{try{const r=await db();r.ref(RUN_ROOT).on("value",snap=>{const v=snap.val()||{};
     // Une entrée change d'état (attente → en cours) : la revérifier.
     Object.entries(v).forEach(([id,x])=>{const want=x?.state==="waiting"?"waiting":"running";if(verified.has(id)&&verified.get(id)!==want&&verified.get(id)!==null)verified.delete(id);});
-    lastIndex=v;checkIndex(r,v);
+    lastIndex=v;indexReady=true;checkIndex(r,v);
     const ok=(id,x)=>{const want=x?.state==="waiting"?"waiting":"running";return !verified.has(id)||verified.get(id)===want;};
     const fresh=Object.entries(v).filter(([id,x])=>x&&srvNow()-Number(x.at||0)<12*3600*1000&&ok(id,x));
-    runningIds=fresh.filter(([,x])=>x.state!=="waiting").map(([id])=>id);onlineRunning=runningIds.length;paintNavDot();document.dispatchEvent(new CustomEvent("bpt-online-tables"));
+    // 10.4.174 : la partie où je suis encore en lice passe en premier.
+    const who=me(),inIt=x=>!!who&&String(x.players||"").split("|").includes(who);
+    runningIds=fresh.filter(([,x])=>x.state!=="waiting").sort((a,b)=>inIt(b[1])-inIt(a[1])).map(([id])=>id);myRunning=fresh.find(([,x])=>x.state!=="waiting"&&inIt(x))?.[0]||"";onlineRunning=runningIds.length;paintNavDot();document.dispatchEvent(new CustomEvent("bpt-online-tables"));
     waitingTables=fresh.filter(([,x])=>x.state==="waiting").map(([id,x])=>({id,...x}));paintHome();});}catch(_e){}})();
   // Alerte « partie en ligne en préparation » : proposée à ceux qui ne sont pas encore inscrits, une fois par table
   // (fermée = plus proposée), retirée au lancement. Pas affichée sur l'écran de la table elle-même.
@@ -1526,8 +1542,14 @@
         const b=e.target.closest("[data-ol-invite-join]");if(!b)return;const id=b.dataset.olInviteJoin;box.hidden=true;
         window.bptOnline.open(id);
         for(let k=0;k<30&&!tables[id];k++)await new Promise(r=>setTimeout(r,150));
-        if(tables[id]&&!mySeat(tables[id]))join(id);});}
+        if(tables[id]&&tables[id].status==="waiting"&&!mySeat(tables[id]))join(id);});}
     const who=me(),skip=dismissed();
+    // 10.4.174 : joueur encore en lice qui n'est pas devant la table (appli rouverte, retour d'un autre écran) → « Revenir à la table ».
+    const atTable=!!$("online")?.classList.contains("active")&&openId===myRunning;
+    if(who&&myRunning&&!atTable&&[undefined,"running"].includes(verified.get(myRunning))){const key="back:"+myRunning;
+      if(box.dataset.key!==key){box.dataset.key=key;box.innerHTML=`<span class="bpt-ol-invite-ico">🃏</span><div><b>Ta partie en ligne continue</b><small>Tu es toujours en jeu</small></div>
+        <button type="button" data-ol-invite-join="${esc(myRunning)}">Revenir à la table</button>`;}
+      box.hidden=false;return;}
     const w=who&&!$("online")?.classList.contains("active")?waitingTables.find(x=>!skip.includes(x.id)&&!String(x.players||"").split("|").includes(who)):null;
     if(!w){box.hidden=true;return;}
     const n=Number(w.n)||0,key=w.id+":"+n;
@@ -1543,7 +1565,7 @@
   window.bptOnline={
     openTables,
     me,
-    active(){const w=waitingTables[0];if(w)return {id:w.id,state:"waiting"};return runningIds[0]?{id:runningIds[0],state:"running"}:null;},
+    active(){if(myRunning)return {id:myRunning,state:"running"};const w=waitingTables[0];if(w)return {id:w.id,state:"waiting"};return runningIds[0]?{id:runningIds[0],state:"running"}:null;},
     pilot(id){const t=tables[id];return t?pilotName(t):null;},
     showHands,handLabel,fillStats, // diagnostic : qui pilote les automatismes
     open(id){openId=id||null;window.showView&&window.showView("online");render();},
