@@ -1,4 +1,4 @@
-/* BPT 10.4.31 — Agenda des parties (encart sur l'Accueil + calendrier).
+/* BPT 10.4.31 (10.4.176 : live + en ligne le même jour, réponses saisies par l’auteur) — Agenda des parties (encart sur l'Accueil + calendrier).
    - Onglet « Agenda » : calendrier mensuel avec les parties proposées (à venir) et jouées (passées).
    - Tout joueur connecté peut proposer une partie (date, heure, lieu, durée, tapis) ;
      seul son auteur (ou le Dealer) peut la modifier / supprimer.
@@ -22,7 +22,7 @@
   const shortDay=iso=>new Date(`${iso}T12:00:00`).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
   const norm=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLocaleLowerCase('fr').trim();
 
-  let events=[],cursor=null,selectedIso='',editing=false,bound=false,live=false;
+  let events=[],cursor=null,selectedIso='',editing=false,addMode='online',bound=false,live=false;
 
   // ---------- Contexte appli ----------
   function me(){
@@ -82,6 +82,38 @@
     const hb=$('bptAgendaHome');if(hb)delete hb.dataset.sig;
     const ref=fbRef();saveCache();render();
     if(ref)await ref.child(e.id).child('responses').child(n).set(choice);
+    // Le joueur répond lui-même : la mention « saisi par » disparaît.
+    if(e.responsesBy&&Object.keys(e.responsesBy).some(k=>norm(k)===norm(n))){
+      const k=Object.keys(e.responsesBy).find(k=>norm(k)===norm(n));delete e.responsesBy[k];saveCache();
+      if(ref)await ref.child(e.id).child('responsesBy').child(k).remove();
+    }
+  }
+  // 10.4.176 — L'auteur de la partie (ou le Dealer) saisit la réponse d'un joueur reçue par téléphone, SMS…
+  // choice=null efface la réponse. responsesBy garde qui l'a saisie (affiché « 📞 » dans les réponses).
+  async function setResponseFor(e,name,choice){
+    const n=me();if(!canEdit(e))return;
+    const key=Object.keys(e.responses||{}).find(k=>norm(k)===norm(name))||name;
+    const self=norm(name)===norm(n);
+    e.responses={...(e.responses||{})};e.responsesBy={...(e.responsesBy||{})};
+    if(choice)e.responses[key]=choice;else delete e.responses[key];
+    if(choice&&!self)e.responsesBy[key]=n;else delete e.responsesBy[key];
+    const hb=$('bptAgendaHome');if(hb)delete hb.dataset.sig;
+    const ref=fbRef();saveCache();render();
+    if(ref){const r=ref.child(e.id);
+      await (choice?r.child('responses').child(key).set(choice):r.child('responses').child(key).remove());
+      await (choice&&!self?r.child('responsesBy').child(key).set(n):r.child('responsesBy').child(key).remove());}
+  }
+  function byOf(e,name){const k=Object.keys(e.responsesBy||{}).find(k=>norm(k)===norm(name));return k?e.responsesBy[k]:'';}
+  let respEditId='';
+  function respEditorHtml(e){
+    const names=[...new Set([...activePlayers(),...Object.keys(e.responses||{})])].sort((a,b)=>a.localeCompare(b,'fr'));
+    const cur=name=>{const k=Object.keys(e.responses||{}).find(k=>norm(k)===norm(name));return k?e.responses[k]:'';};
+    return `<div class="bpt-ag-resp-edit" style="margin-top:10px"><p class="muted" style="margin:0 0 8px">Réponses reçues par téléphone, SMS… : touchez le choix du joueur (✕ barré = effacer).</p>
+      ${names.map(name=>{const c=cur(name);return `<div style="display:flex;align-items:center;gap:6px;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(127,127,127,.15)">
+        <span style="flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(name)}</span>
+        <span style="display:flex;gap:4px;flex:0 0 auto">${CHOICES.map(([k,t])=>`<button type="button" class="bpt-ag-choice is-${k}${c===k?' is-active':''}" style="min-width:38px;padding:4px 8px" data-ag-set="${esc(name)}" data-ag-set-choice="${k}" title="${esc(t)}">${t.split(' ')[0]}</button>`).join('')}
+        <button type="button" class="bpt-ag-choice" style="min-width:34px;padding:4px 6px;${c?'':'visibility:hidden'}" data-ag-set="${esc(name)}" data-ag-set-choice="" title="Effacer la réponse">⌫</button></span></div>`;}).join('')}
+      <div class="bpt-ag-actions"><button type="button" class="btn ghost" data-ag-resp-close>Terminé</button></div></div>`;
   }
 
   function grouped(e){
@@ -99,6 +131,11 @@
     return events.find(e=>e.date>=t&&e.date<=m&&!myChoice(e))||null;
   }
   function eventFor(iso){return events.find(e=>e.date===iso)||null;}
+  // 10.4.176 — Une partie en live ET une partie en ligne possibles le même jour (au plus une de chaque).
+  function eventsFor(iso){return events.filter(e=>e.date===iso);}
+  const modeOf=e=>e?.mode==='online'?'online':'table';
+  const MODE_TITLE={table:'🃏 En live',online:'💻 En ligne'};
+  function sameModeOn(iso,mode,exceptId){return events.find(e=>e.date===iso&&modeOf(e)===mode&&e.id!==exceptId)||null;}
   function nextEvent(){
     const t=todayIso(),max=new Date();max.setDate(max.getDate()+INVITE_DAYS);const m=isoOf(max);
     return events.find(e=>e.date>=t&&e.date<=m)||null;
@@ -118,7 +155,7 @@
     const first=(new Date(y,m,1).getDay()+6)%7,last=new Date(y,m+1,0).getDate();
     for(let i=0;i<first;i++){const s=document.createElement('span');s.className='bpt-ag-day is-empty';host.append(s);}
     for(let d=1;d<=last;d++){
-      const iso=`${y}-${pad(m+1)}-${pad(d)}`,e=eventFor(iso),g=played.find(x=>x.date===iso);
+      const iso=`${y}-${pad(m+1)}-${pad(d)}`,e=eventFor(iso),g=played.find(x=>x.date===iso),both=eventsFor(iso).length>1;
       const b=document.createElement('button');b.type='button';b.className='bpt-ag-day';
       if(iso===t)b.classList.add('is-today');
       if(iso<t)b.classList.add('is-past');
@@ -126,8 +163,8 @@
       if(g)b.classList.add('is-played');
       if(iso===selectedIso)b.classList.add('is-selected');
       const mine=e?myChoice(e):'';
-      b.innerHTML=`<span class="bpt-ag-num">${d}</span>${g?'<span class="bpt-ag-tag">♠</span>':e?`<span class="bpt-ag-tag">${grouped(e).present.length}✓</span>`:''}${e&&!g&&mine?`<span class="bpt-ag-mine is-${mine}"></span>`:''}`;
-      b.title=g?`Partie n°${g.game} jouée`:e?`Partie proposée · ${grouped(e).present.length} présent(s)`:(iso>=t?'Proposer une partie':'');
+      b.innerHTML=`<span class="bpt-ag-num">${d}</span>${g?'<span class="bpt-ag-tag">♠</span>':both?'<span class="bpt-ag-tag">🃏💻</span>':e?`<span class="bpt-ag-tag">${grouped(e).present.length}✓</span>`:''}${e&&!g&&mine?`<span class="bpt-ag-mine is-${mine}"></span>`:''}`;
+      b.title=g?`Partie n°${g.game} jouée`:both?eventsFor(iso).map(x=>`${MODE_TITLE[modeOf(x)]} · ${grouped(x).present.length} présent(s)`).join('\n'):e?`Partie proposée · ${grouped(e).present.length} présent(s)`:(iso>=t?'Proposer une partie':'');
       b.addEventListener('click',()=>{selectedIso=iso;editing=false;render();$('bptAgendaPanel')?.scrollIntoView({behavior:'smooth',block:'nearest'});});
       host.append(b);
     }
@@ -138,7 +175,7 @@
     const g=grouped(e);
     return `<div class="bpt-ag-responses">${['present','maybe','absent','pending'].map(k=>`
       <div class="bpt-ag-col is-${k}"><h4>${CHOICE_LABEL[k]} <b>${g[k].length}</b></h4>
-      <ul>${g[k].map(n=>`<li>${esc(n)}</li>`).join('')||'<li class="muted">—</li>'}</ul></div>`).join('')}</div>`;
+      <ul>${g[k].map(n=>{const by=k==='pending'?'':byOf(e,n);return `<li${by?` title="Réponse saisie par ${esc(by)}"`:''}>${esc(n)}${by?' <span aria-label="saisie par l’organisateur">📞</span>':''}</li>`;}).join('')||'<li class="muted">—</li>'}</ul></div>`).join('')}</div>`;
   }
   function choiceButtons(e){
     const mine=myChoice(e);
@@ -149,13 +186,14 @@
     const form=b.closest('.bpt-ag-form');if(!form)return;const m=b.dataset.agMode;
     form.querySelector('#bptAgMode').value=m;form.querySelectorAll('[data-ag-mode]').forEach(x=>x.classList.toggle('is-on',x===b));
     const loc=form.querySelector('.bpt-ag-loc');if(loc)loc.hidden=m==='online';
-    const tm=form.querySelector('.bpt-ag-time');if(tm)tm.hidden=m!=='online';});
+    const tm=form.querySelector('.bpt-ag-time');if(tm)tm.hidden=m!=='online';
+    form.querySelector('[data-ag-pick]')?._draw?.();}); // dates prises : selon le type choisi
   // Lieu affiché : « 💻 En ligne » pour une partie en ligne, sinon « 📍 lieu ».
   const timeLabel=t=>{const m=String(t||'').match(/^(\d{1,2}):(\d{2})/);return m?`${Number(m[1])} h ${m[2]}`:'';};
   function whereHtml(e){return e?.mode==='online'?`💻 En ligne${e.time?' · '+timeLabel(e.time):''}`:`📍 ${esc(e?.location||'Lieu à définir')}`;}
-  function formHtml(iso,e){
+  function formHtml(iso,e,preset){
     const n=me();const locs=activePlayers();
-    const mode=e?.mode==='online'?'online':'table';
+    const mode=e?modeOf(e):(preset==='online'?'online':'table');
     const loc=mode==='online'?'':(e?.location||(n?`Chez ${n}`:''));
     // 10.4.47 — Proposition réduite à l'essentiel : date et lieu (heure, durée et tapis se règlent au lancement du Live).
     return `<h3>${e?'Modifier la partie':'Proposer une partie'} · <span data-ag-pick-label>${esc(longDate(iso))}</span></h3>
@@ -191,10 +229,10 @@
       for(let i=0;i<lead;i++)cells+='<span></span>';
       for(let d=1;d<=days;d++){
         const iso=`${y}-${pad(m)}-${pad(d)}`;
-        const other=events.find(x=>x.date===iso&&x.id!==editId);
+        const other=sameModeOn(iso,root.querySelector('#bptAgMode')?.value==='online'?'online':'table',editId);
         const past=iso<t,fri=new Date(y,m-1,d).getDay()===5;
         const cls=['bpt-ag-day',past?'is-past':'',other?'is-taken':'',fri?'is-fri':'',iso===sel?'is-sel':'',iso===t?'is-today':''].filter(Boolean).join(' ');
-        cells+=`<button type="button" class="${cls}" data-day="${iso}" ${past||other?'disabled':''} title="${other?'Partie déjà proposée ce jour-là':''}">${d}</button>`;
+        cells+=`<button type="button" class="${cls}" data-day="${iso}" ${past||other?'disabled':''} title="${other?`Partie ${modeOf(other)==='online'?'en ligne':'en live'} déjà proposée ce jour-là`:''}">${d}</button>`;
       }
       el.innerHTML=`<div class="bpt-ag-pick-head"><button type="button" data-pick-nav="-1" ${el.dataset.month<=minMonth?'disabled':''} aria-label="Mois précédent">‹</button><strong>${esc(title.replace(/^./,c=>c.toUpperCase()))}</strong><button type="button" data-pick-nav="1" aria-label="Mois suivant">›</button></div>
         <div class="bpt-ag-pick-week">${['L','M','M','J','V','S','D'].map(x=>`<span>${x}</span>`).join('')}</div>
@@ -206,7 +244,7 @@
       const day=ev.target.closest('[data-day]');
       if(day&&!day.disabled){input.value=day.dataset.day;if(label)label.textContent=longDate(day.dataset.day);draw();}
     };
-    draw();
+    el._draw=draw;draw();
   }
   // 10.4.46 — Invitation WhatsApp : message prêt à envoyer (le joueur choisit le groupe dans WhatsApp).
   let justCreatedId='';
@@ -244,7 +282,10 @@
     const box=$('bptAgendaPanel');if(!box)return;
     const t=todayIso();
     if(!selectedIso){box.innerHTML='<h3>Prochaines parties</h3><div id="bptAgendaUpcoming"></div><p class="muted bpt-ag-hint">Touchez une date future pour proposer une partie, ou une partie jouée (♠) pour revoir son détail.</p>';renderUpcoming();return;}
-    const iso=selectedIso,e=eventFor(iso),g=playedGames().find(x=>x.date===iso);
+    const iso=selectedIso,list=eventsFor(iso),g=playedGames().find(x=>x.date===iso);
+    // editing : false (consultation), 'new' (autre partie ce jour-là) ou id de la partie modifiée.
+    const editE=editing&&editing!=='new'?list.find(x=>x.id===editing)||null:null;
+    const e=editE||list[0]||null;
     if(g){
       box.innerHTML=`<h3>♠ Partie n°${g.game} · ${esc(longDate(iso))}</h3>
         <p class="muted">${esc(g.location||e?.location||'')}${g.location||e?.location?' · ':''}${g.players} joueurs${g.winner?` · vainqueur : <b>${esc(g.winner)}</b>`:''}</p>
@@ -252,34 +293,45 @@
       $('bptAgOpenGame').onclick=()=>openPlayedGame(g);
       return;
     }
-    if(e&&!editing){
+    if(list.length&&!editing){
+      const multi=list.length>1,missing=list.some(x=>modeOf(x)==='online')?'table':'online';
       box.innerHTML=`<button type="button" class="bpt-ag-back" data-ag-back>‹ Prochaines parties</button><h3>📅 ${esc(longDate(iso))}</h3>
-        <p class="bpt-ag-meta">${whereHtml(e)}</p>
-        <p class="muted">Proposée par ${esc(e.createdBy||'—')}</p>
-        ${iso>=t?`<div class="bpt-ag-myline">Votre réponse :</div>${choiceButtons(e)}`:''}
-        ${responsesHtml(e)}
+        ${list.map((x,i)=>`<section class="bpt-ag-event" data-ag-ev="${i}"${multi&&i?' style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(127,127,127,.3)"':''}>
+        ${multi?`<h4 style="margin:0 0 6px">${MODE_TITLE[modeOf(x)]}</h4>`:''}
+        <p class="bpt-ag-meta">${whereHtml(x)}</p>
+        <p class="muted">Proposée par ${esc(x.createdBy||'—')}</p>
+        ${iso>=t?`<div class="bpt-ag-myline">Votre réponse :</div>${choiceButtons(x)}`:''}
+        ${respEditId===x.id&&canEdit(x)?respEditorHtml(x):responsesHtml(x)}
+        ${canEdit(x)&&respEditId!==x.id?`<div class="bpt-ag-actions"><button type="button" class="btn ghost" data-ag-resp-open>📞 Saisir les réponses des joueurs</button></div>`:''}
         ${iso>=t?`<div class="bpt-ag-actions">${waButton()}</div>`:''}
-        ${canEdit(e)?`<div class="bpt-ag-actions"><button type="button" class="btn ghost" id="bptAgEdit">✏️ Modifier</button><button type="button" class="btn ghost" id="bptAgDelete">🗑 Supprimer</button></div>`:''}`;
-      box.querySelector('[data-ag-wa]')?.addEventListener('click',()=>shareWhatsApp(e));
-      box.querySelectorAll('[data-ag-choice]').forEach(b=>b.onclick=()=>respond(e,b.dataset.agChoice));
+        ${canEdit(x)?`<div class="bpt-ag-actions"><button type="button" class="btn ghost" data-ag-ev-edit${multi?'':' id="bptAgEdit"'}>✏️ Modifier</button><button type="button" class="btn ghost" data-ag-ev-del${multi?'':' id="bptAgDelete"'}>🗑 Supprimer</button></div>`:''}
+        </section>`).join('')}
+        ${iso>=t&&!multi&&me()?`<div class="bpt-ag-actions"><button type="button" class="btn ghost" data-ag-add-other>➕ Proposer aussi une partie ${missing==='online'?'en ligne':'en live'} ce jour-là</button></div>`:''}`;
+      box.querySelectorAll('[data-ag-ev]').forEach(sec=>{const x=list[Number(sec.dataset.agEv)];
+        sec.querySelector('[data-ag-wa]')?.addEventListener('click',()=>shareWhatsApp(x));
+        sec.querySelectorAll('[data-ag-choice]').forEach(b=>b.onclick=()=>respond(x,b.dataset.agChoice));
+        sec.querySelector('[data-ag-ev-edit]')?.addEventListener('click',()=>{editing=x.id;renderPanel();});
+        sec.querySelector('[data-ag-resp-open]')?.addEventListener('click',()=>{respEditId=x.id;renderPanel();});
+        sec.querySelector('[data-ag-resp-close]')?.addEventListener('click',()=>{respEditId='';renderPanel();});
+        sec.querySelectorAll('[data-ag-set]').forEach(b=>b.addEventListener('click',()=>setResponseFor(x,b.dataset.agSet,b.dataset.agSetChoice||null)));
+        sec.querySelector('[data-ag-ev-del]')?.addEventListener('click',()=>{if(confirm('Supprimer cette partie de l’agenda ? Les réponses seront perdues.'))removeEvent(x);});});
       box.querySelector('[data-ag-back]')?.addEventListener('click',()=>{selectedIso='';render();});
-      $('bptAgEdit')?.addEventListener('click',()=>{editing=true;renderPanel();});
-      $('bptAgDelete')?.addEventListener('click',()=>{if(confirm('Supprimer cette partie de l’agenda ? Les réponses seront perdues.'))removeEvent(e);});
+      box.querySelector('[data-ag-add-other]')?.addEventListener('click',()=>{editing='new';addMode=missing;renderPanel();});
       return;
     }
-    if(iso<t&&!e){box.innerHTML=`<h3>${esc(longDate(iso))}</h3><p class="muted">Aucune partie ce jour-là.</p>`;return;}
+    if(iso<t&&!list.length){box.innerHTML=`<h3>${esc(longDate(iso))}</h3><p class="muted">Aucune partie ce jour-là.</p>`;return;}
     if(!me()){box.innerHTML=`<h3>${esc(longDate(iso))}</h3><p class="muted">Connectez-vous avec votre nom de joueur pour proposer une partie.</p>`;return;}
-    box.innerHTML=formHtml(iso,editing?e:null);mountPicker(box);
-    $('bptAgCancel').onclick=()=>{editing=false;if(!e)selectedIso='';render();};
-    $('bptAgSave').onclick=()=>saveFromForm(editing?e:null,()=>{editing=false;});
+    box.innerHTML=formHtml(iso,editE,editing==='new'?addMode:null);mountPicker(box);
+    $('bptAgCancel').onclick=()=>{editing=false;if(!list.length)selectedIso='';render();};
+    $('bptAgSave').onclick=()=>saveFromForm(editE,()=>{editing=false;});
   }
 
   async function saveFromForm(e,done){
     const t=todayIso(),date=$('bptAgDate').value;
     if(!date){alert('Choisissez une date.');return;}
     if(date<t){alert('Choisissez une date à venir.');return;}
-    const other=eventFor(date);if(other&&other.id!==e?.id){alert('Une partie est déjà proposée à cette date.');return;}
     const online=$('bptAgMode')?.value==='online',time=String($('bptAgTime')?.value||'').trim();
+    if(sameModeOn(date,online?'online':'table',e?.id)){alert(`Une partie ${online?'en ligne':'en live'} est déjà proposée à cette date.`);return;}
     if(online&&!/^\d{1,2}:\d{2}$/.test(time)){alert('Indiquez l’heure de la partie en ligne.');return;}
     const n=me();
     // Heure, durée et tapis ne sont plus demandés : on conserve ceux d'une partie existante, sinon rien.
@@ -311,7 +363,7 @@
   function renderHome(force){
     const box=$('bptAgendaHome');if(!box)return;
     const e=nextEvent(),n=me();
-    const sig=[homeMode,homeShowAll,n,justCreatedId,e?JSON.stringify([e.id,e.date,e.time,e.location,e.mode,e.responses]):'none'].join('|');
+    const sig=[homeMode,homeShowAll,n,justCreatedId,e?JSON.stringify(eventsFor(e.date).map(x=>[x.id,x.date,x.time,x.location,x.mode,x.responses,x.responsesBy])):'none'].join('|');
     if(!force&&box.dataset.sig===sig)return;
     // 10.4.48 — Saisie en cours dans le formulaire : seuls les rafraîchissements automatiques sont bloqués.
     // Avant, un appui (qui donne le focus au bouton touché) empêchait aussi l'ouverture du formulaire « Modifier ».
@@ -336,22 +388,25 @@
       const created=justCreatedId?events.find(x=>x.id===justCreatedId)||null:null;
       box.innerHTML=`<div class="bpt-ag-home-head"><div><div class="bpt-ag-kicker">${mine?'Prochaine partie':'Partie proposée · à vous de répondre'}</div>
           <h3>📅 ${esc(whenLabel(e.date))}</h3>
-          <p class="bpt-ag-meta">${whereHtml(e)} · proposée par ${esc(e.createdBy||'—')}</p></div>${calLink}</div>
+          <p class="bpt-ag-meta">${whereHtml(e)} · proposée par ${esc(e.createdBy||'—')}</p>
+          ${eventsFor(e.date).filter(x=>x.id!==e.id).map(x=>`<button type="button" class="bpt-ag-link" data-ag-also="${esc(x.date)}">➕ Aussi ce jour-là : ${whereHtml(x)} · ${grouped(x).present.length} ✓</button>`).join('')}</div>${calLink}</div>
         ${n?choiceButtons(e):'<p class="muted">Connectez-vous pour répondre.</p>'}
         <p class="bpt-ag-present"><b>${g.present.length} présent${g.present.length>1?'s':''}</b>${g.present.length?' : '+g.present.map(esc).join(', '):''}${g.maybe.length?` · <span class="is-maybe">${g.maybe.length} peut-être</span>`:''}${g.absent.length?` · <span class="is-absent">${g.absent.length} absent${g.absent.length>1?'s':''}</span>`:''}</p>
         ${homeShowAll?responsesHtml(e):''}
         ${created?`<div class="bpt-ag-wa-box"><div><b>Partie ${created.id===e.id?'':`du ${esc(longDate(created.date))} `}proposée ✓</b><small>Préviens le groupe : le message est prêt, il n'y a plus qu'à choisir la conversation.</small></div><div class="bpt-ag-wa-btns">${waButton('is-big')}<button type="button" class="bpt-ag-wa-later" data-ag-wa-close>Plus tard</button></div><button type="button" class="bpt-ag-wa-close" data-ag-wa-close aria-label="Fermer">×</button></div>`:''}
         <div class="bpt-ag-home-links"><button type="button" class="bpt-ag-link" data-ag-all>${homeShowAll?'Masquer les réponses':'Voir toutes les réponses'}</button>
-        ${canEdit(e)?'<button type="button" class="bpt-ag-link" data-ag-edit>✏️ Modifier</button><button type="button" class="bpt-ag-link" data-ag-del>🗑 Supprimer</button>':''}${n?'<button type="button" class="bpt-ag-link" data-ag-new>➕ Proposer une autre date</button>':''}${n&&!created?'<button type="button" class="bpt-ag-link bpt-ag-link-wa" data-ag-wa>💬 Inviter sur WhatsApp</button>':''}</div>`;
+        ${canEdit(e)?'<button type="button" class="bpt-ag-link" data-ag-edit>✏️ Modifier</button><button type="button" class="bpt-ag-link" data-ag-del>🗑 Supprimer</button><button type="button" class="bpt-ag-link" data-ag-resp-home>📞 Saisir les réponses</button>':''}${n?'<button type="button" class="bpt-ag-link" data-ag-new>➕ Proposer une autre date</button>':''}${n&&!created?'<button type="button" class="bpt-ag-link bpt-ag-link-wa" data-ag-wa>💬 Inviter sur WhatsApp</button>':''}</div>`;
       box.querySelectorAll('[data-ag-wa]').forEach(b=>b.onclick=()=>{shareWhatsApp(created&&b.closest('.bpt-ag-wa-box')?created:e);if(justCreatedId){justCreatedId='';renderHome(true);}});
       box.querySelectorAll('[data-ag-wa-close]').forEach(b=>b.addEventListener('click',()=>{justCreatedId='';renderHome(true);}));
       box.querySelectorAll('[data-ag-choice]').forEach(b=>b.onclick=()=>respond(e,b.dataset.agChoice));
       box.querySelector('[data-ag-all]').onclick=()=>{homeShowAll=!homeShowAll;renderHome(true);};
       box.querySelector('[data-ag-edit]')?.addEventListener('click',()=>{homeMode='form';renderHome(true);});
       box.querySelector('[data-ag-new]')?.addEventListener('click',()=>{homeMode='new';renderHome(true);});
+      box.querySelector('[data-ag-resp-home]')?.addEventListener('click',()=>{selectedIso=e.date;editing=false;respEditId=e.id;const d=new Date(`${e.date}T12:00:00`);cursor=new Date(d.getFullYear(),d.getMonth(),1);openAgenda();});
       box.querySelector('[data-ag-del]')?.addEventListener('click',()=>{if(confirm('Supprimer cette partie ? Les réponses seront perdues.'))removeEvent(e);});
     }
     box.querySelector('[data-ag-propose]')?.addEventListener('click',()=>{homeMode='new';renderHome(true);});
+    box.querySelectorAll('[data-ag-also]').forEach(b=>b.addEventListener('click',()=>{selectedIso=b.dataset.agAlso;editing=false;const d=new Date(`${selectedIso}T12:00:00`);cursor=new Date(d.getFullYear(),d.getMonth(),1);openAgenda();}));
     const calBtn=box.querySelector('[data-ag-cal]');if(calBtn)calBtn.onclick=()=>{selectedIso=e?.date||'';if(e){const d=new Date(`${e.date}T12:00:00`);cursor=new Date(d.getFullYear(),d.getMonth(),1);}openAgenda();};
   }
 
@@ -392,7 +447,9 @@
   // ---------- Live : préremplissage le jour de la partie ----------
   function liveTodayEvent(){
     const t=todayIso(),y=new Date();y.setDate(y.getDate()-1);const yIso=isoOf(y); // partie qui déborde après minuit
-    return events.find(e=>e.date===t)||events.find(e=>e.date===yIso)||null;
+    // 10.4.176 : live et en ligne le même jour → la préparation du Live se cale sur la partie en live.
+    const pick=iso=>events.find(e=>e.date===iso&&modeOf(e)==='table')||events.find(e=>e.date===iso);
+    return pick(t)||pick(yIso)||null;
   }
   function setValue(id,v){const el=$(id);if(!el||v==null||v==='')return;if(el.tagName==='SELECT'&&![...el.options].some(o=>o.value===String(v)))return;el.value=String(v);el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));}
   function prefillLive(){
